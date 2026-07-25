@@ -1,0 +1,11 @@
+{
+  "environment": "staging",
+  "deploymentProfile": "cloud",
+  "defaultLocale": "zh-CN",
+  "fallbackLocale": "en-US",
+  "supportedLocales": ["zh-CN", "en-US"],
+  "activeLocales": ["zh-CN", "en-US"],
+  "appApiBaseUrl": "https://web.staging.sdkwork.com",
+  "backendApiBaseUrl": "https://web.staging.sdkwork.com",
+  "appbaseAppApiBaseUrl": "https://iam.staging.sdkwork.com"
+}

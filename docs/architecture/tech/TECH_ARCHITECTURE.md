@@ -35,6 +35,7 @@ host-operations planes.
 Current implemented baseline:
 
 - app-api and backend-api management surfaces;
+- `apps/sdkwork-webserver-pc`, with package-owned Console and backend-admin capabilities, one IAM/TokenManager bootstrap, generated SDK injection, and lazy backend-admin loading;
 - site, domain, deployment, certificate, Nginx, health-check, audit, environment, and Web Node workflows;
 - SQLx persistence through the SDKWork database framework;
 - ACME/self-signed certificate services;
@@ -114,6 +115,11 @@ sdkwork-webserver-core
 
 sdkwork-webserver-edge-runtime
   `-- existing external Nginx artifact operations only
+
+apps/sdkwork-webserver-pc
+  |-- console-* -> console-core -> @sdkwork/web-app-sdk -> app-api
+  |-- admin-* -> lazy admin-core -> @sdkwork/web-backend-sdk -> backend-api
+  `-- root bootstrap -> IAM + one TokenManager + typed browser runtime config
 ```
 
 The request path does not call management services or repositories. Management route crates continue to use `sdkwork-web-framework`; application traffic routes are configuration-owned Web Server behavior and do not create a second SDKWork business API authority.
@@ -139,6 +145,9 @@ The request path does not call management services or repositories. Management r
 - Request data-plane traffic preserves the configured upstream or static Web protocol; it does not wrap arbitrary application responses in SDKWork management envelopes.
 - PostgreSQL is cloud/default server authority. SQLite is limited to explicitly selected single-node standalone behavior.
 - List/search repositories and SDKs remain subject to store-level SDKWork pagination.
+- The PC Console owns tenant workflows for sites, configuration, domains, certificates, and
+  deployments. The backend-admin surface owns Nginx, server inventory, diagnostics, and audit.
+  UI packages never construct SDK clients or assemble authenticated HTTP requests.
 
 ## 6. Security, Privacy, And Resource Boundaries
 

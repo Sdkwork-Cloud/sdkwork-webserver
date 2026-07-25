@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "kind": "sdkwork.deployment.config",
+  "application": "sdkwork-webserver-pc",
+  "runtimeTarget": "browser",
+  "profiles": {
+    "standalone": { "source": "browser/runtime-env.development.json" },
+    "cloud": { "source": "browser/runtime-env.production.json" }
+  }
+}
+

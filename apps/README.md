@@ -14,7 +14,7 @@ The repository root `sdkwork.app.config.json` governs the primary application ma
 
 | Directory | Surface role | Runnable | Purpose | Entry |
 | --- | --- | --- | --- | --- |
-| sdkwork-web-server-pc | pc | no | Planned SDKWork Web Server PC management client | [README](sdkwork-web-server-pc/README.md) |
+| sdkwork-webserver-pc | pc | yes | SDKWork Web Server Console and backend-admin management application | [README](sdkwork-webserver-pc/README.md) |
 
 ## Allowed Content
 

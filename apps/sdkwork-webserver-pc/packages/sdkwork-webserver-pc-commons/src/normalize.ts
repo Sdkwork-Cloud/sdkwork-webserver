@@ -1,0 +1,27 @@
+import type { WebserverResourcePage } from "./types.ts";
+
+export function normalizeWebserverPage(value: unknown): WebserverResourcePage {
+  const candidate = unwrap(value);
+  if (Array.isArray(candidate)) return { items: candidate.map(toRecord), pageInfo: { page: 1, pageSize: candidate.length, hasMore: false } };
+  if (!isRecord(candidate)) return { items: [], pageInfo: { page: 1, pageSize: 20, hasMore: false } };
+  const items = Array.isArray(candidate.items) ? candidate.items.map(toRecord) : [candidate];
+  const info = isRecord(candidate.pageInfo) ? candidate.pageInfo : {};
+  const page = positiveInteger(info.page, 1);
+  const pageSize = positiveInteger(info.pageSize, Math.max(items.length, 20));
+  const total = typeof info.total === "number" && Number.isFinite(info.total) ? info.total : undefined;
+  return { items, pageInfo: { page, pageSize, total, hasMore: typeof info.hasMore === "boolean" ? info.hasMore : total === undefined ? items.length >= pageSize : page * pageSize < total } };
+}
+
+function unwrap(value: unknown): unknown {
+  if (!isRecord(value)) return value;
+  if (isRecord(value.data)) {
+    if ("items" in value.data || "pageInfo" in value.data) return value.data;
+    if ("resource" in value.data) return value.data.resource;
+  }
+  return value;
+}
+
+function positiveInteger(value: unknown, fallback: number): number { return typeof value === "number" && Number.isInteger(value) && value > 0 ? value : fallback; }
+function toRecord(value: unknown): Record<string, unknown> { return isRecord(value) ? value : { value }; }
+export function isRecord(value: unknown): value is Record<string, unknown> { return typeof value === "object" && value !== null && !Array.isArray(value); }
+

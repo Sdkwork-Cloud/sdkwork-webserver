@@ -1,5 +1,5 @@
 import { appApiPath } from './paths';
-import type { HttpClient } from '../http/client';
+import type { ApiRequestOptions, HttpClient } from '../http/client';
 
 import type { CertificateResponse, CreateCertificateRequest, PageInfo } from '../types';
 
@@ -18,17 +18,17 @@ export class CertificateApi {
 
 
 /** 获取证书列表 */
-  async list(params?: CertificateListParams): Promise<Record<string, unknown>> {
+  async list(params?: CertificateListParams, requestOptions?: ApiRequestOptions): Promise<{ items: CertificateResponse[]; pageInfo: PageInfo; }> {
     const query = buildQueryString([
       { name: 'page', value: params?.page, style: 'form', explode: true, allowReserved: false },
       { name: 'page_size', value: params?.pageSize, style: 'form', explode: true, allowReserved: false },
     ]);
-    return this.client.get<Record<string, unknown>>(appendQueryString(appApiPath(`/certificates`), query));
+    return this.client.request<{ items: CertificateResponse[]; pageInfo: PageInfo; }>(appendQueryString(appApiPath(`/certificates`), query), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any });
   }
 
 /** 申请证书 */
-  async create(body: CreateCertificateRequest): Promise<CertificateResponse> {
-    return this.client.post<CertificateResponse>(appApiPath(`/certificates`), body, undefined, undefined, 'application/json');
+  async create(body: CreateCertificateRequest, requestOptions?: ApiRequestOptions): Promise<CertificateResponse> {
+    return this.client.request<CertificateResponse>(appApiPath(`/certificates`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, body, contentType: 'application/json' });
   }
 }
 

@@ -107,6 +107,7 @@ loop or a second authority.
 | Configuration lifecycle | Draft, validate, plan, immutable revision, publish, canary, activate, observe, rollback, and audit. |
 | Cluster operation | Node-scoped assignments, signed delta snapshots, fencing, offline recovery, version convergence, and no tenant-wide secret broadcast. |
 | Control plane | IAM-protected APIs, SDKs, pagination, idempotency, optimistic concurrency, asynchronous operations, audit, and operational status. |
+| PC management application | `apps/sdkwork-webserver-pc` provides an isolated tenant Console and lazy backend-admin surface. Console workflows consume only `@sdkwork/web-app-sdk`; internal operator workflows consume only `@sdkwork/web-backend-sdk`. |
 | Persistence | PostgreSQL cloud and default server authority, explicit SQLite single-node standalone support, portable contracts, migration governance, transaction safety, and drift detection. |
 | Operations | Health/readiness, structured logs, metrics, traces, alerts, quotas, rate limits, backup/restore, rolling upgrades, and incident runbooks. |
 | Runtime lifecycle | Deterministic bootstrap, config test/dump/explain, non-root operation, atomic reload, graceful shutdown, overload shedding, service-manager integration, and zero-downtime executable upgrade. |
@@ -162,6 +163,8 @@ Health or SLO checks detect a failed canary. The control plane stops rollout, re
 - `PRD-FR-019`: The runtime must provide config validate/dump/explain, start, readiness, reload, drain, stop, status, and version operations with service-manager and container lifecycle integration.
 - `PRD-FR-020`: Reload and executable upgrade must stage a complete candidate, preserve accepted healthy connections, fence concurrent transitions, prove the served revision, and restore the last verified generation on failure.
 - `PRD-FR-021`: Administrative, health, readiness, metrics, profiling, and debug surfaces must use separately governed exposure policies and must never be implicitly exposed through an application virtual host.
+- `PRD-FR-022`: Disabling a tenant site in the PC Console must invoke the recoverable site pause command; reactivation must use the site activate command. The client must not invent a destructive disable state or bypass the generated App SDK.
+- `PRD-FR-023`: The PC host must bootstrap IAM before protected routes, create one shared TokenManager, lazy-load backend-admin code, and keep machine heartbeat/sync operations out of human operator navigation.
 
 ## 8. Non-Functional Requirements
 

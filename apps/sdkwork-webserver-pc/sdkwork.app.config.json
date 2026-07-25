@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 3,
+  "kind": "sdkwork.app",
+  "app": {
+    "key": "sdkwork-webserver-pc",
+    "name": "SDKWork Webserver PC",
+    "displayName": "SDKWork Web Server",
+    "description": "Standalone Web Server tenant console and internal operations application.",
+    "vendor": "SDKWork",
+    "officialWebsiteUrl": "https://sdkwork.com/apps/sdkwork-webserver-pc",
+    "supportUrl": "https://sdkwork.com/support",
+    "privacyPolicyUrl": "https://sdkwork.com/privacy",
+    "termsOfServiceUrl": "https://sdkwork.com/terms",
+    "appType": "APP_REACT",
+    "versionSource": "package.json",
+    "identifiers": { "packageName": null, "bundleId": null, "desktopAppId": null, "containerImage": null }
+  },
+  "backend": {
+    "profileKey": "backend-root-admin",
+    "ownerMode": "tenant",
+    "grantMode": "current",
+    "platform": "WEB",
+    "appId": "sdkwork-webserver-pc",
+    "tenantId": "100001",
+    "organizationId": "0",
+    "accessTokenPermissionScope": ["web.sites.read", "web.sites.write", "web.certificates.read", "web.certificates.write", "web.nginx.write", "web.servers.read", "web.servers.write", "web.auditLogs.read"]
+  },
+  "runtime": { "family": "web", "framework": "react", "runtimes": ["WEB", "BROWSER"], "deliveryModes": ["WEB_URL"], "defaultPlatform": "WEB", "defaultArchitecture": "universal", "supportedDeploymentProfiles": ["standalone", "cloud"], "defaultDeploymentProfile": "standalone" },
+  "publish": { "status": "DRAFT", "platforms": ["WEB"], "installPlatforms": ["WEB"], "config": { "workspaceRoot": "apps/sdkwork-webserver-pc", "framework": "react", "managedBy": "sdkwork-web-server" } },
+  "release": { "currentVersion": "0.1.0", "defaultChannel": "DEV", "latest": { "DEV": "0.1.0" } },
+  "security": { "checksumRequired": true, "signatureRequired": true, "sbomRequired": true },
+  "metadata": { "standardOwner": "sdkwork-platform", "component": "sdkwork-webserver-pc", "surface": "pc", "deploymentConfig": "etc/sdkwork.deployment.config.json" }
+}
+

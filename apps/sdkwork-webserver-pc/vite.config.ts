@@ -1,0 +1,4 @@
+import react from "@vitejs/plugin-react";
+import { defineConfig } from "vite";
+export default defineConfig({ plugins: [react()], server: { port: 5182, strictPort: false }, preview: { port: 4182 }, build: { sourcemap: true, target: "es2022" } });
+

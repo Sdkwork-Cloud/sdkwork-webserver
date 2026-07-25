@@ -3,7 +3,7 @@ import type { PageInfo } from './page-info';
 
 export interface SitesDomainsListResponse {
   code: 0;
-  data: unknown & Record<string, unknown>;
+  data: unknown & { items: DomainResponse[]; pageInfo: PageInfo; };
   /** Server-owned request correlation id. */
   traceId: string;
 }

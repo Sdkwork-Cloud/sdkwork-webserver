@@ -1,0 +1,27 @@
+{
+  "name": "@sdkwork/webserver-pc-console-core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "dependencies": {
+    "@sdkwork/sdk-common": "workspace:*",
+    "@sdkwork/web-app-sdk": "workspace:*",
+    "@sdkwork/webserver-pc-commons": "workspace:*",
+    "react": "catalog:"
+  },
+  "sdkwork": {
+    "applicationCode": "webserver",
+    "architecture": "pc-react",
+    "capability": "console-core",
+    "surface": "app-console",
+    "managedBy": "tools/materialize_webserver_pc.mjs"
+  }
+}

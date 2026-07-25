@@ -1,5 +1,5 @@
 import { appApiPath } from './paths';
-import type { HttpClient } from '../http/client';
+import type { ApiRequestOptions, HttpClient } from '../http/client';
 
 import type { CreateHealthCheckRequest, HealthCheckResponse, PageInfo } from '../types';
 
@@ -13,13 +13,13 @@ export class MonitorSitesHealthChecksApi {
 
 
 /** 获取健康检查配置 */
-  async list(siteId: string): Promise<Record<string, unknown>> {
-    return this.client.get<Record<string, unknown>>(appApiPath(`/sites/${serializePathParameter(siteId, { name: 'siteId', style: 'simple', explode: false })}/health_checks`));
+  async list(siteId: string, requestOptions?: ApiRequestOptions): Promise<{ items: HealthCheckResponse[]; pageInfo: PageInfo; }> {
+    return this.client.request<{ items: HealthCheckResponse[]; pageInfo: PageInfo; }>(appApiPath(`/sites/${serializePathParameter(siteId, { name: 'siteId', style: 'simple', explode: false })}/health_checks`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any });
   }
 
 /** 创建健康检查 */
-  async create(siteId: string, body: CreateHealthCheckRequest): Promise<HealthCheckResponse> {
-    return this.client.post<HealthCheckResponse>(appApiPath(`/sites/${serializePathParameter(siteId, { name: 'siteId', style: 'simple', explode: false })}/health_checks`), body, undefined, undefined, 'application/json');
+  async create(siteId: string, body: CreateHealthCheckRequest, requestOptions?: ApiRequestOptions): Promise<HealthCheckResponse> {
+    return this.client.request<HealthCheckResponse>(appApiPath(`/sites/${serializePathParameter(siteId, { name: 'siteId', style: 'simple', explode: false })}/health_checks`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, body, contentType: 'application/json' });
   }
 }
 
