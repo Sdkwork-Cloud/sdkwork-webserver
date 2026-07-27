@@ -50,7 +50,12 @@
   ],
   "contracts": {
     "publicExports": [
-      "src/index.ts"
+      ".",
+      "./sdk",
+      "./modules",
+      "./host",
+      "./session",
+      "./composition"
     ],
     "runtimeEntrypoints": [],
     "routeManifest": null,
@@ -58,18 +63,34 @@
     "sdkDependencies": [
       {
         "workspace": "sdkwork-web-app-sdk",
+        "permissionModuleId": "web",
         "surface": "app-api",
         "credentialMode": "authenticated-app-api"
       }
     ],
     "permissionComposition": {
-      "inheritanceMode": "openapi-with-explicit-ui-hints",
+      "inheritanceMode": "module-catalog-with-overrides",
+      "moduleCatalogRefs": [
+        {
+          "moduleId": "web",
+          "manifestRef": "../../../../../specs/iam.module.manifest.json",
+          "inheritPermissions": true,
+          "inheritRoles": true
+        }
+      ],
+      "bootstrapAccessTokenScope": {
+        "inheritFrom": "sdkwork.app.config.json#backend.accessTokenPermissionScope",
+        "supplement": [],
+        "overrideReplace": false
+      },
       "routePermissionHints": {
         "inheritFromOpenApi": true,
+        "inheritFromModuleManifests": true,
         "overrides": []
       },
       "consumerPolicy": {
         "forbidLocalPermissionCatalogForDependencyDomains": true,
+        "allowExplicitOverridesOnly": true,
         "allowFrontendHintsWithoutServerDuplication": true
       }
     },

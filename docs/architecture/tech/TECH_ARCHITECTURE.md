@@ -146,7 +146,9 @@ The request path does not call management services or repositories. Management r
 - PostgreSQL is cloud/default server authority. SQLite is limited to explicitly selected single-node standalone behavior.
 - List/search repositories and SDKs remain subject to store-level SDKWork pagination.
 - The PC Console owns tenant workflows for sites, configuration, domains, certificates, and
-  deployments. The backend-admin surface owns Nginx, server inventory, diagnostics, and audit.
+  deployments. The backend-admin surface owns WEB/API application deployment, public domains,
+  canonical certificate lifecycle and fleet convergence, Nginx, server inventory, diagnostics,
+  and audit.
   UI packages never construct SDK clients or assemble authenticated HTTP requests.
 
 ## 6. Security, Privacy, And Resource Boundaries
@@ -185,6 +187,7 @@ The request path does not call management services or repositories. Management r
 | ADR-20260720-process-database-pool | One typed SDKWork lifecycle pool per process | accepted |
 | ADR-20260623-acme-certificate-authority | ACME client, CA selection, key storage | accepted |
 | ADR-20260623-cert-distribution-topology | Node synchronization and certificate distribution | accepted |
+| ADR-20260726-admin-application-and-certificate-control-plane | Backend-admin deployment plus one-authority certificate renewal and fleet convergence | accepted |
 
 ## 9. Verification
 

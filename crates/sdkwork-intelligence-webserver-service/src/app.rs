@@ -17,6 +17,15 @@ impl WebService {
         Ok(context.tenant_id)
     }
 
+    pub(crate) fn validate_application_type(value: &str) -> WebServiceResult<()> {
+        if matches!(value, "WEB" | "API") {
+            return Ok(());
+        }
+        Err(sdkwork_webserver_contract::WebServiceError::validation(
+            "applicationType must be WEB or API",
+        ))
+    }
+
     async fn audit_site_action(
         &self,
         context: &WebAppRequestContext,
@@ -46,6 +55,9 @@ impl WebAppApi for WebService {
         query: &ListSitesQuery,
     ) -> WebServiceResult<sdkwork_webserver_contract::SitePage> {
         let tenant_id = Self::require_tenant(context)?;
+        if let Some(application_type) = query.application_type.as_deref() {
+            Self::validate_application_type(application_type)?;
+        }
         self.repository.list_sites(tenant_id, query).await
     }
 
@@ -55,6 +67,7 @@ impl WebAppApi for WebService {
         request: &CreateSiteRequest,
     ) -> WebServiceResult<sdkwork_webserver_contract::SiteResponse> {
         let tenant_id = Self::require_tenant(context)?;
+        Self::validate_application_type(&request.application_type)?;
         let site = self
             .repository
             .create_site(
@@ -317,5 +330,19 @@ impl WebAppApi for WebService {
         self.repository
             .create_health_check(tenant_id, site_id, request)
             .await
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::WebService;
+
+    #[test]
+    fn application_type_is_limited_to_public_business_types() {
+        assert!(WebService::validate_application_type("WEB").is_ok());
+        assert!(WebService::validate_application_type("API").is_ok());
+        for invalid in ["web", "STATIC", "", "OTHER"] {
+            assert!(WebService::validate_application_type(invalid).is_err());
+        }
     }
 }

@@ -43,12 +43,84 @@ client.set_header("X-Custom-Header", "value");
 
 ## API Modules
 
+- `client.application()` - application API
+- `client.application_domain()` - application_domain API
+- `client.application_deployment()` - application_deployment API
+- `client.certificate()` - certificate API
+- `client.certificate_distribution()` - certificate_distribution API
 - `client.nginx()` - nginx API
 - `client.server()` - server API
 - `client.agent()` - agent API
 - `client.audit()` - audit API
 
 ## Usage Examples
+
+### application
+
+```rust
+use std::collections::HashMap;
+// List managed applications
+let mut query = HashMap::new();
+query.insert("page".to_string(), serde_json::json!(1));
+query.insert("page_size".to_string(), serde_json::json!(2));
+query.insert("applicationType".to_string(), serde_json::json!("WEB"));
+query.insert("siteType".to_string(), serde_json::json!(4));
+query.insert("status".to_string(), serde_json::json!(5));
+query.insert("keyword".to_string(), serde_json::json!("keyword"));
+let result = client.application().applications_list(Some(&query)).await?;
+println!("{result:?}");
+```
+
+### application_domain
+
+```rust
+use std::collections::HashMap;
+// List application domains
+let application_id = "1";
+let mut query = HashMap::new();
+query.insert("page".to_string(), serde_json::json!(1));
+query.insert("page_size".to_string(), serde_json::json!(2));
+let result = client.application_domain().applications_domains_list(application_id, Some(&query)).await?;
+println!("{result:?}");
+```
+
+### application_deployment
+
+```rust
+use std::collections::HashMap;
+// List application deployments
+let application_id = "1";
+let mut query = HashMap::new();
+query.insert("page".to_string(), serde_json::json!(1));
+query.insert("page_size".to_string(), serde_json::json!(2));
+query.insert("status".to_string(), serde_json::json!(3));
+let result = client.application_deployment().applications_deployments_list(application_id, Some(&query)).await?;
+println!("{result:?}");
+```
+
+### certificate
+
+```rust
+use std::collections::HashMap;
+// List canonical certificates
+let mut query = HashMap::new();
+query.insert("page".to_string(), serde_json::json!(1));
+query.insert("page_size".to_string(), serde_json::json!(2));
+let result = client.certificate().certificates_list(Some(&query)).await?;
+println!("{result:?}");
+```
+
+### certificate_distribution
+
+```rust
+use std::collections::HashMap;
+// List certificate manifest convergence by server
+let mut query = HashMap::new();
+query.insert("page".to_string(), serde_json::json!(1));
+query.insert("page_size".to_string(), serde_json::json!(2));
+let result = client.certificate_distribution().certificates_distribution_list(Some(&query)).await?;
+println!("{result:?}");
+```
 
 ### nginx
 

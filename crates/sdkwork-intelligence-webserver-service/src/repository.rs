@@ -4,7 +4,8 @@ use async_trait::async_trait;
 use sdkwork_webserver_contract::WebServiceResult;
 use sdkwork_webserver_contract::{
     AgentHeartbeatRequest, AgentHeartbeatResponse, AgentSyncResponse, AuditLogPage,
-    CertificateIssueUpdate, CertificatePage, CertificateResponse, CreateCertificateRequest,
+    CertificateDistributionPage, CertificateIssueUpdate, CertificatePage,
+    CertificateRenewalCandidate, CertificateResponse, CreateCertificateRequest,
     CreateDeploymentRequest, CreateDomainRequest, CreateEnvVariableRequest,
     CreateHealthCheckRequest, CreateNginxConfigRequest, CreateServerRequest, CreateServerResponse,
     CreateSiteRequest, DeploymentPage, DeploymentResponse, DomainPage, DomainResponse,
@@ -237,6 +238,26 @@ pub trait WebRepositoryPort: Send + Sync {
         certificate_id: &str,
         reason: &str,
     ) -> WebServiceResult<()>;
+
+    async fn retrieve_certificate_renewal_candidate(
+        &self,
+        tenant_id: i64,
+        certificate_id: &str,
+    ) -> WebServiceResult<CertificateRenewalCandidate>;
+
+    async fn update_certificate_auto_renew(
+        &self,
+        tenant_id: i64,
+        certificate_id: &str,
+        auto_renew: bool,
+    ) -> WebServiceResult<CertificateResponse>;
+
+    async fn list_certificate_distribution(
+        &self,
+        tenant_id: i64,
+        page: i32,
+        page_size: i32,
+    ) -> WebServiceResult<CertificateDistributionPage>;
 
     async fn list_health_checks(
         &self,

@@ -16,9 +16,9 @@ pub use machine_credential::MachineCredentialResolverDecorator;
 pub mod response;
 pub use problem::{WebApiError, WebApiResult};
 pub use response::{
-    created_resource, no_content, ok_audit_log_page, ok_certificate_page, ok_deployment_page,
-    ok_domain_page, ok_env_variable_page, ok_health_check_page, ok_nginx_config_page, ok_resource,
-    ok_server_page, ok_site_page,
+    created_resource, no_content, ok_audit_log_page, ok_certificate_distribution_page,
+    ok_certificate_page, ok_deployment_page, ok_domain_page, ok_env_variable_page,
+    ok_health_check_page, ok_nginx_config_page, ok_resource, ok_server_page, ok_site_page,
 };
 
 const PRODUCTION_AUTH_UNAVAILABLE: &str = "production Web auth requires IAM PostgreSQL database";

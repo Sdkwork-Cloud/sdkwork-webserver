@@ -4,7 +4,8 @@
 id: REQ-2026-0004
 title: Prove PostgreSQL and SQLite database lifecycle parity for the Web control plane
 owner: SDKWork maintainers
-status: in-progress
+status: superseded
+superseded_by: MIG-2026-0062
 source: reliability
 problem: The application declares PostgreSQL and SQLite support, but a manifest declaration and static DDL validation do not prove that a fresh database can initialize, seed idempotently, remain drift-clean, and preserve SDKWork explicit-id semantics on both engines.
 goals:
@@ -84,10 +85,15 @@ containers:
 - Strict component-port validation, pagination validation, database-framework validation,
   and strict repository Clippy pass.
 
-The requirement remains `in-progress` only because its bounded-query non-functional criterion is
-not yet true for every growing collection. `list_env_variables` and `list_health_checks` still
-return complete matching sets, and agent sync still constructs tenant-wide configuration and
-certificate vectors. The breaking public pagination and agent delta-sync contract is tracked by
-[REQ-2026-0045](REQ-2026-0045-bounded-control-plane-collections.md) and requires human review before
-OpenAPI/SDK/agent implementation. Database engine parity is proven; commercial bounded-collection
-parity is not claimed yet.
+Before supersession, this requirement remained `in-progress` because its bounded-query
+non-functional criterion was not true for every growing collection. That separate pagination and
+agent delta-sync work remains tracked by
+[REQ-2026-0045](REQ-2026-0045-bounded-control-plane-collections.md). Historical dual-engine test
+evidence does not make SQLite an authoritative server engine under manifest v2.
+
+## Supersession
+
+`MIG-2026-0062` supersedes SQLite as a Web control-plane lifecycle engine. PostgreSQL is the
+only authoritative server engine under database manifest v2. The SQLite DDL is retained only as
+an isolated repository test fixture; it is not a deployable profile, release asset, lifecycle
+contract, recovery authority, or production fallback.

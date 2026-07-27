@@ -1,5 +1,10 @@
 export { BaseApi } from './base';
 export { backendApiPath } from './paths';
+export { ApplicationApi, createApplicationApi } from './application';
+export { ApplicationDomainApi, createApplicationDomainApi } from './application-domain';
+export { ApplicationDeploymentApi, createApplicationDeploymentApi } from './application-deployment';
+export { CertificateApi, createCertificateApi } from './certificate';
+export { CertificateDistributionApi, createCertificateDistributionApi } from './certificate-distribution';
 export { NginxApi, createNginxApi } from './nginx';
 export { ServerApi, createServerApi } from './server';
 export { AgentApi, createAgentApi } from './agent';

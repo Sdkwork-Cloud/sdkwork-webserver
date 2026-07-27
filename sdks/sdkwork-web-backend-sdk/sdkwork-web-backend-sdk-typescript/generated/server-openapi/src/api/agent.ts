@@ -1,5 +1,5 @@
 import { backendApiPath } from './paths';
-import type { HttpClient } from '../http/client';
+import type { ApiRequestOptions, HttpClient } from '../http/client';
 
 import type { AgentHeartbeatRequest, AgentHeartbeatResponse, AgentSyncResponse } from '../types';
 
@@ -17,11 +17,11 @@ export class AgentSyncApi {
 
 
 /** Retrieve the Nginx configuration and certificate bundle */
-  async list(params?: AgentSyncListParams): Promise<AgentSyncResponse> {
+  async list(params?: AgentSyncListParams, requestOptions?: ApiRequestOptions): Promise<AgentSyncResponse> {
     const query = buildQueryString([
       { name: 'ifSyncVersion', value: params?.ifSyncVersion, style: 'form', explode: true, allowReserved: false },
     ]);
-    return this.client.get<AgentSyncResponse>(appendQueryString(backendApiPath(`/agent/sync`), query));
+    return this.client.request<AgentSyncResponse>(appendQueryString(backendApiPath(`/agent/sync`), query), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any });
   }
 }
 
@@ -34,18 +34,18 @@ export class AgentHeartbeatApi {
 
 
 /** Report an edge-agent heartbeat */
-  async create(body: AgentHeartbeatRequest): Promise<AgentHeartbeatResponse> {
-    return this.client.post<AgentHeartbeatResponse>(backendApiPath(`/agent/heartbeat`), body, undefined, undefined, 'application/json');
+  async create(body: AgentHeartbeatRequest, requestOptions?: ApiRequestOptions): Promise<AgentHeartbeatResponse> {
+    return this.client.request<AgentHeartbeatResponse>(backendApiPath(`/agent/heartbeat`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, body, contentType: 'application/json' });
   }
 }
 
 export class AgentApi {
-
+  private client: HttpClient;
   public readonly heartbeat: AgentHeartbeatApi;
   public readonly sync: AgentSyncApi;
 
   constructor(client: HttpClient) {
-
+    this.client = client;
     this.heartbeat = new AgentHeartbeatApi(client);
     this.sync = new AgentSyncApi(client);
   }

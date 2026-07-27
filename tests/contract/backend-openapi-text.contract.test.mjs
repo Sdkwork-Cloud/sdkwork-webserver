@@ -65,8 +65,8 @@ for (const contract of contracts) {
     assert.ok(operation, `${contract.label} is missing ${routePath}`);
     assert.deepEqual(
       operation.security,
-      [{ AgentToken: [] }],
-      `${contract.label} must expose ${routePath} as AgentToken-protected`,
+      [{ AgentToken: [], AccessToken: [] }],
+      `${contract.label} must expose ${routePath} with AgentToken and AccessToken protection`,
     );
     assert.equal(operation['x-sdkwork-auth-mode'], 'api-key');
     assert.equal(operation['x-sdkwork-route-auth'], 'agent-token');

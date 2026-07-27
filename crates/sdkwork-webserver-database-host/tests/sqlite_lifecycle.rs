@@ -1,62 +1,44 @@
-use std::{path::PathBuf, sync::Arc};
-
 use sdkwork_database_config::{DatabaseConfig, DatabaseEngine};
-use sdkwork_database_drift::DriftEngine;
-use sdkwork_database_lifecycle::LifecycleOrchestrator;
-use sdkwork_database_spi::{DefaultDatabaseModule, LocaleTag, SeedProfile};
 use sdkwork_database_sqlx::create_pool_from_config;
 
-fn application_root() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("../..")
-        .canonicalize()
-        .expect("resolve application root")
-}
-
 #[tokio::test]
-async fn sqlite_baseline_seed_and_drift_are_clean() {
-    let module = Arc::new(
-        DefaultDatabaseModule::from_app_root(application_root()).expect("load Web database module"),
-    );
-    let config = DatabaseConfig {
+async fn sqlite_repository_fixture_initializes_expected_schema() {
+    let pool = create_pool_from_config(DatabaseConfig {
         engine: DatabaseEngine::Sqlite,
         url: "sqlite::memory:".to_owned(),
         max_connections: 1,
         ..Default::default()
-    };
-    let pool = create_pool_from_config(config)
-        .await
-        .expect("create SQLite pool");
-    let orchestrator = LifecycleOrchestrator::new(pool.clone(), module.clone())
-        .with_applied_by("sdkwork-webserver-test");
+    })
+    .await
+    .expect("create SQLite fixture pool");
+    let sqlite = pool.as_sqlite().expect("SQLite fixture pool");
 
-    orchestrator
-        .init()
+    sqlx::query("PRAGMA foreign_keys = ON")
+        .execute(sqlite)
         .await
-        .expect("initialize SQLite baseline");
-    orchestrator
-        .init()
-        .await
-        .expect("re-run idempotent SQLite baseline initialization");
-    let applied = orchestrator
-        .seed(&LocaleTag::zh_cn(), &SeedProfile::standard())
-        .await
-        .expect("seed SQLite database");
-    assert_eq!(applied, 1);
+        .expect("enable SQLite foreign keys");
+    sqlx::raw_sql(include_str!(
+        "../../../tests/fixtures/database/sqlite/0001_web_baseline.sql"
+    ))
+    .execute(sqlite)
+    .await
+    .expect("initialize SQLite repository fixture");
 
-    let reapplied = orchestrator
-        .seed(&LocaleTag::zh_cn(), &SeedProfile::standard())
-        .await
-        .expect("re-run idempotent SQLite seed");
-    assert_eq!(reapplied, 0);
+    let table_count: i64 = sqlx::query_scalar(
+        "SELECT COUNT(*) FROM sqlite_schema WHERE type = 'table' AND name LIKE 'web_%'",
+    )
+    .fetch_one(sqlite)
+    .await
+    .expect("count SQLite fixture tables");
+    assert!(table_count >= 12, "expected Web repository fixture tables");
 
-    let report = DriftEngine::new(pool.clone(), module)
-        .analyze()
-        .await
-        .expect("analyze SQLite drift");
-    assert_eq!(report.status, "clean", "{:#?}", report.diffs);
-    assert_eq!(report.summary.error, 0, "{:#?}", report.diffs);
-    assert!(report.pending_migrations.is_empty());
+    let application_type_columns: i64 = sqlx::query_scalar(
+        "SELECT COUNT(*) FROM pragma_table_info('web_site') WHERE name = 'application_type'",
+    )
+    .fetch_one(sqlite)
+    .await
+    .expect("inspect application_type fixture column");
+    assert_eq!(application_type_columns, 1);
 
     pool.close().await;
 }

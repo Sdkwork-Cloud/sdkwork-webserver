@@ -22,6 +22,855 @@
     }
   ],
   "paths": {
+    "/backend/v3/api/applications": {
+      "get": {
+        "operationId": "applications.list",
+        "summary": "List managed applications",
+        "tags": [
+          "application"
+        ],
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-api-surface": "backend-api",
+        "x-sdkwork-api-authority": "sdkwork-web.backend",
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-permission": "web.sites.read",
+        "x-sdkwork-owner": "sdkwork-web-server",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PageParam"
+          },
+          {
+            "$ref": "#/components/parameters/PageSizeParam"
+          },
+          {
+            "name": "applicationType",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "WEB",
+                "API"
+              ]
+            }
+          },
+          {
+            "name": "siteType",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 6
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 3
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Managed application list returned successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SdkWorkApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "required": [
+                            "items",
+                            "pageInfo"
+                          ],
+                          "properties": {
+                            "items": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "#/components/schemas/ApplicationResponse"
+                              }
+                            },
+                            "pageInfo": {
+                              "$ref": "#/components/schemas/PageInfo"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "x-sdkwork-route-auth": "dual-token"
+      },
+      "post": {
+        "operationId": "applications.create",
+        "summary": "Create a managed application",
+        "tags": [
+          "application"
+        ],
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-api-surface": "backend-api",
+        "x-sdkwork-api-authority": "sdkwork-web.backend",
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-permission": "web.sites.write",
+        "x-sdkwork-idempotent": true,
+        "x-sdkwork-owner": "sdkwork-web-server",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateApplicationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Managed application created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SdkWorkApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "required": [
+                            "item"
+                          ],
+                          "properties": {
+                            "item": {
+                              "$ref": "#/components/schemas/ApplicationResponse"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "x-sdkwork-route-auth": "dual-token"
+      }
+    },
+    "/backend/v3/api/applications/{applicationId}/domains": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ApplicationIdParam"
+        }
+      ],
+      "get": {
+        "operationId": "applications.domains.list",
+        "summary": "List application domains",
+        "tags": [
+          "applicationDomain"
+        ],
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-api-surface": "backend-api",
+        "x-sdkwork-api-authority": "sdkwork-web.backend",
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-permission": "web.sites.read",
+        "x-sdkwork-owner": "sdkwork-web-server",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PageParam"
+          },
+          {
+            "$ref": "#/components/parameters/PageSizeParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Application domain list returned successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SdkWorkApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "required": [
+                            "items",
+                            "pageInfo"
+                          ],
+                          "properties": {
+                            "items": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "#/components/schemas/ApplicationDomainResponse"
+                              }
+                            },
+                            "pageInfo": {
+                              "$ref": "#/components/schemas/PageInfo"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "x-sdkwork-route-auth": "dual-token"
+      },
+      "post": {
+        "operationId": "applications.domains.create",
+        "summary": "Bind a public domain to an application",
+        "tags": [
+          "applicationDomain"
+        ],
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-api-surface": "backend-api",
+        "x-sdkwork-api-authority": "sdkwork-web.backend",
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-permission": "web.sites.write",
+        "x-sdkwork-idempotent": true,
+        "x-sdkwork-owner": "sdkwork-web-server",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateApplicationDomainRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Application domain bound successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SdkWorkApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "required": [
+                            "item"
+                          ],
+                          "properties": {
+                            "item": {
+                              "$ref": "#/components/schemas/ApplicationDomainResponse"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "x-sdkwork-route-auth": "dual-token"
+      }
+    },
+    "/backend/v3/api/applications/{applicationId}/domains/{domainId}/verify": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ApplicationIdParam"
+        },
+        {
+          "$ref": "#/components/parameters/DomainIdParam"
+        }
+      ],
+      "post": {
+        "operationId": "applications.domains.verify",
+        "summary": "Verify an application public domain",
+        "tags": [
+          "applicationDomain"
+        ],
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-api-surface": "backend-api",
+        "x-sdkwork-api-authority": "sdkwork-web.backend",
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-permission": "web.sites.write",
+        "x-sdkwork-idempotent": true,
+        "x-sdkwork-owner": "sdkwork-web-server",
+        "responses": {
+          "200": {
+            "description": "Application domain verification result returned successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SdkWorkApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "required": [
+                            "item"
+                          ],
+                          "properties": {
+                            "item": {
+                              "$ref": "#/components/schemas/ApplicationDomainVerifyResponse"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "x-sdkwork-route-auth": "dual-token"
+      }
+    },
+    "/backend/v3/api/applications/{applicationId}/deployments": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ApplicationIdParam"
+        }
+      ],
+      "get": {
+        "operationId": "applications.deployments.list",
+        "summary": "List application deployments",
+        "tags": [
+          "applicationDeployment"
+        ],
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-api-surface": "backend-api",
+        "x-sdkwork-api-authority": "sdkwork-web.backend",
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-permission": "web.sites.read",
+        "x-sdkwork-owner": "sdkwork-web-server",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PageParam"
+          },
+          {
+            "$ref": "#/components/parameters/PageSizeParam"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 6
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Application deployment list returned successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SdkWorkApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "required": [
+                            "items",
+                            "pageInfo"
+                          ],
+                          "properties": {
+                            "items": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "#/components/schemas/ApplicationDeploymentResponse"
+                              }
+                            },
+                            "pageInfo": {
+                              "$ref": "#/components/schemas/PageInfo"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "x-sdkwork-route-auth": "dual-token"
+      },
+      "post": {
+        "operationId": "applications.deployments.create",
+        "summary": "Deploy an application",
+        "tags": [
+          "applicationDeployment"
+        ],
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-api-surface": "backend-api",
+        "x-sdkwork-api-authority": "sdkwork-web.backend",
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-permission": "web.sites.write",
+        "x-sdkwork-idempotent": true,
+        "x-sdkwork-rate-limit-tier": "auth-critical",
+        "x-sdkwork-owner": "sdkwork-web-server",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateApplicationDeploymentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Application deployment created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SdkWorkApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "required": [
+                            "item"
+                          ],
+                          "properties": {
+                            "item": {
+                              "$ref": "#/components/schemas/ApplicationDeploymentResponse"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "x-sdkwork-route-auth": "dual-token"
+      }
+    },
+    "/backend/v3/api/certificates": {
+      "get": {
+        "operationId": "certificates.list",
+        "summary": "List canonical certificates",
+        "tags": [
+          "certificate"
+        ],
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-api-surface": "backend-api",
+        "x-sdkwork-api-authority": "sdkwork-web.backend",
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-permission": "web.certificates.read",
+        "x-sdkwork-owner": "sdkwork-web-server",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PageParam"
+          },
+          {
+            "$ref": "#/components/parameters/PageSizeParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Canonical certificate list returned successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SdkWorkApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "required": [
+                            "items",
+                            "pageInfo"
+                          ],
+                          "properties": {
+                            "items": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "#/components/schemas/CertificateResponse"
+                              }
+                            },
+                            "pageInfo": {
+                              "$ref": "#/components/schemas/PageInfo"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "x-sdkwork-route-auth": "dual-token"
+      },
+      "post": {
+        "operationId": "certificates.create",
+        "summary": "Issue a canonical certificate",
+        "tags": [
+          "certificate"
+        ],
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-api-surface": "backend-api",
+        "x-sdkwork-api-authority": "sdkwork-web.backend",
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-permission": "web.certificates.write",
+        "x-sdkwork-idempotent": true,
+        "x-sdkwork-rate-limit-tier": "auth-critical",
+        "x-sdkwork-owner": "sdkwork-web-server",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCertificateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Canonical certificate issued successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SdkWorkApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "required": [
+                            "item"
+                          ],
+                          "properties": {
+                            "item": {
+                              "$ref": "#/components/schemas/CertificateResponse"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "x-sdkwork-route-auth": "dual-token"
+      }
+    },
+    "/backend/v3/api/certificates/{certificateId}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/CertificateIdParam"
+        }
+      ],
+      "put": {
+        "operationId": "certificates.update",
+        "summary": "Update certificate automatic renewal policy",
+        "tags": [
+          "certificate"
+        ],
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-api-surface": "backend-api",
+        "x-sdkwork-api-authority": "sdkwork-web.backend",
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-permission": "web.certificates.write",
+        "x-sdkwork-idempotent": true,
+        "x-sdkwork-owner": "sdkwork-web-server",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCertificateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Certificate automatic renewal policy updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SdkWorkApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "required": [
+                            "item"
+                          ],
+                          "properties": {
+                            "item": {
+                              "$ref": "#/components/schemas/CertificateResponse"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "x-sdkwork-route-auth": "dual-token"
+      }
+    },
+    "/backend/v3/api/certificates/{certificateId}/renew": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/CertificateIdParam"
+        }
+      ],
+      "post": {
+        "operationId": "certificates.renew",
+        "summary": "Renew a canonical certificate now",
+        "tags": [
+          "certificate"
+        ],
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-api-surface": "backend-api",
+        "x-sdkwork-api-authority": "sdkwork-web.backend",
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-permission": "web.certificates.write",
+        "x-sdkwork-idempotent": true,
+        "x-sdkwork-rate-limit-tier": "auth-critical",
+        "x-sdkwork-owner": "sdkwork-web-server",
+        "responses": {
+          "200": {
+            "description": "Canonical certificate renewed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SdkWorkApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "required": [
+                            "item"
+                          ],
+                          "properties": {
+                            "item": {
+                              "$ref": "#/components/schemas/CertificateResponse"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "x-sdkwork-route-auth": "dual-token"
+      }
+    },
+    "/backend/v3/api/certificate_distribution": {
+      "get": {
+        "operationId": "certificates.distribution.list",
+        "summary": "List certificate manifest convergence by server",
+        "tags": [
+          "certificateDistribution"
+        ],
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-api-surface": "backend-api",
+        "x-sdkwork-api-authority": "sdkwork-web.backend",
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-permission": "web.certificates.read",
+        "x-sdkwork-owner": "sdkwork-web-server",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PageParam"
+          },
+          {
+            "$ref": "#/components/parameters/PageSizeParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Certificate manifest convergence list returned successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SdkWorkApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "required": [
+                            "items",
+                            "pageInfo"
+                          ],
+                          "properties": {
+                            "items": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "#/components/schemas/CertificateDistributionResponse"
+                              }
+                            },
+                            "pageInfo": {
+                              "$ref": "#/components/schemas/PageInfo"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "x-sdkwork-route-auth": "dual-token"
+      }
+    },
     "/backend/v3/api/nginx/configs": {
       "get": {
         "operationId": "configs.list",
@@ -755,7 +1604,8 @@
         ],
         "security": [
           {
-            "AgentToken": []
+            "AgentToken": [],
+            "AccessToken": []
           }
         ],
         "x-sdkwork-api-surface": "backend-api",
@@ -832,7 +1682,8 @@
         ],
         "security": [
           {
-            "AgentToken": []
+            "AgentToken": [],
+            "AccessToken": []
           }
         ],
         "x-sdkwork-api-surface": "backend-api",
@@ -1034,6 +1885,33 @@
       }
     },
     "parameters": {
+      "ApplicationIdParam": {
+        "name": "applicationId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "DomainIdParam": {
+        "name": "domainId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "CertificateIdParam": {
+        "name": "certificateId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
       "PageParam": {
         "name": "page",
         "in": "query",
@@ -1143,6 +2021,386 @@
           "configName": {
             "type": "string",
             "maxLength": 200
+          }
+        }
+      },
+      "CreateApplicationRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "applicationType",
+          "siteType"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "slug": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[a-z0-9][a-z0-9-]*[a-z0-9]$"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "applicationType": {
+            "type": "string",
+            "enum": [
+              "WEB",
+              "API"
+            ],
+            "default": "WEB"
+          },
+          "siteType": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 6
+          },
+          "runtimeConfig": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "ApplicationResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "slug",
+          "applicationType",
+          "siteType",
+          "status",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "applicationType": {
+            "type": "string",
+            "enum": [
+              "WEB",
+              "API"
+            ]
+          },
+          "siteType": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 6
+          },
+          "status": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 3
+          },
+          "runtimeConfig": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CreateApplicationDomainRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "hostname"
+        ],
+        "properties": {
+          "hostname": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 253
+          },
+          "isPrimary": {
+            "type": "boolean",
+            "default": false
+          },
+          "sslEnabled": {
+            "type": "boolean",
+            "default": true
+          },
+          "sslProvider": {
+            "type": "string",
+            "enum": [
+              "letsencrypt",
+              "custom",
+              "none"
+            ]
+          }
+        }
+      },
+      "ApplicationDomainResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "hostname",
+          "isPrimary",
+          "isVerified",
+          "sslEnabled",
+          "status",
+          "createdAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "hostname": {
+            "type": "string"
+          },
+          "isPrimary": {
+            "type": "boolean"
+          },
+          "isVerified": {
+            "type": "boolean"
+          },
+          "sslEnabled": {
+            "type": "boolean"
+          },
+          "sslProvider": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ApplicationDomainVerifyResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "verified"
+        ],
+        "properties": {
+          "verified": {
+            "type": "boolean"
+          },
+          "verifyToken": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateApplicationDeploymentRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "deployType": {
+            "type": "integer",
+            "enum": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "default": 1
+          },
+          "environment": {
+            "type": "string",
+            "maxLength": 100,
+            "default": "production"
+          },
+          "idempotencyKey": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          }
+        }
+      },
+      "ApplicationDeploymentResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "siteId",
+          "status",
+          "deployType",
+          "createdAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "siteId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "integer"
+          },
+          "deployType": {
+            "type": "integer"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CreateCertificateRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "domainId",
+          "certType"
+        ],
+        "properties": {
+          "domainId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "certType": {
+            "type": "integer",
+            "enum": [
+              1,
+              3
+            ],
+            "description": "1=Let's Encrypt, 3=self-signed. Custom import is a separate future workflow."
+          },
+          "autoRenew": {
+            "type": "boolean",
+            "default": true
+          }
+        }
+      },
+      "UpdateCertificateRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "autoRenew"
+        ],
+        "properties": {
+          "autoRenew": {
+            "type": "boolean"
+          }
+        }
+      },
+      "CertificateResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "certName",
+          "status",
+          "createdAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "certName": {
+            "type": "string"
+          },
+          "domain": {
+            "type": "string"
+          },
+          "certType": {
+            "type": "integer"
+          },
+          "issuer": {
+            "type": "string"
+          },
+          "fingerprint": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "notBefore": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "notAfter": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "autoRenew": {
+            "type": "boolean"
+          },
+          "renewalStatus": {
+            "type": "integer",
+            "description": "0=idle, 1=renewing, 2=pending, 3=failed"
+          },
+          "status": {
+            "type": "integer",
+            "description": "0=pending, 1=active, 2=expired, 3=revoked, 4=archived"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CertificateDistributionResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "serverId",
+          "serverName",
+          "host",
+          "desiredSyncVersion",
+          "status"
+        ],
+        "properties": {
+          "serverId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "serverName": {
+            "type": "string"
+          },
+          "host": {
+            "type": "string"
+          },
+          "desiredSyncVersion": {
+            "type": "string",
+            "pattern": "^sv1:[a-f0-9]{64}$"
+          },
+          "appliedSyncVersion": {
+            "type": "string",
+            "pattern": "^sv1:[a-f0-9]{64}$"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "SYNCED",
+              "PENDING",
+              "OFFLINE"
+            ]
+          },
+          "lastHeartbeatAt": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },

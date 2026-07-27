@@ -3,7 +3,8 @@ use sdkwork_database_config::DatabaseEngine;
 use sdkwork_utils_rust::crypto::sha256_hash;
 use sdkwork_webserver_contract::{
     AgentCertificateBundle, AgentHeartbeatRequest, AgentHeartbeatResponse, AgentNginxConfigBundle,
-    AgentSyncResponse, WebServiceError, WebServiceResult,
+    AgentSyncResponse, CertificateDistributionPage, CertificateDistributionResponse,
+    WebServiceError, WebServiceResult,
 };
 use serde_json::{json, Value};
 use super::{EnginePool, EngineRow, WebRepository};
@@ -11,7 +12,7 @@ use sqlx::Row;
 
 use super::support::{
     instant_write_expression, json_from_row, json_write_expression, new_agent_token, now_rfc3339,
-    sha256_hex, store_error,
+    pagination, sha256_hex, store_error,
 };
 
 const MAX_NODE_SYNC_ITEMS: usize = 2_048;
@@ -211,6 +212,95 @@ impl WebRepository {
             },
             encrypted_private_keys,
         ))
+    }
+
+    pub(super) async fn list_certificate_distribution_repo(
+        &self,
+        tenant_id: i64,
+        page: i32,
+        page_size: i32,
+    ) -> WebServiceResult<CertificateDistributionPage> {
+        let (page, page_size, offset) = pagination(page, page_size);
+        let desired_agent = AuthenticatedAgent {
+            server_uuid: "distribution-status".to_string(),
+            tenant_id,
+        };
+        let (manifest, _) = self
+            .build_agent_sync_manifest_repo(&desired_agent, None)
+            .await?;
+        let desired_sync_version = manifest.sync_version;
+
+        let count_row = sqlx::query("SELECT COUNT(*) AS total FROM web_server WHERE tenant_id = $1")
+            .bind(tenant_id)
+            .fetch_one(&self.pool)
+            .await
+            .map_err(|error| store_error("count web_server certificate distribution", error))?;
+        let total: i64 = count_row.try_get("total").unwrap_or(0);
+        let mut rows = sqlx::query(
+            "SELECT uuid, name, host, status, CAST(metadata AS TEXT) AS metadata
+             FROM web_server
+             WHERE tenant_id = $1
+             ORDER BY updated_at DESC, id DESC LIMIT $2 OFFSET $3",
+        )
+        .bind(tenant_id)
+        .bind(page_size)
+        .bind(offset)
+        .fetch(&self.pool);
+
+        let mut items = Vec::with_capacity(page_size as usize);
+        while let Some(row) = rows
+            .try_next()
+            .await
+            .map_err(|error| store_error("stream web_server certificate distribution", error))?
+        {
+            let metadata = json_from_row(&row, "metadata")
+                .map_err(|error| {
+                    WebServiceError::Internal(format!(
+                        "certificate distribution server metadata: {error}"
+                    ))
+                })?
+                .unwrap_or_else(|| json!({}));
+            let applied_sync_version = metadata
+                .get("lastAppliedSyncVersion")
+                .and_then(Value::as_str)
+                .map(str::to_owned);
+            let last_heartbeat_at = metadata
+                .get("lastHeartbeatAt")
+                .and_then(Value::as_str)
+                .map(str::to_owned);
+            let server_status: i32 = row.try_get("status").map_err(|error| {
+                WebServiceError::Internal(format!("certificate distribution server status: {error}"))
+            })?;
+            let status = if server_status == 0 {
+                "OFFLINE"
+            } else if applied_sync_version.as_deref() == Some(desired_sync_version.as_str()) {
+                "SYNCED"
+            } else {
+                "PENDING"
+            };
+            items.push(CertificateDistributionResponse {
+                server_id: row.try_get("uuid").map_err(|error| {
+                    WebServiceError::Internal(format!("certificate distribution server uuid: {error}"))
+                })?,
+                server_name: row.try_get("name").map_err(|error| {
+                    WebServiceError::Internal(format!("certificate distribution server name: {error}"))
+                })?,
+                host: row.try_get("host").map_err(|error| {
+                    WebServiceError::Internal(format!("certificate distribution server host: {error}"))
+                })?,
+                desired_sync_version: desired_sync_version.clone(),
+                applied_sync_version,
+                status: status.to_string(),
+                last_heartbeat_at,
+            });
+        }
+
+        Ok(CertificateDistributionPage {
+            items,
+            total,
+            page,
+            page_size,
+        })
     }
 
     async fn load_active_nginx_configs_for_tenant(

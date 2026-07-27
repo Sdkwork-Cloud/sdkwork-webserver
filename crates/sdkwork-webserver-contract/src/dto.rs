@@ -8,6 +8,8 @@ pub struct SiteResponse {
     pub slug: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
+    #[serde(rename = "applicationType")]
+    pub application_type: String,
     #[serde(rename = "siteType")]
     pub site_type: i32,
     pub status: i32,
@@ -35,10 +37,16 @@ pub struct CreateSiteRequest {
     pub slug: Option<String>,
     #[serde(default)]
     pub description: Option<String>,
+    #[serde(rename = "applicationType", default = "default_application_type")]
+    pub application_type: String,
     #[serde(rename = "siteType")]
     pub site_type: i32,
     #[serde(rename = "runtimeConfig", default)]
     pub runtime_config: Option<Value>,
+}
+
+fn default_application_type() -> String {
+    "WEB".to_string()
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
@@ -178,16 +186,22 @@ pub struct CertificateResponse {
     pub id: String,
     #[serde(rename = "certName")]
     pub cert_name: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub domain: Option<String>,
     #[serde(rename = "certType", skip_serializing_if = "Option::is_none")]
     pub cert_type: Option<i32>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub issuer: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub fingerprint: Option<String>,
     #[serde(rename = "notBefore", skip_serializing_if = "Option::is_none")]
     pub not_before: Option<String>,
     #[serde(rename = "notAfter", skip_serializing_if = "Option::is_none")]
     pub not_after: Option<String>,
     #[serde(rename = "autoRenew", skip_serializing_if = "Option::is_none")]
     pub auto_renew: Option<bool>,
+    #[serde(rename = "renewalStatus", skip_serializing_if = "Option::is_none")]
+    pub renewal_status: Option<i32>,
     pub status: i32,
     #[serde(rename = "createdAt")]
     pub created_at: String,
@@ -208,6 +222,37 @@ pub struct CreateCertificateRequest {
     pub cert_type: i32,
     #[serde(rename = "autoRenew", default = "default_true")]
     pub auto_renew: bool,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct UpdateCertificateRequest {
+    #[serde(rename = "autoRenew")]
+    pub auto_renew: bool,
+}
+
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+pub struct CertificateDistributionResponse {
+    #[serde(rename = "serverId")]
+    pub server_id: String,
+    #[serde(rename = "serverName")]
+    pub server_name: String,
+    pub host: String,
+    #[serde(rename = "desiredSyncVersion")]
+    pub desired_sync_version: String,
+    #[serde(rename = "appliedSyncVersion", skip_serializing_if = "Option::is_none")]
+    pub applied_sync_version: Option<String>,
+    pub status: String,
+    #[serde(rename = "lastHeartbeatAt", skip_serializing_if = "Option::is_none")]
+    pub last_heartbeat_at: Option<String>,
+}
+
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+pub struct CertificateDistributionPage {
+    pub items: Vec<CertificateDistributionResponse>,
+    #[serde(with = "sdkwork_utils_rust::serde_int64")]
+    pub total: i64,
+    pub page: i32,
+    pub page_size: i32,
 }
 
 #[derive(Clone, Debug)]

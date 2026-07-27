@@ -7,7 +7,8 @@ use sdkwork_intelligence_webserver_service::{
 };
 use sdkwork_webserver_contract::{
     AgentHeartbeatRequest, AgentHeartbeatResponse, AgentSyncResponse, AuditLogPage,
-    CertificateIssueUpdate, CertificatePage, CertificateResponse, CreateCertificateRequest,
+    CertificateDistributionPage, CertificateIssueUpdate, CertificatePage,
+    CertificateRenewalCandidate, CertificateResponse, CreateCertificateRequest,
     CreateDeploymentRequest, CreateDomainRequest, CreateEnvVariableRequest,
     CreateHealthCheckRequest, CreateNginxConfigRequest, CreateServerRequest, CreateServerResponse,
     CreateSiteRequest, DeploymentPage, DeploymentResponse, DomainPage, DomainResponse,
@@ -268,6 +269,35 @@ impl WebRepositoryPort for WebRepository {
         reason: &str,
     ) -> WebServiceResult<()> {
         self.fail_certificate_renewal_repo(tenant_id, certificate_id, reason)
+            .await
+    }
+
+    async fn retrieve_certificate_renewal_candidate(
+        &self,
+        tenant_id: i64,
+        certificate_id: &str,
+    ) -> WebServiceResult<CertificateRenewalCandidate> {
+        self.retrieve_certificate_renewal_candidate_repo(tenant_id, certificate_id)
+            .await
+    }
+
+    async fn update_certificate_auto_renew(
+        &self,
+        tenant_id: i64,
+        certificate_id: &str,
+        auto_renew: bool,
+    ) -> WebServiceResult<CertificateResponse> {
+        self.update_certificate_auto_renew_repo(tenant_id, certificate_id, auto_renew)
+            .await
+    }
+
+    async fn list_certificate_distribution(
+        &self,
+        tenant_id: i64,
+        page: i32,
+        page_size: i32,
+    ) -> WebServiceResult<CertificateDistributionPage> {
+        self.list_certificate_distribution_repo(tenant_id, page, page_size)
             .await
     }
 

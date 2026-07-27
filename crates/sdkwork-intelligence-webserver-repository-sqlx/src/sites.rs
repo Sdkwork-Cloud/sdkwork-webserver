@@ -27,27 +27,31 @@ impl WebRepository {
         let count_sql = "SELECT COUNT(*) AS total FROM web_site
              WHERE tenant_id = $1 AND deleted_at IS NULL
                AND ($2 IS NULL OR status = $2)
-               AND ($3 IS NULL OR site_type = $3)
-               AND ($4 IS NULL OR name LIKE $4 OR slug LIKE $4)";
-        let list_sql = "SELECT uuid, name, slug, description, site_type, status,
+               AND ($3 IS NULL OR application_type = $3)
+               AND ($4 IS NULL OR site_type = $4)
+               AND ($5 IS NULL OR name LIKE $5 OR slug LIKE $5)";
+        let list_sql = "SELECT uuid, name, slug, description, application_type, site_type, status,
                     CAST(runtime_config AS TEXT) AS runtime_config,
                     CAST(created_at AS TEXT) AS created_at,
                     CAST(updated_at AS TEXT) AS updated_at
              FROM web_site
              WHERE tenant_id = $1 AND deleted_at IS NULL
                AND ($2 IS NULL OR status = $2)
-               AND ($3 IS NULL OR site_type = $3)
-               AND ($4 IS NULL OR name LIKE $4 OR slug LIKE $4)
-             ORDER BY updated_at DESC, id DESC LIMIT $5 OFFSET $6";
+               AND ($3 IS NULL OR application_type = $3)
+               AND ($4 IS NULL OR site_type = $4)
+               AND ($5 IS NULL OR name LIKE $5 OR slug LIKE $5)
+             ORDER BY updated_at DESC, id DESC LIMIT $6 OFFSET $7";
 
         let count_query = sqlx::query(count_sql)
             .bind(tenant_id)
             .bind(query.status)
+            .bind(query.application_type.as_deref())
             .bind(query.site_type)
             .bind(keyword.as_deref());
         let list_query = sqlx::query(list_sql)
             .bind(tenant_id)
             .bind(query.status)
+            .bind(query.application_type.as_deref())
             .bind(query.site_type)
             .bind(keyword.as_deref())
             .bind(page_size)
@@ -105,14 +109,14 @@ impl WebRepository {
             .unwrap_or_else(|| serde_json::json!({}));
         let org_id = organization_id.unwrap_or(0);
         let engine = self.database_engine().await?;
-        let runtime_config_expression = json_write_expression(engine, "$10");
-        let now_expression = instant_write_expression(engine, "$11");
+        let runtime_config_expression = json_write_expression(engine, "$11");
+        let now_expression = instant_write_expression(engine, "$12");
         let insert_sql = format!(
             "INSERT INTO web_site (
                 id, uuid, tenant_id, organization_id, user_id, name, slug, description,
-                site_type, status, runtime_config, metadata, created_at, updated_at, version
+                application_type, site_type, status, runtime_config, metadata, created_at, updated_at, version
              ) VALUES (
-                $1, $2, $3, $4, $5, $6, $7, $8, $9, 0,
+                $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 0,
                 {runtime_config_expression}, '{{}}', {now_expression}, {now_expression}, 0
              )"
         );
@@ -126,6 +130,7 @@ impl WebRepository {
             .bind(&request.name)
             .bind(&slug)
             .bind(&request.description)
+            .bind(&request.application_type)
             .bind(request.site_type)
             .bind(runtime_config.to_string())
             .bind(&now)
@@ -142,7 +147,7 @@ impl WebRepository {
         site_id: &str,
     ) -> WebServiceResult<SiteResponse> {
         let row = sqlx::query(
-            "SELECT uuid, name, slug, description, site_type, status,
+            "SELECT uuid, name, slug, description, application_type, site_type, status,
                     CAST(runtime_config AS TEXT) AS runtime_config,
                     CAST(created_at AS TEXT) AS created_at,
                     CAST(updated_at AS TEXT) AS updated_at
@@ -272,6 +277,7 @@ fn map_site_row(row: &EngineRow) -> Result<SiteResponse, sqlx::Error> {
         name: row.try_get("name")?,
         slug: row.try_get("slug")?,
         description: row.try_get("description").ok(),
+        application_type: row.try_get("application_type")?,
         site_type: row.try_get("site_type")?,
         status: row.try_get("status")?,
         runtime_config: json_from_row(row, "runtime_config")?,

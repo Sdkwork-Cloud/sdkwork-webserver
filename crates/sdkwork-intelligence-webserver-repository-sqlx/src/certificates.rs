@@ -1,7 +1,7 @@
 use chrono::{DateTime, Duration, Utc};
 use sdkwork_webserver_contract::{
-    CertificateIssueUpdate, CertificatePage, CertificateResponse, CreateCertificateRequest,
-    WebServiceError, WebServiceResult,
+    CertificateIssueUpdate, CertificatePage, CertificateRenewalCandidate, CertificateResponse,
+    CreateCertificateRequest, WebServiceError, WebServiceResult,
 };
 use serde_json::json;
 use super::{EngineRow, WebRepository};
@@ -31,13 +31,15 @@ impl WebRepository {
         let total: i64 = count_row.try_get("total").unwrap_or(0);
 
         let rows = sqlx::query(
-            "SELECT uuid, cert_name, cert_type, issuer,
-                    CAST(not_before AS TEXT) AS not_before,
-                    CAST(not_after AS TEXT) AS not_after,
-                    auto_renew, status, CAST(created_at AS TEXT) AS created_at
-             FROM web_certificate
-             WHERE tenant_id = $1
-             ORDER BY created_at DESC, id DESC LIMIT $2 OFFSET $3",
+            "SELECT c.uuid, c.cert_name, d.hostname AS domain, c.cert_type, c.issuer,
+                    c.fingerprint, CAST(c.not_before AS TEXT) AS not_before,
+                    CAST(c.not_after AS TEXT) AS not_after,
+                    c.auto_renew, c.renewal_status, c.status,
+                    CAST(c.created_at AS TEXT) AS created_at
+             FROM web_certificate c
+             LEFT JOIN web_domain d ON d.id = c.domain_id
+             WHERE c.tenant_id = $1
+             ORDER BY c.created_at DESC, c.id DESC LIMIT $2 OFFSET $3",
         )
         .bind(tenant_id)
         .bind(page_size)
@@ -236,6 +238,84 @@ impl WebRepository {
         Ok(())
     }
 
+    pub(super) async fn retrieve_certificate_renewal_candidate_repo(
+        &self,
+        tenant_id: i64,
+        certificate_uuid: &str,
+    ) -> WebServiceResult<CertificateRenewalCandidate> {
+        let row = sqlx::query(
+            "SELECT c.tenant_id, c.uuid, c.cert_type, c.cert_name, c.auto_renew,
+                    CAST(c.not_after AS TEXT) AS not_after, d.hostname
+             FROM web_certificate c
+             INNER JOIN web_domain d ON d.id = c.domain_id
+             INNER JOIN web_site s ON s.id = d.site_id
+             WHERE c.tenant_id = $1 AND c.uuid = $2 AND c.status = 1
+               AND d.deleted_at IS NULL AND s.deleted_at IS NULL",
+        )
+        .bind(tenant_id)
+        .bind(certificate_uuid)
+        .fetch_optional(&self.pool)
+        .await
+        .map_err(|error| store_error("retrieve web_certificate renewal candidate", error))?
+        .ok_or_else(|| WebServiceError::not_found("active certificate not found"))?;
+
+        Ok(CertificateRenewalCandidate {
+            tenant_id: row.try_get("tenant_id").map_err(|error| {
+                WebServiceError::Internal(format!("renewal candidate tenant_id: {error}"))
+            })?,
+            certificate_id: row.try_get("uuid").map_err(|error| {
+                WebServiceError::Internal(format!("renewal candidate uuid: {error}"))
+            })?,
+            cert_type: row.try_get("cert_type").map_err(|error| {
+                WebServiceError::Internal(format!("renewal candidate cert_type: {error}"))
+            })?,
+            cert_name: row.try_get("cert_name").map_err(|error| {
+                WebServiceError::Internal(format!("renewal candidate cert_name: {error}"))
+            })?,
+            hostname: row.try_get("hostname").map_err(|error| {
+                WebServiceError::Internal(format!("renewal candidate hostname: {error}"))
+            })?,
+            auto_renew: bool_from_row(&row, "auto_renew").map_err(|error| {
+                WebServiceError::Internal(format!("renewal candidate auto_renew: {error}"))
+            })?,
+            not_after: row.try_get("not_after").map_err(|error| {
+                WebServiceError::Internal(format!("renewal candidate not_after: {error}"))
+            })?,
+        })
+    }
+
+    pub(super) async fn update_certificate_auto_renew_repo(
+        &self,
+        tenant_id: i64,
+        certificate_uuid: &str,
+        auto_renew: bool,
+    ) -> WebServiceResult<CertificateResponse> {
+        let now = now_rfc3339();
+        let engine = self.database_engine().await?;
+        let now_expression = instant_write_expression(engine, "$4");
+        let update_sql = format!(
+            "UPDATE web_certificate
+             SET auto_renew = $3, updated_at = {now_expression}, version = version + 1
+             WHERE tenant_id = $1 AND uuid = $2 AND status = 1
+               AND ($3 = FALSE OR cert_type IN (1, 3))"
+        );
+        let result = sqlx::query(&update_sql)
+            .bind(tenant_id)
+            .bind(certificate_uuid)
+            .bind(auto_renew)
+            .bind(&now)
+            .execute(&self.pool)
+            .await
+            .map_err(|error| store_error("update web_certificate auto renewal", error))?;
+        if result.rows_affected() == 0 {
+            return Err(WebServiceError::validation(
+                "active certificate not found or certificate type is not renewable",
+            ));
+        }
+        self.retrieve_certificate_repo(tenant_id, certificate_uuid)
+            .await
+    }
+
     pub(super) async fn finalize_certificate_repo(
         &self,
         tenant_id: i64,
@@ -339,11 +419,13 @@ impl WebRepository {
         certificate_uuid: &str,
     ) -> WebServiceResult<CertificateResponse> {
         let row = sqlx::query(
-            "SELECT uuid, cert_name, cert_type, issuer,
-                    CAST(not_before AS TEXT) AS not_before,
-                    CAST(not_after AS TEXT) AS not_after,
-                    auto_renew, status, CAST(created_at AS TEXT) AS created_at
-             FROM web_certificate WHERE tenant_id = $1 AND uuid = $2",
+            "SELECT c.uuid, c.cert_name, d.hostname AS domain, c.cert_type, c.issuer,
+                    c.fingerprint, CAST(c.not_before AS TEXT) AS not_before,
+                    CAST(c.not_after AS TEXT) AS not_after, c.auto_renew,
+                    c.renewal_status, c.status, CAST(c.created_at AS TEXT) AS created_at
+             FROM web_certificate c
+             LEFT JOIN web_domain d ON d.id = c.domain_id
+             WHERE c.tenant_id = $1 AND c.uuid = $2",
         )
         .bind(tenant_id)
         .bind(certificate_uuid)
@@ -377,11 +459,14 @@ fn map_certificate_row(row: &EngineRow) -> Result<CertificateResponse, sqlx::Err
     Ok(CertificateResponse {
         id: row.try_get("uuid")?,
         cert_name: row.try_get("cert_name")?,
+        domain: row.try_get("domain").ok(),
         cert_type: row.try_get("cert_type").ok(),
         issuer: row.try_get("issuer").ok(),
+        fingerprint: row.try_get("fingerprint").ok(),
         not_before: row.try_get("not_before").ok(),
         not_after: row.try_get("not_after").ok(),
         auto_renew: bool_from_row(row, "auto_renew").ok(),
+        renewal_status: row.try_get("renewal_status").ok(),
         status: row.try_get("status")?,
         created_at: row.try_get("created_at")?,
     })

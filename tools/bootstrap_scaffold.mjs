@@ -36,7 +36,6 @@ const placeholders = [
   'deployments/README.md',
   'deployments/docker/README.md',
   'database/migrations/postgres/README.md',
-  'database/migrations/sqlite/README.md',
   'database/seeds/common/README.md',
   'database/seeds/locales/README.md',
   'database/seeds/locales/en-US/README.md',

@@ -1,5 +1,7 @@
 import { useSdkworkAuthControllerState } from "@sdkwork/auth-pc-react";
 import { webserverModule as auditModule } from "@sdkwork/webserver-pc-admin-audit";
+import { webserverModule as applicationsModule } from "@sdkwork/webserver-pc-admin-applications";
+import { webserverModule as certificatesModule } from "@sdkwork/webserver-pc-admin-certificates";
 import { webserverModule as diagnosticsModule } from "@sdkwork/webserver-pc-admin-diagnostics";
 import { webserverModule as nginxModule } from "@sdkwork/webserver-pc-admin-nginx";
 import { webserverModule as serversModule } from "@sdkwork/webserver-pc-admin-servers";
@@ -16,7 +18,7 @@ import type { BootstrappedWebserverPcRuntime } from "./bootstrap/runtime.ts";
 import { WebserverAuthGate } from "./auth/WebserverAuthGate.tsx";
 
 const consoleModules = [sitesModule, configurationModule, deliveryModule, deploymentsModule] satisfies readonly WebserverPcModuleDefinition[];
-const adminModules = [nginxModule, serversModule, diagnosticsModule, auditModule] satisfies readonly WebserverPcModuleDefinition[];
+const adminModules = [applicationsModule, certificatesModule, nginxModule, serversModule, diagnosticsModule, auditModule] satisfies readonly WebserverPcModuleDefinition[];
 const LazyAuthRoutes = lazy(() => import("./auth/WebserverAuthRoutes.tsx").then((module) => ({ default: module.WebserverAuthRoutes })));
 const LazyAdminSurface = lazy(() => import("./surfaces/WebserverAdminSurface.tsx").then((module) => ({ default: module.WebserverAdminSurface })));
 

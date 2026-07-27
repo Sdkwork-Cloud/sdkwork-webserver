@@ -42,7 +42,6 @@ const PACKAGE_FILES = new Map([
   ['database/contract/schema.yaml', 'schemaVersion: 1\n'],
   ['database/contract/table-registry.json', '{}\n'],
   ['database/ddl/baseline/postgres/0001_web_baseline.sql', '-- postgres baseline\n'],
-  ['database/ddl/baseline/sqlite/0001_web_baseline.sql', '-- sqlite baseline\n'],
   ['database/drift/policy.yaml', 'schemaVersion: 1\n'],
   ['database/seeds/seed.manifest.json', '{}\n'],
   ['database/seeds/common/001_bootstrap.sql', '-- common seed\n'],

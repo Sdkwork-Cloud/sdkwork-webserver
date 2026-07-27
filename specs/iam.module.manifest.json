@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 1,
+  "kind": "sdkwork.iam.module",
+  "moduleId": "web",
+  "catalogVersion": "1.0.0",
+  "domain": "web",
+  "owner": "sdkwork-web-server",
+  "displayName": "SDKWork Web Server",
+  "permissions": {
+    "catalog": [
+      {
+        "code": "web.sites.read",
+        "name": "Read sites and applications",
+        "resource": "sites",
+        "action": "read",
+        "status": "active",
+        "since": "1.0.0",
+        "replacementCode": null
+      },
+      {
+        "code": "web.sites.write",
+        "name": "Manage sites and applications",
+        "resource": "sites",
+        "action": "write",
+        "status": "active",
+        "since": "1.0.0",
+        "replacementCode": null
+      },
+      {
+        "code": "web.certificates.read",
+        "name": "Read certificates",
+        "resource": "certificates",
+        "action": "read",
+        "status": "active",
+        "since": "1.0.0",
+        "replacementCode": null
+      },
+      {
+        "code": "web.certificates.write",
+        "name": "Manage certificates",
+        "resource": "certificates",
+        "action": "write",
+        "status": "active",
+        "since": "1.0.0",
+        "replacementCode": null
+      },
+      {
+        "code": "web.nginx.write",
+        "name": "Manage Nginx configuration",
+        "resource": "nginx",
+        "action": "write",
+        "status": "active",
+        "since": "1.0.0",
+        "replacementCode": null
+      },
+      {
+        "code": "web.servers.read",
+        "name": "Read managed servers",
+        "resource": "servers",
+        "action": "read",
+        "status": "active",
+        "since": "1.0.0",
+        "replacementCode": null
+      },
+      {
+        "code": "web.servers.write",
+        "name": "Manage servers",
+        "resource": "servers",
+        "action": "write",
+        "status": "active",
+        "since": "1.0.0",
+        "replacementCode": null
+      },
+      {
+        "code": "web.auditLogs.read",
+        "name": "Read audit logs",
+        "resource": "auditLogs",
+        "action": "read",
+        "status": "active",
+        "since": "1.0.0",
+        "replacementCode": null
+      },
+      {
+        "code": "web.agent.read",
+        "name": "Read node agent state",
+        "resource": "agent",
+        "action": "read",
+        "status": "active",
+        "since": "1.0.0",
+        "replacementCode": null
+      },
+      {
+        "code": "web.agent.write",
+        "name": "Manage node agent state",
+        "resource": "agent",
+        "action": "write",
+        "status": "active",
+        "since": "1.0.0",
+        "replacementCode": null
+      },
+      {
+        "code": "web.runtimeAssignments.write",
+        "name": "Manage runtime assignments",
+        "resource": "runtimeAssignments",
+        "action": "write",
+        "status": "active",
+        "since": "1.0.0",
+        "replacementCode": null
+      },
+      {
+        "code": "web.heartbeat.write",
+        "name": "Submit node heartbeat",
+        "resource": "heartbeat",
+        "action": "write",
+        "status": "active",
+        "since": "1.0.0",
+        "replacementCode": null
+      },
+      {
+        "code": "web.retrieve.write",
+        "name": "Retrieve node synchronization state",
+        "resource": "retrieve",
+        "action": "write",
+        "status": "active",
+        "since": "1.0.0",
+        "replacementCode": null
+      }
+    ]
+  }
+}

@@ -1,5 +1,5 @@
 import { backendApiPath } from './paths';
-import type { HttpClient } from '../http/client';
+import type { ApiRequestOptions, HttpClient } from '../http/client';
 
 import type { CreateNginxConfigRequest, NginxConfigResponse, NginxDeployResponse, NginxReloadResponse, NginxStatusResponse, NginxValidateResponse, PageInfo, UpdateNginxConfigRequest } from '../types';
 
@@ -13,8 +13,8 @@ export class NginxStatusApi {
 
 
 /** Retrieve Nginx status */
-  async retrieve(): Promise<NginxStatusResponse> {
-    return this.client.get<NginxStatusResponse>(backendApiPath(`/nginx/status`));
+  async retrieve(requestOptions?: ApiRequestOptions): Promise<NginxStatusResponse> {
+    return this.client.request<NginxStatusResponse>(backendApiPath(`/nginx/status`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any });
   }
 }
 
@@ -27,8 +27,8 @@ export class NginxReloadApi {
 
 
 /** Reload Nginx */
-  async create(): Promise<NginxReloadResponse> {
-    return this.client.post<NginxReloadResponse>(backendApiPath(`/nginx/reload`));
+  async create(requestOptions?: ApiRequestOptions): Promise<NginxReloadResponse> {
+    return this.client.request<NginxReloadResponse>(backendApiPath(`/nginx/reload`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any });
   }
 }
 
@@ -49,7 +49,7 @@ export class NginxConfigsApi {
 
 
 /** List Nginx configurations */
-  async list(params?: NginxConfigsListParams): Promise<{ items: NginxConfigResponse[]; pageInfo: PageInfo; }> {
+  async list(params?: NginxConfigsListParams, requestOptions?: ApiRequestOptions): Promise<{ items: NginxConfigResponse[]; pageInfo: PageInfo; }> {
     const query = buildQueryString([
       { name: 'page', value: params?.page, style: 'form', explode: true, allowReserved: false },
       { name: 'page_size', value: params?.pageSize, style: 'form', explode: true, allowReserved: false },
@@ -57,43 +57,43 @@ export class NginxConfigsApi {
       { name: 'configType', value: params?.configType, style: 'form', explode: true, allowReserved: false },
       { name: 'isActive', value: params?.isActive, style: 'form', explode: true, allowReserved: false },
     ]);
-    return this.client.get<{ items: NginxConfigResponse[]; pageInfo: PageInfo; }>(appendQueryString(backendApiPath(`/nginx/configs`), query));
+    return this.client.request<{ items: NginxConfigResponse[]; pageInfo: PageInfo; }>(appendQueryString(backendApiPath(`/nginx/configs`), query), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any });
   }
 
 /** Create an Nginx configuration */
-  async create(body: CreateNginxConfigRequest): Promise<NginxConfigResponse> {
-    return this.client.post<NginxConfigResponse>(backendApiPath(`/nginx/configs`), body, undefined, undefined, 'application/json');
+  async create(body: CreateNginxConfigRequest, requestOptions?: ApiRequestOptions): Promise<NginxConfigResponse> {
+    return this.client.request<NginxConfigResponse>(backendApiPath(`/nginx/configs`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, body, contentType: 'application/json' });
   }
 
 /** Retrieve an Nginx configuration */
-  async retrieve(configId: string): Promise<NginxConfigResponse> {
-    return this.client.get<NginxConfigResponse>(backendApiPath(`/nginx/etc/${serializePathParameter(configId, { name: 'configId', style: 'simple', explode: false })}`));
+  async retrieve(configId: string, requestOptions?: ApiRequestOptions): Promise<NginxConfigResponse> {
+    return this.client.request<NginxConfigResponse>(backendApiPath(`/nginx/etc/${serializePathParameter(configId, { name: 'configId', style: 'simple', explode: false })}`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any });
   }
 
 /** Update an Nginx configuration */
-  async update(configId: string, body: UpdateNginxConfigRequest): Promise<NginxConfigResponse> {
-    return this.client.put<NginxConfigResponse>(backendApiPath(`/nginx/etc/${serializePathParameter(configId, { name: 'configId', style: 'simple', explode: false })}`), body, undefined, undefined, 'application/json');
+  async update(configId: string, body: UpdateNginxConfigRequest, requestOptions?: ApiRequestOptions): Promise<NginxConfigResponse> {
+    return this.client.request<NginxConfigResponse>(backendApiPath(`/nginx/etc/${serializePathParameter(configId, { name: 'configId', style: 'simple', explode: false })}`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'PUT' as any, body, contentType: 'application/json' });
   }
 
 /** Validate an Nginx configuration */
-  async validate(configId: string): Promise<NginxValidateResponse> {
-    return this.client.post<NginxValidateResponse>(backendApiPath(`/nginx/etc/${serializePathParameter(configId, { name: 'configId', style: 'simple', explode: false })}/validate`));
+  async validate(configId: string, requestOptions?: ApiRequestOptions): Promise<NginxValidateResponse> {
+    return this.client.request<NginxValidateResponse>(backendApiPath(`/nginx/etc/${serializePathParameter(configId, { name: 'configId', style: 'simple', explode: false })}/validate`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any });
   }
 
 /** Deploy an Nginx configuration */
-  async deploy(configId: string): Promise<NginxDeployResponse> {
-    return this.client.post<NginxDeployResponse>(backendApiPath(`/nginx/etc/${serializePathParameter(configId, { name: 'configId', style: 'simple', explode: false })}/deploy`));
+  async deploy(configId: string, requestOptions?: ApiRequestOptions): Promise<NginxDeployResponse> {
+    return this.client.request<NginxDeployResponse>(backendApiPath(`/nginx/etc/${serializePathParameter(configId, { name: 'configId', style: 'simple', explode: false })}/deploy`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any });
   }
 }
 
 export class NginxApi {
-
+  private client: HttpClient;
   public readonly configs: NginxConfigsApi;
   public readonly reload: NginxReloadApi;
   public readonly status: NginxStatusApi;
 
   constructor(client: HttpClient) {
-
+    this.client = client;
     this.configs = new NginxConfigsApi(client);
     this.reload = new NginxReloadApi(client);
     this.status = new NginxStatusApi(client);

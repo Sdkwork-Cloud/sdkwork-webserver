@@ -6,8 +6,8 @@ use sdkwork_utils_rust::{
     SDKWORK_TRACE_ID_HEADER,
 };
 use sdkwork_webserver_contract::{
-    AuditLogPage, CertificatePage, DeploymentPage, DomainPage, EnvVariablePage, HealthCheckPage,
-    NginxConfigPage, ServerPage, SitePage, WebServiceResult,
+    AuditLogPage, CertificateDistributionPage, CertificatePage, DeploymentPage, DomainPage,
+    EnvVariablePage, HealthCheckPage, NginxConfigPage, ServerPage, SitePage, WebServiceResult,
 };
 use serde::Serialize;
 
@@ -152,6 +152,18 @@ pub fn ok_certificate_page(
         Ok(page_data) => Ok(envelope(
             StatusCode::OK,
             build_page_data(page_data.items, page, page_size, page_data.total),
+        )),
+        Err(error) => Err(error.into()),
+    }
+}
+
+pub fn ok_certificate_distribution_page(
+    result: WebServiceResult<CertificateDistributionPage>,
+) -> Result<Response, WebApiError> {
+    match result {
+        Ok(page) => Ok(envelope(
+            StatusCode::OK,
+            build_page_data(page.items, page.page, page.page_size, page.total),
         )),
         Err(error) => Err(error.into()),
     }

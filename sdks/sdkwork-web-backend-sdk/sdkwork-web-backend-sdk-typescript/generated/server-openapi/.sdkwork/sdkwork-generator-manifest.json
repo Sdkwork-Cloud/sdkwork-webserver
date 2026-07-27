@@ -12,7 +12,7 @@
   "generatedFiles": [
     {
       "path": "bin/publish-core.mjs",
-      "sha256": "582c020e50ece8a369ab0c5b2f18d6efe16a54d7c46cd4b29d0a2d560ea07d6c"
+      "sha256": "98ad0918a78bfbe22bf8f12fec709b0bed545b9e01edd40f5e4abf31a23378a5"
     },
     {
       "path": "bin/publish.ps1",
@@ -44,7 +44,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "e47df304655c0fb01a090827c3b6ef41e0683ef9b36ffd3ae68809e7a0d3fadc"
+      "sha256": "490db06ba511308c2d6413f06bcdd6fefc60d211e14f90392cc8e71043856aab"
     },
     {
       "path": "sdkwork-sdk.json",
@@ -52,23 +52,43 @@
     },
     {
       "path": "src/api/agent.ts",
-      "sha256": "33ccd01a884d391805a59de67f0e7494ace9e480276755a6e712c1fc773930eb"
+      "sha256": "c89bd3aae42b58d1189ea4312ba8021c20767e7b07bb83016484f7a357610817"
+    },
+    {
+      "path": "src/api/application-deployment.ts",
+      "sha256": "3cc4e0ae538dd663ffa537e555a0eaf22cea03648265cfffe18731898aaae93b"
+    },
+    {
+      "path": "src/api/application-domain.ts",
+      "sha256": "2d4a955e90e9cfc94f9197b049f5b20a589551b26076a1b88eaf15592336e6ae"
+    },
+    {
+      "path": "src/api/application.ts",
+      "sha256": "374ff351093416238509fc8b54377677cb8c3a25083f7cb19ab722deb52aabca"
     },
     {
       "path": "src/api/audit.ts",
-      "sha256": "1e82fa52cc3df5b0592d6366be091d3e05581273b202f2fc81746f2aae88f065"
+      "sha256": "200daf2878bce7de7f22e77921962b9b2400390e4e2a84541c029fe8c9b3a8d5"
     },
     {
       "path": "src/api/base.ts",
       "sha256": "02ad25e6bf331ff241ba387c2947ddf1900dd849038e08c2757416a3aa788a04"
     },
     {
+      "path": "src/api/certificate-distribution.ts",
+      "sha256": "929d9963563cc2f9ab1671a0f933aecc54098247d29de1103ac62237c558c5e8"
+    },
+    {
+      "path": "src/api/certificate.ts",
+      "sha256": "f788b8e44840569cb582ae5935b593e66ca6ef59926a8c1c90b2ec84a11cdcf8"
+    },
+    {
       "path": "src/api/index.ts",
-      "sha256": "321e8d9576230d071807df429ed4e7ac462fff94d1b8e29b5b7bdb71a66f8fdd"
+      "sha256": "e789a3b828a77c2f1439702a38fd1f3868760971a135784d9302f32e85b09f8c"
     },
     {
       "path": "src/api/nginx.ts",
-      "sha256": "e7cf7dcc450e3852da837d52df16c46bbeb20cfc1df696af1d3d36f6f8c21b61"
+      "sha256": "329dbb43cf8f976f679831dbdcb31913134046f706e2d9574e812ccab7702a2f"
     },
     {
       "path": "src/api/paths.ts",
@@ -76,7 +96,7 @@
     },
     {
       "path": "src/api/server.ts",
-      "sha256": "ca7668c4787cf642cb5a9d02ba00b98a236200b178e68abcb88ebb48ce19d6ee"
+      "sha256": "643bcf831274c500c868def368dfaf7badd96425e36431a09a22fe1ae0586c23"
     },
     {
       "path": "src/auth/index.ts",
@@ -84,7 +104,7 @@
     },
     {
       "path": "src/http/client.ts",
-      "sha256": "6e389d5c14fb5845365972b6776af185d8af8eb8da7bb398e59be6c29e394ddf"
+      "sha256": "0de037ee8ebbf0f59afe22af06b918ac098d50a271039f5a0733d01e7819a5d5"
     },
     {
       "path": "src/http/index.ts",
@@ -96,7 +116,7 @@
     },
     {
       "path": "src/sdk.ts",
-      "sha256": "340b806ee53587f1867816c7b03c4a964d0c75d2c273a238f2282d49ce372763"
+      "sha256": "bee243ce56c0e34e36a2c23a3b272aa087afc043fd789fe8bfcece41dd1915cc"
     },
     {
       "path": "src/types/agent-certificate-bundle.ts",
@@ -119,6 +139,50 @@
       "sha256": "75803e9825f4030b52de4f3cdf207a3bb0de7d3ab7af41acd957d788bc240619"
     },
     {
+      "path": "src/types/application-deployment-response.ts",
+      "sha256": "dda18dcd5805560663677ecdb7dc5f2a5f792b94302b9a8407c724e907686d3a"
+    },
+    {
+      "path": "src/types/application-domain-response.ts",
+      "sha256": "6563a22f5ce5d0b6d42b1dceffbcbacef4891702617b3a44de55b8c1e1ce1281"
+    },
+    {
+      "path": "src/types/application-domain-verify-response.ts",
+      "sha256": "727640fff66307e61896da87faf03b7f690e31aeaa8ae67c29e72236a56b7436"
+    },
+    {
+      "path": "src/types/application-response.ts",
+      "sha256": "fef95f716f64aacd98ee13726152e03e37d865f90485d3df4273527fa7459c95"
+    },
+    {
+      "path": "src/types/applications-create-response201.ts",
+      "sha256": "94fc9c8d5f6633bbfa3a5129589c615e1dd13e1747f983367ae00677c04935fe"
+    },
+    {
+      "path": "src/types/applications-deployments-create-response201.ts",
+      "sha256": "480e08cc48299254530eaf38298ca5aeb648749fe22ba0a84859e2ad4bcf3180"
+    },
+    {
+      "path": "src/types/applications-deployments-list-response.ts",
+      "sha256": "4ecdf7679bfe00981c25b953114e08eb6eada9769625a1b8a906a749c3516dd5"
+    },
+    {
+      "path": "src/types/applications-domains-create-response201.ts",
+      "sha256": "74a28d62c2d71f0cdc54c779769ef0633de19307f4372322c0aca019b04ecef5"
+    },
+    {
+      "path": "src/types/applications-domains-list-response.ts",
+      "sha256": "ad7496ad6a2a8bd2c5e29763e5be672555ac8f1084f2cdb55381b015f0a86b56"
+    },
+    {
+      "path": "src/types/applications-domains-verify-response.ts",
+      "sha256": "bf8ed624ecda551c49b4ec5af8190d6cca9f1542d3bf5acb60efe7667f395b6c"
+    },
+    {
+      "path": "src/types/applications-list-response.ts",
+      "sha256": "d98d4c0558657ff4eaf5d6e2d6822bc01c25003ac51c8fb43cd3e41b2f69f45f"
+    },
+    {
       "path": "src/types/audit-log-page.ts",
       "sha256": "4303520ae027c8dc79e718374177f140a1a5513194193866e48e65e211df149c"
     },
@@ -129,6 +193,34 @@
     {
       "path": "src/types/audit-logs-list-response.ts",
       "sha256": "7a0711896a646fb1250f57191f352eedd6f0c3039df5a12d6adc31e095184580"
+    },
+    {
+      "path": "src/types/certificate-distribution-response.ts",
+      "sha256": "e605cc454f88af51b903843b73c09bc3b0b7ceacbdd516068e4f0d6847ceed43"
+    },
+    {
+      "path": "src/types/certificate-response.ts",
+      "sha256": "8b34caee2378a219cb32b3f7179e64f5d8d9f2281ac32cfea7bcd55925997058"
+    },
+    {
+      "path": "src/types/certificates-create-response201.ts",
+      "sha256": "fd86ebe9d39ad4dd0a78afba86c7196e72c0a8cd76344b7a771f022aa4d4f99a"
+    },
+    {
+      "path": "src/types/certificates-distribution-list-response.ts",
+      "sha256": "c60eadba0ddb19ee59b50137cd0c1746440ed2ac4bec301743fbf043b1c53b42"
+    },
+    {
+      "path": "src/types/certificates-list-response.ts",
+      "sha256": "b18af31ac02a1b55e3504058ae01af55ce286ef66ce49739db5d91ab26f4d167"
+    },
+    {
+      "path": "src/types/certificates-renew-response.ts",
+      "sha256": "5d76457bf41546c1473c4f743ce255a95a46a3339e3664b92cf0630143100d5d"
+    },
+    {
+      "path": "src/types/certificates-update-response.ts",
+      "sha256": "d00a804553213c48fb71aee9f6996a4765965e00c8f7d13a0f239db593920be4"
     },
     {
       "path": "src/types/common.ts",
@@ -159,6 +251,22 @@
       "sha256": "9db9f3ccb600d353542b80f3fa768507b0ce5091ae12e0fa9fe06da457c65a45"
     },
     {
+      "path": "src/types/create-application-deployment-request.ts",
+      "sha256": "3bafe8d2cba9191a94c7ecce2be752b667e6c8a570a4e222d4a3231528a7b5eb"
+    },
+    {
+      "path": "src/types/create-application-domain-request.ts",
+      "sha256": "820fb0e68bc6a532c65043f8f197d48bd8a0e44b779a960b36fbd0513bf846e3"
+    },
+    {
+      "path": "src/types/create-application-request.ts",
+      "sha256": "8cce18c0ef20c8a7f0ac1642dcbdd867bc667feabe6968a4c1a2c5a3895771f3"
+    },
+    {
+      "path": "src/types/create-certificate-request.ts",
+      "sha256": "4b982effb7b8452ebc2fd5b5b30e20cc68d09533f87306968eec362d1321c7fd"
+    },
+    {
       "path": "src/types/create-nginx-config-request.ts",
       "sha256": "69fb4dd5e16d0d27843af7c78009b249b0983498cda04bb93852c1611e26f28b"
     },
@@ -180,7 +288,7 @@
     },
     {
       "path": "src/types/index.ts",
-      "sha256": "42cfd65e255c1c2f7deebead5f93343bd459a1b85c835275afd6c4be8eb741dd"
+      "sha256": "66c208996b60446cec7ace80c18884628271374acf017bf765bd6b2ddd4848f9"
     },
     {
       "path": "src/types/nginx-config-page.ts",
@@ -273,6 +381,10 @@
     {
       "path": "src/types/status-retrieve-response.ts",
       "sha256": "00ea64673fac1b0b0172f7600a51641297f95c543ebba278b9253e2dee557df3"
+    },
+    {
+      "path": "src/types/update-certificate-request.ts",
+      "sha256": "d457f510bbbc3d42460090e6ca33e9d697783019256fd810cf42e3cb0a6b4ec8"
     },
     {
       "path": "src/types/update-nginx-config-request.ts",

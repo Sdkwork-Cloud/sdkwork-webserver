@@ -1,18 +1,27 @@
 # WEB Database Module
 
-Canonical lifecycle assets for `sdkwork-web-server` per `DATABASE_FRAMEWORK_SPEC.md`.
+Canonical lifecycle assets for the `sdkwork-web-server` PostgreSQL control-plane authority.
 
 - moduleId: `web`
 - serviceCode: `WEB`
+- owner: `web-platform`
+- databaseRole: `authoritative-server`
+- engine: PostgreSQL 16 or later
+- required extensions: none
 - tablePrefix: `web_`
 
-## Initialization state
+## Initialization State
 
-This module is in **initialization state** for greenfield deployments:
+This module is in initialization state for greenfield PostgreSQL deployments:
 
-1. **Baseline** — `database/ddl/baseline/{engine}/0001_web_baseline.sql` contains the full DDL snapshot.
-2. **Migrations** — `database/migrations/{engine}/` is reserved for post-GA incremental schema changes only. It is intentionally empty at initialization.
-3. **Drift** — run `pnpm db:drift:check` before release.
+1. `database/ddl/baseline/postgres/0001_web_baseline.sql` is the full PostgreSQL DDL snapshot.
+2. `database/migrations/postgres/` is reserved for post-GA incremental changes and is empty at initialization.
+3. Production and staging use explicit migration commands; `lifecycle.autoMigrate` defaults to `false`.
+4. `pnpm db:drift:check` verifies the deployed schema before release.
+
+SQLite is not an authoritative server engine or deployment profile. The historical SQLite DDL is
+retained under `tests/fixtures/database/sqlite/` only for isolated SQLx repository parity. It is not
+read by database lifecycle discovery, included in release packages, or accepted as a rollback target.
 
 ## Commands
 
@@ -31,8 +40,19 @@ pnpm run test:database:recovery
 pnpm run test:postgres:ha
 ```
 
-`db:test:postgres` is intentionally ignored by the default Cargo test run and requires an explicitly configured disposable, empty PostgreSQL database. The test refuses to continue when the target schema already contains `web_*` tables. SQLite is an explicit single-node profile only; PostgreSQL remains the default for standalone shared and cloud control-plane deployments.
+`db:test:sqlite` exercises only the repository test fixture. `db:test:postgres` requires an explicit,
+disposable, empty PostgreSQL database and refuses to continue if the target schema already contains
+`web_*` tables.
 
-`test:database:recovery` is a destructive recovery drill that owns only its temporary SQLite directory and one disposable PostgreSQL container. It proves a consistent SQLite snapshot and PostgreSQL custom-format dump can restore schema integrity and a tenant-scoped canary. It is not a production backup command and does not establish encrypted off-host retention, PostgreSQL PITR, managed-provider recovery, or the product RPO/RTO.
+`test:database:recovery` is a destructive drill scoped to its temporary test directory and disposable
+PostgreSQL container. PostgreSQL recovery is the authoritative release evidence. Any retained SQLite
+fixture coverage is compatibility evidence only and does not establish server backup support.
 
-`test:postgres:ha` owns two disposable PostgreSQL containers and one internal Docker network. It proves physical base backup, asynchronous WAL streaming, replay to a recorded flush LSN, primary shutdown, standby promotion, and post-promotion tenant writes. It does not establish automatic leader election, client connection rerouting, synchronous-replication RPO, split-brain fencing, managed-provider behavior, multi-zone capacity, or production RTO.
+`test:postgres:ha` owns two disposable PostgreSQL containers and one internal Docker network. It proves
+physical base backup, asynchronous WAL streaming, replay to a recorded flush LSN, primary shutdown,
+standby promotion, and post-promotion tenant writes. It does not establish automatic leader election,
+client rerouting, synchronous-replication RPO, split-brain fencing, managed-provider behavior,
+multi-zone capacity, or production RTO.
+
+Related standards: `../sdkwork-specs/DATABASE_SPEC.md`,
+`../sdkwork-specs/DATABASE_FRAMEWORK_SPEC.md`, and `../sdkwork-specs/MIGRATION_SPEC.md`.

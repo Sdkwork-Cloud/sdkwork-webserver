@@ -249,6 +249,7 @@ Health or SLO checks detect a failed canary. The control plane stops rollout, re
 
 ## 11. Linked Requirements
 
+- [REQ-2026-0061 Admin application deployment and certificate distribution](../requirements/REQ-2026-0061-admin-application-deployment-and-certificate-distribution.md) - adds backend-admin WEB/API application deployment, public-domain binding, canonical certificate lifecycle management, and observable one-authority multi-node manifest convergence.
 - [REQ-2026-0003 Rust Web Server data-plane foundation](../requirements/REQ-2026-0003-rust-webserver-data-plane-foundation.md) - accepted bounded foundation for configuration compilation and the first real HTTP/HTTPS data-plane slice; it does not satisfy the remaining Phase 1 or commercial release gates.
 - [REQ-2026-0004 PostgreSQL and SQLite lifecycle parity](../requirements/REQ-2026-0004-database-engine-parity.md) - SQLite/PostgreSQL lifecycle and full public Repository engine parity pass; bounded collection completion remains linked to REQ-2026-0045.
 - [REQ-2026-0045 Bounded control-plane collections and agent delta sync](../requirements/REQ-2026-0045-bounded-control-plane-collections.md) - draft human-review gate for canonical pagination and node-scoped bounded synchronization; public API/SDK/agent changes are not implemented yet.

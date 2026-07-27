@@ -50,20 +50,28 @@
   ],
   "contracts": {
     "publicExports": [
-      "src/index.ts"
+      ".",
+      "./sdk",
+      "./modules",
+      "./host",
+      "./session",
+      "./composition"
     ],
     "runtimeEntrypoints": [],
     "routeManifest": null,
     "sdkClients": [],
     "sdkDependencies": [],
     "permissionComposition": {
-      "inheritanceMode": "openapi-with-explicit-ui-hints",
+      "inheritanceMode": "module-catalog-with-overrides",
+      "moduleCatalogRefs": [],
       "routePermissionHints": {
         "inheritFromOpenApi": true,
+        "inheritFromModuleManifests": true,
         "overrides": []
       },
       "consumerPolicy": {
         "forbidLocalPermissionCatalogForDependencyDomains": true,
+        "allowExplicitOverridesOnly": true,
         "allowFrontendHintsWithoutServerDuplication": true
       }
     },

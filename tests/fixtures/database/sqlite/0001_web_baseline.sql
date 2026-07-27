@@ -11,6 +11,7 @@ CREATE TABLE web_site (
     name            TEXT         NOT NULL,
     slug            TEXT         NOT NULL,
     description     TEXT,
+    application_type TEXT         NOT NULL DEFAULT 'WEB',
     site_type       INTEGER      NOT NULL DEFAULT 1,
     status          INTEGER      NOT NULL DEFAULT 0,
     runtime_config  TEXT         NOT NULL DEFAULT '{}',
@@ -21,6 +22,7 @@ CREATE TABLE web_site (
     deleted_at      TEXT,
     deleted_by      INTEGER,
     PRIMARY KEY (id),
+    CONSTRAINT chk_web_site_application_type CHECK (application_type IN ('WEB', 'API')),
     CONSTRAINT chk_web_site_type CHECK (site_type BETWEEN 1 AND 6),
     CONSTRAINT chk_web_site_status CHECK (status BETWEEN 0 AND 3)
 );
@@ -33,6 +35,9 @@ CREATE UNIQUE INDEX uk_web_site_slug
 
 CREATE INDEX idx_web_site_tenant_status_updated
     ON web_site (tenant_id, organization_id, status, updated_at DESC);
+
+CREATE INDEX idx_web_site_tenant_application_type_updated
+    ON web_site (tenant_id, application_type, updated_at DESC);
 
 CREATE INDEX idx_web_site_user_updated
     ON web_site (tenant_id, user_id, updated_at DESC);

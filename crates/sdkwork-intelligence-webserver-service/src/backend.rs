@@ -2,11 +2,14 @@
 
 use async_trait::async_trait;
 use sdkwork_webserver_contract::{
-    CreateNginxConfigRequest, CreateServerRequest, ListNginxConfigsQuery, UpdateNginxConfigRequest,
-    WebBackendApi, WebBackendRequestContext, WebServiceError, WebServiceResult,
+    CreateCertificateRequest, CreateDeploymentRequest, CreateDomainRequest,
+    CreateNginxConfigRequest, CreateServerRequest, CreateSiteRequest, ListNginxConfigsQuery,
+    ListSitesQuery, UpdateCertificateRequest, UpdateNginxConfigRequest, WebAppApi,
+    WebAppRequestContext, WebBackendApi, WebBackendRequestContext, WebServiceError,
+    WebServiceResult,
 };
 
-use crate::WebService;
+use crate::{AuditLogWrite, WebService};
 
 impl WebService {
     /// 统一的 fail-closed 租户上下文校验。
@@ -22,10 +25,188 @@ impl WebService {
                 "tenant context is required for backend operations",
             ))
     }
+
+    fn backend_app_context(
+        context: &WebBackendRequestContext,
+    ) -> WebServiceResult<WebAppRequestContext> {
+        Ok(WebAppRequestContext {
+            tenant_id: Self::require_backend_tenant(context)?,
+            actor_id: context.operator_id,
+            organization_id: None,
+            session_id: None,
+        })
+    }
+
+    async fn audit_backend_action(
+        &self,
+        context: &WebBackendRequestContext,
+        action: &str,
+        target_type: &str,
+        target_uuid: &str,
+    ) -> WebServiceResult<()> {
+        self.repository
+            .insert_audit_log(AuditLogWrite {
+                tenant_id: Self::require_backend_tenant(context)?,
+                organization_id: 0,
+                operator_id: context.operator_id.unwrap_or(0),
+                action,
+                target_type,
+                target_id: None,
+                target_uuid: Some(target_uuid),
+            })
+            .await
+    }
 }
 
 #[async_trait]
 impl WebBackendApi for WebService {
+    async fn list_applications(
+        &self,
+        context: &WebBackendRequestContext,
+        query: &ListSitesQuery,
+    ) -> WebServiceResult<sdkwork_webserver_contract::SitePage> {
+        let app_context = Self::backend_app_context(context)?;
+        WebAppApi::list_sites(self, &app_context, query).await
+    }
+
+    async fn create_application(
+        &self,
+        context: &WebBackendRequestContext,
+        request: &CreateSiteRequest,
+    ) -> WebServiceResult<sdkwork_webserver_contract::SiteResponse> {
+        let app_context = Self::backend_app_context(context)?;
+        WebAppApi::create_site(self, &app_context, request).await
+    }
+
+    async fn list_application_domains(
+        &self,
+        context: &WebBackendRequestContext,
+        application_id: &str,
+        page: i32,
+        page_size: i32,
+    ) -> WebServiceResult<sdkwork_webserver_contract::DomainPage> {
+        let app_context = Self::backend_app_context(context)?;
+        WebAppApi::list_domains(self, &app_context, application_id, page, page_size).await
+    }
+
+    async fn create_application_domain(
+        &self,
+        context: &WebBackendRequestContext,
+        application_id: &str,
+        request: &CreateDomainRequest,
+    ) -> WebServiceResult<sdkwork_webserver_contract::DomainResponse> {
+        let app_context = Self::backend_app_context(context)?;
+        WebAppApi::create_domain(self, &app_context, application_id, request).await
+    }
+
+    async fn verify_application_domain(
+        &self,
+        context: &WebBackendRequestContext,
+        application_id: &str,
+        domain_id: &str,
+    ) -> WebServiceResult<sdkwork_webserver_contract::DomainVerifyResponse> {
+        let app_context = Self::backend_app_context(context)?;
+        WebAppApi::verify_domain(self, &app_context, application_id, domain_id).await
+    }
+
+    async fn list_application_deployments(
+        &self,
+        context: &WebBackendRequestContext,
+        application_id: &str,
+        page: i32,
+        page_size: i32,
+        status: Option<i32>,
+    ) -> WebServiceResult<sdkwork_webserver_contract::DeploymentPage> {
+        let app_context = Self::backend_app_context(context)?;
+        WebAppApi::list_deployments(self, &app_context, application_id, page, page_size, status)
+            .await
+    }
+
+    async fn create_application_deployment(
+        &self,
+        context: &WebBackendRequestContext,
+        application_id: &str,
+        request: &CreateDeploymentRequest,
+    ) -> WebServiceResult<sdkwork_webserver_contract::DeploymentResponse> {
+        let app_context = Self::backend_app_context(context)?;
+        WebAppApi::create_deployment(self, &app_context, application_id, request).await
+    }
+
+    async fn list_managed_certificates(
+        &self,
+        context: &WebBackendRequestContext,
+        page: i32,
+        page_size: i32,
+    ) -> WebServiceResult<sdkwork_webserver_contract::CertificatePage> {
+        let app_context = Self::backend_app_context(context)?;
+        WebAppApi::list_certificates(self, &app_context, page, page_size).await
+    }
+
+    async fn create_managed_certificate(
+        &self,
+        context: &WebBackendRequestContext,
+        request: &CreateCertificateRequest,
+    ) -> WebServiceResult<sdkwork_webserver_contract::CertificateResponse> {
+        let app_context = Self::backend_app_context(context)?;
+        WebAppApi::create_certificate(self, &app_context, request).await
+    }
+
+    async fn update_managed_certificate(
+        &self,
+        context: &WebBackendRequestContext,
+        certificate_id: &str,
+        request: &UpdateCertificateRequest,
+    ) -> WebServiceResult<sdkwork_webserver_contract::CertificateResponse> {
+        let tenant_id = Self::require_backend_tenant(context)?;
+        let certificate = self
+            .repository
+            .update_certificate_auto_renew(tenant_id, certificate_id, request.auto_renew)
+            .await?;
+        let _ = self
+            .audit_backend_action(
+                context,
+                "certificates.auto_renew.update",
+                "certificate",
+                certificate_id,
+            )
+            .await;
+        Ok(certificate)
+    }
+
+    async fn renew_managed_certificate(
+        &self,
+        context: &WebBackendRequestContext,
+        certificate_id: &str,
+    ) -> WebServiceResult<sdkwork_webserver_contract::CertificateResponse> {
+        let tenant_id = Self::require_backend_tenant(context)?;
+        let candidate = self
+            .repository
+            .retrieve_certificate_renewal_candidate(tenant_id, certificate_id)
+            .await?;
+        let certificate = self.renew_certificate(&candidate, false).await?;
+        let _ = self
+            .audit_backend_action(
+                context,
+                "certificates.renew.manual",
+                "certificate",
+                certificate_id,
+            )
+            .await;
+        Ok(certificate)
+    }
+
+    async fn list_certificate_distribution(
+        &self,
+        context: &WebBackendRequestContext,
+        page: i32,
+        page_size: i32,
+    ) -> WebServiceResult<sdkwork_webserver_contract::CertificateDistributionPage> {
+        let tenant_id = Self::require_backend_tenant(context)?;
+        self.repository
+            .list_certificate_distribution(tenant_id, page, page_size)
+            .await
+    }
+
     async fn list_nginx_configs(
         &self,
         context: &WebBackendRequestContext,

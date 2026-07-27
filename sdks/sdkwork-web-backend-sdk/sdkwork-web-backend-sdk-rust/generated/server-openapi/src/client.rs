@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::api::{AgentApi, AuditApi, NginxApi, ServerApi};
+use crate::api::{ApplicationApi, ApplicationDomainApi, ApplicationDeploymentApi, CertificateApi, CertificateDistributionApi, NginxApi, ServerApi, AgentApi, AuditApi};
 use crate::http::{SdkworkConfig, SdkworkError, SdkworkHttpClient};
 
 #[derive(Clone)]
@@ -33,6 +33,7 @@ impl SdkworkBackendClient {
         self
     }
 
+
     pub fn set_header(&self, key: impl Into<String>, value: impl Into<String>) -> &Self {
         self.http.set_header(key, value);
         self
@@ -42,19 +43,39 @@ impl SdkworkBackendClient {
         Arc::clone(&self.http)
     }
 
+    pub fn application(&self) -> ApplicationApi {
+            ApplicationApi::new(Arc::clone(&self.http))
+        }
+
+    pub fn application_domain(&self) -> ApplicationDomainApi {
+            ApplicationDomainApi::new(Arc::clone(&self.http))
+        }
+
+    pub fn application_deployment(&self) -> ApplicationDeploymentApi {
+            ApplicationDeploymentApi::new(Arc::clone(&self.http))
+        }
+
+    pub fn certificate(&self) -> CertificateApi {
+            CertificateApi::new(Arc::clone(&self.http))
+        }
+
+    pub fn certificate_distribution(&self) -> CertificateDistributionApi {
+            CertificateDistributionApi::new(Arc::clone(&self.http))
+        }
+
     pub fn nginx(&self) -> NginxApi {
-        NginxApi::new(Arc::clone(&self.http))
-    }
+            NginxApi::new(Arc::clone(&self.http))
+        }
 
     pub fn server(&self) -> ServerApi {
-        ServerApi::new(Arc::clone(&self.http))
-    }
+            ServerApi::new(Arc::clone(&self.http))
+        }
 
     pub fn agent(&self) -> AgentApi {
-        AgentApi::new(Arc::clone(&self.http))
-    }
+            AgentApi::new(Arc::clone(&self.http))
+        }
 
     pub fn audit(&self) -> AuditApi {
-        AuditApi::new(Arc::clone(&self.http))
-    }
+            AuditApi::new(Arc::clone(&self.http))
+        }
 }

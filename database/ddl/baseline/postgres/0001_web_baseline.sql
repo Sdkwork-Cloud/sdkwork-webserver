@@ -18,6 +18,7 @@ CREATE TABLE web_site (
     name            VARCHAR(100) NOT NULL,
     slug            VARCHAR(100) NOT NULL,
     description     VARCHAR(500),
+    application_type VARCHAR(16) NOT NULL DEFAULT 'WEB',
     site_type       INTEGER      NOT NULL DEFAULT 1,
     status          INTEGER      NOT NULL DEFAULT 0,
     runtime_config  JSONB        NOT NULL DEFAULT '{}',
@@ -30,6 +31,7 @@ CREATE TABLE web_site (
     PRIMARY KEY (id),
     CONSTRAINT uk_web_site_uuid UNIQUE (uuid),
     CONSTRAINT uk_web_site_slug UNIQUE (tenant_id, slug),
+    CONSTRAINT chk_web_site_application_type CHECK (application_type IN ('WEB', 'API')),
     CONSTRAINT chk_web_site_type CHECK (site_type BETWEEN 1 AND 6),
     CONSTRAINT chk_web_site_status CHECK (status BETWEEN 0 AND 3)
 );
@@ -43,6 +45,7 @@ COMMENT ON COLUMN web_site.data_scope IS 'Data scope: 1=tenant, 2=organization, 
 COMMENT ON COLUMN web_site.user_id IS 'Owning user ID (nullable)';
 COMMENT ON COLUMN web_site.name IS 'Site display name';
 COMMENT ON COLUMN web_site.slug IS 'URL-friendly unique slug within tenant';
+COMMENT ON COLUMN web_site.application_type IS 'Application traffic category: WEB or API';
 COMMENT ON COLUMN web_site.site_type IS 'Site type: 1=static, 2=SPA, 3=Node, 4=PHP, 5=Python, 6=other';
 COMMENT ON COLUMN web_site.status IS 'Status: 0=draft, 1=active, 2=paused, 3=archived';
 COMMENT ON COLUMN web_site.runtime_config IS 'Runtime configuration JSON';
@@ -50,6 +53,9 @@ COMMENT ON COLUMN web_site.version IS 'Optimistic concurrency version';
 
 CREATE INDEX idx_web_site_tenant_status_updated
     ON web_site (tenant_id, organization_id, status, updated_at DESC);
+
+CREATE INDEX idx_web_site_tenant_application_type_updated
+    ON web_site (tenant_id, application_type, updated_at DESC);
 
 CREATE INDEX idx_web_site_user_updated
     ON web_site (tenant_id, user_id, updated_at DESC);

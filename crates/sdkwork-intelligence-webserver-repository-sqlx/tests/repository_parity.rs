@@ -108,17 +108,24 @@ async fn prepare_database(
             existing_tables, 0,
             "refusing to run repository parity against a non-empty PostgreSQL schema"
         );
-    }
-    let lifecycle_host = bootstrap_web_database(lifecycle_pool)
+        bootstrap_web_database(lifecycle_pool.clone())
+            .await
+            .expect("initialize PostgreSQL Web database lifecycle");
+    } else if let Some(sqlite) = lifecycle_pool.as_sqlite() {
+        sqlx::raw_sql(include_str!(
+            "../../../tests/fixtures/database/sqlite/0001_web_baseline.sql"
+        ))
+        .execute(sqlite)
         .await
-        .expect("initialize Web database lifecycle");
+        .expect("initialize SQLite repository fixture");
+    }
 
     let database_engine = config.engine;
     let pool = create_any_pool_from_config(config)
         .await
         .expect("create repository AnyPool");
     let id_generator = SnowflakeIdGenerator::new(731).expect("create test Snowflake generator");
-    let repository = match lifecycle_host.pool() {
+    let repository = match &lifecycle_pool {
         sdkwork_database_sqlx::DatabasePool::Postgres(typed_pool, _) => {
             Arc::new(PostgresWebRepository::new(
                 typed_pool.clone(),
@@ -158,6 +165,7 @@ async fn verify_repository_contract(context: &TestContext) {
                         name: format!("Alpha Site {index}"),
                         slug: Some(format!("alpha-{index}")),
                         description: None,
+                        application_type: "WEB".to_owned(),
                         site_type: 1,
                         runtime_config: None,
                     },
@@ -166,6 +174,39 @@ async fn verify_repository_contract(context: &TestContext) {
                 .expect("create tenant A site"),
         );
     }
+    let api_application = repository
+        .create_site(
+            TENANT_A,
+            Some(31),
+            Some(91),
+            &CreateSiteRequest {
+                name: "Alpha API".to_owned(),
+                slug: Some("alpha-api".to_owned()),
+                description: None,
+                application_type: "API".to_owned(),
+                site_type: 6,
+                runtime_config: None,
+            },
+        )
+        .await
+        .expect("create API application");
+    assert_eq!(api_application.application_type, "API");
+    let api_page = repository
+        .list_sites(
+            TENANT_A,
+            &ListSitesQuery {
+                page: 1,
+                page_size: 20,
+                status: Some(0),
+                application_type: Some("API".to_owned()),
+                site_type: None,
+                keyword: Some("alpha".to_owned()),
+            },
+        )
+        .await
+        .expect("filter API applications");
+    assert_eq!(api_page.total, 1);
+    assert_eq!(api_page.items[0].id, api_application.id);
     let tenant_b_site = repository
         .create_site(
             TENANT_B,
@@ -175,6 +216,7 @@ async fn verify_repository_contract(context: &TestContext) {
                 name: "Tenant B".to_owned(),
                 slug: Some("alpha-0".to_owned()),
                 description: None,
+                application_type: "WEB".to_owned(),
                 site_type: 1,
                 runtime_config: None,
             },
@@ -192,6 +234,7 @@ async fn verify_repository_contract(context: &TestContext) {
                 name: "Duplicate".to_owned(),
                 slug: Some("alpha-0".to_owned()),
                 description: None,
+                application_type: "WEB".to_owned(),
                 site_type: 1,
                 runtime_config: None,
             },
@@ -225,6 +268,7 @@ async fn verify_repository_contract(context: &TestContext) {
         page: 1,
         page_size: 2,
         status: Some(0),
+        application_type: Some("WEB".to_owned()),
         site_type: Some(1),
         keyword: Some(" alpha ".to_owned()),
     };
@@ -254,7 +298,9 @@ async fn verify_repository_contract(context: &TestContext) {
         "stable pages must not overlap"
     );
     let expected: Vec<String> = sqlx::query(
-        "SELECT uuid FROM web_site WHERE tenant_id = $1 ORDER BY updated_at DESC, id DESC",
+        "SELECT uuid FROM web_site
+         WHERE tenant_id = $1 AND application_type = 'WEB'
+         ORDER BY updated_at DESC, id DESC",
     )
     .bind(TENANT_A)
     .fetch_all(&context.pool)
@@ -278,6 +324,7 @@ async fn verify_repository_contract(context: &TestContext) {
                 page: i32::MAX,
                 page_size: i32::MAX,
                 status: None,
+                application_type: None,
                 site_type: None,
                 keyword: None,
             },
@@ -530,6 +577,40 @@ async fn verify_public_repository_surface(context: &TestContext, site_id: &str) 
             .total,
         1
     );
+    let disabled_certificate = repository
+        .update_certificate_auto_renew(TENANT_A, &certificate_id, false)
+        .await
+        .expect("disable certificate automatic renewal");
+    assert_eq!(disabled_certificate.id, certificate_id);
+    assert_eq!(disabled_certificate.auto_renew, Some(false));
+    assert!(!repository
+        .list_certificates_due_for_renewal(3650, 20)
+        .await
+        .expect("exclude disabled certificate from renewal scan")
+        .iter()
+        .any(|candidate| candidate.certificate_id == certificate_id));
+    repository
+        .retrieve_certificate_renewal_candidate(TENANT_B, &certificate_id)
+        .await
+        .expect_err("certificate renewal candidate must remain tenant isolated");
+    let manual_candidate = repository
+        .retrieve_certificate_renewal_candidate(TENANT_A, &certificate_id)
+        .await
+        .expect("load disabled certificate for manual renewal");
+    assert!(!manual_candidate.auto_renew);
+    let enabled_certificate = repository
+        .update_certificate_auto_renew(TENANT_A, &certificate_id, true)
+        .await
+        .expect("enable certificate automatic renewal");
+    assert_eq!(enabled_certificate.id, certificate_id);
+    assert_eq!(
+        repository
+            .list_certificates(TENANT_A, 1, 20)
+            .await
+            .expect("automatic renewal update preserves canonical row")
+            .total,
+        1
+    );
     assert!(repository
         .list_certificates_due_for_renewal(3650, 20)
         .await
@@ -609,6 +690,57 @@ async fn verify_public_repository_surface(context: &TestContext, site_id: &str) 
     assert_eq!(sync.nginx_configs.len(), 1);
     assert_eq!(sync.certificates.len(), 1);
     assert_eq!(encrypted_keys, vec!["test-encrypted-private-key"]);
+    let pending_distribution = repository
+        .list_certificate_distribution(TENANT_A, 1, 20)
+        .await
+        .expect("list pending certificate distribution");
+    let pending_server = pending_distribution
+        .items
+        .iter()
+        .find(|item| item.server_id == server.server.id)
+        .expect("pending server distribution item");
+    assert_eq!(pending_server.status, "PENDING");
+    assert_eq!(pending_server.desired_sync_version, sync.sync_version);
+
+    repository
+        .record_agent_heartbeat(
+            &server.server.id,
+            TENANT_A,
+            &AgentHeartbeatRequest {
+                agent_version: Some("1.0.0-test".to_string()),
+                nginx_enabled: Some(true),
+                active_configs: Some(1),
+                last_sync_version: Some(sync.sync_version.clone()),
+            },
+        )
+        .await
+        .expect("report applied certificate sync version");
+    let offline_server = repository
+        .create_server(
+            TENANT_A,
+            &CreateServerRequest {
+                name: "Parity Offline Edge".to_string(),
+                host: "192.0.2.45".to_string(),
+                tenant_scope_hash: "a".repeat(64),
+                ssh_port: 22,
+            },
+        )
+        .await
+        .expect("create offline distribution server");
+    let converged_distribution = repository
+        .list_certificate_distribution(TENANT_A, 1, 20)
+        .await
+        .expect("list converged certificate distribution");
+    assert_eq!(converged_distribution.total, 2);
+    assert!(converged_distribution.items.iter().any(|item| {
+        item.server_id == server.server.id
+            && item.status == "SYNCED"
+            && item.applied_sync_version.as_deref() == Some(sync.sync_version.as_str())
+    }));
+    assert!(converged_distribution
+        .items
+        .iter()
+        .any(|item| item.server_id == offline_server.server.id && item.status == "OFFLINE"));
     verify_node_sync_database_bounds(context, &server.server.id, &nginx.id, &certificate_id).await;
 
     repository

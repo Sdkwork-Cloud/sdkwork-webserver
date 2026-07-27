@@ -65,6 +65,17 @@
             }
           },
           {
+            "name": "applicationType",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "WEB",
+                "API"
+              ]
+            }
+          },
+          {
             "name": "siteType",
             "in": "query",
             "schema": {
@@ -1915,6 +1926,14 @@
             "type": "string",
             "maxLength": 500
           },
+          "applicationType": {
+            "type": "string",
+            "enum": [
+              "WEB",
+              "API"
+            ],
+            "default": "WEB"
+          },
           "siteType": {
             "type": "integer",
             "enum": [
@@ -1980,6 +1999,13 @@
           },
           "description": {
             "type": "string"
+          },
+          "applicationType": {
+            "type": "string",
+            "enum": [
+              "WEB",
+              "API"
+            ]
           },
           "siteType": {
             "type": "integer"

@@ -24,7 +24,7 @@ impl WebService {
         };
 
         for candidate in candidates {
-            match self.renew_certificate(&candidate).await {
+            match self.renew_certificate(&candidate, true).await {
                 Ok(_) => report.renewed += 1,
                 Err(error) => {
                     report.failed += 1;
@@ -41,20 +41,12 @@ impl WebService {
         Ok(report)
     }
 
-    async fn renew_certificate(
+    pub(crate) async fn renew_certificate(
         &self,
         candidate: &CertificateRenewalCandidate,
+        enforce_auto_renew: bool,
     ) -> WebServiceResult<CertificateResponse> {
-        if !candidate.auto_renew {
-            return Err(WebServiceError::validation("auto_renew is disabled"));
-        }
-
-        if !matches!(candidate.cert_type, 1 | 3) {
-            return Err(WebServiceError::validation(format!(
-                "certType {} is not eligible for automatic renewal",
-                candidate.cert_type
-            )));
-        }
+        validate_renewal_candidate(candidate, enforce_auto_renew)?;
 
         if !self
             .repository
@@ -172,9 +164,27 @@ impl WebService {
     }
 }
 
+fn validate_renewal_candidate(
+    candidate: &CertificateRenewalCandidate,
+    enforce_auto_renew: bool,
+) -> WebServiceResult<()> {
+    if enforce_auto_renew && !candidate.auto_renew {
+        return Err(WebServiceError::validation("auto_renew is disabled"));
+    }
+    if !matches!(candidate.cert_type, 1 | 3) {
+        return Err(WebServiceError::validation(format!(
+            "certType {} is not eligible for renewal",
+            candidate.cert_type
+        )));
+    }
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
+    use super::validate_renewal_candidate;
     use chrono::{Duration, Utc};
+    use sdkwork_webserver_contract::CertificateRenewalCandidate;
 
     fn certificate_due_for_renewal(not_after: &str, renew_before_days: u32) -> bool {
         use chrono::DateTime;
@@ -195,5 +205,29 @@ mod tests {
     fn not_due_when_expiry_far_future() {
         let later = (Utc::now() + Duration::days(120)).to_rfc3339();
         assert!(!certificate_due_for_renewal(&later, 30));
+    }
+
+    #[test]
+    fn manual_renewal_does_not_require_auto_renew_policy() {
+        let candidate = candidate(false, 1);
+        assert!(validate_renewal_candidate(&candidate, false).is_ok());
+        assert!(validate_renewal_candidate(&candidate, true).is_err());
+    }
+
+    #[test]
+    fn unsupported_certificate_type_cannot_be_renewed() {
+        assert!(validate_renewal_candidate(&candidate(true, 2), false).is_err());
+    }
+
+    fn candidate(auto_renew: bool, cert_type: i32) -> CertificateRenewalCandidate {
+        CertificateRenewalCandidate {
+            tenant_id: 1,
+            certificate_id: "certificate-id".to_string(),
+            cert_type,
+            cert_name: "example.test".to_string(),
+            hostname: "example.test".to_string(),
+            auto_renew,
+            not_after: "2027-01-01T00:00:00Z".to_string(),
+        }
     }
 }

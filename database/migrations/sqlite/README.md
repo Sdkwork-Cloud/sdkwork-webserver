@@ -1,3 +1,0 @@
-# README
-
-Reserved per SDKWORK_WORKSPACE_SPEC.md.

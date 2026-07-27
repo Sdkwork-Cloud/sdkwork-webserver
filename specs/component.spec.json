@@ -16,7 +16,8 @@
     "manifests": [
       "sdkwork.app.config.json",
       "AGENTS.md",
-      "specs/component.spec.json"
+      "specs/component.spec.json",
+      "specs/iam.module.manifest.json"
     ]
   },
   "canonicalSpecs": [
@@ -119,6 +120,7 @@
         }
       }
     ],
+    "iamModuleManifest": "specs/iam.module.manifest.json",
     "permissionComposition": {},
     "dependencyApiExports": [
       {

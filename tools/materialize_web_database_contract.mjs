@@ -35,13 +35,13 @@ const prefixRegistry = {
 const schemaYaml = [
   'schema_version: 1',
   'kind: sdkwork.database.schema',
+  'database_role: authoritative-server',
   'module_id: web',
   'contract_version: 1.0.0',
   'owner_team: web-platform',
   'compliance_level: L2',
   'engines:',
   '  - postgres',
-  '  - sqlite',
   'table_prefix: web_',
   'tables:',
   ...tableNames.map(

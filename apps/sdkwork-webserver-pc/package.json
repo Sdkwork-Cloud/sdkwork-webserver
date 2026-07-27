@@ -24,6 +24,8 @@
     "@sdkwork/web-app-sdk": "workspace:*",
     "@sdkwork/web-backend-sdk": "workspace:*",
     "@sdkwork/webserver-pc-admin-audit": "workspace:*",
+    "@sdkwork/webserver-pc-admin-applications": "workspace:*",
+    "@sdkwork/webserver-pc-admin-certificates": "workspace:*",
     "@sdkwork/webserver-pc-admin-core": "workspace:*",
     "@sdkwork/webserver-pc-admin-diagnostics": "workspace:*",
     "@sdkwork/webserver-pc-admin-nginx": "workspace:*",
@@ -53,4 +55,3 @@
     "vitest": "catalog:"
   }
 }
-

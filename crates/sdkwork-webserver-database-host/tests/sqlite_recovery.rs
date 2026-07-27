@@ -1,22 +1,12 @@
 use std::path::Path;
-use std::sync::Arc;
 
 use sdkwork_database_config::{DatabaseConfig, DatabaseEngine};
-use sdkwork_database_lifecycle::LifecycleOrchestrator;
-use sdkwork_database_spi::DefaultDatabaseModule;
 use sdkwork_database_sqlx::create_pool_from_config;
 use tempfile::TempDir;
 
 const MAX_BACKUP_BYTES: u64 = 64 * 1024 * 1024;
 const CANARY_ID: i64 = 9_500_001;
 const CANARY_TENANT_ID: i64 = 9_500;
-
-fn application_root() -> std::path::PathBuf {
-    std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("../..")
-        .canonicalize()
-        .expect("resolve application root")
-}
 
 fn sqlite_url(path: &Path, mode: &str) -> String {
     format!(
@@ -30,9 +20,6 @@ async fn sqlite_consistent_backup_restores_integrity_and_tenant_data() {
     let directory = TempDir::new().expect("create isolated SQLite recovery directory");
     let source_path = directory.path().join("source.sqlite");
     let backup_path = directory.path().join("backup.sqlite");
-    let module = Arc::new(
-        DefaultDatabaseModule::from_app_root(application_root()).expect("load Web database module"),
-    );
     let source_pool = create_pool_from_config(DatabaseConfig {
         engine: DatabaseEngine::Sqlite,
         url: sqlite_url(&source_path, "rwc"),
@@ -41,14 +28,18 @@ async fn sqlite_consistent_backup_restores_integrity_and_tenant_data() {
     })
     .await
     .expect("create source SQLite pool");
-    let orchestrator = LifecycleOrchestrator::new(source_pool.clone(), module)
-        .with_applied_by("sdkwork-webserver-recovery-test");
-    orchestrator
-        .init()
-        .await
-        .expect("initialize source SQLite database");
-
     let sqlite = source_pool.as_sqlite().expect("SQLite source pool");
+    sqlx::query("PRAGMA foreign_keys = ON")
+        .execute(sqlite)
+        .await
+        .expect("enable SQLite foreign keys");
+    sqlx::raw_sql(include_str!(
+        "../../../tests/fixtures/database/sqlite/0001_web_baseline.sql"
+    ))
+    .execute(sqlite)
+    .await
+    .expect("initialize SQLite recovery fixture");
+
     sqlx::query(
         "INSERT INTO web_site (\
             id, uuid, tenant_id, organization_id, data_scope, user_id, name, slug, \

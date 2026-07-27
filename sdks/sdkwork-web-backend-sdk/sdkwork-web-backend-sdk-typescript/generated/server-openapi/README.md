@@ -54,12 +54,79 @@ const client = new SdkworkBackendClient({
 
 ## API Modules
 
+- `client.application` - application API
+- `client.applicationDomain` - application_domain API
+- `client.applicationDeployment` - application_deployment API
+- `client.certificate` - certificate API
+- `client.certificateDistribution` - certificate_distribution API
 - `client.nginx` - nginx API
 - `client.server` - server API
 - `client.agent` - agent API
 - `client.audit` - audit API
 
 ## Usage Examples
+
+### application
+
+```typescript
+// List managed applications
+const params = {
+  page: 1,
+  page_size: 2,
+  applicationType: 'WEB',
+  siteType: 4,
+  status: 5,
+  keyword: 'keyword',
+};
+const result = await client.application.list(params);
+```
+
+### application_domain
+
+```typescript
+// List application domains
+const applicationId = '1';
+const params = {
+  page: 1,
+  page_size: 2,
+};
+const result = await client.applicationDomain.applications.domains.list(applicationId, params);
+```
+
+### application_deployment
+
+```typescript
+// List application deployments
+const applicationId = '1';
+const params = {
+  page: 1,
+  page_size: 2,
+  status: 3,
+};
+const result = await client.applicationDeployment.applications.deployments.list(applicationId, params);
+```
+
+### certificate
+
+```typescript
+// List canonical certificates
+const params = {
+  page: 1,
+  page_size: 2,
+};
+const result = await client.certificate.list(params);
+```
+
+### certificate_distribution
+
+```typescript
+// List certificate manifest convergence by server
+const params = {
+  page: 1,
+  page_size: 2,
+};
+const result = await client.certificateDistribution.certificates.distribution.list(params);
+```
 
 ### nginx
 

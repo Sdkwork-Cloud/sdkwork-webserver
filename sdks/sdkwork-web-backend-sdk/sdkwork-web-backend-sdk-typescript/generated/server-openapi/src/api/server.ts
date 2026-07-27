@@ -1,5 +1,5 @@
 import { backendApiPath } from './paths';
-import type { HttpClient } from '../http/client';
+import type { ApiRequestOptions, HttpClient } from '../http/client';
 
 import type { CreateServerRequest, CreateServerResponse, PageInfo, ServerResponse } from '../types';
 
@@ -18,17 +18,17 @@ export class ServerApi {
 
 
 /** List managed servers */
-  async list(params?: ServerListParams): Promise<{ items: ServerResponse[]; pageInfo: PageInfo; }> {
+  async list(params?: ServerListParams, requestOptions?: ApiRequestOptions): Promise<{ items: ServerResponse[]; pageInfo: PageInfo; }> {
     const query = buildQueryString([
       { name: 'page', value: params?.page, style: 'form', explode: true, allowReserved: false },
       { name: 'page_size', value: params?.pageSize, style: 'form', explode: true, allowReserved: false },
     ]);
-    return this.client.get<{ items: ServerResponse[]; pageInfo: PageInfo; }>(appendQueryString(backendApiPath(`/servers`), query));
+    return this.client.request<{ items: ServerResponse[]; pageInfo: PageInfo; }>(appendQueryString(backendApiPath(`/servers`), query), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any });
   }
 
 /** Register a managed server */
-  async create(body: CreateServerRequest): Promise<CreateServerResponse> {
-    return this.client.post<CreateServerResponse>(backendApiPath(`/servers`), body, undefined, undefined, 'application/json');
+  async create(body: CreateServerRequest, requestOptions?: ApiRequestOptions): Promise<CreateServerResponse> {
+    return this.client.request<CreateServerResponse>(backendApiPath(`/servers`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, body, contentType: 'application/json' });
   }
 }
 

@@ -1,6 +1,16 @@
 pub mod base;
-pub mod nginx;
 pub mod paths;
+pub mod application;
+pub use application::ApplicationApi;
+pub mod application_domain;
+pub use application_domain::ApplicationDomainApi;
+pub mod application_deployment;
+pub use application_deployment::ApplicationDeploymentApi;
+pub mod certificate;
+pub use certificate::CertificateApi;
+pub mod certificate_distribution;
+pub use certificate_distribution::CertificateDistributionApi;
+pub mod nginx;
 pub use nginx::NginxApi;
 pub mod server;
 pub use server::ServerApi;

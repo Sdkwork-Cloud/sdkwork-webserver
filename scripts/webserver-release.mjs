@@ -90,10 +90,6 @@ const PACKAGE_ASSETS = [
     target: 'database/ddl/baseline/postgres/0001_web_baseline.sql',
   },
   {
-    source: 'database/ddl/baseline/sqlite/0001_web_baseline.sql',
-    target: 'database/ddl/baseline/sqlite/0001_web_baseline.sql',
-  },
-  {
     source: 'database/drift/policy.yaml',
     target: 'database/drift/policy.yaml',
   },

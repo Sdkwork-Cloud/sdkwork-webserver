@@ -5,16 +5,19 @@ use axum::{
     Extension, Json, Router,
 };
 use sdkwork_webserver_contract::{
-    CreateNginxConfigRequest, CreateServerRequest, ListNginxConfigsQuery, UpdateNginxConfigRequest,
-    WebBackendApi, WebBackendRequestContext,
+    CreateCertificateRequest, CreateDeploymentRequest, CreateDomainRequest,
+    CreateNginxConfigRequest, CreateServerRequest, CreateSiteRequest, ListNginxConfigsQuery,
+    ListSitesQuery, UpdateCertificateRequest, UpdateNginxConfigRequest, WebBackendApi,
+    WebBackendRequestContext,
 };
 use serde::Deserialize;
 use std::sync::Arc;
 
 use crate::{agent_routes, auth::require_backend_context, paths};
 use sdkwork_routes_webserver_common::{
-    created_resource, ok_audit_log_page, ok_nginx_config_page, ok_resource, ok_server_page,
-    WebApiError,
+    created_resource, ok_audit_log_page, ok_certificate_distribution_page, ok_certificate_page,
+    ok_deployment_page, ok_domain_page, ok_nginx_config_page, ok_resource, ok_server_page,
+    ok_site_page, WebApiError,
 };
 
 #[derive(Clone)]
@@ -31,6 +34,35 @@ where
 
 pub fn build_router_with_shared_backend_api(api: Arc<dyn WebBackendApi>) -> Router {
     Router::new()
+        .route(
+            paths::APPLICATIONS,
+            get(list_applications).post(create_application),
+        )
+        .route(
+            paths::APPLICATION_DOMAINS,
+            get(list_application_domains).post(create_application_domain),
+        )
+        .route(
+            paths::APPLICATION_DOMAIN_VERIFY,
+            post(verify_application_domain),
+        )
+        .route(
+            paths::APPLICATION_DEPLOYMENTS,
+            get(list_application_deployments).post(create_application_deployment),
+        )
+        .route(
+            paths::CERTIFICATES,
+            get(list_managed_certificates).post(create_managed_certificate),
+        )
+        .route(
+            paths::CERTIFICATE,
+            axum::routing::put(update_managed_certificate),
+        )
+        .route(paths::CERTIFICATE_RENEW, post(renew_managed_certificate))
+        .route(
+            paths::CERTIFICATE_DISTRIBUTION,
+            get(list_certificate_distribution),
+        )
         .route(
             paths::NGINX_CONFIGS,
             get(list_nginx_configs).post(create_nginx_config),
@@ -61,12 +93,194 @@ struct PageQuery {
     page_size: i32,
 }
 
+#[derive(Debug, Deserialize)]
+struct DeploymentPageQuery {
+    #[serde(default = "default_page")]
+    page: i32,
+    #[serde(default = "default_page_size")]
+    page_size: i32,
+    status: Option<i32>,
+}
+
 fn default_page() -> i32 {
     1
 }
 
 fn default_page_size() -> i32 {
     20
+}
+
+async fn list_applications(
+    State(state): State<BackendState>,
+    context: Option<Extension<WebBackendRequestContext>>,
+    Query(query): Query<ListSitesQuery>,
+) -> Result<Response, WebApiError> {
+    let context = require_backend_context(context)?;
+    ok_site_page(state.api.list_applications(&context, &query).await)
+}
+
+async fn create_application(
+    State(state): State<BackendState>,
+    context: Option<Extension<WebBackendRequestContext>>,
+    Json(request): Json<CreateSiteRequest>,
+) -> Result<Response, WebApiError> {
+    let context = require_backend_context(context)?;
+    created_resource(state.api.create_application(&context, &request).await)
+}
+
+async fn list_application_domains(
+    State(state): State<BackendState>,
+    context: Option<Extension<WebBackendRequestContext>>,
+    Path(application_id): Path<String>,
+    Query(query): Query<PageQuery>,
+) -> Result<Response, WebApiError> {
+    let context = require_backend_context(context)?;
+    ok_domain_page(
+        state
+            .api
+            .list_application_domains(&context, &application_id, query.page, query.page_size)
+            .await,
+        query.page,
+        query.page_size,
+    )
+}
+
+async fn create_application_domain(
+    State(state): State<BackendState>,
+    context: Option<Extension<WebBackendRequestContext>>,
+    Path(application_id): Path<String>,
+    Json(request): Json<CreateDomainRequest>,
+) -> Result<Response, WebApiError> {
+    let context = require_backend_context(context)?;
+    created_resource(
+        state
+            .api
+            .create_application_domain(&context, &application_id, &request)
+            .await,
+    )
+}
+
+async fn verify_application_domain(
+    State(state): State<BackendState>,
+    context: Option<Extension<WebBackendRequestContext>>,
+    Path((application_id, domain_id)): Path<(String, String)>,
+) -> Result<Response, WebApiError> {
+    let context = require_backend_context(context)?;
+    ok_resource(
+        state
+            .api
+            .verify_application_domain(&context, &application_id, &domain_id)
+            .await,
+    )
+}
+
+async fn list_application_deployments(
+    State(state): State<BackendState>,
+    context: Option<Extension<WebBackendRequestContext>>,
+    Path(application_id): Path<String>,
+    Query(query): Query<DeploymentPageQuery>,
+) -> Result<Response, WebApiError> {
+    let context = require_backend_context(context)?;
+    ok_deployment_page(
+        state
+            .api
+            .list_application_deployments(
+                &context,
+                &application_id,
+                query.page,
+                query.page_size,
+                query.status,
+            )
+            .await,
+    )
+}
+
+async fn create_application_deployment(
+    State(state): State<BackendState>,
+    context: Option<Extension<WebBackendRequestContext>>,
+    Path(application_id): Path<String>,
+    Json(request): Json<CreateDeploymentRequest>,
+) -> Result<Response, WebApiError> {
+    let context = require_backend_context(context)?;
+    created_resource(
+        state
+            .api
+            .create_application_deployment(&context, &application_id, &request)
+            .await,
+    )
+}
+
+async fn list_managed_certificates(
+    State(state): State<BackendState>,
+    context: Option<Extension<WebBackendRequestContext>>,
+    Query(query): Query<PageQuery>,
+) -> Result<Response, WebApiError> {
+    let context = require_backend_context(context)?;
+    ok_certificate_page(
+        state
+            .api
+            .list_managed_certificates(&context, query.page, query.page_size)
+            .await,
+        query.page,
+        query.page_size,
+    )
+}
+
+async fn create_managed_certificate(
+    State(state): State<BackendState>,
+    context: Option<Extension<WebBackendRequestContext>>,
+    Json(request): Json<CreateCertificateRequest>,
+) -> Result<Response, WebApiError> {
+    let context = require_backend_context(context)?;
+    created_resource(
+        state
+            .api
+            .create_managed_certificate(&context, &request)
+            .await,
+    )
+}
+
+async fn update_managed_certificate(
+    State(state): State<BackendState>,
+    context: Option<Extension<WebBackendRequestContext>>,
+    Path(certificate_id): Path<String>,
+    Json(request): Json<UpdateCertificateRequest>,
+) -> Result<Response, WebApiError> {
+    let context = require_backend_context(context)?;
+    ok_resource(
+        state
+            .api
+            .update_managed_certificate(&context, &certificate_id, &request)
+            .await,
+    )
+}
+
+async fn renew_managed_certificate(
+    State(state): State<BackendState>,
+    context: Option<Extension<WebBackendRequestContext>>,
+    Path(certificate_id): Path<String>,
+) -> Result<Response, WebApiError> {
+    let context = require_backend_context(context)?;
+    ok_resource(
+        state
+            .api
+            .renew_managed_certificate(&context, &certificate_id)
+            .await,
+    )
+}
+
+async fn list_certificate_distribution(
+    State(state): State<BackendState>,
+    context: Option<Extension<WebBackendRequestContext>>,
+    Query(query): Query<PageQuery>,
+) -> Result<Response, WebApiError> {
+    let context = require_backend_context(context)?;
+    ok_certificate_distribution_page(
+        state
+            .api
+            .list_certificate_distribution(&context, query.page, query.page_size)
+            .await,
+    )
 }
 
 async fn list_nginx_configs(

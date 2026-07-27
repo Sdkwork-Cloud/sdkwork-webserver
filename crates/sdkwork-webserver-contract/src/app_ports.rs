@@ -29,6 +29,8 @@ pub struct ListSitesQuery {
     #[serde(default = "crate::dto::default_page_size")]
     pub page_size: i32,
     pub status: Option<i32>,
+    #[serde(rename = "applicationType")]
+    pub application_type: Option<String>,
     #[serde(rename = "siteType")]
     pub site_type: Option<i32>,
     pub keyword: Option<String>,
@@ -188,6 +190,89 @@ pub trait WebAppApi: Send + Sync {
 
 #[async_trait]
 pub trait WebBackendApi: Send + Sync {
+    async fn list_applications(
+        &self,
+        context: &WebBackendRequestContext,
+        query: &ListSitesQuery,
+    ) -> WebServiceResult<SitePage>;
+
+    async fn create_application(
+        &self,
+        context: &WebBackendRequestContext,
+        request: &CreateSiteRequest,
+    ) -> WebServiceResult<SiteResponse>;
+
+    async fn list_application_domains(
+        &self,
+        context: &WebBackendRequestContext,
+        application_id: &str,
+        page: i32,
+        page_size: i32,
+    ) -> WebServiceResult<DomainPage>;
+
+    async fn create_application_domain(
+        &self,
+        context: &WebBackendRequestContext,
+        application_id: &str,
+        request: &CreateDomainRequest,
+    ) -> WebServiceResult<DomainResponse>;
+
+    async fn verify_application_domain(
+        &self,
+        context: &WebBackendRequestContext,
+        application_id: &str,
+        domain_id: &str,
+    ) -> WebServiceResult<DomainVerifyResponse>;
+
+    async fn list_application_deployments(
+        &self,
+        context: &WebBackendRequestContext,
+        application_id: &str,
+        page: i32,
+        page_size: i32,
+        status: Option<i32>,
+    ) -> WebServiceResult<DeploymentPage>;
+
+    async fn create_application_deployment(
+        &self,
+        context: &WebBackendRequestContext,
+        application_id: &str,
+        request: &CreateDeploymentRequest,
+    ) -> WebServiceResult<DeploymentResponse>;
+
+    async fn list_managed_certificates(
+        &self,
+        context: &WebBackendRequestContext,
+        page: i32,
+        page_size: i32,
+    ) -> WebServiceResult<CertificatePage>;
+
+    async fn create_managed_certificate(
+        &self,
+        context: &WebBackendRequestContext,
+        request: &CreateCertificateRequest,
+    ) -> WebServiceResult<CertificateResponse>;
+
+    async fn update_managed_certificate(
+        &self,
+        context: &WebBackendRequestContext,
+        certificate_id: &str,
+        request: &UpdateCertificateRequest,
+    ) -> WebServiceResult<CertificateResponse>;
+
+    async fn renew_managed_certificate(
+        &self,
+        context: &WebBackendRequestContext,
+        certificate_id: &str,
+    ) -> WebServiceResult<CertificateResponse>;
+
+    async fn list_certificate_distribution(
+        &self,
+        context: &WebBackendRequestContext,
+        page: i32,
+        page_size: i32,
+    ) -> WebServiceResult<CertificateDistributionPage>;
+
     async fn list_nginx_configs(
         &self,
         context: &WebBackendRequestContext,

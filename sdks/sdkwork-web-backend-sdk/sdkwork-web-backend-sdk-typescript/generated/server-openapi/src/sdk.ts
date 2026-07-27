@@ -2,6 +2,11 @@ import { HttpClient, createHttpClient } from './http/client';
 import type { SdkworkBackendConfig } from './types/common';
 import type { AuthTokenManager } from '@sdkwork/sdk-common';
 
+import { ApplicationApi, createApplicationApi } from './api/application';
+import { ApplicationDomainApi, createApplicationDomainApi } from './api/application-domain';
+import { ApplicationDeploymentApi, createApplicationDeploymentApi } from './api/application-deployment';
+import { CertificateApi, createCertificateApi } from './api/certificate';
+import { CertificateDistributionApi, createCertificateDistributionApi } from './api/certificate-distribution';
 import { NginxApi, createNginxApi } from './api/nginx';
 import { ServerApi, createServerApi } from './api/server';
 import { AgentApi, createAgentApi } from './api/agent';
@@ -10,6 +15,11 @@ import { AuditApi, createAuditApi } from './api/audit';
 export class SdkworkBackendClient {
   private httpClient: HttpClient;
 
+  public readonly application: ApplicationApi;
+  public readonly applicationDomain: ApplicationDomainApi;
+  public readonly applicationDeployment: ApplicationDeploymentApi;
+  public readonly certificate: CertificateApi;
+  public readonly certificateDistribution: CertificateDistributionApi;
   public readonly nginx: NginxApi;
   public readonly server: ServerApi;
   public readonly agent: AgentApi;
@@ -17,6 +27,16 @@ export class SdkworkBackendClient {
 
   constructor(config: SdkworkBackendConfig) {
     this.httpClient = createHttpClient(config);
+    this.application = createApplicationApi(this.httpClient);
+
+    this.applicationDomain = createApplicationDomainApi(this.httpClient);
+
+    this.applicationDeployment = createApplicationDeploymentApi(this.httpClient);
+
+    this.certificate = createCertificateApi(this.httpClient);
+
+    this.certificateDistribution = createCertificateDistributionApi(this.httpClient);
+
     this.nginx = createNginxApi(this.httpClient);
 
     this.server = createServerApi(this.httpClient);

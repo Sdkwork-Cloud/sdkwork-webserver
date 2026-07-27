@@ -6,6 +6,11 @@ export type WebserverResourceKey =
   | "domains"
   | "certificates"
   | "deployments"
+  | "applications"
+  | "application-domains"
+  | "application-deployments"
+  | "managed-certificates"
+  | "certificate-distribution"
   | "nginx"
   | "servers"
   | "diagnostics"
@@ -55,6 +60,7 @@ export interface WebserverResourceAction {
   bodyTemplate: Record<string, unknown>;
   dangerous?: boolean;
   execute(context: WebserverResourceActionContext): Promise<unknown>;
+  fieldOptions?: Readonly<Record<string, readonly (number | string)[]>>;
   id: string;
   label: string;
   requiresScope?: boolean;
@@ -65,7 +71,7 @@ export interface WebserverResourceDataSource {
   actions: readonly WebserverResourceAction[];
   load(query: WebserverResourceQuery): Promise<WebserverResourcePage>;
   requiresScope?: boolean;
+  scopeKind?: "application" | "site";
 }
 
 export type WebserverResourceRegistry = Partial<Record<WebserverResourceKey, WebserverResourceDataSource>>;
-
