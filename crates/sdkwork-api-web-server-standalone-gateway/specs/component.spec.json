@@ -77,6 +77,11 @@
       "purpose": "Bootstrap-owned dependency SDK composition."
     },
     {
+      "file": "IAM_APPLICATION_BOOTSTRAP_SPEC.md",
+      "path": "../../../sdkwork-specs/IAM_APPLICATION_BOOTSTRAP_SPEC.md",
+      "purpose": "Fail-closed embedded tenant application provisioning."
+    },
+    {
       "file": "CONFIG_SPEC.md",
       "path": "../../../sdkwork-specs/CONFIG_SPEC.md",
       "purpose": "Runtime-set, dependency origin, and secret-file configuration."
@@ -175,6 +180,16 @@
         "name": "driveInternalWebsiteSdk",
         "export": "crate-root",
         "provider": "sdkwork-drive-internal-sdk"
+      },
+      {
+        "name": "iamApplicationBootstrap",
+        "export": "crate-root",
+        "provider": "sdkwork-iam-embedded-application-bootstrap"
+      },
+      {
+        "name": "iamDatabaseLifecycle",
+        "export": "crate-root",
+        "provider": "sdkwork-iam-database-host"
       }
     ],
     "runtimeEntrypoints": [
@@ -284,6 +299,11 @@
       "knowledgebase.wiki.search.changed.v1"
     ],
     "configKeys": [
+      "SDKWORK_APP_ROOT",
+      "SDKWORK_WEB_SERVER_APP_ROOT",
+      "SDKWORK_IAM_APP_ROOT",
+      "SDKWORK_IAM_DATABASE_URL",
+      "SDKWORK_IAM_DATABASE_AUTO_MIGRATE",
       "SDKWORK_WEB_APPLICATION_PUBLIC_INGRESS_BIND",
       "SDKWORK_WEB_SERVER_CONFIG_FILE",
       "SDKWORK_WEB_RUNTIME_ASSIGNMENT_SOURCE",

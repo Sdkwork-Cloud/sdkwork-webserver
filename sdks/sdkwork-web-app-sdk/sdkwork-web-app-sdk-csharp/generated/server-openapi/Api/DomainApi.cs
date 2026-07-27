@@ -18,30 +18,30 @@ namespace SDKWork.Web.AppSdk.Api
         /// <summary>
         /// 获取站点域名列表
         /// </summary>
-        public async Task<SDKWork.Web.AppSdk.Models.DomainPage?> SitesDomainsListAsync(string siteId, int? page = null, int? pageSize = null)
+        public async Task<SDKWork.Web.AppSdk.Models.SitesDomainsListResponse?> SitesDomainsListAsync(string siteId, int? page = null, int? pageSize = null)
         {
             var queryString = BuildQueryString(new[]
             {
                 new QueryParameterSpec("page", page, "form", true, false, null),
                 new QueryParameterSpec("page_size", pageSize, "form", true, false, null),
             });
-            return await _client.GetAsync<SDKWork.Web.AppSdk.Models.DomainPage>(ApiPaths.AppendQueryString(ApiPaths.AppPath($"/sites/{SerializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false))}/domains"), queryString));
+            return await _client.GetAsync<SDKWork.Web.AppSdk.Models.SitesDomainsListResponse>(ApiPaths.AppendQueryString(ApiPaths.AppPath($"/sites/{SerializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false))}/domains"), queryString));
         }
 
         /// <summary>
         /// 绑定域名
         /// </summary>
-        public async Task<SDKWork.Web.AppSdk.Models.DomainResponse?> SitesDomainsCreateAsync(string siteId, SDKWork.Web.AppSdk.Models.CreateDomainRequest body)
+        public async Task<SDKWork.Web.AppSdk.Models.SitesDomainsCreateResponse201?> SitesDomainsCreateAsync(string siteId, SDKWork.Web.AppSdk.Models.CreateDomainRequest body)
         {
-            return await _client.PostAsync<SDKWork.Web.AppSdk.Models.DomainResponse>(ApiPaths.AppPath($"/sites/{SerializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false))}/domains"), body, null, null, "application/json");
+            return await _client.PostAsync<SDKWork.Web.AppSdk.Models.SitesDomainsCreateResponse201>(ApiPaths.AppPath($"/sites/{SerializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false))}/domains"), body, null, null, "application/json");
         }
 
         /// <summary>
         /// 获取域名详情
         /// </summary>
-        public async Task<SDKWork.Web.AppSdk.Models.DomainResponse?> SitesDomainsRetrieveAsync(string siteId, string domainId)
+        public async Task<SDKWork.Web.AppSdk.Models.SitesDomainsRetrieveResponse?> SitesDomainsRetrieveAsync(string siteId, string domainId)
         {
-            return await _client.GetAsync<SDKWork.Web.AppSdk.Models.DomainResponse>(ApiPaths.AppPath($"/sites/{SerializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false))}/domains/{SerializePathParameter(domainId, new PathParameterSpec("domainId", "simple", false))}"));
+            return await _client.GetAsync<SDKWork.Web.AppSdk.Models.SitesDomainsRetrieveResponse>(ApiPaths.AppPath($"/sites/{SerializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false))}/domains/{SerializePathParameter(domainId, new PathParameterSpec("domainId", "simple", false))}"));
         }
 
         /// <summary>
@@ -55,9 +55,9 @@ namespace SDKWork.Web.AppSdk.Api
         /// <summary>
         /// 验证域名所有权
         /// </summary>
-        public async Task<SDKWork.Web.AppSdk.Models.DomainVerifyResponse?> SitesDomainsVerifyAsync(string siteId, string domainId)
+        public async Task<SDKWork.Web.AppSdk.Models.SitesDomainsVerifyResponse?> SitesDomainsVerifyAsync(string siteId, string domainId)
         {
-            return await _client.PostAsync<SDKWork.Web.AppSdk.Models.DomainVerifyResponse>(ApiPaths.AppPath($"/sites/{SerializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false))}/domains/{SerializePathParameter(domainId, new PathParameterSpec("domainId", "simple", false))}/verify"), null);
+            return await _client.PostAsync<SDKWork.Web.AppSdk.Models.SitesDomainsVerifyResponse>(ApiPaths.AppPath($"/sites/{SerializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false))}/domains/{SerializePathParameter(domainId, new PathParameterSpec("domainId", "simple", false))}/verify"), null);
         }
 
         private sealed record PathParameterSpec(string Name, string Style, bool Explode);

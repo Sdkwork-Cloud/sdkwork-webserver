@@ -7,5 +7,5 @@
   "activeLocales": ["zh-CN", "en-US"],
   "appApiBaseUrl": "https://web.sdkwork.com",
   "backendApiBaseUrl": "https://web.sdkwork.com",
-  "appbaseAppApiBaseUrl": "https://iam.sdkwork.com"
+  "appbaseAppApiBaseUrl": "https://api.sdkwork.com"
 }

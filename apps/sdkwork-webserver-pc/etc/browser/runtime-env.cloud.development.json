@@ -1,0 +1,11 @@
+{
+  "environment": "development",
+  "deploymentProfile": "cloud",
+  "defaultLocale": "zh-CN",
+  "fallbackLocale": "en-US",
+  "supportedLocales": ["zh-CN", "en-US"],
+  "activeLocales": ["zh-CN", "en-US"],
+  "appApiBaseUrl": "https://web-app-dev.sdkwork.com",
+  "backendApiBaseUrl": "https://web-admin-dev.sdkwork.com",
+  "appbaseAppApiBaseUrl": "https://api-dev.sdkwork.com"
+}

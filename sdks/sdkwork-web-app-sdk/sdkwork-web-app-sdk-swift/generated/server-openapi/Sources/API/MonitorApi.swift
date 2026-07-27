@@ -8,13 +8,13 @@ public class MonitorApi {
     }
 
     /// 获取健康检查配置
-    public func sitesHealthChecksList(siteId: String) async throws -> HealthCheckPage? {
-        return try await client.get(ApiPaths.appPath("/sites/\(serializePathParameter(siteId, PathParameterSpec(name: "siteId", style: "simple", explode: false)))/health_checks"), responseType: HealthCheckPage.self)
+    public func sitesHealthChecksList(siteId: String) async throws -> SitesHealthChecksListResponse? {
+        return try await client.get(ApiPaths.appPath("/sites/\(serializePathParameter(siteId, PathParameterSpec(name: "siteId", style: "simple", explode: false)))/health_checks"), responseType: SitesHealthChecksListResponse.self)
     }
 
     /// 创建健康检查
-    public func sitesHealthChecksCreate(siteId: String, body: CreateHealthCheckRequest) async throws -> HealthCheckResponse? {
-        return try await client.post(ApiPaths.appPath("/sites/\(serializePathParameter(siteId, PathParameterSpec(name: "siteId", style: "simple", explode: false)))/health_checks"), body: body, params: nil, headers: nil, contentType: "application/json", responseType: HealthCheckResponse.self)
+    public func sitesHealthChecksCreate(siteId: String, body: CreateHealthCheckRequest) async throws -> SitesHealthChecksCreateResponse201? {
+        return try await client.post(ApiPaths.appPath("/sites/\(serializePathParameter(siteId, PathParameterSpec(name: "siteId", style: "simple", explode: false)))/health_checks"), body: body, params: nil, headers: nil, contentType: "application/json", responseType: SitesHealthChecksCreateResponse201.self)
     }
 
     private struct PathParameterSpec {

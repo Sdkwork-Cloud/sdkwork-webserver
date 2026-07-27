@@ -9,4 +9,5 @@ class CreateSiteRequest:
     site_type: int
     slug: Optional[str] = None
     description: Optional[str] = None
+    application_type: Optional[str] = None
     runtime_config: Optional[Dict[str, Any]] = None

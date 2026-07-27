@@ -10,13 +10,10 @@ final class CreateServerRequest
 
     public ?string $host = null;
 
+    /** Irreversible tenant scope bound to runtime-set delivery for this node. */
+    public ?string $tenantScopeHash = null;
+
     public ?int $sshPort = null;
-
-    public ?string $sshUser = null;
-
-    public ?string $sshKeyPath = null;
-
-    public ?string $description = null;
 
     public function __construct(array $data = [])
     {
@@ -26,17 +23,11 @@ final class CreateServerRequest
         $this->host = array_key_exists('host', $data)
             ? $data['host']
             : null;
+        $this->tenantScopeHash = array_key_exists('tenantScopeHash', $data)
+            ? $data['tenantScopeHash']
+            : null;
         $this->sshPort = array_key_exists('sshPort', $data)
             ? $data['sshPort']
-            : null;
-        $this->sshUser = array_key_exists('sshUser', $data)
-            ? $data['sshUser']
-            : null;
-        $this->sshKeyPath = array_key_exists('sshKeyPath', $data)
-            ? $data['sshKeyPath']
-            : null;
-        $this->description = array_key_exists('description', $data)
-            ? $data['description']
             : null;
     }
 
@@ -50,10 +41,8 @@ final class CreateServerRequest
         return [
             'name' => $this->name,
             'host' => $this->host,
+            'tenantScopeHash' => $this->tenantScopeHash,
             'sshPort' => $this->sshPort,
-            'sshUser' => $this->sshUser,
-            'sshKeyPath' => $this->sshKeyPath,
-            'description' => $this->description,
         ];
     }
 }

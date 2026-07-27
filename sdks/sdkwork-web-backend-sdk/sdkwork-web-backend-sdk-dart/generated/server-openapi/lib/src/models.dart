@@ -18,7 +18,9 @@ class ProblemDetail {
   final int? status;
   final String? detail;
   final String? instance;
-  final String? requestId;
+  final int? code;
+  final String? traceId;
+  final List<FieldError>? errors;
 
   ProblemDetail({
     this.type,
@@ -26,7 +28,9 @@ class ProblemDetail {
     this.status,
     this.detail,
     this.instance,
-    this.requestId
+    this.code,
+    this.traceId,
+    this.errors
   });
 
   factory ProblemDetail.fromJson(Map<String, dynamic> json) {
@@ -36,7 +40,21 @@ class ProblemDetail {
       status: json['status'] is int ? json['status'] : null,
       detail: json['detail']?.toString(),
       instance: json['instance']?.toString(),
-      requestId: json['requestId']?.toString()
+      code: json['code'] is int ? json['code'] : null,
+      traceId: json['traceId']?.toString(),
+      errors: (() {
+        final list = _sdkworkAsList(json['errors']);
+        if (list == null) {
+          return null;
+        }
+        return list
+            .map((item) => (() {
+        final map = _sdkworkAsMap(item);
+        return map == null ? null : FieldError.fromJson(map);
+      })())
+            .whereType<FieldError>()
+            .toList();
+      })()
     );
   }
 
@@ -47,7 +65,9 @@ class ProblemDetail {
       'status': status,
       'detail': detail,
       'instance': instance,
-      'requestId': requestId,
+      'code': code,
+      'traceId': traceId,
+      'errors': errors?.map((item) => item.toJson()).toList(),
     };
   }
 }
@@ -108,6 +128,426 @@ class UpdateNginxConfigRequest {
     return <String, dynamic>{
       'configContent': configContent,
       'configName': configName,
+    };
+  }
+}
+
+class CreateApplicationRequest {
+  final String? name;
+  final String? slug;
+  final String? description;
+  final String? applicationType;
+  final int? siteType;
+  final Map<String, dynamic>? runtimeConfig;
+
+  CreateApplicationRequest({
+    this.name,
+    this.slug,
+    this.description,
+    this.applicationType,
+    this.siteType,
+    this.runtimeConfig
+  });
+
+  factory CreateApplicationRequest.fromJson(Map<String, dynamic> json) {
+    return CreateApplicationRequest(
+      name: json['name']?.toString(),
+      slug: json['slug']?.toString(),
+      description: json['description']?.toString(),
+      applicationType: json['applicationType']?.toString(),
+      siteType: json['siteType'] is int ? json['siteType'] : null,
+      runtimeConfig: _sdkworkAsMap(json['runtimeConfig'])
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'name': name,
+      'slug': slug,
+      'description': description,
+      'applicationType': applicationType,
+      'siteType': siteType,
+      'runtimeConfig': runtimeConfig,
+    };
+  }
+}
+
+class ApplicationResponse {
+  final String? id;
+  final String? name;
+  final String? slug;
+  final String? description;
+  final String? applicationType;
+  final int? siteType;
+  final int? status;
+  final Map<String, dynamic>? runtimeConfig;
+  final String? createdAt;
+  final String? updatedAt;
+
+  ApplicationResponse({
+    this.id,
+    this.name,
+    this.slug,
+    this.description,
+    this.applicationType,
+    this.siteType,
+    this.status,
+    this.runtimeConfig,
+    this.createdAt,
+    this.updatedAt
+  });
+
+  factory ApplicationResponse.fromJson(Map<String, dynamic> json) {
+    return ApplicationResponse(
+      id: json['id']?.toString(),
+      name: json['name']?.toString(),
+      slug: json['slug']?.toString(),
+      description: json['description']?.toString(),
+      applicationType: json['applicationType']?.toString(),
+      siteType: json['siteType'] is int ? json['siteType'] : null,
+      status: json['status'] is int ? json['status'] : null,
+      runtimeConfig: _sdkworkAsMap(json['runtimeConfig']),
+      createdAt: json['createdAt']?.toString(),
+      updatedAt: json['updatedAt']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'id': id,
+      'name': name,
+      'slug': slug,
+      'description': description,
+      'applicationType': applicationType,
+      'siteType': siteType,
+      'status': status,
+      'runtimeConfig': runtimeConfig,
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
+    };
+  }
+}
+
+class CreateApplicationDomainRequest {
+  final String? hostname;
+  final bool? isPrimary;
+  final bool? sslEnabled;
+  final String? sslProvider;
+
+  CreateApplicationDomainRequest({
+    this.hostname,
+    this.isPrimary,
+    this.sslEnabled,
+    this.sslProvider
+  });
+
+  factory CreateApplicationDomainRequest.fromJson(Map<String, dynamic> json) {
+    return CreateApplicationDomainRequest(
+      hostname: json['hostname']?.toString(),
+      isPrimary: json['isPrimary'] is bool ? json['isPrimary'] : null,
+      sslEnabled: json['sslEnabled'] is bool ? json['sslEnabled'] : null,
+      sslProvider: json['sslProvider']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'hostname': hostname,
+      'isPrimary': isPrimary,
+      'sslEnabled': sslEnabled,
+      'sslProvider': sslProvider,
+    };
+  }
+}
+
+class ApplicationDomainResponse {
+  final String? id;
+  final String? hostname;
+  final bool? isPrimary;
+  final bool? isVerified;
+  final bool? sslEnabled;
+  final String? sslProvider;
+  final int? status;
+  final String? createdAt;
+
+  ApplicationDomainResponse({
+    this.id,
+    this.hostname,
+    this.isPrimary,
+    this.isVerified,
+    this.sslEnabled,
+    this.sslProvider,
+    this.status,
+    this.createdAt
+  });
+
+  factory ApplicationDomainResponse.fromJson(Map<String, dynamic> json) {
+    return ApplicationDomainResponse(
+      id: json['id']?.toString(),
+      hostname: json['hostname']?.toString(),
+      isPrimary: json['isPrimary'] is bool ? json['isPrimary'] : null,
+      isVerified: json['isVerified'] is bool ? json['isVerified'] : null,
+      sslEnabled: json['sslEnabled'] is bool ? json['sslEnabled'] : null,
+      sslProvider: json['sslProvider']?.toString(),
+      status: json['status'] is int ? json['status'] : null,
+      createdAt: json['createdAt']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'id': id,
+      'hostname': hostname,
+      'isPrimary': isPrimary,
+      'isVerified': isVerified,
+      'sslEnabled': sslEnabled,
+      'sslProvider': sslProvider,
+      'status': status,
+      'createdAt': createdAt,
+    };
+  }
+}
+
+class ApplicationDomainVerifyResponse {
+  final bool? verified;
+  final String? verifyToken;
+
+  ApplicationDomainVerifyResponse({
+    this.verified,
+    this.verifyToken
+  });
+
+  factory ApplicationDomainVerifyResponse.fromJson(Map<String, dynamic> json) {
+    return ApplicationDomainVerifyResponse(
+      verified: json['verified'] is bool ? json['verified'] : null,
+      verifyToken: json['verifyToken']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'verified': verified,
+      'verifyToken': verifyToken,
+    };
+  }
+}
+
+class CreateApplicationDeploymentRequest {
+  final int? deployType;
+  final String? environment;
+  final String? idempotencyKey;
+
+  CreateApplicationDeploymentRequest({
+    this.deployType,
+    this.environment,
+    this.idempotencyKey
+  });
+
+  factory CreateApplicationDeploymentRequest.fromJson(Map<String, dynamic> json) {
+    return CreateApplicationDeploymentRequest(
+      deployType: json['deployType'] is int ? json['deployType'] : null,
+      environment: json['environment']?.toString(),
+      idempotencyKey: json['idempotencyKey']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'deployType': deployType,
+      'environment': environment,
+      'idempotencyKey': idempotencyKey,
+    };
+  }
+}
+
+class ApplicationDeploymentResponse {
+  final String? id;
+  final String? siteId;
+  final int? status;
+  final int? deployType;
+  final String? createdAt;
+
+  ApplicationDeploymentResponse({
+    this.id,
+    this.siteId,
+    this.status,
+    this.deployType,
+    this.createdAt
+  });
+
+  factory ApplicationDeploymentResponse.fromJson(Map<String, dynamic> json) {
+    return ApplicationDeploymentResponse(
+      id: json['id']?.toString(),
+      siteId: json['siteId']?.toString(),
+      status: json['status'] is int ? json['status'] : null,
+      deployType: json['deployType'] is int ? json['deployType'] : null,
+      createdAt: json['createdAt']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'id': id,
+      'siteId': siteId,
+      'status': status,
+      'deployType': deployType,
+      'createdAt': createdAt,
+    };
+  }
+}
+
+class CreateCertificateRequest {
+  final String? domainId;
+  final int? certType;
+  final bool? autoRenew;
+
+  CreateCertificateRequest({
+    this.domainId,
+    this.certType,
+    this.autoRenew
+  });
+
+  factory CreateCertificateRequest.fromJson(Map<String, dynamic> json) {
+    return CreateCertificateRequest(
+      domainId: json['domainId']?.toString(),
+      certType: json['certType'] is int ? json['certType'] : null,
+      autoRenew: json['autoRenew'] is bool ? json['autoRenew'] : null
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'domainId': domainId,
+      'certType': certType,
+      'autoRenew': autoRenew,
+    };
+  }
+}
+
+class UpdateCertificateRequest {
+  final bool? autoRenew;
+
+  UpdateCertificateRequest({
+    this.autoRenew
+  });
+
+  factory UpdateCertificateRequest.fromJson(Map<String, dynamic> json) {
+    return UpdateCertificateRequest(
+      autoRenew: json['autoRenew'] is bool ? json['autoRenew'] : null
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'autoRenew': autoRenew,
+    };
+  }
+}
+
+class CertificateResponse {
+  final String? id;
+  final String? certName;
+  final String? domain;
+  final int? certType;
+  final String? issuer;
+  final String? fingerprint;
+  final String? notBefore;
+  final String? notAfter;
+  final bool? autoRenew;
+  final int? renewalStatus;
+  final int? status;
+  final String? createdAt;
+
+  CertificateResponse({
+    this.id,
+    this.certName,
+    this.domain,
+    this.certType,
+    this.issuer,
+    this.fingerprint,
+    this.notBefore,
+    this.notAfter,
+    this.autoRenew,
+    this.renewalStatus,
+    this.status,
+    this.createdAt
+  });
+
+  factory CertificateResponse.fromJson(Map<String, dynamic> json) {
+    return CertificateResponse(
+      id: json['id']?.toString(),
+      certName: json['certName']?.toString(),
+      domain: json['domain']?.toString(),
+      certType: json['certType'] is int ? json['certType'] : null,
+      issuer: json['issuer']?.toString(),
+      fingerprint: json['fingerprint']?.toString(),
+      notBefore: json['notBefore']?.toString(),
+      notAfter: json['notAfter']?.toString(),
+      autoRenew: json['autoRenew'] is bool ? json['autoRenew'] : null,
+      renewalStatus: json['renewalStatus'] is int ? json['renewalStatus'] : null,
+      status: json['status'] is int ? json['status'] : null,
+      createdAt: json['createdAt']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'id': id,
+      'certName': certName,
+      'domain': domain,
+      'certType': certType,
+      'issuer': issuer,
+      'fingerprint': fingerprint,
+      'notBefore': notBefore,
+      'notAfter': notAfter,
+      'autoRenew': autoRenew,
+      'renewalStatus': renewalStatus,
+      'status': status,
+      'createdAt': createdAt,
+    };
+  }
+}
+
+class CertificateDistributionResponse {
+  final String? serverId;
+  final String? serverName;
+  final String? host;
+  final String? desiredSyncVersion;
+  final String? appliedSyncVersion;
+  final String? status;
+  final String? lastHeartbeatAt;
+
+  CertificateDistributionResponse({
+    this.serverId,
+    this.serverName,
+    this.host,
+    this.desiredSyncVersion,
+    this.appliedSyncVersion,
+    this.status,
+    this.lastHeartbeatAt
+  });
+
+  factory CertificateDistributionResponse.fromJson(Map<String, dynamic> json) {
+    return CertificateDistributionResponse(
+      serverId: json['serverId']?.toString(),
+      serverName: json['serverName']?.toString(),
+      host: json['host']?.toString(),
+      desiredSyncVersion: json['desiredSyncVersion']?.toString(),
+      appliedSyncVersion: json['appliedSyncVersion']?.toString(),
+      status: json['status']?.toString(),
+      lastHeartbeatAt: json['lastHeartbeatAt']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'serverId': serverId,
+      'serverName': serverName,
+      'host': host,
+      'desiredSyncVersion': desiredSyncVersion,
+      'appliedSyncVersion': appliedSyncVersion,
+      'status': status,
+      'lastHeartbeatAt': lastHeartbeatAt,
     };
   }
 }
@@ -344,28 +784,22 @@ class NginxStatusResponse {
 class CreateServerRequest {
   final String? name;
   final String? host;
+  final String? tenantScopeHash;
   final int? sshPort;
-  final String? sshUser;
-  final String? sshKeyPath;
-  final String? description;
 
   CreateServerRequest({
     this.name,
     this.host,
-    this.sshPort,
-    this.sshUser,
-    this.sshKeyPath,
-    this.description
+    this.tenantScopeHash,
+    this.sshPort
   });
 
   factory CreateServerRequest.fromJson(Map<String, dynamic> json) {
     return CreateServerRequest(
       name: json['name']?.toString(),
       host: json['host']?.toString(),
-      sshPort: json['sshPort'] is int ? json['sshPort'] : null,
-      sshUser: json['sshUser']?.toString(),
-      sshKeyPath: json['sshKeyPath']?.toString(),
-      description: json['description']?.toString()
+      tenantScopeHash: json['tenantScopeHash']?.toString(),
+      sshPort: json['sshPort'] is int ? json['sshPort'] : null
     );
   }
 
@@ -373,10 +807,8 @@ class CreateServerRequest {
     return <String, dynamic>{
       'name': name,
       'host': host,
+      'tenantScopeHash': tenantScopeHash,
       'sshPort': sshPort,
-      'sshUser': sshUser,
-      'sshKeyPath': sshKeyPath,
-      'description': description,
     };
   }
 }
@@ -385,6 +817,7 @@ class ServerResponse {
   final String? id;
   final String? name;
   final String? host;
+  final String? tenantScopeHash;
   final int? sshPort;
   final int? status;
   final String? lastHeartbeatAt;
@@ -394,6 +827,7 @@ class ServerResponse {
     this.id,
     this.name,
     this.host,
+    this.tenantScopeHash,
     this.sshPort,
     this.status,
     this.lastHeartbeatAt,
@@ -405,6 +839,7 @@ class ServerResponse {
       id: json['id']?.toString(),
       name: json['name']?.toString(),
       host: json['host']?.toString(),
+      tenantScopeHash: json['tenantScopeHash']?.toString(),
       sshPort: json['sshPort'] is int ? json['sshPort'] : null,
       status: json['status'] is int ? json['status'] : null,
       lastHeartbeatAt: json['lastHeartbeatAt']?.toString(),
@@ -417,6 +852,7 @@ class ServerResponse {
       'id': id,
       'name': name,
       'host': host,
+      'tenantScopeHash': tenantScopeHash,
       'sshPort': sshPort,
       'status': status,
       'lastHeartbeatAt': lastHeartbeatAt,
@@ -429,6 +865,7 @@ class CreateServerResponse {
   final String? id;
   final String? name;
   final String? host;
+  final String? tenantScopeHash;
   final int? sshPort;
   final int? status;
   final String? lastHeartbeatAt;
@@ -439,6 +876,7 @@ class CreateServerResponse {
     this.id,
     this.name,
     this.host,
+    this.tenantScopeHash,
     this.sshPort,
     this.status,
     this.lastHeartbeatAt,
@@ -451,6 +889,7 @@ class CreateServerResponse {
       id: json['id']?.toString(),
       name: json['name']?.toString(),
       host: json['host']?.toString(),
+      tenantScopeHash: json['tenantScopeHash']?.toString(),
       sshPort: json['sshPort'] is int ? json['sshPort'] : null,
       status: json['status'] is int ? json['status'] : null,
       lastHeartbeatAt: json['lastHeartbeatAt']?.toString(),
@@ -464,6 +903,7 @@ class CreateServerResponse {
       'id': id,
       'name': name,
       'host': host,
+      'tenantScopeHash': tenantScopeHash,
       'sshPort': sshPort,
       'status': status,
       'lastHeartbeatAt': lastHeartbeatAt,
@@ -709,7 +1149,6 @@ class AuditLogResponse {
   final String? targetType;
   final String? targetId;
   final String? targetUuid;
-  final String? requestId;
   final String? ipAddress;
   final Map<String, dynamic>? changes;
   final String? createdAt;
@@ -722,7 +1161,6 @@ class AuditLogResponse {
     this.targetType,
     this.targetId,
     this.targetUuid,
-    this.requestId,
     this.ipAddress,
     this.changes,
     this.createdAt
@@ -737,7 +1175,6 @@ class AuditLogResponse {
       targetType: json['targetType']?.toString(),
       targetId: json['targetId']?.toString(),
       targetUuid: json['targetUuid']?.toString(),
-      requestId: json['requestId']?.toString(),
       ipAddress: json['ipAddress']?.toString(),
       changes: _sdkworkAsMap(json['changes']),
       createdAt: json['createdAt']?.toString()
@@ -753,7 +1190,6 @@ class AuditLogResponse {
       'targetType': targetType,
       'targetId': targetId,
       'targetUuid': targetUuid,
-      'requestId': requestId,
       'ipAddress': ipAddress,
       'changes': changes,
       'createdAt': createdAt,
@@ -793,6 +1229,974 @@ class AuditLogPage {
     return <String, dynamic>{
       'items': items?.map((item) => item.toJson()).toList(),
       'total': total,
+    };
+  }
+}
+
+class SdkWorkApiResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  SdkWorkApiResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory SdkWorkApiResponse.fromJson(Map<String, dynamic> json) {
+    return SdkWorkApiResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: json['data'],
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SdkWorkResourceData {
+  final Map<String, dynamic>? item;
+
+  SdkWorkResourceData({
+    this.item
+  });
+
+  factory SdkWorkResourceData.fromJson(Map<String, dynamic> json) {
+    return SdkWorkResourceData(
+      item: _sdkworkAsMap(json['item'])
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'item': item,
+    };
+  }
+}
+
+class SdkWorkPageData {
+  final List<Map<String, dynamic>>? items;
+  final PageInfo? pageInfo;
+
+  SdkWorkPageData({
+    this.items,
+    this.pageInfo
+  });
+
+  factory SdkWorkPageData.fromJson(Map<String, dynamic> json) {
+    return SdkWorkPageData(
+      items: (() {
+        final list = _sdkworkAsList(json['items']);
+        if (list == null) {
+          return null;
+        }
+        return list
+            .map((item) => _sdkworkAsMap(item))
+            .whereType<Map<String, dynamic>>()
+            .toList();
+      })(),
+      pageInfo: (() {
+        final map = _sdkworkAsMap(json['pageInfo']);
+        return map == null ? null : PageInfo.fromJson(map);
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'items': items?.map((item) => item).toList(),
+      'pageInfo': pageInfo?.toJson(),
+    };
+  }
+}
+
+class SdkWorkCommandData {
+  final bool? accepted;
+  final String? resourceId;
+  final String? status;
+
+  SdkWorkCommandData({
+    this.accepted,
+    this.resourceId,
+    this.status
+  });
+
+  factory SdkWorkCommandData.fromJson(Map<String, dynamic> json) {
+    return SdkWorkCommandData(
+      accepted: json['accepted'] is bool ? json['accepted'] : null,
+      resourceId: json['resourceId']?.toString(),
+      status: json['status']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'accepted': accepted,
+      'resourceId': resourceId,
+      'status': status,
+    };
+  }
+}
+
+class PageInfo {
+  final String? mode;
+  final int? page;
+  final int? pageSize;
+  final String? totalItems;
+  final int? totalPages;
+  final String? nextCursor;
+  final bool? hasMore;
+
+  PageInfo({
+    this.mode,
+    this.page,
+    this.pageSize,
+    this.totalItems,
+    this.totalPages,
+    this.nextCursor,
+    this.hasMore
+  });
+
+  factory PageInfo.fromJson(Map<String, dynamic> json) {
+    return PageInfo(
+      mode: json['mode']?.toString(),
+      page: json['page'] is int ? json['page'] : null,
+      pageSize: json['pageSize'] is int ? json['pageSize'] : null,
+      totalItems: json['totalItems']?.toString(),
+      totalPages: json['totalPages'] is int ? json['totalPages'] : null,
+      nextCursor: json['nextCursor']?.toString(),
+      hasMore: json['hasMore'] is bool ? json['hasMore'] : null
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'mode': mode,
+      'page': page,
+      'pageSize': pageSize,
+      'totalItems': totalItems,
+      'totalPages': totalPages,
+      'nextCursor': nextCursor,
+      'hasMore': hasMore,
+    };
+  }
+}
+
+class FieldError {
+  final String? field;
+  final String? message;
+  final int? code;
+
+  FieldError({
+    this.field,
+    this.message,
+    this.code
+  });
+
+  factory FieldError.fromJson(Map<String, dynamic> json) {
+    return FieldError(
+      field: json['field']?.toString(),
+      message: json['message']?.toString(),
+      code: json['code'] is int ? json['code'] : null
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'field': field,
+      'message': message,
+      'code': code,
+    };
+  }
+}
+
+class SdkWorkResourceResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  SdkWorkResourceResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory SdkWorkResourceResponse.fromJson(Map<String, dynamic> json) {
+    return SdkWorkResourceResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: json['data'],
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SdkWorkListResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  SdkWorkListResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory SdkWorkListResponse.fromJson(Map<String, dynamic> json) {
+    return SdkWorkListResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: json['data'],
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SdkWorkCommandResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  SdkWorkCommandResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory SdkWorkCommandResponse.fromJson(Map<String, dynamic> json) {
+    return SdkWorkCommandResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: json['data'],
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class ApplicationsListResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  ApplicationsListResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory ApplicationsListResponse.fromJson(Map<String, dynamic> json) {
+    return ApplicationsListResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class ApplicationsCreateResponse201 {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  ApplicationsCreateResponse201({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory ApplicationsCreateResponse201.fromJson(Map<String, dynamic> json) {
+    return ApplicationsCreateResponse201(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class ApplicationsDomainsListResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  ApplicationsDomainsListResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory ApplicationsDomainsListResponse.fromJson(Map<String, dynamic> json) {
+    return ApplicationsDomainsListResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class ApplicationsDomainsCreateResponse201 {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  ApplicationsDomainsCreateResponse201({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory ApplicationsDomainsCreateResponse201.fromJson(Map<String, dynamic> json) {
+    return ApplicationsDomainsCreateResponse201(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class ApplicationsDomainsVerifyResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  ApplicationsDomainsVerifyResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory ApplicationsDomainsVerifyResponse.fromJson(Map<String, dynamic> json) {
+    return ApplicationsDomainsVerifyResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class ApplicationsDeploymentsListResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  ApplicationsDeploymentsListResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory ApplicationsDeploymentsListResponse.fromJson(Map<String, dynamic> json) {
+    return ApplicationsDeploymentsListResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class ApplicationsDeploymentsCreateResponse201 {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  ApplicationsDeploymentsCreateResponse201({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory ApplicationsDeploymentsCreateResponse201.fromJson(Map<String, dynamic> json) {
+    return ApplicationsDeploymentsCreateResponse201(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class CertificatesListResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  CertificatesListResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory CertificatesListResponse.fromJson(Map<String, dynamic> json) {
+    return CertificatesListResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class CertificatesCreateResponse201 {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  CertificatesCreateResponse201({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory CertificatesCreateResponse201.fromJson(Map<String, dynamic> json) {
+    return CertificatesCreateResponse201(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class CertificatesUpdateResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  CertificatesUpdateResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory CertificatesUpdateResponse.fromJson(Map<String, dynamic> json) {
+    return CertificatesUpdateResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class CertificatesRenewResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  CertificatesRenewResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory CertificatesRenewResponse.fromJson(Map<String, dynamic> json) {
+    return CertificatesRenewResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class CertificatesDistributionListResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  CertificatesDistributionListResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory CertificatesDistributionListResponse.fromJson(Map<String, dynamic> json) {
+    return CertificatesDistributionListResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class ConfigsListResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  ConfigsListResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory ConfigsListResponse.fromJson(Map<String, dynamic> json) {
+    return ConfigsListResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class ConfigsCreateResponse201 {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  ConfigsCreateResponse201({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory ConfigsCreateResponse201.fromJson(Map<String, dynamic> json) {
+    return ConfigsCreateResponse201(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class ConfigsRetrieveResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  ConfigsRetrieveResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory ConfigsRetrieveResponse.fromJson(Map<String, dynamic> json) {
+    return ConfigsRetrieveResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class ConfigsUpdateResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  ConfigsUpdateResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory ConfigsUpdateResponse.fromJson(Map<String, dynamic> json) {
+    return ConfigsUpdateResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class ConfigsValidateResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  ConfigsValidateResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory ConfigsValidateResponse.fromJson(Map<String, dynamic> json) {
+    return ConfigsValidateResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class ConfigsDeployResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  ConfigsDeployResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory ConfigsDeployResponse.fromJson(Map<String, dynamic> json) {
+    return ConfigsDeployResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class ReloadResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  ReloadResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory ReloadResponse.fromJson(Map<String, dynamic> json) {
+    return ReloadResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class StatusRetrieveResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  StatusRetrieveResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory StatusRetrieveResponse.fromJson(Map<String, dynamic> json) {
+    return StatusRetrieveResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class ServersListResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  ServersListResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory ServersListResponse.fromJson(Map<String, dynamic> json) {
+    return ServersListResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class ServersCreateResponse201 {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  ServersCreateResponse201({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory ServersCreateResponse201.fromJson(Map<String, dynamic> json) {
+    return ServersCreateResponse201(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class HeartbeatResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  HeartbeatResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory HeartbeatResponse.fromJson(Map<String, dynamic> json) {
+    return HeartbeatResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class RetrieveResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  RetrieveResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory RetrieveResponse.fromJson(Map<String, dynamic> json) {
+    return RetrieveResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class AuditLogsListResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  AuditLogsListResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory AuditLogsListResponse.fromJson(Map<String, dynamic> json) {
+    return AuditLogsListResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
     };
   }
 }

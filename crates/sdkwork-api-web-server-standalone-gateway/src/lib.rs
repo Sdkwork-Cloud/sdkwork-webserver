@@ -1,6 +1,8 @@
 #[cfg(feature = "management")]
 mod bootstrap;
 mod data_plane;
+#[cfg(feature = "management")]
+mod iam_application_bootstrap;
 mod metric_dimensions;
 mod provider_event_ingress;
 #[cfg(feature = "management")]

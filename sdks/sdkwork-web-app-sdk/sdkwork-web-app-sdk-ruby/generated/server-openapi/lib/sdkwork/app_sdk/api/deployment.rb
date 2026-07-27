@@ -1,7 +1,9 @@
 require_relative 'base_api'
 require_relative '../models/create_deployment_request'
-require_relative '../models/deployment_page'
-require_relative '../models/deployment_response'
+require_relative '../models/sites_deployments_create_response201'
+require_relative '../models/sites_deployments_list_response'
+require_relative '../models/sites_deployments_retrieve_response'
+require_relative '../models/sites_deployments_rollback_response'
 
 module Sdkwork
   module AppSdk
@@ -12,14 +14,14 @@ module Sdkwork
             path = interpolate_path('/app/v3/api/sites/{siteId}/deployments', siteId: serialize_path_parameter(site_id, PathParameterSpec.new('siteId', 'simple', false)))
             query = build_query_string([
               QueryParameterSpec.new('page', page, 'form', true, false, nil),
-              QueryParameterSpec.new('pageSize', page_size, 'form', true, false, nil),
+              QueryParameterSpec.new('page_size', page_size, 'form', true, false, nil),
               QueryParameterSpec.new('status', status, 'form', true, false, nil),
             ])
             path = append_query_string(path, query)
             options = {}
 
             result = @client.request('GET', path, **options)
-            result.is_a?(Hash) ? Models::DeploymentPage.from_hash(result) : nil
+            result.is_a?(Hash) ? Models::SitesDeploymentsListResponse.from_hash(result) : nil
           end
 
           # 发起部署
@@ -29,7 +31,7 @@ module Sdkwork
             options = {}
             options[:json] = payload unless payload.nil?
             result = @client.request('POST', path, **options)
-            result.is_a?(Hash) ? Models::DeploymentResponse.from_hash(result) : nil
+            result.is_a?(Hash) ? Models::SitesDeploymentsCreateResponse201.from_hash(result) : nil
           end
 
           # 获取部署详情
@@ -38,7 +40,7 @@ module Sdkwork
             options = {}
 
             result = @client.request('GET', path, **options)
-            result.is_a?(Hash) ? Models::DeploymentResponse.from_hash(result) : nil
+            result.is_a?(Hash) ? Models::SitesDeploymentsRetrieveResponse.from_hash(result) : nil
           end
 
           # 回滚部署
@@ -47,7 +49,7 @@ module Sdkwork
             options = {}
 
             result = @client.request('POST', path, **options)
-            result.is_a?(Hash) ? Models::DeploymentResponse.from_hash(result) : nil
+            result.is_a?(Hash) ? Models::SitesDeploymentsRollbackResponse.from_hash(result) : nil
           end
 
       end

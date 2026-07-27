@@ -10,7 +10,6 @@ public class AuditLogResponse {
     private String targetType;
     private String targetId;
     private String targetUuid;
-    private String requestId;
     private String ipAddress;
     private Map<String, Object> changes;
     private String createdAt;
@@ -69,14 +68,6 @@ public class AuditLogResponse {
 
     public void setTargetUuid(String targetUuid) {
         this.targetUuid = targetUuid;
-    }
-
-    public String getRequestId() {
-        return this.requestId;
-    }
-
-    public void setRequestId(String requestId) {
-        this.requestId = requestId;
     }
 
     public String getIpAddress() {

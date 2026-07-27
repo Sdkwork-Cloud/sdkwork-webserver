@@ -7,8 +7,8 @@ public class NginxApi {
         self.client = client
     }
 
-    /// 获取 Nginx 配置列表
-    public func configsList(page: Int? = nil, pageSize: Int? = nil, siteId: String? = nil, configType: Int? = nil, isActive: Bool? = nil) async throws -> NginxConfigPage? {
+    /// List Nginx configurations
+    public func configsList(page: Int? = nil, pageSize: Int? = nil, siteId: String? = nil, configType: Int? = nil, isActive: Bool? = nil) async throws -> ConfigsListResponse? {
         let query = buildQueryString([
             QueryParameterSpec(name: "page", value: page, style: "form", explode: true, allowReserved: false, contentType: nil),
             QueryParameterSpec(name: "page_size", value: pageSize, style: "form", explode: true, allowReserved: false, contentType: nil),
@@ -16,42 +16,42 @@ public class NginxApi {
             QueryParameterSpec(name: "configType", value: configType, style: "form", explode: true, allowReserved: false, contentType: nil),
             QueryParameterSpec(name: "isActive", value: isActive, style: "form", explode: true, allowReserved: false, contentType: nil)
         ])
-        return try await client.get(ApiPaths.appendQueryString(ApiPaths.backendPath("/nginx/configs"), query), responseType: NginxConfigPage.self)
+        return try await client.get(ApiPaths.appendQueryString(ApiPaths.backendPath("/nginx/configs"), query), responseType: ConfigsListResponse.self)
     }
 
-    /// 创建 Nginx 配置
-    public func configsCreate(body: CreateNginxConfigRequest) async throws -> NginxConfigResponse? {
-        return try await client.post(ApiPaths.backendPath("/nginx/configs"), body: body, params: nil, headers: nil, contentType: "application/json", responseType: NginxConfigResponse.self)
+    /// Create an Nginx configuration
+    public func configsCreate(body: CreateNginxConfigRequest) async throws -> ConfigsCreateResponse201? {
+        return try await client.post(ApiPaths.backendPath("/nginx/configs"), body: body, params: nil, headers: nil, contentType: "application/json", responseType: ConfigsCreateResponse201.self)
     }
 
-    /// 获取 Nginx 配置详情
-    public func configsRetrieve(configId: String) async throws -> NginxConfigResponse? {
-        return try await client.get(ApiPaths.backendPath("/nginx/etc/\(serializePathParameter(configId, PathParameterSpec(name: "configId", style: "simple", explode: false)))"), responseType: NginxConfigResponse.self)
+    /// Retrieve an Nginx configuration
+    public func configsRetrieve(configId: String) async throws -> ConfigsRetrieveResponse? {
+        return try await client.get(ApiPaths.backendPath("/nginx/etc/\(serializePathParameter(configId, PathParameterSpec(name: "configId", style: "simple", explode: false)))"), responseType: ConfigsRetrieveResponse.self)
     }
 
-    /// 更新 Nginx 配置
-    public func configsUpdate(configId: String, body: UpdateNginxConfigRequest) async throws -> NginxConfigResponse? {
-        return try await client.put(ApiPaths.backendPath("/nginx/etc/\(serializePathParameter(configId, PathParameterSpec(name: "configId", style: "simple", explode: false)))"), body: body, params: nil, headers: nil, contentType: "application/json", responseType: NginxConfigResponse.self)
+    /// Update an Nginx configuration
+    public func configsUpdate(configId: String, body: UpdateNginxConfigRequest) async throws -> ConfigsUpdateResponse? {
+        return try await client.put(ApiPaths.backendPath("/nginx/etc/\(serializePathParameter(configId, PathParameterSpec(name: "configId", style: "simple", explode: false)))"), body: body, params: nil, headers: nil, contentType: "application/json", responseType: ConfigsUpdateResponse.self)
     }
 
-    /// 校验 Nginx 配置
-    public func configsValidate(configId: String) async throws -> NginxValidateResponse? {
-        return try await client.post(ApiPaths.backendPath("/nginx/etc/\(serializePathParameter(configId, PathParameterSpec(name: "configId", style: "simple", explode: false)))/validate"), body: nil, responseType: NginxValidateResponse.self)
+    /// Validate an Nginx configuration
+    public func configsValidate(configId: String) async throws -> ConfigsValidateResponse? {
+        return try await client.post(ApiPaths.backendPath("/nginx/etc/\(serializePathParameter(configId, PathParameterSpec(name: "configId", style: "simple", explode: false)))/validate"), body: nil, responseType: ConfigsValidateResponse.self)
     }
 
-    /// 部署 Nginx 配置
-    public func configsDeploy(configId: String) async throws -> NginxDeployResponse? {
-        return try await client.post(ApiPaths.backendPath("/nginx/etc/\(serializePathParameter(configId, PathParameterSpec(name: "configId", style: "simple", explode: false)))/deploy"), body: nil, responseType: NginxDeployResponse.self)
+    /// Deploy an Nginx configuration
+    public func configsDeploy(configId: String) async throws -> ConfigsDeployResponse? {
+        return try await client.post(ApiPaths.backendPath("/nginx/etc/\(serializePathParameter(configId, PathParameterSpec(name: "configId", style: "simple", explode: false)))/deploy"), body: nil, responseType: ConfigsDeployResponse.self)
     }
 
-    /// 热加载 Nginx
-    public func reload() async throws -> NginxReloadResponse? {
-        return try await client.post(ApiPaths.backendPath("/nginx/reload"), body: nil, responseType: NginxReloadResponse.self)
+    /// Reload Nginx
+    public func reload() async throws -> ReloadResponse? {
+        return try await client.post(ApiPaths.backendPath("/nginx/reload"), body: nil, responseType: ReloadResponse.self)
     }
 
-    /// 获取 Nginx 状态
-    public func statusRetrieve() async throws -> NginxStatusResponse? {
-        return try await client.get(ApiPaths.backendPath("/nginx/status"), responseType: NginxStatusResponse.self)
+    /// Retrieve Nginx status
+    public func statusRetrieve() async throws -> StatusRetrieveResponse? {
+        return try await client.get(ApiPaths.backendPath("/nginx/status"), responseType: StatusRetrieveResponse.self)
     }
 
     private struct PathParameterSpec {

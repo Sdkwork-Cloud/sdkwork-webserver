@@ -26,7 +26,7 @@ client.setAccessToken("your-access-token")
 // Use the SDK
 let params: [String: Any] = [
     "page": 1,
-    "pageSize": 2
+    "page_size": 2
 ]
 let result = try await client.certificate.certificatesList(params: params)
 print(result)
@@ -67,8 +67,9 @@ client.setHeader("X-Custom-Header", value: "value")
 // 获取站点列表
 let params: [String: Any] = [
     "page": 1,
-    "pageSize": 2,
+    "page_size": 2,
     "status": 0,
+    "applicationType": "WEB",
     "siteType": 1,
     "keyword": "keyword"
 ]
@@ -83,7 +84,7 @@ print(result)
 let siteId = "1"
 let params: [String: Any] = [
     "page": 1,
-    "pageSize": 2
+    "page_size": 2
 ]
 let result = try await client.domain.sitesDomainsList(siteId: siteId, params: params)
 print(result)
@@ -96,7 +97,7 @@ print(result)
 let siteId = "1"
 let params: [String: Any] = [
     "page": 1,
-    "pageSize": 2,
+    "page_size": 2,
     "status": 0
 ]
 let result = try await client.deployment.sitesDeploymentsList(siteId: siteId, params: params)
@@ -121,7 +122,7 @@ print(result)
 // 获取证书列表
 let params: [String: Any] = [
     "page": 1,
-    "pageSize": 2
+    "page_size": 2
 ]
 let result = try await client.certificate.certificatesList(params: params)
 print(result)
@@ -142,7 +143,7 @@ print(result)
 do {
     let params: [String: Any] = [
         "page": 1,
-        "pageSize": 2
+        "page_size": 2
     ]
     try await client.certificate.certificatesList(params: params)
 } catch {

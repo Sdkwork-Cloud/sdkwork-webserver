@@ -3,7 +3,7 @@ use std::sync::Arc;
 use crate::api::paths::app_path;
 use crate::api::paths::append_query_string;
 use crate::http::{SdkworkError, SdkworkHttpClient};
-use crate::models::{CreateSiteRequest, SitePage, SiteResponse, UpdateSiteRequest};
+use crate::models::{CreateSiteRequest, SiteResponse, UpdateSiteRequest};
 
 #[derive(Clone)]
 pub struct SiteApi {
@@ -16,11 +16,12 @@ impl SiteApi {
     }
 
     /// 获取站点列表
-    pub async fn sites_list(&self, page: Option<i64>, page_size: Option<i64>, status: Option<i64>, site_type: Option<i64>, keyword: Option<&str>) -> Result<SitePage, SdkworkError> {
+    pub async fn sites_list(&self, page: Option<i64>, page_size: Option<i64>, status: Option<i64>, application_type: Option<&str>, site_type: Option<i64>, keyword: Option<&str>) -> Result<serde_json::Value, SdkworkError> {
         let query = build_query_string(&[
             QueryParameterSpec::new("page", page, "form", true, false, None),
             QueryParameterSpec::new("page_size", page_size, "form", true, false, None),
             QueryParameterSpec::new("status", status, "form", true, false, None),
+            QueryParameterSpec::new("applicationType", application_type, "form", true, false, None),
             QueryParameterSpec::new("siteType", site_type, "form", true, false, None),
             QueryParameterSpec::new("keyword", keyword, "form", true, false, None),
         ]);

@@ -12,7 +12,7 @@ class CertificateApi {
   CertificateApi(this._client);
 
   /// 获取证书列表
-  Future<CertificatePage?> certificatesList([int? page, int? pageSize]) async {
+  Future<CertificatesListResponse?> certificatesList([int? page, int? pageSize]) async {
     final query = buildQueryString([
       QueryParameterSpec('page', page, 'form', true, false, null),
       QueryParameterSpec('page_size', pageSize, 'form', true, false, null)
@@ -20,17 +20,17 @@ class CertificateApi {
     final response = await _client.get(ApiPaths.appendQueryString(ApiPaths.appPath('/certificates'), query));
     return (() {
       final map = sdkworkResponseAsMap(response);
-      return map == null ? null : CertificatePage.fromJson(map);
+      return map == null ? null : CertificatesListResponse.fromJson(map);
     })();
   }
 
   /// 申请证书
-  Future<CertificateResponse?> certificatesCreate(CreateCertificateRequest body) async {
+  Future<CertificatesCreateResponse201?> certificatesCreate(CreateCertificateRequest body) async {
     final payload = body.toJson();
     final response = await _client.post(ApiPaths.appPath('/certificates'), body: payload, contentType: 'application/json');
     return (() {
       final map = sdkworkResponseAsMap(response);
-      return map == null ? null : CertificateResponse.fromJson(map);
+      return map == null ? null : CertificatesCreateResponse201.fromJson(map);
     })();
   }
 }

@@ -17,23 +17,23 @@ func NewMonitorApi(client *sdkhttp.Client) *MonitorApi {
 }
 
 // 获取健康检查配置
-func (a *MonitorApi) SitesHealthChecksList(siteId string) (sdktypes.HealthCheckPage, error) {
+func (a *MonitorApi) SitesHealthChecksList(siteId string) (sdktypes.SitesHealthChecksListResponse, error) {
     raw, err := a.client.Get(AppApiPath(fmt.Sprintf("/sites/%s/health_checks", SerializePathParameter(siteId, PathParameterSpec{Name: "siteId", Style: "simple", Explode: false}))), nil, nil)
     if err != nil {
-        var zero sdktypes.HealthCheckPage
+        var zero sdktypes.SitesHealthChecksListResponse
         return zero, err
     }
-    return decodeResult[sdktypes.HealthCheckPage](raw)
+    return decodeResult[sdktypes.SitesHealthChecksListResponse](raw)
 }
 
 // 创建健康检查
-func (a *MonitorApi) SitesHealthChecksCreate(siteId string, body sdktypes.CreateHealthCheckRequest) (sdktypes.HealthCheckResponse, error) {
+func (a *MonitorApi) SitesHealthChecksCreate(siteId string, body sdktypes.CreateHealthCheckRequest) (sdktypes.SitesHealthChecksCreateResponse201, error) {
     raw, err := a.client.Post(AppApiPath(fmt.Sprintf("/sites/%s/health_checks", SerializePathParameter(siteId, PathParameterSpec{Name: "siteId", Style: "simple", Explode: false}))), body, nil, nil, "application/json")
     if err != nil {
-        var zero sdktypes.HealthCheckResponse
+        var zero sdktypes.SitesHealthChecksCreateResponse201
         return zero, err
     }
-    return decodeResult[sdktypes.HealthCheckResponse](raw)
+    return decodeResult[sdktypes.SitesHealthChecksCreateResponse201](raw)
 }
 
 type PathParameterSpec struct {

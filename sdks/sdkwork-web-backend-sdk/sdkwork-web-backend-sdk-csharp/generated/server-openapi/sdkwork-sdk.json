@@ -5,6 +5,8 @@
   "language": "csharp",
   "sdkType": "backend",
   "packageName": "SDKWork.Web.BackendSdk",
+  "transportPackageName": "SDKWork.Web.BackendSdk",
+  "consumerPackageName": "SDKWork.Web.BackendSdk",
   "generator": "@sdkwork/sdk-generator",
   "capabilities": {
     "supportsGeneratedTests": true,

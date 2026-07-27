@@ -1,5 +1,5 @@
 import { customApiPath } from './paths';
-import type { HttpClient } from '../http/client';
+import type { ApiRequestOptions, HttpClient } from '../http/client';
 
 import type { CreateRuntimeObservationRequest, GenerationString, PublishRuntimeAssignmentRequest, RuntimeAssignment, RuntimeAssignmentDelivery, RuntimeEnvironment, RuntimeObservation, Sha256 } from '../types';
 
@@ -13,8 +13,8 @@ export class RuntimeRuntimeAssignmentsObservationsLatestApi {
 
 
 /** Retrieve the latest authenticated Web Node runtime-set observation */
-  async retrieve(snapshotUuid: string): Promise<RuntimeObservation> {
-    return this.client.get<RuntimeObservation>(customApiPath(`/web/runtime_assignments/${serializePathParameter(snapshotUuid, { name: 'snapshotUuid', style: 'simple', explode: false })}/observations/latest`));
+  async retrieve(snapshotUuid: string, requestOptions?: ApiRequestOptions): Promise<RuntimeObservation> {
+    return this.client.request<RuntimeObservation>(customApiPath(`/web/runtime_assignments/${serializePathParameter(snapshotUuid, { name: 'snapshotUuid', style: 'simple', explode: false })}/observations/latest`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any });
   }
 }
 
@@ -29,8 +29,8 @@ export class RuntimeRuntimeAssignmentsObservationsApi {
 
 
 /** Record a Web Node runtime-set observation */
-  async create(snapshotUuid: string, body: CreateRuntimeObservationRequest): Promise<RuntimeObservation> {
-    return this.client.post<RuntimeObservation>(customApiPath(`/web/runtime_assignments/${serializePathParameter(snapshotUuid, { name: 'snapshotUuid', style: 'simple', explode: false })}/observations`), body, undefined, undefined, 'application/json');
+  async create(snapshotUuid: string, body: CreateRuntimeObservationRequest, requestOptions?: ApiRequestOptions): Promise<RuntimeObservation> {
+    return this.client.request<RuntimeObservation>(customApiPath(`/web/runtime_assignments/${serializePathParameter(snapshotUuid, { name: 'snapshotUuid', style: 'simple', explode: false })}/observations`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, body, contentType: 'application/json' });
   }
 }
 
@@ -49,13 +49,13 @@ export class RuntimeRuntimeAssignmentsCurrentApi {
 
 
 /** Retrieve the authenticated Web Node's current desired runtime-set */
-  async retrieve(params: RuntimeRuntimeAssignmentsCurrentRetrieveParams): Promise<RuntimeAssignmentDelivery> {
+  async retrieve(params: RuntimeRuntimeAssignmentsCurrentRetrieveParams, requestOptions?: ApiRequestOptions): Promise<RuntimeAssignmentDelivery> {
     const query = buildQueryString([
       { name: 'environment', value: params.environment, style: 'form', explode: true, allowReserved: false },
       { name: 'ifGeneration', value: params.ifGeneration, style: 'form', explode: true, allowReserved: false },
       { name: 'ifSnapshotSha256', value: params.ifSnapshotSha256, style: 'form', explode: true, allowReserved: false },
     ]);
-    return this.client.get<RuntimeAssignmentDelivery>(appendQueryString(customApiPath(`/web/runtime_assignments/current`), query));
+    return this.client.request<RuntimeAssignmentDelivery>(appendQueryString(customApiPath(`/web/runtime_assignments/current`), query), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any });
   }
 }
 
@@ -72,17 +72,17 @@ export class RuntimeRuntimeAssignmentsApi {
 
 
 /** Publish the desired runtime-set for a Web Node */
-  async update(nodeUuid: string, environment: RuntimeEnvironment, body: PublishRuntimeAssignmentRequest): Promise<RuntimeAssignment> {
-    return this.client.put<RuntimeAssignment>(customApiPath(`/web/runtime_assignments/${serializePathParameter(nodeUuid, { name: 'nodeUuid', style: 'simple', explode: false })}/${serializePathParameter(environment, { name: 'environment', style: 'simple', explode: false })}`), body, undefined, undefined, 'application/json');
+  async update(nodeUuid: string, environment: RuntimeEnvironment, body: PublishRuntimeAssignmentRequest, requestOptions?: ApiRequestOptions): Promise<RuntimeAssignment> {
+    return this.client.request<RuntimeAssignment>(customApiPath(`/web/runtime_assignments/${serializePathParameter(nodeUuid, { name: 'nodeUuid', style: 'simple', explode: false })}/${serializePathParameter(environment, { name: 'environment', style: 'simple', explode: false })}`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'PUT' as any, body, contentType: 'application/json' });
   }
 }
 
 export class RuntimeApi {
-
+  private client: HttpClient;
   public readonly runtimeAssignments: RuntimeRuntimeAssignmentsApi;
 
   constructor(client: HttpClient) {
-
+    this.client = client;
     this.runtimeAssignments = new RuntimeRuntimeAssignmentsApi(client);
   }
 

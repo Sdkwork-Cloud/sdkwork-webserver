@@ -9,13 +9,20 @@
     "protocol": "http",
     "packageName": "SDKWork.Web.BackendSdk"
   },
-  "changeFingerprint": "719027e8933590df853d7c91bffbdeb5b3ba846880487352b99ed44d199cd896",
+  "changeFingerprint": "25df68eda5349de014f37372ec2810d7e3d62fb953a0aa130b0897cc8e8ded89",
   "changes": {
-    "createdGeneratedFiles": [
+    "createdGeneratedFiles": [],
+    "updatedGeneratedFiles": [],
+    "unchangedGeneratedFiles": [
       "Api/AgentApi.cs",
       "Api/Api.cs",
       "Api/ApiPaths.cs",
+      "Api/ApplicationApi.cs",
+      "Api/ApplicationDeploymentApi.cs",
+      "Api/ApplicationDomainApi.cs",
       "Api/AuditApi.cs",
+      "Api/CertificateApi.cs",
+      "Api/CertificateDistributionApi.cs",
       "Api/NginxApi.cs",
       "Api/ServerApi.cs",
       "bin/publish-core.mjs",
@@ -29,168 +36,101 @@
       "Models/AgentHeartbeatResponse.cs",
       "Models/AgentNginxConfigBundle.cs",
       "Models/AgentSyncResponse.cs",
+      "Models/ApplicationDeploymentResponse.cs",
+      "Models/ApplicationDomainResponse.cs",
+      "Models/ApplicationDomainVerifyResponse.cs",
+      "Models/ApplicationResponse.cs",
+      "Models/ApplicationsCreateResponse201.cs",
+      "Models/ApplicationsDeploymentsCreateResponse201.cs",
+      "Models/ApplicationsDeploymentsListResponse.cs",
+      "Models/ApplicationsDomainsCreateResponse201.cs",
+      "Models/ApplicationsDomainsListResponse.cs",
+      "Models/ApplicationsDomainsVerifyResponse.cs",
+      "Models/ApplicationsListResponse.cs",
       "Models/AuditLogPage.cs",
       "Models/AuditLogResponse.cs",
+      "Models/AuditLogsListResponse.cs",
+      "Models/CertificateDistributionResponse.cs",
+      "Models/CertificateResponse.cs",
+      "Models/CertificatesCreateResponse201.cs",
+      "Models/CertificatesDistributionListResponse.cs",
+      "Models/CertificatesListResponse.cs",
+      "Models/CertificatesRenewResponse.cs",
+      "Models/CertificatesUpdateResponse.cs",
+      "Models/ConfigsCreateResponse201.cs",
+      "Models/ConfigsDeployResponse.cs",
+      "Models/ConfigsListResponse.cs",
+      "Models/ConfigsRetrieveResponse.cs",
+      "Models/ConfigsUpdateResponse.cs",
+      "Models/ConfigsValidateResponse.cs",
+      "Models/CreateApplicationDeploymentRequest.cs",
+      "Models/CreateApplicationDomainRequest.cs",
+      "Models/CreateApplicationRequest.cs",
+      "Models/CreateCertificateRequest.cs",
       "Models/CreateNginxConfigRequest.cs",
       "Models/CreateServerRequest.cs",
       "Models/CreateServerResponse.cs",
+      "Models/FieldError.cs",
+      "Models/HeartbeatResponse.cs",
       "Models/NginxConfigPage.cs",
       "Models/NginxConfigResponse.cs",
       "Models/NginxDeployResponse.cs",
       "Models/NginxReloadResponse.cs",
       "Models/NginxStatusResponse.cs",
       "Models/NginxValidateResponse.cs",
+      "Models/PageInfo.cs",
       "Models/ProblemDetail.cs",
+      "Models/ReloadResponse.cs",
+      "Models/RetrieveResponse.cs",
+      "Models/SdkWorkApiResponse.cs",
+      "Models/SdkWorkCommandData.cs",
+      "Models/SdkWorkCommandResponse.cs",
+      "Models/SdkWorkListResponse.cs",
+      "Models/SdkWorkPageData.cs",
+      "Models/SdkWorkResourceData.cs",
+      "Models/SdkWorkResourceResponse.cs",
       "Models/ServerPage.cs",
       "Models/ServerResponse.cs",
+      "Models/ServersCreateResponse201.cs",
+      "Models/ServersListResponse.cs",
+      "Models/StatusRetrieveResponse.cs",
+      "Models/UpdateCertificateRequest.cs",
       "Models/UpdateNginxConfigRequest.cs",
       "README.md",
       "sdkwork-sdk.json",
       "SDKWork.Web.BackendSdk.csproj",
       "SdkworkBackendClient.cs"
     ],
-    "updatedGeneratedFiles": [],
-    "unchangedGeneratedFiles": [],
     "deletedGeneratedFiles": [],
-    "scaffoldedFiles": [
+    "scaffoldedFiles": [],
+    "preservedScaffoldFiles": [
       "custom/README.md"
     ],
-    "preservedScaffoldFiles": [],
     "backedUpFiles": []
   },
   "impact": {
     "schemaVersion": 1,
-    "areas": [
-      "api-surface",
-      "models",
-      "runtime",
-      "build-metadata",
-      "publish-workflow",
-      "documentation",
-      "custom-scaffold",
-      "unknown"
-    ],
-    "details": [
-      {
-        "area": "api-surface",
-        "paths": [
-          "Api/AgentApi.cs",
-          "Api/Api.cs",
-          "Api/ApiPaths.cs",
-          "Api/AuditApi.cs",
-          "Api/NginxApi.cs",
-          "Api/ServerApi.cs",
-          "SdkworkBackendClient.cs"
-        ]
-      },
-      {
-        "area": "models",
-        "paths": [
-          "Models/AgentCertificateBundle.cs",
-          "Models/AgentHeartbeatRequest.cs",
-          "Models/AgentHeartbeatResponse.cs",
-          "Models/AgentNginxConfigBundle.cs",
-          "Models/AgentSyncResponse.cs",
-          "Models/AuditLogPage.cs",
-          "Models/AuditLogResponse.cs",
-          "Models/CreateNginxConfigRequest.cs",
-          "Models/CreateServerRequest.cs",
-          "Models/CreateServerResponse.cs",
-          "Models/NginxConfigPage.cs",
-          "Models/NginxConfigResponse.cs",
-          "Models/NginxDeployResponse.cs",
-          "Models/NginxReloadResponse.cs",
-          "Models/NginxStatusResponse.cs",
-          "Models/NginxValidateResponse.cs",
-          "Models/ProblemDetail.cs",
-          "Models/ServerPage.cs",
-          "Models/ServerResponse.cs",
-          "Models/UpdateNginxConfigRequest.cs"
-        ]
-      },
-      {
-        "area": "runtime",
-        "paths": [
-          "Http/HttpClient.cs"
-        ]
-      },
-      {
-        "area": "build-metadata",
-        "paths": [
-          "sdkwork-sdk.json",
-          "SDKWork.Web.BackendSdk.csproj"
-        ]
-      },
-      {
-        "area": "publish-workflow",
-        "paths": [
-          "bin/publish-core.mjs",
-          "bin/publish.ps1",
-          "bin/publish.sh"
-        ]
-      },
-      {
-        "area": "documentation",
-        "paths": [
-          "CHANGELOG.md",
-          "custom/README.md",
-          "README.md"
-        ]
-      },
-      {
-        "area": "custom-scaffold",
-        "paths": [
-          "custom/README.md"
-        ]
-      },
-      {
-        "area": "unknown",
-        "paths": [
-          "LICENSE"
-        ]
-      }
-    ],
-    "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, models, runtime, build-metadata, publish-workflow, documentation, custom-scaffold, unknown. Verification is required."
+    "areas": [],
+    "details": [],
+    "requiresVerification": false,
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
   },
   "verificationPlan": {
-    "shouldRun": true,
-    "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, models, runtime, build-metadata, publish-workflow, documentation, custom-scaffold, unknown. Verification is required. Run the required verification commands now against the generated SDK output.",
-    "steps": [
-      {
-        "id": "check",
-        "title": "Unified package check",
-        "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, runtime, build-metadata, publish-workflow, documentation, custom-scaffold, unknown.",
-        "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-csharp\\generated\\server-openapi",
-        "command": "node",
-        "args": [
-          "./bin/publish-core.mjs",
-          "--language",
-          "csharp",
-          "--project-dir",
-          ".",
-          "--action",
-          "check"
-        ],
-        "displayCommand": "node ./bin/publish-core.mjs --language csharp --project-dir . --action check"
-      }
-    ]
+    "shouldRun": false,
+    "runPhase": "skip",
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
+    "steps": []
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "high",
-    "nextAction": "verify",
+    "riskLevel": "low",
+    "nextAction": "skip",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
-    "summary": "Changes have been applied. Run the required verification plan now.",
+    "summary": "No actionable changes were detected. No apply or verification step is required.",
     "reasons": [
-      "manual-review-required",
-      "preserved-legacy-files",
-      "unknown-impact",
-      "verification-required"
+      "no-actionable-changes"
     ]
   },
-  "preservedLegacyFiles": true
+  "preservedLegacyFiles": false
 }

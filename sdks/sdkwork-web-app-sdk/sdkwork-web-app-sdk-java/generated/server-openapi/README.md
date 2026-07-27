@@ -39,8 +39,8 @@ client.setAccessToken("your-access-token");
         // Use the SDK
         Map<String, Object> params = new LinkedHashMap<>();
         params.put("page", 1);
-        params.put("pageSize", 2);
-        CertificatePage result = client.getCertificate().certificatesList(params);
+        params.put("page_size", 2);
+        CertificatesListResponse result = client.getCertificate().certificatesList(params);
         System.out.println(result);
     }
 }
@@ -81,11 +81,12 @@ client.getHttpClient().setHeader("X-Custom-Header", "value");
 // 获取站点列表
 Map<String, Object> params = new LinkedHashMap<>();
 params.put("page", 1);
-params.put("pageSize", 2);
+params.put("page_size", 2);
 params.put("status", 0);
+params.put("applicationType", "WEB");
 params.put("siteType", 1);
 params.put("keyword", "keyword");
-SitePage result = client.getSite().sitesList(params);
+SitesListResponse result = client.getSite().sitesList(params);
 System.out.println(result);
 ```
 
@@ -96,8 +97,8 @@ System.out.println(result);
 String siteId = "1";
 Map<String, Object> params = new LinkedHashMap<>();
 params.put("page", 1);
-params.put("pageSize", 2);
-DomainPage result = client.getDomain().sitesDomainsList(siteId, params);
+params.put("page_size", 2);
+SitesDomainsListResponse result = client.getDomain().sitesDomainsList(siteId, params);
 System.out.println(result);
 ```
 
@@ -108,9 +109,9 @@ System.out.println(result);
 String siteId = "1";
 Map<String, Object> params = new LinkedHashMap<>();
 params.put("page", 1);
-params.put("pageSize", 2);
+params.put("page_size", 2);
 params.put("status", 0);
-DeploymentPage result = client.getDeployment().sitesDeploymentsList(siteId, params);
+SitesDeploymentsListResponse result = client.getDeployment().sitesDeploymentsList(siteId, params);
 System.out.println(result);
 ```
 
@@ -121,7 +122,7 @@ System.out.println(result);
 String siteId = "1";
 Map<String, Object> params = new LinkedHashMap<>();
 params.put("environment", "environment");
-EnvVariablePage result = client.getEnvVariable().sitesEnvVariablesList(siteId, params);
+SitesEnvVariablesListResponse result = client.getEnvVariable().sitesEnvVariablesList(siteId, params);
 System.out.println(result);
 ```
 
@@ -131,8 +132,8 @@ System.out.println(result);
 // 获取证书列表
 Map<String, Object> params = new LinkedHashMap<>();
 params.put("page", 1);
-params.put("pageSize", 2);
-CertificatePage result = client.getCertificate().certificatesList(params);
+params.put("page_size", 2);
+CertificatesListResponse result = client.getCertificate().certificatesList(params);
 System.out.println(result);
 ```
 
@@ -141,7 +142,7 @@ System.out.println(result);
 ```java
 // 获取健康检查配置
 String siteId = "1";
-HealthCheckPage result = client.getMonitor().sitesHealthChecksList(siteId);
+SitesHealthChecksListResponse result = client.getMonitor().sitesHealthChecksList(siteId);
 System.out.println(result);
 ```
 
@@ -151,8 +152,8 @@ System.out.println(result);
 try {
     Map<String, Object> params = new LinkedHashMap<>();
     params.put("page", 1);
-    params.put("pageSize", 2);
-    CertificatePage result = client.getCertificate().certificatesList(params);
+    params.put("page_size", 2);
+    CertificatesListResponse result = client.getCertificate().certificatesList(params);
     System.out.println(result);
 } catch (Exception e) {
     System.err.println("Error: " + e.getMessage());

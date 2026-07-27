@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use crate::api::paths::app_path;
 use crate::http::{SdkworkError, SdkworkHttpClient};
-use crate::models::{CreateHealthCheckRequest, HealthCheckPage, HealthCheckResponse};
+use crate::models::{CreateHealthCheckRequest, HealthCheckResponse};
 
 #[derive(Clone)]
 pub struct MonitorApi {
@@ -15,7 +15,7 @@ impl MonitorApi {
     }
 
     /// 获取健康检查配置
-    pub async fn sites_health_checks_list(&self, site_id: &str) -> Result<HealthCheckPage, SdkworkError> {
+    pub async fn sites_health_checks_list(&self, site_id: &str) -> Result<serde_json::Value, SdkworkError> {
         let path = app_path(&format!("/sites/{}/health_checks", serialize_path_parameter(site_id, PathParameterSpec::new("siteId", "simple", false))));
         self.client.get(&path, None, None).await
     }

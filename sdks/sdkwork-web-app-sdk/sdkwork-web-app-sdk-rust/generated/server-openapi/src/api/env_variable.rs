@@ -3,7 +3,7 @@ use std::sync::Arc;
 use crate::api::paths::app_path;
 use crate::api::paths::append_query_string;
 use crate::http::{SdkworkError, SdkworkHttpClient};
-use crate::models::{CreateEnvVariableRequest, EnvVariablePage, EnvVariableResponse};
+use crate::models::{CreateEnvVariableRequest, EnvVariableResponse};
 
 #[derive(Clone)]
 pub struct EnvVariableApi {
@@ -16,7 +16,7 @@ impl EnvVariableApi {
     }
 
     /// 获取环境变量列表
-    pub async fn sites_env_variables_list(&self, site_id: &str, environment: Option<&str>) -> Result<EnvVariablePage, SdkworkError> {
+    pub async fn sites_env_variables_list(&self, site_id: &str, environment: Option<&str>) -> Result<serde_json::Value, SdkworkError> {
         let query = build_query_string(&[
             QueryParameterSpec::new("environment", environment, "form", true, false, None),
         ]);

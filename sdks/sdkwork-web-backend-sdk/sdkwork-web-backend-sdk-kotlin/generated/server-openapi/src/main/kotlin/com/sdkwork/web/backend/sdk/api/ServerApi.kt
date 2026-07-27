@@ -8,20 +8,20 @@ import com.sdkwork.web.backend.sdk.http.HttpClient
 
 class ServerApi(private val client: HttpClient) {
 
-    /** 获取服务器列表 */
-    suspend fun serversList(page: Int? = null, pageSize: Int? = null): ServerPage? {
+    /** List managed servers */
+    suspend fun serversList(page: Int? = null, pageSize: Int? = null): ServersListResponse? {
         val query = buildQueryString(listOf(
             QueryParameterSpec("page", page, "form", true, false, null),
             QueryParameterSpec("page_size", pageSize, "form", true, false, null)
         ))
         val raw = client.get(ApiPaths.appendQueryString(ApiPaths.backendPath("/servers"), query))
-        return client.convertValue(raw, object : TypeReference<ServerPage>() {})
+        return client.convertValue(raw, object : TypeReference<ServersListResponse>() {})
     }
 
-    /** 注册服务器 */
-    suspend fun serversCreate(body: CreateServerRequest): CreateServerResponse? {
+    /** Register a managed server */
+    suspend fun serversCreate(body: CreateServerRequest): ServersCreateResponse201? {
         val raw = client.post(ApiPaths.backendPath("/servers"), body, null, null, "application/json")
-        return client.convertValue(raw, object : TypeReference<CreateServerResponse>() {})
+        return client.convertValue(raw, object : TypeReference<ServersCreateResponse201>() {})
     }
 
 

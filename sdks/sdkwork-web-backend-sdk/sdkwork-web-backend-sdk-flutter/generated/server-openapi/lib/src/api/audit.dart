@@ -11,8 +11,8 @@ class AuditApi {
 
   AuditApi(this._client);
 
-  /// 获取审计日志列表
-  Future<AuditLogPage?> logsList([int? page, int? pageSize, String? targetType, String? action, String? operatorId, String? startDate, String? endDate]) async {
+  /// List audit logs
+  Future<AuditLogsListResponse?> logsList([int? page, int? pageSize, String? targetType, String? action, String? operatorId, String? startDate, String? endDate]) async {
     final query = buildQueryString([
       QueryParameterSpec('page', page, 'form', true, false, null),
       QueryParameterSpec('page_size', pageSize, 'form', true, false, null),
@@ -25,7 +25,7 @@ class AuditApi {
     final response = await _client.get(ApiPaths.appendQueryString(ApiPaths.backendPath('/audit_logs'), query));
     return (() {
       final map = sdkworkResponseAsMap(response);
-      return map == null ? null : AuditLogPage.fromJson(map);
+      return map == null ? null : AuditLogsListResponse.fromJson(map);
     })();
   }
 }

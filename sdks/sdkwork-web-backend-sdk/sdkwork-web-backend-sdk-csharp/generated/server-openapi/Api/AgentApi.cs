@@ -16,23 +16,23 @@ namespace SDKWork.Web.BackendSdk.Api
         }
 
         /// <summary>
-        /// 边缘节点心跳
+        /// Report an edge-agent heartbeat
         /// </summary>
-        public async Task<SDKWork.Web.BackendSdk.Models.AgentHeartbeatResponse?> HeartbeatAsync(SDKWork.Web.BackendSdk.Models.AgentHeartbeatRequest body)
+        public async Task<SDKWork.Web.BackendSdk.Models.HeartbeatResponse?> HeartbeatAsync(SDKWork.Web.BackendSdk.Models.AgentHeartbeatRequest body)
         {
-            return await _client.PostAsync<SDKWork.Web.BackendSdk.Models.AgentHeartbeatResponse>(ApiPaths.BackendPath("/agent/heartbeat"), body, null, null, "application/json");
+            return await _client.PostAsync<SDKWork.Web.BackendSdk.Models.HeartbeatResponse>(ApiPaths.BackendPath("/agent/heartbeat"), body, null, null, "application/json");
         }
 
         /// <summary>
-        /// 拉取 nginx 配置与证书 bundle
+        /// Retrieve the Nginx configuration and certificate bundle
         /// </summary>
-        public async Task<SDKWork.Web.BackendSdk.Models.AgentSyncResponse?> SyncAsync(string? ifSyncVersion = null)
+        public async Task<SDKWork.Web.BackendSdk.Models.RetrieveResponse?> RetrieveAsync(string? ifSyncVersion = null)
         {
             var queryString = BuildQueryString(new[]
             {
                 new QueryParameterSpec("ifSyncVersion", ifSyncVersion, "form", true, false, null),
             });
-            return await _client.GetAsync<SDKWork.Web.BackendSdk.Models.AgentSyncResponse>(ApiPaths.AppendQueryString(ApiPaths.BackendPath("/agent/sync"), queryString));
+            return await _client.GetAsync<SDKWork.Web.BackendSdk.Models.RetrieveResponse>(ApiPaths.AppendQueryString(ApiPaths.BackendPath("/agent/sync"), queryString));
         }
 
 

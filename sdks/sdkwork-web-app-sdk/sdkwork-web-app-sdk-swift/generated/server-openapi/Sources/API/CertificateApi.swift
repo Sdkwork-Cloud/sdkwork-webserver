@@ -8,17 +8,17 @@ public class CertificateApi {
     }
 
     /// 获取证书列表
-    public func certificatesList(page: Int? = nil, pageSize: Int? = nil) async throws -> CertificatePage? {
+    public func certificatesList(page: Int? = nil, pageSize: Int? = nil) async throws -> CertificatesListResponse? {
         let query = buildQueryString([
             QueryParameterSpec(name: "page", value: page, style: "form", explode: true, allowReserved: false, contentType: nil),
             QueryParameterSpec(name: "page_size", value: pageSize, style: "form", explode: true, allowReserved: false, contentType: nil)
         ])
-        return try await client.get(ApiPaths.appendQueryString(ApiPaths.appPath("/certificates"), query), responseType: CertificatePage.self)
+        return try await client.get(ApiPaths.appendQueryString(ApiPaths.appPath("/certificates"), query), responseType: CertificatesListResponse.self)
     }
 
     /// 申请证书
-    public func certificatesCreate(body: CreateCertificateRequest) async throws -> CertificateResponse? {
-        return try await client.post(ApiPaths.appPath("/certificates"), body: body, params: nil, headers: nil, contentType: "application/json", responseType: CertificateResponse.self)
+    public func certificatesCreate(body: CreateCertificateRequest) async throws -> CertificatesCreateResponse201? {
+        return try await client.post(ApiPaths.appPath("/certificates"), body: body, params: nil, headers: nil, contentType: "application/json", responseType: CertificatesCreateResponse201.self)
     }
 
 

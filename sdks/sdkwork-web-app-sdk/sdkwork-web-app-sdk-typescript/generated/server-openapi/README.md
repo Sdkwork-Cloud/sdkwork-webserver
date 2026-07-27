@@ -75,6 +75,7 @@ const params = {
   page: 1,
   page_size: 2,
   status: 0,
+  applicationType: 'WEB',
   siteType: 1,
   keyword: 'keyword',
 };

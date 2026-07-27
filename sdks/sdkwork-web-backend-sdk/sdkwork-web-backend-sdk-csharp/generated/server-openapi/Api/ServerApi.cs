@@ -16,24 +16,24 @@ namespace SDKWork.Web.BackendSdk.Api
         }
 
         /// <summary>
-        /// 获取服务器列表
+        /// List managed servers
         /// </summary>
-        public async Task<SDKWork.Web.BackendSdk.Models.ServerPage?> ServersListAsync(int? page = null, int? pageSize = null)
+        public async Task<SDKWork.Web.BackendSdk.Models.ServersListResponse?> ServersListAsync(int? page = null, int? pageSize = null)
         {
             var queryString = BuildQueryString(new[]
             {
                 new QueryParameterSpec("page", page, "form", true, false, null),
                 new QueryParameterSpec("page_size", pageSize, "form", true, false, null),
             });
-            return await _client.GetAsync<SDKWork.Web.BackendSdk.Models.ServerPage>(ApiPaths.AppendQueryString(ApiPaths.BackendPath("/servers"), queryString));
+            return await _client.GetAsync<SDKWork.Web.BackendSdk.Models.ServersListResponse>(ApiPaths.AppendQueryString(ApiPaths.BackendPath("/servers"), queryString));
         }
 
         /// <summary>
-        /// 注册服务器
+        /// Register a managed server
         /// </summary>
-        public async Task<SDKWork.Web.BackendSdk.Models.CreateServerResponse?> ServersCreateAsync(SDKWork.Web.BackendSdk.Models.CreateServerRequest body)
+        public async Task<SDKWork.Web.BackendSdk.Models.ServersCreateResponse201?> ServersCreateAsync(SDKWork.Web.BackendSdk.Models.CreateServerRequest body)
         {
-            return await _client.PostAsync<SDKWork.Web.BackendSdk.Models.CreateServerResponse>(ApiPaths.BackendPath("/servers"), body, null, null, "application/json");
+            return await _client.PostAsync<SDKWork.Web.BackendSdk.Models.ServersCreateResponse201>(ApiPaths.BackendPath("/servers"), body, null, null, "application/json");
         }
 
 

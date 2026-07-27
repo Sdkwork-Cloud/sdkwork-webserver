@@ -44,23 +44,23 @@
     },
     {
       "path": "lib/src/api/certificate.dart",
-      "sha256": "ee6ba99ae3786cfc6b7861f673b334726e755f88d85f4419584e5a1eae3e3f72"
+      "sha256": "42f901f9287af26447d69a6aaea6dbd074fe66763223b5980ca0455893244135"
     },
     {
       "path": "lib/src/api/deployment.dart",
-      "sha256": "a77844fdafad3298c4427cdb234e2193e6e2bad8417a5665073ca924e2ff45c3"
+      "sha256": "0752bf8f26d648cda0191fdb7a4788338cf4b76d5334e4d61c28bb767d3c66dd"
     },
     {
       "path": "lib/src/api/domain.dart",
-      "sha256": "93e3213adeb7300f642517e2a5c8968a09194e236b7c7d6e474b8fb6ac9c6dae"
+      "sha256": "7e72d88f211afbc43996fb9ba6ae2ad2854f4bd2505f12a9114217a273b5a96a"
     },
     {
       "path": "lib/src/api/env_variable.dart",
-      "sha256": "a713fcd1afca985c80198c41e8e5a6137441f52217e298f4357bd90f7ae9ed5b"
+      "sha256": "3d7f4a2a0c666a4908a3bc8b45815a459d4d3ca56a7103b0712bc595f629f098"
     },
     {
       "path": "lib/src/api/monitor.dart",
-      "sha256": "62af891ad0bae14d302ba91bc1cc6d4003c6147191e12b79ac672abca4a231a4"
+      "sha256": "565f70357ba3cfa534cddec2c0fd04840c38e8b638cc7270f71c2df5fd5a64fc"
     },
     {
       "path": "lib/src/api/paths.dart",
@@ -72,11 +72,11 @@
     },
     {
       "path": "lib/src/api/site.dart",
-      "sha256": "12e23c9fbe61a7ee191844dc6ef575e44fea7ddc08a4f01b889f5a269dd1632c"
+      "sha256": "25f34c1504a8566a7fa39e4c518b0836db3fd3e82acd1de218dd664a4e48372a"
     },
     {
       "path": "lib/src/http/client.dart",
-      "sha256": "9984029605ea1e2e05ae5fa024e80567197d76af4853a7e8251c2e92f77b7360"
+      "sha256": "146b0e454877420723d49e87b6331cae7098dc8dc53760b0e888f16d1da4a9e5"
     },
     {
       "path": "lib/src/http/sdk_config.dart",
@@ -84,7 +84,7 @@
     },
     {
       "path": "lib/src/models.dart",
-      "sha256": "064de251e1d495f91c715ebd2370e3b2eaaee5ed2b8e0c00a5158551f229ce94"
+      "sha256": "bd212658a49d9775f16a3e55bb26285b53f758ed3a64bca1fee8bb06a27bb330"
     },
     {
       "path": "LICENSE",
@@ -96,11 +96,11 @@
     },
     {
       "path": "README.md",
-      "sha256": "8802a2226b70594fe28e2e3866e1c20842b2f24585cb0afe5e2b042d8b8c1854"
+      "sha256": "a81196aa16ba341ebff013286ec514449c8bbd5e50d94b82187a55ab9c79d8e1"
     },
     {
       "path": "sdkwork-sdk.json",
-      "sha256": "c1c969bba03bb26877f5a2d34dbc7e9b6e55d217198760df7da4c8e7466ce01c"
+      "sha256": "796575c07f6e6bcbd60e061637a939460d50af65db2b9a4ef187b9196eca6d6b"
     }
   ],
   "scaffoldFiles": [

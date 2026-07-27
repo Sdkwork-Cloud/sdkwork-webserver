@@ -7,8 +7,8 @@ public class AuditApi {
         self.client = client
     }
 
-    /// 获取审计日志列表
-    public func logsList(page: Int? = nil, pageSize: Int? = nil, targetType: String? = nil, action: String? = nil, operatorId: String? = nil, startDate: String? = nil, endDate: String? = nil) async throws -> AuditLogPage? {
+    /// List audit logs
+    public func logsList(page: Int? = nil, pageSize: Int? = nil, targetType: String? = nil, action: String? = nil, operatorId: String? = nil, startDate: String? = nil, endDate: String? = nil) async throws -> AuditLogsListResponse? {
         let query = buildQueryString([
             QueryParameterSpec(name: "page", value: page, style: "form", explode: true, allowReserved: false, contentType: nil),
             QueryParameterSpec(name: "page_size", value: pageSize, style: "form", explode: true, allowReserved: false, contentType: nil),
@@ -18,7 +18,7 @@ public class AuditApi {
             QueryParameterSpec(name: "startDate", value: startDate, style: "form", explode: true, allowReserved: false, contentType: nil),
             QueryParameterSpec(name: "endDate", value: endDate, style: "form", explode: true, allowReserved: false, contentType: nil)
         ])
-        return try await client.get(ApiPaths.appendQueryString(ApiPaths.backendPath("/audit_logs"), query), responseType: AuditLogPage.self)
+        return try await client.get(ApiPaths.appendQueryString(ApiPaths.backendPath("/audit_logs"), query), responseType: AuditLogsListResponse.self)
     }
 
 

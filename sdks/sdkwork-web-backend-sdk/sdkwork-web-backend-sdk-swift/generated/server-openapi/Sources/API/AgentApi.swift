@@ -7,17 +7,17 @@ public class AgentApi {
         self.client = client
     }
 
-    /// 边缘节点心跳
-    public func heartbeat(body: AgentHeartbeatRequest) async throws -> AgentHeartbeatResponse? {
-        return try await client.post(ApiPaths.backendPath("/agent/heartbeat"), body: body, params: nil, headers: nil, contentType: "application/json", responseType: AgentHeartbeatResponse.self)
+    /// Report an edge-agent heartbeat
+    public func heartbeat(body: AgentHeartbeatRequest) async throws -> HeartbeatResponse? {
+        return try await client.post(ApiPaths.backendPath("/agent/heartbeat"), body: body, params: nil, headers: nil, contentType: "application/json", responseType: HeartbeatResponse.self)
     }
 
-    /// 拉取 nginx 配置与证书 bundle
-    public func sync(ifSyncVersion: String? = nil) async throws -> AgentSyncResponse? {
+    /// Retrieve the Nginx configuration and certificate bundle
+    public func retrieve(ifSyncVersion: String? = nil) async throws -> RetrieveResponse? {
         let query = buildQueryString([
             QueryParameterSpec(name: "ifSyncVersion", value: ifSyncVersion, style: "form", explode: true, allowReserved: false, contentType: nil)
         ])
-        return try await client.get(ApiPaths.appendQueryString(ApiPaths.backendPath("/agent/sync"), query), responseType: AgentSyncResponse.self)
+        return try await client.get(ApiPaths.appendQueryString(ApiPaths.backendPath("/agent/sync"), query), responseType: RetrieveResponse.self)
     }
 
 

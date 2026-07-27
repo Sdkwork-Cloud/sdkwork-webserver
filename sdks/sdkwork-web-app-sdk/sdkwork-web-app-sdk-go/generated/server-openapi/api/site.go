@@ -18,50 +18,51 @@ func NewSiteApi(client *sdkhttp.Client) *SiteApi {
 }
 
 // 获取站点列表
-func (a *SiteApi) SitesList(page *int, pageSize *int, status *int, siteType *int, keyword *string) (sdktypes.SitePage, error) {
+func (a *SiteApi) SitesList(page *int, pageSize *int, status *int, applicationType *string, siteType *int, keyword *string) (sdktypes.SitesListResponse, error) {
     query := BuildQueryString([]QueryParameterSpec{
         {Name: "page", Value: func() interface{} { if page == nil { return nil }; return *page }(), Style: "form", Explode: true, AllowReserved: false},
-        {Name: "pageSize", Value: func() interface{} { if pageSize == nil { return nil }; return *pageSize }(), Style: "form", Explode: true, AllowReserved: false},
+        {Name: "page_size", Value: func() interface{} { if pageSize == nil { return nil }; return *pageSize }(), Style: "form", Explode: true, AllowReserved: false},
         {Name: "status", Value: func() interface{} { if status == nil { return nil }; return *status }(), Style: "form", Explode: true, AllowReserved: false},
+        {Name: "applicationType", Value: func() interface{} { if applicationType == nil { return nil }; return *applicationType }(), Style: "form", Explode: true, AllowReserved: false},
         {Name: "siteType", Value: func() interface{} { if siteType == nil { return nil }; return *siteType }(), Style: "form", Explode: true, AllowReserved: false},
         {Name: "keyword", Value: func() interface{} { if keyword == nil { return nil }; return *keyword }(), Style: "form", Explode: true, AllowReserved: false},
     })
     raw, err := a.client.Get(AppendQueryString(AppApiPath("/sites"), query), nil, nil)
     if err != nil {
-        var zero sdktypes.SitePage
+        var zero sdktypes.SitesListResponse
         return zero, err
     }
-    return decodeResult[sdktypes.SitePage](raw)
+    return decodeResult[sdktypes.SitesListResponse](raw)
 }
 
 // 创建站点
-func (a *SiteApi) SitesCreate(body sdktypes.CreateSiteRequest) (sdktypes.SiteResponse, error) {
+func (a *SiteApi) SitesCreate(body sdktypes.CreateSiteRequest) (sdktypes.SitesCreateResponse201, error) {
     raw, err := a.client.Post(AppApiPath("/sites"), body, nil, nil, "application/json")
     if err != nil {
-        var zero sdktypes.SiteResponse
+        var zero sdktypes.SitesCreateResponse201
         return zero, err
     }
-    return decodeResult[sdktypes.SiteResponse](raw)
+    return decodeResult[sdktypes.SitesCreateResponse201](raw)
 }
 
 // 获取站点详情
-func (a *SiteApi) SitesRetrieve(siteId string) (sdktypes.SiteResponse, error) {
+func (a *SiteApi) SitesRetrieve(siteId string) (sdktypes.SitesRetrieveResponse, error) {
     raw, err := a.client.Get(AppApiPath(fmt.Sprintf("/sites/%s", SerializePathParameter(siteId, PathParameterSpec{Name: "siteId", Style: "simple", Explode: false}))), nil, nil)
     if err != nil {
-        var zero sdktypes.SiteResponse
+        var zero sdktypes.SitesRetrieveResponse
         return zero, err
     }
-    return decodeResult[sdktypes.SiteResponse](raw)
+    return decodeResult[sdktypes.SitesRetrieveResponse](raw)
 }
 
 // 更新站点
-func (a *SiteApi) SitesUpdate(siteId string, body sdktypes.UpdateSiteRequest) (sdktypes.SiteResponse, error) {
+func (a *SiteApi) SitesUpdate(siteId string, body sdktypes.UpdateSiteRequest) (sdktypes.SitesUpdateResponse, error) {
     raw, err := a.client.Patch(AppApiPath(fmt.Sprintf("/sites/%s", SerializePathParameter(siteId, PathParameterSpec{Name: "siteId", Style: "simple", Explode: false}))), body, nil, nil, "application/json")
     if err != nil {
-        var zero sdktypes.SiteResponse
+        var zero sdktypes.SitesUpdateResponse
         return zero, err
     }
-    return decodeResult[sdktypes.SiteResponse](raw)
+    return decodeResult[sdktypes.SitesUpdateResponse](raw)
 }
 
 // 删除站点
@@ -75,23 +76,23 @@ func (a *SiteApi) SitesDelete(siteId string) (struct{}, error) {
 }
 
 // 激活站点
-func (a *SiteApi) SitesActivate(siteId string) (sdktypes.SiteResponse, error) {
+func (a *SiteApi) SitesActivate(siteId string) (sdktypes.SitesActivateResponse, error) {
     raw, err := a.client.Post(AppApiPath(fmt.Sprintf("/sites/%s/activate", SerializePathParameter(siteId, PathParameterSpec{Name: "siteId", Style: "simple", Explode: false}))), nil, nil, nil, "")
     if err != nil {
-        var zero sdktypes.SiteResponse
+        var zero sdktypes.SitesActivateResponse
         return zero, err
     }
-    return decodeResult[sdktypes.SiteResponse](raw)
+    return decodeResult[sdktypes.SitesActivateResponse](raw)
 }
 
 // 暂停站点
-func (a *SiteApi) SitesPause(siteId string) (sdktypes.SiteResponse, error) {
+func (a *SiteApi) SitesPause(siteId string) (sdktypes.SitesPauseResponse, error) {
     raw, err := a.client.Post(AppApiPath(fmt.Sprintf("/sites/%s/pause", SerializePathParameter(siteId, PathParameterSpec{Name: "siteId", Style: "simple", Explode: false}))), nil, nil, nil, "")
     if err != nil {
-        var zero sdktypes.SiteResponse
+        var zero sdktypes.SitesPauseResponse
         return zero, err
     }
-    return decodeResult[sdktypes.SiteResponse](raw)
+    return decodeResult[sdktypes.SitesPauseResponse](raw)
 }
 
 type PathParameterSpec struct {

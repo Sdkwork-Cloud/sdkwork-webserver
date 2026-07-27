@@ -9,19 +9,19 @@ import com.sdkwork.web.app.sdk.http.HttpClient
 class CertificateApi(private val client: HttpClient) {
 
     /** 获取证书列表 */
-    suspend fun certificatesList(page: Int? = null, pageSize: Int? = null): CertificatePage? {
+    suspend fun certificatesList(page: Int? = null, pageSize: Int? = null): CertificatesListResponse? {
         val query = buildQueryString(listOf(
             QueryParameterSpec("page", page, "form", true, false, null),
             QueryParameterSpec("page_size", pageSize, "form", true, false, null)
         ))
         val raw = client.get(ApiPaths.appendQueryString(ApiPaths.appPath("/certificates"), query))
-        return client.convertValue(raw, object : TypeReference<CertificatePage>() {})
+        return client.convertValue(raw, object : TypeReference<CertificatesListResponse>() {})
     }
 
     /** 申请证书 */
-    suspend fun certificatesCreate(body: CreateCertificateRequest): CertificateResponse? {
+    suspend fun certificatesCreate(body: CreateCertificateRequest): CertificatesCreateResponse201? {
         val raw = client.post(ApiPaths.appPath("/certificates"), body, null, null, "application/json")
-        return client.convertValue(raw, object : TypeReference<CertificateResponse>() {})
+        return client.convertValue(raw, object : TypeReference<CertificatesCreateResponse201>() {})
     }
 
 

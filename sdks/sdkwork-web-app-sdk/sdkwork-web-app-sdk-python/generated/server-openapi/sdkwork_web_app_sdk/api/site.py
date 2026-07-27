@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional
 from ..http_client import HttpClient
-from ..models import CreateSiteRequest, SitePage, SiteResponse, UpdateSiteRequest
+from ..models import CreateSiteRequest, SitesActivateResponse, SitesCreateResponse201, SitesListResponse, SitesPauseResponse, SitesRetrieveResponse, SitesUpdateResponse, UpdateSiteRequest
 
 def _append_query_string(path: str, raw_query_string: str) -> str:
     query = raw_query_string.lstrip('?')
@@ -191,26 +191,27 @@ class SiteApi:
         self._client = client
 
 
-    def list(self, page: Optional[int] = None, page_size: Optional[int] = None, status: Optional[int] = None, site_type: Optional[int] = None, keyword: Optional[str] = None) -> SitePage:
+    def list(self, page: Optional[int] = None, page_size: Optional[int] = None, status: Optional[int] = None, application_type: Optional[str] = None, site_type: Optional[int] = None, keyword: Optional[str] = None) -> SitesListResponse:
         """获取站点列表"""
         query = build_query_string([
             {'name': 'page', 'value': page, 'style': 'form', 'explode': True, 'allow_reserved': False},
             {'name': 'page_size', 'value': page_size, 'style': 'form', 'explode': True, 'allow_reserved': False},
             {'name': 'status', 'value': status, 'style': 'form', 'explode': True, 'allow_reserved': False},
+            {'name': 'applicationType', 'value': application_type, 'style': 'form', 'explode': True, 'allow_reserved': False},
             {'name': 'siteType', 'value': site_type, 'style': 'form', 'explode': True, 'allow_reserved': False},
             {'name': 'keyword', 'value': keyword, 'style': 'form', 'explode': True, 'allow_reserved': False},
         ])
         return self._client.get(_append_query_string(f"/app/v3/api/sites", query))
 
-    def create(self, body: CreateSiteRequest) -> SiteResponse:
+    def create(self, body: CreateSiteRequest) -> SitesCreateResponse201:
         """创建站点"""
         return self._client.post(f"/app/v3/api/sites", json=body)
 
-    def retrieve(self, site_id: str) -> SiteResponse:
+    def retrieve(self, site_id: str) -> SitesRetrieveResponse:
         """获取站点详情"""
         return self._client.get(f"/app/v3/api/sites/{serialize_path_parameter(site_id, {'name': 'siteId', 'style': 'simple', 'explode': False})}")
 
-    def update(self, site_id: str, body: UpdateSiteRequest) -> SiteResponse:
+    def update(self, site_id: str, body: UpdateSiteRequest) -> SitesUpdateResponse:
         """更新站点"""
         return self._client.patch(f"/app/v3/api/sites/{serialize_path_parameter(site_id, {'name': 'siteId', 'style': 'simple', 'explode': False})}", json=body)
 
@@ -218,10 +219,10 @@ class SiteApi:
         """删除站点"""
         return self._client.delete(f"/app/v3/api/sites/{serialize_path_parameter(site_id, {'name': 'siteId', 'style': 'simple', 'explode': False})}")
 
-    def create_activate(self, site_id: str) -> SiteResponse:
+    def create_activate(self, site_id: str) -> SitesActivateResponse:
         """激活站点"""
         return self._client.post(f"/app/v3/api/sites/{serialize_path_parameter(site_id, {'name': 'siteId', 'style': 'simple', 'explode': False})}/activate")
 
-    def pause(self, site_id: str) -> SiteResponse:
+    def pause(self, site_id: str) -> SitesPauseResponse:
         """暂停站点"""
         return self._client.post(f"/app/v3/api/sites/{serialize_path_parameter(site_id, {'name': 'siteId', 'style': 'simple', 'explode': False})}/pause")

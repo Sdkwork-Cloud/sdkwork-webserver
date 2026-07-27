@@ -18,21 +18,21 @@ namespace SDKWork.Web.AppSdk.Api
         /// <summary>
         /// 获取环境变量列表
         /// </summary>
-        public async Task<SDKWork.Web.AppSdk.Models.EnvVariablePage?> SitesEnvVariablesListAsync(string siteId, string? environment = null)
+        public async Task<SDKWork.Web.AppSdk.Models.SitesEnvVariablesListResponse?> SitesEnvVariablesListAsync(string siteId, string? environment = null)
         {
             var queryString = BuildQueryString(new[]
             {
                 new QueryParameterSpec("environment", environment, "form", true, false, null),
             });
-            return await _client.GetAsync<SDKWork.Web.AppSdk.Models.EnvVariablePage>(ApiPaths.AppendQueryString(ApiPaths.AppPath($"/sites/{SerializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false))}/env_variables"), queryString));
+            return await _client.GetAsync<SDKWork.Web.AppSdk.Models.SitesEnvVariablesListResponse>(ApiPaths.AppendQueryString(ApiPaths.AppPath($"/sites/{SerializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false))}/env_variables"), queryString));
         }
 
         /// <summary>
         /// 创建环境变量
         /// </summary>
-        public async Task<SDKWork.Web.AppSdk.Models.EnvVariableResponse?> SitesEnvVariablesCreateAsync(string siteId, SDKWork.Web.AppSdk.Models.CreateEnvVariableRequest body)
+        public async Task<SDKWork.Web.AppSdk.Models.SitesEnvVariablesCreateResponse201?> SitesEnvVariablesCreateAsync(string siteId, SDKWork.Web.AppSdk.Models.CreateEnvVariableRequest body)
         {
-            return await _client.PostAsync<SDKWork.Web.AppSdk.Models.EnvVariableResponse>(ApiPaths.AppPath($"/sites/{SerializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false))}/env_variables"), body, null, null, "application/json");
+            return await _client.PostAsync<SDKWork.Web.AppSdk.Models.SitesEnvVariablesCreateResponse201>(ApiPaths.AppPath($"/sites/{SerializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false))}/env_variables"), body, null, null, "application/json");
         }
 
         private sealed record PathParameterSpec(string Name, string Style, bool Explode);

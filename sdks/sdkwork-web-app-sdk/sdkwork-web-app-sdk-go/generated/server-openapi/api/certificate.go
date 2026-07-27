@@ -18,27 +18,27 @@ func NewCertificateApi(client *sdkhttp.Client) *CertificateApi {
 }
 
 // 获取证书列表
-func (a *CertificateApi) CertificatesList(page *int, pageSize *int) (sdktypes.CertificatePage, error) {
+func (a *CertificateApi) CertificatesList(page *int, pageSize *int) (sdktypes.CertificatesListResponse, error) {
     query := BuildQueryString([]QueryParameterSpec{
         {Name: "page", Value: func() interface{} { if page == nil { return nil }; return *page }(), Style: "form", Explode: true, AllowReserved: false},
-        {Name: "pageSize", Value: func() interface{} { if pageSize == nil { return nil }; return *pageSize }(), Style: "form", Explode: true, AllowReserved: false},
+        {Name: "page_size", Value: func() interface{} { if pageSize == nil { return nil }; return *pageSize }(), Style: "form", Explode: true, AllowReserved: false},
     })
     raw, err := a.client.Get(AppendQueryString(AppApiPath("/certificates"), query), nil, nil)
     if err != nil {
-        var zero sdktypes.CertificatePage
+        var zero sdktypes.CertificatesListResponse
         return zero, err
     }
-    return decodeResult[sdktypes.CertificatePage](raw)
+    return decodeResult[sdktypes.CertificatesListResponse](raw)
 }
 
 // 申请证书
-func (a *CertificateApi) CertificatesCreate(body sdktypes.CreateCertificateRequest) (sdktypes.CertificateResponse, error) {
+func (a *CertificateApi) CertificatesCreate(body sdktypes.CreateCertificateRequest) (sdktypes.CertificatesCreateResponse201, error) {
     raw, err := a.client.Post(AppApiPath("/certificates"), body, nil, nil, "application/json")
     if err != nil {
-        var zero sdktypes.CertificateResponse
+        var zero sdktypes.CertificatesCreateResponse201
         return zero, err
     }
-    return decodeResult[sdktypes.CertificateResponse](raw)
+    return decodeResult[sdktypes.CertificatesCreateResponse201](raw)
 }
 
 

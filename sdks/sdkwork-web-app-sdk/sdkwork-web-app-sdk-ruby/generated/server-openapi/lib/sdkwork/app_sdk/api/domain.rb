@@ -1,8 +1,9 @@
 require_relative 'base_api'
 require_relative '../models/create_domain_request'
-require_relative '../models/domain_page'
-require_relative '../models/domain_response'
-require_relative '../models/domain_verify_response'
+require_relative '../models/sites_domains_create_response201'
+require_relative '../models/sites_domains_list_response'
+require_relative '../models/sites_domains_retrieve_response'
+require_relative '../models/sites_domains_verify_response'
 
 module Sdkwork
   module AppSdk
@@ -13,13 +14,13 @@ module Sdkwork
             path = interpolate_path('/app/v3/api/sites/{siteId}/domains', siteId: serialize_path_parameter(site_id, PathParameterSpec.new('siteId', 'simple', false)))
             query = build_query_string([
               QueryParameterSpec.new('page', page, 'form', true, false, nil),
-              QueryParameterSpec.new('pageSize', page_size, 'form', true, false, nil),
+              QueryParameterSpec.new('page_size', page_size, 'form', true, false, nil),
             ])
             path = append_query_string(path, query)
             options = {}
 
             result = @client.request('GET', path, **options)
-            result.is_a?(Hash) ? Models::DomainPage.from_hash(result) : nil
+            result.is_a?(Hash) ? Models::SitesDomainsListResponse.from_hash(result) : nil
           end
 
           # 绑定域名
@@ -29,7 +30,7 @@ module Sdkwork
             options = {}
             options[:json] = payload unless payload.nil?
             result = @client.request('POST', path, **options)
-            result.is_a?(Hash) ? Models::DomainResponse.from_hash(result) : nil
+            result.is_a?(Hash) ? Models::SitesDomainsCreateResponse201.from_hash(result) : nil
           end
 
           # 获取域名详情
@@ -38,7 +39,7 @@ module Sdkwork
             options = {}
 
             result = @client.request('GET', path, **options)
-            result.is_a?(Hash) ? Models::DomainResponse.from_hash(result) : nil
+            result.is_a?(Hash) ? Models::SitesDomainsRetrieveResponse.from_hash(result) : nil
           end
 
           # 解绑域名
@@ -56,7 +57,7 @@ module Sdkwork
             options = {}
 
             result = @client.request('POST', path, **options)
-            result.is_a?(Hash) ? Models::DomainVerifyResponse.from_hash(result) : nil
+            result.is_a?(Hash) ? Models::SitesDomainsVerifyResponse.from_hash(result) : nil
           end
 
       end

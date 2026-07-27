@@ -6,16 +6,20 @@ public struct ProblemDetail: Codable {
     public let status: Int?
     public let detail: String?
     public let instance: String?
-    public let requestId: String?
+    public let code: Int?
+    public let traceId: String?
+    public let errors: [FieldError]?
 
 
-    public init(type: String? = nil, title: String? = nil, status: Int? = nil, detail: String? = nil, instance: String? = nil, requestId: String? = nil) {
+    public init(type: String? = nil, title: String? = nil, status: Int? = nil, detail: String? = nil, instance: String? = nil, code: Int? = nil, traceId: String? = nil, errors: [FieldError]? = nil) {
         self.type = type
         self.title = title
         self.status = status
         self.detail = detail
         self.instance = instance
-        self.requestId = requestId
+        self.code = code
+        self.traceId = traceId
+        self.errors = errors
     }
 }
 
@@ -23,14 +27,16 @@ public struct CreateSiteRequest: Codable {
     public let name: String?
     public let slug: String?
     public let description: String?
+    public let applicationType: String?
     public let siteType: Int?
     public let runtimeConfig: [String: Any]?
 
 
-    public init(name: String? = nil, slug: String? = nil, description: String? = nil, siteType: Int? = nil, runtimeConfig: [String: Any]? = nil) {
+    public init(name: String? = nil, slug: String? = nil, description: String? = nil, applicationType: String? = nil, siteType: Int? = nil, runtimeConfig: [String: Any]? = nil) {
         self.name = name
         self.slug = slug
         self.description = description
+        self.applicationType = applicationType
         self.siteType = siteType
         self.runtimeConfig = runtimeConfig
     }
@@ -54,6 +60,7 @@ public struct SiteResponse: Codable {
     public let name: String?
     public let slug: String?
     public let description: String?
+    public let applicationType: String?
     public let siteType: Int?
     public let status: Int?
     public let runtimeConfig: [String: Any]?
@@ -61,11 +68,12 @@ public struct SiteResponse: Codable {
     public let updatedAt: String?
 
 
-    public init(id: String? = nil, name: String? = nil, slug: String? = nil, description: String? = nil, siteType: Int? = nil, status: Int? = nil, runtimeConfig: [String: Any]? = nil, createdAt: String? = nil, updatedAt: String? = nil) {
+    public init(id: String? = nil, name: String? = nil, slug: String? = nil, description: String? = nil, applicationType: String? = nil, siteType: Int? = nil, status: Int? = nil, runtimeConfig: [String: Any]? = nil, createdAt: String? = nil, updatedAt: String? = nil) {
         self.id = id
         self.name = name
         self.slug = slug
         self.description = description
+        self.applicationType = applicationType
         self.siteType = siteType
         self.status = status
         self.runtimeConfig = runtimeConfig
@@ -342,5 +350,384 @@ public struct HealthCheckPage: Codable {
     public init(items: [HealthCheckResponse]? = nil, total: String? = nil) {
         self.items = items
         self.total = total
+    }
+}
+
+public struct SdkWorkApiResponse: Codable {
+    public let code: Int?
+    public let data: Any?
+    public let traceId: String?
+
+
+    public init(code: Int? = nil, data: Any? = nil, traceId: String? = nil) {
+        self.code = code
+        self.data = data
+        self.traceId = traceId
+    }
+}
+
+public struct SdkWorkResourceData: Codable {
+    public let item: [String: Any]?
+
+
+    public init(item: [String: Any]? = nil) {
+        self.item = item
+    }
+}
+
+public struct SdkWorkPageData: Codable {
+    public let items: [[String: Any]]?
+    public let pageInfo: PageInfo?
+
+
+    public init(items: [[String: Any]]? = nil, pageInfo: PageInfo? = nil) {
+        self.items = items
+        self.pageInfo = pageInfo
+    }
+}
+
+public struct SdkWorkCommandData: Codable {
+    public let accepted: Bool?
+    public let resourceId: String?
+    public let status: String?
+
+
+    public init(accepted: Bool? = nil, resourceId: String? = nil, status: String? = nil) {
+        self.accepted = accepted
+        self.resourceId = resourceId
+        self.status = status
+    }
+}
+
+public struct PageInfo: Codable {
+    public let mode: String?
+    public let page: Int?
+    public let pageSize: Int?
+    public let totalItems: String?
+    public let totalPages: Int?
+    public let nextCursor: String?
+    public let hasMore: Bool?
+
+
+    public init(mode: String? = nil, page: Int? = nil, pageSize: Int? = nil, totalItems: String? = nil, totalPages: Int? = nil, nextCursor: String? = nil, hasMore: Bool? = nil) {
+        self.mode = mode
+        self.page = page
+        self.pageSize = pageSize
+        self.totalItems = totalItems
+        self.totalPages = totalPages
+        self.nextCursor = nextCursor
+        self.hasMore = hasMore
+    }
+}
+
+public struct FieldError: Codable {
+    public let field: String?
+    public let message: String?
+    public let code: Int?
+
+
+    public init(field: String? = nil, message: String? = nil, code: Int? = nil) {
+        self.field = field
+        self.message = message
+        self.code = code
+    }
+}
+
+public struct SdkWorkResourceResponse: Codable {
+    public let code: Int?
+    public let data: Any?
+    public let traceId: String?
+
+
+    public init(code: Int? = nil, data: Any? = nil, traceId: String? = nil) {
+        self.code = code
+        self.data = data
+        self.traceId = traceId
+    }
+}
+
+public struct SdkWorkListResponse: Codable {
+    public let code: Int?
+    public let data: Any?
+    public let traceId: String?
+
+
+    public init(code: Int? = nil, data: Any? = nil, traceId: String? = nil) {
+        self.code = code
+        self.data = data
+        self.traceId = traceId
+    }
+}
+
+public struct SdkWorkCommandResponse: Codable {
+    public let code: Int?
+    public let data: Any?
+    public let traceId: String?
+
+
+    public init(code: Int? = nil, data: Any? = nil, traceId: String? = nil) {
+        self.code = code
+        self.data = data
+        self.traceId = traceId
+    }
+}
+
+public struct SitesListResponse: Codable {
+    public let code: Int?
+    public let data: Any?
+    public let traceId: String?
+
+
+    public init(code: Int? = nil, data: Any? = nil, traceId: String? = nil) {
+        self.code = code
+        self.data = data
+        self.traceId = traceId
+    }
+}
+
+public struct SitesCreateResponse201: Codable {
+    public let code: Int?
+    public let data: Any?
+    public let traceId: String?
+
+
+    public init(code: Int? = nil, data: Any? = nil, traceId: String? = nil) {
+        self.code = code
+        self.data = data
+        self.traceId = traceId
+    }
+}
+
+public struct SitesRetrieveResponse: Codable {
+    public let code: Int?
+    public let data: Any?
+    public let traceId: String?
+
+
+    public init(code: Int? = nil, data: Any? = nil, traceId: String? = nil) {
+        self.code = code
+        self.data = data
+        self.traceId = traceId
+    }
+}
+
+public struct SitesUpdateResponse: Codable {
+    public let code: Int?
+    public let data: Any?
+    public let traceId: String?
+
+
+    public init(code: Int? = nil, data: Any? = nil, traceId: String? = nil) {
+        self.code = code
+        self.data = data
+        self.traceId = traceId
+    }
+}
+
+public struct SitesActivateResponse: Codable {
+    public let code: Int?
+    public let data: Any?
+    public let traceId: String?
+
+
+    public init(code: Int? = nil, data: Any? = nil, traceId: String? = nil) {
+        self.code = code
+        self.data = data
+        self.traceId = traceId
+    }
+}
+
+public struct SitesPauseResponse: Codable {
+    public let code: Int?
+    public let data: Any?
+    public let traceId: String?
+
+
+    public init(code: Int? = nil, data: Any? = nil, traceId: String? = nil) {
+        self.code = code
+        self.data = data
+        self.traceId = traceId
+    }
+}
+
+public struct SitesDomainsListResponse: Codable {
+    public let code: Int?
+    public let data: Any?
+    public let traceId: String?
+
+
+    public init(code: Int? = nil, data: Any? = nil, traceId: String? = nil) {
+        self.code = code
+        self.data = data
+        self.traceId = traceId
+    }
+}
+
+public struct SitesDomainsCreateResponse201: Codable {
+    public let code: Int?
+    public let data: Any?
+    public let traceId: String?
+
+
+    public init(code: Int? = nil, data: Any? = nil, traceId: String? = nil) {
+        self.code = code
+        self.data = data
+        self.traceId = traceId
+    }
+}
+
+public struct SitesDomainsRetrieveResponse: Codable {
+    public let code: Int?
+    public let data: Any?
+    public let traceId: String?
+
+
+    public init(code: Int? = nil, data: Any? = nil, traceId: String? = nil) {
+        self.code = code
+        self.data = data
+        self.traceId = traceId
+    }
+}
+
+public struct SitesDomainsVerifyResponse: Codable {
+    public let code: Int?
+    public let data: Any?
+    public let traceId: String?
+
+
+    public init(code: Int? = nil, data: Any? = nil, traceId: String? = nil) {
+        self.code = code
+        self.data = data
+        self.traceId = traceId
+    }
+}
+
+public struct SitesDeploymentsListResponse: Codable {
+    public let code: Int?
+    public let data: Any?
+    public let traceId: String?
+
+
+    public init(code: Int? = nil, data: Any? = nil, traceId: String? = nil) {
+        self.code = code
+        self.data = data
+        self.traceId = traceId
+    }
+}
+
+public struct SitesDeploymentsCreateResponse201: Codable {
+    public let code: Int?
+    public let data: Any?
+    public let traceId: String?
+
+
+    public init(code: Int? = nil, data: Any? = nil, traceId: String? = nil) {
+        self.code = code
+        self.data = data
+        self.traceId = traceId
+    }
+}
+
+public struct SitesDeploymentsRetrieveResponse: Codable {
+    public let code: Int?
+    public let data: Any?
+    public let traceId: String?
+
+
+    public init(code: Int? = nil, data: Any? = nil, traceId: String? = nil) {
+        self.code = code
+        self.data = data
+        self.traceId = traceId
+    }
+}
+
+public struct SitesDeploymentsRollbackResponse: Codable {
+    public let code: Int?
+    public let data: Any?
+    public let traceId: String?
+
+
+    public init(code: Int? = nil, data: Any? = nil, traceId: String? = nil) {
+        self.code = code
+        self.data = data
+        self.traceId = traceId
+    }
+}
+
+public struct SitesEnvVariablesListResponse: Codable {
+    public let code: Int?
+    public let data: Any?
+    public let traceId: String?
+
+
+    public init(code: Int? = nil, data: Any? = nil, traceId: String? = nil) {
+        self.code = code
+        self.data = data
+        self.traceId = traceId
+    }
+}
+
+public struct SitesEnvVariablesCreateResponse201: Codable {
+    public let code: Int?
+    public let data: Any?
+    public let traceId: String?
+
+
+    public init(code: Int? = nil, data: Any? = nil, traceId: String? = nil) {
+        self.code = code
+        self.data = data
+        self.traceId = traceId
+    }
+}
+
+public struct CertificatesListResponse: Codable {
+    public let code: Int?
+    public let data: Any?
+    public let traceId: String?
+
+
+    public init(code: Int? = nil, data: Any? = nil, traceId: String? = nil) {
+        self.code = code
+        self.data = data
+        self.traceId = traceId
+    }
+}
+
+public struct CertificatesCreateResponse201: Codable {
+    public let code: Int?
+    public let data: Any?
+    public let traceId: String?
+
+
+    public init(code: Int? = nil, data: Any? = nil, traceId: String? = nil) {
+        self.code = code
+        self.data = data
+        self.traceId = traceId
+    }
+}
+
+public struct SitesHealthChecksListResponse: Codable {
+    public let code: Int?
+    public let data: Any?
+    public let traceId: String?
+
+
+    public init(code: Int? = nil, data: Any? = nil, traceId: String? = nil) {
+        self.code = code
+        self.data = data
+        self.traceId = traceId
+    }
+}
+
+public struct SitesHealthChecksCreateResponse201: Codable {
+    public let code: Int?
+    public let data: Any?
+    public let traceId: String?
+
+
+    public init(code: Int? = nil, data: Any? = nil, traceId: String? = nil) {
+        self.code = code
+        self.data = data
+        self.traceId = traceId
     }
 }

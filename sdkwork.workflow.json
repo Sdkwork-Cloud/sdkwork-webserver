@@ -89,7 +89,7 @@
       {
         "name": "Build web API server",
         "shell": "pwsh",
-        "run": "cargo build --workspace --release"
+        "run": "node scripts/build.mjs --release"
       }
     ],
     "package": [

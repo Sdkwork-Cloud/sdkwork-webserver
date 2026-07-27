@@ -9,32 +9,32 @@ import com.sdkwork.web.app.sdk.http.HttpClient
 class DeploymentApi(private val client: HttpClient) {
 
     /** 获取部署历史 */
-    suspend fun sitesDeploymentsList(siteId: String, page: Int? = null, pageSize: Int? = null, status: Int? = null): DeploymentPage? {
+    suspend fun sitesDeploymentsList(siteId: String, page: Int? = null, pageSize: Int? = null, status: Int? = null): SitesDeploymentsListResponse? {
         val query = buildQueryString(listOf(
             QueryParameterSpec("page", page, "form", true, false, null),
             QueryParameterSpec("page_size", pageSize, "form", true, false, null),
             QueryParameterSpec("status", status, "form", true, false, null)
         ))
         val raw = client.get(ApiPaths.appendQueryString(ApiPaths.appPath("/sites/${serializePathParameter(siteId, PathParameterSpec("siteId", "simple", false))}/deployments"), query))
-        return client.convertValue(raw, object : TypeReference<DeploymentPage>() {})
+        return client.convertValue(raw, object : TypeReference<SitesDeploymentsListResponse>() {})
     }
 
     /** 发起部署 */
-    suspend fun sitesDeploymentsCreate(siteId: String, body: CreateDeploymentRequest): DeploymentResponse? {
+    suspend fun sitesDeploymentsCreate(siteId: String, body: CreateDeploymentRequest): SitesDeploymentsCreateResponse201? {
         val raw = client.post(ApiPaths.appPath("/sites/${serializePathParameter(siteId, PathParameterSpec("siteId", "simple", false))}/deployments"), body, null, null, "application/json")
-        return client.convertValue(raw, object : TypeReference<DeploymentResponse>() {})
+        return client.convertValue(raw, object : TypeReference<SitesDeploymentsCreateResponse201>() {})
     }
 
     /** 获取部署详情 */
-    suspend fun sitesDeploymentsRetrieve(siteId: String, deploymentId: String): DeploymentResponse? {
+    suspend fun sitesDeploymentsRetrieve(siteId: String, deploymentId: String): SitesDeploymentsRetrieveResponse? {
         val raw = client.get(ApiPaths.appPath("/sites/${serializePathParameter(siteId, PathParameterSpec("siteId", "simple", false))}/deployments/${serializePathParameter(deploymentId, PathParameterSpec("deploymentId", "simple", false))}"))
-        return client.convertValue(raw, object : TypeReference<DeploymentResponse>() {})
+        return client.convertValue(raw, object : TypeReference<SitesDeploymentsRetrieveResponse>() {})
     }
 
     /** 回滚部署 */
-    suspend fun sitesDeploymentsRollback(siteId: String, deploymentId: String): DeploymentResponse? {
+    suspend fun sitesDeploymentsRollback(siteId: String, deploymentId: String): SitesDeploymentsRollbackResponse? {
         val raw = client.post(ApiPaths.appPath("/sites/${serializePathParameter(siteId, PathParameterSpec("siteId", "simple", false))}/deployments/${serializePathParameter(deploymentId, PathParameterSpec("deploymentId", "simple", false))}/rollback"), null)
-        return client.convertValue(raw, object : TypeReference<DeploymentResponse>() {})
+        return client.convertValue(raw, object : TypeReference<SitesDeploymentsRollbackResponse>() {})
     }
 
     private data class PathParameterSpec(val name: String, val style: String, val explode: Boolean)

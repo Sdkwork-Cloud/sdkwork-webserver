@@ -9,25 +9,25 @@ import com.sdkwork.web.app.sdk.http.HttpClient
 class DomainApi(private val client: HttpClient) {
 
     /** 获取站点域名列表 */
-    suspend fun sitesDomainsList(siteId: String, page: Int? = null, pageSize: Int? = null): DomainPage? {
+    suspend fun sitesDomainsList(siteId: String, page: Int? = null, pageSize: Int? = null): SitesDomainsListResponse? {
         val query = buildQueryString(listOf(
             QueryParameterSpec("page", page, "form", true, false, null),
             QueryParameterSpec("page_size", pageSize, "form", true, false, null)
         ))
         val raw = client.get(ApiPaths.appendQueryString(ApiPaths.appPath("/sites/${serializePathParameter(siteId, PathParameterSpec("siteId", "simple", false))}/domains"), query))
-        return client.convertValue(raw, object : TypeReference<DomainPage>() {})
+        return client.convertValue(raw, object : TypeReference<SitesDomainsListResponse>() {})
     }
 
     /** 绑定域名 */
-    suspend fun sitesDomainsCreate(siteId: String, body: CreateDomainRequest): DomainResponse? {
+    suspend fun sitesDomainsCreate(siteId: String, body: CreateDomainRequest): SitesDomainsCreateResponse201? {
         val raw = client.post(ApiPaths.appPath("/sites/${serializePathParameter(siteId, PathParameterSpec("siteId", "simple", false))}/domains"), body, null, null, "application/json")
-        return client.convertValue(raw, object : TypeReference<DomainResponse>() {})
+        return client.convertValue(raw, object : TypeReference<SitesDomainsCreateResponse201>() {})
     }
 
     /** 获取域名详情 */
-    suspend fun sitesDomainsRetrieve(siteId: String, domainId: String): DomainResponse? {
+    suspend fun sitesDomainsRetrieve(siteId: String, domainId: String): SitesDomainsRetrieveResponse? {
         val raw = client.get(ApiPaths.appPath("/sites/${serializePathParameter(siteId, PathParameterSpec("siteId", "simple", false))}/domains/${serializePathParameter(domainId, PathParameterSpec("domainId", "simple", false))}"))
-        return client.convertValue(raw, object : TypeReference<DomainResponse>() {})
+        return client.convertValue(raw, object : TypeReference<SitesDomainsRetrieveResponse>() {})
     }
 
     /** 解绑域名 */
@@ -36,9 +36,9 @@ class DomainApi(private val client: HttpClient) {
     }
 
     /** 验证域名所有权 */
-    suspend fun sitesDomainsVerify(siteId: String, domainId: String): DomainVerifyResponse? {
+    suspend fun sitesDomainsVerify(siteId: String, domainId: String): SitesDomainsVerifyResponse? {
         val raw = client.post(ApiPaths.appPath("/sites/${serializePathParameter(siteId, PathParameterSpec("siteId", "simple", false))}/domains/${serializePathParameter(domainId, PathParameterSpec("domainId", "simple", false))}/verify"), null)
-        return client.convertValue(raw, object : TypeReference<DomainVerifyResponse>() {})
+        return client.convertValue(raw, object : TypeReference<SitesDomainsVerifyResponse>() {})
     }
 
     private data class PathParameterSpec(val name: String, val style: String, val explode: Boolean)

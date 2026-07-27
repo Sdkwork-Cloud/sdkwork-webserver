@@ -12,6 +12,8 @@ final class CreateSiteRequest
 
     public ?string $description = null;
 
+    public ?string $applicationType = null;
+
     public ?int $siteType = null;
 
     public array $runtimeConfig = [];
@@ -26,6 +28,9 @@ final class CreateSiteRequest
             : null;
         $this->description = array_key_exists('description', $data)
             ? $data['description']
+            : null;
+        $this->applicationType = array_key_exists('applicationType', $data)
+            ? $data['applicationType']
             : null;
         $this->siteType = array_key_exists('siteType', $data)
             ? $data['siteType']
@@ -46,6 +51,7 @@ final class CreateSiteRequest
             'name' => $this->name,
             'slug' => $this->slug,
             'description' => $this->description,
+            'applicationType' => $this->applicationType,
             'siteType' => $this->siteType,
             'runtimeConfig' => $this->runtimeConfig,
         ];

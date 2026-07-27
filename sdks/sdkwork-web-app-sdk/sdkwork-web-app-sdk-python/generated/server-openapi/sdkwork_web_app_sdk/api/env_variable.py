@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional
 from ..http_client import HttpClient
-from ..models import CreateEnvVariableRequest, EnvVariablePage, EnvVariableResponse
+from ..models import CreateEnvVariableRequest, SitesEnvVariablesCreateResponse201, SitesEnvVariablesListResponse
 
 def _append_query_string(path: str, raw_query_string: str) -> str:
     query = raw_query_string.lstrip('?')
@@ -207,13 +207,13 @@ class EnvVariableSitesEnvVariablesApi:
         self._client = client
 
 
-    def list(self, site_id: str, environment: Optional[str] = None) -> EnvVariablePage:
+    def list(self, site_id: str, environment: Optional[str] = None) -> SitesEnvVariablesListResponse:
         """获取环境变量列表"""
         query = build_query_string([
             {'name': 'environment', 'value': environment, 'style': 'form', 'explode': True, 'allow_reserved': False},
         ])
         return self._client.get(_append_query_string(f"/app/v3/api/sites/{serialize_path_parameter(site_id, {'name': 'siteId', 'style': 'simple', 'explode': False})}/env_variables", query))
 
-    def create(self, site_id: str, body: CreateEnvVariableRequest) -> EnvVariableResponse:
+    def create(self, site_id: str, body: CreateEnvVariableRequest) -> SitesEnvVariablesCreateResponse201:
         """创建环境变量"""
         return self._client.post(f"/app/v3/api/sites/{serialize_path_parameter(site_id, {'name': 'siteId', 'style': 'simple', 'explode': False})}/env_variables", json=body)

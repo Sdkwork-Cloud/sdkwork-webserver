@@ -12,7 +12,7 @@ class DomainApi {
   DomainApi(this._client);
 
   /// 获取站点域名列表
-  Future<DomainPage?> sitesDomainsList(String siteId, [int? page, int? pageSize]) async {
+  Future<SitesDomainsListResponse?> sitesDomainsList(String siteId, [int? page, int? pageSize]) async {
     final query = buildQueryString([
       QueryParameterSpec('page', page, 'form', true, false, null),
       QueryParameterSpec('page_size', pageSize, 'form', true, false, null)
@@ -20,26 +20,26 @@ class DomainApi {
     final response = await _client.get(ApiPaths.appendQueryString(ApiPaths.appPath('/sites/${serializePathParameter(siteId, const PathParameterSpec('siteId', 'simple', false))}/domains'), query));
     return (() {
       final map = sdkworkResponseAsMap(response);
-      return map == null ? null : DomainPage.fromJson(map);
+      return map == null ? null : SitesDomainsListResponse.fromJson(map);
     })();
   }
 
   /// 绑定域名
-  Future<DomainResponse?> sitesDomainsCreate(String siteId, CreateDomainRequest body) async {
+  Future<SitesDomainsCreateResponse201?> sitesDomainsCreate(String siteId, CreateDomainRequest body) async {
     final payload = body.toJson();
     final response = await _client.post(ApiPaths.appPath('/sites/${serializePathParameter(siteId, const PathParameterSpec('siteId', 'simple', false))}/domains'), body: payload, contentType: 'application/json');
     return (() {
       final map = sdkworkResponseAsMap(response);
-      return map == null ? null : DomainResponse.fromJson(map);
+      return map == null ? null : SitesDomainsCreateResponse201.fromJson(map);
     })();
   }
 
   /// 获取域名详情
-  Future<DomainResponse?> sitesDomainsRetrieve(String siteId, String domainId) async {
+  Future<SitesDomainsRetrieveResponse?> sitesDomainsRetrieve(String siteId, String domainId) async {
     final response = await _client.get(ApiPaths.appPath('/sites/${serializePathParameter(siteId, const PathParameterSpec('siteId', 'simple', false))}/domains/${serializePathParameter(domainId, const PathParameterSpec('domainId', 'simple', false))}'));
     return (() {
       final map = sdkworkResponseAsMap(response);
-      return map == null ? null : DomainResponse.fromJson(map);
+      return map == null ? null : SitesDomainsRetrieveResponse.fromJson(map);
     })();
   }
 
@@ -49,11 +49,11 @@ class DomainApi {
   }
 
   /// 验证域名所有权
-  Future<DomainVerifyResponse?> sitesDomainsVerify(String siteId, String domainId) async {
+  Future<SitesDomainsVerifyResponse?> sitesDomainsVerify(String siteId, String domainId) async {
     final response = await _client.post(ApiPaths.appPath('/sites/${serializePathParameter(siteId, const PathParameterSpec('siteId', 'simple', false))}/domains/${serializePathParameter(domainId, const PathParameterSpec('domainId', 'simple', false))}/verify'));
     return (() {
       final map = sdkworkResponseAsMap(response);
-      return map == null ? null : DomainVerifyResponse.fromJson(map);
+      return map == null ? null : SitesDomainsVerifyResponse.fromJson(map);
     })();
   }
 }

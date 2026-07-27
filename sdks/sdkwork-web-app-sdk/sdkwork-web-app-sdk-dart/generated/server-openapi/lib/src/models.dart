@@ -18,7 +18,9 @@ class ProblemDetail {
   final int? status;
   final String? detail;
   final String? instance;
-  final String? requestId;
+  final int? code;
+  final String? traceId;
+  final List<FieldError>? errors;
 
   ProblemDetail({
     this.type,
@@ -26,7 +28,9 @@ class ProblemDetail {
     this.status,
     this.detail,
     this.instance,
-    this.requestId
+    this.code,
+    this.traceId,
+    this.errors
   });
 
   factory ProblemDetail.fromJson(Map<String, dynamic> json) {
@@ -36,7 +40,21 @@ class ProblemDetail {
       status: json['status'] is int ? json['status'] : null,
       detail: json['detail']?.toString(),
       instance: json['instance']?.toString(),
-      requestId: json['requestId']?.toString()
+      code: json['code'] is int ? json['code'] : null,
+      traceId: json['traceId']?.toString(),
+      errors: (() {
+        final list = _sdkworkAsList(json['errors']);
+        if (list == null) {
+          return null;
+        }
+        return list
+            .map((item) => (() {
+        final map = _sdkworkAsMap(item);
+        return map == null ? null : FieldError.fromJson(map);
+      })())
+            .whereType<FieldError>()
+            .toList();
+      })()
     );
   }
 
@@ -47,7 +65,9 @@ class ProblemDetail {
       'status': status,
       'detail': detail,
       'instance': instance,
-      'requestId': requestId,
+      'code': code,
+      'traceId': traceId,
+      'errors': errors?.map((item) => item.toJson()).toList(),
     };
   }
 }
@@ -56,6 +76,7 @@ class CreateSiteRequest {
   final String? name;
   final String? slug;
   final String? description;
+  final String? applicationType;
   final int? siteType;
   final Map<String, dynamic>? runtimeConfig;
 
@@ -63,6 +84,7 @@ class CreateSiteRequest {
     this.name,
     this.slug,
     this.description,
+    this.applicationType,
     this.siteType,
     this.runtimeConfig
   });
@@ -72,6 +94,7 @@ class CreateSiteRequest {
       name: json['name']?.toString(),
       slug: json['slug']?.toString(),
       description: json['description']?.toString(),
+      applicationType: json['applicationType']?.toString(),
       siteType: json['siteType'] is int ? json['siteType'] : null,
       runtimeConfig: _sdkworkAsMap(json['runtimeConfig'])
     );
@@ -82,6 +105,7 @@ class CreateSiteRequest {
       'name': name,
       'slug': slug,
       'description': description,
+      'applicationType': applicationType,
       'siteType': siteType,
       'runtimeConfig': runtimeConfig,
     };
@@ -121,6 +145,7 @@ class SiteResponse {
   final String? name;
   final String? slug;
   final String? description;
+  final String? applicationType;
   final int? siteType;
   final int? status;
   final Map<String, dynamic>? runtimeConfig;
@@ -132,6 +157,7 @@ class SiteResponse {
     this.name,
     this.slug,
     this.description,
+    this.applicationType,
     this.siteType,
     this.status,
     this.runtimeConfig,
@@ -145,6 +171,7 @@ class SiteResponse {
       name: json['name']?.toString(),
       slug: json['slug']?.toString(),
       description: json['description']?.toString(),
+      applicationType: json['applicationType']?.toString(),
       siteType: json['siteType'] is int ? json['siteType'] : null,
       status: json['status'] is int ? json['status'] : null,
       runtimeConfig: _sdkworkAsMap(json['runtimeConfig']),
@@ -159,6 +186,7 @@ class SiteResponse {
       'name': name,
       'slug': slug,
       'description': description,
+      'applicationType': applicationType,
       'siteType': siteType,
       'status': status,
       'runtimeConfig': runtimeConfig,
@@ -812,6 +840,834 @@ class HealthCheckPage {
     return <String, dynamic>{
       'items': items?.map((item) => item.toJson()).toList(),
       'total': total,
+    };
+  }
+}
+
+class SdkWorkApiResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  SdkWorkApiResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory SdkWorkApiResponse.fromJson(Map<String, dynamic> json) {
+    return SdkWorkApiResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: json['data'],
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SdkWorkResourceData {
+  final Map<String, dynamic>? item;
+
+  SdkWorkResourceData({
+    this.item
+  });
+
+  factory SdkWorkResourceData.fromJson(Map<String, dynamic> json) {
+    return SdkWorkResourceData(
+      item: _sdkworkAsMap(json['item'])
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'item': item,
+    };
+  }
+}
+
+class SdkWorkPageData {
+  final List<Map<String, dynamic>>? items;
+  final PageInfo? pageInfo;
+
+  SdkWorkPageData({
+    this.items,
+    this.pageInfo
+  });
+
+  factory SdkWorkPageData.fromJson(Map<String, dynamic> json) {
+    return SdkWorkPageData(
+      items: (() {
+        final list = _sdkworkAsList(json['items']);
+        if (list == null) {
+          return null;
+        }
+        return list
+            .map((item) => _sdkworkAsMap(item))
+            .whereType<Map<String, dynamic>>()
+            .toList();
+      })(),
+      pageInfo: (() {
+        final map = _sdkworkAsMap(json['pageInfo']);
+        return map == null ? null : PageInfo.fromJson(map);
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'items': items?.map((item) => item).toList(),
+      'pageInfo': pageInfo?.toJson(),
+    };
+  }
+}
+
+class SdkWorkCommandData {
+  final bool? accepted;
+  final String? resourceId;
+  final String? status;
+
+  SdkWorkCommandData({
+    this.accepted,
+    this.resourceId,
+    this.status
+  });
+
+  factory SdkWorkCommandData.fromJson(Map<String, dynamic> json) {
+    return SdkWorkCommandData(
+      accepted: json['accepted'] is bool ? json['accepted'] : null,
+      resourceId: json['resourceId']?.toString(),
+      status: json['status']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'accepted': accepted,
+      'resourceId': resourceId,
+      'status': status,
+    };
+  }
+}
+
+class PageInfo {
+  final String? mode;
+  final int? page;
+  final int? pageSize;
+  final String? totalItems;
+  final int? totalPages;
+  final String? nextCursor;
+  final bool? hasMore;
+
+  PageInfo({
+    this.mode,
+    this.page,
+    this.pageSize,
+    this.totalItems,
+    this.totalPages,
+    this.nextCursor,
+    this.hasMore
+  });
+
+  factory PageInfo.fromJson(Map<String, dynamic> json) {
+    return PageInfo(
+      mode: json['mode']?.toString(),
+      page: json['page'] is int ? json['page'] : null,
+      pageSize: json['pageSize'] is int ? json['pageSize'] : null,
+      totalItems: json['totalItems']?.toString(),
+      totalPages: json['totalPages'] is int ? json['totalPages'] : null,
+      nextCursor: json['nextCursor']?.toString(),
+      hasMore: json['hasMore'] is bool ? json['hasMore'] : null
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'mode': mode,
+      'page': page,
+      'pageSize': pageSize,
+      'totalItems': totalItems,
+      'totalPages': totalPages,
+      'nextCursor': nextCursor,
+      'hasMore': hasMore,
+    };
+  }
+}
+
+class FieldError {
+  final String? field;
+  final String? message;
+  final int? code;
+
+  FieldError({
+    this.field,
+    this.message,
+    this.code
+  });
+
+  factory FieldError.fromJson(Map<String, dynamic> json) {
+    return FieldError(
+      field: json['field']?.toString(),
+      message: json['message']?.toString(),
+      code: json['code'] is int ? json['code'] : null
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'field': field,
+      'message': message,
+      'code': code,
+    };
+  }
+}
+
+class SdkWorkResourceResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  SdkWorkResourceResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory SdkWorkResourceResponse.fromJson(Map<String, dynamic> json) {
+    return SdkWorkResourceResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: json['data'],
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SdkWorkListResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  SdkWorkListResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory SdkWorkListResponse.fromJson(Map<String, dynamic> json) {
+    return SdkWorkListResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: json['data'],
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SdkWorkCommandResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  SdkWorkCommandResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory SdkWorkCommandResponse.fromJson(Map<String, dynamic> json) {
+    return SdkWorkCommandResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: json['data'],
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SitesListResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  SitesListResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory SitesListResponse.fromJson(Map<String, dynamic> json) {
+    return SitesListResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SitesCreateResponse201 {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  SitesCreateResponse201({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory SitesCreateResponse201.fromJson(Map<String, dynamic> json) {
+    return SitesCreateResponse201(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SitesRetrieveResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  SitesRetrieveResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory SitesRetrieveResponse.fromJson(Map<String, dynamic> json) {
+    return SitesRetrieveResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SitesUpdateResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  SitesUpdateResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory SitesUpdateResponse.fromJson(Map<String, dynamic> json) {
+    return SitesUpdateResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SitesActivateResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  SitesActivateResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory SitesActivateResponse.fromJson(Map<String, dynamic> json) {
+    return SitesActivateResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SitesPauseResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  SitesPauseResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory SitesPauseResponse.fromJson(Map<String, dynamic> json) {
+    return SitesPauseResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SitesDomainsListResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  SitesDomainsListResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory SitesDomainsListResponse.fromJson(Map<String, dynamic> json) {
+    return SitesDomainsListResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SitesDomainsCreateResponse201 {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  SitesDomainsCreateResponse201({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory SitesDomainsCreateResponse201.fromJson(Map<String, dynamic> json) {
+    return SitesDomainsCreateResponse201(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SitesDomainsRetrieveResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  SitesDomainsRetrieveResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory SitesDomainsRetrieveResponse.fromJson(Map<String, dynamic> json) {
+    return SitesDomainsRetrieveResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SitesDomainsVerifyResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  SitesDomainsVerifyResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory SitesDomainsVerifyResponse.fromJson(Map<String, dynamic> json) {
+    return SitesDomainsVerifyResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SitesDeploymentsListResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  SitesDeploymentsListResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory SitesDeploymentsListResponse.fromJson(Map<String, dynamic> json) {
+    return SitesDeploymentsListResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SitesDeploymentsCreateResponse201 {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  SitesDeploymentsCreateResponse201({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory SitesDeploymentsCreateResponse201.fromJson(Map<String, dynamic> json) {
+    return SitesDeploymentsCreateResponse201(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SitesDeploymentsRetrieveResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  SitesDeploymentsRetrieveResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory SitesDeploymentsRetrieveResponse.fromJson(Map<String, dynamic> json) {
+    return SitesDeploymentsRetrieveResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SitesDeploymentsRollbackResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  SitesDeploymentsRollbackResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory SitesDeploymentsRollbackResponse.fromJson(Map<String, dynamic> json) {
+    return SitesDeploymentsRollbackResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SitesEnvVariablesListResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  SitesEnvVariablesListResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory SitesEnvVariablesListResponse.fromJson(Map<String, dynamic> json) {
+    return SitesEnvVariablesListResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SitesEnvVariablesCreateResponse201 {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  SitesEnvVariablesCreateResponse201({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory SitesEnvVariablesCreateResponse201.fromJson(Map<String, dynamic> json) {
+    return SitesEnvVariablesCreateResponse201(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class CertificatesListResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  CertificatesListResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory CertificatesListResponse.fromJson(Map<String, dynamic> json) {
+    return CertificatesListResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class CertificatesCreateResponse201 {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  CertificatesCreateResponse201({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory CertificatesCreateResponse201.fromJson(Map<String, dynamic> json) {
+    return CertificatesCreateResponse201(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SitesHealthChecksListResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  SitesHealthChecksListResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory SitesHealthChecksListResponse.fromJson(Map<String, dynamic> json) {
+    return SitesHealthChecksListResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SitesHealthChecksCreateResponse201 {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  SitesHealthChecksCreateResponse201({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory SitesHealthChecksCreateResponse201.fromJson(Map<String, dynamic> json) {
+    return SitesHealthChecksCreateResponse201(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
     };
   }
 }

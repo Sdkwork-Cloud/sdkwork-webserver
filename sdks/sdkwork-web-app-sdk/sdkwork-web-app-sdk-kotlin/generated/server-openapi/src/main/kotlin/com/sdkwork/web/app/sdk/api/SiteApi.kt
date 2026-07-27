@@ -9,34 +9,35 @@ import com.sdkwork.web.app.sdk.http.HttpClient
 class SiteApi(private val client: HttpClient) {
 
     /** 获取站点列表 */
-    suspend fun sitesList(page: Int? = null, pageSize: Int? = null, status: Int? = null, siteType: Int? = null, keyword: String? = null): SitePage? {
+    suspend fun sitesList(page: Int? = null, pageSize: Int? = null, status: Int? = null, applicationType: String? = null, siteType: Int? = null, keyword: String? = null): SitesListResponse? {
         val query = buildQueryString(listOf(
             QueryParameterSpec("page", page, "form", true, false, null),
             QueryParameterSpec("page_size", pageSize, "form", true, false, null),
             QueryParameterSpec("status", status, "form", true, false, null),
+            QueryParameterSpec("applicationType", applicationType, "form", true, false, null),
             QueryParameterSpec("siteType", siteType, "form", true, false, null),
             QueryParameterSpec("keyword", keyword, "form", true, false, null)
         ))
         val raw = client.get(ApiPaths.appendQueryString(ApiPaths.appPath("/sites"), query))
-        return client.convertValue(raw, object : TypeReference<SitePage>() {})
+        return client.convertValue(raw, object : TypeReference<SitesListResponse>() {})
     }
 
     /** 创建站点 */
-    suspend fun sitesCreate(body: CreateSiteRequest): SiteResponse? {
+    suspend fun sitesCreate(body: CreateSiteRequest): SitesCreateResponse201? {
         val raw = client.post(ApiPaths.appPath("/sites"), body, null, null, "application/json")
-        return client.convertValue(raw, object : TypeReference<SiteResponse>() {})
+        return client.convertValue(raw, object : TypeReference<SitesCreateResponse201>() {})
     }
 
     /** 获取站点详情 */
-    suspend fun sitesRetrieve(siteId: String): SiteResponse? {
+    suspend fun sitesRetrieve(siteId: String): SitesRetrieveResponse? {
         val raw = client.get(ApiPaths.appPath("/sites/${serializePathParameter(siteId, PathParameterSpec("siteId", "simple", false))}"))
-        return client.convertValue(raw, object : TypeReference<SiteResponse>() {})
+        return client.convertValue(raw, object : TypeReference<SitesRetrieveResponse>() {})
     }
 
     /** 更新站点 */
-    suspend fun sitesUpdate(siteId: String, body: UpdateSiteRequest): SiteResponse? {
+    suspend fun sitesUpdate(siteId: String, body: UpdateSiteRequest): SitesUpdateResponse? {
         val raw = client.patch(ApiPaths.appPath("/sites/${serializePathParameter(siteId, PathParameterSpec("siteId", "simple", false))}"), body, null, null, "application/json")
-        return client.convertValue(raw, object : TypeReference<SiteResponse>() {})
+        return client.convertValue(raw, object : TypeReference<SitesUpdateResponse>() {})
     }
 
     /** 删除站点 */
@@ -45,15 +46,15 @@ class SiteApi(private val client: HttpClient) {
     }
 
     /** 激活站点 */
-    suspend fun sitesActivate(siteId: String): SiteResponse? {
+    suspend fun sitesActivate(siteId: String): SitesActivateResponse? {
         val raw = client.post(ApiPaths.appPath("/sites/${serializePathParameter(siteId, PathParameterSpec("siteId", "simple", false))}/activate"), null)
-        return client.convertValue(raw, object : TypeReference<SiteResponse>() {})
+        return client.convertValue(raw, object : TypeReference<SitesActivateResponse>() {})
     }
 
     /** 暂停站点 */
-    suspend fun sitesPause(siteId: String): SiteResponse? {
+    suspend fun sitesPause(siteId: String): SitesPauseResponse? {
         val raw = client.post(ApiPaths.appPath("/sites/${serializePathParameter(siteId, PathParameterSpec("siteId", "simple", false))}/pause"), null)
-        return client.convertValue(raw, object : TypeReference<SiteResponse>() {})
+        return client.convertValue(raw, object : TypeReference<SitesPauseResponse>() {})
     }
 
     private data class PathParameterSpec(val name: String, val style: String, val explode: Boolean)

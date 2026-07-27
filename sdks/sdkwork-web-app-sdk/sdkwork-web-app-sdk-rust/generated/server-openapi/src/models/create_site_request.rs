@@ -10,6 +10,10 @@ pub struct CreateSiteRequest {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
 
+    #[serde(rename = "applicationType")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub application_type: Option<String>,
+
     #[serde(rename = "siteType")]
     pub site_type: i64,
 

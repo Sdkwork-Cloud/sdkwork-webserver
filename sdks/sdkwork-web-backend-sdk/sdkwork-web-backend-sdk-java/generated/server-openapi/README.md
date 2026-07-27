@@ -35,7 +35,7 @@ public class Main {
 client.setAccessToken("your-access-token");
 
         // Use the SDK
-        NginxStatusResponse result = client.getNginx().statusRetrieve();
+        StatusRetrieveResponse result = client.getNginx().statusRetrieve();
         System.out.println(result);
     }
 }
@@ -61,6 +61,11 @@ client.getHttpClient().setHeader("X-Custom-Header", "value");
 
 ## API Modules
 
+- `client.getApplication()` - application API
+- `client.getApplicationDomain()` - application_domain API
+- `client.getApplicationDeployment()` - application_deployment API
+- `client.getCertificate()` - certificate API
+- `client.getCertificateDistribution()` - certificate_distribution API
 - `client.getNginx()` - nginx API
 - `client.getServer()` - server API
 - `client.getAgent()` - agent API
@@ -68,48 +73,110 @@ client.getHttpClient().setHeader("X-Custom-Header", "value");
 
 ## Usage Examples
 
+### application
+
+```java
+// List managed applications
+Map<String, Object> params = new LinkedHashMap<>();
+params.put("page", 1);
+params.put("page_size", 2);
+params.put("applicationType", "WEB");
+params.put("siteType", 4);
+params.put("status", 5);
+params.put("keyword", "keyword");
+ApplicationsListResponse result = client.getApplication().applicationsList(params);
+System.out.println(result);
+```
+
+### application_domain
+
+```java
+// List application domains
+String applicationId = "1";
+Map<String, Object> params = new LinkedHashMap<>();
+params.put("page", 1);
+params.put("page_size", 2);
+ApplicationsDomainsListResponse result = client.getApplicationDomain().applicationsDomainsList(applicationId, params);
+System.out.println(result);
+```
+
+### application_deployment
+
+```java
+// List application deployments
+String applicationId = "1";
+Map<String, Object> params = new LinkedHashMap<>();
+params.put("page", 1);
+params.put("page_size", 2);
+params.put("status", 3);
+ApplicationsDeploymentsListResponse result = client.getApplicationDeployment().applicationsDeploymentsList(applicationId, params);
+System.out.println(result);
+```
+
+### certificate
+
+```java
+// List canonical certificates
+Map<String, Object> params = new LinkedHashMap<>();
+params.put("page", 1);
+params.put("page_size", 2);
+CertificatesListResponse result = client.getCertificate().certificatesList(params);
+System.out.println(result);
+```
+
+### certificate_distribution
+
+```java
+// List certificate manifest convergence by server
+Map<String, Object> params = new LinkedHashMap<>();
+params.put("page", 1);
+params.put("page_size", 2);
+CertificatesDistributionListResponse result = client.getCertificateDistribution().certificatesDistributionList(params);
+System.out.println(result);
+```
+
 ### nginx
 
 ```java
-// 获取 Nginx 状态
-NginxStatusResponse result = client.getNginx().statusRetrieve();
+// Retrieve Nginx status
+StatusRetrieveResponse result = client.getNginx().statusRetrieve();
 System.out.println(result);
 ```
 
 ### server
 
 ```java
-// 获取服务器列表
+// List managed servers
 Map<String, Object> params = new LinkedHashMap<>();
 params.put("page", 1);
-params.put("pageSize", 2);
-ServerPage result = client.getServer().serversList(params);
+params.put("page_size", 2);
+ServersListResponse result = client.getServer().serversList(params);
 System.out.println(result);
 ```
 
 ### agent
 
 ```java
-// 拉取 nginx 配置与证书 bundle
+// Retrieve the Nginx configuration and certificate bundle
 Map<String, Object> params = new LinkedHashMap<>();
 params.put("ifSyncVersion", "ifsyncversion");
-AgentSyncResponse result = client.getAgent().sync(params);
+RetrieveResponse result = client.getAgent().retrieve(params);
 System.out.println(result);
 ```
 
 ### audit
 
 ```java
-// 获取审计日志列表
+// List audit logs
 Map<String, Object> params = new LinkedHashMap<>();
 params.put("page", 1);
-params.put("pageSize", 2);
+params.put("page_size", 2);
 params.put("targetType", "targettype");
 params.put("action", "action");
 params.put("operatorId", "1");
 params.put("startDate", "2026-04-10T00:00:00Z");
 params.put("endDate", "2026-04-10T00:00:00Z");
-AuditLogPage result = client.getAudit().logsList(params);
+AuditLogsListResponse result = client.getAudit().logsList(params);
 System.out.println(result);
 ```
 
@@ -117,7 +184,7 @@ System.out.println(result);
 
 ```java
 try {
-    NginxStatusResponse result = client.getNginx().statusRetrieve();
+    StatusRetrieveResponse result = client.getNginx().statusRetrieve();
     System.out.println(result);
 } catch (Exception e) {
     System.err.println("Error: " + e.getMessage());

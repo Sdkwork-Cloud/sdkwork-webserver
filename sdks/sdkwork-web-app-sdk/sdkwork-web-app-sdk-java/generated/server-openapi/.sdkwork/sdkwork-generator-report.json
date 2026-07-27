@@ -10,169 +10,37 @@
   },
   "status": "ok",
   "mode": "apply",
-  "hasChanges": true,
+  "hasChanges": false,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "eb80f6f5f6268adb18617bc1787d7da32967a558f51da83b8a5c791dd4d007fb",
+  "changeFingerprint": "b6daee0d0b6c16556c01f44559ce9e9228ca2a8a81bf4c643ae8f80cd0958216",
   "changeImpact": {
     "schemaVersion": 1,
-    "areas": [
-      "api-surface",
-      "models",
-      "runtime",
-      "build-metadata",
-      "publish-workflow",
-      "documentation",
-      "custom-scaffold",
-      "unknown"
-    ],
-    "details": [
-      {
-        "area": "api-surface",
-        "paths": [
-          "src/main/java/com/sdkwork/web/app/sdk/api/ApiPaths.java",
-          "src/main/java/com/sdkwork/web/app/sdk/api/CertificateApi.java",
-          "src/main/java/com/sdkwork/web/app/sdk/api/DeploymentApi.java",
-          "src/main/java/com/sdkwork/web/app/sdk/api/DomainApi.java",
-          "src/main/java/com/sdkwork/web/app/sdk/api/EnvVariableApi.java",
-          "src/main/java/com/sdkwork/web/app/sdk/api/MonitorApi.java",
-          "src/main/java/com/sdkwork/web/app/sdk/api/package-info.java",
-          "src/main/java/com/sdkwork/web/app/sdk/api/SiteApi.java",
-          "src/main/java/com/sdkwork/web/app/sdk/SdkworkAppClient.java"
-        ]
-      },
-      {
-        "area": "models",
-        "paths": [
-          "src/main/java/com/sdkwork/web/app/sdk/model/CertificatePage.java",
-          "src/main/java/com/sdkwork/web/app/sdk/model/CertificateResponse.java",
-          "src/main/java/com/sdkwork/web/app/sdk/model/CreateCertificateRequest.java",
-          "src/main/java/com/sdkwork/web/app/sdk/model/CreateDeploymentRequest.java",
-          "src/main/java/com/sdkwork/web/app/sdk/model/CreateDomainRequest.java",
-          "src/main/java/com/sdkwork/web/app/sdk/model/CreateEnvVariableRequest.java",
-          "src/main/java/com/sdkwork/web/app/sdk/model/CreateHealthCheckRequest.java",
-          "src/main/java/com/sdkwork/web/app/sdk/model/CreateSiteRequest.java",
-          "src/main/java/com/sdkwork/web/app/sdk/model/DeploymentPage.java",
-          "src/main/java/com/sdkwork/web/app/sdk/model/DeploymentResponse.java",
-          "src/main/java/com/sdkwork/web/app/sdk/model/DomainPage.java",
-          "src/main/java/com/sdkwork/web/app/sdk/model/DomainResponse.java",
-          "src/main/java/com/sdkwork/web/app/sdk/model/DomainVerifyResponse.java",
-          "src/main/java/com/sdkwork/web/app/sdk/model/EnvVariablePage.java",
-          "src/main/java/com/sdkwork/web/app/sdk/model/EnvVariableResponse.java",
-          "src/main/java/com/sdkwork/web/app/sdk/model/HealthCheckPage.java",
-          "src/main/java/com/sdkwork/web/app/sdk/model/HealthCheckResponse.java",
-          "src/main/java/com/sdkwork/web/app/sdk/model/ProblemDetail.java",
-          "src/main/java/com/sdkwork/web/app/sdk/model/SitePage.java",
-          "src/main/java/com/sdkwork/web/app/sdk/model/SiteResponse.java",
-          "src/main/java/com/sdkwork/web/app/sdk/model/UpdateSiteRequest.java"
-        ]
-      },
-      {
-        "area": "runtime",
-        "paths": [
-          "src/main/java/com/sdkwork/web/app/sdk/http/HttpClient.java"
-        ]
-      },
-      {
-        "area": "build-metadata",
-        "paths": [
-          "pom.xml",
-          "sdkwork-sdk.json"
-        ]
-      },
-      {
-        "area": "publish-workflow",
-        "paths": [
-          "bin/publish-core.mjs",
-          "bin/publish.ps1",
-          "bin/publish.sh"
-        ]
-      },
-      {
-        "area": "documentation",
-        "paths": [
-          "CHANGELOG.md",
-          "custom/README.md",
-          "README.md"
-        ]
-      },
-      {
-        "area": "custom-scaffold",
-        "paths": [
-          "custom/README.md"
-        ]
-      },
-      {
-        "area": "unknown",
-        "paths": [
-          "LICENSE"
-        ]
-      }
-    ],
-    "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, models, runtime, build-metadata, publish-workflow, documentation, custom-scaffold, unknown. Verification is required."
+    "areas": [],
+    "details": [],
+    "requiresVerification": false,
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "high",
-    "nextAction": "verify",
+    "riskLevel": "low",
+    "nextAction": "skip",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
-    "summary": "Changes have been applied. Run the required verification plan now.",
+    "summary": "No actionable changes were detected. No apply or verification step is required.",
     "reasons": [
-      "manual-review-required",
-      "preserved-legacy-files",
-      "unknown-impact",
-      "verification-required"
+      "no-actionable-changes"
     ]
   },
   "executionHandoff": {
     "schemaVersion": 1,
-    "summary": "Run the required verification commands now.",
-    "steps": [
-      {
-        "id": "verify-check",
-        "title": "Unified package check",
-        "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, runtime, build-metadata, publish-workflow, documentation, custom-scaffold, unknown.",
-        "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-java\\generated\\server-openapi",
-        "command": "node",
-        "args": [
-          "./bin/publish-core.mjs",
-          "--language",
-          "java",
-          "--project-dir",
-          ".",
-          "--action",
-          "check"
-        ],
-        "displayCommand": "node ./bin/publish-core.mjs --language java --project-dir . --action check"
-      }
-    ]
+    "summary": "No further commands are required.",
+    "steps": []
   },
   "verificationPlan": {
-    "shouldRun": true,
-    "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, models, runtime, build-metadata, publish-workflow, documentation, custom-scaffold, unknown. Verification is required. Run the required verification commands now against the generated SDK output.",
-    "steps": [
-      {
-        "id": "check",
-        "title": "Unified package check",
-        "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, runtime, build-metadata, publish-workflow, documentation, custom-scaffold, unknown.",
-        "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-java\\generated\\server-openapi",
-        "command": "node",
-        "args": [
-          "./bin/publish-core.mjs",
-          "--language",
-          "java",
-          "--project-dir",
-          ".",
-          "--action",
-          "check"
-        ],
-        "displayCommand": "node ./bin/publish-core.mjs --language java --project-dir . --action check"
-      }
-    ]
+    "shouldRun": false,
+    "runPhase": "skip",
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
+    "steps": []
   },
   "sdk": {
     "name": "sdkwork-web-app-sdk",
@@ -188,8 +56,8 @@
     "localVersions": []
   },
   "stats": {
-    "totalFiles": 40,
-    "models": 21,
+    "totalFiles": 69,
+    "models": 50,
     "apis": 6,
     "types": 0
   },
@@ -197,14 +65,16 @@
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 40,
-    "skippedScaffoldFiles": 0,
-    "skippedUnchangedGeneratedFiles": 0,
+    "writtenFiles": 0,
+    "skippedScaffoldFiles": 1,
+    "skippedUnchangedGeneratedFiles": 68,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "eb80f6f5f6268adb18617bc1787d7da32967a558f51da83b8a5c791dd4d007fb",
+    "changeFingerprint": "b6daee0d0b6c16556c01f44559ce9e9228ca2a8a81bf4c643ae8f80cd0958216",
     "changes": {
-      "createdGeneratedFiles": [
+      "createdGeneratedFiles": [],
+      "updatedGeneratedFiles": [],
+      "unchangedGeneratedFiles": [
         "bin/publish-core.mjs",
         "bin/publish.ps1",
         "bin/publish.sh",
@@ -224,6 +94,8 @@
         "src/main/java/com/sdkwork/web/app/sdk/http/HttpClient.java",
         "src/main/java/com/sdkwork/web/app/sdk/model/CertificatePage.java",
         "src/main/java/com/sdkwork/web/app/sdk/model/CertificateResponse.java",
+        "src/main/java/com/sdkwork/web/app/sdk/model/CertificatesCreateResponse201.java",
+        "src/main/java/com/sdkwork/web/app/sdk/model/CertificatesListResponse.java",
         "src/main/java/com/sdkwork/web/app/sdk/model/CreateCertificateRequest.java",
         "src/main/java/com/sdkwork/web/app/sdk/model/CreateDeploymentRequest.java",
         "src/main/java/com/sdkwork/web/app/sdk/model/CreateDomainRequest.java",
@@ -237,161 +109,73 @@
         "src/main/java/com/sdkwork/web/app/sdk/model/DomainVerifyResponse.java",
         "src/main/java/com/sdkwork/web/app/sdk/model/EnvVariablePage.java",
         "src/main/java/com/sdkwork/web/app/sdk/model/EnvVariableResponse.java",
+        "src/main/java/com/sdkwork/web/app/sdk/model/FieldError.java",
         "src/main/java/com/sdkwork/web/app/sdk/model/HealthCheckPage.java",
         "src/main/java/com/sdkwork/web/app/sdk/model/HealthCheckResponse.java",
+        "src/main/java/com/sdkwork/web/app/sdk/model/PageInfo.java",
         "src/main/java/com/sdkwork/web/app/sdk/model/ProblemDetail.java",
+        "src/main/java/com/sdkwork/web/app/sdk/model/SdkWorkApiResponse.java",
+        "src/main/java/com/sdkwork/web/app/sdk/model/SdkWorkCommandData.java",
+        "src/main/java/com/sdkwork/web/app/sdk/model/SdkWorkCommandResponse.java",
+        "src/main/java/com/sdkwork/web/app/sdk/model/SdkWorkListResponse.java",
+        "src/main/java/com/sdkwork/web/app/sdk/model/SdkWorkPageData.java",
+        "src/main/java/com/sdkwork/web/app/sdk/model/SdkWorkResourceData.java",
+        "src/main/java/com/sdkwork/web/app/sdk/model/SdkWorkResourceResponse.java",
         "src/main/java/com/sdkwork/web/app/sdk/model/SitePage.java",
         "src/main/java/com/sdkwork/web/app/sdk/model/SiteResponse.java",
+        "src/main/java/com/sdkwork/web/app/sdk/model/SitesActivateResponse.java",
+        "src/main/java/com/sdkwork/web/app/sdk/model/SitesCreateResponse201.java",
+        "src/main/java/com/sdkwork/web/app/sdk/model/SitesDeploymentsCreateResponse201.java",
+        "src/main/java/com/sdkwork/web/app/sdk/model/SitesDeploymentsListResponse.java",
+        "src/main/java/com/sdkwork/web/app/sdk/model/SitesDeploymentsRetrieveResponse.java",
+        "src/main/java/com/sdkwork/web/app/sdk/model/SitesDeploymentsRollbackResponse.java",
+        "src/main/java/com/sdkwork/web/app/sdk/model/SitesDomainsCreateResponse201.java",
+        "src/main/java/com/sdkwork/web/app/sdk/model/SitesDomainsListResponse.java",
+        "src/main/java/com/sdkwork/web/app/sdk/model/SitesDomainsRetrieveResponse.java",
+        "src/main/java/com/sdkwork/web/app/sdk/model/SitesDomainsVerifyResponse.java",
+        "src/main/java/com/sdkwork/web/app/sdk/model/SitesEnvVariablesCreateResponse201.java",
+        "src/main/java/com/sdkwork/web/app/sdk/model/SitesEnvVariablesListResponse.java",
+        "src/main/java/com/sdkwork/web/app/sdk/model/SitesHealthChecksCreateResponse201.java",
+        "src/main/java/com/sdkwork/web/app/sdk/model/SitesHealthChecksListResponse.java",
+        "src/main/java/com/sdkwork/web/app/sdk/model/SitesListResponse.java",
+        "src/main/java/com/sdkwork/web/app/sdk/model/SitesPauseResponse.java",
+        "src/main/java/com/sdkwork/web/app/sdk/model/SitesRetrieveResponse.java",
+        "src/main/java/com/sdkwork/web/app/sdk/model/SitesUpdateResponse.java",
         "src/main/java/com/sdkwork/web/app/sdk/model/UpdateSiteRequest.java",
         "src/main/java/com/sdkwork/web/app/sdk/SdkworkAppClient.java"
       ],
-      "updatedGeneratedFiles": [],
-      "unchangedGeneratedFiles": [],
       "deletedGeneratedFiles": [],
-      "scaffoldedFiles": [
+      "scaffoldedFiles": [],
+      "preservedScaffoldFiles": [
         "custom/README.md"
       ],
-      "preservedScaffoldFiles": [],
       "backedUpFiles": []
     },
     "impact": {
       "schemaVersion": 1,
-      "areas": [
-        "api-surface",
-        "models",
-        "runtime",
-        "build-metadata",
-        "publish-workflow",
-        "documentation",
-        "custom-scaffold",
-        "unknown"
-      ],
-      "details": [
-        {
-          "area": "api-surface",
-          "paths": [
-            "src/main/java/com/sdkwork/web/app/sdk/api/ApiPaths.java",
-            "src/main/java/com/sdkwork/web/app/sdk/api/CertificateApi.java",
-            "src/main/java/com/sdkwork/web/app/sdk/api/DeploymentApi.java",
-            "src/main/java/com/sdkwork/web/app/sdk/api/DomainApi.java",
-            "src/main/java/com/sdkwork/web/app/sdk/api/EnvVariableApi.java",
-            "src/main/java/com/sdkwork/web/app/sdk/api/MonitorApi.java",
-            "src/main/java/com/sdkwork/web/app/sdk/api/package-info.java",
-            "src/main/java/com/sdkwork/web/app/sdk/api/SiteApi.java",
-            "src/main/java/com/sdkwork/web/app/sdk/SdkworkAppClient.java"
-          ]
-        },
-        {
-          "area": "models",
-          "paths": [
-            "src/main/java/com/sdkwork/web/app/sdk/model/CertificatePage.java",
-            "src/main/java/com/sdkwork/web/app/sdk/model/CertificateResponse.java",
-            "src/main/java/com/sdkwork/web/app/sdk/model/CreateCertificateRequest.java",
-            "src/main/java/com/sdkwork/web/app/sdk/model/CreateDeploymentRequest.java",
-            "src/main/java/com/sdkwork/web/app/sdk/model/CreateDomainRequest.java",
-            "src/main/java/com/sdkwork/web/app/sdk/model/CreateEnvVariableRequest.java",
-            "src/main/java/com/sdkwork/web/app/sdk/model/CreateHealthCheckRequest.java",
-            "src/main/java/com/sdkwork/web/app/sdk/model/CreateSiteRequest.java",
-            "src/main/java/com/sdkwork/web/app/sdk/model/DeploymentPage.java",
-            "src/main/java/com/sdkwork/web/app/sdk/model/DeploymentResponse.java",
-            "src/main/java/com/sdkwork/web/app/sdk/model/DomainPage.java",
-            "src/main/java/com/sdkwork/web/app/sdk/model/DomainResponse.java",
-            "src/main/java/com/sdkwork/web/app/sdk/model/DomainVerifyResponse.java",
-            "src/main/java/com/sdkwork/web/app/sdk/model/EnvVariablePage.java",
-            "src/main/java/com/sdkwork/web/app/sdk/model/EnvVariableResponse.java",
-            "src/main/java/com/sdkwork/web/app/sdk/model/HealthCheckPage.java",
-            "src/main/java/com/sdkwork/web/app/sdk/model/HealthCheckResponse.java",
-            "src/main/java/com/sdkwork/web/app/sdk/model/ProblemDetail.java",
-            "src/main/java/com/sdkwork/web/app/sdk/model/SitePage.java",
-            "src/main/java/com/sdkwork/web/app/sdk/model/SiteResponse.java",
-            "src/main/java/com/sdkwork/web/app/sdk/model/UpdateSiteRequest.java"
-          ]
-        },
-        {
-          "area": "runtime",
-          "paths": [
-            "src/main/java/com/sdkwork/web/app/sdk/http/HttpClient.java"
-          ]
-        },
-        {
-          "area": "build-metadata",
-          "paths": [
-            "pom.xml",
-            "sdkwork-sdk.json"
-          ]
-        },
-        {
-          "area": "publish-workflow",
-          "paths": [
-            "bin/publish-core.mjs",
-            "bin/publish.ps1",
-            "bin/publish.sh"
-          ]
-        },
-        {
-          "area": "documentation",
-          "paths": [
-            "CHANGELOG.md",
-            "custom/README.md",
-            "README.md"
-          ]
-        },
-        {
-          "area": "custom-scaffold",
-          "paths": [
-            "custom/README.md"
-          ]
-        },
-        {
-          "area": "unknown",
-          "paths": [
-            "LICENSE"
-          ]
-        }
-      ],
-      "requiresVerification": true,
-      "summary": "Detected impact areas: api-surface, models, runtime, build-metadata, publish-workflow, documentation, custom-scaffold, unknown. Verification is required."
+      "areas": [],
+      "details": [],
+      "requiresVerification": false,
+      "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
     },
     "verificationPlan": {
-      "shouldRun": true,
-      "runPhase": "now",
-      "summary": "Detected impact areas: api-surface, models, runtime, build-metadata, publish-workflow, documentation, custom-scaffold, unknown. Verification is required. Run the required verification commands now against the generated SDK output.",
-      "steps": [
-        {
-          "id": "check",
-          "title": "Unified package check",
-          "required": true,
-          "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, runtime, build-metadata, publish-workflow, documentation, custom-scaffold, unknown.",
-          "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-java\\generated\\server-openapi",
-          "command": "node",
-          "args": [
-            "./bin/publish-core.mjs",
-            "--language",
-            "java",
-            "--project-dir",
-            ".",
-            "--action",
-            "check"
-          ],
-          "displayCommand": "node ./bin/publish-core.mjs --language java --project-dir . --action check"
-        }
-      ]
+      "shouldRun": false,
+      "runPhase": "skip",
+      "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
+      "steps": []
     },
     "executionDecision": {
       "schemaVersion": 1,
-      "riskLevel": "high",
-      "nextAction": "verify",
+      "riskLevel": "low",
+      "nextAction": "skip",
       "requiresManualReview": false,
       "applyRequiresExpectedFingerprint": false,
-      "summary": "Changes have been applied. Run the required verification plan now.",
+      "summary": "No actionable changes were detected. No apply or verification step is required.",
       "reasons": [
-        "manual-review-required",
-        "preserved-legacy-files",
-        "unknown-impact",
-        "verification-required"
+        "no-actionable-changes"
       ]
     },
     "backedUpFiles": [],
-    "preservedLegacyFiles": true
+    "preservedLegacyFiles": false
   }
 }

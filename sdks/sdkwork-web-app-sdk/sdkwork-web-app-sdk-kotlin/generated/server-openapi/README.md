@@ -33,7 +33,7 @@ client.setAccessToken("your-access-token")
     // Use the SDK
     val params = linkedMapOf<String, Any>(
         "page" to 1,
-        "pageSize" to 2
+        "page_size" to 2
     )
     val result = client.certificate.certificatesList(params)
     println(result)
@@ -72,8 +72,9 @@ val client = SdkworkAppClient(config)
 // 获取站点列表
 val params = linkedMapOf<String, Any>(
     "page" to 1,
-    "pageSize" to 2,
+    "page_size" to 2,
     "status" to 0,
+    "applicationType" to "WEB",
     "siteType" to 1,
     "keyword" to "keyword"
 )
@@ -88,7 +89,7 @@ println(result)
 val siteId = "1"
 val params = linkedMapOf<String, Any>(
     "page" to 1,
-    "pageSize" to 2
+    "page_size" to 2
 )
 val result = client.domain.sitesDomainsList(siteId, params)
 println(result)
@@ -101,7 +102,7 @@ println(result)
 val siteId = "1"
 val params = linkedMapOf<String, Any>(
     "page" to 1,
-    "pageSize" to 2,
+    "page_size" to 2,
     "status" to 0
 )
 val result = client.deployment.sitesDeploymentsList(siteId, params)
@@ -126,7 +127,7 @@ println(result)
 // 获取证书列表
 val params = linkedMapOf<String, Any>(
     "page" to 1,
-    "pageSize" to 2
+    "page_size" to 2
 )
 val result = client.certificate.certificatesList(params)
 println(result)
@@ -150,7 +151,7 @@ fun main() = runBlocking {
     try {
         val params = linkedMapOf<String, Any>(
             "page" to 1,
-            "pageSize" to 2
+            "page_size" to 2
         )
         val result = client.certificate.certificatesList(params)
         println(result)

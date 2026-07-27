@@ -1,7 +1,7 @@
 require_relative 'base_api'
 require_relative '../models/create_env_variable_request'
-require_relative '../models/env_variable_page'
-require_relative '../models/env_variable_response'
+require_relative '../models/sites_env_variables_create_response201'
+require_relative '../models/sites_env_variables_list_response'
 
 module Sdkwork
   module AppSdk
@@ -17,7 +17,7 @@ module Sdkwork
             options = {}
 
             result = @client.request('GET', path, **options)
-            result.is_a?(Hash) ? Models::EnvVariablePage.from_hash(result) : nil
+            result.is_a?(Hash) ? Models::SitesEnvVariablesListResponse.from_hash(result) : nil
           end
 
           # 创建环境变量
@@ -27,7 +27,7 @@ module Sdkwork
             options = {}
             options[:json] = payload unless payload.nil?
             result = @client.request('POST', path, **options)
-            result.is_a?(Hash) ? Models::EnvVariableResponse.from_hash(result) : nil
+            result.is_a?(Hash) ? Models::SitesEnvVariablesCreateResponse201.from_hash(result) : nil
           end
 
       end

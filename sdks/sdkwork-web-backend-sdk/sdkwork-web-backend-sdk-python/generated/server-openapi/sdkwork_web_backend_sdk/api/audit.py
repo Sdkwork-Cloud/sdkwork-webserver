@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional
 from ..http_client import HttpClient
-from ..models import AuditLogPage
+from ..models import AuditLogsListResponse
 
 def _append_query_string(path: str, raw_query_string: str) -> str:
     query = raw_query_string.lstrip('?')
@@ -138,8 +138,8 @@ class AuditAuditLogsApi:
         self._client = client
 
 
-    def list(self, page: Optional[int] = None, page_size: Optional[int] = None, target_type: Optional[str] = None, action: Optional[str] = None, operator_id: Optional[str] = None, start_date: Optional[str] = None, end_date: Optional[str] = None) -> AuditLogPage:
-        """获取审计日志列表"""
+    def list(self, page: Optional[int] = None, page_size: Optional[int] = None, target_type: Optional[str] = None, action: Optional[str] = None, operator_id: Optional[str] = None, start_date: Optional[str] = None, end_date: Optional[str] = None) -> AuditLogsListResponse:
+        """List audit logs"""
         query = build_query_string([
             {'name': 'page', 'value': page, 'style': 'form', 'explode': True, 'allow_reserved': False},
             {'name': 'page_size', 'value': page_size, 'style': 'form', 'explode': True, 'allow_reserved': False},

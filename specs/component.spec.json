@@ -26,6 +26,8 @@
     { "file": "CODE_STYLE_SPEC.md", "path": "../sdkwork-specs/CODE_STYLE_SPEC.md", "purpose": "Authored source and generated-code boundaries." },
     { "file": "NAMING_SPEC.md", "path": "../sdkwork-specs/NAMING_SPEC.md", "purpose": "Canonical component and Rust crate naming." },
     { "file": "RUST_CODE_SPEC.md", "path": "../sdkwork-specs/RUST_CODE_SPEC.md", "purpose": "Rust crate structure and verification." },
+    { "file": "TYPESCRIPT_CODE_SPEC.md", "path": "../sdkwork-specs/TYPESCRIPT_CODE_SPEC.md", "purpose": "Node tooling and TypeScript package structure." },
+    { "file": "PNPM_SCRIPT_SPEC.md", "path": "../sdkwork-specs/PNPM_SCRIPT_SPEC.md", "purpose": "Repository and app-surface pnpm command contracts." },
     { "file": "WEB_FRAMEWORK_SPEC.md", "path": "../sdkwork-specs/WEB_FRAMEWORK_SPEC.md", "purpose": "Mandatory sdkwork-web-framework integration." },
     { "file": "WEB_BACKEND_SPEC.md", "path": "../sdkwork-specs/WEB_BACKEND_SPEC.md", "purpose": "Backend route, service, and repository boundaries." },
     { "file": "DATABASE_FRAMEWORK_SPEC.md", "path": "../sdkwork-specs/DATABASE_FRAMEWORK_SPEC.md", "purpose": "Database lifecycle and SPI orchestration." },
@@ -33,6 +35,8 @@
     { "file": "SDK_SPEC.md", "path": "../sdkwork-specs/SDK_SPEC.md", "purpose": "Generated dependency SDK boundaries." },
     { "file": "SDK_WORKSPACE_GENERATION_SPEC.md", "path": "../sdkwork-specs/SDK_WORKSPACE_GENERATION_SPEC.md", "purpose": "Generated SDK family ownership and workspace boundaries." },
     { "file": "APP_SDK_INTEGRATION_SPEC.md", "path": "../sdkwork-specs/APP_SDK_INTEGRATION_SPEC.md", "purpose": "Injected Rust dependency SDK composition." },
+    { "file": "IAM_APPLICATION_BOOTSTRAP_SPEC.md", "path": "../sdkwork-specs/IAM_APPLICATION_BOOTSTRAP_SPEC.md", "purpose": "Tenant application provisioning before credential entry." },
+    { "file": "IAM_LOGIN_INTEGRATION_SPEC.md", "path": "../sdkwork-specs/IAM_LOGIN_INTEGRATION_SPEC.md", "purpose": "Credential-entry and authenticated session integration." },
     { "file": "CONFIG_SPEC.md", "path": "../sdkwork-specs/CONFIG_SPEC.md", "purpose": "Dependency SDK base URL and bootstrap ownership." },
     { "file": "SECURITY_SPEC.md", "path": "../sdkwork-specs/SECURITY_SPEC.md", "purpose": "Tenant isolation, credential, and public content safety." },
     { "file": "TEST_SPEC.md", "path": "../sdkwork-specs/TEST_SPEC.md", "purpose": "Contract and runtime verification requirements." }

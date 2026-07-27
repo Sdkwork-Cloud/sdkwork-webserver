@@ -1,20 +1,30 @@
 #!/usr/bin/env node
 
-import { spawn, spawnSync } from 'node:child_process';
-import { copyFileSync, existsSync, mkdirSync, readFileSync } from 'node:fs';
+import { spawn } from 'node:child_process';
+import { mkdirSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
-import { fileURLToPath } from 'node:url';
-import { parseEnv } from 'node:util';
 
-const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+import { ensureTrackedBuildSources } from './lib/build-source-integrity.mjs';
+import {
+  IAM_APPLICATION_BOOTSTRAP_ENV,
+  REPO_ROOT,
+  VALID_DEPLOYMENT_PROFILES,
+  VALID_ENVIRONMENTS,
+  loadProfile,
+  mergeRuntimeEnv,
+  resolveIamDevEnv,
+} from './lib/webserver-topology.mjs';
+
 const CRITICAL_SOURCE_FILES = [
   '.env.postgres.example',
   'Cargo.toml',
+  'sdkwork.app.config.json',
+  'apps/sdkwork-webserver-pc/sdkwork.app.config.json',
   'crates/sdkwork-api-web-server-standalone-gateway/Cargo.toml',
   'crates/sdkwork-api-web-server-standalone-gateway/src/main.rs',
+  'scripts/lib/webserver-topology.mjs',
 ];
-const POSTGRES_ENV_PREFIX = 'SDKWORK_CLAW_DATABASE_';
 
 function parseArgs(argv) {
   const settings = {
@@ -47,11 +57,13 @@ function parseArgs(argv) {
   if (!['postgres', 'sqlite'].includes(settings.database)) {
     throw new Error('--database must be postgres or sqlite');
   }
-  if (!['standalone', 'cloud'].includes(settings.deploymentProfile)) {
-    throw new Error('--deployment-profile must be standalone or cloud');
+  if (!VALID_DEPLOYMENT_PROFILES.includes(settings.deploymentProfile)) {
+    throw new Error(
+      `--deployment-profile must be ${VALID_DEPLOYMENT_PROFILES.join(' or ')}`,
+    );
   }
-  if (!['development', 'test', 'staging', 'production'].includes(settings.environment)) {
-    throw new Error('--environment must be development, test, staging, or production');
+  if (!VALID_ENVIRONMENTS.includes(settings.environment)) {
+    throw new Error(`--environment must be ${VALID_ENVIRONMENTS.join(' or ')}`);
   }
   if (settings.database === 'sqlite' && settings.deploymentProfile !== 'standalone') {
     throw new Error('SQLite is supported only by the standalone development profile');
@@ -72,78 +84,11 @@ Options:
   --help, -h                               Show this help`);
 }
 
-function runGit(args) {
-  return spawnSync('git', args, {
-    cwd: REPO_ROOT,
-    encoding: 'utf8',
-    stdio: 'pipe',
-    windowsHide: true,
-  });
-}
-
 function ensureCriticalSources() {
-  for (const relativePath of CRITICAL_SOURCE_FILES) {
-    const absolutePath = path.join(REPO_ROOT, relativePath);
-    if (existsSync(absolutePath)) {
-      continue;
-    }
-
-    const tracked = runGit(['ls-files', '--error-unmatch', '--', relativePath]);
-    const recoveryCommand = `git checkout HEAD -- ${relativePath}`;
-    if (tracked.status !== 0) {
-      throw new Error(
-        `missing build-critical source ${relativePath}; recover it with: ${recoveryCommand}`,
-      );
-    }
-
-    const recovered = runGit(['checkout', 'HEAD', '--', relativePath]);
-    if (recovered.status !== 0 || !existsSync(absolutePath)) {
-      throw new Error(
-        `failed to recover build-critical source ${relativePath}; run: ${recoveryCommand}`,
-      );
-    }
-    console.log(`[sdkwork-web] recovered ${relativePath} from git`);
-  }
-}
-
-function resolveEnvPath(relativeOrAbsolutePath) {
-  return path.isAbsolute(relativeOrAbsolutePath)
-    ? relativeOrAbsolutePath
-    : path.join(REPO_ROOT, relativeOrAbsolutePath);
-}
-
-function materializeDefaultPostgresEnv(envPath) {
-  if (existsSync(envPath)) {
-    return;
-  }
-
-  const defaultEnvPath = path.join(REPO_ROOT, '.env.postgres');
-  if (path.resolve(envPath) !== defaultEnvPath) {
-    throw new Error(`PostgreSQL environment file does not exist: ${envPath}`);
-  }
-
-  const examplePath = path.join(REPO_ROOT, '.env.postgres.example');
-  if (!existsSync(examplePath)) {
-    throw new Error(
-      'missing build-critical source .env.postgres.example; run: git checkout HEAD -- .env.postgres.example',
-    );
-  }
-  copyFileSync(examplePath, envPath);
-  console.log('[sdkwork-web] created .env.postgres from .env.postgres.example');
-}
-
-function loadPostgresEnv(settings) {
-  const envPath = resolveEnvPath(settings.devEnvFile);
-  materializeDefaultPostgresEnv(envPath);
-  const parsed = parseEnv(readFileSync(envPath, 'utf8'));
-  const databaseEnv = Object.fromEntries(
-    Object.entries(parsed).filter(([key]) => key.startsWith(POSTGRES_ENV_PREFIX)),
-  );
-
-  if (databaseEnv.SDKWORK_CLAW_DATABASE_ENGINE !== 'postgresql') {
-    throw new Error(`${settings.devEnvFile} must set SDKWORK_CLAW_DATABASE_ENGINE=postgresql`);
-  }
-  return { databaseEnv, envPath };
+  ensureTrackedBuildSources({
+    repoRoot: REPO_ROOT,
+    relativePaths: CRITICAL_SOURCE_FILES,
+  });
 }
 
 function createSqliteEnv() {
@@ -158,25 +103,31 @@ function createSqliteEnv() {
 }
 
 function buildRuntimeEnv(settings) {
-  let databaseEnv;
-  let databaseSource;
-  if (settings.database === 'postgres') {
-    const loaded = loadPostgresEnv(settings);
-    databaseEnv = loaded.databaseEnv;
-    databaseSource = path.relative(REPO_ROOT, loaded.envPath) || loaded.envPath;
-  } else {
-    databaseEnv = createSqliteEnv();
-    databaseSource = '.sdkwork/runtime/webserver/webserver.sqlite';
-  }
+  const profileId = `${settings.deploymentProfile}.${settings.environment}`;
+  const profileEnv = loadProfile(profileId);
+  const baseEnv = mergeRuntimeEnv(process.env, profileEnv);
+  const iamEnv = resolveIamDevEnv(baseEnv, {
+    postgresEnvFile: settings.devEnvFile,
+  });
+  const databaseEnv = settings.database === 'sqlite' ? createSqliteEnv() : {};
+  const databaseSource = settings.database === 'postgres'
+    ? path.relative(REPO_ROOT, path.resolve(REPO_ROOT, settings.devEnvFile))
+    : '.sdkwork/runtime/webserver/webserver.sqlite';
+  const autoMigrate = settings.environment === 'development' ? 'true' : 'false';
 
   return {
     databaseSource,
     env: {
-      ...process.env,
+      ...iamEnv,
       ...databaseEnv,
-      SDKWORK_WEB_DATABASE_AUTO_MIGRATE: 'true',
+      ...IAM_APPLICATION_BOOTSTRAP_ENV,
+      SDKWORK_DEPLOYMENT_PROFILE: settings.deploymentProfile,
+      SDKWORK_ENVIRONMENT: settings.environment,
+      SDKWORK_IAM_DATABASE_AUTO_MIGRATE:
+        iamEnv.SDKWORK_IAM_DATABASE_AUTO_MIGRATE ?? autoMigrate,
+      SDKWORK_WEB_DATABASE_AUTO_MIGRATE:
+        iamEnv.SDKWORK_WEB_DATABASE_AUTO_MIGRATE ?? autoMigrate,
       SDKWORK_WEB_DEPLOYMENT_PROFILE: settings.deploymentProfile,
-      SDKWORK_WEB_DEV_AUTH_BYPASS: settings.environment === 'development' ? 'true' : 'false',
       SDKWORK_WEB_ENVIRONMENT: settings.environment,
       SDKWORK_WEB_RUNTIME_TARGET: 'server',
       SDKWORK_WEB_SNOWFLAKE_NODE_ID: process.env.SDKWORK_WEB_SNOWFLAKE_NODE_ID ?? '0',
@@ -197,7 +148,9 @@ async function run() {
     `[sdkwork-web] environment=${settings.environment} deploymentProfile=${settings.deploymentProfile} runtimeTarget=server database=${settings.database}`,
   );
   console.log(`[sdkwork-web] databaseSource=${runtime.databaseSource}`);
-  console.log('[sdkwork-web] managementUrl=http://127.0.0.1:3800');
+  console.log(
+    `[sdkwork-web] managementUrl=${runtime.env.SDKWORK_WEB_APPLICATION_PUBLIC_HTTP_URL}`,
+  );
 
   const command = process.platform === 'win32' ? 'cargo.exe' : 'cargo';
   const args = [

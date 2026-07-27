@@ -11,25 +11,25 @@ class AgentApi {
 
   AgentApi(this._client);
 
-  /// 边缘节点心跳
-  Future<AgentHeartbeatResponse?> heartbeat(AgentHeartbeatRequest body) async {
+  /// Report an edge-agent heartbeat
+  Future<HeartbeatResponse?> heartbeat(AgentHeartbeatRequest body) async {
     final payload = body.toJson();
     final response = await _client.post(ApiPaths.backendPath('/agent/heartbeat'), body: payload, contentType: 'application/json');
     return (() {
       final map = sdkworkResponseAsMap(response);
-      return map == null ? null : AgentHeartbeatResponse.fromJson(map);
+      return map == null ? null : HeartbeatResponse.fromJson(map);
     })();
   }
 
-  /// 拉取 nginx 配置与证书 bundle
-  Future<AgentSyncResponse?> sync_([String? ifSyncVersion]) async {
+  /// Retrieve the Nginx configuration and certificate bundle
+  Future<RetrieveResponse?> retrieve([String? ifSyncVersion]) async {
     final query = buildQueryString([
       QueryParameterSpec('ifSyncVersion', ifSyncVersion, 'form', true, false, null)
     ]);
     final response = await _client.get(ApiPaths.appendQueryString(ApiPaths.backendPath('/agent/sync'), query));
     return (() {
       final map = sdkworkResponseAsMap(response);
-      return map == null ? null : AgentSyncResponse.fromJson(map);
+      return map == null ? null : RetrieveResponse.fromJson(map);
     })();
   }
 }

@@ -50,6 +50,11 @@ client.SetHeader("X-Custom-Header", "value");
 
 ## API Modules
 
+- `client.Application` - application API
+- `client.ApplicationDomain` - application_domain API
+- `client.ApplicationDeployment` - application_deployment API
+- `client.Certificate` - certificate API
+- `client.CertificateDistribution` - certificate_distribution API
 - `client.Nginx` - nginx API
 - `client.Server` - server API
 - `client.Agent` - agent API
@@ -57,10 +62,82 @@ client.SetHeader("X-Custom-Header", "value");
 
 ## Usage Examples
 
+### application
+
+```csharp
+// List managed applications
+var query = new Dictionary<string, object>
+{
+    ["page"] = 1,
+    ["page_size"] = 2,
+    ["applicationType"] = "WEB",
+    ["siteType"] = 4,
+    ["status"] = 5,
+    ["keyword"] = "keyword",
+};
+var result = await client.Application.ApplicationsListAsync(query);
+Console.WriteLine(result);
+```
+
+### application_domain
+
+```csharp
+// List application domains
+var applicationId = "1";
+var query = new Dictionary<string, object>
+{
+    ["page"] = 1,
+    ["page_size"] = 2,
+};
+var result = await client.ApplicationDomain.ApplicationsDomainsListAsync(applicationId, query);
+Console.WriteLine(result);
+```
+
+### application_deployment
+
+```csharp
+// List application deployments
+var applicationId = "1";
+var query = new Dictionary<string, object>
+{
+    ["page"] = 1,
+    ["page_size"] = 2,
+    ["status"] = 3,
+};
+var result = await client.ApplicationDeployment.ApplicationsDeploymentsListAsync(applicationId, query);
+Console.WriteLine(result);
+```
+
+### certificate
+
+```csharp
+// List canonical certificates
+var query = new Dictionary<string, object>
+{
+    ["page"] = 1,
+    ["page_size"] = 2,
+};
+var result = await client.Certificate.CertificatesListAsync(query);
+Console.WriteLine(result);
+```
+
+### certificate_distribution
+
+```csharp
+// List certificate manifest convergence by server
+var query = new Dictionary<string, object>
+{
+    ["page"] = 1,
+    ["page_size"] = 2,
+};
+var result = await client.CertificateDistribution.CertificatesDistributionListAsync(query);
+Console.WriteLine(result);
+```
+
 ### nginx
 
 ```csharp
-// 获取 Nginx 状态
+// Retrieve Nginx status
 var result = await client.Nginx.StatusRetrieveAsync();
 Console.WriteLine(result);
 ```
@@ -68,11 +145,11 @@ Console.WriteLine(result);
 ### server
 
 ```csharp
-// 获取服务器列表
+// List managed servers
 var query = new Dictionary<string, object>
 {
     ["page"] = 1,
-    ["pageSize"] = 2,
+    ["page_size"] = 2,
 };
 var result = await client.Server.ServersListAsync(query);
 Console.WriteLine(result);
@@ -81,23 +158,23 @@ Console.WriteLine(result);
 ### agent
 
 ```csharp
-// 拉取 nginx 配置与证书 bundle
+// Retrieve the Nginx configuration and certificate bundle
 var query = new Dictionary<string, object>
 {
     ["ifSyncVersion"] = "ifsyncversion",
 };
-var result = await client.Agent.SyncAsync(query);
+var result = await client.Agent.RetrieveAsync(query);
 Console.WriteLine(result);
 ```
 
 ### audit
 
 ```csharp
-// 获取审计日志列表
+// List audit logs
 var query = new Dictionary<string, object>
 {
     ["page"] = 1,
-    ["pageSize"] = 2,
+    ["page_size"] = 2,
     ["targetType"] = "targettype",
     ["action"] = "action",
     ["operatorId"] = "1",

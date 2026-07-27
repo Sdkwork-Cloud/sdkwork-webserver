@@ -3,7 +3,7 @@ use std::sync::Arc;
 use crate::api::paths::app_path;
 use crate::api::paths::append_query_string;
 use crate::http::{SdkworkError, SdkworkHttpClient};
-use crate::models::{CreateDomainRequest, DomainPage, DomainResponse, DomainVerifyResponse};
+use crate::models::{CreateDomainRequest, DomainResponse, DomainVerifyResponse};
 
 #[derive(Clone)]
 pub struct DomainApi {
@@ -16,7 +16,7 @@ impl DomainApi {
     }
 
     /// 获取站点域名列表
-    pub async fn sites_domains_list(&self, site_id: &str, page: Option<i64>, page_size: Option<i64>) -> Result<DomainPage, SdkworkError> {
+    pub async fn sites_domains_list(&self, site_id: &str, page: Option<i64>, page_size: Option<i64>) -> Result<serde_json::Value, SdkworkError> {
         let query = build_query_string(&[
             QueryParameterSpec::new("page", page, "form", true, false, None),
             QueryParameterSpec::new("page_size", page_size, "form", true, false, None),

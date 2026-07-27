@@ -10,166 +10,37 @@
   },
   "status": "ok",
   "mode": "apply",
-  "hasChanges": true,
+  "hasChanges": false,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "c9d7ccac8d841c9754e79d39d4d1fa548c5e8a89ef3dafb0cc9d4a9c4aa13d9b",
+  "changeFingerprint": "85e4590162d5b4f22afd29060f9cb54891eb925075c3d139b7407484967d4edc",
   "changeImpact": {
     "schemaVersion": 1,
-    "areas": [
-      "api-surface",
-      "models",
-      "runtime",
-      "build-metadata",
-      "publish-workflow",
-      "documentation",
-      "custom-scaffold",
-      "unknown"
-    ],
-    "details": [
-      {
-        "area": "api-surface",
-        "paths": [
-          "src/Api/Agent.php",
-          "src/Api/Audit.php",
-          "src/Api/BaseApi.php",
-          "src/Api/Nginx.php",
-          "src/Api/Server.php",
-          "src/SdkworkBackendClient.php"
-        ]
-      },
-      {
-        "area": "models",
-        "paths": [
-          "src/Models/AgentCertificateBundle.php",
-          "src/Models/AgentHeartbeatRequest.php",
-          "src/Models/AgentHeartbeatResponse.php",
-          "src/Models/AgentNginxConfigBundle.php",
-          "src/Models/AgentSyncResponse.php",
-          "src/Models/AuditLogPage.php",
-          "src/Models/AuditLogResponse.php",
-          "src/Models/CreateNginxConfigRequest.php",
-          "src/Models/CreateServerRequest.php",
-          "src/Models/CreateServerResponse.php",
-          "src/Models/NginxConfigPage.php",
-          "src/Models/NginxConfigResponse.php",
-          "src/Models/NginxDeployResponse.php",
-          "src/Models/NginxReloadResponse.php",
-          "src/Models/NginxStatusResponse.php",
-          "src/Models/NginxValidateResponse.php",
-          "src/Models/ProblemDetail.php",
-          "src/Models/ServerPage.php",
-          "src/Models/ServerResponse.php",
-          "src/Models/UpdateNginxConfigRequest.php"
-        ]
-      },
-      {
-        "area": "runtime",
-        "paths": [
-          "src/Http/HttpClient.php"
-        ]
-      },
-      {
-        "area": "build-metadata",
-        "paths": [
-          "composer.json",
-          "sdkwork-sdk.json"
-        ]
-      },
-      {
-        "area": "publish-workflow",
-        "paths": [
-          "bin/publish-core.mjs",
-          "bin/publish.ps1",
-          "bin/publish.sh"
-        ]
-      },
-      {
-        "area": "documentation",
-        "paths": [
-          "CHANGELOG.md",
-          "custom/README.md",
-          "README.md"
-        ]
-      },
-      {
-        "area": "custom-scaffold",
-        "paths": [
-          "custom/README.md"
-        ]
-      },
-      {
-        "area": "unknown",
-        "paths": [
-          "LICENSE",
-          "src/SdkConfig.php"
-        ]
-      }
-    ],
-    "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, models, runtime, build-metadata, publish-workflow, documentation, custom-scaffold, unknown. Verification is required."
+    "areas": [],
+    "details": [],
+    "requiresVerification": false,
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "high",
-    "nextAction": "verify",
+    "riskLevel": "low",
+    "nextAction": "skip",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
-    "summary": "Changes have been applied. Run the required verification plan now.",
+    "summary": "No actionable changes were detected. No apply or verification step is required.",
     "reasons": [
-      "manual-review-required",
-      "preserved-legacy-files",
-      "unknown-impact",
-      "verification-required"
+      "no-actionable-changes"
     ]
   },
   "executionHandoff": {
     "schemaVersion": 1,
-    "summary": "Run the required verification commands now.",
-    "steps": [
-      {
-        "id": "verify-check",
-        "title": "Unified package check",
-        "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, runtime, build-metadata, publish-workflow, documentation, custom-scaffold, unknown.",
-        "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-php\\generated\\server-openapi",
-        "command": "node",
-        "args": [
-          "./bin/publish-core.mjs",
-          "--language",
-          "php",
-          "--project-dir",
-          ".",
-          "--action",
-          "check"
-        ],
-        "displayCommand": "node ./bin/publish-core.mjs --language php --project-dir . --action check"
-      }
-    ]
+    "summary": "No further commands are required.",
+    "steps": []
   },
   "verificationPlan": {
-    "shouldRun": true,
-    "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, models, runtime, build-metadata, publish-workflow, documentation, custom-scaffold, unknown. Verification is required. Run the required verification commands now against the generated SDK output.",
-    "steps": [
-      {
-        "id": "check",
-        "title": "Unified package check",
-        "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, runtime, build-metadata, publish-workflow, documentation, custom-scaffold, unknown.",
-        "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-php\\generated\\server-openapi",
-        "command": "node",
-        "args": [
-          "./bin/publish-core.mjs",
-          "--language",
-          "php",
-          "--project-dir",
-          ".",
-          "--action",
-          "check"
-        ],
-        "displayCommand": "node ./bin/publish-core.mjs --language php --project-dir . --action check"
-      }
-    ]
+    "shouldRun": false,
+    "runPhase": "skip",
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
+    "steps": []
   },
   "sdk": {
     "name": "sdkwork-web-backend-sdk",
@@ -185,23 +56,25 @@
     "localVersions": []
   },
   "stats": {
-    "totalFiles": 37,
-    "models": 20,
-    "apis": 4,
+    "totalFiles": 87,
+    "models": 65,
+    "apis": 9,
     "types": 0
   },
   "warnings": [],
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 37,
-    "skippedScaffoldFiles": 0,
-    "skippedUnchangedGeneratedFiles": 0,
+    "writtenFiles": 0,
+    "skippedScaffoldFiles": 1,
+    "skippedUnchangedGeneratedFiles": 86,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "c9d7ccac8d841c9754e79d39d4d1fa548c5e8a89ef3dafb0cc9d4a9c4aa13d9b",
+    "changeFingerprint": "85e4590162d5b4f22afd29060f9cb54891eb925075c3d139b7407484967d4edc",
     "changes": {
-      "createdGeneratedFiles": [
+      "createdGeneratedFiles": [],
+      "updatedGeneratedFiles": [],
+      "unchangedGeneratedFiles": [
         "bin/publish-core.mjs",
         "bin/publish.ps1",
         "bin/publish.sh",
@@ -211,8 +84,13 @@
         "README.md",
         "sdkwork-sdk.json",
         "src/Api/Agent.php",
+        "src/Api/Application.php",
+        "src/Api/ApplicationDeployment.php",
+        "src/Api/ApplicationDomain.php",
         "src/Api/Audit.php",
         "src/Api/BaseApi.php",
+        "src/Api/Certificate.php",
+        "src/Api/CertificateDistribution.php",
         "src/Api/Nginx.php",
         "src/Api/Server.php",
         "src/Http/HttpClient.php",
@@ -221,168 +99,101 @@
         "src/Models/AgentHeartbeatResponse.php",
         "src/Models/AgentNginxConfigBundle.php",
         "src/Models/AgentSyncResponse.php",
+        "src/Models/ApplicationDeploymentResponse.php",
+        "src/Models/ApplicationDomainResponse.php",
+        "src/Models/ApplicationDomainVerifyResponse.php",
+        "src/Models/ApplicationResponse.php",
+        "src/Models/ApplicationsCreateResponse201.php",
+        "src/Models/ApplicationsDeploymentsCreateResponse201.php",
+        "src/Models/ApplicationsDeploymentsListResponse.php",
+        "src/Models/ApplicationsDomainsCreateResponse201.php",
+        "src/Models/ApplicationsDomainsListResponse.php",
+        "src/Models/ApplicationsDomainsVerifyResponse.php",
+        "src/Models/ApplicationsListResponse.php",
         "src/Models/AuditLogPage.php",
         "src/Models/AuditLogResponse.php",
+        "src/Models/AuditLogsListResponse.php",
+        "src/Models/CertificateDistributionResponse.php",
+        "src/Models/CertificateResponse.php",
+        "src/Models/CertificatesCreateResponse201.php",
+        "src/Models/CertificatesDistributionListResponse.php",
+        "src/Models/CertificatesListResponse.php",
+        "src/Models/CertificatesRenewResponse.php",
+        "src/Models/CertificatesUpdateResponse.php",
+        "src/Models/ConfigsCreateResponse201.php",
+        "src/Models/ConfigsDeployResponse.php",
+        "src/Models/ConfigsListResponse.php",
+        "src/Models/ConfigsRetrieveResponse.php",
+        "src/Models/ConfigsUpdateResponse.php",
+        "src/Models/ConfigsValidateResponse.php",
+        "src/Models/CreateApplicationDeploymentRequest.php",
+        "src/Models/CreateApplicationDomainRequest.php",
+        "src/Models/CreateApplicationRequest.php",
+        "src/Models/CreateCertificateRequest.php",
         "src/Models/CreateNginxConfigRequest.php",
         "src/Models/CreateServerRequest.php",
         "src/Models/CreateServerResponse.php",
+        "src/Models/FieldError.php",
+        "src/Models/HeartbeatResponse.php",
         "src/Models/NginxConfigPage.php",
         "src/Models/NginxConfigResponse.php",
         "src/Models/NginxDeployResponse.php",
         "src/Models/NginxReloadResponse.php",
         "src/Models/NginxStatusResponse.php",
         "src/Models/NginxValidateResponse.php",
+        "src/Models/PageInfo.php",
         "src/Models/ProblemDetail.php",
+        "src/Models/ReloadResponse.php",
+        "src/Models/RetrieveResponse.php",
+        "src/Models/SdkWorkApiResponse.php",
+        "src/Models/SdkWorkCommandData.php",
+        "src/Models/SdkWorkCommandResponse.php",
+        "src/Models/SdkWorkListResponse.php",
+        "src/Models/SdkWorkPageData.php",
+        "src/Models/SdkWorkResourceData.php",
+        "src/Models/SdkWorkResourceResponse.php",
         "src/Models/ServerPage.php",
         "src/Models/ServerResponse.php",
+        "src/Models/ServersCreateResponse201.php",
+        "src/Models/ServersListResponse.php",
+        "src/Models/StatusRetrieveResponse.php",
+        "src/Models/UpdateCertificateRequest.php",
         "src/Models/UpdateNginxConfigRequest.php",
         "src/SdkConfig.php",
         "src/SdkworkBackendClient.php"
       ],
-      "updatedGeneratedFiles": [],
-      "unchangedGeneratedFiles": [],
       "deletedGeneratedFiles": [],
-      "scaffoldedFiles": [
+      "scaffoldedFiles": [],
+      "preservedScaffoldFiles": [
         "custom/README.md"
       ],
-      "preservedScaffoldFiles": [],
       "backedUpFiles": []
     },
     "impact": {
       "schemaVersion": 1,
-      "areas": [
-        "api-surface",
-        "models",
-        "runtime",
-        "build-metadata",
-        "publish-workflow",
-        "documentation",
-        "custom-scaffold",
-        "unknown"
-      ],
-      "details": [
-        {
-          "area": "api-surface",
-          "paths": [
-            "src/Api/Agent.php",
-            "src/Api/Audit.php",
-            "src/Api/BaseApi.php",
-            "src/Api/Nginx.php",
-            "src/Api/Server.php",
-            "src/SdkworkBackendClient.php"
-          ]
-        },
-        {
-          "area": "models",
-          "paths": [
-            "src/Models/AgentCertificateBundle.php",
-            "src/Models/AgentHeartbeatRequest.php",
-            "src/Models/AgentHeartbeatResponse.php",
-            "src/Models/AgentNginxConfigBundle.php",
-            "src/Models/AgentSyncResponse.php",
-            "src/Models/AuditLogPage.php",
-            "src/Models/AuditLogResponse.php",
-            "src/Models/CreateNginxConfigRequest.php",
-            "src/Models/CreateServerRequest.php",
-            "src/Models/CreateServerResponse.php",
-            "src/Models/NginxConfigPage.php",
-            "src/Models/NginxConfigResponse.php",
-            "src/Models/NginxDeployResponse.php",
-            "src/Models/NginxReloadResponse.php",
-            "src/Models/NginxStatusResponse.php",
-            "src/Models/NginxValidateResponse.php",
-            "src/Models/ProblemDetail.php",
-            "src/Models/ServerPage.php",
-            "src/Models/ServerResponse.php",
-            "src/Models/UpdateNginxConfigRequest.php"
-          ]
-        },
-        {
-          "area": "runtime",
-          "paths": [
-            "src/Http/HttpClient.php"
-          ]
-        },
-        {
-          "area": "build-metadata",
-          "paths": [
-            "composer.json",
-            "sdkwork-sdk.json"
-          ]
-        },
-        {
-          "area": "publish-workflow",
-          "paths": [
-            "bin/publish-core.mjs",
-            "bin/publish.ps1",
-            "bin/publish.sh"
-          ]
-        },
-        {
-          "area": "documentation",
-          "paths": [
-            "CHANGELOG.md",
-            "custom/README.md",
-            "README.md"
-          ]
-        },
-        {
-          "area": "custom-scaffold",
-          "paths": [
-            "custom/README.md"
-          ]
-        },
-        {
-          "area": "unknown",
-          "paths": [
-            "LICENSE",
-            "src/SdkConfig.php"
-          ]
-        }
-      ],
-      "requiresVerification": true,
-      "summary": "Detected impact areas: api-surface, models, runtime, build-metadata, publish-workflow, documentation, custom-scaffold, unknown. Verification is required."
+      "areas": [],
+      "details": [],
+      "requiresVerification": false,
+      "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
     },
     "verificationPlan": {
-      "shouldRun": true,
-      "runPhase": "now",
-      "summary": "Detected impact areas: api-surface, models, runtime, build-metadata, publish-workflow, documentation, custom-scaffold, unknown. Verification is required. Run the required verification commands now against the generated SDK output.",
-      "steps": [
-        {
-          "id": "check",
-          "title": "Unified package check",
-          "required": true,
-          "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, runtime, build-metadata, publish-workflow, documentation, custom-scaffold, unknown.",
-          "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-php\\generated\\server-openapi",
-          "command": "node",
-          "args": [
-            "./bin/publish-core.mjs",
-            "--language",
-            "php",
-            "--project-dir",
-            ".",
-            "--action",
-            "check"
-          ],
-          "displayCommand": "node ./bin/publish-core.mjs --language php --project-dir . --action check"
-        }
-      ]
+      "shouldRun": false,
+      "runPhase": "skip",
+      "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
+      "steps": []
     },
     "executionDecision": {
       "schemaVersion": 1,
-      "riskLevel": "high",
-      "nextAction": "verify",
+      "riskLevel": "low",
+      "nextAction": "skip",
       "requiresManualReview": false,
       "applyRequiresExpectedFingerprint": false,
-      "summary": "Changes have been applied. Run the required verification plan now.",
+      "summary": "No actionable changes were detected. No apply or verification step is required.",
       "reasons": [
-        "manual-review-required",
-        "preserved-legacy-files",
-        "unknown-impact",
-        "verification-required"
+        "no-actionable-changes"
       ]
     },
     "backedUpFiles": [],
-    "preservedLegacyFiles": true
+    "preservedLegacyFiles": false
   }
 }

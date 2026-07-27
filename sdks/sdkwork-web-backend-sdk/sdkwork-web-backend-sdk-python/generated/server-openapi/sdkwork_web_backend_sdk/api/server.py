@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional
 from ..http_client import HttpClient
-from ..models import CreateServerRequest, CreateServerResponse, ServerPage
+from ..models import CreateServerRequest, ServersCreateResponse201, ServersListResponse
 
 def _append_query_string(path: str, raw_query_string: str) -> str:
     query = raw_query_string.lstrip('?')
@@ -130,14 +130,14 @@ class ServerApi:
         self._client = client
 
 
-    def list(self, page: Optional[int] = None, page_size: Optional[int] = None) -> ServerPage:
-        """获取服务器列表"""
+    def list(self, page: Optional[int] = None, page_size: Optional[int] = None) -> ServersListResponse:
+        """List managed servers"""
         query = build_query_string([
             {'name': 'page', 'value': page, 'style': 'form', 'explode': True, 'allow_reserved': False},
             {'name': 'page_size', 'value': page_size, 'style': 'form', 'explode': True, 'allow_reserved': False},
         ])
         return self._client.get(_append_query_string(f"/backend/v3/api/servers", query))
 
-    def create(self, body: CreateServerRequest) -> CreateServerResponse:
-        """注册服务器"""
+    def create(self, body: CreateServerRequest) -> ServersCreateResponse201:
+        """Register a managed server"""
         return self._client.post(f"/backend/v3/api/servers", json=body)

@@ -5,6 +5,8 @@
   "language": "go",
   "sdkType": "backend",
   "packageName": "github.com/sdkwork/sdkwork-web-backend-sdk",
+  "transportPackageName": "github.com/sdkwork/sdkwork-web-backend-sdk",
+  "consumerPackageName": "github.com/sdkwork/sdkwork-web-backend-sdk",
   "generator": "@sdkwork/sdk-generator",
   "capabilities": {
     "supportsGeneratedTests": true,

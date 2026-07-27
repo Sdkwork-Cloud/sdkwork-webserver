@@ -5,6 +5,7 @@ public class ServerResponse {
     private String id;
     private String name;
     private String host;
+    private String tenantScopeHash;
     private Integer sshPort;
     private Integer status;
     private String lastHeartbeatAt;
@@ -32,6 +33,14 @@ public class ServerResponse {
 
     public void setHost(String host) {
         this.host = host;
+    }
+
+    public String getTenantScopeHash() {
+        return this.tenantScopeHash;
+    }
+
+    public void setTenantScopeHash(String tenantScopeHash) {
+        this.tenantScopeHash = tenantScopeHash;
     }
 
     public Integer getSshPort() {

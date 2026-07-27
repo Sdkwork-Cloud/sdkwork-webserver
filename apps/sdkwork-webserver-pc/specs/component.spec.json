@@ -17,11 +17,17 @@
     "manifests": ["package.json", "sdkwork.app.config.json", "specs/component.spec.json"]
   },
   "canonicalSpecs": [
+    { "file": "SOUL.md", "path": "../../../sdkwork-specs/SOUL.md", "purpose": "SDKWork execution principles." },
+    { "file": "CODE_STYLE_SPEC.md", "path": "../../../sdkwork-specs/CODE_STYLE_SPEC.md", "purpose": "Build source integrity and authored source boundaries." },
+    { "file": "NAMING_SPEC.md", "path": "../../../sdkwork-specs/NAMING_SPEC.md", "purpose": "Canonical application and package naming." },
+    { "file": "TYPESCRIPT_CODE_SPEC.md", "path": "../../../sdkwork-specs/TYPESCRIPT_CODE_SPEC.md", "purpose": "TypeScript package and build runner contracts." },
+    { "file": "PNPM_SCRIPT_SPEC.md", "path": "../../../sdkwork-specs/PNPM_SCRIPT_SPEC.md", "purpose": "Delegated app-surface pnpm command contracts." },
     { "file": "APP_PC_ARCHITECTURE_SPEC.md", "path": "../../../sdkwork-specs/APP_PC_ARCHITECTURE_SPEC.md", "purpose": "PC package taxonomy." },
     { "file": "APP_PC_REACT_UI_SPEC.md", "path": "../../../sdkwork-specs/APP_PC_REACT_UI_SPEC.md", "purpose": "React PC UI architecture." },
     { "file": "APP_SDK_INTEGRATION_SPEC.md", "path": "../../../sdkwork-specs/APP_SDK_INTEGRATION_SPEC.md", "purpose": "SDK and IAM composition." },
     { "file": "BACKEND_UI_SPEC.md", "path": "../../../sdkwork-specs/BACKEND_UI_SPEC.md", "purpose": "Backend-admin isolation." },
     { "file": "CONFIG_SPEC.md", "path": "../../../sdkwork-specs/CONFIG_SPEC.md", "purpose": "Runtime configuration." },
+    { "file": "SOURCE_CONFIG_SPEC.md", "path": "../../../sdkwork-specs/SOURCE_CONFIG_SPEC.md", "purpose": "Parent topology delegation and runtime materialization." },
     { "file": "TEST_SPEC.md", "path": "../../../sdkwork-specs/TEST_SPEC.md", "purpose": "Verification." }
   ],
   "contracts": {
@@ -47,4 +53,3 @@
   },
   "metadata": { "managedBy": "sdkwork-web-server", "standardVersion": "2026-07-24" }
 }
-

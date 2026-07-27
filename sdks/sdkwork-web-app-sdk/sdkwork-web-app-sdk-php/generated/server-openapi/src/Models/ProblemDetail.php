@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace SDKWork\Web\AppSdk\Models;
 
+use SDKWork\Web\AppSdk\Models\FieldError;
+
 final class ProblemDetail
 {
     public ?string $type = null;
@@ -16,7 +18,13 @@ final class ProblemDetail
 
     public ?string $instance = null;
 
-    public ?string $requestId = null;
+    /** Platform or domain error code per API_SPEC.md §15.3. */
+    public ?int $code = null;
+
+    /** Server-owned request correlation id. */
+    public ?string $traceId = null;
+
+    public array $errors = [];
 
     public function __construct(array $data = [])
     {
@@ -35,9 +43,17 @@ final class ProblemDetail
         $this->instance = array_key_exists('instance', $data)
             ? $data['instance']
             : null;
-        $this->requestId = array_key_exists('requestId', $data)
-            ? $data['requestId']
+        $this->code = array_key_exists('code', $data)
+            ? $data['code']
             : null;
+        $this->traceId = array_key_exists('traceId', $data)
+            ? $data['traceId']
+            : null;
+        $this->errors = array_key_exists('errors', $data)
+            ? is_array($data['errors'])
+                ? array_values(array_map(static fn($item) => is_array($item) ? FieldError::fromArray($item) : $item, $data['errors']))
+                : []
+            : [];
     }
 
     public static function fromArray(?array $data): ?self
@@ -53,7 +69,9 @@ final class ProblemDetail
             'status' => $this->status,
             'detail' => $this->detail,
             'instance' => $this->instance,
-            'requestId' => $this->requestId,
+            'code' => $this->code,
+            'traceId' => $this->traceId,
+            'errors' => array_values(array_map(static fn($item) => $item instanceof FieldError ? $item->toArray() : $item, $this->errors)),
         ];
     }
 }

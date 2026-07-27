@@ -14,25 +14,25 @@ public class DomainApi {
     }
 
     /** 获取站点域名列表 */
-    public DomainPage sitesDomainsList(String siteId, Integer page, Integer pageSize) throws Exception {
+    public SitesDomainsListResponse sitesDomainsList(String siteId, Integer page, Integer pageSize) throws Exception {
         String query = buildQueryString(List.of(
             new QueryParameterSpec("page", page, "form", true, false, null),
             new QueryParameterSpec("page_size", pageSize, "form", true, false, null)
         ));
         Object raw = client.get(ApiPaths.appendQueryString(ApiPaths.appPath("/sites/" + serializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false)) + "/domains"), query));
-        return client.convertValue(raw, new TypeReference<DomainPage>() {});
+        return client.convertValue(raw, new TypeReference<SitesDomainsListResponse>() {});
     }
 
     /** 绑定域名 */
-    public DomainResponse sitesDomainsCreate(String siteId, CreateDomainRequest body) throws Exception {
+    public SitesDomainsCreateResponse201 sitesDomainsCreate(String siteId, CreateDomainRequest body) throws Exception {
         Object raw = client.post(ApiPaths.appPath("/sites/" + serializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false)) + "/domains"), body, null, null, "application/json");
-        return client.convertValue(raw, new TypeReference<DomainResponse>() {});
+        return client.convertValue(raw, new TypeReference<SitesDomainsCreateResponse201>() {});
     }
 
     /** 获取域名详情 */
-    public DomainResponse sitesDomainsRetrieve(String siteId, String domainId) throws Exception {
+    public SitesDomainsRetrieveResponse sitesDomainsRetrieve(String siteId, String domainId) throws Exception {
         Object raw = client.get(ApiPaths.appPath("/sites/" + serializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false)) + "/domains/" + serializePathParameter(domainId, new PathParameterSpec("domainId", "simple", false)) + ""));
-        return client.convertValue(raw, new TypeReference<DomainResponse>() {});
+        return client.convertValue(raw, new TypeReference<SitesDomainsRetrieveResponse>() {});
     }
 
     /** 解绑域名 */
@@ -42,9 +42,9 @@ public class DomainApi {
     }
 
     /** 验证域名所有权 */
-    public DomainVerifyResponse sitesDomainsVerify(String siteId, String domainId) throws Exception {
+    public SitesDomainsVerifyResponse sitesDomainsVerify(String siteId, String domainId) throws Exception {
         Object raw = client.post(ApiPaths.appPath("/sites/" + serializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false)) + "/domains/" + serializePathParameter(domainId, new PathParameterSpec("domainId", "simple", false)) + "/verify"), null);
-        return client.convertValue(raw, new TypeReference<DomainVerifyResponse>() {});
+        return client.convertValue(raw, new TypeReference<SitesDomainsVerifyResponse>() {});
     }
 
     private record PathParameterSpec(String name, String style, boolean explode) {}

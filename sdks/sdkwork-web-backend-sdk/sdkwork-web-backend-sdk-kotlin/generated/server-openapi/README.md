@@ -53,6 +53,11 @@ val client = SdkworkBackendClient(config)
 
 ## API Modules
 
+- `client.application` - application API
+- `client.applicationDomain` - application_domain API
+- `client.applicationDeployment` - application_deployment API
+- `client.certificate` - certificate API
+- `client.certificateDistribution` - certificate_distribution API
 - `client.nginx` - nginx API
 - `client.server` - server API
 - `client.agent` - agent API
@@ -60,10 +65,77 @@ val client = SdkworkBackendClient(config)
 
 ## Usage Examples
 
+### application
+
+```kotlin
+// List managed applications
+val params = linkedMapOf<String, Any>(
+    "page" to 1,
+    "page_size" to 2,
+    "applicationType" to "WEB",
+    "siteType" to 4,
+    "status" to 5,
+    "keyword" to "keyword"
+)
+val result = client.application.applicationsList(params)
+println(result)
+```
+
+### application_domain
+
+```kotlin
+// List application domains
+val applicationId = "1"
+val params = linkedMapOf<String, Any>(
+    "page" to 1,
+    "page_size" to 2
+)
+val result = client.applicationDomain.applicationsDomainsList(applicationId, params)
+println(result)
+```
+
+### application_deployment
+
+```kotlin
+// List application deployments
+val applicationId = "1"
+val params = linkedMapOf<String, Any>(
+    "page" to 1,
+    "page_size" to 2,
+    "status" to 3
+)
+val result = client.applicationDeployment.applicationsDeploymentsList(applicationId, params)
+println(result)
+```
+
+### certificate
+
+```kotlin
+// List canonical certificates
+val params = linkedMapOf<String, Any>(
+    "page" to 1,
+    "page_size" to 2
+)
+val result = client.certificate.certificatesList(params)
+println(result)
+```
+
+### certificate_distribution
+
+```kotlin
+// List certificate manifest convergence by server
+val params = linkedMapOf<String, Any>(
+    "page" to 1,
+    "page_size" to 2
+)
+val result = client.certificateDistribution.certificatesDistributionList(params)
+println(result)
+```
+
 ### nginx
 
 ```kotlin
-// 获取 Nginx 状态
+// Retrieve Nginx status
 val result = client.nginx.statusRetrieve()
 println(result)
 ```
@@ -71,10 +143,10 @@ println(result)
 ### server
 
 ```kotlin
-// 获取服务器列表
+// List managed servers
 val params = linkedMapOf<String, Any>(
     "page" to 1,
-    "pageSize" to 2
+    "page_size" to 2
 )
 val result = client.server.serversList(params)
 println(result)
@@ -83,21 +155,21 @@ println(result)
 ### agent
 
 ```kotlin
-// 拉取 nginx 配置与证书 bundle
+// Retrieve the Nginx configuration and certificate bundle
 val params = linkedMapOf<String, Any>(
     "ifSyncVersion" to "ifsyncversion"
 )
-val result = client.agent.sync(params)
+val result = client.agent.retrieve(params)
 println(result)
 ```
 
 ### audit
 
 ```kotlin
-// 获取审计日志列表
+// List audit logs
 val params = linkedMapOf<String, Any>(
     "page" to 1,
-    "pageSize" to 2,
+    "page_size" to 2,
     "targetType" to "targettype",
     "action" to "action",
     "operatorId" to "1",

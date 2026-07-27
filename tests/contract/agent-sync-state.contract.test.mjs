@@ -68,8 +68,9 @@ test('node daemon state contract is present in root verification and component m
   const packageJson = JSON.parse(readFileSync(path.join(REPO_ROOT, 'package.json'), 'utf8'));
   assert.equal(packageJson.scripts.test, 'pnpm exec sdkwork-app test');
   assert.equal(packageJson.scripts.verify, 'pnpm exec sdkwork-app verify');
-  assert.match(packageJson.scripts['_sdkwork:test'], /agent-sync-state\.contract\.test\.mjs/u);
-  assert.match(packageJson.scripts['_sdkwork:verify'], /agent-sync-state\.contract\.test\.mjs/u);
+  assert.match(packageJson.scripts['test:contracts'], /tests\/contract\/\*\.contract\.test\.mjs/u);
+  assert.match(packageJson.scripts['_sdkwork:test'], /pnpm test:contracts/u);
+  assert.match(packageJson.scripts['_sdkwork:verify'], /pnpm run _sdkwork:test/u);
 
   const component = JSON.parse(
     readFileSync(

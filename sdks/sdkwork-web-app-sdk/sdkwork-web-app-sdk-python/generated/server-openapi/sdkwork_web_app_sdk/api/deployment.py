@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional
 from ..http_client import HttpClient
-from ..models import CreateDeploymentRequest, DeploymentPage, DeploymentResponse
+from ..models import CreateDeploymentRequest, SitesDeploymentsCreateResponse201, SitesDeploymentsListResponse, SitesDeploymentsRetrieveResponse, SitesDeploymentsRollbackResponse
 
 def _append_query_string(path: str, raw_query_string: str) -> str:
     query = raw_query_string.lstrip('?')
@@ -207,7 +207,7 @@ class DeploymentSitesDeploymentsApi:
         self._client = client
 
 
-    def list(self, site_id: str, page: Optional[int] = None, page_size: Optional[int] = None, status: Optional[int] = None) -> DeploymentPage:
+    def list(self, site_id: str, page: Optional[int] = None, page_size: Optional[int] = None, status: Optional[int] = None) -> SitesDeploymentsListResponse:
         """获取部署历史"""
         query = build_query_string([
             {'name': 'page', 'value': page, 'style': 'form', 'explode': True, 'allow_reserved': False},
@@ -216,14 +216,14 @@ class DeploymentSitesDeploymentsApi:
         ])
         return self._client.get(_append_query_string(f"/app/v3/api/sites/{serialize_path_parameter(site_id, {'name': 'siteId', 'style': 'simple', 'explode': False})}/deployments", query))
 
-    def create(self, site_id: str, body: CreateDeploymentRequest) -> DeploymentResponse:
+    def create(self, site_id: str, body: CreateDeploymentRequest) -> SitesDeploymentsCreateResponse201:
         """发起部署"""
         return self._client.post(f"/app/v3/api/sites/{serialize_path_parameter(site_id, {'name': 'siteId', 'style': 'simple', 'explode': False})}/deployments", json=body)
 
-    def retrieve(self, site_id: str, deployment_id: str) -> DeploymentResponse:
+    def retrieve(self, site_id: str, deployment_id: str) -> SitesDeploymentsRetrieveResponse:
         """获取部署详情"""
         return self._client.get(f"/app/v3/api/sites/{serialize_path_parameter(site_id, {'name': 'siteId', 'style': 'simple', 'explode': False})}/deployments/{serialize_path_parameter(deployment_id, {'name': 'deploymentId', 'style': 'simple', 'explode': False})}")
 
-    def rollback(self, site_id: str, deployment_id: str) -> DeploymentResponse:
+    def rollback(self, site_id: str, deployment_id: str) -> SitesDeploymentsRollbackResponse:
         """回滚部署"""
         return self._client.post(f"/app/v3/api/sites/{serialize_path_parameter(site_id, {'name': 'siteId', 'style': 'simple', 'explode': False})}/deployments/{serialize_path_parameter(deployment_id, {'name': 'deploymentId', 'style': 'simple', 'explode': False})}/rollback")

@@ -111,6 +111,8 @@ sdkwork-web-backend-sdk = { path = "sdks/sdkwork-web-backend-sdk/sdkwork-web-bac
 sdkwork-web-internal-sdk = { path = "sdks/sdkwork-web-internal-sdk/sdkwork-web-internal-sdk-rust/generated/server-openapi" }
 
 sdkwork-iam-web-adapter = { path = "../sdkwork-iam/crates/sdkwork-iam-web-adapter" }
+sdkwork-iam-database-host = { path = "../sdkwork-iam/crates/sdkwork-iam-database-host" }
+sdkwork-iam-embedded-application-bootstrap = { path = "../sdkwork-iam/crates/sdkwork-iam-embedded-application-bootstrap" }
 sdkwork-web-axum = { path = "../sdkwork-web-framework/crates/sdkwork-web-axum" }
 sdkwork-web-core = { path = "../sdkwork-web-framework/crates/sdkwork-web-core" }
 sdkwork-web-bootstrap = { path = "../sdkwork-web-framework/crates/sdkwork-web-bootstrap" }

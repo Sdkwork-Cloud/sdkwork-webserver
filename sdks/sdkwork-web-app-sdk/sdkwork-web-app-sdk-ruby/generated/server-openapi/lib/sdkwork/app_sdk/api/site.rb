@@ -1,7 +1,11 @@
 require_relative 'base_api'
 require_relative '../models/create_site_request'
-require_relative '../models/site_page'
-require_relative '../models/site_response'
+require_relative '../models/sites_activate_response'
+require_relative '../models/sites_create_response201'
+require_relative '../models/sites_list_response'
+require_relative '../models/sites_pause_response'
+require_relative '../models/sites_retrieve_response'
+require_relative '../models/sites_update_response'
 require_relative '../models/update_site_request'
 
 module Sdkwork
@@ -9,12 +13,13 @@ module Sdkwork
     module Api
       class SiteApi < BaseApi
           # 获取站点列表
-          def sites_list(page: nil, page_size: nil, status: nil, site_type: nil, keyword: nil)
+          def sites_list(page: nil, page_size: nil, status: nil, application_type: nil, site_type: nil, keyword: nil)
             path = '/app/v3/api/sites'
             query = build_query_string([
               QueryParameterSpec.new('page', page, 'form', true, false, nil),
-              QueryParameterSpec.new('pageSize', page_size, 'form', true, false, nil),
+              QueryParameterSpec.new('page_size', page_size, 'form', true, false, nil),
               QueryParameterSpec.new('status', status, 'form', true, false, nil),
+              QueryParameterSpec.new('applicationType', application_type, 'form', true, false, nil),
               QueryParameterSpec.new('siteType', site_type, 'form', true, false, nil),
               QueryParameterSpec.new('keyword', keyword, 'form', true, false, nil),
             ])
@@ -22,7 +27,7 @@ module Sdkwork
             options = {}
 
             result = @client.request('GET', path, **options)
-            result.is_a?(Hash) ? Models::SitePage.from_hash(result) : nil
+            result.is_a?(Hash) ? Models::SitesListResponse.from_hash(result) : nil
           end
 
           # 创建站点
@@ -32,7 +37,7 @@ module Sdkwork
             options = {}
             options[:json] = payload unless payload.nil?
             result = @client.request('POST', path, **options)
-            result.is_a?(Hash) ? Models::SiteResponse.from_hash(result) : nil
+            result.is_a?(Hash) ? Models::SitesCreateResponse201.from_hash(result) : nil
           end
 
           # 获取站点详情
@@ -41,7 +46,7 @@ module Sdkwork
             options = {}
 
             result = @client.request('GET', path, **options)
-            result.is_a?(Hash) ? Models::SiteResponse.from_hash(result) : nil
+            result.is_a?(Hash) ? Models::SitesRetrieveResponse.from_hash(result) : nil
           end
 
           # 更新站点
@@ -51,7 +56,7 @@ module Sdkwork
             options = {}
             options[:json] = payload unless payload.nil?
             result = @client.request('PATCH', path, **options)
-            result.is_a?(Hash) ? Models::SiteResponse.from_hash(result) : nil
+            result.is_a?(Hash) ? Models::SitesUpdateResponse.from_hash(result) : nil
           end
 
           # 删除站点
@@ -69,7 +74,7 @@ module Sdkwork
             options = {}
 
             result = @client.request('POST', path, **options)
-            result.is_a?(Hash) ? Models::SiteResponse.from_hash(result) : nil
+            result.is_a?(Hash) ? Models::SitesActivateResponse.from_hash(result) : nil
           end
 
           # 暂停站点
@@ -78,7 +83,7 @@ module Sdkwork
             options = {}
 
             result = @client.request('POST', path, **options)
-            result.is_a?(Hash) ? Models::SiteResponse.from_hash(result) : nil
+            result.is_a?(Hash) ? Models::SitesPauseResponse.from_hash(result) : nil
           end
 
       end

@@ -16,9 +16,9 @@ namespace SDKWork.Web.BackendSdk.Api
         }
 
         /// <summary>
-        /// 获取 Nginx 配置列表
+        /// List Nginx configurations
         /// </summary>
-        public async Task<SDKWork.Web.BackendSdk.Models.NginxConfigPage?> ConfigsListAsync(int? page = null, int? pageSize = null, string? siteId = null, int? configType = null, bool? isActive = null)
+        public async Task<SDKWork.Web.BackendSdk.Models.ConfigsListResponse?> ConfigsListAsync(int? page = null, int? pageSize = null, string? siteId = null, int? configType = null, bool? isActive = null)
         {
             var queryString = BuildQueryString(new[]
             {
@@ -28,63 +28,63 @@ namespace SDKWork.Web.BackendSdk.Api
                 new QueryParameterSpec("configType", configType, "form", true, false, null),
                 new QueryParameterSpec("isActive", isActive, "form", true, false, null),
             });
-            return await _client.GetAsync<SDKWork.Web.BackendSdk.Models.NginxConfigPage>(ApiPaths.AppendQueryString(ApiPaths.BackendPath("/nginx/configs"), queryString));
+            return await _client.GetAsync<SDKWork.Web.BackendSdk.Models.ConfigsListResponse>(ApiPaths.AppendQueryString(ApiPaths.BackendPath("/nginx/configs"), queryString));
         }
 
         /// <summary>
-        /// 创建 Nginx 配置
+        /// Create an Nginx configuration
         /// </summary>
-        public async Task<SDKWork.Web.BackendSdk.Models.NginxConfigResponse?> ConfigsCreateAsync(SDKWork.Web.BackendSdk.Models.CreateNginxConfigRequest body)
+        public async Task<SDKWork.Web.BackendSdk.Models.ConfigsCreateResponse201?> ConfigsCreateAsync(SDKWork.Web.BackendSdk.Models.CreateNginxConfigRequest body)
         {
-            return await _client.PostAsync<SDKWork.Web.BackendSdk.Models.NginxConfigResponse>(ApiPaths.BackendPath("/nginx/configs"), body, null, null, "application/json");
+            return await _client.PostAsync<SDKWork.Web.BackendSdk.Models.ConfigsCreateResponse201>(ApiPaths.BackendPath("/nginx/configs"), body, null, null, "application/json");
         }
 
         /// <summary>
-        /// 获取 Nginx 配置详情
+        /// Retrieve an Nginx configuration
         /// </summary>
-        public async Task<SDKWork.Web.BackendSdk.Models.NginxConfigResponse?> ConfigsRetrieveAsync(string configId)
+        public async Task<SDKWork.Web.BackendSdk.Models.ConfigsRetrieveResponse?> ConfigsRetrieveAsync(string configId)
         {
-            return await _client.GetAsync<SDKWork.Web.BackendSdk.Models.NginxConfigResponse>(ApiPaths.BackendPath($"/nginx/etc/{SerializePathParameter(configId, new PathParameterSpec("configId", "simple", false))}"));
+            return await _client.GetAsync<SDKWork.Web.BackendSdk.Models.ConfigsRetrieveResponse>(ApiPaths.BackendPath($"/nginx/etc/{SerializePathParameter(configId, new PathParameterSpec("configId", "simple", false))}"));
         }
 
         /// <summary>
-        /// 更新 Nginx 配置
+        /// Update an Nginx configuration
         /// </summary>
-        public async Task<SDKWork.Web.BackendSdk.Models.NginxConfigResponse?> ConfigsUpdateAsync(string configId, SDKWork.Web.BackendSdk.Models.UpdateNginxConfigRequest body)
+        public async Task<SDKWork.Web.BackendSdk.Models.ConfigsUpdateResponse?> ConfigsUpdateAsync(string configId, SDKWork.Web.BackendSdk.Models.UpdateNginxConfigRequest body)
         {
-            return await _client.PutAsync<SDKWork.Web.BackendSdk.Models.NginxConfigResponse>(ApiPaths.BackendPath($"/nginx/etc/{SerializePathParameter(configId, new PathParameterSpec("configId", "simple", false))}"), body, null, null, "application/json");
+            return await _client.PutAsync<SDKWork.Web.BackendSdk.Models.ConfigsUpdateResponse>(ApiPaths.BackendPath($"/nginx/etc/{SerializePathParameter(configId, new PathParameterSpec("configId", "simple", false))}"), body, null, null, "application/json");
         }
 
         /// <summary>
-        /// 校验 Nginx 配置
+        /// Validate an Nginx configuration
         /// </summary>
-        public async Task<SDKWork.Web.BackendSdk.Models.NginxValidateResponse?> ConfigsValidateAsync(string configId)
+        public async Task<SDKWork.Web.BackendSdk.Models.ConfigsValidateResponse?> ConfigsValidateAsync(string configId)
         {
-            return await _client.PostAsync<SDKWork.Web.BackendSdk.Models.NginxValidateResponse>(ApiPaths.BackendPath($"/nginx/etc/{SerializePathParameter(configId, new PathParameterSpec("configId", "simple", false))}/validate"), null);
+            return await _client.PostAsync<SDKWork.Web.BackendSdk.Models.ConfigsValidateResponse>(ApiPaths.BackendPath($"/nginx/etc/{SerializePathParameter(configId, new PathParameterSpec("configId", "simple", false))}/validate"), null);
         }
 
         /// <summary>
-        /// 部署 Nginx 配置
+        /// Deploy an Nginx configuration
         /// </summary>
-        public async Task<SDKWork.Web.BackendSdk.Models.NginxDeployResponse?> ConfigsDeployAsync(string configId)
+        public async Task<SDKWork.Web.BackendSdk.Models.ConfigsDeployResponse?> ConfigsDeployAsync(string configId)
         {
-            return await _client.PostAsync<SDKWork.Web.BackendSdk.Models.NginxDeployResponse>(ApiPaths.BackendPath($"/nginx/etc/{SerializePathParameter(configId, new PathParameterSpec("configId", "simple", false))}/deploy"), null);
+            return await _client.PostAsync<SDKWork.Web.BackendSdk.Models.ConfigsDeployResponse>(ApiPaths.BackendPath($"/nginx/etc/{SerializePathParameter(configId, new PathParameterSpec("configId", "simple", false))}/deploy"), null);
         }
 
         /// <summary>
-        /// 热加载 Nginx
+        /// Reload Nginx
         /// </summary>
-        public async Task<SDKWork.Web.BackendSdk.Models.NginxReloadResponse?> ReloadAsync()
+        public async Task<SDKWork.Web.BackendSdk.Models.ReloadResponse?> ReloadAsync()
         {
-            return await _client.PostAsync<SDKWork.Web.BackendSdk.Models.NginxReloadResponse>(ApiPaths.BackendPath("/nginx/reload"), null);
+            return await _client.PostAsync<SDKWork.Web.BackendSdk.Models.ReloadResponse>(ApiPaths.BackendPath("/nginx/reload"), null);
         }
 
         /// <summary>
-        /// 获取 Nginx 状态
+        /// Retrieve Nginx status
         /// </summary>
-        public async Task<SDKWork.Web.BackendSdk.Models.NginxStatusResponse?> StatusRetrieveAsync()
+        public async Task<SDKWork.Web.BackendSdk.Models.StatusRetrieveResponse?> StatusRetrieveAsync()
         {
-            return await _client.GetAsync<SDKWork.Web.BackendSdk.Models.NginxStatusResponse>(ApiPaths.BackendPath("/nginx/status"));
+            return await _client.GetAsync<SDKWork.Web.BackendSdk.Models.StatusRetrieveResponse>(ApiPaths.BackendPath("/nginx/status"));
         }
 
         private sealed record PathParameterSpec(string Name, string Style, bool Explode);

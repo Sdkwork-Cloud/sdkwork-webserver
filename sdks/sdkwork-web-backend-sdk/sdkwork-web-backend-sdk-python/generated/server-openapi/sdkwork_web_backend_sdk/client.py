@@ -1,4 +1,9 @@
 from .http_client import HttpClient, SdkConfig
+from .api.application import ApplicationApi
+from .api.application_domain import ApplicationDomainApi
+from .api.application_deployment import ApplicationDeploymentApi
+from .api.certificate import CertificateApi
+from .api.certificate_distribution import CertificateDistributionApi
 from .api.nginx import NginxApi
 from .api.server import ServerApi
 from .api.agent import AgentApi
@@ -10,12 +15,22 @@ class SdkworkBackendClient:
 
     def __init__(self, config: SdkConfig):
         self._client = HttpClient(config)
+        self.application: ApplicationApi
+        self.application_domain: ApplicationDomainApi
+        self.application_deployment: ApplicationDeploymentApi
+        self.certificate: CertificateApi
+        self.certificate_distribution: CertificateDistributionApi
         self.nginx: NginxApi
         self.server: ServerApi
         self.agent: AgentApi
         self.audit: AuditApi
 
         # Initialize API modules
+        self.application = ApplicationApi(self._client)
+        self.application_domain = ApplicationDomainApi(self._client)
+        self.application_deployment = ApplicationDeploymentApi(self._client)
+        self.certificate = CertificateApi(self._client)
+        self.certificate_distribution = CertificateDistributionApi(self._client)
         self.nginx = NginxApi(self._client)
         self.server = ServerApi(self._client)
         self.agent = AgentApi(self._client)

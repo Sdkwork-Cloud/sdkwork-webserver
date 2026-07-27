@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional
 from ..http_client import HttpClient
-from ..models import CreateNginxConfigRequest, NginxConfigPage, NginxConfigResponse, NginxDeployResponse, NginxReloadResponse, NginxStatusResponse, NginxValidateResponse, UpdateNginxConfigRequest
+from ..models import ConfigsCreateResponse201, ConfigsDeployResponse, ConfigsListResponse, ConfigsRetrieveResponse, ConfigsUpdateResponse, ConfigsValidateResponse, CreateNginxConfigRequest, ReloadResponse, StatusRetrieveResponse, UpdateNginxConfigRequest
 
 def _append_query_string(path: str, raw_query_string: str) -> str:
     query = raw_query_string.lstrip('?')
@@ -190,12 +190,9 @@ class NginxApi:
     def __init__(self, client: HttpClient):
         self._client = client
         self.configs = NginxConfigsApi(client)
+        self.reload = NginxReloadApi(client)
         self.status = NginxStatusApi(client)
 
-
-    def create_reload(self) -> NginxReloadResponse:
-        """热加载 Nginx"""
-        return self._client.post(f"/backend/v3/api/nginx/reload")
 
 class NginxConfigsApi:
     """nginx nginx.configs API client."""
@@ -204,8 +201,8 @@ class NginxConfigsApi:
         self._client = client
 
 
-    def list(self, page: Optional[int] = None, page_size: Optional[int] = None, site_id: Optional[str] = None, config_type: Optional[int] = None, is_active: Optional[bool] = None) -> NginxConfigPage:
-        """获取 Nginx 配置列表"""
+    def list(self, page: Optional[int] = None, page_size: Optional[int] = None, site_id: Optional[str] = None, config_type: Optional[int] = None, is_active: Optional[bool] = None) -> ConfigsListResponse:
+        """List Nginx configurations"""
         query = build_query_string([
             {'name': 'page', 'value': page, 'style': 'form', 'explode': True, 'allow_reserved': False},
             {'name': 'page_size', 'value': page_size, 'style': 'form', 'explode': True, 'allow_reserved': False},
@@ -215,25 +212,36 @@ class NginxConfigsApi:
         ])
         return self._client.get(_append_query_string(f"/backend/v3/api/nginx/configs", query))
 
-    def create(self, body: CreateNginxConfigRequest) -> NginxConfigResponse:
-        """创建 Nginx 配置"""
+    def create(self, body: CreateNginxConfigRequest) -> ConfigsCreateResponse201:
+        """Create an Nginx configuration"""
         return self._client.post(f"/backend/v3/api/nginx/configs", json=body)
 
-    def retrieve(self, config_id: str) -> NginxConfigResponse:
-        """获取 Nginx 配置详情"""
+    def retrieve(self, config_id: str) -> ConfigsRetrieveResponse:
+        """Retrieve an Nginx configuration"""
         return self._client.get(f"/backend/v3/api/nginx/etc/{serialize_path_parameter(config_id, {'name': 'configId', 'style': 'simple', 'explode': False})}")
 
-    def update(self, config_id: str, body: UpdateNginxConfigRequest) -> NginxConfigResponse:
-        """更新 Nginx 配置"""
+    def update(self, config_id: str, body: UpdateNginxConfigRequest) -> ConfigsUpdateResponse:
+        """Update an Nginx configuration"""
         return self._client.put(f"/backend/v3/api/nginx/etc/{serialize_path_parameter(config_id, {'name': 'configId', 'style': 'simple', 'explode': False})}", json=body)
 
-    def create_validate(self, config_id: str) -> NginxValidateResponse:
-        """校验 Nginx 配置"""
+    def validate(self, config_id: str) -> ConfigsValidateResponse:
+        """Validate an Nginx configuration"""
         return self._client.post(f"/backend/v3/api/nginx/etc/{serialize_path_parameter(config_id, {'name': 'configId', 'style': 'simple', 'explode': False})}/validate")
 
-    def create_deploy(self, config_id: str) -> NginxDeployResponse:
-        """部署 Nginx 配置"""
+    def deploy(self, config_id: str) -> ConfigsDeployResponse:
+        """Deploy an Nginx configuration"""
         return self._client.post(f"/backend/v3/api/nginx/etc/{serialize_path_parameter(config_id, {'name': 'configId', 'style': 'simple', 'explode': False})}/deploy")
+
+class NginxReloadApi:
+    """nginx nginx.reload API client."""
+
+    def __init__(self, client: HttpClient):
+        self._client = client
+
+
+    def create(self) -> ReloadResponse:
+        """Reload Nginx"""
+        return self._client.post(f"/backend/v3/api/nginx/reload")
 
 class NginxStatusApi:
     """nginx nginx.status API client."""
@@ -242,6 +250,6 @@ class NginxStatusApi:
         self._client = client
 
 
-    def list(self) -> NginxStatusResponse:
-        """获取 Nginx 状态"""
+    def retrieve(self) -> StatusRetrieveResponse:
+        """Retrieve Nginx status"""
         return self._client.get(f"/backend/v3/api/nginx/status")

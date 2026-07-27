@@ -29,7 +29,7 @@ client.SetAccessToken("your-access-token")
     // Use the SDK
     params := map[string]interface{}{
         "page": 1,
-        "pageSize": 2,
+        "page_size": 2,
     }
     result, err := client.Certificate.CertificatesList(params)
     if err != nil {
@@ -74,8 +74,9 @@ client.SetHeader("X-Custom-Header", "value")
 // 获取站点列表
 params := map[string]interface{}{
     "page": 1,
-    "pageSize": 2,
+    "page_size": 2,
     "status": 0,
+    "applicationType": "WEB",
     "siteType": 1,
     "keyword": "keyword",
 }
@@ -93,7 +94,7 @@ fmt.Println(result)
 siteId := "1"
 params := map[string]interface{}{
     "page": 1,
-    "pageSize": 2,
+    "page_size": 2,
 }
 result, err := client.Domain.SitesDomainsList(siteId, params)
 if err != nil {
@@ -109,7 +110,7 @@ fmt.Println(result)
 siteId := "1"
 params := map[string]interface{}{
     "page": 1,
-    "pageSize": 2,
+    "page_size": 2,
     "status": 0,
 }
 result, err := client.Deployment.SitesDeploymentsList(siteId, params)
@@ -140,7 +141,7 @@ fmt.Println(result)
 // 获取证书列表
 params := map[string]interface{}{
     "page": 1,
-    "pageSize": 2,
+    "page_size": 2,
 }
 result, err := client.Certificate.CertificatesList(params)
 if err != nil {
@@ -166,7 +167,7 @@ fmt.Println(result)
 ```go
 params := map[string]interface{}{
     "page": 1,
-    "pageSize": 2,
+    "page_size": 2,
 }
 _, err := client.Certificate.CertificatesList(params)
 if err != nil {

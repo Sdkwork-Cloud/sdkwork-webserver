@@ -8,6 +8,7 @@ export interface SiteListParams {
   page?: number;
   pageSize?: number;
   status?: 0 | 1 | 2 | 3;
+  applicationType?: 'WEB' | 'API';
   siteType?: 1 | 2 | 3 | 4 | 5 | 6;
   keyword?: string;
 }
@@ -26,6 +27,7 @@ export class SiteApi {
       { name: 'page', value: params?.page, style: 'form', explode: true, allowReserved: false },
       { name: 'page_size', value: params?.pageSize, style: 'form', explode: true, allowReserved: false },
       { name: 'status', value: params?.status, style: 'form', explode: true, allowReserved: false },
+      { name: 'applicationType', value: params?.applicationType, style: 'form', explode: true, allowReserved: false },
       { name: 'siteType', value: params?.siteType, style: 'form', explode: true, allowReserved: false },
       { name: 'keyword', value: params?.keyword, style: 'form', explode: true, allowReserved: false },
     ]);

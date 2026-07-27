@@ -8,8 +8,8 @@ import com.sdkwork.web.backend.sdk.http.HttpClient
 
 class NginxApi(private val client: HttpClient) {
 
-    /** 获取 Nginx 配置列表 */
-    suspend fun configsList(page: Int? = null, pageSize: Int? = null, siteId: String? = null, configType: Int? = null, isActive: Boolean? = null): NginxConfigPage? {
+    /** List Nginx configurations */
+    suspend fun configsList(page: Int? = null, pageSize: Int? = null, siteId: String? = null, configType: Int? = null, isActive: Boolean? = null): ConfigsListResponse? {
         val query = buildQueryString(listOf(
             QueryParameterSpec("page", page, "form", true, false, null),
             QueryParameterSpec("page_size", pageSize, "form", true, false, null),
@@ -18,49 +18,49 @@ class NginxApi(private val client: HttpClient) {
             QueryParameterSpec("isActive", isActive, "form", true, false, null)
         ))
         val raw = client.get(ApiPaths.appendQueryString(ApiPaths.backendPath("/nginx/configs"), query))
-        return client.convertValue(raw, object : TypeReference<NginxConfigPage>() {})
+        return client.convertValue(raw, object : TypeReference<ConfigsListResponse>() {})
     }
 
-    /** 创建 Nginx 配置 */
-    suspend fun configsCreate(body: CreateNginxConfigRequest): NginxConfigResponse? {
+    /** Create an Nginx configuration */
+    suspend fun configsCreate(body: CreateNginxConfigRequest): ConfigsCreateResponse201? {
         val raw = client.post(ApiPaths.backendPath("/nginx/configs"), body, null, null, "application/json")
-        return client.convertValue(raw, object : TypeReference<NginxConfigResponse>() {})
+        return client.convertValue(raw, object : TypeReference<ConfigsCreateResponse201>() {})
     }
 
-    /** 获取 Nginx 配置详情 */
-    suspend fun configsRetrieve(configId: String): NginxConfigResponse? {
+    /** Retrieve an Nginx configuration */
+    suspend fun configsRetrieve(configId: String): ConfigsRetrieveResponse? {
         val raw = client.get(ApiPaths.backendPath("/nginx/etc/${serializePathParameter(configId, PathParameterSpec("configId", "simple", false))}"))
-        return client.convertValue(raw, object : TypeReference<NginxConfigResponse>() {})
+        return client.convertValue(raw, object : TypeReference<ConfigsRetrieveResponse>() {})
     }
 
-    /** 更新 Nginx 配置 */
-    suspend fun configsUpdate(configId: String, body: UpdateNginxConfigRequest): NginxConfigResponse? {
+    /** Update an Nginx configuration */
+    suspend fun configsUpdate(configId: String, body: UpdateNginxConfigRequest): ConfigsUpdateResponse? {
         val raw = client.put(ApiPaths.backendPath("/nginx/etc/${serializePathParameter(configId, PathParameterSpec("configId", "simple", false))}"), body, null, null, "application/json")
-        return client.convertValue(raw, object : TypeReference<NginxConfigResponse>() {})
+        return client.convertValue(raw, object : TypeReference<ConfigsUpdateResponse>() {})
     }
 
-    /** 校验 Nginx 配置 */
-    suspend fun configsValidate(configId: String): NginxValidateResponse? {
+    /** Validate an Nginx configuration */
+    suspend fun configsValidate(configId: String): ConfigsValidateResponse? {
         val raw = client.post(ApiPaths.backendPath("/nginx/etc/${serializePathParameter(configId, PathParameterSpec("configId", "simple", false))}/validate"), null)
-        return client.convertValue(raw, object : TypeReference<NginxValidateResponse>() {})
+        return client.convertValue(raw, object : TypeReference<ConfigsValidateResponse>() {})
     }
 
-    /** 部署 Nginx 配置 */
-    suspend fun configsDeploy(configId: String): NginxDeployResponse? {
+    /** Deploy an Nginx configuration */
+    suspend fun configsDeploy(configId: String): ConfigsDeployResponse? {
         val raw = client.post(ApiPaths.backendPath("/nginx/etc/${serializePathParameter(configId, PathParameterSpec("configId", "simple", false))}/deploy"), null)
-        return client.convertValue(raw, object : TypeReference<NginxDeployResponse>() {})
+        return client.convertValue(raw, object : TypeReference<ConfigsDeployResponse>() {})
     }
 
-    /** 热加载 Nginx */
-    suspend fun reload(): NginxReloadResponse? {
+    /** Reload Nginx */
+    suspend fun reload(): ReloadResponse? {
         val raw = client.post(ApiPaths.backendPath("/nginx/reload"), null)
-        return client.convertValue(raw, object : TypeReference<NginxReloadResponse>() {})
+        return client.convertValue(raw, object : TypeReference<ReloadResponse>() {})
     }
 
-    /** 获取 Nginx 状态 */
-    suspend fun statusRetrieve(): NginxStatusResponse? {
+    /** Retrieve Nginx status */
+    suspend fun statusRetrieve(): StatusRetrieveResponse? {
         val raw = client.get(ApiPaths.backendPath("/nginx/status"))
-        return client.convertValue(raw, object : TypeReference<NginxStatusResponse>() {})
+        return client.convertValue(raw, object : TypeReference<StatusRetrieveResponse>() {})
     }
 
     private data class PathParameterSpec(val name: String, val style: String, val explode: Boolean)

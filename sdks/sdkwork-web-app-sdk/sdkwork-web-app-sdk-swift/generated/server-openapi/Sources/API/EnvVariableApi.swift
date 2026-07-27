@@ -8,16 +8,16 @@ public class EnvVariableApi {
     }
 
     /// 获取环境变量列表
-    public func sitesEnvVariablesList(siteId: String, environment: String? = nil) async throws -> EnvVariablePage? {
+    public func sitesEnvVariablesList(siteId: String, environment: String? = nil) async throws -> SitesEnvVariablesListResponse? {
         let query = buildQueryString([
             QueryParameterSpec(name: "environment", value: environment, style: "form", explode: true, allowReserved: false, contentType: nil)
         ])
-        return try await client.get(ApiPaths.appendQueryString(ApiPaths.appPath("/sites/\(serializePathParameter(siteId, PathParameterSpec(name: "siteId", style: "simple", explode: false)))/env_variables"), query), responseType: EnvVariablePage.self)
+        return try await client.get(ApiPaths.appendQueryString(ApiPaths.appPath("/sites/\(serializePathParameter(siteId, PathParameterSpec(name: "siteId", style: "simple", explode: false)))/env_variables"), query), responseType: SitesEnvVariablesListResponse.self)
     }
 
     /// 创建环境变量
-    public func sitesEnvVariablesCreate(siteId: String, body: CreateEnvVariableRequest) async throws -> EnvVariableResponse? {
-        return try await client.post(ApiPaths.appPath("/sites/\(serializePathParameter(siteId, PathParameterSpec(name: "siteId", style: "simple", explode: false)))/env_variables"), body: body, params: nil, headers: nil, contentType: "application/json", responseType: EnvVariableResponse.self)
+    public func sitesEnvVariablesCreate(siteId: String, body: CreateEnvVariableRequest) async throws -> SitesEnvVariablesCreateResponse201? {
+        return try await client.post(ApiPaths.appPath("/sites/\(serializePathParameter(siteId, PathParameterSpec(name: "siteId", style: "simple", explode: false)))/env_variables"), body: body, params: nil, headers: nil, contentType: "application/json", responseType: SitesEnvVariablesCreateResponse201.self)
     }
 
     private struct PathParameterSpec {

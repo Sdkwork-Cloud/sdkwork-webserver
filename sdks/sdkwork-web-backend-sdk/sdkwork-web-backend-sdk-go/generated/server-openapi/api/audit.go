@@ -17,11 +17,11 @@ func NewAuditApi(client *sdkhttp.Client) *AuditApi {
     return &AuditApi{client: client}
 }
 
-// 获取审计日志列表
-func (a *AuditApi) LogsList(page *int, pageSize *int, targetType *string, action *string, operatorId *string, startDate *string, endDate *string) (sdktypes.AuditLogPage, error) {
+// List audit logs
+func (a *AuditApi) LogsList(page *int, pageSize *int, targetType *string, action *string, operatorId *string, startDate *string, endDate *string) (sdktypes.AuditLogsListResponse, error) {
     query := BuildQueryString([]QueryParameterSpec{
         {Name: "page", Value: func() interface{} { if page == nil { return nil }; return *page }(), Style: "form", Explode: true, AllowReserved: false},
-        {Name: "pageSize", Value: func() interface{} { if pageSize == nil { return nil }; return *pageSize }(), Style: "form", Explode: true, AllowReserved: false},
+        {Name: "page_size", Value: func() interface{} { if pageSize == nil { return nil }; return *pageSize }(), Style: "form", Explode: true, AllowReserved: false},
         {Name: "targetType", Value: func() interface{} { if targetType == nil { return nil }; return *targetType }(), Style: "form", Explode: true, AllowReserved: false},
         {Name: "action", Value: func() interface{} { if action == nil { return nil }; return *action }(), Style: "form", Explode: true, AllowReserved: false},
         {Name: "operatorId", Value: func() interface{} { if operatorId == nil { return nil }; return *operatorId }(), Style: "form", Explode: true, AllowReserved: false},
@@ -30,10 +30,10 @@ func (a *AuditApi) LogsList(page *int, pageSize *int, targetType *string, action
     })
     raw, err := a.client.Get(AppendQueryString(BackendApiPath("/audit_logs"), query), nil, nil)
     if err != nil {
-        var zero sdktypes.AuditLogPage
+        var zero sdktypes.AuditLogsListResponse
         return zero, err
     }
-    return decodeResult[sdktypes.AuditLogPage](raw)
+    return decodeResult[sdktypes.AuditLogsListResponse](raw)
 }
 
 

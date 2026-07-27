@@ -23,7 +23,7 @@ client.set_access_token("your-access-token");
 
     let mut query = HashMap::new();
     query.insert("page".to_string(), serde_json::json!(1));
-    query.insert("pageSize".to_string(), serde_json::json!(2));
+    query.insert("page_size".to_string(), serde_json::json!(2));
     let result = client.certificate().certificates_list(Some(&query)).await?;
     println!("{result:?}");
     Ok(())
@@ -63,8 +63,9 @@ use std::collections::HashMap;
 // 获取站点列表
 let mut query = HashMap::new();
 query.insert("page".to_string(), serde_json::json!(1));
-query.insert("pageSize".to_string(), serde_json::json!(2));
+query.insert("page_size".to_string(), serde_json::json!(2));
 query.insert("status".to_string(), serde_json::json!(0));
+query.insert("applicationType".to_string(), serde_json::json!("WEB"));
 query.insert("siteType".to_string(), serde_json::json!(1));
 query.insert("keyword".to_string(), serde_json::json!("keyword"));
 let result = client.site().sites_list(Some(&query)).await?;
@@ -79,7 +80,7 @@ use std::collections::HashMap;
 let site_id = "1";
 let mut query = HashMap::new();
 query.insert("page".to_string(), serde_json::json!(1));
-query.insert("pageSize".to_string(), serde_json::json!(2));
+query.insert("page_size".to_string(), serde_json::json!(2));
 let result = client.domain().sites_domains_list(site_id, Some(&query)).await?;
 println!("{result:?}");
 ```
@@ -92,7 +93,7 @@ use std::collections::HashMap;
 let site_id = "1";
 let mut query = HashMap::new();
 query.insert("page".to_string(), serde_json::json!(1));
-query.insert("pageSize".to_string(), serde_json::json!(2));
+query.insert("page_size".to_string(), serde_json::json!(2));
 query.insert("status".to_string(), serde_json::json!(0));
 let result = client.deployment().sites_deployments_list(site_id, Some(&query)).await?;
 println!("{result:?}");
@@ -117,7 +118,7 @@ use std::collections::HashMap;
 // 获取证书列表
 let mut query = HashMap::new();
 query.insert("page".to_string(), serde_json::json!(1));
-query.insert("pageSize".to_string(), serde_json::json!(2));
+query.insert("page_size".to_string(), serde_json::json!(2));
 let result = client.certificate().certificates_list(Some(&query)).await?;
 println!("{result:?}");
 ```
@@ -143,7 +144,7 @@ let client = SdkworkAppClient::new(SdkworkConfig::new("http://localhost:3800"))?
 let outcome: Result<(), _> = async {
     let mut query = HashMap::new();
     query.insert("page".to_string(), serde_json::json!(1));
-    query.insert("pageSize".to_string(), serde_json::json!(2));
+    query.insert("page_size".to_string(), serde_json::json!(2));
     client.certificate().certificates_list(Some(&query)).await?;
     Ok(())
 }.await;

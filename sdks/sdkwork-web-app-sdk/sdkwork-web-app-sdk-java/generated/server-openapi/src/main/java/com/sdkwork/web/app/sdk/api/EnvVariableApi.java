@@ -14,18 +14,18 @@ public class EnvVariableApi {
     }
 
     /** 获取环境变量列表 */
-    public EnvVariablePage sitesEnvVariablesList(String siteId, String environment) throws Exception {
+    public SitesEnvVariablesListResponse sitesEnvVariablesList(String siteId, String environment) throws Exception {
         String query = buildQueryString(List.of(
             new QueryParameterSpec("environment", environment, "form", true, false, null)
         ));
         Object raw = client.get(ApiPaths.appendQueryString(ApiPaths.appPath("/sites/" + serializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false)) + "/env_variables"), query));
-        return client.convertValue(raw, new TypeReference<EnvVariablePage>() {});
+        return client.convertValue(raw, new TypeReference<SitesEnvVariablesListResponse>() {});
     }
 
     /** 创建环境变量 */
-    public EnvVariableResponse sitesEnvVariablesCreate(String siteId, CreateEnvVariableRequest body) throws Exception {
+    public SitesEnvVariablesCreateResponse201 sitesEnvVariablesCreate(String siteId, CreateEnvVariableRequest body) throws Exception {
         Object raw = client.post(ApiPaths.appPath("/sites/" + serializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false)) + "/env_variables"), body, null, null, "application/json");
-        return client.convertValue(raw, new TypeReference<EnvVariableResponse>() {});
+        return client.convertValue(raw, new TypeReference<SitesEnvVariablesCreateResponse201>() {});
     }
 
     private record PathParameterSpec(String name, String style, boolean explode) {}

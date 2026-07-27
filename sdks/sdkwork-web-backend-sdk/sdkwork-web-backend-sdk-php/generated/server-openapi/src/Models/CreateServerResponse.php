@@ -12,6 +12,8 @@ final class CreateServerResponse
 
     public ?string $host = null;
 
+    public ?string $tenantScopeHash = null;
+
     public ?int $sshPort = null;
 
     /** 0=offline, 1=online */
@@ -34,6 +36,9 @@ final class CreateServerResponse
             : null;
         $this->host = array_key_exists('host', $data)
             ? $data['host']
+            : null;
+        $this->tenantScopeHash = array_key_exists('tenantScopeHash', $data)
+            ? $data['tenantScopeHash']
             : null;
         $this->sshPort = array_key_exists('sshPort', $data)
             ? $data['sshPort']
@@ -63,6 +68,7 @@ final class CreateServerResponse
             'id' => $this->id,
             'name' => $this->name,
             'host' => $this->host,
+            'tenantScopeHash' => $this->tenantScopeHash,
             'sshPort' => $this->sshPort,
             'status' => $this->status,
             'lastHeartbeatAt' => $this->lastHeartbeatAt,

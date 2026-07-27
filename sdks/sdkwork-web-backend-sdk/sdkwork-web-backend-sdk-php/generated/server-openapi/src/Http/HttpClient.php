@@ -37,7 +37,7 @@ final class HttpClient
     public function setAuthToken(string $token): self
     {
         $this->authToken = $token;
-        if (strtolower('Access-Token') !== 'authorization') {
+        if (strtolower('X-SDKWork-Agent-Token') !== 'authorization') {
             $this->apiKey = null;
         }
         return $this;
@@ -46,7 +46,7 @@ final class HttpClient
     public function setAccessToken(string $token): self
     {
         $this->accessToken = $token;
-        if (strtolower('Access-Token') !== 'access-token') {
+        if (strtolower('X-SDKWork-Agent-Token') !== 'access-token') {
             $this->apiKey = null;
         }
         return $this;
@@ -60,14 +60,8 @@ final class HttpClient
 
     public function request(string $method, string $path, array $options = []): mixed
     {
-        $clientHeaders = empty($options['skipAuth'])
-            ? array_merge($this->buildAuthHeaders(), $this->headers)
-            : [];
         $requestOptions = [];
-        $requestOptions['headers'] = array_merge(
-            $clientHeaders,
-            $options['headers'] ?? []
-        );
+        $requestOptions['headers'] = $this->resolveHeaders($options);
 
         if (!empty($options['query'])) {
             $requestOptions['query'] = $options['query'];
@@ -103,16 +97,12 @@ final class HttpClient
 
     public function stream(string $method, string $path, array $options = []): \Generator
     {
-        $clientHeaders = empty($options['skipAuth'])
-            ? array_merge($this->buildAuthHeaders(), $this->headers)
-            : [];
         $requestOptions = [
             'stream' => true,
         ];
         $requestOptions['headers'] = array_merge(
-            $clientHeaders,
             ['Accept' => 'text/event-stream'],
-            $options['headers'] ?? []
+            $this->resolveHeaders($options)
         );
 
         if (!empty($options['query'])) {
@@ -155,12 +145,48 @@ final class HttpClient
         }
     }
 
+    private function resolveHeaders(array $options): array
+    {
+        $skipAuth = !empty($options['skipAuth']);
+        $accessTokenOnly = !empty($options['accessTokenOnly']);
+        $requestHeaders = $options['headers'] ?? [];
+        if (!$skipAuth && !$accessTokenOnly) {
+            return array_merge($this->buildAuthHeaders(), $this->headers, $requestHeaders);
+        }
+
+        $resolved = $this->stripCredentialHeaders($requestHeaders);
+        if ($accessTokenOnly) {
+            $accessToken = trim($this->accessToken ?? '');
+            if ($accessToken === '') {
+                throw new RuntimeException(
+                    'access-token-only request requires Access-Token before request dispatch'
+                );
+            }
+            $resolved['Access-Token'] = $accessToken;
+        }
+        return $resolved;
+    }
+
+    private function stripCredentialHeaders(array $headers): array
+    {
+        $forbidden = [
+            'authorization', 'access-token', 'x-api-key', 'x-tenant-id',
+            'x-organization-id', 'x-platform', 'x-user-id',
+            'x-sdkwork-tenant-id', 'x-sdkwork-organization-id', 'x-sdkwork-user-id',
+        ];
+        return array_filter(
+            $headers,
+            static fn(string $key): bool => !in_array(strtolower($key), $forbidden, true),
+            ARRAY_FILTER_USE_KEY
+        );
+    }
+
     private function buildAuthHeaders(): array
     {
         $headers = [];
 
         if ($this->apiKey !== null && $this->apiKey !== '') {
-            $headers['Access-Token'] = $this->apiKey;
+            $headers['X-SDKWork-Agent-Token'] = $this->apiKey;
         }
         if ($this->authToken !== null && $this->authToken !== '') {
             $headers['Authorization'] = $this->formatBearer($this->authToken);

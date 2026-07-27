@@ -17,28 +17,28 @@ func NewServerApi(client *sdkhttp.Client) *ServerApi {
     return &ServerApi{client: client}
 }
 
-// 获取服务器列表
-func (a *ServerApi) ServersList(page *int, pageSize *int) (sdktypes.ServerPage, error) {
+// List managed servers
+func (a *ServerApi) ServersList(page *int, pageSize *int) (sdktypes.ServersListResponse, error) {
     query := BuildQueryString([]QueryParameterSpec{
         {Name: "page", Value: func() interface{} { if page == nil { return nil }; return *page }(), Style: "form", Explode: true, AllowReserved: false},
-        {Name: "pageSize", Value: func() interface{} { if pageSize == nil { return nil }; return *pageSize }(), Style: "form", Explode: true, AllowReserved: false},
+        {Name: "page_size", Value: func() interface{} { if pageSize == nil { return nil }; return *pageSize }(), Style: "form", Explode: true, AllowReserved: false},
     })
     raw, err := a.client.Get(AppendQueryString(BackendApiPath("/servers"), query), nil, nil)
     if err != nil {
-        var zero sdktypes.ServerPage
+        var zero sdktypes.ServersListResponse
         return zero, err
     }
-    return decodeResult[sdktypes.ServerPage](raw)
+    return decodeResult[sdktypes.ServersListResponse](raw)
 }
 
-// 注册服务器
-func (a *ServerApi) ServersCreate(body sdktypes.CreateServerRequest) (sdktypes.CreateServerResponse, error) {
+// Register a managed server
+func (a *ServerApi) ServersCreate(body sdktypes.CreateServerRequest) (sdktypes.ServersCreateResponse201, error) {
     raw, err := a.client.Post(BackendApiPath("/servers"), body, nil, nil, "application/json")
     if err != nil {
-        var zero sdktypes.CreateServerResponse
+        var zero sdktypes.ServersCreateResponse201
         return zero, err
     }
-    return decodeResult[sdktypes.CreateServerResponse](raw)
+    return decodeResult[sdktypes.ServersCreateResponse201](raw)
 }
 
 

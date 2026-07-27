@@ -5,6 +5,11 @@ declare(strict_types=1);
 namespace SDKWork\Web\BackendSdk;
 
 use SDKWork\Web\BackendSdk\Http\HttpClient;
+use SDKWork\Web\BackendSdk\Api\ApplicationApi;
+use SDKWork\Web\BackendSdk\Api\ApplicationDomainApi;
+use SDKWork\Web\BackendSdk\Api\ApplicationDeploymentApi;
+use SDKWork\Web\BackendSdk\Api\CertificateApi;
+use SDKWork\Web\BackendSdk\Api\CertificateDistributionApi;
 use SDKWork\Web\BackendSdk\Api\NginxApi;
 use SDKWork\Web\BackendSdk\Api\ServerApi;
 use SDKWork\Web\BackendSdk\Api\AgentApi;
@@ -13,6 +18,11 @@ use SDKWork\Web\BackendSdk\Api\AuditApi;
 final class SdkworkBackendClient
 {
     public HttpClient $http;
+    public ApplicationApi $application;
+    public ApplicationDomainApi $applicationDomain;
+    public ApplicationDeploymentApi $applicationDeployment;
+    public CertificateApi $certificate;
+    public CertificateDistributionApi $certificateDistribution;
     public NginxApi $nginx;
     public ServerApi $server;
     public AgentApi $agent;
@@ -21,6 +31,11 @@ final class SdkworkBackendClient
     public function __construct(SdkConfig $config)
     {
         $this->http = new HttpClient($config);
+        $this->application = new ApplicationApi($this->http);
+        $this->applicationDomain = new ApplicationDomainApi($this->http);
+        $this->applicationDeployment = new ApplicationDeploymentApi($this->http);
+        $this->certificate = new CertificateApi($this->http);
+        $this->certificateDistribution = new CertificateDistributionApi($this->http);
         $this->nginx = new NginxApi($this->http);
         $this->server = new ServerApi($this->http);
         $this->agent = new AgentApi($this->http);

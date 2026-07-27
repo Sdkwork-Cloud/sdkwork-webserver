@@ -13,8 +13,8 @@ public class AuditApi {
         this.client = client;
     }
 
-    /** 获取审计日志列表 */
-    public AuditLogPage logsList(Integer page, Integer pageSize, String targetType, String action, String operatorId, String startDate, String endDate) throws Exception {
+    /** List audit logs */
+    public AuditLogsListResponse logsList(Integer page, Integer pageSize, String targetType, String action, String operatorId, String startDate, String endDate) throws Exception {
         String query = buildQueryString(List.of(
             new QueryParameterSpec("page", page, "form", true, false, null),
             new QueryParameterSpec("page_size", pageSize, "form", true, false, null),
@@ -25,7 +25,7 @@ public class AuditApi {
             new QueryParameterSpec("endDate", endDate, "form", true, false, null)
         ));
         Object raw = client.get(ApiPaths.appendQueryString(ApiPaths.backendPath("/audit_logs"), query));
-        return client.convertValue(raw, new TypeReference<AuditLogPage>() {});
+        return client.convertValue(raw, new TypeReference<AuditLogsListResponse>() {});
     }
 
 

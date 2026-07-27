@@ -12,7 +12,7 @@ class DeploymentApi {
   DeploymentApi(this._client);
 
   /// 获取部署历史
-  Future<DeploymentPage?> sitesDeploymentsList(String siteId, [int? page, int? pageSize, int? status]) async {
+  Future<SitesDeploymentsListResponse?> sitesDeploymentsList(String siteId, [int? page, int? pageSize, int? status]) async {
     final query = buildQueryString([
       QueryParameterSpec('page', page, 'form', true, false, null),
       QueryParameterSpec('page_size', pageSize, 'form', true, false, null),
@@ -21,35 +21,35 @@ class DeploymentApi {
     final response = await _client.get(ApiPaths.appendQueryString(ApiPaths.appPath('/sites/${serializePathParameter(siteId, const PathParameterSpec('siteId', 'simple', false))}/deployments'), query));
     return (() {
       final map = sdkworkResponseAsMap(response);
-      return map == null ? null : DeploymentPage.fromJson(map);
+      return map == null ? null : SitesDeploymentsListResponse.fromJson(map);
     })();
   }
 
   /// 发起部署
-  Future<DeploymentResponse?> sitesDeploymentsCreate(String siteId, CreateDeploymentRequest body) async {
+  Future<SitesDeploymentsCreateResponse201?> sitesDeploymentsCreate(String siteId, CreateDeploymentRequest body) async {
     final payload = body.toJson();
     final response = await _client.post(ApiPaths.appPath('/sites/${serializePathParameter(siteId, const PathParameterSpec('siteId', 'simple', false))}/deployments'), body: payload, contentType: 'application/json');
     return (() {
       final map = sdkworkResponseAsMap(response);
-      return map == null ? null : DeploymentResponse.fromJson(map);
+      return map == null ? null : SitesDeploymentsCreateResponse201.fromJson(map);
     })();
   }
 
   /// 获取部署详情
-  Future<DeploymentResponse?> sitesDeploymentsRetrieve(String siteId, String deploymentId) async {
+  Future<SitesDeploymentsRetrieveResponse?> sitesDeploymentsRetrieve(String siteId, String deploymentId) async {
     final response = await _client.get(ApiPaths.appPath('/sites/${serializePathParameter(siteId, const PathParameterSpec('siteId', 'simple', false))}/deployments/${serializePathParameter(deploymentId, const PathParameterSpec('deploymentId', 'simple', false))}'));
     return (() {
       final map = sdkworkResponseAsMap(response);
-      return map == null ? null : DeploymentResponse.fromJson(map);
+      return map == null ? null : SitesDeploymentsRetrieveResponse.fromJson(map);
     })();
   }
 
   /// 回滚部署
-  Future<DeploymentResponse?> sitesDeploymentsRollback(String siteId, String deploymentId) async {
+  Future<SitesDeploymentsRollbackResponse?> sitesDeploymentsRollback(String siteId, String deploymentId) async {
     final response = await _client.post(ApiPaths.appPath('/sites/${serializePathParameter(siteId, const PathParameterSpec('siteId', 'simple', false))}/deployments/${serializePathParameter(deploymentId, const PathParameterSpec('deploymentId', 'simple', false))}/rollback'));
     return (() {
       final map = sdkworkResponseAsMap(response);
-      return map == null ? null : DeploymentResponse.fromJson(map);
+      return map == null ? null : SitesDeploymentsRollbackResponse.fromJson(map);
     })();
   }
 }

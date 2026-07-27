@@ -13,20 +13,20 @@ public class ServerApi {
         this.client = client;
     }
 
-    /** 获取服务器列表 */
-    public ServerPage serversList(Integer page, Integer pageSize) throws Exception {
+    /** List managed servers */
+    public ServersListResponse serversList(Integer page, Integer pageSize) throws Exception {
         String query = buildQueryString(List.of(
             new QueryParameterSpec("page", page, "form", true, false, null),
             new QueryParameterSpec("page_size", pageSize, "form", true, false, null)
         ));
         Object raw = client.get(ApiPaths.appendQueryString(ApiPaths.backendPath("/servers"), query));
-        return client.convertValue(raw, new TypeReference<ServerPage>() {});
+        return client.convertValue(raw, new TypeReference<ServersListResponse>() {});
     }
 
-    /** 注册服务器 */
-    public CreateServerResponse serversCreate(CreateServerRequest body) throws Exception {
+    /** Register a managed server */
+    public ServersCreateResponse201 serversCreate(CreateServerRequest body) throws Exception {
         Object raw = client.post(ApiPaths.backendPath("/servers"), body, null, null, "application/json");
-        return client.convertValue(raw, new TypeReference<CreateServerResponse>() {});
+        return client.convertValue(raw, new TypeReference<ServersCreateResponse201>() {});
     }
 
 

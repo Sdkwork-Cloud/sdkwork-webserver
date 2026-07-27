@@ -50,6 +50,11 @@ $client->setHeader('X-Custom-Header', 'value');
 
 ## API Modules
 
+- `$client->application` - application API
+- `$client->applicationDomain` - application_domain API
+- `$client->applicationDeployment` - application_deployment API
+- `$client->certificate` - certificate API
+- `$client->certificateDistribution` - certificate_distribution API
 - `$client->nginx` - nginx API
 - `$client->server` - server API
 - `$client->agent` - agent API
@@ -57,12 +62,69 @@ $client->setHeader('X-Custom-Header', 'value');
 
 ## Usage Examples
 
+### application
+
+```php
+<?php
+
+// List managed applications
+$params = ['page' => 1, 'page_size' => 2, 'applicationType' => 'WEB', 'siteType' => 4, 'status' => 5, 'keyword' => 'keyword'];
+$result = $client->application->applicationsList($params);
+var_dump($result);
+```
+
+### application_domain
+
+```php
+<?php
+
+// List application domains
+$applicationId = '1';
+$params = ['page' => 1, 'page_size' => 2];
+$result = $client->applicationDomain->applicationsDomainsList($applicationId, $params);
+var_dump($result);
+```
+
+### application_deployment
+
+```php
+<?php
+
+// List application deployments
+$applicationId = '1';
+$params = ['page' => 1, 'page_size' => 2, 'status' => 3];
+$result = $client->applicationDeployment->applicationsDeploymentsList($applicationId, $params);
+var_dump($result);
+```
+
+### certificate
+
+```php
+<?php
+
+// List canonical certificates
+$params = ['page' => 1, 'page_size' => 2];
+$result = $client->certificate->certificatesList($params);
+var_dump($result);
+```
+
+### certificate_distribution
+
+```php
+<?php
+
+// List certificate manifest convergence by server
+$params = ['page' => 1, 'page_size' => 2];
+$result = $client->certificateDistribution->certificatesDistributionList($params);
+var_dump($result);
+```
+
 ### nginx
 
 ```php
 <?php
 
-// 获取 Nginx 状态
+// Retrieve Nginx status
 $result = $client->nginx->statusRetrieve();
 var_dump($result);
 ```
@@ -72,8 +134,8 @@ var_dump($result);
 ```php
 <?php
 
-// 获取服务器列表
-$params = ['page' => 1, 'pageSize' => 2];
+// List managed servers
+$params = ['page' => 1, 'page_size' => 2];
 $result = $client->server->serversList($params);
 var_dump($result);
 ```
@@ -83,9 +145,9 @@ var_dump($result);
 ```php
 <?php
 
-// 拉取 nginx 配置与证书 bundle
+// Retrieve the Nginx configuration and certificate bundle
 $params = ['ifSyncVersion' => 'ifsyncversion'];
-$result = $client->agent->sync($params);
+$result = $client->agent->retrieve($params);
 var_dump($result);
 ```
 
@@ -94,8 +156,8 @@ var_dump($result);
 ```php
 <?php
 
-// 获取审计日志列表
-$params = ['page' => 1, 'pageSize' => 2, 'targetType' => 'targettype', 'action' => 'action', 'operatorId' => '1', 'startDate' => '2026-04-10T00:00:00Z', 'endDate' => '2026-04-10T00:00:00Z'];
+// List audit logs
+$params = ['page' => 1, 'page_size' => 2, 'targetType' => 'targettype', 'action' => 'action', 'operatorId' => '1', 'startDate' => '2026-04-10T00:00:00Z', 'endDate' => '2026-04-10T00:00:00Z'];
 $result = $client->audit->logsList($params);
 var_dump($result);
 ```

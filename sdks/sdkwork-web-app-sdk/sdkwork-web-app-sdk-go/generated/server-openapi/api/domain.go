@@ -18,37 +18,37 @@ func NewDomainApi(client *sdkhttp.Client) *DomainApi {
 }
 
 // 获取站点域名列表
-func (a *DomainApi) SitesDomainsList(siteId string, page *int, pageSize *int) (sdktypes.DomainPage, error) {
+func (a *DomainApi) SitesDomainsList(siteId string, page *int, pageSize *int) (sdktypes.SitesDomainsListResponse, error) {
     query := BuildQueryString([]QueryParameterSpec{
         {Name: "page", Value: func() interface{} { if page == nil { return nil }; return *page }(), Style: "form", Explode: true, AllowReserved: false},
-        {Name: "pageSize", Value: func() interface{} { if pageSize == nil { return nil }; return *pageSize }(), Style: "form", Explode: true, AllowReserved: false},
+        {Name: "page_size", Value: func() interface{} { if pageSize == nil { return nil }; return *pageSize }(), Style: "form", Explode: true, AllowReserved: false},
     })
     raw, err := a.client.Get(AppendQueryString(AppApiPath(fmt.Sprintf("/sites/%s/domains", SerializePathParameter(siteId, PathParameterSpec{Name: "siteId", Style: "simple", Explode: false}))), query), nil, nil)
     if err != nil {
-        var zero sdktypes.DomainPage
+        var zero sdktypes.SitesDomainsListResponse
         return zero, err
     }
-    return decodeResult[sdktypes.DomainPage](raw)
+    return decodeResult[sdktypes.SitesDomainsListResponse](raw)
 }
 
 // 绑定域名
-func (a *DomainApi) SitesDomainsCreate(siteId string, body sdktypes.CreateDomainRequest) (sdktypes.DomainResponse, error) {
+func (a *DomainApi) SitesDomainsCreate(siteId string, body sdktypes.CreateDomainRequest) (sdktypes.SitesDomainsCreateResponse201, error) {
     raw, err := a.client.Post(AppApiPath(fmt.Sprintf("/sites/%s/domains", SerializePathParameter(siteId, PathParameterSpec{Name: "siteId", Style: "simple", Explode: false}))), body, nil, nil, "application/json")
     if err != nil {
-        var zero sdktypes.DomainResponse
+        var zero sdktypes.SitesDomainsCreateResponse201
         return zero, err
     }
-    return decodeResult[sdktypes.DomainResponse](raw)
+    return decodeResult[sdktypes.SitesDomainsCreateResponse201](raw)
 }
 
 // 获取域名详情
-func (a *DomainApi) SitesDomainsRetrieve(siteId string, domainId string) (sdktypes.DomainResponse, error) {
+func (a *DomainApi) SitesDomainsRetrieve(siteId string, domainId string) (sdktypes.SitesDomainsRetrieveResponse, error) {
     raw, err := a.client.Get(AppApiPath(fmt.Sprintf("/sites/%s/domains/%s", SerializePathParameter(siteId, PathParameterSpec{Name: "siteId", Style: "simple", Explode: false}), SerializePathParameter(domainId, PathParameterSpec{Name: "domainId", Style: "simple", Explode: false}))), nil, nil)
     if err != nil {
-        var zero sdktypes.DomainResponse
+        var zero sdktypes.SitesDomainsRetrieveResponse
         return zero, err
     }
-    return decodeResult[sdktypes.DomainResponse](raw)
+    return decodeResult[sdktypes.SitesDomainsRetrieveResponse](raw)
 }
 
 // 解绑域名
@@ -62,13 +62,13 @@ func (a *DomainApi) SitesDomainsDelete(siteId string, domainId string) (struct{}
 }
 
 // 验证域名所有权
-func (a *DomainApi) SitesDomainsVerify(siteId string, domainId string) (sdktypes.DomainVerifyResponse, error) {
+func (a *DomainApi) SitesDomainsVerify(siteId string, domainId string) (sdktypes.SitesDomainsVerifyResponse, error) {
     raw, err := a.client.Post(AppApiPath(fmt.Sprintf("/sites/%s/domains/%s/verify", SerializePathParameter(siteId, PathParameterSpec{Name: "siteId", Style: "simple", Explode: false}), SerializePathParameter(domainId, PathParameterSpec{Name: "domainId", Style: "simple", Explode: false}))), nil, nil, nil, "")
     if err != nil {
-        var zero sdktypes.DomainVerifyResponse
+        var zero sdktypes.SitesDomainsVerifyResponse
         return zero, err
     }
-    return decodeResult[sdktypes.DomainVerifyResponse](raw)
+    return decodeResult[sdktypes.SitesDomainsVerifyResponse](raw)
 }
 
 type PathParameterSpec struct {

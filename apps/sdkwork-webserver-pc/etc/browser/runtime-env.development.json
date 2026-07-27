@@ -5,7 +5,7 @@
   "fallbackLocale": "en-US",
   "supportedLocales": ["zh-CN", "en-US"],
   "activeLocales": ["zh-CN", "en-US"],
-  "appApiBaseUrl": "http://127.0.0.1:8080",
-  "backendApiBaseUrl": "http://127.0.0.1:8080",
-  "appbaseAppApiBaseUrl": "http://127.0.0.1:8080"
+  "appApiBaseUrl": "http://127.0.0.1:3800",
+  "backendApiBaseUrl": "http://127.0.0.1:3800",
+  "appbaseAppApiBaseUrl": "http://127.0.0.1:3900"
 }

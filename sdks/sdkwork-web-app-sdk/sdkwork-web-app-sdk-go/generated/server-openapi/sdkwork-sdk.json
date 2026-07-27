@@ -5,6 +5,8 @@
   "language": "go",
   "sdkType": "app",
   "packageName": "github.com/sdkwork/sdkwork-web-app-sdk",
+  "transportPackageName": "github.com/sdkwork/sdkwork-web-app-sdk",
+  "consumerPackageName": "github.com/sdkwork/sdkwork-web-app-sdk",
   "generator": "@sdkwork/sdk-generator",
   "capabilities": {
     "supportsGeneratedTests": true,

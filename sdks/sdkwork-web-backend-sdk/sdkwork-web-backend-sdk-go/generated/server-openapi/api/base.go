@@ -77,5 +77,5 @@ func (b *BaseApi) Request(
     headers map[string]string,
     contentType string,
 ) (interface{}, error) {
-    return b.http.Request(method, b.basePath+path, body, query, headers, contentType)
+    return b.http.Request(method, b.basePath+path, body, query, headers, contentType, false, false)
 }

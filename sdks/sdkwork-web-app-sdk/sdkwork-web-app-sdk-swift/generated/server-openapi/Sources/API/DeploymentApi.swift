@@ -8,28 +8,28 @@ public class DeploymentApi {
     }
 
     /// 获取部署历史
-    public func sitesDeploymentsList(siteId: String, page: Int? = nil, pageSize: Int? = nil, status: Int? = nil) async throws -> DeploymentPage? {
+    public func sitesDeploymentsList(siteId: String, page: Int? = nil, pageSize: Int? = nil, status: Int? = nil) async throws -> SitesDeploymentsListResponse? {
         let query = buildQueryString([
             QueryParameterSpec(name: "page", value: page, style: "form", explode: true, allowReserved: false, contentType: nil),
             QueryParameterSpec(name: "page_size", value: pageSize, style: "form", explode: true, allowReserved: false, contentType: nil),
             QueryParameterSpec(name: "status", value: status, style: "form", explode: true, allowReserved: false, contentType: nil)
         ])
-        return try await client.get(ApiPaths.appendQueryString(ApiPaths.appPath("/sites/\(serializePathParameter(siteId, PathParameterSpec(name: "siteId", style: "simple", explode: false)))/deployments"), query), responseType: DeploymentPage.self)
+        return try await client.get(ApiPaths.appendQueryString(ApiPaths.appPath("/sites/\(serializePathParameter(siteId, PathParameterSpec(name: "siteId", style: "simple", explode: false)))/deployments"), query), responseType: SitesDeploymentsListResponse.self)
     }
 
     /// 发起部署
-    public func sitesDeploymentsCreate(siteId: String, body: CreateDeploymentRequest) async throws -> DeploymentResponse? {
-        return try await client.post(ApiPaths.appPath("/sites/\(serializePathParameter(siteId, PathParameterSpec(name: "siteId", style: "simple", explode: false)))/deployments"), body: body, params: nil, headers: nil, contentType: "application/json", responseType: DeploymentResponse.self)
+    public func sitesDeploymentsCreate(siteId: String, body: CreateDeploymentRequest) async throws -> SitesDeploymentsCreateResponse201? {
+        return try await client.post(ApiPaths.appPath("/sites/\(serializePathParameter(siteId, PathParameterSpec(name: "siteId", style: "simple", explode: false)))/deployments"), body: body, params: nil, headers: nil, contentType: "application/json", responseType: SitesDeploymentsCreateResponse201.self)
     }
 
     /// 获取部署详情
-    public func sitesDeploymentsRetrieve(siteId: String, deploymentId: String) async throws -> DeploymentResponse? {
-        return try await client.get(ApiPaths.appPath("/sites/\(serializePathParameter(siteId, PathParameterSpec(name: "siteId", style: "simple", explode: false)))/deployments/\(serializePathParameter(deploymentId, PathParameterSpec(name: "deploymentId", style: "simple", explode: false)))"), responseType: DeploymentResponse.self)
+    public func sitesDeploymentsRetrieve(siteId: String, deploymentId: String) async throws -> SitesDeploymentsRetrieveResponse? {
+        return try await client.get(ApiPaths.appPath("/sites/\(serializePathParameter(siteId, PathParameterSpec(name: "siteId", style: "simple", explode: false)))/deployments/\(serializePathParameter(deploymentId, PathParameterSpec(name: "deploymentId", style: "simple", explode: false)))"), responseType: SitesDeploymentsRetrieveResponse.self)
     }
 
     /// 回滚部署
-    public func sitesDeploymentsRollback(siteId: String, deploymentId: String) async throws -> DeploymentResponse? {
-        return try await client.post(ApiPaths.appPath("/sites/\(serializePathParameter(siteId, PathParameterSpec(name: "siteId", style: "simple", explode: false)))/deployments/\(serializePathParameter(deploymentId, PathParameterSpec(name: "deploymentId", style: "simple", explode: false)))/rollback"), body: nil, responseType: DeploymentResponse.self)
+    public func sitesDeploymentsRollback(siteId: String, deploymentId: String) async throws -> SitesDeploymentsRollbackResponse? {
+        return try await client.post(ApiPaths.appPath("/sites/\(serializePathParameter(siteId, PathParameterSpec(name: "siteId", style: "simple", explode: false)))/deployments/\(serializePathParameter(deploymentId, PathParameterSpec(name: "deploymentId", style: "simple", explode: false)))/rollback"), body: nil, responseType: SitesDeploymentsRollbackResponse.self)
     }
 
     private struct PathParameterSpec {

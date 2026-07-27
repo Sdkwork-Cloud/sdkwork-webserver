@@ -2,16 +2,14 @@ module Sdkwork
   module BackendSdk
     module Models
       class CreateServerRequest
-              attr_accessor :name, :host, :ssh_port, :ssh_user, :ssh_key_path, :description
+              attr_accessor :name, :host, :tenant_scope_hash, :ssh_port
 
               def initialize(attributes = {})
                 attributes = (attributes || {}).transform_keys(&:to_s)
                 @name = attributes['name']
                 @host = attributes['host']
+                @tenant_scope_hash = attributes['tenantScopeHash']
                 @ssh_port = attributes['sshPort']
-                @ssh_user = attributes['sshUser']
-                @ssh_key_path = attributes['sshKeyPath']
-                @description = attributes['description']
               end
 
               def self.from_hash(data)
@@ -24,10 +22,8 @@ module Sdkwork
                 {
                   'name' => @name,
                   'host' => @host,
+                  'tenantScopeHash' => @tenant_scope_hash,
                   'sshPort' => @ssh_port,
-                  'sshUser' => @ssh_user,
-                  'sshKeyPath' => @ssh_key_path,
-                  'description' => @description,
                 }
               end
             end

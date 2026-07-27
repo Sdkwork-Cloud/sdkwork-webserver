@@ -12,7 +12,6 @@ class AuditLogResponse:
     target_type: Optional[str] = None
     target_id: Optional[str] = None
     target_uuid: Optional[str] = None
-    request_id: Optional[str] = None
     ip_address: Optional[str] = None
     changes: Optional[Dict[str, Any]] = None
     created_at: Optional[str] = None

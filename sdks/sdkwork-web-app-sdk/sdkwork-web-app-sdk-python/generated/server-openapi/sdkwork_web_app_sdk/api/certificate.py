@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional
 from ..http_client import HttpClient
-from ..models import CertificatePage, CertificateResponse, CreateCertificateRequest
+from ..models import CertificatesCreateResponse201, CertificatesListResponse, CreateCertificateRequest
 
 def _append_query_string(path: str, raw_query_string: str) -> str:
     query = raw_query_string.lstrip('?')
@@ -130,7 +130,7 @@ class CertificateApi:
         self._client = client
 
 
-    def list(self, page: Optional[int] = None, page_size: Optional[int] = None) -> CertificatePage:
+    def list(self, page: Optional[int] = None, page_size: Optional[int] = None) -> CertificatesListResponse:
         """获取证书列表"""
         query = build_query_string([
             {'name': 'page', 'value': page, 'style': 'form', 'explode': True, 'allow_reserved': False},
@@ -138,6 +138,6 @@ class CertificateApi:
         ])
         return self._client.get(_append_query_string(f"/app/v3/api/certificates", query))
 
-    def create(self, body: CreateCertificateRequest) -> CertificateResponse:
+    def create(self, body: CreateCertificateRequest) -> CertificatesCreateResponse201:
         """申请证书"""
         return self._client.post(f"/app/v3/api/certificates", json=body)

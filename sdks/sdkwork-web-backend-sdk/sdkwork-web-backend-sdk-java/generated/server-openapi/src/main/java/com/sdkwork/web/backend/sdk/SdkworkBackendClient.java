@@ -2,6 +2,11 @@ package com.sdkwork.web.backend.sdk;
 
 import com.sdkwork.common.core.Types;
 import com.sdkwork.web.backend.sdk.http.HttpClient;
+import com.sdkwork.web.backend.sdk.api.ApplicationApi;
+import com.sdkwork.web.backend.sdk.api.ApplicationDomainApi;
+import com.sdkwork.web.backend.sdk.api.ApplicationDeploymentApi;
+import com.sdkwork.web.backend.sdk.api.CertificateApi;
+import com.sdkwork.web.backend.sdk.api.CertificateDistributionApi;
 import com.sdkwork.web.backend.sdk.api.NginxApi;
 import com.sdkwork.web.backend.sdk.api.ServerApi;
 import com.sdkwork.web.backend.sdk.api.AgentApi;
@@ -9,6 +14,11 @@ import com.sdkwork.web.backend.sdk.api.AuditApi;
 
 public class SdkworkBackendClient {
     private final HttpClient httpClient;
+    private ApplicationApi application;
+    private ApplicationDomainApi applicationDomain;
+    private ApplicationDeploymentApi applicationDeployment;
+    private CertificateApi certificate;
+    private CertificateDistributionApi certificateDistribution;
     private NginxApi nginx;
     private ServerApi server;
     private AgentApi agent;
@@ -16,6 +26,11 @@ public class SdkworkBackendClient {
 
     public SdkworkBackendClient(String baseUrl) {
         this.httpClient = new HttpClient(baseUrl);
+        this.application = new ApplicationApi(httpClient);
+        this.applicationDomain = new ApplicationDomainApi(httpClient);
+        this.applicationDeployment = new ApplicationDeploymentApi(httpClient);
+        this.certificate = new CertificateApi(httpClient);
+        this.certificateDistribution = new CertificateDistributionApi(httpClient);
         this.nginx = new NginxApi(httpClient);
         this.server = new ServerApi(httpClient);
         this.agent = new AgentApi(httpClient);
@@ -24,10 +39,35 @@ public class SdkworkBackendClient {
 
     public SdkworkBackendClient(Types.SdkConfig config) {
         this.httpClient = new HttpClient(config);
+        this.application = new ApplicationApi(httpClient);
+        this.applicationDomain = new ApplicationDomainApi(httpClient);
+        this.applicationDeployment = new ApplicationDeploymentApi(httpClient);
+        this.certificate = new CertificateApi(httpClient);
+        this.certificateDistribution = new CertificateDistributionApi(httpClient);
         this.nginx = new NginxApi(httpClient);
         this.server = new ServerApi(httpClient);
         this.agent = new AgentApi(httpClient);
         this.audit = new AuditApi(httpClient);
+    }
+
+    public ApplicationApi getApplication() {
+        return this.application;
+    }
+
+    public ApplicationDomainApi getApplicationDomain() {
+        return this.applicationDomain;
+    }
+
+    public ApplicationDeploymentApi getApplicationDeployment() {
+        return this.applicationDeployment;
+    }
+
+    public CertificateApi getCertificate() {
+        return this.certificate;
+    }
+
+    public CertificateDistributionApi getCertificateDistribution() {
+        return this.certificateDistribution;
     }
 
     public NginxApi getNginx() {

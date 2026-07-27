@@ -12,47 +12,48 @@ class SiteApi {
   SiteApi(this._client);
 
   /// 获取站点列表
-  Future<SitePage?> sitesList([int? page, int? pageSize, int? status, int? siteType, String? keyword]) async {
+  Future<SitesListResponse?> sitesList([int? page, int? pageSize, int? status, String? applicationType, int? siteType, String? keyword]) async {
     final query = buildQueryString([
       QueryParameterSpec('page', page, 'form', true, false, null),
       QueryParameterSpec('page_size', pageSize, 'form', true, false, null),
       QueryParameterSpec('status', status, 'form', true, false, null),
+      QueryParameterSpec('applicationType', applicationType, 'form', true, false, null),
       QueryParameterSpec('siteType', siteType, 'form', true, false, null),
       QueryParameterSpec('keyword', keyword, 'form', true, false, null)
     ]);
     final response = await _client.get(ApiPaths.appendQueryString(ApiPaths.appPath('/sites'), query));
     return (() {
       final map = sdkworkResponseAsMap(response);
-      return map == null ? null : SitePage.fromJson(map);
+      return map == null ? null : SitesListResponse.fromJson(map);
     })();
   }
 
   /// 创建站点
-  Future<SiteResponse?> sitesCreate(CreateSiteRequest body) async {
+  Future<SitesCreateResponse201?> sitesCreate(CreateSiteRequest body) async {
     final payload = body.toJson();
     final response = await _client.post(ApiPaths.appPath('/sites'), body: payload, contentType: 'application/json');
     return (() {
       final map = sdkworkResponseAsMap(response);
-      return map == null ? null : SiteResponse.fromJson(map);
+      return map == null ? null : SitesCreateResponse201.fromJson(map);
     })();
   }
 
   /// 获取站点详情
-  Future<SiteResponse?> sitesRetrieve(String siteId) async {
+  Future<SitesRetrieveResponse?> sitesRetrieve(String siteId) async {
     final response = await _client.get(ApiPaths.appPath('/sites/${serializePathParameter(siteId, const PathParameterSpec('siteId', 'simple', false))}'));
     return (() {
       final map = sdkworkResponseAsMap(response);
-      return map == null ? null : SiteResponse.fromJson(map);
+      return map == null ? null : SitesRetrieveResponse.fromJson(map);
     })();
   }
 
   /// 更新站点
-  Future<SiteResponse?> sitesUpdate(String siteId, UpdateSiteRequest body) async {
+  Future<SitesUpdateResponse?> sitesUpdate(String siteId, UpdateSiteRequest body) async {
     final payload = body.toJson();
     final response = await _client.patch(ApiPaths.appPath('/sites/${serializePathParameter(siteId, const PathParameterSpec('siteId', 'simple', false))}'), body: payload, contentType: 'application/json');
     return (() {
       final map = sdkworkResponseAsMap(response);
-      return map == null ? null : SiteResponse.fromJson(map);
+      return map == null ? null : SitesUpdateResponse.fromJson(map);
     })();
   }
 
@@ -62,20 +63,20 @@ class SiteApi {
   }
 
   /// 激活站点
-  Future<SiteResponse?> sitesActivate(String siteId) async {
+  Future<SitesActivateResponse?> sitesActivate(String siteId) async {
     final response = await _client.post(ApiPaths.appPath('/sites/${serializePathParameter(siteId, const PathParameterSpec('siteId', 'simple', false))}/activate'));
     return (() {
       final map = sdkworkResponseAsMap(response);
-      return map == null ? null : SiteResponse.fromJson(map);
+      return map == null ? null : SitesActivateResponse.fromJson(map);
     })();
   }
 
   /// 暂停站点
-  Future<SiteResponse?> sitesPause(String siteId) async {
+  Future<SitesPauseResponse?> sitesPause(String siteId) async {
     final response = await _client.post(ApiPaths.appPath('/sites/${serializePathParameter(siteId, const PathParameterSpec('siteId', 'simple', false))}/pause'));
     return (() {
       final map = sdkworkResponseAsMap(response);
-      return map == null ? null : SiteResponse.fromJson(map);
+      return map == null ? null : SitesPauseResponse.fromJson(map);
     })();
   }
 }

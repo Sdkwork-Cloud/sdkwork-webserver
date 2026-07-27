@@ -8,19 +8,19 @@ import com.sdkwork.web.backend.sdk.http.HttpClient
 
 class AgentApi(private val client: HttpClient) {
 
-    /** 边缘节点心跳 */
-    suspend fun heartbeat(body: AgentHeartbeatRequest): AgentHeartbeatResponse? {
+    /** Report an edge-agent heartbeat */
+    suspend fun heartbeat(body: AgentHeartbeatRequest): HeartbeatResponse? {
         val raw = client.post(ApiPaths.backendPath("/agent/heartbeat"), body, null, null, "application/json")
-        return client.convertValue(raw, object : TypeReference<AgentHeartbeatResponse>() {})
+        return client.convertValue(raw, object : TypeReference<HeartbeatResponse>() {})
     }
 
-    /** 拉取 nginx 配置与证书 bundle */
-    suspend fun sync(ifSyncVersion: String? = null): AgentSyncResponse? {
+    /** Retrieve the Nginx configuration and certificate bundle */
+    suspend fun retrieve(ifSyncVersion: String? = null): RetrieveResponse? {
         val query = buildQueryString(listOf(
             QueryParameterSpec("ifSyncVersion", ifSyncVersion, "form", true, false, null)
         ))
         val raw = client.get(ApiPaths.appendQueryString(ApiPaths.backendPath("/agent/sync"), query))
-        return client.convertValue(raw, object : TypeReference<AgentSyncResponse>() {})
+        return client.convertValue(raw, object : TypeReference<RetrieveResponse>() {})
     }
 
 

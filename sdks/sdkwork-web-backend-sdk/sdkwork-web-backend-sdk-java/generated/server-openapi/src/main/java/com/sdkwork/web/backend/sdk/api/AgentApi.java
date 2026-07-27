@@ -13,19 +13,19 @@ public class AgentApi {
         this.client = client;
     }
 
-    /** 边缘节点心跳 */
-    public AgentHeartbeatResponse heartbeat(AgentHeartbeatRequest body) throws Exception {
+    /** Report an edge-agent heartbeat */
+    public HeartbeatResponse heartbeat(AgentHeartbeatRequest body) throws Exception {
         Object raw = client.post(ApiPaths.backendPath("/agent/heartbeat"), body, null, null, "application/json");
-        return client.convertValue(raw, new TypeReference<AgentHeartbeatResponse>() {});
+        return client.convertValue(raw, new TypeReference<HeartbeatResponse>() {});
     }
 
-    /** 拉取 nginx 配置与证书 bundle */
-    public AgentSyncResponse sync(String ifSyncVersion) throws Exception {
+    /** Retrieve the Nginx configuration and certificate bundle */
+    public RetrieveResponse retrieve(String ifSyncVersion) throws Exception {
         String query = buildQueryString(List.of(
             new QueryParameterSpec("ifSyncVersion", ifSyncVersion, "form", true, false, null)
         ));
         Object raw = client.get(ApiPaths.appendQueryString(ApiPaths.backendPath("/agent/sync"), query));
-        return client.convertValue(raw, new TypeReference<AgentSyncResponse>() {});
+        return client.convertValue(raw, new TypeReference<RetrieveResponse>() {});
     }
 
 

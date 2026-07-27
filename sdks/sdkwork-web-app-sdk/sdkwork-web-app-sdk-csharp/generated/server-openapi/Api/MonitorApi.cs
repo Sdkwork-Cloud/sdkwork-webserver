@@ -18,17 +18,17 @@ namespace SDKWork.Web.AppSdk.Api
         /// <summary>
         /// 获取健康检查配置
         /// </summary>
-        public async Task<SDKWork.Web.AppSdk.Models.HealthCheckPage?> SitesHealthChecksListAsync(string siteId)
+        public async Task<SDKWork.Web.AppSdk.Models.SitesHealthChecksListResponse?> SitesHealthChecksListAsync(string siteId)
         {
-            return await _client.GetAsync<SDKWork.Web.AppSdk.Models.HealthCheckPage>(ApiPaths.AppPath($"/sites/{SerializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false))}/health_checks"));
+            return await _client.GetAsync<SDKWork.Web.AppSdk.Models.SitesHealthChecksListResponse>(ApiPaths.AppPath($"/sites/{SerializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false))}/health_checks"));
         }
 
         /// <summary>
         /// 创建健康检查
         /// </summary>
-        public async Task<SDKWork.Web.AppSdk.Models.HealthCheckResponse?> SitesHealthChecksCreateAsync(string siteId, SDKWork.Web.AppSdk.Models.CreateHealthCheckRequest body)
+        public async Task<SDKWork.Web.AppSdk.Models.SitesHealthChecksCreateResponse201?> SitesHealthChecksCreateAsync(string siteId, SDKWork.Web.AppSdk.Models.CreateHealthCheckRequest body)
         {
-            return await _client.PostAsync<SDKWork.Web.AppSdk.Models.HealthCheckResponse>(ApiPaths.AppPath($"/sites/{SerializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false))}/health_checks"), body, null, null, "application/json");
+            return await _client.PostAsync<SDKWork.Web.AppSdk.Models.SitesHealthChecksCreateResponse201>(ApiPaths.AppPath($"/sites/{SerializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false))}/health_checks"), body, null, null, "application/json");
         }
 
         private sealed record PathParameterSpec(string Name, string Style, bool Explode);

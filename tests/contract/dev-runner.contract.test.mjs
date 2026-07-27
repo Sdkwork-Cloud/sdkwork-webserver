@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import test from 'node:test';
+import { parseEnv } from 'node:util';
 import { fileURLToPath } from 'node:url';
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -12,11 +13,11 @@ test('root dev commands use the SDKWork app lifecycle for this server applicatio
   assert.equal(packageJson.scripts.dev, 'pnpm dev:standalone');
   assert.equal(
     packageJson.scripts['dev:standalone'],
-    'pnpm exec sdkwork-app dev --runtime-target server --deployment-profile standalone',
+    'pnpm exec sdkwork-app dev --deployment-profile standalone',
   );
   assert.equal(
     packageJson.scripts['dev:cloud'],
-    'pnpm exec sdkwork-app dev --runtime-target server --deployment-profile cloud',
+    'pnpm exec sdkwork-app dev --deployment-profile cloud',
   );
   assert.equal(
     packageJson.scripts['dev:server'],
@@ -42,4 +43,15 @@ test('deployment index owns all supported Web Server profiles', () => {
   ]);
   assert.equal(deployment.environments.development.cloudApiBaseUrl, 'https://api-dev.sdkwork.com');
   assert.equal(deployment.environments.production.applicationOrigin, 'https://web.sdkwork.com');
+});
+
+test('standalone development supplies an explicit single-node Snowflake id', () => {
+  const profile = parseEnv(
+    readFileSync(
+      path.join(REPO_ROOT, 'etc', 'topology', 'standalone.development.env'),
+      'utf8',
+    ),
+  );
+
+  assert.equal(profile.SDKWORK_WEB_SNOWFLAKE_NODE_ID, '0');
 });

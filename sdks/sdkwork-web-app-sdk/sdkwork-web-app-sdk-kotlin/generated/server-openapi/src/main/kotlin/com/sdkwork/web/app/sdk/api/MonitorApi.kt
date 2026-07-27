@@ -9,15 +9,15 @@ import com.sdkwork.web.app.sdk.http.HttpClient
 class MonitorApi(private val client: HttpClient) {
 
     /** 获取健康检查配置 */
-    suspend fun sitesHealthChecksList(siteId: String): HealthCheckPage? {
+    suspend fun sitesHealthChecksList(siteId: String): SitesHealthChecksListResponse? {
         val raw = client.get(ApiPaths.appPath("/sites/${serializePathParameter(siteId, PathParameterSpec("siteId", "simple", false))}/health_checks"))
-        return client.convertValue(raw, object : TypeReference<HealthCheckPage>() {})
+        return client.convertValue(raw, object : TypeReference<SitesHealthChecksListResponse>() {})
     }
 
     /** 创建健康检查 */
-    suspend fun sitesHealthChecksCreate(siteId: String, body: CreateHealthCheckRequest): HealthCheckResponse? {
+    suspend fun sitesHealthChecksCreate(siteId: String, body: CreateHealthCheckRequest): SitesHealthChecksCreateResponse201? {
         val raw = client.post(ApiPaths.appPath("/sites/${serializePathParameter(siteId, PathParameterSpec("siteId", "simple", false))}/health_checks"), body, null, null, "application/json")
-        return client.convertValue(raw, object : TypeReference<HealthCheckResponse>() {})
+        return client.convertValue(raw, object : TypeReference<SitesHealthChecksCreateResponse201>() {})
     }
 
     private data class PathParameterSpec(val name: String, val style: String, val explode: Boolean)

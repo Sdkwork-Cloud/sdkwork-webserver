@@ -5,6 +5,8 @@
   "language": "java",
   "sdkType": "app",
   "packageName": "com.sdkwork:sdkwork-web-app-sdk",
+  "transportPackageName": "com.sdkwork:sdkwork-web-app-sdk",
+  "consumerPackageName": "com.sdkwork:sdkwork-web-app-sdk",
   "generator": "@sdkwork/sdk-generator",
   "capabilities": {
     "supportsGeneratedTests": true,

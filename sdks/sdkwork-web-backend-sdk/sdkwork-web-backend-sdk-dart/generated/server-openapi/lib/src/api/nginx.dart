@@ -11,8 +11,8 @@ class NginxApi {
 
   NginxApi(this._client);
 
-  /// 获取 Nginx 配置列表
-  Future<NginxConfigPage?> configsList([int? page, int? pageSize, String? siteId, int? configType, bool? isActive]) async {
+  /// List Nginx configurations
+  Future<ConfigsListResponse?> configsList([int? page, int? pageSize, String? siteId, int? configType, bool? isActive]) async {
     final query = buildQueryString([
       QueryParameterSpec('page', page, 'form', true, false, null),
       QueryParameterSpec('page_size', pageSize, 'form', true, false, null),
@@ -23,72 +23,72 @@ class NginxApi {
     final response = await _client.get(ApiPaths.appendQueryString(ApiPaths.backendPath('/nginx/configs'), query));
     return (() {
       final map = sdkworkResponseAsMap(response);
-      return map == null ? null : NginxConfigPage.fromJson(map);
+      return map == null ? null : ConfigsListResponse.fromJson(map);
     })();
   }
 
-  /// 创建 Nginx 配置
-  Future<NginxConfigResponse?> configsCreate(CreateNginxConfigRequest body) async {
+  /// Create an Nginx configuration
+  Future<ConfigsCreateResponse201?> configsCreate(CreateNginxConfigRequest body) async {
     final payload = body.toJson();
     final response = await _client.post(ApiPaths.backendPath('/nginx/configs'), body: payload, contentType: 'application/json');
     return (() {
       final map = sdkworkResponseAsMap(response);
-      return map == null ? null : NginxConfigResponse.fromJson(map);
+      return map == null ? null : ConfigsCreateResponse201.fromJson(map);
     })();
   }
 
-  /// 获取 Nginx 配置详情
-  Future<NginxConfigResponse?> configsRetrieve(String configId) async {
+  /// Retrieve an Nginx configuration
+  Future<ConfigsRetrieveResponse?> configsRetrieve(String configId) async {
     final response = await _client.get(ApiPaths.backendPath('/nginx/etc/${serializePathParameter(configId, const PathParameterSpec('configId', 'simple', false))}'));
     return (() {
       final map = sdkworkResponseAsMap(response);
-      return map == null ? null : NginxConfigResponse.fromJson(map);
+      return map == null ? null : ConfigsRetrieveResponse.fromJson(map);
     })();
   }
 
-  /// 更新 Nginx 配置
-  Future<NginxConfigResponse?> configsUpdate(String configId, UpdateNginxConfigRequest body) async {
+  /// Update an Nginx configuration
+  Future<ConfigsUpdateResponse?> configsUpdate(String configId, UpdateNginxConfigRequest body) async {
     final payload = body.toJson();
     final response = await _client.put(ApiPaths.backendPath('/nginx/etc/${serializePathParameter(configId, const PathParameterSpec('configId', 'simple', false))}'), body: payload, contentType: 'application/json');
     return (() {
       final map = sdkworkResponseAsMap(response);
-      return map == null ? null : NginxConfigResponse.fromJson(map);
+      return map == null ? null : ConfigsUpdateResponse.fromJson(map);
     })();
   }
 
-  /// 校验 Nginx 配置
-  Future<NginxValidateResponse?> configsValidate(String configId) async {
+  /// Validate an Nginx configuration
+  Future<ConfigsValidateResponse?> configsValidate(String configId) async {
     final response = await _client.post(ApiPaths.backendPath('/nginx/etc/${serializePathParameter(configId, const PathParameterSpec('configId', 'simple', false))}/validate'));
     return (() {
       final map = sdkworkResponseAsMap(response);
-      return map == null ? null : NginxValidateResponse.fromJson(map);
+      return map == null ? null : ConfigsValidateResponse.fromJson(map);
     })();
   }
 
-  /// 部署 Nginx 配置
-  Future<NginxDeployResponse?> configsDeploy(String configId) async {
+  /// Deploy an Nginx configuration
+  Future<ConfigsDeployResponse?> configsDeploy(String configId) async {
     final response = await _client.post(ApiPaths.backendPath('/nginx/etc/${serializePathParameter(configId, const PathParameterSpec('configId', 'simple', false))}/deploy'));
     return (() {
       final map = sdkworkResponseAsMap(response);
-      return map == null ? null : NginxDeployResponse.fromJson(map);
+      return map == null ? null : ConfigsDeployResponse.fromJson(map);
     })();
   }
 
-  /// 热加载 Nginx
-  Future<NginxReloadResponse?> reload() async {
+  /// Reload Nginx
+  Future<ReloadResponse?> reload() async {
     final response = await _client.post(ApiPaths.backendPath('/nginx/reload'));
     return (() {
       final map = sdkworkResponseAsMap(response);
-      return map == null ? null : NginxReloadResponse.fromJson(map);
+      return map == null ? null : ReloadResponse.fromJson(map);
     })();
   }
 
-  /// 获取 Nginx 状态
-  Future<NginxStatusResponse?> statusRetrieve() async {
+  /// Retrieve Nginx status
+  Future<StatusRetrieveResponse?> statusRetrieve() async {
     final response = await _client.get(ApiPaths.backendPath('/nginx/status'));
     return (() {
       final map = sdkworkResponseAsMap(response);
-      return map == null ? null : NginxStatusResponse.fromJson(map);
+      return map == null ? null : StatusRetrieveResponse.fromJson(map);
     })();
   }
 }

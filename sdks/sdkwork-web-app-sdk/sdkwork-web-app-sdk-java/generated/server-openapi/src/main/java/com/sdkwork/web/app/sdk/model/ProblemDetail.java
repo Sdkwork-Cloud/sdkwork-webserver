@@ -1,5 +1,6 @@
 package com.sdkwork.web.app.sdk.model;
 
+import java.util.List;
 
 public class ProblemDetail {
     private String type;
@@ -7,7 +8,9 @@ public class ProblemDetail {
     private Integer status;
     private String detail;
     private String instance;
-    private String requestId;
+    private Integer code;
+    private String traceId;
+    private List<FieldError> errors;
 
     public String getType() {
         return this.type;
@@ -49,11 +52,27 @@ public class ProblemDetail {
         this.instance = instance;
     }
 
-    public String getRequestId() {
-        return this.requestId;
+    public Integer getCode() {
+        return this.code;
     }
 
-    public void setRequestId(String requestId) {
-        this.requestId = requestId;
+    public void setCode(Integer code) {
+        this.code = code;
+    }
+
+    public String getTraceId() {
+        return this.traceId;
+    }
+
+    public void setTraceId(String traceId) {
+        this.traceId = traceId;
+    }
+
+    public List<FieldError> getErrors() {
+        return this.errors;
+    }
+
+    public void setErrors(List<FieldError> errors) {
+        this.errors = errors;
     }
 }

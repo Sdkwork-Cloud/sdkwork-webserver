@@ -5,8 +5,8 @@ from typing import TYPE_CHECKING, Optional, List, Dict, Any
 
 @dataclass
 class AgentCertificateBundle:
-    certificate_id: Optional[str] = None
-    cert_name: Optional[str] = None
-    fingerprint: Optional[str] = None
-    fullchain_pem: Optional[str] = None
-    privkey_pem: Optional[str] = None
+    certificate_id: str
+    cert_name: str
+    fingerprint: str
+    fullchain_pem: str
+    privkey_pem: str

@@ -7,18 +7,18 @@ public class ServerApi {
         self.client = client
     }
 
-    /// 获取服务器列表
-    public func serversList(page: Int? = nil, pageSize: Int? = nil) async throws -> ServerPage? {
+    /// List managed servers
+    public func serversList(page: Int? = nil, pageSize: Int? = nil) async throws -> ServersListResponse? {
         let query = buildQueryString([
             QueryParameterSpec(name: "page", value: page, style: "form", explode: true, allowReserved: false, contentType: nil),
             QueryParameterSpec(name: "page_size", value: pageSize, style: "form", explode: true, allowReserved: false, contentType: nil)
         ])
-        return try await client.get(ApiPaths.appendQueryString(ApiPaths.backendPath("/servers"), query), responseType: ServerPage.self)
+        return try await client.get(ApiPaths.appendQueryString(ApiPaths.backendPath("/servers"), query), responseType: ServersListResponse.self)
     }
 
-    /// 注册服务器
-    public func serversCreate(body: CreateServerRequest) async throws -> CreateServerResponse? {
-        return try await client.post(ApiPaths.backendPath("/servers"), body: body, params: nil, headers: nil, contentType: "application/json", responseType: CreateServerResponse.self)
+    /// Register a managed server
+    public func serversCreate(body: CreateServerRequest) async throws -> ServersCreateResponse201? {
+        return try await client.post(ApiPaths.backendPath("/servers"), body: body, params: nil, headers: nil, contentType: "application/json", responseType: ServersCreateResponse201.self)
     }
 
 

@@ -14,19 +14,19 @@ public class CertificateApi {
     }
 
     /** 获取证书列表 */
-    public CertificatePage certificatesList(Integer page, Integer pageSize) throws Exception {
+    public CertificatesListResponse certificatesList(Integer page, Integer pageSize) throws Exception {
         String query = buildQueryString(List.of(
             new QueryParameterSpec("page", page, "form", true, false, null),
             new QueryParameterSpec("page_size", pageSize, "form", true, false, null)
         ));
         Object raw = client.get(ApiPaths.appendQueryString(ApiPaths.appPath("/certificates"), query));
-        return client.convertValue(raw, new TypeReference<CertificatePage>() {});
+        return client.convertValue(raw, new TypeReference<CertificatesListResponse>() {});
     }
 
     /** 申请证书 */
-    public CertificateResponse certificatesCreate(CreateCertificateRequest body) throws Exception {
+    public CertificatesCreateResponse201 certificatesCreate(CreateCertificateRequest body) throws Exception {
         Object raw = client.post(ApiPaths.appPath("/certificates"), body, null, null, "application/json");
-        return client.convertValue(raw, new TypeReference<CertificateResponse>() {});
+        return client.convertValue(raw, new TypeReference<CertificatesCreateResponse201>() {});
     }
 
 

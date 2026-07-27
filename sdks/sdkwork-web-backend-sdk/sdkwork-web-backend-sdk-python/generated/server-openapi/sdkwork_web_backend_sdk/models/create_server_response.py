@@ -5,11 +5,12 @@ from typing import TYPE_CHECKING, Optional, List, Dict, Any
 
 @dataclass
 class CreateServerResponse:
+    id: str
+    name: str
+    host: str
+    tenant_scope_hash: str
+    ssh_port: int
+    status: int
+    created_at: str
     agent_token: str
-    id: Optional[str] = None
-    name: Optional[str] = None
-    host: Optional[str] = None
-    ssh_port: Optional[int] = None
-    status: Optional[int] = None
     last_heartbeat_at: Optional[str] = None
-    created_at: Optional[str] = None

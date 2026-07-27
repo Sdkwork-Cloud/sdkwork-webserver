@@ -18,22 +18,22 @@ namespace SDKWork.Web.AppSdk.Api
         /// <summary>
         /// 获取证书列表
         /// </summary>
-        public async Task<SDKWork.Web.AppSdk.Models.CertificatePage?> CertificatesListAsync(int? page = null, int? pageSize = null)
+        public async Task<SDKWork.Web.AppSdk.Models.CertificatesListResponse?> CertificatesListAsync(int? page = null, int? pageSize = null)
         {
             var queryString = BuildQueryString(new[]
             {
                 new QueryParameterSpec("page", page, "form", true, false, null),
                 new QueryParameterSpec("page_size", pageSize, "form", true, false, null),
             });
-            return await _client.GetAsync<SDKWork.Web.AppSdk.Models.CertificatePage>(ApiPaths.AppendQueryString(ApiPaths.AppPath("/certificates"), queryString));
+            return await _client.GetAsync<SDKWork.Web.AppSdk.Models.CertificatesListResponse>(ApiPaths.AppendQueryString(ApiPaths.AppPath("/certificates"), queryString));
         }
 
         /// <summary>
         /// 申请证书
         /// </summary>
-        public async Task<SDKWork.Web.AppSdk.Models.CertificateResponse?> CertificatesCreateAsync(SDKWork.Web.AppSdk.Models.CreateCertificateRequest body)
+        public async Task<SDKWork.Web.AppSdk.Models.CertificatesCreateResponse201?> CertificatesCreateAsync(SDKWork.Web.AppSdk.Models.CreateCertificateRequest body)
         {
-            return await _client.PostAsync<SDKWork.Web.AppSdk.Models.CertificateResponse>(ApiPaths.AppPath("/certificates"), body, null, null, "application/json");
+            return await _client.PostAsync<SDKWork.Web.AppSdk.Models.CertificatesCreateResponse201>(ApiPaths.AppPath("/certificates"), body, null, null, "application/json");
         }
 
 

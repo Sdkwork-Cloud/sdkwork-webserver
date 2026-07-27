@@ -22,7 +22,7 @@ client.set_auth_token("your-auth-token")
 client.set_access_token("your-access-token")
 
 # Use the SDK
-result = client.nginx.status.list()
+result = client.nginx.status.retrieve()
 ```
 
 ## Authentication
@@ -48,6 +48,11 @@ client.set_header('X-Custom-Header', 'value')
 
 ## API Modules
 
+- `client.application` - application API
+- `client.application_domain` - application_domain API
+- `client.application_deployment` - application_deployment API
+- `client.certificate` - certificate API
+- `client.certificate_distribution` - certificate_distribution API
 - `client.nginx` - nginx API
 - `client.server` - server API
 - `client.agent` - agent API
@@ -55,21 +60,88 @@ client.set_header('X-Custom-Header', 'value')
 
 ## Usage Examples
 
+### application
+
+```python
+# List managed applications
+params = {
+    'page': 1,
+    'page_size': 2,
+    'applicationType': 'WEB',
+    'siteType': 4,
+    'status': 5,
+    'keyword': 'keyword',
+}
+result = client.application.list(params)
+print(result)
+```
+
+### application_domain
+
+```python
+# List application domains
+application_id = '1'
+params = {
+    'page': 1,
+    'page_size': 2,
+}
+result = client.application_domain.applications.domains.list(application_id, params)
+print(result)
+```
+
+### application_deployment
+
+```python
+# List application deployments
+application_id = '1'
+params = {
+    'page': 1,
+    'page_size': 2,
+    'status': 3,
+}
+result = client.application_deployment.applications.deployments.list(application_id, params)
+print(result)
+```
+
+### certificate
+
+```python
+# List canonical certificates
+params = {
+    'page': 1,
+    'page_size': 2,
+}
+result = client.certificate.list(params)
+print(result)
+```
+
+### certificate_distribution
+
+```python
+# List certificate manifest convergence by server
+params = {
+    'page': 1,
+    'page_size': 2,
+}
+result = client.certificate_distribution.certificates.distribution.list(params)
+print(result)
+```
+
 ### nginx
 
 ```python
-# 获取 Nginx 状态
-result = client.nginx.status.list()
+# Retrieve Nginx status
+result = client.nginx.status.retrieve()
 print(result)
 ```
 
 ### server
 
 ```python
-# 获取服务器列表
+# List managed servers
 params = {
     'page': 1,
-    'pageSize': 2,
+    'page_size': 2,
 }
 result = client.server.list(params)
 print(result)
@@ -78,21 +150,21 @@ print(result)
 ### agent
 
 ```python
-# 拉取 nginx 配置与证书 bundle
+# Retrieve the Nginx configuration and certificate bundle
 params = {
     'ifSyncVersion': 'ifSyncVersion',
 }
-result = client.agent.list_sync(params)
+result = client.agent.sync.list(params)
 print(result)
 ```
 
 ### audit
 
 ```python
-# 获取审计日志列表
+# List audit logs
 params = {
     'page': 1,
-    'pageSize': 2,
+    'page_size': 2,
     'targetType': 'targetType',
     'action': 'action',
     'operatorId': 'operatorId',
@@ -107,7 +179,7 @@ print(result)
 
 ```python
 try:
-    client.nginx.status.list()
+    client.nginx.status.retrieve()
 except Exception as error:
     print(f"Error: {error}")
 ```

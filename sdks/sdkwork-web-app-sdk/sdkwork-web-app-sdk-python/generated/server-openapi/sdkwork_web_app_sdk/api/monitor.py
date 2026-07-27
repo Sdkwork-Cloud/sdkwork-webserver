@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional
 from ..http_client import HttpClient
-from ..models import CreateHealthCheckRequest, HealthCheckPage, HealthCheckResponse
+from ..models import CreateHealthCheckRequest, SitesHealthChecksCreateResponse201, SitesHealthChecksListResponse
 
 def _append_query_string(path: str, raw_query_string: str) -> str:
     query = raw_query_string.lstrip('?')
@@ -97,10 +97,10 @@ class MonitorSitesHealthChecksApi:
         self._client = client
 
 
-    def list(self, site_id: str) -> HealthCheckPage:
+    def list(self, site_id: str) -> SitesHealthChecksListResponse:
         """获取健康检查配置"""
         return self._client.get(f"/app/v3/api/sites/{serialize_path_parameter(site_id, {'name': 'siteId', 'style': 'simple', 'explode': False})}/health_checks")
 
-    def create(self, site_id: str, body: CreateHealthCheckRequest) -> HealthCheckResponse:
+    def create(self, site_id: str, body: CreateHealthCheckRequest) -> SitesHealthChecksCreateResponse201:
         """创建健康检查"""
         return self._client.post(f"/app/v3/api/sites/{serialize_path_parameter(site_id, {'name': 'siteId', 'style': 'simple', 'explode': False})}/health_checks", json=body)

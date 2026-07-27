@@ -13,30 +13,78 @@ List<dynamic>? _sdkworkAsList(dynamic value) {
 }
 
 class ProblemDetail {
-  final String? type;
-  final String? title;
-  final int? status;
+  final String type;
+  final String title;
+  final int status;
   final String? detail;
   final String? instance;
-  final String? requestId;
+  final int code;
+  final String traceId;
+  final List<FieldError>? errors;
 
   ProblemDetail({
-    this.type,
-    this.title,
-    this.status,
+    required this.type,
+    required this.title,
+    required this.status,
     this.detail,
     this.instance,
-    this.requestId
+    required this.code,
+    required this.traceId,
+    this.errors
   });
 
   factory ProblemDetail.fromJson(Map<String, dynamic> json) {
     return ProblemDetail(
-      type: json['type']?.toString(),
-      title: json['title']?.toString(),
-      status: json['status'] is int ? json['status'] : null,
+      type: (() {
+        final value = json['type']?.toString();
+        if (value == null) {
+          throw FormatException('ProblemDetail.type is required');
+        }
+        return value;
+      })(),
+      title: (() {
+        final value = json['title']?.toString();
+        if (value == null) {
+          throw FormatException('ProblemDetail.title is required');
+        }
+        return value;
+      })(),
+      status: (() {
+        final value = json['status'];
+        if (value is! int) {
+          throw FormatException('ProblemDetail.status is required');
+        }
+        return value;
+      })(),
       detail: json['detail']?.toString(),
       instance: json['instance']?.toString(),
-      requestId: json['requestId']?.toString()
+      code: (() {
+        final value = json['code'];
+        if (value is! int) {
+          throw FormatException('ProblemDetail.code is required');
+        }
+        return value;
+      })(),
+      traceId: (() {
+        final value = json['traceId']?.toString();
+        if (value == null) {
+          throw FormatException('ProblemDetail.traceId is required');
+        }
+        return value;
+      })(),
+      errors: (() {
+        final list = _sdkworkAsList(json['errors']);
+        if (list == null) {
+          return null;
+        }
+        return list
+            .map((item) => (() {
+        final map = _sdkworkAsMap(item);
+        return map == null ? null : FieldError.fromJson(map);
+      })())
+            .whereType<FieldError>()
+            .toList();
+      })()
     );
   }
 
@@ -47,7 +95,9 @@ class ProblemDetail {
       'status': status,
       'detail': detail,
       'instance': instance,
-      'requestId': requestId,
+      'code': code,
+      'traceId': traceId,
+      'errors': errors?.map((item) => item.toJson()).toList(),
     };
   }
 }
@@ -56,6 +106,7 @@ class CreateSiteRequest {
   final String name;
   final String? slug;
   final String? description;
+  final String? applicationType;
   final int siteType;
   final Map<String, dynamic>? runtimeConfig;
 
@@ -63,6 +114,7 @@ class CreateSiteRequest {
     required this.name,
     this.slug,
     this.description,
+    this.applicationType,
     required this.siteType,
     this.runtimeConfig
   });
@@ -78,6 +130,7 @@ class CreateSiteRequest {
       })(),
       slug: json['slug']?.toString(),
       description: json['description']?.toString(),
+      applicationType: json['applicationType']?.toString(),
       siteType: (() {
         final value = json['siteType'];
         if (value is! int) {
@@ -94,6 +147,7 @@ class CreateSiteRequest {
       'name': name,
       'slug': slug,
       'description': description,
+      'applicationType': applicationType,
       'siteType': siteType,
       'runtimeConfig': runtimeConfig,
     };
@@ -133,6 +187,7 @@ class SiteResponse {
   final String? name;
   final String? slug;
   final String? description;
+  final String? applicationType;
   final int? siteType;
   final int? status;
   final Map<String, dynamic>? runtimeConfig;
@@ -144,6 +199,7 @@ class SiteResponse {
     this.name,
     this.slug,
     this.description,
+    this.applicationType,
     this.siteType,
     this.status,
     this.runtimeConfig,
@@ -157,6 +213,7 @@ class SiteResponse {
       name: json['name']?.toString(),
       slug: json['slug']?.toString(),
       description: json['description']?.toString(),
+      applicationType: json['applicationType']?.toString(),
       siteType: json['siteType'] is int ? json['siteType'] : null,
       status: json['status'] is int ? json['status'] : null,
       runtimeConfig: _sdkworkAsMap(json['runtimeConfig']),
@@ -171,6 +228,7 @@ class SiteResponse {
       'name': name,
       'slug': slug,
       'description': description,
+      'applicationType': applicationType,
       'siteType': siteType,
       'status': status,
       'runtimeConfig': runtimeConfig,
@@ -866,6 +924,1275 @@ class HealthCheckPage {
     return <String, dynamic>{
       'items': items?.map((item) => item.toJson()).toList(),
       'total': total,
+    };
+  }
+}
+
+class SdkWorkApiResponse {
+  final int code;
+  final dynamic data;
+  final String traceId;
+
+  SdkWorkApiResponse({
+    required this.code,
+    required this.data,
+    required this.traceId
+  });
+
+  factory SdkWorkApiResponse.fromJson(Map<String, dynamic> json) {
+    return SdkWorkApiResponse(
+      code: (() {
+        final value = json['code'];
+        if (value is! int) {
+          throw FormatException('SdkWorkApiResponse.code is required');
+        }
+        return value;
+      })(),
+      data: json['data'],
+      traceId: (() {
+        final value = json['traceId']?.toString();
+        if (value == null) {
+          throw FormatException('SdkWorkApiResponse.traceId is required');
+        }
+        return value;
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SdkWorkResourceData {
+  final Map<String, dynamic> item;
+
+  SdkWorkResourceData({
+    required this.item
+  });
+
+  factory SdkWorkResourceData.fromJson(Map<String, dynamic> json) {
+    return SdkWorkResourceData(
+      item: (() {
+        final map = _sdkworkAsMap(json['item']);
+        if (map == null) {
+          throw FormatException('SdkWorkResourceData.item is required');
+        }
+        return map;
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'item': item,
+    };
+  }
+}
+
+class SdkWorkPageData {
+  final List<Map<String, dynamic>> items;
+  final PageInfo pageInfo;
+
+  SdkWorkPageData({
+    required this.items,
+    required this.pageInfo
+  });
+
+  factory SdkWorkPageData.fromJson(Map<String, dynamic> json) {
+    return SdkWorkPageData(
+      items: (() {
+        final list = _sdkworkAsList(json['items']);
+        if (list == null) {
+          throw FormatException('SdkWorkPageData.items is required');
+        }
+        return list
+            .map((item) => _sdkworkAsMap(item))
+            .whereType<Map<String, dynamic>>()
+            .toList();
+      })(),
+      pageInfo: (() {
+        final map = _sdkworkAsMap(json['pageInfo']);
+        if (map == null) {
+          throw FormatException('SdkWorkPageData.pageInfo is required');
+        }
+        return PageInfo.fromJson(map);
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'items': items.map((item) => item).toList(),
+      'pageInfo': pageInfo.toJson(),
+    };
+  }
+}
+
+class SdkWorkCommandData {
+  final bool accepted;
+  final String? resourceId;
+  final String? status;
+
+  SdkWorkCommandData({
+    required this.accepted,
+    this.resourceId,
+    this.status
+  });
+
+  factory SdkWorkCommandData.fromJson(Map<String, dynamic> json) {
+    return SdkWorkCommandData(
+      accepted: (() {
+        final value = json['accepted'];
+        if (value is! bool) {
+          throw FormatException('SdkWorkCommandData.accepted is required');
+        }
+        return value;
+      })(),
+      resourceId: json['resourceId']?.toString(),
+      status: json['status']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'accepted': accepted,
+      'resourceId': resourceId,
+      'status': status,
+    };
+  }
+}
+
+class PageInfo {
+  final String mode;
+  final int? page;
+  final int? pageSize;
+  final String? totalItems;
+  final int? totalPages;
+  final String? nextCursor;
+  final bool? hasMore;
+
+  PageInfo({
+    required this.mode,
+    this.page,
+    this.pageSize,
+    this.totalItems,
+    this.totalPages,
+    this.nextCursor,
+    this.hasMore
+  });
+
+  factory PageInfo.fromJson(Map<String, dynamic> json) {
+    return PageInfo(
+      mode: (() {
+        final value = json['mode']?.toString();
+        if (value == null) {
+          throw FormatException('PageInfo.mode is required');
+        }
+        return value;
+      })(),
+      page: json['page'] is int ? json['page'] : null,
+      pageSize: json['pageSize'] is int ? json['pageSize'] : null,
+      totalItems: json['totalItems']?.toString(),
+      totalPages: json['totalPages'] is int ? json['totalPages'] : null,
+      nextCursor: json['nextCursor']?.toString(),
+      hasMore: json['hasMore'] is bool ? json['hasMore'] : null
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'mode': mode,
+      'page': page,
+      'pageSize': pageSize,
+      'totalItems': totalItems,
+      'totalPages': totalPages,
+      'nextCursor': nextCursor,
+      'hasMore': hasMore,
+    };
+  }
+}
+
+class FieldError {
+  final String field;
+  final String message;
+  final int? code;
+
+  FieldError({
+    required this.field,
+    required this.message,
+    this.code
+  });
+
+  factory FieldError.fromJson(Map<String, dynamic> json) {
+    return FieldError(
+      field: (() {
+        final value = json['field']?.toString();
+        if (value == null) {
+          throw FormatException('FieldError.field is required');
+        }
+        return value;
+      })(),
+      message: (() {
+        final value = json['message']?.toString();
+        if (value == null) {
+          throw FormatException('FieldError.message is required');
+        }
+        return value;
+      })(),
+      code: json['code'] is int ? json['code'] : null
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'field': field,
+      'message': message,
+      'code': code,
+    };
+  }
+}
+
+class SdkWorkResourceResponse {
+  final int code;
+  final dynamic data;
+  final String traceId;
+
+  SdkWorkResourceResponse({
+    required this.code,
+    required this.data,
+    required this.traceId
+  });
+
+  factory SdkWorkResourceResponse.fromJson(Map<String, dynamic> json) {
+    return SdkWorkResourceResponse(
+      code: (() {
+        final value = json['code'];
+        if (value is! int) {
+          throw FormatException('SdkWorkResourceResponse.code is required');
+        }
+        return value;
+      })(),
+      data: json['data'],
+      traceId: (() {
+        final value = json['traceId']?.toString();
+        if (value == null) {
+          throw FormatException('SdkWorkResourceResponse.traceId is required');
+        }
+        return value;
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SdkWorkListResponse {
+  final int code;
+  final dynamic data;
+  final String traceId;
+
+  SdkWorkListResponse({
+    required this.code,
+    required this.data,
+    required this.traceId
+  });
+
+  factory SdkWorkListResponse.fromJson(Map<String, dynamic> json) {
+    return SdkWorkListResponse(
+      code: (() {
+        final value = json['code'];
+        if (value is! int) {
+          throw FormatException('SdkWorkListResponse.code is required');
+        }
+        return value;
+      })(),
+      data: json['data'],
+      traceId: (() {
+        final value = json['traceId']?.toString();
+        if (value == null) {
+          throw FormatException('SdkWorkListResponse.traceId is required');
+        }
+        return value;
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SdkWorkCommandResponse {
+  final int code;
+  final dynamic data;
+  final String traceId;
+
+  SdkWorkCommandResponse({
+    required this.code,
+    required this.data,
+    required this.traceId
+  });
+
+  factory SdkWorkCommandResponse.fromJson(Map<String, dynamic> json) {
+    return SdkWorkCommandResponse(
+      code: (() {
+        final value = json['code'];
+        if (value is! int) {
+          throw FormatException('SdkWorkCommandResponse.code is required');
+        }
+        return value;
+      })(),
+      data: json['data'],
+      traceId: (() {
+        final value = json['traceId']?.toString();
+        if (value == null) {
+          throw FormatException('SdkWorkCommandResponse.traceId is required');
+        }
+        return value;
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SitesListResponse {
+  final int code;
+  final dynamic data;
+  final String traceId;
+
+  SitesListResponse({
+    required this.code,
+    required this.data,
+    required this.traceId
+  });
+
+  factory SitesListResponse.fromJson(Map<String, dynamic> json) {
+    return SitesListResponse(
+      code: (() {
+        final value = json['code'];
+        if (value is! int) {
+          throw FormatException('SitesListResponse.code is required');
+        }
+        return value;
+      })(),
+      data: (() {
+        final map = _sdkworkAsMap(json['data']);
+        if (map == null) {
+          throw FormatException('SitesListResponse.data is required');
+        }
+        return map;
+      })(),
+      traceId: (() {
+        final value = json['traceId']?.toString();
+        if (value == null) {
+          throw FormatException('SitesListResponse.traceId is required');
+        }
+        return value;
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SitesCreateResponse201 {
+  final int code;
+  final dynamic data;
+  final String traceId;
+
+  SitesCreateResponse201({
+    required this.code,
+    required this.data,
+    required this.traceId
+  });
+
+  factory SitesCreateResponse201.fromJson(Map<String, dynamic> json) {
+    return SitesCreateResponse201(
+      code: (() {
+        final value = json['code'];
+        if (value is! int) {
+          throw FormatException('SitesCreateResponse201.code is required');
+        }
+        return value;
+      })(),
+      data: (() {
+        final map = _sdkworkAsMap(json['data']);
+        if (map == null) {
+          throw FormatException('SitesCreateResponse201.data is required');
+        }
+        return map;
+      })(),
+      traceId: (() {
+        final value = json['traceId']?.toString();
+        if (value == null) {
+          throw FormatException('SitesCreateResponse201.traceId is required');
+        }
+        return value;
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SitesRetrieveResponse {
+  final int code;
+  final dynamic data;
+  final String traceId;
+
+  SitesRetrieveResponse({
+    required this.code,
+    required this.data,
+    required this.traceId
+  });
+
+  factory SitesRetrieveResponse.fromJson(Map<String, dynamic> json) {
+    return SitesRetrieveResponse(
+      code: (() {
+        final value = json['code'];
+        if (value is! int) {
+          throw FormatException('SitesRetrieveResponse.code is required');
+        }
+        return value;
+      })(),
+      data: (() {
+        final map = _sdkworkAsMap(json['data']);
+        if (map == null) {
+          throw FormatException('SitesRetrieveResponse.data is required');
+        }
+        return map;
+      })(),
+      traceId: (() {
+        final value = json['traceId']?.toString();
+        if (value == null) {
+          throw FormatException('SitesRetrieveResponse.traceId is required');
+        }
+        return value;
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SitesUpdateResponse {
+  final int code;
+  final dynamic data;
+  final String traceId;
+
+  SitesUpdateResponse({
+    required this.code,
+    required this.data,
+    required this.traceId
+  });
+
+  factory SitesUpdateResponse.fromJson(Map<String, dynamic> json) {
+    return SitesUpdateResponse(
+      code: (() {
+        final value = json['code'];
+        if (value is! int) {
+          throw FormatException('SitesUpdateResponse.code is required');
+        }
+        return value;
+      })(),
+      data: (() {
+        final map = _sdkworkAsMap(json['data']);
+        if (map == null) {
+          throw FormatException('SitesUpdateResponse.data is required');
+        }
+        return map;
+      })(),
+      traceId: (() {
+        final value = json['traceId']?.toString();
+        if (value == null) {
+          throw FormatException('SitesUpdateResponse.traceId is required');
+        }
+        return value;
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SitesActivateResponse {
+  final int code;
+  final dynamic data;
+  final String traceId;
+
+  SitesActivateResponse({
+    required this.code,
+    required this.data,
+    required this.traceId
+  });
+
+  factory SitesActivateResponse.fromJson(Map<String, dynamic> json) {
+    return SitesActivateResponse(
+      code: (() {
+        final value = json['code'];
+        if (value is! int) {
+          throw FormatException('SitesActivateResponse.code is required');
+        }
+        return value;
+      })(),
+      data: (() {
+        final map = _sdkworkAsMap(json['data']);
+        if (map == null) {
+          throw FormatException('SitesActivateResponse.data is required');
+        }
+        return map;
+      })(),
+      traceId: (() {
+        final value = json['traceId']?.toString();
+        if (value == null) {
+          throw FormatException('SitesActivateResponse.traceId is required');
+        }
+        return value;
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SitesPauseResponse {
+  final int code;
+  final dynamic data;
+  final String traceId;
+
+  SitesPauseResponse({
+    required this.code,
+    required this.data,
+    required this.traceId
+  });
+
+  factory SitesPauseResponse.fromJson(Map<String, dynamic> json) {
+    return SitesPauseResponse(
+      code: (() {
+        final value = json['code'];
+        if (value is! int) {
+          throw FormatException('SitesPauseResponse.code is required');
+        }
+        return value;
+      })(),
+      data: (() {
+        final map = _sdkworkAsMap(json['data']);
+        if (map == null) {
+          throw FormatException('SitesPauseResponse.data is required');
+        }
+        return map;
+      })(),
+      traceId: (() {
+        final value = json['traceId']?.toString();
+        if (value == null) {
+          throw FormatException('SitesPauseResponse.traceId is required');
+        }
+        return value;
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SitesDomainsListResponse {
+  final int code;
+  final dynamic data;
+  final String traceId;
+
+  SitesDomainsListResponse({
+    required this.code,
+    required this.data,
+    required this.traceId
+  });
+
+  factory SitesDomainsListResponse.fromJson(Map<String, dynamic> json) {
+    return SitesDomainsListResponse(
+      code: (() {
+        final value = json['code'];
+        if (value is! int) {
+          throw FormatException('SitesDomainsListResponse.code is required');
+        }
+        return value;
+      })(),
+      data: (() {
+        final map = _sdkworkAsMap(json['data']);
+        if (map == null) {
+          throw FormatException('SitesDomainsListResponse.data is required');
+        }
+        return map;
+      })(),
+      traceId: (() {
+        final value = json['traceId']?.toString();
+        if (value == null) {
+          throw FormatException('SitesDomainsListResponse.traceId is required');
+        }
+        return value;
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SitesDomainsCreateResponse201 {
+  final int code;
+  final dynamic data;
+  final String traceId;
+
+  SitesDomainsCreateResponse201({
+    required this.code,
+    required this.data,
+    required this.traceId
+  });
+
+  factory SitesDomainsCreateResponse201.fromJson(Map<String, dynamic> json) {
+    return SitesDomainsCreateResponse201(
+      code: (() {
+        final value = json['code'];
+        if (value is! int) {
+          throw FormatException('SitesDomainsCreateResponse201.code is required');
+        }
+        return value;
+      })(),
+      data: (() {
+        final map = _sdkworkAsMap(json['data']);
+        if (map == null) {
+          throw FormatException('SitesDomainsCreateResponse201.data is required');
+        }
+        return map;
+      })(),
+      traceId: (() {
+        final value = json['traceId']?.toString();
+        if (value == null) {
+          throw FormatException('SitesDomainsCreateResponse201.traceId is required');
+        }
+        return value;
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SitesDomainsRetrieveResponse {
+  final int code;
+  final dynamic data;
+  final String traceId;
+
+  SitesDomainsRetrieveResponse({
+    required this.code,
+    required this.data,
+    required this.traceId
+  });
+
+  factory SitesDomainsRetrieveResponse.fromJson(Map<String, dynamic> json) {
+    return SitesDomainsRetrieveResponse(
+      code: (() {
+        final value = json['code'];
+        if (value is! int) {
+          throw FormatException('SitesDomainsRetrieveResponse.code is required');
+        }
+        return value;
+      })(),
+      data: (() {
+        final map = _sdkworkAsMap(json['data']);
+        if (map == null) {
+          throw FormatException('SitesDomainsRetrieveResponse.data is required');
+        }
+        return map;
+      })(),
+      traceId: (() {
+        final value = json['traceId']?.toString();
+        if (value == null) {
+          throw FormatException('SitesDomainsRetrieveResponse.traceId is required');
+        }
+        return value;
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SitesDomainsVerifyResponse {
+  final int code;
+  final dynamic data;
+  final String traceId;
+
+  SitesDomainsVerifyResponse({
+    required this.code,
+    required this.data,
+    required this.traceId
+  });
+
+  factory SitesDomainsVerifyResponse.fromJson(Map<String, dynamic> json) {
+    return SitesDomainsVerifyResponse(
+      code: (() {
+        final value = json['code'];
+        if (value is! int) {
+          throw FormatException('SitesDomainsVerifyResponse.code is required');
+        }
+        return value;
+      })(),
+      data: (() {
+        final map = _sdkworkAsMap(json['data']);
+        if (map == null) {
+          throw FormatException('SitesDomainsVerifyResponse.data is required');
+        }
+        return map;
+      })(),
+      traceId: (() {
+        final value = json['traceId']?.toString();
+        if (value == null) {
+          throw FormatException('SitesDomainsVerifyResponse.traceId is required');
+        }
+        return value;
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SitesDeploymentsListResponse {
+  final int code;
+  final dynamic data;
+  final String traceId;
+
+  SitesDeploymentsListResponse({
+    required this.code,
+    required this.data,
+    required this.traceId
+  });
+
+  factory SitesDeploymentsListResponse.fromJson(Map<String, dynamic> json) {
+    return SitesDeploymentsListResponse(
+      code: (() {
+        final value = json['code'];
+        if (value is! int) {
+          throw FormatException('SitesDeploymentsListResponse.code is required');
+        }
+        return value;
+      })(),
+      data: (() {
+        final map = _sdkworkAsMap(json['data']);
+        if (map == null) {
+          throw FormatException('SitesDeploymentsListResponse.data is required');
+        }
+        return map;
+      })(),
+      traceId: (() {
+        final value = json['traceId']?.toString();
+        if (value == null) {
+          throw FormatException('SitesDeploymentsListResponse.traceId is required');
+        }
+        return value;
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SitesDeploymentsCreateResponse201 {
+  final int code;
+  final dynamic data;
+  final String traceId;
+
+  SitesDeploymentsCreateResponse201({
+    required this.code,
+    required this.data,
+    required this.traceId
+  });
+
+  factory SitesDeploymentsCreateResponse201.fromJson(Map<String, dynamic> json) {
+    return SitesDeploymentsCreateResponse201(
+      code: (() {
+        final value = json['code'];
+        if (value is! int) {
+          throw FormatException('SitesDeploymentsCreateResponse201.code is required');
+        }
+        return value;
+      })(),
+      data: (() {
+        final map = _sdkworkAsMap(json['data']);
+        if (map == null) {
+          throw FormatException('SitesDeploymentsCreateResponse201.data is required');
+        }
+        return map;
+      })(),
+      traceId: (() {
+        final value = json['traceId']?.toString();
+        if (value == null) {
+          throw FormatException('SitesDeploymentsCreateResponse201.traceId is required');
+        }
+        return value;
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SitesDeploymentsRetrieveResponse {
+  final int code;
+  final dynamic data;
+  final String traceId;
+
+  SitesDeploymentsRetrieveResponse({
+    required this.code,
+    required this.data,
+    required this.traceId
+  });
+
+  factory SitesDeploymentsRetrieveResponse.fromJson(Map<String, dynamic> json) {
+    return SitesDeploymentsRetrieveResponse(
+      code: (() {
+        final value = json['code'];
+        if (value is! int) {
+          throw FormatException('SitesDeploymentsRetrieveResponse.code is required');
+        }
+        return value;
+      })(),
+      data: (() {
+        final map = _sdkworkAsMap(json['data']);
+        if (map == null) {
+          throw FormatException('SitesDeploymentsRetrieveResponse.data is required');
+        }
+        return map;
+      })(),
+      traceId: (() {
+        final value = json['traceId']?.toString();
+        if (value == null) {
+          throw FormatException('SitesDeploymentsRetrieveResponse.traceId is required');
+        }
+        return value;
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SitesDeploymentsRollbackResponse {
+  final int code;
+  final dynamic data;
+  final String traceId;
+
+  SitesDeploymentsRollbackResponse({
+    required this.code,
+    required this.data,
+    required this.traceId
+  });
+
+  factory SitesDeploymentsRollbackResponse.fromJson(Map<String, dynamic> json) {
+    return SitesDeploymentsRollbackResponse(
+      code: (() {
+        final value = json['code'];
+        if (value is! int) {
+          throw FormatException('SitesDeploymentsRollbackResponse.code is required');
+        }
+        return value;
+      })(),
+      data: (() {
+        final map = _sdkworkAsMap(json['data']);
+        if (map == null) {
+          throw FormatException('SitesDeploymentsRollbackResponse.data is required');
+        }
+        return map;
+      })(),
+      traceId: (() {
+        final value = json['traceId']?.toString();
+        if (value == null) {
+          throw FormatException('SitesDeploymentsRollbackResponse.traceId is required');
+        }
+        return value;
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SitesEnvVariablesListResponse {
+  final int code;
+  final dynamic data;
+  final String traceId;
+
+  SitesEnvVariablesListResponse({
+    required this.code,
+    required this.data,
+    required this.traceId
+  });
+
+  factory SitesEnvVariablesListResponse.fromJson(Map<String, dynamic> json) {
+    return SitesEnvVariablesListResponse(
+      code: (() {
+        final value = json['code'];
+        if (value is! int) {
+          throw FormatException('SitesEnvVariablesListResponse.code is required');
+        }
+        return value;
+      })(),
+      data: (() {
+        final map = _sdkworkAsMap(json['data']);
+        if (map == null) {
+          throw FormatException('SitesEnvVariablesListResponse.data is required');
+        }
+        return map;
+      })(),
+      traceId: (() {
+        final value = json['traceId']?.toString();
+        if (value == null) {
+          throw FormatException('SitesEnvVariablesListResponse.traceId is required');
+        }
+        return value;
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SitesEnvVariablesCreateResponse201 {
+  final int code;
+  final dynamic data;
+  final String traceId;
+
+  SitesEnvVariablesCreateResponse201({
+    required this.code,
+    required this.data,
+    required this.traceId
+  });
+
+  factory SitesEnvVariablesCreateResponse201.fromJson(Map<String, dynamic> json) {
+    return SitesEnvVariablesCreateResponse201(
+      code: (() {
+        final value = json['code'];
+        if (value is! int) {
+          throw FormatException('SitesEnvVariablesCreateResponse201.code is required');
+        }
+        return value;
+      })(),
+      data: (() {
+        final map = _sdkworkAsMap(json['data']);
+        if (map == null) {
+          throw FormatException('SitesEnvVariablesCreateResponse201.data is required');
+        }
+        return map;
+      })(),
+      traceId: (() {
+        final value = json['traceId']?.toString();
+        if (value == null) {
+          throw FormatException('SitesEnvVariablesCreateResponse201.traceId is required');
+        }
+        return value;
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class CertificatesListResponse {
+  final int code;
+  final dynamic data;
+  final String traceId;
+
+  CertificatesListResponse({
+    required this.code,
+    required this.data,
+    required this.traceId
+  });
+
+  factory CertificatesListResponse.fromJson(Map<String, dynamic> json) {
+    return CertificatesListResponse(
+      code: (() {
+        final value = json['code'];
+        if (value is! int) {
+          throw FormatException('CertificatesListResponse.code is required');
+        }
+        return value;
+      })(),
+      data: (() {
+        final map = _sdkworkAsMap(json['data']);
+        if (map == null) {
+          throw FormatException('CertificatesListResponse.data is required');
+        }
+        return map;
+      })(),
+      traceId: (() {
+        final value = json['traceId']?.toString();
+        if (value == null) {
+          throw FormatException('CertificatesListResponse.traceId is required');
+        }
+        return value;
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class CertificatesCreateResponse201 {
+  final int code;
+  final dynamic data;
+  final String traceId;
+
+  CertificatesCreateResponse201({
+    required this.code,
+    required this.data,
+    required this.traceId
+  });
+
+  factory CertificatesCreateResponse201.fromJson(Map<String, dynamic> json) {
+    return CertificatesCreateResponse201(
+      code: (() {
+        final value = json['code'];
+        if (value is! int) {
+          throw FormatException('CertificatesCreateResponse201.code is required');
+        }
+        return value;
+      })(),
+      data: (() {
+        final map = _sdkworkAsMap(json['data']);
+        if (map == null) {
+          throw FormatException('CertificatesCreateResponse201.data is required');
+        }
+        return map;
+      })(),
+      traceId: (() {
+        final value = json['traceId']?.toString();
+        if (value == null) {
+          throw FormatException('CertificatesCreateResponse201.traceId is required');
+        }
+        return value;
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SitesHealthChecksListResponse {
+  final int code;
+  final dynamic data;
+  final String traceId;
+
+  SitesHealthChecksListResponse({
+    required this.code,
+    required this.data,
+    required this.traceId
+  });
+
+  factory SitesHealthChecksListResponse.fromJson(Map<String, dynamic> json) {
+    return SitesHealthChecksListResponse(
+      code: (() {
+        final value = json['code'];
+        if (value is! int) {
+          throw FormatException('SitesHealthChecksListResponse.code is required');
+        }
+        return value;
+      })(),
+      data: (() {
+        final map = _sdkworkAsMap(json['data']);
+        if (map == null) {
+          throw FormatException('SitesHealthChecksListResponse.data is required');
+        }
+        return map;
+      })(),
+      traceId: (() {
+        final value = json['traceId']?.toString();
+        if (value == null) {
+          throw FormatException('SitesHealthChecksListResponse.traceId is required');
+        }
+        return value;
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SitesHealthChecksCreateResponse201 {
+  final int code;
+  final dynamic data;
+  final String traceId;
+
+  SitesHealthChecksCreateResponse201({
+    required this.code,
+    required this.data,
+    required this.traceId
+  });
+
+  factory SitesHealthChecksCreateResponse201.fromJson(Map<String, dynamic> json) {
+    return SitesHealthChecksCreateResponse201(
+      code: (() {
+        final value = json['code'];
+        if (value is! int) {
+          throw FormatException('SitesHealthChecksCreateResponse201.code is required');
+        }
+        return value;
+      })(),
+      data: (() {
+        final map = _sdkworkAsMap(json['data']);
+        if (map == null) {
+          throw FormatException('SitesHealthChecksCreateResponse201.data is required');
+        }
+        return map;
+      })(),
+      traceId: (() {
+        final value = json['traceId']?.toString();
+        if (value == null) {
+          throw FormatException('SitesHealthChecksCreateResponse201.traceId is required');
+        }
+        return value;
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
     };
   }
 }

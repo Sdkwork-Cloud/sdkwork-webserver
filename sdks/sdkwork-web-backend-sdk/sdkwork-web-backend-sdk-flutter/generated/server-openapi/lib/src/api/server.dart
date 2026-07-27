@@ -11,8 +11,8 @@ class ServerApi {
 
   ServerApi(this._client);
 
-  /// 获取服务器列表
-  Future<ServerPage?> serversList([int? page, int? pageSize]) async {
+  /// List managed servers
+  Future<ServersListResponse?> serversList([int? page, int? pageSize]) async {
     final query = buildQueryString([
       QueryParameterSpec('page', page, 'form', true, false, null),
       QueryParameterSpec('page_size', pageSize, 'form', true, false, null)
@@ -20,17 +20,17 @@ class ServerApi {
     final response = await _client.get(ApiPaths.appendQueryString(ApiPaths.backendPath('/servers'), query));
     return (() {
       final map = sdkworkResponseAsMap(response);
-      return map == null ? null : ServerPage.fromJson(map);
+      return map == null ? null : ServersListResponse.fromJson(map);
     })();
   }
 
-  /// 注册服务器
-  Future<CreateServerResponse?> serversCreate(CreateServerRequest body) async {
+  /// Register a managed server
+  Future<ServersCreateResponse201?> serversCreate(CreateServerRequest body) async {
     final payload = body.toJson();
     final response = await _client.post(ApiPaths.backendPath('/servers'), body: payload, contentType: 'application/json');
     return (() {
       final map = sdkworkResponseAsMap(response);
-      return map == null ? null : CreateServerResponse.fromJson(map);
+      return map == null ? null : ServersCreateResponse201.fromJson(map);
     })();
   }
 }

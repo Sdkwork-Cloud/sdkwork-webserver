@@ -22,8 +22,6 @@ final class AuditLogResponse
 
     public ?string $targetUuid = null;
 
-    public ?string $requestId = null;
-
     public ?string $ipAddress = null;
 
     public array $changes = [];
@@ -53,9 +51,6 @@ final class AuditLogResponse
         $this->targetUuid = array_key_exists('targetUuid', $data)
             ? $data['targetUuid']
             : null;
-        $this->requestId = array_key_exists('requestId', $data)
-            ? $data['requestId']
-            : null;
         $this->ipAddress = array_key_exists('ipAddress', $data)
             ? $data['ipAddress']
             : null;
@@ -82,7 +77,6 @@ final class AuditLogResponse
             'targetType' => $this->targetType,
             'targetId' => $this->targetId,
             'targetUuid' => $this->targetUuid,
-            'requestId' => $this->requestId,
             'ipAddress' => $this->ipAddress,
             'changes' => $this->changes,
             'createdAt' => $this->createdAt,

@@ -10,164 +10,37 @@
   },
   "status": "ok",
   "mode": "apply",
-  "hasChanges": true,
+  "hasChanges": false,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "76743ce7cf552f147e9cae6d489f203c2c6e7069476a74a01ac10e4c8b109d5d",
+  "changeFingerprint": "11730022c451aa59c389ea5abd4619088bfeebbda050d5b0cda7ce16d7e757e0",
   "changeImpact": {
     "schemaVersion": 1,
-    "areas": [
-      "api-surface",
-      "runtime",
-      "build-metadata",
-      "publish-workflow",
-      "documentation",
-      "custom-scaffold",
-      "unknown"
-    ],
-    "details": [
-      {
-        "area": "api-surface",
-        "paths": [
-          "src/main/kotlin/com/sdkwork/web/app/sdk/api/Api.kt",
-          "src/main/kotlin/com/sdkwork/web/app/sdk/api/ApiPaths.kt",
-          "src/main/kotlin/com/sdkwork/web/app/sdk/api/CertificateApi.kt",
-          "src/main/kotlin/com/sdkwork/web/app/sdk/api/DeploymentApi.kt",
-          "src/main/kotlin/com/sdkwork/web/app/sdk/api/DomainApi.kt",
-          "src/main/kotlin/com/sdkwork/web/app/sdk/api/EnvVariableApi.kt",
-          "src/main/kotlin/com/sdkwork/web/app/sdk/api/MonitorApi.kt",
-          "src/main/kotlin/com/sdkwork/web/app/sdk/api/SiteApi.kt",
-          "src/main/kotlin/com/sdkwork/web/app/sdk/SdkworkAppClient.kt"
-        ]
-      },
-      {
-        "area": "runtime",
-        "paths": [
-          "src/main/kotlin/com/sdkwork/web/app/sdk/http/HttpClient.kt"
-        ]
-      },
-      {
-        "area": "build-metadata",
-        "paths": [
-          "build.gradle.kts",
-          "sdkwork-sdk.json",
-          "settings.gradle.kts"
-        ]
-      },
-      {
-        "area": "publish-workflow",
-        "paths": [
-          "bin/publish-core.mjs",
-          "bin/publish.ps1",
-          "bin/publish.sh"
-        ]
-      },
-      {
-        "area": "documentation",
-        "paths": [
-          "CHANGELOG.md",
-          "custom/README.md",
-          "README.md"
-        ]
-      },
-      {
-        "area": "custom-scaffold",
-        "paths": [
-          "custom/README.md"
-        ]
-      },
-      {
-        "area": "unknown",
-        "paths": [
-          "LICENSE",
-          "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatePage.kt",
-          "src/main/kotlin/com/sdkwork/web/app/sdk/CertificateResponse.kt",
-          "src/main/kotlin/com/sdkwork/web/app/sdk/CreateCertificateRequest.kt",
-          "src/main/kotlin/com/sdkwork/web/app/sdk/CreateDeploymentRequest.kt",
-          "src/main/kotlin/com/sdkwork/web/app/sdk/CreateDomainRequest.kt",
-          "src/main/kotlin/com/sdkwork/web/app/sdk/CreateEnvVariableRequest.kt",
-          "src/main/kotlin/com/sdkwork/web/app/sdk/CreateHealthCheckRequest.kt",
-          "src/main/kotlin/com/sdkwork/web/app/sdk/CreateSiteRequest.kt",
-          "src/main/kotlin/com/sdkwork/web/app/sdk/DeploymentPage.kt",
-          "src/main/kotlin/com/sdkwork/web/app/sdk/DeploymentResponse.kt",
-          "src/main/kotlin/com/sdkwork/web/app/sdk/DomainPage.kt",
-          "src/main/kotlin/com/sdkwork/web/app/sdk/DomainResponse.kt",
-          "src/main/kotlin/com/sdkwork/web/app/sdk/DomainVerifyResponse.kt",
-          "src/main/kotlin/com/sdkwork/web/app/sdk/EnvVariablePage.kt",
-          "src/main/kotlin/com/sdkwork/web/app/sdk/EnvVariableResponse.kt",
-          "src/main/kotlin/com/sdkwork/web/app/sdk/HealthCheckPage.kt",
-          "src/main/kotlin/com/sdkwork/web/app/sdk/HealthCheckResponse.kt",
-          "src/main/kotlin/com/sdkwork/web/app/sdk/ProblemDetail.kt",
-          "src/main/kotlin/com/sdkwork/web/app/sdk/SitePage.kt",
-          "src/main/kotlin/com/sdkwork/web/app/sdk/SiteResponse.kt",
-          "src/main/kotlin/com/sdkwork/web/app/sdk/UpdateSiteRequest.kt"
-        ]
-      }
-    ],
-    "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, runtime, build-metadata, publish-workflow, documentation, custom-scaffold, unknown. Verification is required."
+    "areas": [],
+    "details": [],
+    "requiresVerification": false,
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "high",
-    "nextAction": "verify",
+    "riskLevel": "low",
+    "nextAction": "skip",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
-    "summary": "Changes have been applied. Run the required verification plan now.",
+    "summary": "No actionable changes were detected. No apply or verification step is required.",
     "reasons": [
-      "manual-review-required",
-      "preserved-legacy-files",
-      "unknown-impact",
-      "verification-required"
+      "no-actionable-changes"
     ]
   },
   "executionHandoff": {
     "schemaVersion": 1,
-    "summary": "Run the required verification commands now.",
-    "steps": [
-      {
-        "id": "verify-check",
-        "title": "Unified package check",
-        "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, runtime, build-metadata, publish-workflow, documentation, custom-scaffold, unknown.",
-        "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-kotlin\\generated\\server-openapi",
-        "command": "node",
-        "args": [
-          "./bin/publish-core.mjs",
-          "--language",
-          "kotlin",
-          "--project-dir",
-          ".",
-          "--action",
-          "check"
-        ],
-        "displayCommand": "node ./bin/publish-core.mjs --language kotlin --project-dir . --action check"
-      }
-    ]
+    "summary": "No further commands are required.",
+    "steps": []
   },
   "verificationPlan": {
-    "shouldRun": true,
-    "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, runtime, build-metadata, publish-workflow, documentation, custom-scaffold, unknown. Verification is required. Run the required verification commands now against the generated SDK output.",
-    "steps": [
-      {
-        "id": "check",
-        "title": "Unified package check",
-        "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, runtime, build-metadata, publish-workflow, documentation, custom-scaffold, unknown.",
-        "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-kotlin\\generated\\server-openapi",
-        "command": "node",
-        "args": [
-          "./bin/publish-core.mjs",
-          "--language",
-          "kotlin",
-          "--project-dir",
-          ".",
-          "--action",
-          "check"
-        ],
-        "displayCommand": "node ./bin/publish-core.mjs --language kotlin --project-dir . --action check"
-      }
-    ]
+    "shouldRun": false,
+    "runPhase": "skip",
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
+    "steps": []
   },
   "sdk": {
     "name": "sdkwork-web-app-sdk",
@@ -183,8 +56,8 @@
     "localVersions": []
   },
   "stats": {
-    "totalFiles": 41,
-    "models": 21,
+    "totalFiles": 70,
+    "models": 50,
     "apis": 6,
     "types": 0
   },
@@ -192,14 +65,16 @@
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 41,
-    "skippedScaffoldFiles": 0,
-    "skippedUnchangedGeneratedFiles": 0,
+    "writtenFiles": 0,
+    "skippedScaffoldFiles": 1,
+    "skippedUnchangedGeneratedFiles": 69,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "76743ce7cf552f147e9cae6d489f203c2c6e7069476a74a01ac10e4c8b109d5d",
+    "changeFingerprint": "11730022c451aa59c389ea5abd4619088bfeebbda050d5b0cda7ce16d7e757e0",
     "changes": {
-      "createdGeneratedFiles": [
+      "createdGeneratedFiles": [],
+      "updatedGeneratedFiles": [],
+      "unchangedGeneratedFiles": [
         "bin/publish-core.mjs",
         "bin/publish.ps1",
         "bin/publish.sh",
@@ -219,6 +94,8 @@
         "src/main/kotlin/com/sdkwork/web/app/sdk/api/SiteApi.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatePage.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/CertificateResponse.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatesCreateResponse201.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatesListResponse.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/CreateCertificateRequest.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/CreateDeploymentRequest.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/CreateDomainRequest.kt",
@@ -232,157 +109,74 @@
         "src/main/kotlin/com/sdkwork/web/app/sdk/DomainVerifyResponse.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/EnvVariablePage.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/EnvVariableResponse.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/FieldError.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/HealthCheckPage.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/HealthCheckResponse.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/http/HttpClient.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/PageInfo.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/ProblemDetail.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/SdkWorkApiResponse.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/SdkworkAppClient.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/SdkWorkCommandData.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/SdkWorkCommandResponse.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/SdkWorkListResponse.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/SdkWorkPageData.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/SdkWorkResourceData.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/SdkWorkResourceResponse.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/SitePage.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/SiteResponse.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/SitesActivateResponse.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/SitesCreateResponse201.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/SitesDeploymentsCreateResponse201.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/SitesDeploymentsListResponse.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/SitesDeploymentsRetrieveResponse.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/SitesDeploymentsRollbackResponse.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/SitesDomainsCreateResponse201.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/SitesDomainsListResponse.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/SitesDomainsRetrieveResponse.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/SitesDomainsVerifyResponse.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/SitesEnvVariablesCreateResponse201.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/SitesEnvVariablesListResponse.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/SitesHealthChecksCreateResponse201.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/SitesHealthChecksListResponse.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/SitesListResponse.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/SitesPauseResponse.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/SitesRetrieveResponse.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/SitesUpdateResponse.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/UpdateSiteRequest.kt"
       ],
-      "updatedGeneratedFiles": [],
-      "unchangedGeneratedFiles": [],
       "deletedGeneratedFiles": [],
-      "scaffoldedFiles": [
+      "scaffoldedFiles": [],
+      "preservedScaffoldFiles": [
         "custom/README.md"
       ],
-      "preservedScaffoldFiles": [],
       "backedUpFiles": []
     },
     "impact": {
       "schemaVersion": 1,
-      "areas": [
-        "api-surface",
-        "runtime",
-        "build-metadata",
-        "publish-workflow",
-        "documentation",
-        "custom-scaffold",
-        "unknown"
-      ],
-      "details": [
-        {
-          "area": "api-surface",
-          "paths": [
-            "src/main/kotlin/com/sdkwork/web/app/sdk/api/Api.kt",
-            "src/main/kotlin/com/sdkwork/web/app/sdk/api/ApiPaths.kt",
-            "src/main/kotlin/com/sdkwork/web/app/sdk/api/CertificateApi.kt",
-            "src/main/kotlin/com/sdkwork/web/app/sdk/api/DeploymentApi.kt",
-            "src/main/kotlin/com/sdkwork/web/app/sdk/api/DomainApi.kt",
-            "src/main/kotlin/com/sdkwork/web/app/sdk/api/EnvVariableApi.kt",
-            "src/main/kotlin/com/sdkwork/web/app/sdk/api/MonitorApi.kt",
-            "src/main/kotlin/com/sdkwork/web/app/sdk/api/SiteApi.kt",
-            "src/main/kotlin/com/sdkwork/web/app/sdk/SdkworkAppClient.kt"
-          ]
-        },
-        {
-          "area": "runtime",
-          "paths": [
-            "src/main/kotlin/com/sdkwork/web/app/sdk/http/HttpClient.kt"
-          ]
-        },
-        {
-          "area": "build-metadata",
-          "paths": [
-            "build.gradle.kts",
-            "sdkwork-sdk.json",
-            "settings.gradle.kts"
-          ]
-        },
-        {
-          "area": "publish-workflow",
-          "paths": [
-            "bin/publish-core.mjs",
-            "bin/publish.ps1",
-            "bin/publish.sh"
-          ]
-        },
-        {
-          "area": "documentation",
-          "paths": [
-            "CHANGELOG.md",
-            "custom/README.md",
-            "README.md"
-          ]
-        },
-        {
-          "area": "custom-scaffold",
-          "paths": [
-            "custom/README.md"
-          ]
-        },
-        {
-          "area": "unknown",
-          "paths": [
-            "LICENSE",
-            "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatePage.kt",
-            "src/main/kotlin/com/sdkwork/web/app/sdk/CertificateResponse.kt",
-            "src/main/kotlin/com/sdkwork/web/app/sdk/CreateCertificateRequest.kt",
-            "src/main/kotlin/com/sdkwork/web/app/sdk/CreateDeploymentRequest.kt",
-            "src/main/kotlin/com/sdkwork/web/app/sdk/CreateDomainRequest.kt",
-            "src/main/kotlin/com/sdkwork/web/app/sdk/CreateEnvVariableRequest.kt",
-            "src/main/kotlin/com/sdkwork/web/app/sdk/CreateHealthCheckRequest.kt",
-            "src/main/kotlin/com/sdkwork/web/app/sdk/CreateSiteRequest.kt",
-            "src/main/kotlin/com/sdkwork/web/app/sdk/DeploymentPage.kt",
-            "src/main/kotlin/com/sdkwork/web/app/sdk/DeploymentResponse.kt",
-            "src/main/kotlin/com/sdkwork/web/app/sdk/DomainPage.kt",
-            "src/main/kotlin/com/sdkwork/web/app/sdk/DomainResponse.kt",
-            "src/main/kotlin/com/sdkwork/web/app/sdk/DomainVerifyResponse.kt",
-            "src/main/kotlin/com/sdkwork/web/app/sdk/EnvVariablePage.kt",
-            "src/main/kotlin/com/sdkwork/web/app/sdk/EnvVariableResponse.kt",
-            "src/main/kotlin/com/sdkwork/web/app/sdk/HealthCheckPage.kt",
-            "src/main/kotlin/com/sdkwork/web/app/sdk/HealthCheckResponse.kt",
-            "src/main/kotlin/com/sdkwork/web/app/sdk/ProblemDetail.kt",
-            "src/main/kotlin/com/sdkwork/web/app/sdk/SitePage.kt",
-            "src/main/kotlin/com/sdkwork/web/app/sdk/SiteResponse.kt",
-            "src/main/kotlin/com/sdkwork/web/app/sdk/UpdateSiteRequest.kt"
-          ]
-        }
-      ],
-      "requiresVerification": true,
-      "summary": "Detected impact areas: api-surface, runtime, build-metadata, publish-workflow, documentation, custom-scaffold, unknown. Verification is required."
+      "areas": [],
+      "details": [],
+      "requiresVerification": false,
+      "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
     },
     "verificationPlan": {
-      "shouldRun": true,
-      "runPhase": "now",
-      "summary": "Detected impact areas: api-surface, runtime, build-metadata, publish-workflow, documentation, custom-scaffold, unknown. Verification is required. Run the required verification commands now against the generated SDK output.",
-      "steps": [
-        {
-          "id": "check",
-          "title": "Unified package check",
-          "required": true,
-          "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, runtime, build-metadata, publish-workflow, documentation, custom-scaffold, unknown.",
-          "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-kotlin\\generated\\server-openapi",
-          "command": "node",
-          "args": [
-            "./bin/publish-core.mjs",
-            "--language",
-            "kotlin",
-            "--project-dir",
-            ".",
-            "--action",
-            "check"
-          ],
-          "displayCommand": "node ./bin/publish-core.mjs --language kotlin --project-dir . --action check"
-        }
-      ]
+      "shouldRun": false,
+      "runPhase": "skip",
+      "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
+      "steps": []
     },
     "executionDecision": {
       "schemaVersion": 1,
-      "riskLevel": "high",
-      "nextAction": "verify",
+      "riskLevel": "low",
+      "nextAction": "skip",
       "requiresManualReview": false,
       "applyRequiresExpectedFingerprint": false,
-      "summary": "Changes have been applied. Run the required verification plan now.",
+      "summary": "No actionable changes were detected. No apply or verification step is required.",
       "reasons": [
-        "manual-review-required",
-        "preserved-legacy-files",
-        "unknown-impact",
-        "verification-required"
+        "no-actionable-changes"
       ]
     },
     "backedUpFiles": [],
-    "preservedLegacyFiles": true
+    "preservedLegacyFiles": false
   }
 }

@@ -9,18 +9,18 @@ import com.sdkwork.web.app.sdk.http.HttpClient
 class EnvVariableApi(private val client: HttpClient) {
 
     /** 获取环境变量列表 */
-    suspend fun sitesEnvVariablesList(siteId: String, environment: String? = null): EnvVariablePage? {
+    suspend fun sitesEnvVariablesList(siteId: String, environment: String? = null): SitesEnvVariablesListResponse? {
         val query = buildQueryString(listOf(
             QueryParameterSpec("environment", environment, "form", true, false, null)
         ))
         val raw = client.get(ApiPaths.appendQueryString(ApiPaths.appPath("/sites/${serializePathParameter(siteId, PathParameterSpec("siteId", "simple", false))}/env_variables"), query))
-        return client.convertValue(raw, object : TypeReference<EnvVariablePage>() {})
+        return client.convertValue(raw, object : TypeReference<SitesEnvVariablesListResponse>() {})
     }
 
     /** 创建环境变量 */
-    suspend fun sitesEnvVariablesCreate(siteId: String, body: CreateEnvVariableRequest): EnvVariableResponse? {
+    suspend fun sitesEnvVariablesCreate(siteId: String, body: CreateEnvVariableRequest): SitesEnvVariablesCreateResponse201? {
         val raw = client.post(ApiPaths.appPath("/sites/${serializePathParameter(siteId, PathParameterSpec("siteId", "simple", false))}/env_variables"), body, null, null, "application/json")
-        return client.convertValue(raw, object : TypeReference<EnvVariableResponse>() {})
+        return client.convertValue(raw, object : TypeReference<SitesEnvVariablesCreateResponse201>() {})
     }
 
     private data class PathParameterSpec(val name: String, val style: String, val explode: Boolean)

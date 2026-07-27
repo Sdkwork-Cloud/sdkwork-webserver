@@ -4,9 +4,11 @@ use sdkwork_web_bootstrap::{service_router, ServiceRouterConfig};
 use std::sync::Arc;
 use tracing::info;
 
+use crate::iam_application_bootstrap::ensure_web_tenant_application_bootstrap;
 use crate::readiness::WebServiceReadinessCheck;
 
 pub async fn build_router() -> Result<Router, String> {
+    ensure_web_tenant_application_bootstrap().await?;
     let assembly = assemble_api_router().await?;
     let readiness = Arc::new(WebServiceReadinessCheck::new(assembly.service));
     Ok(service_router(

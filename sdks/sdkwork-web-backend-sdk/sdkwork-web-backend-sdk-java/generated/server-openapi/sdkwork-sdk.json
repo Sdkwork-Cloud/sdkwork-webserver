@@ -5,6 +5,8 @@
   "language": "java",
   "sdkType": "backend",
   "packageName": "com.sdkwork:sdkwork-web-backend-sdk",
+  "transportPackageName": "com.sdkwork:sdkwork-web-backend-sdk",
+  "consumerPackageName": "com.sdkwork:sdkwork-web-backend-sdk",
   "generator": "@sdkwork/sdk-generator",
   "capabilities": {
     "supportsGeneratedTests": true,

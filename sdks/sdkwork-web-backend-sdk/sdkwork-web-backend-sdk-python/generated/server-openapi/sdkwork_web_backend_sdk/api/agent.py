@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional
 from ..http_client import HttpClient
-from ..models import AgentHeartbeatRequest, AgentHeartbeatResponse, AgentSyncResponse
+from ..models import AgentHeartbeatRequest, HeartbeatResponse, RetrieveResponse
 
 def _append_query_string(path: str, raw_query_string: str) -> str:
     query = raw_query_string.lstrip('?')
@@ -128,14 +128,30 @@ class AgentApi:
 
     def __init__(self, client: HttpClient):
         self._client = client
+        self.heartbeat = AgentHeartbeatApi(client)
+        self.sync = AgentSyncApi(client)
 
 
-    def create_heartbeat(self, body: AgentHeartbeatRequest) -> AgentHeartbeatResponse:
-        """边缘节点心跳"""
+class AgentHeartbeatApi:
+    """agent agent.heartbeat API client."""
+
+    def __init__(self, client: HttpClient):
+        self._client = client
+
+
+    def create(self, body: AgentHeartbeatRequest) -> HeartbeatResponse:
+        """Report an edge-agent heartbeat"""
         return self._client.post(f"/backend/v3/api/agent/heartbeat", json=body)
 
-    def list_sync(self, if_sync_version: Optional[str] = None) -> AgentSyncResponse:
-        """拉取 nginx 配置与证书 bundle"""
+class AgentSyncApi:
+    """agent agent.sync API client."""
+
+    def __init__(self, client: HttpClient):
+        self._client = client
+
+
+    def list(self, if_sync_version: Optional[str] = None) -> RetrieveResponse:
+        """Retrieve the Nginx configuration and certificate bundle"""
         query = build_query_string([
             {'name': 'ifSyncVersion', 'value': if_sync_version, 'style': 'form', 'explode': True, 'allow_reserved': False},
         ])

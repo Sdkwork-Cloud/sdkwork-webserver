@@ -18,41 +18,42 @@ namespace SDKWork.Web.AppSdk.Api
         /// <summary>
         /// 获取站点列表
         /// </summary>
-        public async Task<SDKWork.Web.AppSdk.Models.SitePage?> SitesListAsync(int? page = null, int? pageSize = null, int? status = null, int? siteType = null, string? keyword = null)
+        public async Task<SDKWork.Web.AppSdk.Models.SitesListResponse?> SitesListAsync(int? page = null, int? pageSize = null, int? status = null, string? applicationType = null, int? siteType = null, string? keyword = null)
         {
             var queryString = BuildQueryString(new[]
             {
                 new QueryParameterSpec("page", page, "form", true, false, null),
                 new QueryParameterSpec("page_size", pageSize, "form", true, false, null),
                 new QueryParameterSpec("status", status, "form", true, false, null),
+                new QueryParameterSpec("applicationType", applicationType, "form", true, false, null),
                 new QueryParameterSpec("siteType", siteType, "form", true, false, null),
                 new QueryParameterSpec("keyword", keyword, "form", true, false, null),
             });
-            return await _client.GetAsync<SDKWork.Web.AppSdk.Models.SitePage>(ApiPaths.AppendQueryString(ApiPaths.AppPath("/sites"), queryString));
+            return await _client.GetAsync<SDKWork.Web.AppSdk.Models.SitesListResponse>(ApiPaths.AppendQueryString(ApiPaths.AppPath("/sites"), queryString));
         }
 
         /// <summary>
         /// 创建站点
         /// </summary>
-        public async Task<SDKWork.Web.AppSdk.Models.SiteResponse?> SitesCreateAsync(SDKWork.Web.AppSdk.Models.CreateSiteRequest body)
+        public async Task<SDKWork.Web.AppSdk.Models.SitesCreateResponse201?> SitesCreateAsync(SDKWork.Web.AppSdk.Models.CreateSiteRequest body)
         {
-            return await _client.PostAsync<SDKWork.Web.AppSdk.Models.SiteResponse>(ApiPaths.AppPath("/sites"), body, null, null, "application/json");
+            return await _client.PostAsync<SDKWork.Web.AppSdk.Models.SitesCreateResponse201>(ApiPaths.AppPath("/sites"), body, null, null, "application/json");
         }
 
         /// <summary>
         /// 获取站点详情
         /// </summary>
-        public async Task<SDKWork.Web.AppSdk.Models.SiteResponse?> SitesRetrieveAsync(string siteId)
+        public async Task<SDKWork.Web.AppSdk.Models.SitesRetrieveResponse?> SitesRetrieveAsync(string siteId)
         {
-            return await _client.GetAsync<SDKWork.Web.AppSdk.Models.SiteResponse>(ApiPaths.AppPath($"/sites/{SerializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false))}"));
+            return await _client.GetAsync<SDKWork.Web.AppSdk.Models.SitesRetrieveResponse>(ApiPaths.AppPath($"/sites/{SerializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false))}"));
         }
 
         /// <summary>
         /// 更新站点
         /// </summary>
-        public async Task<SDKWork.Web.AppSdk.Models.SiteResponse?> SitesUpdateAsync(string siteId, SDKWork.Web.AppSdk.Models.UpdateSiteRequest body)
+        public async Task<SDKWork.Web.AppSdk.Models.SitesUpdateResponse?> SitesUpdateAsync(string siteId, SDKWork.Web.AppSdk.Models.UpdateSiteRequest body)
         {
-            return await _client.PatchAsync<SDKWork.Web.AppSdk.Models.SiteResponse>(ApiPaths.AppPath($"/sites/{SerializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false))}"), body, null, null, "application/json");
+            return await _client.PatchAsync<SDKWork.Web.AppSdk.Models.SitesUpdateResponse>(ApiPaths.AppPath($"/sites/{SerializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false))}"), body, null, null, "application/json");
         }
 
         /// <summary>
@@ -66,17 +67,17 @@ namespace SDKWork.Web.AppSdk.Api
         /// <summary>
         /// 激活站点
         /// </summary>
-        public async Task<SDKWork.Web.AppSdk.Models.SiteResponse?> SitesActivateAsync(string siteId)
+        public async Task<SDKWork.Web.AppSdk.Models.SitesActivateResponse?> SitesActivateAsync(string siteId)
         {
-            return await _client.PostAsync<SDKWork.Web.AppSdk.Models.SiteResponse>(ApiPaths.AppPath($"/sites/{SerializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false))}/activate"), null);
+            return await _client.PostAsync<SDKWork.Web.AppSdk.Models.SitesActivateResponse>(ApiPaths.AppPath($"/sites/{SerializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false))}/activate"), null);
         }
 
         /// <summary>
         /// 暂停站点
         /// </summary>
-        public async Task<SDKWork.Web.AppSdk.Models.SiteResponse?> SitesPauseAsync(string siteId)
+        public async Task<SDKWork.Web.AppSdk.Models.SitesPauseResponse?> SitesPauseAsync(string siteId)
         {
-            return await _client.PostAsync<SDKWork.Web.AppSdk.Models.SiteResponse>(ApiPaths.AppPath($"/sites/{SerializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false))}/pause"), null);
+            return await _client.PostAsync<SDKWork.Web.AppSdk.Models.SitesPauseResponse>(ApiPaths.AppPath($"/sites/{SerializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false))}/pause"), null);
         }
 
         private sealed record PathParameterSpec(string Name, string Style, bool Explode);

@@ -110,8 +110,23 @@
             "id": "application.public-ingress",
             "crate": "sdkwork-api-web-server-standalone-gateway",
             "binary": "sdkwork-api-web-server-standalone-gateway",
+            "script": "_sdkwork:gateway:standalone",
             "required": true,
             "role": "api-standalone-gateway"
+          },
+          {
+            "id": "webserver-pc-browser",
+            "role": "client",
+            "script": "_sdkwork:client:browser:standalone",
+            "applicationRoot": "apps/sdkwork-webserver-pc",
+            "bindEnv": "SDKWORK_WEB_PC_DEV_BIND",
+            "runtimeTargets": [
+              "browser"
+            ],
+            "clientArchitectures": [
+              "pc-web"
+            ],
+            "required": true
           }
         ],
         "healthSurfaces": [
@@ -126,6 +141,20 @@
             "binary": "sdkwork-web-node-daemon",
             "required": true,
             "role": "client"
+          },
+          {
+            "id": "webserver-pc-browser",
+            "role": "client",
+            "script": "_sdkwork:client:browser:cloud",
+            "applicationRoot": "apps/sdkwork-webserver-pc",
+            "bindEnv": "SDKWORK_WEB_PC_DEV_BIND",
+            "runtimeTargets": [
+              "browser"
+            ],
+            "clientArchitectures": [
+              "pc-web"
+            ],
+            "required": true
           }
         ],
         "healthSurfaces": [

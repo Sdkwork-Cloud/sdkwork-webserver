@@ -8,30 +8,31 @@ public class SiteApi {
     }
 
     /// 获取站点列表
-    public func sitesList(page: Int? = nil, pageSize: Int? = nil, status: Int? = nil, siteType: Int? = nil, keyword: String? = nil) async throws -> SitePage? {
+    public func sitesList(page: Int? = nil, pageSize: Int? = nil, status: Int? = nil, applicationType: String? = nil, siteType: Int? = nil, keyword: String? = nil) async throws -> SitesListResponse? {
         let query = buildQueryString([
             QueryParameterSpec(name: "page", value: page, style: "form", explode: true, allowReserved: false, contentType: nil),
             QueryParameterSpec(name: "page_size", value: pageSize, style: "form", explode: true, allowReserved: false, contentType: nil),
             QueryParameterSpec(name: "status", value: status, style: "form", explode: true, allowReserved: false, contentType: nil),
+            QueryParameterSpec(name: "applicationType", value: applicationType, style: "form", explode: true, allowReserved: false, contentType: nil),
             QueryParameterSpec(name: "siteType", value: siteType, style: "form", explode: true, allowReserved: false, contentType: nil),
             QueryParameterSpec(name: "keyword", value: keyword, style: "form", explode: true, allowReserved: false, contentType: nil)
         ])
-        return try await client.get(ApiPaths.appendQueryString(ApiPaths.appPath("/sites"), query), responseType: SitePage.self)
+        return try await client.get(ApiPaths.appendQueryString(ApiPaths.appPath("/sites"), query), responseType: SitesListResponse.self)
     }
 
     /// 创建站点
-    public func sitesCreate(body: CreateSiteRequest) async throws -> SiteResponse? {
-        return try await client.post(ApiPaths.appPath("/sites"), body: body, params: nil, headers: nil, contentType: "application/json", responseType: SiteResponse.self)
+    public func sitesCreate(body: CreateSiteRequest) async throws -> SitesCreateResponse201? {
+        return try await client.post(ApiPaths.appPath("/sites"), body: body, params: nil, headers: nil, contentType: "application/json", responseType: SitesCreateResponse201.self)
     }
 
     /// 获取站点详情
-    public func sitesRetrieve(siteId: String) async throws -> SiteResponse? {
-        return try await client.get(ApiPaths.appPath("/sites/\(serializePathParameter(siteId, PathParameterSpec(name: "siteId", style: "simple", explode: false)))"), responseType: SiteResponse.self)
+    public func sitesRetrieve(siteId: String) async throws -> SitesRetrieveResponse? {
+        return try await client.get(ApiPaths.appPath("/sites/\(serializePathParameter(siteId, PathParameterSpec(name: "siteId", style: "simple", explode: false)))"), responseType: SitesRetrieveResponse.self)
     }
 
     /// 更新站点
-    public func sitesUpdate(siteId: String, body: UpdateSiteRequest) async throws -> SiteResponse? {
-        return try await client.patch(ApiPaths.appPath("/sites/\(serializePathParameter(siteId, PathParameterSpec(name: "siteId", style: "simple", explode: false)))"), body: body, params: nil, headers: nil, contentType: "application/json", responseType: SiteResponse.self)
+    public func sitesUpdate(siteId: String, body: UpdateSiteRequest) async throws -> SitesUpdateResponse? {
+        return try await client.patch(ApiPaths.appPath("/sites/\(serializePathParameter(siteId, PathParameterSpec(name: "siteId", style: "simple", explode: false)))"), body: body, params: nil, headers: nil, contentType: "application/json", responseType: SitesUpdateResponse.self)
     }
 
     /// 删除站点
@@ -40,13 +41,13 @@ public class SiteApi {
     }
 
     /// 激活站点
-    public func sitesActivate(siteId: String) async throws -> SiteResponse? {
-        return try await client.post(ApiPaths.appPath("/sites/\(serializePathParameter(siteId, PathParameterSpec(name: "siteId", style: "simple", explode: false)))/activate"), body: nil, responseType: SiteResponse.self)
+    public func sitesActivate(siteId: String) async throws -> SitesActivateResponse? {
+        return try await client.post(ApiPaths.appPath("/sites/\(serializePathParameter(siteId, PathParameterSpec(name: "siteId", style: "simple", explode: false)))/activate"), body: nil, responseType: SitesActivateResponse.self)
     }
 
     /// 暂停站点
-    public func sitesPause(siteId: String) async throws -> SiteResponse? {
-        return try await client.post(ApiPaths.appPath("/sites/\(serializePathParameter(siteId, PathParameterSpec(name: "siteId", style: "simple", explode: false)))/pause"), body: nil, responseType: SiteResponse.self)
+    public func sitesPause(siteId: String) async throws -> SitesPauseResponse? {
+        return try await client.post(ApiPaths.appPath("/sites/\(serializePathParameter(siteId, PathParameterSpec(name: "siteId", style: "simple", explode: false)))/pause"), body: nil, responseType: SitesPauseResponse.self)
     }
 
     private struct PathParameterSpec {

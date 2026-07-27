@@ -7,7 +7,5 @@ from typing import TYPE_CHECKING, Optional, List, Dict, Any
 class CreateServerRequest:
     name: str
     host: str
+    tenant_scope_hash: str
     ssh_port: int
-    ssh_user: Optional[str] = None
-    ssh_key_path: Optional[str] = None
-    description: Optional[str] = None

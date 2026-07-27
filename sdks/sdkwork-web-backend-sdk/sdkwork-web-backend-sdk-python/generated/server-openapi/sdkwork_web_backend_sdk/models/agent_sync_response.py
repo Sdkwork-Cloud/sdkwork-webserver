@@ -9,8 +9,8 @@ if TYPE_CHECKING:
 
 @dataclass
 class AgentSyncResponse:
-    server_id: Optional[str] = None
-    sync_version: Optional[str] = None
-    unchanged: Optional[bool] = None
-    nginx_configs: Optional[List[AgentNginxConfigBundle]] = None
-    certificates: Optional[List[AgentCertificateBundle]] = None
+    server_id: str
+    sync_version: str
+    unchanged: bool
+    nginx_configs: List[AgentNginxConfigBundle]
+    certificates: List[AgentCertificateBundle]

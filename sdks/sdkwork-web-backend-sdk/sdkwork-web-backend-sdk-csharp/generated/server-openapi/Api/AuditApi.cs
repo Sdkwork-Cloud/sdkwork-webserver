@@ -16,9 +16,9 @@ namespace SDKWork.Web.BackendSdk.Api
         }
 
         /// <summary>
-        /// 获取审计日志列表
+        /// List audit logs
         /// </summary>
-        public async Task<SDKWork.Web.BackendSdk.Models.AuditLogPage?> LogsListAsync(int? page = null, int? pageSize = null, string? targetType = null, string? action = null, string? operatorId = null, string? startDate = null, string? endDate = null)
+        public async Task<SDKWork.Web.BackendSdk.Models.AuditLogsListResponse?> LogsListAsync(int? page = null, int? pageSize = null, string? targetType = null, string? action = null, string? operatorId = null, string? startDate = null, string? endDate = null)
         {
             var queryString = BuildQueryString(new[]
             {
@@ -30,7 +30,7 @@ namespace SDKWork.Web.BackendSdk.Api
                 new QueryParameterSpec("startDate", startDate, "form", true, false, null),
                 new QueryParameterSpec("endDate", endDate, "form", true, false, null),
             });
-            return await _client.GetAsync<SDKWork.Web.BackendSdk.Models.AuditLogPage>(ApiPaths.AppendQueryString(ApiPaths.BackendPath("/audit_logs"), queryString));
+            return await _client.GetAsync<SDKWork.Web.BackendSdk.Models.AuditLogsListResponse>(ApiPaths.AppendQueryString(ApiPaths.BackendPath("/audit_logs"), queryString));
         }
 
 

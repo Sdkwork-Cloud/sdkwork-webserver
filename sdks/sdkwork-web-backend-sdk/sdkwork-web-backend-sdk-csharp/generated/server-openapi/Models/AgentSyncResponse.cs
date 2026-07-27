@@ -6,10 +6,10 @@ namespace SDKWork.Web.BackendSdk.Models
 {
     public class AgentSyncResponse
     {
-        public string? ServerId { get; set; }
-        public string? SyncVersion { get; set; }
-        public bool? Unchanged { get; set; }
-        public List<AgentNginxConfigBundle>? NginxConfigs { get; set; }
-        public List<AgentCertificateBundle>? Certificates { get; set; }
+        public string ServerId { get; set; }
+        public string SyncVersion { get; set; }
+        public bool Unchanged { get; set; }
+        public List<AgentNginxConfigBundle> NginxConfigs { get; set; }
+        public List<AgentCertificateBundle> Certificates { get; set; }
     }
 }

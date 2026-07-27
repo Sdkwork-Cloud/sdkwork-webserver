@@ -30,7 +30,7 @@ client.SetAccessToken("your-access-token");
 var query = new Dictionary<string, object>
 {
     ["page"] = 1,
-    ["pageSize"] = 2,
+    ["page_size"] = 2,
 };
 var result = await client.Certificate.CertificatesListAsync(query);
 Console.WriteLine(result);
@@ -72,8 +72,9 @@ client.SetHeader("X-Custom-Header", "value");
 var query = new Dictionary<string, object>
 {
     ["page"] = 1,
-    ["pageSize"] = 2,
+    ["page_size"] = 2,
     ["status"] = 0,
+    ["applicationType"] = "WEB",
     ["siteType"] = 1,
     ["keyword"] = "keyword",
 };
@@ -89,7 +90,7 @@ var siteId = "1";
 var query = new Dictionary<string, object>
 {
     ["page"] = 1,
-    ["pageSize"] = 2,
+    ["page_size"] = 2,
 };
 var result = await client.Domain.SitesDomainsListAsync(siteId, query);
 Console.WriteLine(result);
@@ -103,7 +104,7 @@ var siteId = "1";
 var query = new Dictionary<string, object>
 {
     ["page"] = 1,
-    ["pageSize"] = 2,
+    ["page_size"] = 2,
     ["status"] = 0,
 };
 var result = await client.Deployment.SitesDeploymentsListAsync(siteId, query);
@@ -130,7 +131,7 @@ Console.WriteLine(result);
 var query = new Dictionary<string, object>
 {
     ["page"] = 1,
-    ["pageSize"] = 2,
+    ["page_size"] = 2,
 };
 var result = await client.Certificate.CertificatesListAsync(query);
 Console.WriteLine(result);
@@ -153,7 +154,7 @@ try
     var query = new Dictionary<string, object>
     {
         ["page"] = 1,
-        ["pageSize"] = 2,
+        ["page_size"] = 2,
     };
     await client.Certificate.CertificatesListAsync(query);
 }

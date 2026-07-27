@@ -8,7 +8,6 @@ data class AuditLogResponse(
     val targetType: String? = null,
     val targetId: String? = null,
     val targetUuid: String? = null,
-    val requestId: String? = null,
     val ipAddress: String? = null,
     val changes: Map<String, Any>? = null,
     val createdAt: String? = null

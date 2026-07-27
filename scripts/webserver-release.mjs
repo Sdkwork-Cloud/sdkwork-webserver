@@ -23,6 +23,8 @@ import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { list as listTar } from 'tar';
 
+import { ensureTrackedBuildSources } from './lib/build-source-integrity.mjs';
+
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const STAGE_PARENT = path.join(REPO_ROOT, '.sdkwork', 'runtime', 'release-stage');
 const OUTPUT_ROOT = path.join(REPO_ROOT, 'dist', 'release');
@@ -264,30 +266,14 @@ function readSmallText(filePath, maxBytes, label) {
 }
 
 function ensureCriticalSources() {
-  for (const relativePath of [
+  const relativePaths = [
     'Cargo.toml',
     'scripts/webserver-sbom.mjs',
     ...PACKAGE_ASSETS.map((asset) => asset.source),
-  ]) {
+  ];
+  ensureTrackedBuildSources({ repoRoot: REPO_ROOT, relativePaths });
+  for (const relativePath of relativePaths) {
     const absolutePath = path.join(REPO_ROOT, relativePath);
-    if (existsSync(absolutePath)) {
-      inspectRegularFile(absolutePath, `package source ${relativePath}`);
-      continue;
-    }
-    const tracked = run('git', ['ls-files', '--error-unmatch', '--', relativePath], {
-      capture: true,
-      timeoutMs: GIT_TIMEOUT_MS,
-    });
-    if (!tracked.stdout.trim()) {
-      throw new Error(`missing untracked package source ${relativePath}`);
-    }
-    run('git', ['checkout', 'HEAD', '--', relativePath], {
-      capture: true,
-      timeoutMs: GIT_TIMEOUT_MS,
-    });
-    if (!existsSync(absolutePath)) {
-      throw new Error(`failed to recover package source ${relativePath}`);
-    }
     inspectRegularFile(absolutePath, `package source ${relativePath}`);
   }
 }

@@ -14,32 +14,32 @@ public class DeploymentApi {
     }
 
     /** 获取部署历史 */
-    public DeploymentPage sitesDeploymentsList(String siteId, Integer page, Integer pageSize, Integer status) throws Exception {
+    public SitesDeploymentsListResponse sitesDeploymentsList(String siteId, Integer page, Integer pageSize, Integer status) throws Exception {
         String query = buildQueryString(List.of(
             new QueryParameterSpec("page", page, "form", true, false, null),
             new QueryParameterSpec("page_size", pageSize, "form", true, false, null),
             new QueryParameterSpec("status", status, "form", true, false, null)
         ));
         Object raw = client.get(ApiPaths.appendQueryString(ApiPaths.appPath("/sites/" + serializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false)) + "/deployments"), query));
-        return client.convertValue(raw, new TypeReference<DeploymentPage>() {});
+        return client.convertValue(raw, new TypeReference<SitesDeploymentsListResponse>() {});
     }
 
     /** 发起部署 */
-    public DeploymentResponse sitesDeploymentsCreate(String siteId, CreateDeploymentRequest body) throws Exception {
+    public SitesDeploymentsCreateResponse201 sitesDeploymentsCreate(String siteId, CreateDeploymentRequest body) throws Exception {
         Object raw = client.post(ApiPaths.appPath("/sites/" + serializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false)) + "/deployments"), body, null, null, "application/json");
-        return client.convertValue(raw, new TypeReference<DeploymentResponse>() {});
+        return client.convertValue(raw, new TypeReference<SitesDeploymentsCreateResponse201>() {});
     }
 
     /** 获取部署详情 */
-    public DeploymentResponse sitesDeploymentsRetrieve(String siteId, String deploymentId) throws Exception {
+    public SitesDeploymentsRetrieveResponse sitesDeploymentsRetrieve(String siteId, String deploymentId) throws Exception {
         Object raw = client.get(ApiPaths.appPath("/sites/" + serializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false)) + "/deployments/" + serializePathParameter(deploymentId, new PathParameterSpec("deploymentId", "simple", false)) + ""));
-        return client.convertValue(raw, new TypeReference<DeploymentResponse>() {});
+        return client.convertValue(raw, new TypeReference<SitesDeploymentsRetrieveResponse>() {});
     }
 
     /** 回滚部署 */
-    public DeploymentResponse sitesDeploymentsRollback(String siteId, String deploymentId) throws Exception {
+    public SitesDeploymentsRollbackResponse sitesDeploymentsRollback(String siteId, String deploymentId) throws Exception {
         Object raw = client.post(ApiPaths.appPath("/sites/" + serializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false)) + "/deployments/" + serializePathParameter(deploymentId, new PathParameterSpec("deploymentId", "simple", false)) + "/rollback"), null);
-        return client.convertValue(raw, new TypeReference<DeploymentResponse>() {});
+        return client.convertValue(raw, new TypeReference<SitesDeploymentsRollbackResponse>() {});
     }
 
     private record PathParameterSpec(String name, String style, boolean explode) {}

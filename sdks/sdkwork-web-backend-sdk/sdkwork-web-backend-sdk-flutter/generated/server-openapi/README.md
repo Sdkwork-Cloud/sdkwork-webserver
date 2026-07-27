@@ -44,6 +44,11 @@ client.setHeader('X-Custom-Header', 'value');
 
 ## API Modules
 
+- `client.application` - application API
+- `client.applicationDomain` - application_domain API
+- `client.applicationDeployment` - application_deployment API
+- `client.certificate` - certificate API
+- `client.certificateDistribution` - certificate_distribution API
 - `client.nginx` - nginx API
 - `client.server` - server API
 - `client.agent` - agent API
@@ -51,19 +56,81 @@ client.setHeader('X-Custom-Header', 'value');
 
 ## Usage Examples
 
+### application
+```dart
+// List managed applications
+final params = <String, dynamic>{
+  'page': 1,
+  'page_size': 2,
+  'applicationType': 'WEB',
+  'siteType': 4,
+  'status': 5,
+  'keyword': 'keyword',
+};
+final result = await client.application.applicationsList(params);
+print(result);
+```
+
+### application_domain
+```dart
+// List application domains
+final applicationId = '1';
+final params = <String, dynamic>{
+  'page': 1,
+  'page_size': 2,
+};
+final result = await client.applicationDomain.applicationsDomainsList(applicationId, params);
+print(result);
+```
+
+### application_deployment
+```dart
+// List application deployments
+final applicationId = '1';
+final params = <String, dynamic>{
+  'page': 1,
+  'page_size': 2,
+  'status': 3,
+};
+final result = await client.applicationDeployment.applicationsDeploymentsList(applicationId, params);
+print(result);
+```
+
+### certificate
+```dart
+// List canonical certificates
+final params = <String, dynamic>{
+  'page': 1,
+  'page_size': 2,
+};
+final result = await client.certificate.certificatesList(params);
+print(result);
+```
+
+### certificate_distribution
+```dart
+// List certificate manifest convergence by server
+final params = <String, dynamic>{
+  'page': 1,
+  'page_size': 2,
+};
+final result = await client.certificateDistribution.certificatesDistributionList(params);
+print(result);
+```
+
 ### nginx
 ```dart
-// 获取 Nginx 状态
+// Retrieve Nginx status
 final result = await client.nginx.statusRetrieve();
 print(result);
 ```
 
 ### server
 ```dart
-// 获取服务器列表
+// List managed servers
 final params = <String, dynamic>{
   'page': 1,
-  'pageSize': 2,
+  'page_size': 2,
 };
 final result = await client.server.serversList(params);
 print(result);
@@ -71,20 +138,20 @@ print(result);
 
 ### agent
 ```dart
-// 拉取 nginx 配置与证书 bundle
+// Retrieve the Nginx configuration and certificate bundle
 final params = <String, dynamic>{
   'ifSyncVersion': 'ifsyncversion',
 };
-final result = await client.agent.sync_(params);
+final result = await client.agent.retrieve(params);
 print(result);
 ```
 
 ### audit
 ```dart
-// 获取审计日志列表
+// List audit logs
 final params = <String, dynamic>{
   'page': 1,
-  'pageSize': 2,
+  'page_size': 2,
   'targetType': 'targettype',
   'action': 'action',
   'operatorId': '1',

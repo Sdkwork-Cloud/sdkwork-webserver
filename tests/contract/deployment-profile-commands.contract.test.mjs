@@ -32,15 +32,15 @@ test('root development commands select explicit standalone and cloud development
   assert.equal(packageJson.scripts.dev, 'pnpm dev:standalone');
   assert.equal(
     packageJson.scripts['dev:standalone'],
-    'pnpm exec sdkwork-app dev --runtime-target server --deployment-profile standalone',
+    'pnpm exec sdkwork-app dev --deployment-profile standalone',
   );
   assert.equal(
     packageJson.scripts['dev:cloud'],
-    'pnpm exec sdkwork-app dev --runtime-target server --deployment-profile cloud',
+    'pnpm exec sdkwork-app dev --deployment-profile cloud',
   );
   assert.match(
     packageJson.scripts['_sdkwork:verify'],
-    /pnpm exec sdkwork-app dev --runtime-target server --deployment-profile cloud --dry-run/u,
+    /pnpm exec sdkwork-app dev --deployment-profile cloud --dry-run/u,
   );
 
   const index = readJson('etc/sdkwork.deployment.config.json');
@@ -48,7 +48,7 @@ test('root development commands select explicit standalone and cloud development
   assert.equal(index.profiles['cloud.development'].config, 'topology/cloud.development.env');
 });
 
-test('cloud development uses one remote HTTPS control plane and starts only the Node Daemon', () => {
+test('cloud development uses remote HTTPS surfaces and starts only local clients', () => {
   const source = readFileSync(
     path.join(REPO_ROOT, 'etc/topology/cloud.development.env'),
     'utf8',
@@ -66,15 +66,15 @@ test('cloud development uses one remote HTTPS control plane and starts only the 
   assert.doesNotMatch(source, /token|credential|secret/iu);
 
   const topology = readJson('specs/topology.spec.json');
-  assert.deepEqual(topology.orchestration.profiles['cloud.development'].processes, [
-    {
-      id: 'application.node-daemon',
-      crate: 'sdkwork-web-agent',
-      binary: 'sdkwork-web-node-daemon',
-      required: true,
-      role: 'client',
-    },
-  ]);
+  assert.deepEqual(
+    topology.orchestration.profiles['cloud.development'].processes.map((entry) => entry.role),
+    ['client', 'client'],
+  );
+  const browser = topology.orchestration.profiles['cloud.development'].processes.find(
+    (entry) => entry.id === 'webserver-pc-browser',
+  );
+  assert.equal(browser.script, '_sdkwork:client:browser:cloud');
+  assert.deepEqual(browser.runtimeTargets, ['browser']);
   const envExample = readFileSync(path.join(REPO_ROOT, 'etc/agent/development.env.example'), 'utf8');
   assert.match(envExample, /^SDKWORK_WEB_NODE_TOKEN=$/mu);
 });
@@ -156,6 +156,7 @@ test('release smoke fails before archive access on a mismatched host architectur
 
 test('release workflow and archive implementation preserve immutable bounded package contracts', () => {
   const workflow = readJson('sdkwork.workflow.json');
+  assert.equal(workflow.lifecycle.build[0].run, 'node scripts/build.mjs --release');
   assert.equal(workflow.lifecycle.package.length, 1);
   assert.equal(workflow.lifecycle.package[0].run, 'node scripts/webserver-release.mjs package');
   assert.deepEqual(

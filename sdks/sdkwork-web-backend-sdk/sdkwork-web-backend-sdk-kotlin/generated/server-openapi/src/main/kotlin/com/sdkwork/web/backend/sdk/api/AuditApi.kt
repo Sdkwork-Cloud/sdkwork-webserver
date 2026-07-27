@@ -8,8 +8,8 @@ import com.sdkwork.web.backend.sdk.http.HttpClient
 
 class AuditApi(private val client: HttpClient) {
 
-    /** 获取审计日志列表 */
-    suspend fun logsList(page: Int? = null, pageSize: Int? = null, targetType: String? = null, action: String? = null, operatorId: String? = null, startDate: String? = null, endDate: String? = null): AuditLogPage? {
+    /** List audit logs */
+    suspend fun logsList(page: Int? = null, pageSize: Int? = null, targetType: String? = null, action: String? = null, operatorId: String? = null, startDate: String? = null, endDate: String? = null): AuditLogsListResponse? {
         val query = buildQueryString(listOf(
             QueryParameterSpec("page", page, "form", true, false, null),
             QueryParameterSpec("page_size", pageSize, "form", true, false, null),
@@ -20,7 +20,7 @@ class AuditApi(private val client: HttpClient) {
             QueryParameterSpec("endDate", endDate, "form", true, false, null)
         ))
         val raw = client.get(ApiPaths.appendQueryString(ApiPaths.backendPath("/audit_logs"), query))
-        return client.convertValue(raw, object : TypeReference<AuditLogPage>() {})
+        return client.convertValue(raw, object : TypeReference<AuditLogsListResponse>() {})
     }
 
 

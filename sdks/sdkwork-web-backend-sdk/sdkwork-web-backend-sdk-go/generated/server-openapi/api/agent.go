@@ -17,27 +17,27 @@ func NewAgentApi(client *sdkhttp.Client) *AgentApi {
     return &AgentApi{client: client}
 }
 
-// 边缘节点心跳
-func (a *AgentApi) Heartbeat(body sdktypes.AgentHeartbeatRequest) (sdktypes.AgentHeartbeatResponse, error) {
+// Report an edge-agent heartbeat
+func (a *AgentApi) Heartbeat(body sdktypes.AgentHeartbeatRequest) (sdktypes.HeartbeatResponse, error) {
     raw, err := a.client.Post(BackendApiPath("/agent/heartbeat"), body, nil, nil, "application/json")
     if err != nil {
-        var zero sdktypes.AgentHeartbeatResponse
+        var zero sdktypes.HeartbeatResponse
         return zero, err
     }
-    return decodeResult[sdktypes.AgentHeartbeatResponse](raw)
+    return decodeResult[sdktypes.HeartbeatResponse](raw)
 }
 
-// 拉取 nginx 配置与证书 bundle
-func (a *AgentApi) Sync(ifSyncVersion *string) (sdktypes.AgentSyncResponse, error) {
+// Retrieve the Nginx configuration and certificate bundle
+func (a *AgentApi) Retrieve(ifSyncVersion *string) (sdktypes.RetrieveResponse, error) {
     query := BuildQueryString([]QueryParameterSpec{
         {Name: "ifSyncVersion", Value: func() interface{} { if ifSyncVersion == nil { return nil }; return *ifSyncVersion }(), Style: "form", Explode: true, AllowReserved: false},
     })
     raw, err := a.client.Get(AppendQueryString(BackendApiPath("/agent/sync"), query), nil, nil)
     if err != nil {
-        var zero sdktypes.AgentSyncResponse
+        var zero sdktypes.RetrieveResponse
         return zero, err
     }
-    return decodeResult[sdktypes.AgentSyncResponse](raw)
+    return decodeResult[sdktypes.RetrieveResponse](raw)
 }
 
 

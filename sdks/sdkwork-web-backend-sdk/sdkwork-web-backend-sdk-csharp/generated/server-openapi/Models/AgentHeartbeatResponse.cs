@@ -6,8 +6,8 @@ namespace SDKWork.Web.BackendSdk.Models
 {
     public class AgentHeartbeatResponse
     {
-        public string? ServerId { get; set; }
-        public int? Status { get; set; }
-        public string? AcknowledgedAt { get; set; }
+        public string ServerId { get; set; }
+        public int Status { get; set; }
+        public string AcknowledgedAt { get; set; }
     }
 }

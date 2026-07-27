@@ -5,6 +5,7 @@ data class SiteResponse(
     val name: String? = null,
     val slug: String? = null,
     val description: String? = null,
+    val applicationType: String? = null,
     val siteType: Int? = null,
     val status: Int? = null,
     val runtimeConfig: Map<String, Any>? = null,

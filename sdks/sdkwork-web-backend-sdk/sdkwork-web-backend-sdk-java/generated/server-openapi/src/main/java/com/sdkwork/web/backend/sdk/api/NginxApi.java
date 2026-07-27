@@ -13,8 +13,8 @@ public class NginxApi {
         this.client = client;
     }
 
-    /** 获取 Nginx 配置列表 */
-    public NginxConfigPage configsList(Integer page, Integer pageSize, String siteId, Integer configType, Boolean isActive) throws Exception {
+    /** List Nginx configurations */
+    public ConfigsListResponse configsList(Integer page, Integer pageSize, String siteId, Integer configType, Boolean isActive) throws Exception {
         String query = buildQueryString(List.of(
             new QueryParameterSpec("page", page, "form", true, false, null),
             new QueryParameterSpec("page_size", pageSize, "form", true, false, null),
@@ -23,49 +23,49 @@ public class NginxApi {
             new QueryParameterSpec("isActive", isActive, "form", true, false, null)
         ));
         Object raw = client.get(ApiPaths.appendQueryString(ApiPaths.backendPath("/nginx/configs"), query));
-        return client.convertValue(raw, new TypeReference<NginxConfigPage>() {});
+        return client.convertValue(raw, new TypeReference<ConfigsListResponse>() {});
     }
 
-    /** 创建 Nginx 配置 */
-    public NginxConfigResponse configsCreate(CreateNginxConfigRequest body) throws Exception {
+    /** Create an Nginx configuration */
+    public ConfigsCreateResponse201 configsCreate(CreateNginxConfigRequest body) throws Exception {
         Object raw = client.post(ApiPaths.backendPath("/nginx/configs"), body, null, null, "application/json");
-        return client.convertValue(raw, new TypeReference<NginxConfigResponse>() {});
+        return client.convertValue(raw, new TypeReference<ConfigsCreateResponse201>() {});
     }
 
-    /** 获取 Nginx 配置详情 */
-    public NginxConfigResponse configsRetrieve(String configId) throws Exception {
+    /** Retrieve an Nginx configuration */
+    public ConfigsRetrieveResponse configsRetrieve(String configId) throws Exception {
         Object raw = client.get(ApiPaths.backendPath("/nginx/etc/" + serializePathParameter(configId, new PathParameterSpec("configId", "simple", false)) + ""));
-        return client.convertValue(raw, new TypeReference<NginxConfigResponse>() {});
+        return client.convertValue(raw, new TypeReference<ConfigsRetrieveResponse>() {});
     }
 
-    /** 更新 Nginx 配置 */
-    public NginxConfigResponse configsUpdate(String configId, UpdateNginxConfigRequest body) throws Exception {
+    /** Update an Nginx configuration */
+    public ConfigsUpdateResponse configsUpdate(String configId, UpdateNginxConfigRequest body) throws Exception {
         Object raw = client.put(ApiPaths.backendPath("/nginx/etc/" + serializePathParameter(configId, new PathParameterSpec("configId", "simple", false)) + ""), body, null, null, "application/json");
-        return client.convertValue(raw, new TypeReference<NginxConfigResponse>() {});
+        return client.convertValue(raw, new TypeReference<ConfigsUpdateResponse>() {});
     }
 
-    /** 校验 Nginx 配置 */
-    public NginxValidateResponse configsValidate(String configId) throws Exception {
+    /** Validate an Nginx configuration */
+    public ConfigsValidateResponse configsValidate(String configId) throws Exception {
         Object raw = client.post(ApiPaths.backendPath("/nginx/etc/" + serializePathParameter(configId, new PathParameterSpec("configId", "simple", false)) + "/validate"), null);
-        return client.convertValue(raw, new TypeReference<NginxValidateResponse>() {});
+        return client.convertValue(raw, new TypeReference<ConfigsValidateResponse>() {});
     }
 
-    /** 部署 Nginx 配置 */
-    public NginxDeployResponse configsDeploy(String configId) throws Exception {
+    /** Deploy an Nginx configuration */
+    public ConfigsDeployResponse configsDeploy(String configId) throws Exception {
         Object raw = client.post(ApiPaths.backendPath("/nginx/etc/" + serializePathParameter(configId, new PathParameterSpec("configId", "simple", false)) + "/deploy"), null);
-        return client.convertValue(raw, new TypeReference<NginxDeployResponse>() {});
+        return client.convertValue(raw, new TypeReference<ConfigsDeployResponse>() {});
     }
 
-    /** 热加载 Nginx */
-    public NginxReloadResponse reload() throws Exception {
+    /** Reload Nginx */
+    public ReloadResponse reload() throws Exception {
         Object raw = client.post(ApiPaths.backendPath("/nginx/reload"), null);
-        return client.convertValue(raw, new TypeReference<NginxReloadResponse>() {});
+        return client.convertValue(raw, new TypeReference<ReloadResponse>() {});
     }
 
-    /** 获取 Nginx 状态 */
-    public NginxStatusResponse statusRetrieve() throws Exception {
+    /** Retrieve Nginx status */
+    public StatusRetrieveResponse statusRetrieve() throws Exception {
         Object raw = client.get(ApiPaths.backendPath("/nginx/status"));
-        return client.convertValue(raw, new TypeReference<NginxStatusResponse>() {});
+        return client.convertValue(raw, new TypeReference<StatusRetrieveResponse>() {});
     }
 
     private record PathParameterSpec(String name, String style, boolean explode) {}

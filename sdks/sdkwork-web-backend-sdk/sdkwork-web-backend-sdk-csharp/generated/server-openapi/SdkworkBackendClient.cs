@@ -9,6 +9,11 @@ namespace SDKWork.Web.BackendSdk
     {
         private readonly SdkHttpClient _httpClient;
 
+        public ApplicationApi Application { get; }
+        public ApplicationDomainApi ApplicationDomain { get; }
+        public ApplicationDeploymentApi ApplicationDeployment { get; }
+        public CertificateApi Certificate { get; }
+        public CertificateDistributionApi CertificateDistribution { get; }
         public NginxApi Nginx { get; }
         public ServerApi Server { get; }
         public AgentApi Agent { get; }
@@ -17,6 +22,11 @@ namespace SDKWork.Web.BackendSdk
         public SdkworkBackendClient(string baseUrl)
         {
             _httpClient = new SdkHttpClient(baseUrl);
+            Application = new ApplicationApi(_httpClient);
+            ApplicationDomain = new ApplicationDomainApi(_httpClient);
+            ApplicationDeployment = new ApplicationDeploymentApi(_httpClient);
+            Certificate = new CertificateApi(_httpClient);
+            CertificateDistribution = new CertificateDistributionApi(_httpClient);
             Nginx = new NginxApi(_httpClient);
             Server = new ServerApi(_httpClient);
             Agent = new AgentApi(_httpClient);
@@ -26,6 +36,11 @@ namespace SDKWork.Web.BackendSdk
         public SdkworkBackendClient(SdkConfig config)
         {
             _httpClient = new SdkHttpClient(config);
+            Application = new ApplicationApi(_httpClient);
+            ApplicationDomain = new ApplicationDomainApi(_httpClient);
+            ApplicationDeployment = new ApplicationDeploymentApi(_httpClient);
+            Certificate = new CertificateApi(_httpClient);
+            CertificateDistribution = new CertificateDistributionApi(_httpClient);
             Nginx = new NginxApi(_httpClient);
             Server = new ServerApi(_httpClient);
             Agent = new AgentApi(_httpClient);

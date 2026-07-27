@@ -15,8 +15,8 @@ require 'sdkwork/backend_sdk'
 
 config = Sdkwork::BackendSdk::SdkConfig.new(base_url: 'http://localhost:3800')
 client = Sdkwork::BackendSdk::SdkworkBackendClient.new(config)
-params = { 'page' => 1, 'pageSize' => 2 }
-result = client.server.servers_list(params: params)
+params = { 'page' => 1, 'page_size' => 2 }
+result = client.certificate.certificates_list(params: params)
 
 
 puts result.inspect
@@ -42,6 +42,11 @@ client.set_header('X-Custom-Header', 'value')
 
 ## API Modules
 
+- `client.application` - application API
+- `client.application_domain` - application_domain API
+- `client.application_deployment` - application_deployment API
+- `client.certificate` - certificate API
+- `client.certificate_distribution` - certificate_distribution API
 - `client.nginx` - nginx API
 - `client.server` - server API
 - `client.agent` - agent API
@@ -49,10 +54,57 @@ client.set_header('X-Custom-Header', 'value')
 
 ## Usage Examples
 
+### application
+
+```ruby
+# List managed applications
+params = { 'page' => 1, 'page_size' => 2, 'applicationType' => 'WEB', 'siteType' => 4, 'status' => 5, 'keyword' => 'keyword' }
+result = client.application.applications_list(params: params)
+puts result.inspect
+```
+
+### application_domain
+
+```ruby
+# List application domains
+application_id = '1'
+params = { 'page' => 1, 'page_size' => 2 }
+result = client.application_domain.applications_domains_list(application_id, params: params)
+puts result.inspect
+```
+
+### application_deployment
+
+```ruby
+# List application deployments
+application_id = '1'
+params = { 'page' => 1, 'page_size' => 2, 'status' => 3 }
+result = client.application_deployment.applications_deployments_list(application_id, params: params)
+puts result.inspect
+```
+
+### certificate
+
+```ruby
+# List canonical certificates
+params = { 'page' => 1, 'page_size' => 2 }
+result = client.certificate.certificates_list(params: params)
+puts result.inspect
+```
+
+### certificate_distribution
+
+```ruby
+# List certificate manifest convergence by server
+params = { 'page' => 1, 'page_size' => 2 }
+result = client.certificate_distribution.certificates_distribution_list(params: params)
+puts result.inspect
+```
+
 ### nginx
 
 ```ruby
-# 获取 Nginx 状态
+# Retrieve Nginx status
 result = client.nginx.status_retrieve()
 puts result.inspect
 ```
@@ -60,8 +112,8 @@ puts result.inspect
 ### server
 
 ```ruby
-# 获取服务器列表
-params = { 'page' => 1, 'pageSize' => 2 }
+# List managed servers
+params = { 'page' => 1, 'page_size' => 2 }
 result = client.server.servers_list(params: params)
 puts result.inspect
 ```
@@ -69,17 +121,17 @@ puts result.inspect
 ### agent
 
 ```ruby
-# 拉取 nginx 配置与证书 bundle
+# Retrieve the Nginx configuration and certificate bundle
 params = { 'ifSyncVersion' => 'ifsyncversion' }
-result = client.agent.sync(params: params)
+result = client.agent.retrieve(params: params)
 puts result.inspect
 ```
 
 ### audit
 
 ```ruby
-# 获取审计日志列表
-params = { 'page' => 1, 'pageSize' => 2, 'targetType' => 'targettype', 'action' => 'action', 'operatorId' => '1', 'startDate' => '2026-04-10T00:00:00Z', 'endDate' => '2026-04-10T00:00:00Z' }
+# List audit logs
+params = { 'page' => 1, 'page_size' => 2, 'targetType' => 'targettype', 'action' => 'action', 'operatorId' => '1', 'startDate' => '2026-04-10T00:00:00Z', 'endDate' => '2026-04-10T00:00:00Z' }
 result = client.audit.logs_list(params: params)
 puts result.inspect
 ```
@@ -88,8 +140,8 @@ puts result.inspect
 
 ```ruby
 begin
-  params = { 'page' => 1, 'pageSize' => 2 }
-  client.server.servers_list(params: params)
+  params = { 'page' => 1, 'page_size' => 2 }
+  client.certificate.certificates_list(params: params)
 rescue StandardError => e
   warn("Error: #{e.message}")
 end

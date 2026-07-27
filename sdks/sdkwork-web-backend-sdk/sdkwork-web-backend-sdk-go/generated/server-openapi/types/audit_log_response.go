@@ -9,7 +9,6 @@ type AuditLogResponse struct {
 	TargetType string `json:"targetType"`
 	TargetId string `json:"targetId"`
 	TargetUuid string `json:"targetUuid"`
-	RequestId string `json:"requestId"`
 	IpAddress string `json:"ipAddress"`
 	Changes map[string]interface{} `json:"changes"`
 	CreatedAt string `json:"createdAt"`

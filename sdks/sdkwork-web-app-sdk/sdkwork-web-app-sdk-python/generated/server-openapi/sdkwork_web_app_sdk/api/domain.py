@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional
 from ..http_client import HttpClient
-from ..models import CreateDomainRequest, DomainPage, DomainResponse, DomainVerifyResponse
+from ..models import CreateDomainRequest, SitesDomainsCreateResponse201, SitesDomainsListResponse, SitesDomainsRetrieveResponse, SitesDomainsVerifyResponse
 
 def _append_query_string(path: str, raw_query_string: str) -> str:
     query = raw_query_string.lstrip('?')
@@ -207,7 +207,7 @@ class DomainSitesDomainsApi:
         self._client = client
 
 
-    def list(self, site_id: str, page: Optional[int] = None, page_size: Optional[int] = None) -> DomainPage:
+    def list(self, site_id: str, page: Optional[int] = None, page_size: Optional[int] = None) -> SitesDomainsListResponse:
         """获取站点域名列表"""
         query = build_query_string([
             {'name': 'page', 'value': page, 'style': 'form', 'explode': True, 'allow_reserved': False},
@@ -215,11 +215,11 @@ class DomainSitesDomainsApi:
         ])
         return self._client.get(_append_query_string(f"/app/v3/api/sites/{serialize_path_parameter(site_id, {'name': 'siteId', 'style': 'simple', 'explode': False})}/domains", query))
 
-    def create(self, site_id: str, body: CreateDomainRequest) -> DomainResponse:
+    def create(self, site_id: str, body: CreateDomainRequest) -> SitesDomainsCreateResponse201:
         """绑定域名"""
         return self._client.post(f"/app/v3/api/sites/{serialize_path_parameter(site_id, {'name': 'siteId', 'style': 'simple', 'explode': False})}/domains", json=body)
 
-    def retrieve(self, site_id: str, domain_id: str) -> DomainResponse:
+    def retrieve(self, site_id: str, domain_id: str) -> SitesDomainsRetrieveResponse:
         """获取域名详情"""
         return self._client.get(f"/app/v3/api/sites/{serialize_path_parameter(site_id, {'name': 'siteId', 'style': 'simple', 'explode': False})}/domains/{serialize_path_parameter(domain_id, {'name': 'domainId', 'style': 'simple', 'explode': False})}")
 
@@ -227,6 +227,6 @@ class DomainSitesDomainsApi:
         """解绑域名"""
         return self._client.delete(f"/app/v3/api/sites/{serialize_path_parameter(site_id, {'name': 'siteId', 'style': 'simple', 'explode': False})}/domains/{serialize_path_parameter(domain_id, {'name': 'domainId', 'style': 'simple', 'explode': False})}")
 
-    def verify(self, site_id: str, domain_id: str) -> DomainVerifyResponse:
+    def verify(self, site_id: str, domain_id: str) -> SitesDomainsVerifyResponse:
         """验证域名所有权"""
         return self._client.post(f"/app/v3/api/sites/{serialize_path_parameter(site_id, {'name': 'siteId', 'style': 'simple', 'explode': False})}/domains/{serialize_path_parameter(domain_id, {'name': 'domainId', 'style': 'simple', 'explode': False})}/verify")

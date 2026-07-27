@@ -8,22 +8,22 @@ public class DomainApi {
     }
 
     /// 获取站点域名列表
-    public func sitesDomainsList(siteId: String, page: Int? = nil, pageSize: Int? = nil) async throws -> DomainPage? {
+    public func sitesDomainsList(siteId: String, page: Int? = nil, pageSize: Int? = nil) async throws -> SitesDomainsListResponse? {
         let query = buildQueryString([
             QueryParameterSpec(name: "page", value: page, style: "form", explode: true, allowReserved: false, contentType: nil),
             QueryParameterSpec(name: "page_size", value: pageSize, style: "form", explode: true, allowReserved: false, contentType: nil)
         ])
-        return try await client.get(ApiPaths.appendQueryString(ApiPaths.appPath("/sites/\(serializePathParameter(siteId, PathParameterSpec(name: "siteId", style: "simple", explode: false)))/domains"), query), responseType: DomainPage.self)
+        return try await client.get(ApiPaths.appendQueryString(ApiPaths.appPath("/sites/\(serializePathParameter(siteId, PathParameterSpec(name: "siteId", style: "simple", explode: false)))/domains"), query), responseType: SitesDomainsListResponse.self)
     }
 
     /// 绑定域名
-    public func sitesDomainsCreate(siteId: String, body: CreateDomainRequest) async throws -> DomainResponse? {
-        return try await client.post(ApiPaths.appPath("/sites/\(serializePathParameter(siteId, PathParameterSpec(name: "siteId", style: "simple", explode: false)))/domains"), body: body, params: nil, headers: nil, contentType: "application/json", responseType: DomainResponse.self)
+    public func sitesDomainsCreate(siteId: String, body: CreateDomainRequest) async throws -> SitesDomainsCreateResponse201? {
+        return try await client.post(ApiPaths.appPath("/sites/\(serializePathParameter(siteId, PathParameterSpec(name: "siteId", style: "simple", explode: false)))/domains"), body: body, params: nil, headers: nil, contentType: "application/json", responseType: SitesDomainsCreateResponse201.self)
     }
 
     /// 获取域名详情
-    public func sitesDomainsRetrieve(siteId: String, domainId: String) async throws -> DomainResponse? {
-        return try await client.get(ApiPaths.appPath("/sites/\(serializePathParameter(siteId, PathParameterSpec(name: "siteId", style: "simple", explode: false)))/domains/\(serializePathParameter(domainId, PathParameterSpec(name: "domainId", style: "simple", explode: false)))"), responseType: DomainResponse.self)
+    public func sitesDomainsRetrieve(siteId: String, domainId: String) async throws -> SitesDomainsRetrieveResponse? {
+        return try await client.get(ApiPaths.appPath("/sites/\(serializePathParameter(siteId, PathParameterSpec(name: "siteId", style: "simple", explode: false)))/domains/\(serializePathParameter(domainId, PathParameterSpec(name: "domainId", style: "simple", explode: false)))"), responseType: SitesDomainsRetrieveResponse.self)
     }
 
     /// 解绑域名
@@ -32,8 +32,8 @@ public class DomainApi {
     }
 
     /// 验证域名所有权
-    public func sitesDomainsVerify(siteId: String, domainId: String) async throws -> DomainVerifyResponse? {
-        return try await client.post(ApiPaths.appPath("/sites/\(serializePathParameter(siteId, PathParameterSpec(name: "siteId", style: "simple", explode: false)))/domains/\(serializePathParameter(domainId, PathParameterSpec(name: "domainId", style: "simple", explode: false)))/verify"), body: nil, responseType: DomainVerifyResponse.self)
+    public func sitesDomainsVerify(siteId: String, domainId: String) async throws -> SitesDomainsVerifyResponse? {
+        return try await client.post(ApiPaths.appPath("/sites/\(serializePathParameter(siteId, PathParameterSpec(name: "siteId", style: "simple", explode: false)))/domains/\(serializePathParameter(domainId, PathParameterSpec(name: "domainId", style: "simple", explode: false)))/verify"), body: nil, responseType: SitesDomainsVerifyResponse.self)
     }
 
     private struct PathParameterSpec {

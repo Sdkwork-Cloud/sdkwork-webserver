@@ -19,7 +19,7 @@ use SDKWork\Web\AppSdk\SdkConfig;
 
 $config = new SdkConfig(baseUrl: 'http://localhost:3800');
 $client = new SdkworkAppClient($config);
-$$params = ['page' => 1, 'pageSize' => 2];
+$$params = ['page' => 1, 'page_size' => 2];
 $result = $client->certificate->certificatesList($params);
 
 
@@ -66,7 +66,7 @@ $client->setHeader('X-Custom-Header', 'value');
 <?php
 
 // 获取站点列表
-$params = ['page' => 1, 'pageSize' => 2, 'status' => 0, 'siteType' => 1, 'keyword' => 'keyword'];
+$params = ['page' => 1, 'page_size' => 2, 'status' => 0, 'applicationType' => 'WEB', 'siteType' => 1, 'keyword' => 'keyword'];
 $result = $client->site->sitesList($params);
 var_dump($result);
 ```
@@ -78,7 +78,7 @@ var_dump($result);
 
 // 获取站点域名列表
 $siteId = '1';
-$params = ['page' => 1, 'pageSize' => 2];
+$params = ['page' => 1, 'page_size' => 2];
 $result = $client->domain->sitesDomainsList($siteId, $params);
 var_dump($result);
 ```
@@ -90,7 +90,7 @@ var_dump($result);
 
 // 获取部署历史
 $siteId = '1';
-$params = ['page' => 1, 'pageSize' => 2, 'status' => 0];
+$params = ['page' => 1, 'page_size' => 2, 'status' => 0];
 $result = $client->deployment->sitesDeploymentsList($siteId, $params);
 var_dump($result);
 ```
@@ -113,7 +113,7 @@ var_dump($result);
 <?php
 
 // 获取证书列表
-$params = ['page' => 1, 'pageSize' => 2];
+$params = ['page' => 1, 'page_size' => 2];
 $result = $client->certificate->certificatesList($params);
 var_dump($result);
 ```
@@ -142,7 +142,7 @@ $config = new SdkConfig(baseUrl: 'http://localhost:3800');
 $client = new SdkworkAppClient($config);
 
 try {
-    $params = ['page' => 1, 'pageSize' => 2];
+    $params = ['page' => 1, 'page_size' => 2];
     $client->certificate->certificatesList($params);
 } catch (\Throwable $e) {
     echo "Error: {$e->getMessage()}\n";

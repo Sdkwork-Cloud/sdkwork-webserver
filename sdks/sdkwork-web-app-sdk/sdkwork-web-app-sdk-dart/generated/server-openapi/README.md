@@ -24,7 +24,7 @@ client.setAccessToken('your-access-token');
 // Use the SDK
 final params = <String, dynamic>{
   'page': 1,
-  'pageSize': 2,
+  'page_size': 2,
 };
 final result = await client.certificate.certificatesList(params);
 print(result);
@@ -62,8 +62,9 @@ client.setHeader('X-Custom-Header', 'value');
 // 获取站点列表
 final params = <String, dynamic>{
   'page': 1,
-  'pageSize': 2,
+  'page_size': 2,
   'status': 0,
+  'applicationType': 'WEB',
   'siteType': 1,
   'keyword': 'keyword',
 };
@@ -78,7 +79,7 @@ print(result);
 final siteId = '1';
 final params = <String, dynamic>{
   'page': 1,
-  'pageSize': 2,
+  'page_size': 2,
 };
 final result = await client.domain.sitesDomainsList(siteId, params);
 print(result);
@@ -91,7 +92,7 @@ print(result);
 final siteId = '1';
 final params = <String, dynamic>{
   'page': 1,
-  'pageSize': 2,
+  'page_size': 2,
   'status': 0,
 };
 final result = await client.deployment.sitesDeploymentsList(siteId, params);
@@ -116,7 +117,7 @@ print(result);
 // 获取证书列表
 final params = <String, dynamic>{
   'page': 1,
-  'pageSize': 2,
+  'page_size': 2,
 };
 final result = await client.certificate.certificatesList(params);
 print(result);
@@ -137,7 +138,7 @@ print(result);
 try {
   final params = <String, dynamic>{
     'page': 1,
-    'pageSize': 2,
+    'page_size': 2,
   };
   final result = await client.certificate.certificatesList(params);
   print(result);

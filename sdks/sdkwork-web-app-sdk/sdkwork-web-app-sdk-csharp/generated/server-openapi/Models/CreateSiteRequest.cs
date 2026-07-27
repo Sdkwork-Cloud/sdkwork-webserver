@@ -9,6 +9,7 @@ namespace SDKWork.Web.AppSdk.Models
         public string Name { get; set; }
         public string? Slug { get; set; }
         public string? Description { get; set; }
+        public string? ApplicationType { get; set; }
         public int SiteType { get; set; }
         public Dictionary<string, object>? RuntimeConfig { get; set; }
     }

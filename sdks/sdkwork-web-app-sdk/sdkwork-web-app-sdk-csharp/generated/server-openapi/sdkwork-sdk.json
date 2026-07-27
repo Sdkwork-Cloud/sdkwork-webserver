@@ -5,6 +5,8 @@
   "language": "csharp",
   "sdkType": "app",
   "packageName": "SDKWork.Web.AppSdk",
+  "transportPackageName": "SDKWork.Web.AppSdk",
+  "consumerPackageName": "SDKWork.Web.AppSdk",
   "generator": "@sdkwork/sdk-generator",
   "capabilities": {
     "supportsGeneratedTests": true,

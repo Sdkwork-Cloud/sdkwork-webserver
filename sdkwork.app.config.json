@@ -24,6 +24,8 @@
     "profileKey": "backend-root-admin",
     "ownerMode": "tenant",
     "grantMode": "current",
+    "tenantId": "100001",
+    "organizationId": "0",
     "accessTokenPermissionScope": [
       "web.sites.read",
       "web.sites.write",

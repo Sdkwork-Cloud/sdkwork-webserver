@@ -7,6 +7,7 @@ public class SiteResponse {
     private String name;
     private String slug;
     private String description;
+    private String applicationType;
     private Integer siteType;
     private Integer status;
     private Map<String, Object> runtimeConfig;
@@ -43,6 +44,14 @@ public class SiteResponse {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getApplicationType() {
+        return this.applicationType;
+    }
+
+    public void setApplicationType(String applicationType) {
+        this.applicationType = applicationType;
     }
 
     public Integer getSiteType() {

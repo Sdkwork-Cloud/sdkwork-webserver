@@ -13,7 +13,6 @@ namespace SDKWork.Web.BackendSdk.Models
         public string? TargetType { get; set; }
         public string? TargetId { get; set; }
         public string? TargetUuid { get; set; }
-        public string? RequestId { get; set; }
         public string? IpAddress { get; set; }
         public Dictionary<string, object>? Changes { get; set; }
         public string? CreatedAt { get; set; }

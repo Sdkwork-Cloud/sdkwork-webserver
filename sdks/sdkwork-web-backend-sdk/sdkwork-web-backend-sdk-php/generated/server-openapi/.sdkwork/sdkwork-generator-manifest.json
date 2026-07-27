@@ -36,35 +36,55 @@
     },
     {
       "path": "README.md",
-      "sha256": "b95144735455b37be3d82c66021ceff3c5d15c8558c8c7545f61f1e099dabac3"
+      "sha256": "bd620d42dc582f573a274e29ed2e201b2fd0484603271160a4ae72bff0186eeb"
     },
     {
       "path": "sdkwork-sdk.json",
-      "sha256": "353407518182d0ff9ac92f0164f47643573ce07996e83987ee0492d8de1ab7b4"
+      "sha256": "a06df776178efb29c490048bb6b504446f0f5ff62bb0918391a7d7f0681eea8e"
     },
     {
       "path": "src/Api/Agent.php",
-      "sha256": "26677687076f09deac6265c3f589e463979a0ff3e46e76fd3476d7bcb3fd21ff"
+      "sha256": "1a0b6b4b8cdbb6ba31fa05ea8fddb7cbae8492d1899422e08c2cb6b4e5c766dc"
+    },
+    {
+      "path": "src/Api/Application.php",
+      "sha256": "a9ec20d694022238298f7ca2a1eecc0a636479038949922002f56613589cceda"
+    },
+    {
+      "path": "src/Api/ApplicationDeployment.php",
+      "sha256": "95eaebb4f8fe05876586e579226df2b3fd4ce79e6587cd3e86d017c35f5ddc82"
+    },
+    {
+      "path": "src/Api/ApplicationDomain.php",
+      "sha256": "2928a962497f0eba71486cc887e7c1478fcb0bd07834083a9e55154017aac3ab"
     },
     {
       "path": "src/Api/Audit.php",
-      "sha256": "50cac654a5f4bdd28e71d33be8a46cd033cfa3781ff39332bfb6780576408dad"
+      "sha256": "5aecc76882f1c4ad9dcc6000b78bfecec54305debf62b20d276439aa3588ecaa"
     },
     {
       "path": "src/Api/BaseApi.php",
       "sha256": "2b930bed1ec357ead5f4aad3637b983c26500b01313679bd9bc1692d11f85caf"
     },
     {
+      "path": "src/Api/Certificate.php",
+      "sha256": "616d265fa7d7d349e5bd3d147b306607acbe7086d0bdebc6a33c29b152d66ee9"
+    },
+    {
+      "path": "src/Api/CertificateDistribution.php",
+      "sha256": "45c81a1eb92cb2293e0033452fe7c572bfe3c728af8d22be83dbc836f6d3bc4b"
+    },
+    {
       "path": "src/Api/Nginx.php",
-      "sha256": "7012f75402d1f4325ad612e6752817f63187c75d9e361ca47ce96f6759e5f768"
+      "sha256": "79b76b7ef00bcd9e84a4e7b35413390fd8dc9d4da82de7e328fdc6c94608a326"
     },
     {
       "path": "src/Api/Server.php",
-      "sha256": "85ac3ffd13f54c84bc757ad83554e027b45153e5f5bbe0b079c76f2994254fb0"
+      "sha256": "082a66ab3d106a14bb0a9acc5665d00a12849a20b5fd327b92a3beeb74a4c7c8"
     },
     {
       "path": "src/Http/HttpClient.php",
-      "sha256": "1b5db075abfdd6e3fd23b4f0f1e46ba44da9da724a37cfac103407c613d77b6a"
+      "sha256": "d76e43171ff30f11c9ff528a4cd78e3af96938d3b85018a525f21981c62e5a27"
     },
     {
       "path": "src/Models/AgentCertificateBundle.php",
@@ -87,12 +107,128 @@
       "sha256": "44454923e3df7aae63755246560e3317cd43d97dd8dc4610b4773586532ad484"
     },
     {
+      "path": "src/Models/ApplicationDeploymentResponse.php",
+      "sha256": "957f81fa5d12cb8a192ec65a72677952cf70cf8d95d5f0cf741326c3d9ffa37d"
+    },
+    {
+      "path": "src/Models/ApplicationDomainResponse.php",
+      "sha256": "23f8e2f16212e475bf53ab61542bc55806d78f1be56409679c434994fafa2cf0"
+    },
+    {
+      "path": "src/Models/ApplicationDomainVerifyResponse.php",
+      "sha256": "63e3e74e96d58e14cd445c4ad5d7590724a4bcde89b39ac99ebe0769175f7793"
+    },
+    {
+      "path": "src/Models/ApplicationResponse.php",
+      "sha256": "f17e0c60d16f0329a93a10f938bd42df138ababbcd889b71ba8946d39ce56062"
+    },
+    {
+      "path": "src/Models/ApplicationsCreateResponse201.php",
+      "sha256": "3fd9f6ecbdeee8eb7b0b5c7f43eda661ed73ddda05a20abaadc446432805e1a7"
+    },
+    {
+      "path": "src/Models/ApplicationsDeploymentsCreateResponse201.php",
+      "sha256": "d3f80a332b3bd9460740f53f648a601c4e007b2114a69e2d32897a4106e8aacb"
+    },
+    {
+      "path": "src/Models/ApplicationsDeploymentsListResponse.php",
+      "sha256": "494fbb938e90e6624df54ac75cd982f5be223343ac8253f7e2557e62700e36b9"
+    },
+    {
+      "path": "src/Models/ApplicationsDomainsCreateResponse201.php",
+      "sha256": "1e9bca835e7a28c84d9eafa798cd0a8601b17eb65e5de5f4121a7a38a82d7371"
+    },
+    {
+      "path": "src/Models/ApplicationsDomainsListResponse.php",
+      "sha256": "e745718a69e7fea3f7d76931b42deb052048764d1cd25f6dfca1668912893cc1"
+    },
+    {
+      "path": "src/Models/ApplicationsDomainsVerifyResponse.php",
+      "sha256": "a39da2b1b646c823b06bf217aac218f6b4bd9f5188efb4bea761ec136e828ab7"
+    },
+    {
+      "path": "src/Models/ApplicationsListResponse.php",
+      "sha256": "fdbd6e03cc65b0a346a7865b9e63a818a694b6b5985c9cff1967cd30dee798d5"
+    },
+    {
       "path": "src/Models/AuditLogPage.php",
       "sha256": "157e0cd23540d7954f25dc1926b64683c898651195d4692327628ffe63b44d4a"
     },
     {
       "path": "src/Models/AuditLogResponse.php",
-      "sha256": "078ac599feed013893c028821278c4e84a64ece0a12e92ea532088e172798284"
+      "sha256": "7d6703b6536e3d5ab90e5cc9ab77672c6a749633a72040eec2455e2ab7dd41c9"
+    },
+    {
+      "path": "src/Models/AuditLogsListResponse.php",
+      "sha256": "42e20f7abe0150089cca8aa6489b6838068b4b5b537380b12645da194fb0029e"
+    },
+    {
+      "path": "src/Models/CertificateDistributionResponse.php",
+      "sha256": "5ddb595eeef99241a0e77eaaa6a2e5aeaa4e4c62b531f492389b230200e6fa9e"
+    },
+    {
+      "path": "src/Models/CertificateResponse.php",
+      "sha256": "c27661e86c08aef84b4a8920a5290edbf42e19b421ff4a8d1dcf4181afc3c99d"
+    },
+    {
+      "path": "src/Models/CertificatesCreateResponse201.php",
+      "sha256": "bb1ed39ab275dd325ee2f40a16473e3dcb3de011bed59192bb712fe0fb879fd3"
+    },
+    {
+      "path": "src/Models/CertificatesDistributionListResponse.php",
+      "sha256": "c784db0f906dfe52d72affeaefc7a4dbe4cb8497a82018d200f46cacc1402dad"
+    },
+    {
+      "path": "src/Models/CertificatesListResponse.php",
+      "sha256": "e9ede6db5229bfb3336432cf9c070f53e8de61ee8addba31a4d9adf0f7857115"
+    },
+    {
+      "path": "src/Models/CertificatesRenewResponse.php",
+      "sha256": "6c5890fc5065dc30e187b6052d9ff429a7cbc4f6741180ece048288c6c58a43f"
+    },
+    {
+      "path": "src/Models/CertificatesUpdateResponse.php",
+      "sha256": "ff683f292008292d1883d65be6f0cea4c45638e77a43849ac3c1cfdb76ca44ef"
+    },
+    {
+      "path": "src/Models/ConfigsCreateResponse201.php",
+      "sha256": "97ebb13d8c9db84e6cc9f3d4c39c81eb3cd8f5639c0588f6669b0a149a6df19a"
+    },
+    {
+      "path": "src/Models/ConfigsDeployResponse.php",
+      "sha256": "87be775bc867ee8d93ea9e2c041062ab0c7225329a5f021e1fbd8f33c4f236d2"
+    },
+    {
+      "path": "src/Models/ConfigsListResponse.php",
+      "sha256": "170dc78b8c347a737e7f2e1aa4e5b2492e7640f5a96440b3fd510dfac3ba4aca"
+    },
+    {
+      "path": "src/Models/ConfigsRetrieveResponse.php",
+      "sha256": "edbfc81b53cf573a989e03cb5c904ee4bf7d9f3eaa034329d008c0fbeb663bb7"
+    },
+    {
+      "path": "src/Models/ConfigsUpdateResponse.php",
+      "sha256": "633177b780a239fd6a643436320e830b5c916db87ec173a535e0a749adf6133b"
+    },
+    {
+      "path": "src/Models/ConfigsValidateResponse.php",
+      "sha256": "7943f25beaa6dd9ad21d4a482b1a0a15d232fb85214bfb3e02a1dc41062f33da"
+    },
+    {
+      "path": "src/Models/CreateApplicationDeploymentRequest.php",
+      "sha256": "966a35b188ecd4ff6e07b20f688a75c1ab3d8c98aef6129ef5aefddb1a516f9f"
+    },
+    {
+      "path": "src/Models/CreateApplicationDomainRequest.php",
+      "sha256": "01d3481d04fca125080eb8c1dc1b1f24f0e8c81e5a18ef88097b5f52274a7f80"
+    },
+    {
+      "path": "src/Models/CreateApplicationRequest.php",
+      "sha256": "bbf7957966654f00ceac2ea0184fa7d3b5e779360610e65a1659d0cc790339a7"
+    },
+    {
+      "path": "src/Models/CreateCertificateRequest.php",
+      "sha256": "3c237df9d8cb927b2f20d9aa5b5109e6e3f6d4e74e5a2b17bee2d0702089b514"
     },
     {
       "path": "src/Models/CreateNginxConfigRequest.php",
@@ -100,11 +236,19 @@
     },
     {
       "path": "src/Models/CreateServerRequest.php",
-      "sha256": "728664dfa4239b0b5a32184e10140cf699abc3a29457b9265be1317b2ec3aacf"
+      "sha256": "a81aa10c01972b1c966604d4bfdc18f42a20cb26ac3f2b1e93c672479656289a"
     },
     {
       "path": "src/Models/CreateServerResponse.php",
-      "sha256": "5d6dfbcc7a2936c9201c9ca3a7715032aafdeacba6e08017674f0f48862d0ac9"
+      "sha256": "37157ce18f5c4f0742e43f3072738f9eb0a13fbd370d291e164d8dafa93679a1"
+    },
+    {
+      "path": "src/Models/FieldError.php",
+      "sha256": "e55a31a5369961ab064054ceb4b516acf7c943cf2463095af8bd3d8c4ad80c2e"
+    },
+    {
+      "path": "src/Models/HeartbeatResponse.php",
+      "sha256": "22c9f4d039e85bc074f8f6d38d9033b51f29ed7c0d41d685de92cdc3a79c39d5"
     },
     {
       "path": "src/Models/NginxConfigPage.php",
@@ -131,8 +275,48 @@
       "sha256": "71f7064039c3529d9e51a4ed874fe466c2e2c765806ccb5ecb5fedb03f4d7f61"
     },
     {
+      "path": "src/Models/PageInfo.php",
+      "sha256": "5b4400037f32e66bec63f79eb4dcbc0ed92f2e3c1d7d162ccdf858c23edf2451"
+    },
+    {
       "path": "src/Models/ProblemDetail.php",
-      "sha256": "4df317512f6cd5587d516f9e2cd46fb5822e22fd49b0c7df5ec4193c76c564c9"
+      "sha256": "652c86eef213b5fabc09d272d1300818cadfe448dd36e42da8cfc61c2635a40b"
+    },
+    {
+      "path": "src/Models/ReloadResponse.php",
+      "sha256": "50472c5aab21ab73e8fe9405a188db45d0f375d5e0f9856cd936ae3697e13c51"
+    },
+    {
+      "path": "src/Models/RetrieveResponse.php",
+      "sha256": "3d33ae0063f18e226798abe078105020504b6d52d437c27462c7623aa0bc5e6c"
+    },
+    {
+      "path": "src/Models/SdkWorkApiResponse.php",
+      "sha256": "936f8c4abff9702bbcd3fe9a5e51b0508a238edb121205a98816152d2f56ce61"
+    },
+    {
+      "path": "src/Models/SdkWorkCommandData.php",
+      "sha256": "299db8e70200e8e6547631c98f40f31920c683f2bcbaa2bfa52aeeb89b6f7bf1"
+    },
+    {
+      "path": "src/Models/SdkWorkCommandResponse.php",
+      "sha256": "406e6042c426f4f368a631f30da0f8a2ddce9b371b661f0126498e8ba61a2f31"
+    },
+    {
+      "path": "src/Models/SdkWorkListResponse.php",
+      "sha256": "06947feda43b359c0cda9ccd7fde7e03b8c5e276f690e7fbeea13b643d9b51b0"
+    },
+    {
+      "path": "src/Models/SdkWorkPageData.php",
+      "sha256": "2b07e0fb550a4263af511fb1f0e6581a0c46df5acbcd794cac6e4f037992fe46"
+    },
+    {
+      "path": "src/Models/SdkWorkResourceData.php",
+      "sha256": "11fb3cb57d631ab62f58c76e1b3ab6c8e329642de8ff0e6b24f62d7385a2733f"
+    },
+    {
+      "path": "src/Models/SdkWorkResourceResponse.php",
+      "sha256": "76062485fc5ea7f95c381c88c4990b9c909009a7029b0450c285c8f4a00a7fed"
     },
     {
       "path": "src/Models/ServerPage.php",
@@ -140,7 +324,23 @@
     },
     {
       "path": "src/Models/ServerResponse.php",
-      "sha256": "0656f7faa177db80c80ce23c2201f3bd83257233812f76b162a78b6013e31f93"
+      "sha256": "c2def3d77866d6f3d4919fb0ebfdc8b829b915bce397c32a6c3c0f073f8fc589"
+    },
+    {
+      "path": "src/Models/ServersCreateResponse201.php",
+      "sha256": "677616ec22dd04950b97a6fab8a1de3655884a468d39ebbf962e100520d2d567"
+    },
+    {
+      "path": "src/Models/ServersListResponse.php",
+      "sha256": "a172c07f2f3085abd2d5357163c89426b483f6522b428ee3bc52f50b5f6e8321"
+    },
+    {
+      "path": "src/Models/StatusRetrieveResponse.php",
+      "sha256": "271c7942b9b4fb6a8cb5a3bbbc53f138c955bac2d7ccd707d0ec1f2a5817f08c"
+    },
+    {
+      "path": "src/Models/UpdateCertificateRequest.php",
+      "sha256": "0f13c80253c8c891336b6d683a44b6e8ed916d5719a7ba1f797cc1631d0c2331"
     },
     {
       "path": "src/Models/UpdateNginxConfigRequest.php",
@@ -152,7 +352,7 @@
     },
     {
       "path": "src/SdkworkBackendClient.php",
-      "sha256": "6161382226b04e252770360b14015ddae0bdc3f42cdc08c74a2fb847119b37e9"
+      "sha256": "35b3ac9c74e46a8bdbf01f6e858d84a814ac1bdaa7a30936505c8145377da821"
     }
   ],
   "scaffoldFiles": [

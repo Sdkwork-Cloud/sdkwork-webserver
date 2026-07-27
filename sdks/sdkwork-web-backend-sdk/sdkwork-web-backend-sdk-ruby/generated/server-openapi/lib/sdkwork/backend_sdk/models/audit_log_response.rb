@@ -2,7 +2,7 @@ module Sdkwork
   module BackendSdk
     module Models
       class AuditLogResponse
-              attr_accessor :id, :operator_id, :operator_type, :action, :target_type, :target_id, :target_uuid, :request_id, :ip_address, :changes, :created_at
+              attr_accessor :id, :operator_id, :operator_type, :action, :target_type, :target_id, :target_uuid, :ip_address, :changes, :created_at
 
               def initialize(attributes = {})
                 attributes = (attributes || {}).transform_keys(&:to_s)
@@ -13,7 +13,6 @@ module Sdkwork
                 @target_type = attributes['targetType']
                 @target_id = attributes['targetId']
                 @target_uuid = attributes['targetUuid']
-                @request_id = attributes['requestId']
                 @ip_address = attributes['ipAddress']
                 @changes = attributes['changes'].is_a?(Hash) ? attributes['changes'] : {}
                 @created_at = attributes['createdAt']
@@ -34,7 +33,6 @@ module Sdkwork
                   'targetType' => @target_type,
                   'targetId' => @target_id,
                   'targetUuid' => @target_uuid,
-                  'requestId' => @request_id,
                   'ipAddress' => @ip_address,
                   'changes' => @changes,
                   'createdAt' => @created_at,

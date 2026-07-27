@@ -24,7 +24,7 @@ client.set_access_token("your-access-token")
 # Use the SDK
 params = {
     'page': 1,
-    'pageSize': 2,
+    'page_size': 2,
 }
 result = client.certificate.list(params)
 ```
@@ -67,8 +67,9 @@ client.set_header('X-Custom-Header', 'value')
 # 获取站点列表
 params = {
     'page': 1,
-    'pageSize': 2,
+    'page_size': 2,
     'status': 0,
+    'applicationType': 'WEB',
     'siteType': 1,
     'keyword': 'keyword',
 }
@@ -83,7 +84,7 @@ print(result)
 site_id = '1'
 params = {
     'page': 1,
-    'pageSize': 2,
+    'page_size': 2,
 }
 result = client.domain.sites.domains.list(site_id, params)
 print(result)
@@ -96,7 +97,7 @@ print(result)
 site_id = '1'
 params = {
     'page': 1,
-    'pageSize': 2,
+    'page_size': 2,
     'status': 0,
 }
 result = client.deployment.sites.deployments.list(site_id, params)
@@ -121,7 +122,7 @@ print(result)
 # 获取证书列表
 params = {
     'page': 1,
-    'pageSize': 2,
+    'page_size': 2,
 }
 result = client.certificate.list(params)
 print(result)
@@ -142,7 +143,7 @@ print(result)
 try:
     params = {
         'page': 1,
-        'pageSize': 2,
+        'page_size': 2,
     }
     client.certificate.list(params)
 except Exception as error:

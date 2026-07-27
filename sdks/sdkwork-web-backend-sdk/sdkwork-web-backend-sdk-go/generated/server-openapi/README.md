@@ -55,6 +55,11 @@ client.SetHeader("X-Custom-Header", "value")
 
 ## API Modules
 
+- `client.Application` - application API
+- `client.ApplicationDomain` - application_domain API
+- `client.ApplicationDeployment` - application_deployment API
+- `client.Certificate` - certificate API
+- `client.CertificateDistribution` - certificate_distribution API
 - `client.Nginx` - nginx API
 - `client.Server` - server API
 - `client.Agent` - agent API
@@ -62,10 +67,92 @@ client.SetHeader("X-Custom-Header", "value")
 
 ## Usage Examples
 
+### application
+
+```go
+// List managed applications
+params := map[string]interface{}{
+    "page": 1,
+    "page_size": 2,
+    "applicationType": "WEB",
+    "siteType": 4,
+    "status": 5,
+    "keyword": "keyword",
+}
+result, err := client.Application.ApplicationsList(params)
+if err != nil {
+    panic(err)
+}
+fmt.Println(result)
+```
+
+### application_domain
+
+```go
+// List application domains
+applicationId := "1"
+params := map[string]interface{}{
+    "page": 1,
+    "page_size": 2,
+}
+result, err := client.ApplicationDomain.ApplicationsDomainsList(applicationId, params)
+if err != nil {
+    panic(err)
+}
+fmt.Println(result)
+```
+
+### application_deployment
+
+```go
+// List application deployments
+applicationId := "1"
+params := map[string]interface{}{
+    "page": 1,
+    "page_size": 2,
+    "status": 3,
+}
+result, err := client.ApplicationDeployment.ApplicationsDeploymentsList(applicationId, params)
+if err != nil {
+    panic(err)
+}
+fmt.Println(result)
+```
+
+### certificate
+
+```go
+// List canonical certificates
+params := map[string]interface{}{
+    "page": 1,
+    "page_size": 2,
+}
+result, err := client.Certificate.CertificatesList(params)
+if err != nil {
+    panic(err)
+}
+fmt.Println(result)
+```
+
+### certificate_distribution
+
+```go
+// List certificate manifest convergence by server
+params := map[string]interface{}{
+    "page": 1,
+    "page_size": 2,
+}
+result, err := client.CertificateDistribution.CertificatesDistributionList(params)
+if err != nil {
+    panic(err)
+}
+fmt.Println(result)
+```
+
 ### nginx
 
 ```go
-// 获取 Nginx 状态
+// Retrieve Nginx status
 result, err := client.Nginx.StatusRetrieve()
 if err != nil {
     panic(err)
@@ -76,10 +163,10 @@ fmt.Println(result)
 ### server
 
 ```go
-// 获取服务器列表
+// List managed servers
 params := map[string]interface{}{
     "page": 1,
-    "pageSize": 2,
+    "page_size": 2,
 }
 result, err := client.Server.ServersList(params)
 if err != nil {
@@ -91,11 +178,11 @@ fmt.Println(result)
 ### agent
 
 ```go
-// 拉取 nginx 配置与证书 bundle
+// Retrieve the Nginx configuration and certificate bundle
 params := map[string]interface{}{
     "ifSyncVersion": "ifSyncVersion",
 }
-result, err := client.Agent.Sync(params)
+result, err := client.Agent.Retrieve(params)
 if err != nil {
     panic(err)
 }
@@ -105,10 +192,10 @@ fmt.Println(result)
 ### audit
 
 ```go
-// 获取审计日志列表
+// List audit logs
 params := map[string]interface{}{
     "page": 1,
-    "pageSize": 2,
+    "page_size": 2,
     "targetType": "targetType",
     "action": "action",
     "operatorId": "operatorId",

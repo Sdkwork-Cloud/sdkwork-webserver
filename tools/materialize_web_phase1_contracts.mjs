@@ -4,6 +4,8 @@ import { spawnSync } from "node:child_process";
 import { parse as parseYaml } from "yaml";
 
 const root = process.cwd();
+const checkMode = process.argv.slice(2).includes("--check");
+const drift = [];
 
 const surfaces = [
   {
@@ -59,8 +61,16 @@ const surfaces = [
 
 function writeText(relativePath, content) {
   const target = path.join(root, relativePath);
+  const desired = content.replace(/\r\n/g, "\n");
+  if (checkMode) {
+    const current = fs.existsSync(target)
+      ? fs.readFileSync(target, "utf8").replace(/\r\n/g, "\n")
+      : null;
+    if (current !== desired) drift.push(relativePath);
+    return;
+  }
   fs.mkdirSync(path.dirname(target), { recursive: true });
-  fs.writeFileSync(target, content.replace(/\r\n/g, "\n"), "utf8");
+  fs.writeFileSync(target, desired, "utf8");
   console.log(`wrote ${relativePath}`);
 }
 
@@ -68,17 +78,18 @@ function writeJson(relativePath, value) {
   writeText(relativePath, `${JSON.stringify(value, null, 2)}\n`);
 }
 
-function formatRustSource(relativePath) {
+function formatRustSource(relativePath, content) {
   const result = spawnSync(
     "rustfmt",
-    ["--edition", "2021", path.join(root, relativePath)],
-    { encoding: "utf8" },
+    ["--edition", "2021"],
+    { encoding: "utf8", input: content },
   );
   if (result.status !== 0) {
     throw new Error(
       `rustfmt failed for ${relativePath}: ${result.stderr || result.stdout || "unknown error"}`,
     );
   }
+  return result.stdout;
 }
 
 function enrichOpenApi(openapi, profile) {
@@ -274,8 +285,7 @@ function writeHttpRouteManifestRust(crateDir, fnName, routes) {
   }
   lines.push("];", "", `pub fn ${fnName}() -> HttpRouteManifest {`, "    HttpRouteManifest::new(HTTP_ROUTES)", "}", "");
   const relativePath = `${crateDir}/src/http_route_manifest.rs`;
-  writeText(relativePath, lines.join("\n"));
-  formatRustSource(relativePath);
+  writeText(relativePath, formatRustSource(relativePath, lines.join("\n")));
 }
 
 // C4-C7: SDK family metadata, sdkgen input, and generate-sdk wrapper scripts.
@@ -922,4 +932,7 @@ writeJson("apis/authority-manifest.json", {
   })),
 });
 
-console.log("web phase-1 contracts materialized");
+if (checkMode && drift.length > 0) {
+  throw new Error(`web phase-1 contract drift: ${drift.join(", ")}`);
+}
+console.log(checkMode ? "web phase-1 contracts are current" : "web phase-1 contracts materialized");

@@ -12,24 +12,24 @@ class EnvVariableApi {
   EnvVariableApi(this._client);
 
   /// 获取环境变量列表
-  Future<EnvVariablePage?> sitesEnvVariablesList(String siteId, [String? environment]) async {
+  Future<SitesEnvVariablesListResponse?> sitesEnvVariablesList(String siteId, [String? environment]) async {
     final query = buildQueryString([
       QueryParameterSpec('environment', environment, 'form', true, false, null)
     ]);
     final response = await _client.get(ApiPaths.appendQueryString(ApiPaths.appPath('/sites/${serializePathParameter(siteId, const PathParameterSpec('siteId', 'simple', false))}/env_variables'), query));
     return (() {
       final map = sdkworkResponseAsMap(response);
-      return map == null ? null : EnvVariablePage.fromJson(map);
+      return map == null ? null : SitesEnvVariablesListResponse.fromJson(map);
     })();
   }
 
   /// 创建环境变量
-  Future<EnvVariableResponse?> sitesEnvVariablesCreate(String siteId, CreateEnvVariableRequest body) async {
+  Future<SitesEnvVariablesCreateResponse201?> sitesEnvVariablesCreate(String siteId, CreateEnvVariableRequest body) async {
     final payload = body.toJson();
     final response = await _client.post(ApiPaths.appPath('/sites/${serializePathParameter(siteId, const PathParameterSpec('siteId', 'simple', false))}/env_variables'), body: payload, contentType: 'application/json');
     return (() {
       final map = sdkworkResponseAsMap(response);
-      return map == null ? null : EnvVariableResponse.fromJson(map);
+      return map == null ? null : SitesEnvVariablesCreateResponse201.fromJson(map);
     })();
   }
 }

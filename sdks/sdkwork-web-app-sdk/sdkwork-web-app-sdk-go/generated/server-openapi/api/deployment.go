@@ -18,48 +18,48 @@ func NewDeploymentApi(client *sdkhttp.Client) *DeploymentApi {
 }
 
 // 获取部署历史
-func (a *DeploymentApi) SitesDeploymentsList(siteId string, page *int, pageSize *int, status *int) (sdktypes.DeploymentPage, error) {
+func (a *DeploymentApi) SitesDeploymentsList(siteId string, page *int, pageSize *int, status *int) (sdktypes.SitesDeploymentsListResponse, error) {
     query := BuildQueryString([]QueryParameterSpec{
         {Name: "page", Value: func() interface{} { if page == nil { return nil }; return *page }(), Style: "form", Explode: true, AllowReserved: false},
-        {Name: "pageSize", Value: func() interface{} { if pageSize == nil { return nil }; return *pageSize }(), Style: "form", Explode: true, AllowReserved: false},
+        {Name: "page_size", Value: func() interface{} { if pageSize == nil { return nil }; return *pageSize }(), Style: "form", Explode: true, AllowReserved: false},
         {Name: "status", Value: func() interface{} { if status == nil { return nil }; return *status }(), Style: "form", Explode: true, AllowReserved: false},
     })
     raw, err := a.client.Get(AppendQueryString(AppApiPath(fmt.Sprintf("/sites/%s/deployments", SerializePathParameter(siteId, PathParameterSpec{Name: "siteId", Style: "simple", Explode: false}))), query), nil, nil)
     if err != nil {
-        var zero sdktypes.DeploymentPage
+        var zero sdktypes.SitesDeploymentsListResponse
         return zero, err
     }
-    return decodeResult[sdktypes.DeploymentPage](raw)
+    return decodeResult[sdktypes.SitesDeploymentsListResponse](raw)
 }
 
 // 发起部署
-func (a *DeploymentApi) SitesDeploymentsCreate(siteId string, body sdktypes.CreateDeploymentRequest) (sdktypes.DeploymentResponse, error) {
+func (a *DeploymentApi) SitesDeploymentsCreate(siteId string, body sdktypes.CreateDeploymentRequest) (sdktypes.SitesDeploymentsCreateResponse201, error) {
     raw, err := a.client.Post(AppApiPath(fmt.Sprintf("/sites/%s/deployments", SerializePathParameter(siteId, PathParameterSpec{Name: "siteId", Style: "simple", Explode: false}))), body, nil, nil, "application/json")
     if err != nil {
-        var zero sdktypes.DeploymentResponse
+        var zero sdktypes.SitesDeploymentsCreateResponse201
         return zero, err
     }
-    return decodeResult[sdktypes.DeploymentResponse](raw)
+    return decodeResult[sdktypes.SitesDeploymentsCreateResponse201](raw)
 }
 
 // 获取部署详情
-func (a *DeploymentApi) SitesDeploymentsRetrieve(siteId string, deploymentId string) (sdktypes.DeploymentResponse, error) {
+func (a *DeploymentApi) SitesDeploymentsRetrieve(siteId string, deploymentId string) (sdktypes.SitesDeploymentsRetrieveResponse, error) {
     raw, err := a.client.Get(AppApiPath(fmt.Sprintf("/sites/%s/deployments/%s", SerializePathParameter(siteId, PathParameterSpec{Name: "siteId", Style: "simple", Explode: false}), SerializePathParameter(deploymentId, PathParameterSpec{Name: "deploymentId", Style: "simple", Explode: false}))), nil, nil)
     if err != nil {
-        var zero sdktypes.DeploymentResponse
+        var zero sdktypes.SitesDeploymentsRetrieveResponse
         return zero, err
     }
-    return decodeResult[sdktypes.DeploymentResponse](raw)
+    return decodeResult[sdktypes.SitesDeploymentsRetrieveResponse](raw)
 }
 
 // 回滚部署
-func (a *DeploymentApi) SitesDeploymentsRollback(siteId string, deploymentId string) (sdktypes.DeploymentResponse, error) {
+func (a *DeploymentApi) SitesDeploymentsRollback(siteId string, deploymentId string) (sdktypes.SitesDeploymentsRollbackResponse, error) {
     raw, err := a.client.Post(AppApiPath(fmt.Sprintf("/sites/%s/deployments/%s/rollback", SerializePathParameter(siteId, PathParameterSpec{Name: "siteId", Style: "simple", Explode: false}), SerializePathParameter(deploymentId, PathParameterSpec{Name: "deploymentId", Style: "simple", Explode: false}))), nil, nil, nil, "")
     if err != nil {
-        var zero sdktypes.DeploymentResponse
+        var zero sdktypes.SitesDeploymentsRollbackResponse
         return zero, err
     }
-    return decodeResult[sdktypes.DeploymentResponse](raw)
+    return decodeResult[sdktypes.SitesDeploymentsRollbackResponse](raw)
 }
 
 type PathParameterSpec struct {

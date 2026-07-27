@@ -14,34 +14,35 @@ public class SiteApi {
     }
 
     /** 获取站点列表 */
-    public SitePage sitesList(Integer page, Integer pageSize, Integer status, Integer siteType, String keyword) throws Exception {
+    public SitesListResponse sitesList(Integer page, Integer pageSize, Integer status, String applicationType, Integer siteType, String keyword) throws Exception {
         String query = buildQueryString(List.of(
             new QueryParameterSpec("page", page, "form", true, false, null),
             new QueryParameterSpec("page_size", pageSize, "form", true, false, null),
             new QueryParameterSpec("status", status, "form", true, false, null),
+            new QueryParameterSpec("applicationType", applicationType, "form", true, false, null),
             new QueryParameterSpec("siteType", siteType, "form", true, false, null),
             new QueryParameterSpec("keyword", keyword, "form", true, false, null)
         ));
         Object raw = client.get(ApiPaths.appendQueryString(ApiPaths.appPath("/sites"), query));
-        return client.convertValue(raw, new TypeReference<SitePage>() {});
+        return client.convertValue(raw, new TypeReference<SitesListResponse>() {});
     }
 
     /** 创建站点 */
-    public SiteResponse sitesCreate(CreateSiteRequest body) throws Exception {
+    public SitesCreateResponse201 sitesCreate(CreateSiteRequest body) throws Exception {
         Object raw = client.post(ApiPaths.appPath("/sites"), body, null, null, "application/json");
-        return client.convertValue(raw, new TypeReference<SiteResponse>() {});
+        return client.convertValue(raw, new TypeReference<SitesCreateResponse201>() {});
     }
 
     /** 获取站点详情 */
-    public SiteResponse sitesRetrieve(String siteId) throws Exception {
+    public SitesRetrieveResponse sitesRetrieve(String siteId) throws Exception {
         Object raw = client.get(ApiPaths.appPath("/sites/" + serializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false)) + ""));
-        return client.convertValue(raw, new TypeReference<SiteResponse>() {});
+        return client.convertValue(raw, new TypeReference<SitesRetrieveResponse>() {});
     }
 
     /** 更新站点 */
-    public SiteResponse sitesUpdate(String siteId, UpdateSiteRequest body) throws Exception {
+    public SitesUpdateResponse sitesUpdate(String siteId, UpdateSiteRequest body) throws Exception {
         Object raw = client.patch(ApiPaths.appPath("/sites/" + serializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false)) + ""), body, null, null, "application/json");
-        return client.convertValue(raw, new TypeReference<SiteResponse>() {});
+        return client.convertValue(raw, new TypeReference<SitesUpdateResponse>() {});
     }
 
     /** 删除站点 */
@@ -51,15 +52,15 @@ public class SiteApi {
     }
 
     /** 激活站点 */
-    public SiteResponse sitesActivate(String siteId) throws Exception {
+    public SitesActivateResponse sitesActivate(String siteId) throws Exception {
         Object raw = client.post(ApiPaths.appPath("/sites/" + serializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false)) + "/activate"), null);
-        return client.convertValue(raw, new TypeReference<SiteResponse>() {});
+        return client.convertValue(raw, new TypeReference<SitesActivateResponse>() {});
     }
 
     /** 暂停站点 */
-    public SiteResponse sitesPause(String siteId) throws Exception {
+    public SitesPauseResponse sitesPause(String siteId) throws Exception {
         Object raw = client.post(ApiPaths.appPath("/sites/" + serializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false)) + "/pause"), null);
-        return client.convertValue(raw, new TypeReference<SiteResponse>() {});
+        return client.convertValue(raw, new TypeReference<SitesPauseResponse>() {});
     }
 
     private record PathParameterSpec(String name, String style, boolean explode) {}

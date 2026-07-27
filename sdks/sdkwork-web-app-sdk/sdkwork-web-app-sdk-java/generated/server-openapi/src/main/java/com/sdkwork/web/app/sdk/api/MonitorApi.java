@@ -14,15 +14,15 @@ public class MonitorApi {
     }
 
     /** 获取健康检查配置 */
-    public HealthCheckPage sitesHealthChecksList(String siteId) throws Exception {
+    public SitesHealthChecksListResponse sitesHealthChecksList(String siteId) throws Exception {
         Object raw = client.get(ApiPaths.appPath("/sites/" + serializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false)) + "/health_checks"));
-        return client.convertValue(raw, new TypeReference<HealthCheckPage>() {});
+        return client.convertValue(raw, new TypeReference<SitesHealthChecksListResponse>() {});
     }
 
     /** 创建健康检查 */
-    public HealthCheckResponse sitesHealthChecksCreate(String siteId, CreateHealthCheckRequest body) throws Exception {
+    public SitesHealthChecksCreateResponse201 sitesHealthChecksCreate(String siteId, CreateHealthCheckRequest body) throws Exception {
         Object raw = client.post(ApiPaths.appPath("/sites/" + serializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false)) + "/health_checks"), body, null, null, "application/json");
-        return client.convertValue(raw, new TypeReference<HealthCheckResponse>() {});
+        return client.convertValue(raw, new TypeReference<SitesHealthChecksCreateResponse201>() {});
     }
 
     private record PathParameterSpec(String name, String style, boolean explode) {}

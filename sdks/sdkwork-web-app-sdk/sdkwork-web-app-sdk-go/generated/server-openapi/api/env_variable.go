@@ -18,26 +18,26 @@ func NewEnvVariableApi(client *sdkhttp.Client) *EnvVariableApi {
 }
 
 // 获取环境变量列表
-func (a *EnvVariableApi) SitesEnvVariablesList(siteId string, environment *string) (sdktypes.EnvVariablePage, error) {
+func (a *EnvVariableApi) SitesEnvVariablesList(siteId string, environment *string) (sdktypes.SitesEnvVariablesListResponse, error) {
     query := BuildQueryString([]QueryParameterSpec{
         {Name: "environment", Value: func() interface{} { if environment == nil { return nil }; return *environment }(), Style: "form", Explode: true, AllowReserved: false},
     })
     raw, err := a.client.Get(AppendQueryString(AppApiPath(fmt.Sprintf("/sites/%s/env_variables", SerializePathParameter(siteId, PathParameterSpec{Name: "siteId", Style: "simple", Explode: false}))), query), nil, nil)
     if err != nil {
-        var zero sdktypes.EnvVariablePage
+        var zero sdktypes.SitesEnvVariablesListResponse
         return zero, err
     }
-    return decodeResult[sdktypes.EnvVariablePage](raw)
+    return decodeResult[sdktypes.SitesEnvVariablesListResponse](raw)
 }
 
 // 创建环境变量
-func (a *EnvVariableApi) SitesEnvVariablesCreate(siteId string, body sdktypes.CreateEnvVariableRequest) (sdktypes.EnvVariableResponse, error) {
+func (a *EnvVariableApi) SitesEnvVariablesCreate(siteId string, body sdktypes.CreateEnvVariableRequest) (sdktypes.SitesEnvVariablesCreateResponse201, error) {
     raw, err := a.client.Post(AppApiPath(fmt.Sprintf("/sites/%s/env_variables", SerializePathParameter(siteId, PathParameterSpec{Name: "siteId", Style: "simple", Explode: false}))), body, nil, nil, "application/json")
     if err != nil {
-        var zero sdktypes.EnvVariableResponse
+        var zero sdktypes.SitesEnvVariablesCreateResponse201
         return zero, err
     }
-    return decodeResult[sdktypes.EnvVariableResponse](raw)
+    return decodeResult[sdktypes.SitesEnvVariablesCreateResponse201](raw)
 }
 
 type PathParameterSpec struct {

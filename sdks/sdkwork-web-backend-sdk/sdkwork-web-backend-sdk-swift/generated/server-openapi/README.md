@@ -48,6 +48,11 @@ client.setHeader("X-Custom-Header", value: "value")
 
 ## API Modules
 
+- `client.application` - application API
+- `client.applicationDomain` - application_domain API
+- `client.applicationDeployment` - application_deployment API
+- `client.certificate` - certificate API
+- `client.certificateDistribution` - certificate_distribution API
 - `client.nginx` - nginx API
 - `client.server` - server API
 - `client.agent` - agent API
@@ -55,10 +60,77 @@ client.setHeader("X-Custom-Header", value: "value")
 
 ## Usage Examples
 
+### application
+
+```swift
+// List managed applications
+let params: [String: Any] = [
+    "page": 1,
+    "page_size": 2,
+    "applicationType": "WEB",
+    "siteType": 4,
+    "status": 5,
+    "keyword": "keyword"
+]
+let result = try await client.application.applicationsList(params: params)
+print(result)
+```
+
+### application_domain
+
+```swift
+// List application domains
+let applicationId = "1"
+let params: [String: Any] = [
+    "page": 1,
+    "page_size": 2
+]
+let result = try await client.applicationDomain.applicationsDomainsList(applicationId: applicationId, params: params)
+print(result)
+```
+
+### application_deployment
+
+```swift
+// List application deployments
+let applicationId = "1"
+let params: [String: Any] = [
+    "page": 1,
+    "page_size": 2,
+    "status": 3
+]
+let result = try await client.applicationDeployment.applicationsDeploymentsList(applicationId: applicationId, params: params)
+print(result)
+```
+
+### certificate
+
+```swift
+// List canonical certificates
+let params: [String: Any] = [
+    "page": 1,
+    "page_size": 2
+]
+let result = try await client.certificate.certificatesList(params: params)
+print(result)
+```
+
+### certificate_distribution
+
+```swift
+// List certificate manifest convergence by server
+let params: [String: Any] = [
+    "page": 1,
+    "page_size": 2
+]
+let result = try await client.certificateDistribution.certificatesDistributionList(params: params)
+print(result)
+```
+
 ### nginx
 
 ```swift
-// 获取 Nginx 状态
+// Retrieve Nginx status
 let result = try await client.nginx.statusRetrieve()
 print(result)
 ```
@@ -66,10 +138,10 @@ print(result)
 ### server
 
 ```swift
-// 获取服务器列表
+// List managed servers
 let params: [String: Any] = [
     "page": 1,
-    "pageSize": 2
+    "page_size": 2
 ]
 let result = try await client.server.serversList(params: params)
 print(result)
@@ -78,21 +150,21 @@ print(result)
 ### agent
 
 ```swift
-// 拉取 nginx 配置与证书 bundle
+// Retrieve the Nginx configuration and certificate bundle
 let params: [String: Any] = [
     "ifSyncVersion": "ifsyncversion"
 ]
-let result = try await client.agent.sync(params: params)
+let result = try await client.agent.retrieve(params: params)
 print(result)
 ```
 
 ### audit
 
 ```swift
-// 获取审计日志列表
+// List audit logs
 let params: [String: Any] = [
     "page": 1,
-    "pageSize": 2,
+    "page_size": 2,
     "targetType": "targettype",
     "action": "action",
     "operatorId": "1",

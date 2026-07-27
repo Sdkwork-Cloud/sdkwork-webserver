@@ -17,91 +17,91 @@ func NewNginxApi(client *sdkhttp.Client) *NginxApi {
     return &NginxApi{client: client}
 }
 
-// 获取 Nginx 配置列表
-func (a *NginxApi) ConfigsList(page *int, pageSize *int, siteId *string, configType *int, isActive *bool) (sdktypes.NginxConfigPage, error) {
+// List Nginx configurations
+func (a *NginxApi) ConfigsList(page *int, pageSize *int, siteId *string, configType *int, isActive *bool) (sdktypes.ConfigsListResponse, error) {
     query := BuildQueryString([]QueryParameterSpec{
         {Name: "page", Value: func() interface{} { if page == nil { return nil }; return *page }(), Style: "form", Explode: true, AllowReserved: false},
-        {Name: "pageSize", Value: func() interface{} { if pageSize == nil { return nil }; return *pageSize }(), Style: "form", Explode: true, AllowReserved: false},
+        {Name: "page_size", Value: func() interface{} { if pageSize == nil { return nil }; return *pageSize }(), Style: "form", Explode: true, AllowReserved: false},
         {Name: "siteId", Value: func() interface{} { if siteId == nil { return nil }; return *siteId }(), Style: "form", Explode: true, AllowReserved: false},
         {Name: "configType", Value: func() interface{} { if configType == nil { return nil }; return *configType }(), Style: "form", Explode: true, AllowReserved: false},
         {Name: "isActive", Value: func() interface{} { if isActive == nil { return nil }; return *isActive }(), Style: "form", Explode: true, AllowReserved: false},
     })
     raw, err := a.client.Get(AppendQueryString(BackendApiPath("/nginx/configs"), query), nil, nil)
     if err != nil {
-        var zero sdktypes.NginxConfigPage
+        var zero sdktypes.ConfigsListResponse
         return zero, err
     }
-    return decodeResult[sdktypes.NginxConfigPage](raw)
+    return decodeResult[sdktypes.ConfigsListResponse](raw)
 }
 
-// 创建 Nginx 配置
-func (a *NginxApi) ConfigsCreate(body sdktypes.CreateNginxConfigRequest) (sdktypes.NginxConfigResponse, error) {
+// Create an Nginx configuration
+func (a *NginxApi) ConfigsCreate(body sdktypes.CreateNginxConfigRequest) (sdktypes.ConfigsCreateResponse201, error) {
     raw, err := a.client.Post(BackendApiPath("/nginx/configs"), body, nil, nil, "application/json")
     if err != nil {
-        var zero sdktypes.NginxConfigResponse
+        var zero sdktypes.ConfigsCreateResponse201
         return zero, err
     }
-    return decodeResult[sdktypes.NginxConfigResponse](raw)
+    return decodeResult[sdktypes.ConfigsCreateResponse201](raw)
 }
 
-// 获取 Nginx 配置详情
-func (a *NginxApi) ConfigsRetrieve(configId string) (sdktypes.NginxConfigResponse, error) {
+// Retrieve an Nginx configuration
+func (a *NginxApi) ConfigsRetrieve(configId string) (sdktypes.ConfigsRetrieveResponse, error) {
     raw, err := a.client.Get(BackendApiPath(fmt.Sprintf("/nginx/etc/%s", SerializePathParameter(configId, PathParameterSpec{Name: "configId", Style: "simple", Explode: false}))), nil, nil)
     if err != nil {
-        var zero sdktypes.NginxConfigResponse
+        var zero sdktypes.ConfigsRetrieveResponse
         return zero, err
     }
-    return decodeResult[sdktypes.NginxConfigResponse](raw)
+    return decodeResult[sdktypes.ConfigsRetrieveResponse](raw)
 }
 
-// 更新 Nginx 配置
-func (a *NginxApi) ConfigsUpdate(configId string, body sdktypes.UpdateNginxConfigRequest) (sdktypes.NginxConfigResponse, error) {
+// Update an Nginx configuration
+func (a *NginxApi) ConfigsUpdate(configId string, body sdktypes.UpdateNginxConfigRequest) (sdktypes.ConfigsUpdateResponse, error) {
     raw, err := a.client.Put(BackendApiPath(fmt.Sprintf("/nginx/etc/%s", SerializePathParameter(configId, PathParameterSpec{Name: "configId", Style: "simple", Explode: false}))), body, nil, nil, "application/json")
     if err != nil {
-        var zero sdktypes.NginxConfigResponse
+        var zero sdktypes.ConfigsUpdateResponse
         return zero, err
     }
-    return decodeResult[sdktypes.NginxConfigResponse](raw)
+    return decodeResult[sdktypes.ConfigsUpdateResponse](raw)
 }
 
-// 校验 Nginx 配置
-func (a *NginxApi) ConfigsValidate(configId string) (sdktypes.NginxValidateResponse, error) {
+// Validate an Nginx configuration
+func (a *NginxApi) ConfigsValidate(configId string) (sdktypes.ConfigsValidateResponse, error) {
     raw, err := a.client.Post(BackendApiPath(fmt.Sprintf("/nginx/etc/%s/validate", SerializePathParameter(configId, PathParameterSpec{Name: "configId", Style: "simple", Explode: false}))), nil, nil, nil, "")
     if err != nil {
-        var zero sdktypes.NginxValidateResponse
+        var zero sdktypes.ConfigsValidateResponse
         return zero, err
     }
-    return decodeResult[sdktypes.NginxValidateResponse](raw)
+    return decodeResult[sdktypes.ConfigsValidateResponse](raw)
 }
 
-// 部署 Nginx 配置
-func (a *NginxApi) ConfigsDeploy(configId string) (sdktypes.NginxDeployResponse, error) {
+// Deploy an Nginx configuration
+func (a *NginxApi) ConfigsDeploy(configId string) (sdktypes.ConfigsDeployResponse, error) {
     raw, err := a.client.Post(BackendApiPath(fmt.Sprintf("/nginx/etc/%s/deploy", SerializePathParameter(configId, PathParameterSpec{Name: "configId", Style: "simple", Explode: false}))), nil, nil, nil, "")
     if err != nil {
-        var zero sdktypes.NginxDeployResponse
+        var zero sdktypes.ConfigsDeployResponse
         return zero, err
     }
-    return decodeResult[sdktypes.NginxDeployResponse](raw)
+    return decodeResult[sdktypes.ConfigsDeployResponse](raw)
 }
 
-// 热加载 Nginx
-func (a *NginxApi) Reload() (sdktypes.NginxReloadResponse, error) {
+// Reload Nginx
+func (a *NginxApi) Reload() (sdktypes.ReloadResponse, error) {
     raw, err := a.client.Post(BackendApiPath("/nginx/reload"), nil, nil, nil, "")
     if err != nil {
-        var zero sdktypes.NginxReloadResponse
+        var zero sdktypes.ReloadResponse
         return zero, err
     }
-    return decodeResult[sdktypes.NginxReloadResponse](raw)
+    return decodeResult[sdktypes.ReloadResponse](raw)
 }
 
-// 获取 Nginx 状态
-func (a *NginxApi) StatusRetrieve() (sdktypes.NginxStatusResponse, error) {
+// Retrieve Nginx status
+func (a *NginxApi) StatusRetrieve() (sdktypes.StatusRetrieveResponse, error) {
     raw, err := a.client.Get(BackendApiPath("/nginx/status"), nil, nil)
     if err != nil {
-        var zero sdktypes.NginxStatusResponse
+        var zero sdktypes.StatusRetrieveResponse
         return zero, err
     }
-    return decodeResult[sdktypes.NginxStatusResponse](raw)
+    return decodeResult[sdktypes.StatusRetrieveResponse](raw)
 }
 
 type PathParameterSpec struct {

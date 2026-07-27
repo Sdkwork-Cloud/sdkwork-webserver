@@ -36,47 +36,67 @@
     },
     {
       "path": "README.md",
-      "sha256": "6e7acc1d93b41a83dfdc6d36d845127d2ad0f28dd5995f7b94908a3d3c2f81da"
+      "sha256": "2fe81e397ee58ae5af365fdb1b17b9fff7aaccd2e6fc4e8c642bf03a817bc337"
     },
     {
       "path": "sdkwork-sdk.json",
-      "sha256": "1039a8ea44d9f65a730b5cf1ecc313b81ba9b6884e4b87ebdd5d5de936776fad"
+      "sha256": "94ede8eaaac6f79f2394c02c09d374e4831a5ed6c606b6ba336731aedc5bef4f"
     },
     {
       "path": "Sources/API/AgentApi.swift",
-      "sha256": "a82c06278f5a9481e8193866c97688b63db61ec41cdd35672d96cbf0e656342d"
+      "sha256": "513edc1ad69baac69307828a7c95145d08217d06bf1d64f4254d1f84c33c2e35"
     },
     {
       "path": "Sources/API/API.swift",
-      "sha256": "637d43f68b3c6289553a4bb33e40881811f3a09827951c7b3b7457ccd65f20aa"
+      "sha256": "86ac4e95198f0153b5ebc9fc1c6fdda429c57fa15a55d5010ad5d84e07b9d8af"
     },
     {
       "path": "Sources/API/ApiPaths.swift",
       "sha256": "de83398a4a354d026b9b8316b5d734c4e06a100ecaefb9a10a00b65b182e6334"
     },
     {
+      "path": "Sources/API/ApplicationApi.swift",
+      "sha256": "d0af21141bc27a247c6664598afb09cd59855c3bd9931d1e7964b8156e34073d"
+    },
+    {
+      "path": "Sources/API/ApplicationDeploymentApi.swift",
+      "sha256": "db93ff3adbd47657d0fab69ea191e8fffe07e2d678b366198ac3fa5e6fa5dcf3"
+    },
+    {
+      "path": "Sources/API/ApplicationDomainApi.swift",
+      "sha256": "657c85cbd6978a97673de69831787ca61a78b90e091108aa2d8656bea5796521"
+    },
+    {
       "path": "Sources/API/AuditApi.swift",
-      "sha256": "0e613b53468cf90c6f1e1f7e09fb9cdad95df805622c6791599caf3db66acebc"
+      "sha256": "420608c912bf8bc0e566d898bef2680f565884f1d73c45dd2d29781ed69740f9"
+    },
+    {
+      "path": "Sources/API/CertificateApi.swift",
+      "sha256": "c5cb8ed92cbcc02b19cfaf7569e54117930c38049d4b41235c9ef73a26a0cf97"
+    },
+    {
+      "path": "Sources/API/CertificateDistributionApi.swift",
+      "sha256": "d4633f9cdeb3cf6cb0c3ae785e3be55a800a0ad0310bedfcbe8b9283fac334d4"
     },
     {
       "path": "Sources/API/NginxApi.swift",
-      "sha256": "84e2974dc03f07d2e45386d01f0a2e2d31cfb5d6b2ac06c29400972062f7f548"
+      "sha256": "97c45dedbf51853458f3b5272622360bc8eef26beef03eac4b4fa89bf310dddb"
     },
     {
       "path": "Sources/API/ServerApi.swift",
-      "sha256": "0e652bfb7dd0d49b605cd92546985ccd8d5113a3f996e600e748d0d67c0055e2"
+      "sha256": "aaabe7507a4bba25847cbd5c6b8b892dd2391dbb2729094d78bf5bb9585ede31"
     },
     {
       "path": "Sources/HTTP/HttpClient.swift",
-      "sha256": "1bf6cd5c7aa0964a38c0e701185540a129e8653987a6f11521055c9beb1d7b9a"
+      "sha256": "2b9bed2b9bf16c7f305e6b8c8d5463832ad28cb6788007f52e3147f488ef7f50"
     },
     {
       "path": "Sources/Models.swift",
-      "sha256": "cce132f615201bf5912e1595ce51961fffaf4f64d002f87e549dd2515e924883"
+      "sha256": "30c6e13462bb94f8958af7d1a31f21a9d30b68f6e256da931f0dd83ffc313dc8"
     },
     {
       "path": "Sources/SdkworkBackendClient.swift",
-      "sha256": "0c32f5581ddc081ecf7af7da4ca6cb9f1ad6573e2a3be48cd71d53eba5ab4b9f"
+      "sha256": "e466dd11ea902bce0b45d15a2167dbb5d8118d7b8e7d6eee694687e8054a6008"
     }
   ],
   "scaffoldFiles": [

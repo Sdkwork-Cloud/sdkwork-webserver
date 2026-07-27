@@ -11,21 +11,21 @@ class MonitorApi {
   MonitorApi(this._client);
 
   /// 获取健康检查配置
-  Future<HealthCheckPage?> sitesHealthChecksList(String siteId) async {
+  Future<SitesHealthChecksListResponse?> sitesHealthChecksList(String siteId) async {
     final response = await _client.get(ApiPaths.appPath('/sites/${serializePathParameter(siteId, const PathParameterSpec('siteId', 'simple', false))}/health_checks'));
     return (() {
       final map = sdkworkResponseAsMap(response);
-      return map == null ? null : HealthCheckPage.fromJson(map);
+      return map == null ? null : SitesHealthChecksListResponse.fromJson(map);
     })();
   }
 
   /// 创建健康检查
-  Future<HealthCheckResponse?> sitesHealthChecksCreate(String siteId, CreateHealthCheckRequest body) async {
+  Future<SitesHealthChecksCreateResponse201?> sitesHealthChecksCreate(String siteId, CreateHealthCheckRequest body) async {
     final payload = body.toJson();
     final response = await _client.post(ApiPaths.appPath('/sites/${serializePathParameter(siteId, const PathParameterSpec('siteId', 'simple', false))}/health_checks'), body: payload, contentType: 'application/json');
     return (() {
       final map = sdkworkResponseAsMap(response);
-      return map == null ? null : HealthCheckResponse.fromJson(map);
+      return map == null ? null : SitesHealthChecksCreateResponse201.fromJson(map);
     })();
   }
 }
