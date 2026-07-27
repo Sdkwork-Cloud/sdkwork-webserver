@@ -219,6 +219,10 @@ class ApplicationDomainApplicationsDomainsApi:
         """Bind a public domain to an application"""
         return self._client.post(f"/backend/v3/api/applications/{serialize_path_parameter(application_id, {'name': 'applicationId', 'style': 'simple', 'explode': False})}/domains", json=body)
 
+    def delete(self, application_id: str, domain_id: str) -> None:
+        """Unbind an application public domain"""
+        return self._client.delete(f"/backend/v3/api/applications/{serialize_path_parameter(application_id, {'name': 'applicationId', 'style': 'simple', 'explode': False})}/domains/{serialize_path_parameter(domain_id, {'name': 'domainId', 'style': 'simple', 'explode': False})}")
+
     def verify(self, application_id: str, domain_id: str) -> ApplicationsDomainsVerifyResponse:
         """Verify an application public domain"""
         return self._client.post(f"/backend/v3/api/applications/{serialize_path_parameter(application_id, {'name': 'applicationId', 'style': 'simple', 'explode': False})}/domains/{serialize_path_parameter(domain_id, {'name': 'domainId', 'style': 'simple', 'explode': False})}/verify")

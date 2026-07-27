@@ -7,5 +7,6 @@
   "activeLocales": ["zh-CN", "en-US"],
   "appApiBaseUrl": "http://127.0.0.1:3800",
   "backendApiBaseUrl": "http://127.0.0.1:3800",
+  "driveAppApiBaseUrl": "http://127.0.0.1:3900",
   "appbaseAppApiBaseUrl": "http://127.0.0.1:3900"
 }

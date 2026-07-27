@@ -3,7 +3,7 @@ import { createSdkworkAppbasePcAuthRuntime } from "@sdkwork/auth-runtime-pc-reac
 import { createClient as createIamAppClient } from "@sdkwork/iam-app-sdk";
 import { createPersistentIamTokenStore } from "@sdkwork/iam-runtime";
 import { createTokenManager } from "@sdkwork/sdk-common";
-import { createWebserverConsoleSdkClient } from "@sdkwork/webserver-pc-console-core";
+import { createWebserverConsoleSdkClients } from "@sdkwork/webserver-pc-console-core";
 import { loadWebserverPcRuntimeConfig, resolveWebserverLocale } from "@sdkwork/webserver-pc-core";
 import { createWebserverAuthRuntimeConfigLoader } from "../auth/authRuntimeConfig.ts";
 
@@ -13,17 +13,21 @@ export async function bootstrapWebserverPcRuntime() {
   const config = await loadWebserverPcRuntimeConfig();
   const locale = resolveWebserverLocale(config, navigator.languages);
   const tokenManager = createTokenManager();
+  // The shared IAM store owns authToken/accessToken persistence; app code never reads credentials.
   const tokenStore = createPersistentIamTokenStore({
     appId: WEBSERVER_PC_APP_ID,
     storage: window.localStorage,
   });
-  const appClient = createWebserverConsoleSdkClient(config.appApiBaseUrl, tokenManager);
+  const consoleClients = createWebserverConsoleSdkClients({
+    driveAppApiBaseUrl: config.driveAppApiBaseUrl,
+    webAppApiBaseUrl: config.appApiBaseUrl,
+  }, tokenManager);
   const auth = createSdkworkAppbasePcAuthRuntime({
     app: { appId: WEBSERVER_PC_APP_ID, deploymentMode: config.deploymentProfile === "cloud" ? "saas" : "local", environment: config.environment === "development" ? "dev" : config.environment === "test" ? "test" : "prod", platform: "pc" },
     baseUrls: { appbaseAppApiBaseUrl: config.appbaseAppApiBaseUrl },
     createAppbaseAppClient: (clientConfig) => createIamAppClient({ ...clientConfig, timeout: config.environment === "production" || config.environment === "staging" ? 10_000 : 5_000 }),
     localeProvider: () => locale,
-    sdkClients: [appClient],
+    sdkClients: [consoleClients.web, consoleClients.drive],
     sessionAuth: true,
     tokenManager,
     tokenStore,
@@ -32,7 +36,7 @@ export async function bootstrapWebserverPcRuntime() {
   const getAuthRuntime = () => auth.getRuntime() as unknown as SdkworkIamRuntimeAuthRuntimeLike;
   const authController = createSdkworkIamRuntimeAuthController({ getRuntime: getAuthRuntime });
   const loadAuthRuntimeConfig = createWebserverAuthRuntimeConfigLoader(auth.appbaseApp);
-  return { appClient, auth, authController, config, loadAuthRuntimeConfig, locale, tokenManager } as const;
+  return { appClient: consoleClients.web, auth, authController, config, consoleClients, loadAuthRuntimeConfig, locale, tokenManager } as const;
 }
 
 export type BootstrappedWebserverPcRuntime = Awaited<ReturnType<typeof bootstrapWebserverPcRuntime>>;

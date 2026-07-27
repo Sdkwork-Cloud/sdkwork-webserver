@@ -8,10 +8,11 @@ public class CertificateApi {
     }
 
     /// 获取证书列表
-    public func certificatesList(page: Int? = nil, pageSize: Int? = nil) async throws -> CertificatesListResponse? {
+    public func certificatesList(page: Int? = nil, pageSize: Int? = nil, siteId: String? = nil) async throws -> CertificatesListResponse? {
         let query = buildQueryString([
             QueryParameterSpec(name: "page", value: page, style: "form", explode: true, allowReserved: false, contentType: nil),
-            QueryParameterSpec(name: "page_size", value: pageSize, style: "form", explode: true, allowReserved: false, contentType: nil)
+            QueryParameterSpec(name: "page_size", value: pageSize, style: "form", explode: true, allowReserved: false, contentType: nil),
+            QueryParameterSpec(name: "siteId", value: siteId, style: "form", explode: true, allowReserved: false, contentType: nil)
         ])
         return try await client.get(ApiPaths.appendQueryString(ApiPaths.appPath("/certificates"), query), responseType: CertificatesListResponse.self)
     }

@@ -32,6 +32,12 @@ impl ApplicationDeploymentApi {
         self.client.post(&path, Some(body), None, None, Some("application/json")).await
     }
 
+    /// Roll back a managed application deployment
+    pub async fn applications_deployments_rollback(&self, application_id: &str, deployment_id: &str) -> Result<ApplicationDeploymentResponse, SdkworkError> {
+        let path = backend_path(&format!("/applications/{}/deployments/{}/rollback", serialize_path_parameter(application_id, PathParameterSpec::new("applicationId", "simple", false)), serialize_path_parameter(deployment_id, PathParameterSpec::new("deploymentId", "simple", false))));
+        self.client.post(&path, Option::<&serde_json::Value>::None, None, None, None).await
+    }
+
 }
 
 struct PathParameterSpec<'a> {

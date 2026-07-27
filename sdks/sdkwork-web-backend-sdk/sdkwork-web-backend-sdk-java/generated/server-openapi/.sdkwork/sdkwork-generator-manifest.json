@@ -52,15 +52,15 @@
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/api/ApplicationApi.java",
-      "sha256": "69d65f584cd2e97d4f0fb9b2db370581b5dc29bec1f924991e7bbb699e6d888b"
+      "sha256": "c33a1a7dea8968d4ccd0a303275d88d59cf97746ea47592fc4b6ede09852d05f"
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/api/ApplicationDeploymentApi.java",
-      "sha256": "ab64327cc6002f344e8aafac14ab53a805d8567a0d3bd812e1905093cd39eb37"
+      "sha256": "0616f8b57e67c03c9d6d4c91e2fb190678dd15d005b1d9088df86934941e4439"
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/api/ApplicationDomainApi.java",
-      "sha256": "e8f29b86135f1eba38a30e1d058179f32db7b0dd70ff9a2260ac3118bc2b4951"
+      "sha256": "6ac2de9f7fcee52139e48ac3eeb3dad0c439fdb055b4365f0ec29e9a1898a1eb"
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/api/AuditApi.java",
@@ -112,7 +112,7 @@
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationDeploymentResponse.java",
-      "sha256": "14274eed50e8e2391783b449efe2fc1b34a512bd4f69781ce540a3901e851b11"
+      "sha256": "65878df53318c134916b29db4408afc93530c0d5b837803e11c4c95abcd00373"
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationDomainResponse.java",
@@ -127,6 +127,10 @@
       "sha256": "c465e63b71c7517101035d11c9996f7525f38f5f5cdf116245b055bd3fa12a1f"
     },
     {
+      "path": "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsActivateResponse.java",
+      "sha256": "86bd23ca88f31e3850148add45801d9d13e98c6e292b1eb9d42a148568547814"
+    },
+    {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsCreateResponse201.java",
       "sha256": "d46b9832cbb3cb1d8d34f4a82f7aa3d2b4130ecf1745c45448f1c17e210f0aed"
     },
@@ -137,6 +141,10 @@
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsDeploymentsListResponse.java",
       "sha256": "7e1a958fd20c86622db5e8baa0114e5209792092bdae699e04bca62ff1a717a0"
+    },
+    {
+      "path": "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsDeploymentsRollbackResponse.java",
+      "sha256": "580c54a196da221507ce3871cc537a24e819fae4579a099a5ee71c64811409c1"
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsDomainsCreateResponse201.java",
@@ -153,6 +161,18 @@
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsListResponse.java",
       "sha256": "47bd86fbd04d40e080ae6a3e7183f726c2f665161e6fa85c4736df8af6c1aed8"
+    },
+    {
+      "path": "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsPauseResponse.java",
+      "sha256": "59e3c2e2a42c012226d28bfe66df6353b71c6da96b4f80464d50a54d8f8e6c7f"
+    },
+    {
+      "path": "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsRetrieveResponse.java",
+      "sha256": "917a0002518b87f040c3d8659cddbe814cb203195a3d83b5c1a1700bdd40b97e"
+    },
+    {
+      "path": "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsUpdateResponse.java",
+      "sha256": "f0b8250bf809b9cc6aa75b426935abcb1b467d0eba0e4c1f43a52134aa13268b"
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/model/AuditLogPage.java",
@@ -220,7 +240,7 @@
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/model/CreateApplicationDeploymentRequest.java",
-      "sha256": "a37327b63fc4af858731ae1c3856e508bdb04535f49d4c04d4dde5500ddfd8fd"
+      "sha256": "a76d9cd698b8a692c972c34f7af902e983cc1d672d420b8dfdae796df80ab667"
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/model/CreateApplicationDomainRequest.java",
@@ -341,6 +361,10 @@
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/model/StatusRetrieveResponse.java",
       "sha256": "e65196b8090b32d7f92b7e90de838d0a16f432da23c64e94449e887a8c02bfa3"
+    },
+    {
+      "path": "src/main/java/com/sdkwork/web/backend/sdk/model/UpdateApplicationRequest.java",
+      "sha256": "db4773488b0335c23caca1d934920e38faf113e762a53ae2b877f9d518acdda1"
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/model/UpdateCertificateRequest.java",

@@ -126,7 +126,7 @@ export function WebserverAuthRoutes({
     appearance: WEBSERVER_AUTH_APPEARANCE,
     basePath: "/auth",
     controller,
-    homePath: "/console",
+    homePath: "/",
     runtimeConfig: runtimeConfig.value,
   };
   const isOAuthCallback = location.pathname === "/auth/oauth/callback"

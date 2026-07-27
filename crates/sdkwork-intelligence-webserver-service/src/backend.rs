@@ -4,9 +4,9 @@ use async_trait::async_trait;
 use sdkwork_webserver_contract::{
     CreateCertificateRequest, CreateDeploymentRequest, CreateDomainRequest,
     CreateNginxConfigRequest, CreateServerRequest, CreateSiteRequest, ListNginxConfigsQuery,
-    ListSitesQuery, UpdateCertificateRequest, UpdateNginxConfigRequest, WebAppApi,
-    WebAppRequestContext, WebBackendApi, WebBackendRequestContext, WebServiceError,
-    WebServiceResult,
+    ListSitesQuery, UpdateCertificateRequest, UpdateNginxConfigRequest, UpdateSiteRequest,
+    WebAppApi, WebAppRequestContext, WebAppResourceScope, WebBackendApi, WebBackendRequestContext,
+    WebServiceError, WebServiceResult,
 };
 
 use crate::{AuditLogWrite, WebService};
@@ -34,6 +34,7 @@ impl WebService {
             actor_id: context.operator_id,
             organization_id: None,
             session_id: None,
+            resource_scope: WebAppResourceScope::Tenant,
         })
     }
 
@@ -78,6 +79,52 @@ impl WebBackendApi for WebService {
         WebAppApi::create_site(self, &app_context, request).await
     }
 
+    async fn retrieve_application(
+        &self,
+        context: &WebBackendRequestContext,
+        application_id: &str,
+    ) -> WebServiceResult<sdkwork_webserver_contract::SiteResponse> {
+        let app_context = Self::backend_app_context(context)?;
+        WebAppApi::retrieve_site(self, &app_context, application_id).await
+    }
+
+    async fn update_application(
+        &self,
+        context: &WebBackendRequestContext,
+        application_id: &str,
+        request: &UpdateSiteRequest,
+    ) -> WebServiceResult<sdkwork_webserver_contract::SiteResponse> {
+        let app_context = Self::backend_app_context(context)?;
+        WebAppApi::update_site(self, &app_context, application_id, request).await
+    }
+
+    async fn delete_application(
+        &self,
+        context: &WebBackendRequestContext,
+        application_id: &str,
+    ) -> WebServiceResult<()> {
+        let app_context = Self::backend_app_context(context)?;
+        WebAppApi::delete_site(self, &app_context, application_id).await
+    }
+
+    async fn activate_application(
+        &self,
+        context: &WebBackendRequestContext,
+        application_id: &str,
+    ) -> WebServiceResult<sdkwork_webserver_contract::SiteResponse> {
+        let app_context = Self::backend_app_context(context)?;
+        WebAppApi::activate_site(self, &app_context, application_id).await
+    }
+
+    async fn pause_application(
+        &self,
+        context: &WebBackendRequestContext,
+        application_id: &str,
+    ) -> WebServiceResult<sdkwork_webserver_contract::SiteResponse> {
+        let app_context = Self::backend_app_context(context)?;
+        WebAppApi::pause_site(self, &app_context, application_id).await
+    }
+
     async fn list_application_domains(
         &self,
         context: &WebBackendRequestContext,
@@ -109,6 +156,16 @@ impl WebBackendApi for WebService {
         WebAppApi::verify_domain(self, &app_context, application_id, domain_id).await
     }
 
+    async fn delete_application_domain(
+        &self,
+        context: &WebBackendRequestContext,
+        application_id: &str,
+        domain_id: &str,
+    ) -> WebServiceResult<()> {
+        let app_context = Self::backend_app_context(context)?;
+        WebAppApi::delete_domain(self, &app_context, application_id, domain_id).await
+    }
+
     async fn list_application_deployments(
         &self,
         context: &WebBackendRequestContext,
@@ -132,6 +189,16 @@ impl WebBackendApi for WebService {
         WebAppApi::create_deployment(self, &app_context, application_id, request).await
     }
 
+    async fn rollback_application_deployment(
+        &self,
+        context: &WebBackendRequestContext,
+        application_id: &str,
+        deployment_id: &str,
+    ) -> WebServiceResult<sdkwork_webserver_contract::DeploymentResponse> {
+        let app_context = Self::backend_app_context(context)?;
+        WebAppApi::rollback_deployment(self, &app_context, application_id, deployment_id).await
+    }
+
     async fn list_managed_certificates(
         &self,
         context: &WebBackendRequestContext,
@@ -139,7 +206,7 @@ impl WebBackendApi for WebService {
         page_size: i32,
     ) -> WebServiceResult<sdkwork_webserver_contract::CertificatePage> {
         let app_context = Self::backend_app_context(context)?;
-        WebAppApi::list_certificates(self, &app_context, page, page_size).await
+        WebAppApi::list_certificates(self, &app_context, None, page, page_size).await
     }
 
     async fn create_managed_certificate(
@@ -370,7 +437,8 @@ fn validate_tenant_scope_hash(value: &str) -> WebServiceResult<()> {
 
 #[cfg(test)]
 mod tests {
-    use super::validate_tenant_scope_hash;
+    use super::{validate_tenant_scope_hash, WebService};
+    use sdkwork_webserver_contract::{WebAppResourceScope, WebBackendRequestContext};
 
     #[test]
     fn tenant_scope_hash_is_exact_lowercase_sha256_shape() {
@@ -378,5 +446,20 @@ mod tests {
         for invalid in ["a".repeat(63), "A".repeat(64), "g".repeat(64)] {
             assert!(validate_tenant_scope_hash(&invalid).is_err());
         }
+    }
+
+    #[test]
+    fn backend_application_operations_use_tenant_scope() {
+        let context = WebBackendRequestContext {
+            tenant_id: Some(42),
+            operator_id: Some(7),
+            subject_id: Some("7".to_owned()),
+        };
+
+        let app_context = WebService::backend_app_context(&context).unwrap();
+
+        assert_eq!(app_context.tenant_id, 42);
+        assert_eq!(app_context.actor_id, Some(7));
+        assert_eq!(app_context.resource_scope, WebAppResourceScope::Tenant);
     }
 }

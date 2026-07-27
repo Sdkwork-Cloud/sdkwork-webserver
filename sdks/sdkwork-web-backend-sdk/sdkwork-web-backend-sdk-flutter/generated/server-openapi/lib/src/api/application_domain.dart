@@ -34,6 +34,11 @@ class ApplicationDomainApi {
     })();
   }
 
+  /// Unbind an application public domain
+  Future<void> applicationsDomainsDelete(String applicationId, String domainId) async {
+    await _client.delete(ApiPaths.backendPath('/applications/${serializePathParameter(applicationId, const PathParameterSpec('applicationId', 'simple', false))}/domains/${serializePathParameter(domainId, const PathParameterSpec('domainId', 'simple', false))}'));
+  }
+
   /// Verify an application public domain
   Future<ApplicationsDomainsVerifyResponse?> applicationsDomainsVerify(String applicationId, String domainId) async {
     final response = await _client.post(ApiPaths.backendPath('/applications/${serializePathParameter(applicationId, const PathParameterSpec('applicationId', 'simple', false))}/domains/${serializePathParameter(domainId, const PathParameterSpec('domainId', 'simple', false))}/verify'));

@@ -14,10 +14,11 @@ public class CertificateApi {
     }
 
     /** 获取证书列表 */
-    public CertificatesListResponse certificatesList(Integer page, Integer pageSize) throws Exception {
+    public CertificatesListResponse certificatesList(Integer page, Integer pageSize, String siteId) throws Exception {
         String query = buildQueryString(List.of(
             new QueryParameterSpec("page", page, "form", true, false, null),
-            new QueryParameterSpec("page_size", pageSize, "form", true, false, null)
+            new QueryParameterSpec("page_size", pageSize, "form", true, false, null),
+            new QueryParameterSpec("siteId", siteId, "form", true, false, null)
         ));
         Object raw = client.get(ApiPaths.appendQueryString(ApiPaths.appPath("/certificates"), query));
         return client.convertValue(raw, new TypeReference<CertificatesListResponse>() {});

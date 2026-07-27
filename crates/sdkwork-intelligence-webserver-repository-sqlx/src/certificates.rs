@@ -17,14 +17,25 @@ impl WebRepository {
     pub(super) async fn list_certificates_repo(
         &self,
         tenant_id: i64,
+        owner_id: Option<i64>,
+        site_id: Option<&str>,
         page: i32,
         page_size: i32,
     ) -> WebServiceResult<CertificatePage> {
         let (_page, page_size, offset) = pagination(page, page_size);
 
         let count_row =
-            sqlx::query("SELECT COUNT(*) AS total FROM web_certificate WHERE tenant_id = $1")
-                .bind(tenant_id)
+            sqlx::query(
+                "SELECT COUNT(*) AS total
+                 FROM web_certificate c
+                 INNER JOIN web_site s ON s.id = c.site_id
+                 WHERE c.tenant_id = $1 AND s.deleted_at IS NULL
+                   AND ($2 IS NULL OR (s.data_scope = 3 AND s.user_id = $2))
+                   AND ($3 IS NULL OR s.uuid = $3)",
+            )
+            .bind(tenant_id)
+            .bind(owner_id)
+            .bind(site_id)
                 .fetch_one(&self.pool)
                 .await
                 .map_err(|error| store_error("count web_certificate", error))?;
@@ -38,10 +49,15 @@ impl WebRepository {
                     CAST(c.created_at AS TEXT) AS created_at
              FROM web_certificate c
              LEFT JOIN web_domain d ON d.id = c.domain_id
-             WHERE c.tenant_id = $1
-             ORDER BY c.created_at DESC, c.id DESC LIMIT $2 OFFSET $3",
+             INNER JOIN web_site s ON s.id = c.site_id
+             WHERE c.tenant_id = $1 AND s.deleted_at IS NULL
+               AND ($2 IS NULL OR (s.data_scope = 3 AND s.user_id = $2))
+               AND ($3 IS NULL OR s.uuid = $3)
+             ORDER BY c.created_at DESC, c.id DESC LIMIT $4 OFFSET $5",
         )
         .bind(tenant_id)
+        .bind(owner_id)
+        .bind(site_id)
         .bind(page_size)
         .bind(offset)
         .fetch_all(&self.pool)
@@ -61,11 +77,12 @@ impl WebRepository {
     pub(super) async fn insert_certificate_pending_repo(
         &self,
         tenant_id: i64,
+        owner_id: Option<i64>,
         domain_uuid: &str,
         cert_type: i32,
         auto_renew: bool,
     ) -> WebServiceResult<(String, String)> {
-        let domain = resolve_domain_by_uuid(&self.pool, tenant_id, domain_uuid).await?;
+        let domain = resolve_domain_by_uuid(&self.pool, tenant_id, owner_id, domain_uuid).await?;
         if cert_type == 1 && !domain.is_verified {
             return Err(WebServiceError::validation(
                 "domain must be verified before Let's Encrypt issuance",
@@ -441,11 +458,13 @@ impl WebRepository {
     pub(super) async fn create_certificate_repo(
         &self,
         tenant_id: i64,
+        owner_id: Option<i64>,
         request: &CreateCertificateRequest,
     ) -> WebServiceResult<CertificateResponse> {
         let (uuid, _) = self
             .insert_certificate_pending_repo(
                 tenant_id,
+                owner_id,
                 &request.domain_id,
                 request.cert_type,
                 request.auto_renew,

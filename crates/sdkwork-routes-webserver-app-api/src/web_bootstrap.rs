@@ -3,14 +3,15 @@ use std::sync::Arc;
 use axum::Router;
 use sdkwork_iam_web_adapter::IamWebRequestContextResolver;
 use sdkwork_routes_webserver_common::{
-    web_auth_mode_from_env, with_problem_correlation, ProductionFailClosedResolver, WebAuthMode,
+    web_auth_mode_from_env, web_framework_runtime_policy_from_env, with_problem_correlation,
+    ProductionFailClosedResolver, WebAuthMode,
 };
 use sdkwork_web_axum::{with_web_request_context, WebFrameworkLayer};
 use sdkwork_web_core::{
     DefaultWebRequestContextResolver, DomainContextInjector, HttpMetricsRegistry,
     WebRequestContext, WebRequestContextProfile,
 };
-use sdkwork_webserver_contract::WebAppRequestContext;
+use sdkwork_webserver_contract::{WebAppRequestContext, WebAppResourceScope};
 
 use crate::http_route_manifest::app_route_manifest;
 use crate::paths;
@@ -47,6 +48,7 @@ fn web_app_context_from_web_request(context: &WebRequestContext) -> Option<WebAp
         actor_id,
         organization_id,
         session_id,
+        resource_scope: WebAppResourceScope::Owner,
     })
 }
 
@@ -89,6 +91,7 @@ where
     R: sdkwork_web_core::WebRequestContextResolver + Clone,
 {
     let route_manifest = app_route_manifest();
+    let (environment, security_policy) = web_framework_runtime_policy_from_env();
     route_manifest
         .validate_public_path_prefixes(&web_app_api_public_path_prefixes())
         .expect("Web app-api public prefixes must not cover protected manifest routes");
@@ -97,8 +100,10 @@ where
         .with_profile(WebRequestContextProfile {
             app_api_prefix: paths::PREFIX.to_owned(),
             public_path_prefixes: web_app_api_public_path_prefixes(),
+            environment,
             ..WebRequestContextProfile::default()
         })
+        .with_security_policy(security_policy)
         .with_route_manifest(route_manifest)
         .with_domain_injector(Arc::new(WebAppContextInjector));
     match metrics {

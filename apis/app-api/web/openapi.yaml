@@ -807,6 +807,13 @@ paths:
       parameters:
         - $ref: "#/components/parameters/PageParam"
         - $ref: "#/components/parameters/PageSizeParam"
+        - name: siteId
+          in: query
+          required: false
+          description: Limit certificates to one application owned by the authenticated user.
+          schema:
+            type: string
+            format: uuid
       responses:
         "200":
           description: 成功
@@ -1222,14 +1229,33 @@ components:
           type: string
         sourceRef:
           type: string
+          maxLength: 500
+        artifactDriveUri:
+          type: string
+          maxLength: 500
+          pattern: '^drive://spaces/[^/?#]+/nodes/[^/?#]+$'
+          description: Stable Drive resource identity. Signed delivery URLs are forbidden.
+        artifactSize:
+          type: string
+          format: int64
+          pattern: '^[1-9][0-9]*$'
+          x-sdkwork-int64-string: true
+          x-sdkwork-rust-type: i64
+        artifactHash:
+          type: string
+          pattern: '^[A-Fa-f0-9]{64}$'
+          description: SHA-256 hexadecimal digest of the uploaded package.
         environment:
           type: string
+          maxLength: 32
           default: production
         idempotencyKey:
           type: string
           maxLength: 200
     DeploymentResponse:
       type: object
+      additionalProperties: false
+      required: [id, siteId, status, deployType, environment, createdAt]
       properties:
         id:
           type: string
@@ -1241,6 +1267,24 @@ components:
           type: integer
         versionTag:
           type: string
+        commitHash:
+          type: string
+        sourceRef:
+          type: string
+        environment:
+          type: string
+        artifactDriveUri:
+          type: string
+          pattern: '^drive://spaces/[^/?#]+/nodes/[^/?#]+$'
+        artifactSize:
+          type: string
+          format: int64
+          pattern: '^[1-9][0-9]*$'
+          x-sdkwork-int64-string: true
+          x-sdkwork-rust-type: i64
+        artifactHash:
+          type: string
+          pattern: '^[A-Fa-f0-9]{64}$'
         status:
           type: integer
         startedAt:
@@ -1334,16 +1378,23 @@ components:
           default: true
     CertificateResponse:
       type: object
+      additionalProperties: false
+      required: [id, certName, status, createdAt]
       properties:
         id:
           type: string
           format: uuid
         certName:
           type: string
+        domain:
+          type: string
         certType:
           type: integer
         issuer:
           type: string
+        fingerprint:
+          type: string
+          pattern: '^[a-f0-9]{64}$'
         notBefore:
           type: string
           format: date-time
@@ -1352,8 +1403,12 @@ components:
           format: date-time
         autoRenew:
           type: boolean
+        renewalStatus:
+          type: integer
+          description: 0=idle, 1=renewing, 2=pending, 3=failed
         status:
           type: integer
+          description: 0=pending, 1=active, 2=expired, 3=revoked, 4=archived
         createdAt:
           type: string
           format: date-time

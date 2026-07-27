@@ -31,6 +31,7 @@ var query = new Dictionary<string, object>
 {
     ["page"] = 1,
     ["page_size"] = 2,
+    ["siteId"] = "00000000-0000-0000-0000-000000000001",
 };
 var result = await client.Certificate.CertificatesListAsync(query);
 Console.WriteLine(result);
@@ -132,6 +133,7 @@ var query = new Dictionary<string, object>
 {
     ["page"] = 1,
     ["page_size"] = 2,
+    ["siteId"] = "00000000-0000-0000-0000-000000000001",
 };
 var result = await client.Certificate.CertificatesListAsync(query);
 Console.WriteLine(result);
@@ -155,6 +157,7 @@ try
     {
         ["page"] = 1,
         ["page_size"] = 2,
+        ["siteId"] = "00000000-0000-0000-0000-000000000001",
     };
     await client.Certificate.CertificatesListAsync(query);
 }

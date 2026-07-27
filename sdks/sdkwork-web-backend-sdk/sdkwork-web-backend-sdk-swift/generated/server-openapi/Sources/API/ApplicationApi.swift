@@ -25,6 +25,105 @@ public class ApplicationApi {
         return try await client.post(ApiPaths.backendPath("/applications"), body: body, params: nil, headers: nil, contentType: "application/json", responseType: ApplicationsCreateResponse201.self)
     }
 
+    /// Retrieve a managed application
+    public func applicationsRetrieve(applicationId: String) async throws -> ApplicationsRetrieveResponse? {
+        return try await client.get(ApiPaths.backendPath("/applications/\(serializePathParameter(applicationId, PathParameterSpec(name: "applicationId", style: "simple", explode: false)))"), responseType: ApplicationsRetrieveResponse.self)
+    }
+
+    /// Update a managed application
+    public func applicationsUpdate(applicationId: String, body: UpdateApplicationRequest) async throws -> ApplicationsUpdateResponse? {
+        return try await client.patch(ApiPaths.backendPath("/applications/\(serializePathParameter(applicationId, PathParameterSpec(name: "applicationId", style: "simple", explode: false)))"), body: body, params: nil, headers: nil, contentType: "application/json", responseType: ApplicationsUpdateResponse.self)
+    }
+
+    /// Delete a managed application
+    public func applicationsDelete(applicationId: String) async throws -> Void {
+        _ = try await client.delete(ApiPaths.backendPath("/applications/\(serializePathParameter(applicationId, PathParameterSpec(name: "applicationId", style: "simple", explode: false)))"))
+    }
+
+    /// Activate a managed application
+    public func applicationsActivate(applicationId: String) async throws -> ApplicationsActivateResponse? {
+        return try await client.post(ApiPaths.backendPath("/applications/\(serializePathParameter(applicationId, PathParameterSpec(name: "applicationId", style: "simple", explode: false)))/activate"), body: nil, responseType: ApplicationsActivateResponse.self)
+    }
+
+    /// Pause a managed application
+    public func applicationsPause(applicationId: String) async throws -> ApplicationsPauseResponse? {
+        return try await client.post(ApiPaths.backendPath("/applications/\(serializePathParameter(applicationId, PathParameterSpec(name: "applicationId", style: "simple", explode: false)))/pause"), body: nil, responseType: ApplicationsPauseResponse.self)
+    }
+
+    private struct PathParameterSpec {
+        let name: String
+        let style: String
+        let explode: Bool
+    }
+
+    private func serializePathParameter(_ value: Any?, _ spec: PathParameterSpec) -> String {
+        guard let value else { return "" }
+        let style = spec.style.isEmpty ? "simple" : spec.style
+        if let array = value as? [Any] {
+            return serializePathArray(spec.name, array, style, spec.explode)
+        }
+        if let object = value as? [String: Any] {
+            return serializePathObject(spec.name, object, style, spec.explode)
+        }
+        return pathPrimitivePrefix(spec.name, style) + pathEncode(String(describing: value))
+    }
+
+    private func serializePathArray(_ name: String, _ values: [Any], _ style: String, _ explode: Bool) -> String {
+        let serialized = values.map { pathEncode(String(describing: $0)) }
+        if serialized.isEmpty { return pathPrefix(name, style) }
+        if style == "matrix" {
+            if explode {
+                return serialized.map { ";\(name)=\($0)" }.joined()
+            }
+            return ";\(name)=" + serialized.joined(separator: ",")
+        }
+        let separator = explode ? "." : ","
+        return pathPrefix(name, style) + serialized.joined(separator: separator)
+    }
+
+    private func serializePathObject(_ name: String, _ values: [String: Any], _ style: String, _ explode: Bool) -> String {
+        var entries: [String] = []
+        var exploded: [String] = []
+        for (key, value) in values {
+            let escapedKey = pathEncode(key)
+            let escapedValue = pathEncode(String(describing: value))
+            if explode {
+                if style == "matrix" {
+                    exploded.append(";\(escapedKey)=\(escapedValue)")
+                } else {
+                    exploded.append("\(escapedKey)=\(escapedValue)")
+                }
+            } else {
+                entries.append(escapedKey)
+                entries.append(escapedValue)
+            }
+        }
+        if style == "matrix" {
+            if explode {
+                return exploded.joined()
+            }
+            return ";\(name)=" + entries.joined(separator: ",")
+        }
+        if explode {
+            let separator = style == "label" ? "." : ","
+            return pathPrefix(name, style) + exploded.joined(separator: separator)
+        }
+        return pathPrefix(name, style) + entries.joined(separator: ",")
+    }
+
+    private func pathPrefix(_ name: String, _ style: String) -> String {
+        if style == "label" { return "." }
+        if style == "matrix" { return ";\(name)" }
+        return ""
+    }
+
+    private func pathPrimitivePrefix(_ name: String, _ style: String) -> String {
+        style == "matrix" ? ";\(name)=" : pathPrefix(name, style)
+    }
+
+    private func pathEncode(_ value: String) -> String {
+        value.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? value
+    }
 
     private struct QueryParameterSpec {
         let name: String

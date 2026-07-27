@@ -30,6 +30,7 @@ client.SetAccessToken("your-access-token")
     params := map[string]interface{}{
         "page": 1,
         "page_size": 2,
+        "siteId": "siteId",
     }
     result, err := client.Certificate.CertificatesList(params)
     if err != nil {
@@ -142,6 +143,7 @@ fmt.Println(result)
 params := map[string]interface{}{
     "page": 1,
     "page_size": 2,
+    "siteId": "siteId",
 }
 result, err := client.Certificate.CertificatesList(params)
 if err != nil {
@@ -168,6 +170,7 @@ fmt.Println(result)
 params := map[string]interface{}{
     "page": 1,
     "page_size": 2,
+    "siteId": "siteId",
 }
 _, err := client.Certificate.CertificatesList(params)
 if err != nil {

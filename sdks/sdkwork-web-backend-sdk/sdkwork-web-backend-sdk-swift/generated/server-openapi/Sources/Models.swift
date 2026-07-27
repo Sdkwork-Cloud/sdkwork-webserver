@@ -70,6 +70,19 @@ public struct CreateApplicationRequest: Codable {
     }
 }
 
+public struct UpdateApplicationRequest: Codable {
+    public let name: String?
+    public let description: String?
+    public let runtimeConfig: [String: Any]?
+
+
+    public init(name: String? = nil, description: String? = nil, runtimeConfig: [String: Any]? = nil) {
+        self.name = name
+        self.description = description
+        self.runtimeConfig = runtimeConfig
+    }
+}
+
 public struct ApplicationResponse: Codable {
     public let id: String?
     public let name: String?
@@ -149,12 +162,24 @@ public struct ApplicationDomainVerifyResponse: Codable {
 public struct CreateApplicationDeploymentRequest: Codable {
     public let deployType: Int?
     public let environment: String?
+    public let versionTag: String?
+    public let commitHash: String?
+    public let sourceRef: String?
+    public let artifactDriveUri: String?
+    public let artifactSize: String?
+    public let artifactHash: String?
     public let idempotencyKey: String?
 
 
-    public init(deployType: Int? = nil, environment: String? = nil, idempotencyKey: String? = nil) {
+    public init(deployType: Int? = nil, environment: String? = nil, versionTag: String? = nil, commitHash: String? = nil, sourceRef: String? = nil, artifactDriveUri: String? = nil, artifactSize: String? = nil, artifactHash: String? = nil, idempotencyKey: String? = nil) {
         self.deployType = deployType
         self.environment = environment
+        self.versionTag = versionTag
+        self.commitHash = commitHash
+        self.sourceRef = sourceRef
+        self.artifactDriveUri = artifactDriveUri
+        self.artifactSize = artifactSize
+        self.artifactHash = artifactHash
         self.idempotencyKey = idempotencyKey
     }
 }
@@ -164,14 +189,34 @@ public struct ApplicationDeploymentResponse: Codable {
     public let siteId: String?
     public let status: Int?
     public let deployType: Int?
+    public let environment: String?
+    public let versionTag: String?
+    public let commitHash: String?
+    public let sourceRef: String?
+    public let artifactDriveUri: String?
+    public let artifactSize: String?
+    public let artifactHash: String?
+    public let startedAt: String?
+    public let completedAt: String?
+    public let durationMs: String?
     public let createdAt: String?
 
 
-    public init(id: String? = nil, siteId: String? = nil, status: Int? = nil, deployType: Int? = nil, createdAt: String? = nil) {
+    public init(id: String? = nil, siteId: String? = nil, status: Int? = nil, deployType: Int? = nil, environment: String? = nil, versionTag: String? = nil, commitHash: String? = nil, sourceRef: String? = nil, artifactDriveUri: String? = nil, artifactSize: String? = nil, artifactHash: String? = nil, startedAt: String? = nil, completedAt: String? = nil, durationMs: String? = nil, createdAt: String? = nil) {
         self.id = id
         self.siteId = siteId
         self.status = status
         self.deployType = deployType
+        self.environment = environment
+        self.versionTag = versionTag
+        self.commitHash = commitHash
+        self.sourceRef = sourceRef
+        self.artifactDriveUri = artifactDriveUri
+        self.artifactSize = artifactSize
+        self.artifactHash = artifactHash
+        self.startedAt = startedAt
+        self.completedAt = completedAt
+        self.durationMs = durationMs
         self.createdAt = createdAt
     }
 }
@@ -684,6 +729,58 @@ public struct ApplicationsCreateResponse201: Codable {
     }
 }
 
+public struct ApplicationsRetrieveResponse: Codable {
+    public let code: Int?
+    public let data: Any?
+    public let traceId: String?
+
+
+    public init(code: Int? = nil, data: Any? = nil, traceId: String? = nil) {
+        self.code = code
+        self.data = data
+        self.traceId = traceId
+    }
+}
+
+public struct ApplicationsUpdateResponse: Codable {
+    public let code: Int?
+    public let data: Any?
+    public let traceId: String?
+
+
+    public init(code: Int? = nil, data: Any? = nil, traceId: String? = nil) {
+        self.code = code
+        self.data = data
+        self.traceId = traceId
+    }
+}
+
+public struct ApplicationsActivateResponse: Codable {
+    public let code: Int?
+    public let data: Any?
+    public let traceId: String?
+
+
+    public init(code: Int? = nil, data: Any? = nil, traceId: String? = nil) {
+        self.code = code
+        self.data = data
+        self.traceId = traceId
+    }
+}
+
+public struct ApplicationsPauseResponse: Codable {
+    public let code: Int?
+    public let data: Any?
+    public let traceId: String?
+
+
+    public init(code: Int? = nil, data: Any? = nil, traceId: String? = nil) {
+        self.code = code
+        self.data = data
+        self.traceId = traceId
+    }
+}
+
 public struct ApplicationsDomainsListResponse: Codable {
     public let code: Int?
     public let data: Any?
@@ -737,6 +834,19 @@ public struct ApplicationsDeploymentsListResponse: Codable {
 }
 
 public struct ApplicationsDeploymentsCreateResponse201: Codable {
+    public let code: Int?
+    public let data: Any?
+    public let traceId: String?
+
+
+    public init(code: Int? = nil, data: Any? = nil, traceId: String? = nil) {
+        self.code = code
+        self.data = data
+        self.traceId = traceId
+    }
+}
+
+public struct ApplicationsDeploymentsRollbackResponse: Codable {
     public let code: Int?
     public let data: Any?
     public let traceId: String?

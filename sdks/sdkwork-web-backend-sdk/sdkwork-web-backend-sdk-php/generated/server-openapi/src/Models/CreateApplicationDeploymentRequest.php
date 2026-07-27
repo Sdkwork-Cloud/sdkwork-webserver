@@ -10,6 +10,20 @@ final class CreateApplicationDeploymentRequest
 
     public ?string $environment = null;
 
+    public ?string $versionTag = null;
+
+    public ?string $commitHash = null;
+
+    public ?string $sourceRef = null;
+
+    /** Stable Drive resource identity. Signed delivery URLs are forbidden. */
+    public ?string $artifactDriveUri = null;
+
+    public ?string $artifactSize = null;
+
+    /** SHA-256 hexadecimal digest of the uploaded package. */
+    public ?string $artifactHash = null;
+
     public ?string $idempotencyKey = null;
 
     public function __construct(array $data = [])
@@ -19,6 +33,24 @@ final class CreateApplicationDeploymentRequest
             : null;
         $this->environment = array_key_exists('environment', $data)
             ? $data['environment']
+            : null;
+        $this->versionTag = array_key_exists('versionTag', $data)
+            ? $data['versionTag']
+            : null;
+        $this->commitHash = array_key_exists('commitHash', $data)
+            ? $data['commitHash']
+            : null;
+        $this->sourceRef = array_key_exists('sourceRef', $data)
+            ? $data['sourceRef']
+            : null;
+        $this->artifactDriveUri = array_key_exists('artifactDriveUri', $data)
+            ? $data['artifactDriveUri']
+            : null;
+        $this->artifactSize = array_key_exists('artifactSize', $data)
+            ? $data['artifactSize']
+            : null;
+        $this->artifactHash = array_key_exists('artifactHash', $data)
+            ? $data['artifactHash']
             : null;
         $this->idempotencyKey = array_key_exists('idempotencyKey', $data)
             ? $data['idempotencyKey']
@@ -35,6 +67,12 @@ final class CreateApplicationDeploymentRequest
         return [
             'deployType' => $this->deployType,
             'environment' => $this->environment,
+            'versionTag' => $this->versionTag,
+            'commitHash' => $this->commitHash,
+            'sourceRef' => $this->sourceRef,
+            'artifactDriveUri' => $this->artifactDriveUri,
+            'artifactSize' => $this->artifactSize,
+            'artifactHash' => $this->artifactHash,
             'idempotencyKey' => $this->idempotencyKey,
         ];
     }

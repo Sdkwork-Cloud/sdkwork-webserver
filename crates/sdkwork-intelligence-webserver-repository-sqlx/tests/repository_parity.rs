@@ -194,6 +194,7 @@ async fn verify_repository_contract(context: &TestContext) {
     let api_page = repository
         .list_sites(
             TENANT_A,
+            None,
             &ListSitesQuery {
                 page: 1,
                 page_size: 20,
@@ -207,6 +208,47 @@ async fn verify_repository_contract(context: &TestContext) {
         .expect("filter API applications");
     assert_eq!(api_page.total, 1);
     assert_eq!(api_page.items[0].id, api_application.id);
+    let owner_page = repository
+        .list_sites(
+            TENANT_A,
+            Some(91),
+            &ListSitesQuery {
+                page: 1,
+                page_size: 100,
+                status: None,
+                application_type: None,
+                site_type: None,
+                keyword: None,
+            },
+        )
+        .await
+        .expect("list applications for the owning user");
+    assert_eq!(owner_page.total, 5);
+    assert!(repository
+        .list_sites(
+            TENANT_A,
+            Some(92),
+            &ListSitesQuery {
+                page: 1,
+                page_size: 100,
+                status: None,
+                application_type: None,
+                site_type: None,
+                keyword: None,
+            },
+        )
+        .await
+        .expect("list applications for another user")
+        .items
+        .is_empty());
+    repository
+        .retrieve_site(TENANT_A, Some(92), &api_application.id)
+        .await
+        .expect_err("another user must not retrieve an owner-scoped application");
+    repository
+        .retrieve_site(TENANT_A, None, &api_application.id)
+        .await
+        .expect("tenant admin must retrieve an owner-scoped application");
     let tenant_b_site = repository
         .create_site(
             TENANT_B,
@@ -244,11 +286,11 @@ async fn verify_repository_contract(context: &TestContext) {
     assert_eq!(duplicate_slug.kind(), WebServiceErrorKind::Conflict);
 
     repository
-        .retrieve_site(TENANT_A, &tenant_b_site.id)
+        .retrieve_site(TENANT_A, None, &tenant_b_site.id)
         .await
         .expect_err("tenant A must not retrieve tenant B site");
     repository
-        .retrieve_site(TENANT_B, &sites[0].id)
+        .retrieve_site(TENANT_B, None, &sites[0].id)
         .await
         .expect_err("tenant B must not retrieve tenant A site");
 
@@ -273,12 +315,13 @@ async fn verify_repository_contract(context: &TestContext) {
         keyword: Some(" alpha ".to_owned()),
     };
     let first_page = repository
-        .list_sites(TENANT_A, &query)
+        .list_sites(TENANT_A, None, &query)
         .await
         .expect("list first filtered page");
     let second_page = repository
         .list_sites(
             TENANT_A,
+            None,
             &ListSitesQuery {
                 page: 2,
                 ..query.clone()
@@ -320,6 +363,7 @@ async fn verify_repository_contract(context: &TestContext) {
     let deep_page = repository
         .list_sites(
             TENANT_A,
+            None,
             &ListSitesQuery {
                 page: i32::MAX,
                 page_size: i32::MAX,
@@ -541,7 +585,7 @@ async fn verify_public_repository_surface(context: &TestContext, site_id: &str) 
         .expect("atomically activate nginx config through global backend scope");
 
     let (certificate_id, _) = repository
-        .insert_certificate_pending(TENANT_A, &domain.id, 1, true)
+        .insert_certificate_pending(TENANT_A, None, &domain.id, 1, true)
         .await
         .expect("insert pending certificate timestamps");
     let certificate = repository
@@ -571,12 +615,30 @@ async fn verify_public_repository_surface(context: &TestContext, site_id: &str) 
     assert_eq!(certificate.status, 1);
     assert_eq!(
         repository
-            .list_certificates(TENANT_A, 1, 20)
+            .list_certificates(TENANT_A, None, None, 1, 20)
             .await
             .expect("list certificate timestamp projections")
             .total,
         1
     );
+    assert_eq!(
+        repository
+            .list_certificates(TENANT_A, Some(91), Some(site_id), 1, 20)
+            .await
+            .expect("owning user can list application certificates")
+            .total,
+        1
+    );
+    assert!(repository
+        .list_certificates(TENANT_A, Some(92), Some(site_id), 1, 20)
+        .await
+        .expect("another user receives an empty certificate page")
+        .items
+        .is_empty());
+    repository
+        .insert_certificate_pending(TENANT_A, Some(92), &domain.id, 1, true)
+        .await
+        .expect_err("another user cannot issue a certificate for an owned application domain");
     let disabled_certificate = repository
         .update_certificate_auto_renew(TENANT_A, &certificate_id, false)
         .await
@@ -605,7 +667,7 @@ async fn verify_public_repository_surface(context: &TestContext, site_id: &str) 
     assert_eq!(enabled_certificate.id, certificate_id);
     assert_eq!(
         repository
-            .list_certificates(TENANT_A, 1, 20)
+            .list_certificates(TENANT_A, None, None, 1, 20)
             .await
             .expect("automatic renewal update preserves canonical row")
             .total,
@@ -628,6 +690,7 @@ async fn verify_public_repository_surface(context: &TestContext, site_id: &str) 
     let failed_certificate = repository
         .create_certificate(
             TENANT_A,
+            None,
             &CreateCertificateRequest {
                 domain_id: domain.id.clone(),
                 cert_type: 1,
@@ -766,12 +829,21 @@ async fn verify_public_repository_surface(context: &TestContext, site_id: &str) 
         .delete_domain(TENANT_A, site_id, &domain.id)
         .await
         .expect("soft-delete domain timestamps");
+    let active_delete = repository
+        .delete_site(TENANT_A, site_id, Some(91))
+        .await
+        .expect_err("active site deletion must be rejected");
+    assert_eq!(active_delete.kind(), WebServiceErrorKind::Conflict);
+    repository
+        .set_site_status(TENANT_A, site_id, 2)
+        .await
+        .expect("disable site before deletion");
     repository
         .delete_site(TENANT_A, site_id, Some(91))
         .await
         .expect("soft-delete site timestamps");
     repository
-        .retrieve_site(TENANT_A, site_id)
+        .retrieve_site(TENANT_A, None, site_id)
         .await
         .expect_err("soft-deleted site must not be retrievable");
 }
@@ -1218,6 +1290,12 @@ async fn verify_deployment_idempotency(
     let request = CreateDeploymentRequest {
         deploy_type: 1,
         environment: Some("production".to_owned()),
+        version_tag: Some("v1.2.3".to_owned()),
+        commit_hash: Some("0123456789abcdef".to_owned()),
+        source_ref: Some("main".to_owned()),
+        artifact_drive_uri: Some("drive://spaces/space-1/nodes/node-1".to_owned()),
+        artifact_size: Some(4096),
+        artifact_hash: Some("a".repeat(64)),
         idempotency_key: Some("deploy-idempotency-1".to_owned()),
     };
     let first = repository
@@ -1229,6 +1307,17 @@ async fn verify_deployment_idempotency(
         .await
         .expect("repeat identical deployment");
     assert_eq!(repeated.id, first.id);
+    assert_eq!(first.environment, "production");
+    assert_eq!(first.version_tag.as_deref(), Some("v1.2.3"));
+    assert_eq!(
+        first.artifact_drive_uri.as_deref(),
+        Some("drive://spaces/space-1/nodes/node-1")
+    );
+    assert_eq!(first.artifact_size, Some(4096));
+    assert!(first
+        .artifact_hash
+        .as_deref()
+        .is_some_and(|hash| hash == "a".repeat(64)));
 
     let conflicting_input = repository
         .create_deployment(
@@ -1273,11 +1362,33 @@ async fn verify_rollback_atomicity(context: &TestContext, site_id: &str) {
             &CreateDeploymentRequest {
                 deploy_type: 1,
                 environment: Some("production".to_owned()),
+                version_tag: Some("rollback-source".to_owned()),
+                commit_hash: None,
+                source_ref: Some("release/rollback-source".to_owned()),
+                artifact_drive_uri: Some(
+                    "drive://spaces/space-rollback/nodes/node-rollback".to_owned(),
+                ),
+                artifact_size: Some(2048),
+                artifact_hash: Some("b".repeat(64)),
                 idempotency_key: None,
             },
         )
         .await
         .expect("create rollback source");
+    let pending_rollback = context
+        .repository
+        .rollback_deployment(TENANT_A, site_id, &source.id, Some(91))
+        .await
+        .expect_err("pending deployment rollback must be rejected");
+    assert_eq!(pending_rollback.kind(), WebServiceErrorKind::Conflict);
+
+    sqlx::query("UPDATE web_deployment SET status = 2 WHERE tenant_id = $1 AND uuid = $2")
+        .bind(TENANT_A)
+        .bind(&source.id)
+        .execute(&context.pool)
+        .await
+        .expect("mark rollback source successful");
+
     install_rollback_failure_trigger(&context.pool, context.engine).await;
     context
         .repository
@@ -1292,7 +1403,7 @@ async fn verify_rollback_atomicity(context: &TestContext, site_id: &str) {
             .fetch_one(&context.pool)
             .await
             .expect("read rollback source status");
-    assert_eq!(status, 0, "failed transaction must restore source status");
+    assert_eq!(status, 2, "failed transaction must restore source status");
     let rollback_records: i64 = sqlx::query_scalar(
         "SELECT COUNT(*) FROM web_deployment WHERE tenant_id = $1 AND rollback_from IS NOT NULL",
     )
@@ -1309,6 +1420,16 @@ async fn verify_rollback_atomicity(context: &TestContext, site_id: &str) {
         .await
         .expect("rollback succeeds after removing failure trigger");
     assert_eq!(rollback.site_id, site_id);
+    assert_eq!(rollback.version_tag.as_deref(), Some("rollback-source"));
+    assert_eq!(
+        rollback.artifact_drive_uri.as_deref(),
+        Some("drive://spaces/space-rollback/nodes/node-rollback")
+    );
+    assert_eq!(rollback.artifact_size, Some(2048));
+    assert!(rollback
+        .artifact_hash
+        .as_deref()
+        .is_some_and(|hash| hash == "b".repeat(64)));
     let source_status: i32 =
         sqlx::query_scalar("SELECT status FROM web_deployment WHERE tenant_id = $1 AND uuid = $2")
             .bind(TENANT_A)

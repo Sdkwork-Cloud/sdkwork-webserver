@@ -5,12 +5,18 @@ from typing import TYPE_CHECKING, Optional, List, Dict, Any
 
 @dataclass
 class DeploymentResponse:
-    id: Optional[str] = None
-    site_id: Optional[str] = None
-    deploy_type: Optional[int] = None
+    id: str
+    site_id: str
+    deploy_type: int
+    environment: str
+    status: int
+    created_at: str
     version_tag: Optional[str] = None
-    status: Optional[int] = None
+    commit_hash: Optional[str] = None
+    source_ref: Optional[str] = None
+    artifact_drive_uri: Optional[str] = None
+    artifact_size: Optional[str] = None
+    artifact_hash: Optional[str] = None
     started_at: Optional[str] = None
     completed_at: Optional[str] = None
     duration_ms: Optional[str] = None
-    created_at: Optional[str] = None

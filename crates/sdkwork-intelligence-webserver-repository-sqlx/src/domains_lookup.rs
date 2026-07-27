@@ -14,16 +14,19 @@ pub struct DomainRecord {
 pub(crate) async fn resolve_domain_by_uuid(
     pool: &EnginePool,
     tenant_id: i64,
+    owner_id: Option<i64>,
     domain_uuid: &str,
 ) -> Result<DomainRecord, WebServiceError> {
     let row = sqlx::query(
         "SELECT d.id, d.site_id, d.hostname, d.is_verified
          FROM web_domain d
          INNER JOIN web_site s ON s.id = d.site_id
-         WHERE d.tenant_id = $1 AND d.uuid = $2 AND d.deleted_at IS NULL AND s.deleted_at IS NULL",
+         WHERE d.tenant_id = $1 AND d.uuid = $2 AND d.deleted_at IS NULL AND s.deleted_at IS NULL
+           AND ($3 IS NULL OR (s.data_scope = 3 AND s.user_id = $3))",
     )
     .bind(tenant_id)
     .bind(domain_uuid)
+    .bind(owner_id)
     .fetch_optional(pool)
     .await
     .map_err(|error| super::support::store_error("resolve web_domain", error))?;

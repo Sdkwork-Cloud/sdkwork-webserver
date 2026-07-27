@@ -10,6 +10,9 @@ namespace SDKWork.Web.AppSdk.Models
         public string? VersionTag { get; set; }
         public string? CommitHash { get; set; }
         public string? SourceRef { get; set; }
+        public string? ArtifactDriveUri { get; set; }
+        public string? ArtifactSize { get; set; }
+        public string? ArtifactHash { get; set; }
         public string? Environment { get; set; }
         public string? IdempotencyKey { get; set; }
     }

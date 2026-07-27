@@ -7,6 +7,7 @@ import type { CertificateResponse, CreateCertificateRequest, PageInfo } from '..
 export interface CertificateListParams {
   page?: number;
   pageSize?: number;
+  siteId?: string;
 }
 
 export class CertificateApi {
@@ -22,6 +23,7 @@ export class CertificateApi {
     const query = buildQueryString([
       { name: 'page', value: params?.page, style: 'form', explode: true, allowReserved: false },
       { name: 'page_size', value: params?.pageSize, style: 'form', explode: true, allowReserved: false },
+      { name: 'siteId', value: params?.siteId, style: 'form', explode: true, allowReserved: false },
     ]);
     return this.client.request<{ items: CertificateResponse[]; pageInfo: PageInfo; }>(appendQueryString(appApiPath(`/certificates`), query), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any });
   }

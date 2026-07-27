@@ -44,7 +44,7 @@
     },
     {
       "path": "lib/src/api/certificate.dart",
-      "sha256": "42f901f9287af26447d69a6aaea6dbd074fe66763223b5980ca0455893244135"
+      "sha256": "a929d3fb6cbfad2eb85d2fe1475172715d0f7a7fd9fde86a2581dd28f5b39bca"
     },
     {
       "path": "lib/src/api/deployment.dart",
@@ -84,7 +84,7 @@
     },
     {
       "path": "lib/src/models.dart",
-      "sha256": "bd212658a49d9775f16a3e55bb26285b53f758ed3a64bca1fee8bb06a27bb330"
+      "sha256": "f1c16e493e3da96d5d53b1fe3d8bf57848d8999f479a40eb0e69a41abecbfff8"
     },
     {
       "path": "LICENSE",
@@ -96,7 +96,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "a81196aa16ba341ebff013286ec514449c8bbd5e50d94b82187a55ab9c79d8e1"
+      "sha256": "a0676c7cf401be17bb285ba4d1d38d0aa49d678adcdabad32987dd0c26e9f1bc"
     },
     {
       "path": "sdkwork-sdk.json",

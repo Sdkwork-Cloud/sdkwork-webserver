@@ -4,11 +4,14 @@ package com.sdkwork.web.app.sdk.model;
 public class CertificateResponse {
     private String id;
     private String certName;
+    private String domain;
     private Integer certType;
     private String issuer;
+    private String fingerprint;
     private String notBefore;
     private String notAfter;
     private Boolean autoRenew;
+    private Integer renewalStatus;
     private Integer status;
     private String createdAt;
 
@@ -28,6 +31,14 @@ public class CertificateResponse {
         this.certName = certName;
     }
 
+    public String getDomain() {
+        return this.domain;
+    }
+
+    public void setDomain(String domain) {
+        this.domain = domain;
+    }
+
     public Integer getCertType() {
         return this.certType;
     }
@@ -42,6 +53,14 @@ public class CertificateResponse {
 
     public void setIssuer(String issuer) {
         this.issuer = issuer;
+    }
+
+    public String getFingerprint() {
+        return this.fingerprint;
+    }
+
+    public void setFingerprint(String fingerprint) {
+        this.fingerprint = fingerprint;
     }
 
     public String getNotBefore() {
@@ -66,6 +85,14 @@ public class CertificateResponse {
 
     public void setAutoRenew(Boolean autoRenew) {
         this.autoRenew = autoRenew;
+    }
+
+    public Integer getRenewalStatus() {
+        return this.renewalStatus;
+    }
+
+    public void setRenewalStatus(Integer renewalStatus) {
+        this.renewalStatus = renewalStatus;
     }
 
     public Integer getStatus() {

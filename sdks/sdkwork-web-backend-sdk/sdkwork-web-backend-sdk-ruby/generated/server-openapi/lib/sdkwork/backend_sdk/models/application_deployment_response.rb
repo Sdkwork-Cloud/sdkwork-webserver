@@ -2,7 +2,7 @@ module Sdkwork
   module BackendSdk
     module Models
       class ApplicationDeploymentResponse
-              attr_accessor :id, :site_id, :status, :deploy_type, :created_at
+              attr_accessor :id, :site_id, :status, :deploy_type, :environment, :version_tag, :commit_hash, :source_ref, :artifact_drive_uri, :artifact_size, :artifact_hash, :started_at, :completed_at, :duration_ms, :created_at
 
               def initialize(attributes = {})
                 attributes = (attributes || {}).transform_keys(&:to_s)
@@ -10,6 +10,16 @@ module Sdkwork
                 @site_id = attributes['siteId']
                 @status = attributes['status']
                 @deploy_type = attributes['deployType']
+                @environment = attributes['environment']
+                @version_tag = attributes['versionTag']
+                @commit_hash = attributes['commitHash']
+                @source_ref = attributes['sourceRef']
+                @artifact_drive_uri = attributes['artifactDriveUri']
+                @artifact_size = attributes['artifactSize']
+                @artifact_hash = attributes['artifactHash']
+                @started_at = attributes['startedAt']
+                @completed_at = attributes['completedAt']
+                @duration_ms = attributes['durationMs']
                 @created_at = attributes['createdAt']
               end
 
@@ -25,6 +35,16 @@ module Sdkwork
                   'siteId' => @site_id,
                   'status' => @status,
                   'deployType' => @deploy_type,
+                  'environment' => @environment,
+                  'versionTag' => @version_tag,
+                  'commitHash' => @commit_hash,
+                  'sourceRef' => @source_ref,
+                  'artifactDriveUri' => @artifact_drive_uri,
+                  'artifactSize' => @artifact_size,
+                  'artifactHash' => @artifact_hash,
+                  'startedAt' => @started_at,
+                  'completedAt' => @completed_at,
+                  'durationMs' => @duration_ms,
                   'createdAt' => @created_at,
                 }
               end

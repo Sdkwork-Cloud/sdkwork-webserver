@@ -26,7 +26,8 @@ client.setAccessToken("your-access-token")
 // Use the SDK
 let params: [String: Any] = [
     "page": 1,
-    "page_size": 2
+    "page_size": 2,
+    "siteId": "00000000-0000-0000-0000-000000000001"
 ]
 let result = try await client.certificate.certificatesList(params: params)
 print(result)
@@ -122,7 +123,8 @@ print(result)
 // 获取证书列表
 let params: [String: Any] = [
     "page": 1,
-    "page_size": 2
+    "page_size": 2,
+    "siteId": "00000000-0000-0000-0000-000000000001"
 ]
 let result = try await client.certificate.certificatesList(params: params)
 print(result)
@@ -143,7 +145,8 @@ print(result)
 do {
     let params: [String: Any] = [
         "page": 1,
-        "page_size": 2
+        "page_size": 2,
+        "siteId": "00000000-0000-0000-0000-000000000001"
     ]
     try await client.certificate.certificatesList(params: params)
 } catch {

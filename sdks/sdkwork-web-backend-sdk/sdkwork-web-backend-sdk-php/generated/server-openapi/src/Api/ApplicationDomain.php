@@ -35,6 +35,14 @@ final class ApplicationDomainApi extends BaseApi
         return is_array($result) ? ApplicationsDomainsCreateResponse201::fromArray($result) : null;
     }
 
+    /** Unbind an application public domain */
+    public function applicationsDomainsDelete(string $applicationId, string $domainId): mixed
+    {
+        $path = $this->interpolatePath('/backend/v3/api/applications/{applicationId}/domains/{domainId}', ['applicationId' => $this->serializePathParameter($applicationId, new PathParameterSpec('applicationId', 'simple', false)), 'domainId' => $this->serializePathParameter($domainId, new PathParameterSpec('domainId', 'simple', false))]);
+        $result = $this->client->request('DELETE', $path, []);
+        return $result;
+    }
+
     /** Verify an application public domain */
     public function applicationsDomainsVerify(string $applicationId, string $domainId): ?ApplicationsDomainsVerifyResponse
     {

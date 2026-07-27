@@ -40,6 +40,7 @@ client.setAccessToken("your-access-token");
         Map<String, Object> params = new LinkedHashMap<>();
         params.put("page", 1);
         params.put("page_size", 2);
+        params.put("siteId", "00000000-0000-0000-0000-000000000001");
         CertificatesListResponse result = client.getCertificate().certificatesList(params);
         System.out.println(result);
     }
@@ -133,6 +134,7 @@ System.out.println(result);
 Map<String, Object> params = new LinkedHashMap<>();
 params.put("page", 1);
 params.put("page_size", 2);
+params.put("siteId", "00000000-0000-0000-0000-000000000001");
 CertificatesListResponse result = client.getCertificate().certificatesList(params);
 System.out.println(result);
 ```
@@ -153,6 +155,7 @@ try {
     Map<String, Object> params = new LinkedHashMap<>();
     params.put("page", 1);
     params.put("page_size", 2);
+    params.put("siteId", "00000000-0000-0000-0000-000000000001");
     CertificatesListResponse result = client.getCertificate().certificatesList(params);
     System.out.println(result);
 } catch (Exception e) {

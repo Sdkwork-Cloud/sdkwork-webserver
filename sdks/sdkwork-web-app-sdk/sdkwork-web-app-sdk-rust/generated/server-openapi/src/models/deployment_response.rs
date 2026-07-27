@@ -2,23 +2,41 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct DeploymentResponse {
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub id: Option<String>,
+    pub id: String,
 
     #[serde(rename = "siteId")]
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub site_id: Option<String>,
+    pub site_id: String,
 
     #[serde(rename = "deployType")]
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub deploy_type: Option<i64>,
+    pub deploy_type: i64,
 
     #[serde(rename = "versionTag")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub version_tag: Option<String>,
 
+    #[serde(rename = "commitHash")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub status: Option<i64>,
+    pub commit_hash: Option<String>,
+
+    #[serde(rename = "sourceRef")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_ref: Option<String>,
+
+    pub environment: String,
+
+    #[serde(rename = "artifactDriveUri")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub artifact_drive_uri: Option<String>,
+
+    #[serde(rename = "artifactSize")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub artifact_size: Option<String>,
+
+    #[serde(rename = "artifactHash")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub artifact_hash: Option<String>,
+
+    pub status: i64,
 
     #[serde(rename = "startedAt")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -34,6 +52,5 @@ pub struct DeploymentResponse {
     pub duration_ms: Option<String>,
 
     #[serde(rename = "createdAt")]
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub created_at: Option<String>,
+    pub created_at: String,
 }

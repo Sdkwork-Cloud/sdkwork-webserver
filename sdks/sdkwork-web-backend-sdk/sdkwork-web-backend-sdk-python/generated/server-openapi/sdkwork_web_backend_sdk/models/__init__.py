@@ -4,6 +4,7 @@ from .problem_detail import ProblemDetail
 from .create_nginx_config_request import CreateNginxConfigRequest
 from .update_nginx_config_request import UpdateNginxConfigRequest
 from .create_application_request import CreateApplicationRequest
+from .update_application_request import UpdateApplicationRequest
 from .application_response import ApplicationResponse
 from .create_application_domain_request import CreateApplicationDomainRequest
 from .application_domain_response import ApplicationDomainResponse
@@ -42,11 +43,16 @@ from .sdk_work_list_response import SdkWorkListResponse
 from .sdk_work_command_response import SdkWorkCommandResponse
 from .applications_list_response import ApplicationsListResponse
 from .applications_create_response201 import ApplicationsCreateResponse201
+from .applications_retrieve_response import ApplicationsRetrieveResponse
+from .applications_update_response import ApplicationsUpdateResponse
+from .applications_activate_response import ApplicationsActivateResponse
+from .applications_pause_response import ApplicationsPauseResponse
 from .applications_domains_list_response import ApplicationsDomainsListResponse
 from .applications_domains_create_response201 import ApplicationsDomainsCreateResponse201
 from .applications_domains_verify_response import ApplicationsDomainsVerifyResponse
 from .applications_deployments_list_response import ApplicationsDeploymentsListResponse
 from .applications_deployments_create_response201 import ApplicationsDeploymentsCreateResponse201
+from .applications_deployments_rollback_response import ApplicationsDeploymentsRollbackResponse
 from .certificates_list_response import CertificatesListResponse
 from .certificates_create_response201 import CertificatesCreateResponse201
 from .certificates_update_response import CertificatesUpdateResponse
@@ -66,4 +72,4 @@ from .heartbeat_response import HeartbeatResponse
 from .retrieve_response import RetrieveResponse
 from .audit_logs_list_response import AuditLogsListResponse
 
-__all__ = ['ProblemDetail', 'CreateNginxConfigRequest', 'UpdateNginxConfigRequest', 'CreateApplicationRequest', 'ApplicationResponse', 'CreateApplicationDomainRequest', 'ApplicationDomainResponse', 'ApplicationDomainVerifyResponse', 'CreateApplicationDeploymentRequest', 'ApplicationDeploymentResponse', 'CreateCertificateRequest', 'UpdateCertificateRequest', 'CertificateResponse', 'CertificateDistributionResponse', 'NginxConfigResponse', 'NginxConfigPage', 'NginxValidateResponse', 'NginxDeployResponse', 'NginxReloadResponse', 'NginxStatusResponse', 'CreateServerRequest', 'ServerResponse', 'CreateServerResponse', 'AgentHeartbeatRequest', 'AgentHeartbeatResponse', 'AgentSyncResponse', 'AgentNginxConfigBundle', 'AgentCertificateBundle', 'ServerPage', 'AuditLogResponse', 'AuditLogPage', 'SdkWorkApiResponse', 'SdkWorkResourceData', 'SdkWorkPageData', 'SdkWorkCommandData', 'PageInfo', 'FieldError', 'SdkWorkResourceResponse', 'SdkWorkListResponse', 'SdkWorkCommandResponse', 'ApplicationsListResponse', 'ApplicationsCreateResponse201', 'ApplicationsDomainsListResponse', 'ApplicationsDomainsCreateResponse201', 'ApplicationsDomainsVerifyResponse', 'ApplicationsDeploymentsListResponse', 'ApplicationsDeploymentsCreateResponse201', 'CertificatesListResponse', 'CertificatesCreateResponse201', 'CertificatesUpdateResponse', 'CertificatesRenewResponse', 'CertificatesDistributionListResponse', 'ConfigsListResponse', 'ConfigsCreateResponse201', 'ConfigsRetrieveResponse', 'ConfigsUpdateResponse', 'ConfigsValidateResponse', 'ConfigsDeployResponse', 'ReloadResponse', 'StatusRetrieveResponse', 'ServersListResponse', 'ServersCreateResponse201', 'HeartbeatResponse', 'RetrieveResponse', 'AuditLogsListResponse']
+__all__ = ['ProblemDetail', 'CreateNginxConfigRequest', 'UpdateNginxConfigRequest', 'CreateApplicationRequest', 'UpdateApplicationRequest', 'ApplicationResponse', 'CreateApplicationDomainRequest', 'ApplicationDomainResponse', 'ApplicationDomainVerifyResponse', 'CreateApplicationDeploymentRequest', 'ApplicationDeploymentResponse', 'CreateCertificateRequest', 'UpdateCertificateRequest', 'CertificateResponse', 'CertificateDistributionResponse', 'NginxConfigResponse', 'NginxConfigPage', 'NginxValidateResponse', 'NginxDeployResponse', 'NginxReloadResponse', 'NginxStatusResponse', 'CreateServerRequest', 'ServerResponse', 'CreateServerResponse', 'AgentHeartbeatRequest', 'AgentHeartbeatResponse', 'AgentSyncResponse', 'AgentNginxConfigBundle', 'AgentCertificateBundle', 'ServerPage', 'AuditLogResponse', 'AuditLogPage', 'SdkWorkApiResponse', 'SdkWorkResourceData', 'SdkWorkPageData', 'SdkWorkCommandData', 'PageInfo', 'FieldError', 'SdkWorkResourceResponse', 'SdkWorkListResponse', 'SdkWorkCommandResponse', 'ApplicationsListResponse', 'ApplicationsCreateResponse201', 'ApplicationsRetrieveResponse', 'ApplicationsUpdateResponse', 'ApplicationsActivateResponse', 'ApplicationsPauseResponse', 'ApplicationsDomainsListResponse', 'ApplicationsDomainsCreateResponse201', 'ApplicationsDomainsVerifyResponse', 'ApplicationsDeploymentsListResponse', 'ApplicationsDeploymentsCreateResponse201', 'ApplicationsDeploymentsRollbackResponse', 'CertificatesListResponse', 'CertificatesCreateResponse201', 'CertificatesUpdateResponse', 'CertificatesRenewResponse', 'CertificatesDistributionListResponse', 'ConfigsListResponse', 'ConfigsCreateResponse201', 'ConfigsRetrieveResponse', 'ConfigsUpdateResponse', 'ConfigsValidateResponse', 'ConfigsDeployResponse', 'ReloadResponse', 'StatusRetrieveResponse', 'ServersListResponse', 'ServersCreateResponse201', 'HeartbeatResponse', 'RetrieveResponse', 'AuditLogsListResponse']

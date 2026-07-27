@@ -7,13 +7,13 @@ const appRoot = resolve(repositoryRoot, "apps/sdkwork-webserver-pc");
 
 const packages = [
   { id: "core", surface: "pc", capability: "runtime-core", deps: {}, coreComposition: true },
-  { id: "commons", surface: "pc", capability: "shared-ui", deps: { react: "catalog:", "react-router-dom": "^7.15.0", "lucide-react": "catalog:" } },
-  { id: "console-core", surface: "app-console", capability: "console-core", deps: { "@sdkwork/sdk-common": "workspace:*", "@sdkwork/web-app-sdk": "workspace:*", "@sdkwork/webserver-pc-commons": "workspace:*", react: "catalog:" }, sdk: "sdkwork-web-app-sdk", sdkPackage: "@sdkwork/web-app-sdk", sdkAuthority: "sdkwork-web.app", coreComposition: true },
+  { id: "commons", surface: "pc", capability: "shared-ui", deps: { "@sdkwork/iam-contracts": "workspace:*", react: "catalog:", "react-router-dom": "^7.15.0", "lucide-react": "catalog:" } },
+  { id: "console-core", surface: "app-console", capability: "console-core", deps: { "@sdkwork/drive-app-sdk": "workspace:*", "@sdkwork/sdk-common": "workspace:*", "@sdkwork/web-app-sdk": "workspace:*", "@sdkwork/webserver-pc-commons": "workspace:*", react: "catalog:" }, sdk: "sdkwork-web-app-sdk", sdkPackage: "@sdkwork/web-app-sdk", sdkAuthority: "sdkwork-web.app", sdkClients: ["SdkworkAppClient", "SdkworkDriveAppClient"], sdkDependencies: [{ workspace: "sdkwork-web-app-sdk", permissionModuleId: "web", surface: "app-api", credentialMode: "authenticated-app-api" }, { workspace: "sdkwork-drive-app-sdk", permissionModuleId: "drive", surface: "app-api", credentialMode: "authenticated-app-api" }], coreComposition: true },
   { id: "console-shell", surface: "app-console", capability: "console-shell", deps: { "@sdkwork/webserver-pc-commons": "workspace:*", react: "catalog:" } },
   { id: "console-sites", surface: "app-console", capability: "sites", deps: { "@sdkwork/webserver-pc-commons": "workspace:*" }, module: [["sites", "Sites", "Site lifecycle and availability", "web.sites.read"]] },
-  { id: "console-site-configuration", surface: "app-console", capability: "site-configuration", deps: { "@sdkwork/webserver-pc-commons": "workspace:*" }, module: [["configuration", "Configuration", "Environment variables and health checks", "web.sites.read"]] },
-  { id: "console-delivery", surface: "app-console", capability: "delivery", deps: { "@sdkwork/webserver-pc-commons": "workspace:*" }, module: [["domains", "Domains", "Domain ownership and routing", "web.sites.read"], ["certificates", "Certificates", "TLS certificate lifecycle", "web.certificates.read"]] },
-  { id: "console-deployments", surface: "app-console", capability: "deployments", deps: { "@sdkwork/webserver-pc-commons": "workspace:*" }, module: [["deployments", "Deployments", "Standalone deployment history and rollback", "web.sites.read"]] },
+  { id: "console-site-configuration", surface: "app-console", capability: "site-configuration", deps: { "@sdkwork/webserver-pc-commons": "workspace:*" }, module: [["configuration", "Configuration", "Environment variables and health checks", "web.sites.write"]] },
+  { id: "console-delivery", surface: "app-console", capability: "delivery", deps: { "@sdkwork/webserver-pc-commons": "workspace:*" }, module: [["domains", "Domains", "Domain ownership and routing", "web.sites.write"], ["certificates", "Certificates", "TLS certificate lifecycle", "web.certificates.read"]] },
+  { id: "console-deployments", surface: "app-console", capability: "deployments", deps: { "@sdkwork/webserver-pc-commons": "workspace:*" }, module: [["deployments", "Deployments", "Drive-backed package release, status history, and rollback", "web.sites.write"]] },
   { id: "admin-core", surface: "backend-admin", capability: "admin-core", deps: { "@sdkwork/web-backend-sdk": "workspace:*", "@sdkwork/webserver-pc-commons": "workspace:*", "@sdkwork/sdk-common": "workspace:*", react: "catalog:" }, sdk: "sdkwork-web-backend-sdk", sdkPackage: "@sdkwork/web-backend-sdk", sdkAuthority: "sdkwork-web.backend", coreComposition: true },
   { id: "admin-shell", surface: "backend-admin", capability: "admin-shell", deps: { "@sdkwork/webserver-pc-commons": "workspace:*", react: "catalog:" } },
   { id: "admin-applications", surface: "backend-admin", capability: "applications", deps: { "@sdkwork/webserver-pc-admin-core": "workspace:*", "@sdkwork/webserver-pc-commons": "workspace:*" }, module: [["applications", "Applications", "Deploy WEB and API applications", "web.sites.read"], ["application-domains", "Application domains", "Public domains bound to an application", "web.sites.read"], ["application-deployments", "Application deployments", "Application deployment history", "web.sites.read"]], dataSource: "./data-source.ts" },
@@ -76,7 +76,7 @@ function packageManifest(definition) {
 }
 
 function componentSpec(definition) {
-  const sdkDependencies = definition.sdk ? [{ workspace: definition.sdk, permissionModuleId: "web", surface: definition.surface === "backend-admin" ? "backend-api" : "app-api", credentialMode: definition.surface === "backend-admin" ? "authenticated-backend-admin" : "authenticated-app-api" }] : [];
+  const sdkDependencies = definition.sdkDependencies ?? (definition.sdk ? [{ workspace: definition.sdk, permissionModuleId: "web", surface: definition.surface === "backend-admin" ? "backend-api" : "app-api", credentialMode: definition.surface === "backend-admin" ? "authenticated-backend-admin" : "authenticated-app-api" }] : []);
   const publicExports = definition.coreComposition
     ? [".", "./sdk", "./modules", "./host", "./session", "./composition"]
     : ["src/index.ts"];
@@ -109,7 +109,7 @@ function componentSpec(definition) {
       publicExports,
       runtimeEntrypoints: [],
       routeManifest: null,
-      sdkClients: [],
+      sdkClients: definition.sdkClients ?? [],
       sdkDependencies,
       permissionComposition: permissionComposition(definition),
       events: [],
@@ -146,9 +146,13 @@ function permissionComposition(definition) {
       consumerPolicy: { forbidLocalPermissionCatalogForDependencyDomains: true, allowExplicitOverridesOnly: true, allowFrontendHintsWithoutServerDuplication: true },
     };
   }
+  const moduleCatalogRefs = [{ moduleId: "web", manifestRef: "../../../../../specs/iam.module.manifest.json", inheritPermissions: true, inheritRoles: true }];
+  if (definition.sdkDependencies?.some((dependency) => dependency.permissionModuleId === "drive")) {
+    moduleCatalogRefs.push({ moduleId: "drive", manifestRef: "../../../../../../sdkwork-iam/iam/modules/drive/iam.module.manifest.json", inheritPermissions: true, inheritRoles: true });
+  }
   return {
     inheritanceMode: "module-catalog-with-overrides",
-    moduleCatalogRefs: [{ moduleId: "web", manifestRef: "../../../../../specs/iam.module.manifest.json", inheritPermissions: true, inheritRoles: true }],
+    moduleCatalogRefs,
     bootstrapAccessTokenScope: { inheritFrom: "sdkwork.app.config.json#backend.accessTokenPermissionScope", supplement: [], overrideReplace: false },
     routePermissionHints: { inheritFromOpenApi: true, inheritFromModuleManifests: true, overrides: [] },
     consumerPolicy: { forbidLocalPermissionCatalogForDependencyDomains: true, allowExplicitOverridesOnly: true, allowFrontendHintsWithoutServerDuplication: true },
@@ -182,10 +186,15 @@ function materializeCoreComposition(directory, definition) {
 }
 
 function sdkInventorySource(definition) {
-  const inventory = definition.sdkPackage
-    ? `\n    { packageName: "${definition.sdkPackage}", authority: "${definition.sdkAuthority}", surface: "${definition.surface === "backend-admin" ? "backend-api" : "app-api"}" },`
-    : "";
-  return `export function listWebserverCoreSdkInventory() {\n  return [${inventory}\n  ] as const;\n}\n`;
+  const inventory = [];
+  if (definition.sdkPackage) {
+    inventory.push({ packageName: definition.sdkPackage, authority: definition.sdkAuthority, surface: definition.surface === "backend-admin" ? "backend-api" : "app-api" });
+  }
+  if (definition.sdkDependencies?.some((dependency) => dependency.workspace === "sdkwork-drive-app-sdk")) {
+    inventory.push({ packageName: "@sdkwork/drive-app-sdk", authority: "sdkwork-drive-app-api", surface: "app-api" });
+  }
+  const entries = inventory.map((item) => `    { packageName: "${item.packageName}", authority: "${item.authority}", surface: "${item.surface}" },`).join("\n");
+  return `export function listWebserverCoreSdkInventory() {\n  return [\n${entries}\n  ] as const;\n}\n`;
 }
 
 function moduleSource(definition) {

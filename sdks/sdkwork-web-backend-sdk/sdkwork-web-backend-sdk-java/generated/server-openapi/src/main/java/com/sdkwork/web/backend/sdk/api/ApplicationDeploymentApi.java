@@ -30,6 +30,12 @@ public class ApplicationDeploymentApi {
         return client.convertValue(raw, new TypeReference<ApplicationsDeploymentsCreateResponse201>() {});
     }
 
+    /** Roll back a managed application deployment */
+    public ApplicationsDeploymentsRollbackResponse applicationsDeploymentsRollback(String applicationId, String deploymentId) throws Exception {
+        Object raw = client.post(ApiPaths.backendPath("/applications/" + serializePathParameter(applicationId, new PathParameterSpec("applicationId", "simple", false)) + "/deployments/" + serializePathParameter(deploymentId, new PathParameterSpec("deploymentId", "simple", false)) + "/rollback"), null);
+        return client.convertValue(raw, new TypeReference<ApplicationsDeploymentsRollbackResponse>() {});
+    }
+
     private record PathParameterSpec(String name, String style, boolean explode) {}
 
     private static String serializePathParameter(Object value, PathParameterSpec spec) {

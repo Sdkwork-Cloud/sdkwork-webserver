@@ -6,6 +6,9 @@ public class CreateDeploymentRequest {
     private String versionTag;
     private String commitHash;
     private String sourceRef;
+    private String artifactDriveUri;
+    private String artifactSize;
+    private String artifactHash;
     private String environment;
     private String idempotencyKey;
 
@@ -39,6 +42,30 @@ public class CreateDeploymentRequest {
 
     public void setSourceRef(String sourceRef) {
         this.sourceRef = sourceRef;
+    }
+
+    public String getArtifactDriveUri() {
+        return this.artifactDriveUri;
+    }
+
+    public void setArtifactDriveUri(String artifactDriveUri) {
+        this.artifactDriveUri = artifactDriveUri;
+    }
+
+    public String getArtifactSize() {
+        return this.artifactSize;
+    }
+
+    public void setArtifactSize(String artifactSize) {
+        this.artifactSize = artifactSize;
+    }
+
+    public String getArtifactHash() {
+        return this.artifactHash;
+    }
+
+    public void setArtifactHash(String artifactHash) {
+        this.artifactHash = artifactHash;
     }
 
     public String getEnvironment() {

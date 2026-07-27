@@ -437,6 +437,9 @@ class CreateDeploymentRequest {
   final String? versionTag;
   final String? commitHash;
   final String? sourceRef;
+  final String? artifactDriveUri;
+  final String? artifactSize;
+  final String? artifactHash;
   final String? environment;
   final String? idempotencyKey;
 
@@ -445,6 +448,9 @@ class CreateDeploymentRequest {
     this.versionTag,
     this.commitHash,
     this.sourceRef,
+    this.artifactDriveUri,
+    this.artifactSize,
+    this.artifactHash,
     this.environment,
     this.idempotencyKey
   });
@@ -461,6 +467,9 @@ class CreateDeploymentRequest {
       versionTag: json['versionTag']?.toString(),
       commitHash: json['commitHash']?.toString(),
       sourceRef: json['sourceRef']?.toString(),
+      artifactDriveUri: json['artifactDriveUri']?.toString(),
+      artifactSize: json['artifactSize']?.toString(),
+      artifactHash: json['artifactHash']?.toString(),
       environment: json['environment']?.toString(),
       idempotencyKey: json['idempotencyKey']?.toString()
     );
@@ -472,6 +481,9 @@ class CreateDeploymentRequest {
       'versionTag': versionTag,
       'commitHash': commitHash,
       'sourceRef': sourceRef,
+      'artifactDriveUri': artifactDriveUri,
+      'artifactSize': artifactSize,
+      'artifactHash': artifactHash,
       'environment': environment,
       'idempotencyKey': idempotencyKey,
     };
@@ -479,39 +491,93 @@ class CreateDeploymentRequest {
 }
 
 class DeploymentResponse {
-  final String? id;
-  final String? siteId;
-  final int? deployType;
+  final String id;
+  final String siteId;
+  final int deployType;
   final String? versionTag;
-  final int? status;
+  final String? commitHash;
+  final String? sourceRef;
+  final String environment;
+  final String? artifactDriveUri;
+  final String? artifactSize;
+  final String? artifactHash;
+  final int status;
   final String? startedAt;
   final String? completedAt;
   final String? durationMs;
-  final String? createdAt;
+  final String createdAt;
 
   DeploymentResponse({
-    this.id,
-    this.siteId,
-    this.deployType,
+    required this.id,
+    required this.siteId,
+    required this.deployType,
     this.versionTag,
-    this.status,
+    this.commitHash,
+    this.sourceRef,
+    required this.environment,
+    this.artifactDriveUri,
+    this.artifactSize,
+    this.artifactHash,
+    required this.status,
     this.startedAt,
     this.completedAt,
     this.durationMs,
-    this.createdAt
+    required this.createdAt
   });
 
   factory DeploymentResponse.fromJson(Map<String, dynamic> json) {
     return DeploymentResponse(
-      id: json['id']?.toString(),
-      siteId: json['siteId']?.toString(),
-      deployType: json['deployType'] is int ? json['deployType'] : null,
+      id: (() {
+        final value = json['id']?.toString();
+        if (value == null) {
+          throw FormatException('DeploymentResponse.id is required');
+        }
+        return value;
+      })(),
+      siteId: (() {
+        final value = json['siteId']?.toString();
+        if (value == null) {
+          throw FormatException('DeploymentResponse.siteId is required');
+        }
+        return value;
+      })(),
+      deployType: (() {
+        final value = json['deployType'];
+        if (value is! int) {
+          throw FormatException('DeploymentResponse.deployType is required');
+        }
+        return value;
+      })(),
       versionTag: json['versionTag']?.toString(),
-      status: json['status'] is int ? json['status'] : null,
+      commitHash: json['commitHash']?.toString(),
+      sourceRef: json['sourceRef']?.toString(),
+      environment: (() {
+        final value = json['environment']?.toString();
+        if (value == null) {
+          throw FormatException('DeploymentResponse.environment is required');
+        }
+        return value;
+      })(),
+      artifactDriveUri: json['artifactDriveUri']?.toString(),
+      artifactSize: json['artifactSize']?.toString(),
+      artifactHash: json['artifactHash']?.toString(),
+      status: (() {
+        final value = json['status'];
+        if (value is! int) {
+          throw FormatException('DeploymentResponse.status is required');
+        }
+        return value;
+      })(),
       startedAt: json['startedAt']?.toString(),
       completedAt: json['completedAt']?.toString(),
       durationMs: json['durationMs']?.toString(),
-      createdAt: json['createdAt']?.toString()
+      createdAt: (() {
+        final value = json['createdAt']?.toString();
+        if (value == null) {
+          throw FormatException('DeploymentResponse.createdAt is required');
+        }
+        return value;
+      })()
     );
   }
 
@@ -521,6 +587,12 @@ class DeploymentResponse {
       'siteId': siteId,
       'deployType': deployType,
       'versionTag': versionTag,
+      'commitHash': commitHash,
+      'sourceRef': sourceRef,
+      'environment': environment,
+      'artifactDriveUri': artifactDriveUri,
+      'artifactSize': artifactSize,
+      'artifactHash': artifactHash,
       'status': status,
       'startedAt': startedAt,
       'completedAt': completedAt,
@@ -723,39 +795,72 @@ class CreateCertificateRequest {
 }
 
 class CertificateResponse {
-  final String? id;
-  final String? certName;
+  final String id;
+  final String certName;
+  final String? domain;
   final int? certType;
   final String? issuer;
+  final String? fingerprint;
   final String? notBefore;
   final String? notAfter;
   final bool? autoRenew;
-  final int? status;
-  final String? createdAt;
+  final int? renewalStatus;
+  final int status;
+  final String createdAt;
 
   CertificateResponse({
-    this.id,
-    this.certName,
+    required this.id,
+    required this.certName,
+    this.domain,
     this.certType,
     this.issuer,
+    this.fingerprint,
     this.notBefore,
     this.notAfter,
     this.autoRenew,
-    this.status,
-    this.createdAt
+    this.renewalStatus,
+    required this.status,
+    required this.createdAt
   });
 
   factory CertificateResponse.fromJson(Map<String, dynamic> json) {
     return CertificateResponse(
-      id: json['id']?.toString(),
-      certName: json['certName']?.toString(),
+      id: (() {
+        final value = json['id']?.toString();
+        if (value == null) {
+          throw FormatException('CertificateResponse.id is required');
+        }
+        return value;
+      })(),
+      certName: (() {
+        final value = json['certName']?.toString();
+        if (value == null) {
+          throw FormatException('CertificateResponse.certName is required');
+        }
+        return value;
+      })(),
+      domain: json['domain']?.toString(),
       certType: json['certType'] is int ? json['certType'] : null,
       issuer: json['issuer']?.toString(),
+      fingerprint: json['fingerprint']?.toString(),
       notBefore: json['notBefore']?.toString(),
       notAfter: json['notAfter']?.toString(),
       autoRenew: json['autoRenew'] is bool ? json['autoRenew'] : null,
-      status: json['status'] is int ? json['status'] : null,
-      createdAt: json['createdAt']?.toString()
+      renewalStatus: json['renewalStatus'] is int ? json['renewalStatus'] : null,
+      status: (() {
+        final value = json['status'];
+        if (value is! int) {
+          throw FormatException('CertificateResponse.status is required');
+        }
+        return value;
+      })(),
+      createdAt: (() {
+        final value = json['createdAt']?.toString();
+        if (value == null) {
+          throw FormatException('CertificateResponse.createdAt is required');
+        }
+        return value;
+      })()
     );
   }
 
@@ -763,11 +868,14 @@ class CertificateResponse {
     return <String, dynamic>{
       'id': id,
       'certName': certName,
+      'domain': domain,
       'certType': certType,
       'issuer': issuer,
+      'fingerprint': fingerprint,
       'notBefore': notBefore,
       'notAfter': notAfter,
       'autoRenew': autoRenew,
+      'renewalStatus': renewalStatus,
       'status': status,
       'createdAt': createdAt,
     };

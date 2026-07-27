@@ -12,6 +12,7 @@
     }
   },
   "dependencies": {
+    "@sdkwork/iam-contracts": "workspace:*",
     "react": "catalog:",
     "react-router-dom": "^7.15.0",
     "lucide-react": "catalog:"

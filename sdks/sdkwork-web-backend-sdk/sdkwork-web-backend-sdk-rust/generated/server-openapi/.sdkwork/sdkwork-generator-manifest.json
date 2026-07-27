@@ -48,15 +48,15 @@
     },
     {
       "path": "src/api/application_deployment.rs",
-      "sha256": "21840b08414d468127329167ffd4689310144c5a126a60061a60c89aebf4b111"
+      "sha256": "602f7d6ef21f350ff8dddc1086dbf23cd905ddb19ea109744c1ba3d9a9871ba0"
     },
     {
       "path": "src/api/application_domain.rs",
-      "sha256": "f3a341cfdb36b8a2cdb8efac190d2e48e393e1b431592e9d520205afa4d476ba"
+      "sha256": "73790dad9563f5ff23af863b85ac0e4a6a2a73ded4f26731f236331a7559d73d"
     },
     {
       "path": "src/api/application.rs",
-      "sha256": "fbfccf2251cec552419275d223a5af255e87f583727ff2668daba33bb5e6874c"
+      "sha256": "ff1dc36c943c7f8ec482518bf1caaf229ab20b70c0ccccc65adf6bb7d8ee3927"
     },
     {
       "path": "src/api/audit.rs",
@@ -128,7 +128,7 @@
     },
     {
       "path": "src/models/application_deployment_response.rs",
-      "sha256": "26467ac79d3c27d27dc61bb77b8724480796ca5f7d8bb7840269a4e85b140fae"
+      "sha256": "375155b323eb29182050369a56380ab06aa5143df6a40f89a2dd4249cbbac815"
     },
     {
       "path": "src/models/application_domain_response.rs",
@@ -143,6 +143,10 @@
       "sha256": "bfc7963dbb5f2679e30512082f55007ae8025a99f2a39a926362dac8f12500ba"
     },
     {
+      "path": "src/models/applications_activate_response.rs",
+      "sha256": "e905ff0d676a5ad7c5840a173458698647d09c185a7ba618e43816cd1e05d109"
+    },
+    {
       "path": "src/models/applications_create_response201.rs",
       "sha256": "8d7420a92e6970be7397cd6fae659220aae61218235752a79c06ad24e9f34349"
     },
@@ -153,6 +157,10 @@
     {
       "path": "src/models/applications_deployments_list_response.rs",
       "sha256": "31e2a532b4dc43e90415c03c45dfab926349147b91d63cc40b6e17ee51a526be"
+    },
+    {
+      "path": "src/models/applications_deployments_rollback_response.rs",
+      "sha256": "45f37545e45bcfea93647846e7d25dd0f6ea1714dfdc73c69a8110f24f256a2f"
     },
     {
       "path": "src/models/applications_domains_create_response201.rs",
@@ -169,6 +177,18 @@
     {
       "path": "src/models/applications_list_response.rs",
       "sha256": "0636679a33e9fd9a8ff571868f0c5b363595609c09caa9b172702f9048be0700"
+    },
+    {
+      "path": "src/models/applications_pause_response.rs",
+      "sha256": "85a277763ad2583d1933f75cd47bd34caeae4527002eeda4d84ac7a43a625f5a"
+    },
+    {
+      "path": "src/models/applications_retrieve_response.rs",
+      "sha256": "e8b826f09eb9a8792bd66e3d72b6eead1a8def6e28470fe633c0f2cda93851e4"
+    },
+    {
+      "path": "src/models/applications_update_response.rs",
+      "sha256": "b8dc66b94c86fe3fe5d434cf115881c0326c3058e5dbdce6b3520ff761599f34"
     },
     {
       "path": "src/models/audit_log_page.rs",
@@ -240,7 +260,7 @@
     },
     {
       "path": "src/models/create_application_deployment_request.rs",
-      "sha256": "55fc7e42f934aeffce0390ba814be1e44151af44fbe2b1ff36698e8bef473ead"
+      "sha256": "f445faba8c107c8a08d0d10ec016456034657d97b3fc2c40aa88d592c014dbc2"
     },
     {
       "path": "src/models/create_application_domain_request.rs",
@@ -276,7 +296,7 @@
     },
     {
       "path": "src/models/mod.rs",
-      "sha256": "d9b5e0e8404eec1179084c5346ef1bcfb42b044272785a073c9ed22e09f8b4d5"
+      "sha256": "ab0cda0d600fa807d339ec3e36809a05dca1ed3360c3f4ce54956b7e585f48f3"
     },
     {
       "path": "src/models/nginx_config_page.rs",
@@ -365,6 +385,10 @@
     {
       "path": "src/models/status_retrieve_response.rs",
       "sha256": "683a6b3e782c887fa264ea47e17fa880e13054cc1525f3ba9bfed6fad3787887"
+    },
+    {
+      "path": "src/models/update_application_request.rs",
+      "sha256": "252d9af450bb4ee1a93a96ec755b182872d9ac5603f2dd60e0b9e306259cad2e"
     },
     {
       "path": "src/models/update_certificate_request.rs",

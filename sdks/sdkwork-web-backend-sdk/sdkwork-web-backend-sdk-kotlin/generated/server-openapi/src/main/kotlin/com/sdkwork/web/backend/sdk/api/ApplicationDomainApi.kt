@@ -24,6 +24,11 @@ class ApplicationDomainApi(private val client: HttpClient) {
         return client.convertValue(raw, object : TypeReference<ApplicationsDomainsCreateResponse201>() {})
     }
 
+    /** Unbind an application public domain */
+    suspend fun applicationsDomainsDelete(applicationId: String, domainId: String): Unit {
+        client.delete(ApiPaths.backendPath("/applications/${serializePathParameter(applicationId, PathParameterSpec("applicationId", "simple", false))}/domains/${serializePathParameter(domainId, PathParameterSpec("domainId", "simple", false))}"))
+    }
+
     /** Verify an application public domain */
     suspend fun applicationsDomainsVerify(applicationId: String, domainId: String): ApplicationsDomainsVerifyResponse? {
         val raw = client.post(ApiPaths.backendPath("/applications/${serializePathParameter(applicationId, PathParameterSpec("applicationId", "simple", false))}/domains/${serializePathParameter(domainId, PathParameterSpec("domainId", "simple", false))}/verify"), null)

@@ -12,10 +12,11 @@ class CertificateApi {
   CertificateApi(this._client);
 
   /// 获取证书列表
-  Future<CertificatesListResponse?> certificatesList([int? page, int? pageSize]) async {
+  Future<CertificatesListResponse?> certificatesList([int? page, int? pageSize, String? siteId]) async {
     final query = buildQueryString([
       QueryParameterSpec('page', page, 'form', true, false, null),
-      QueryParameterSpec('page_size', pageSize, 'form', true, false, null)
+      QueryParameterSpec('page_size', pageSize, 'form', true, false, null),
+      QueryParameterSpec('siteId', siteId, 'form', true, false, null)
     ]);
     final response = await _client.get(ApiPaths.appendQueryString(ApiPaths.appPath('/certificates'), query));
     return (() {

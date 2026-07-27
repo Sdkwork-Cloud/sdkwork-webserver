@@ -7,6 +7,7 @@ export interface WebserverPcRuntimeConfig {
   appApiBaseUrl: string;
   appbaseAppApiBaseUrl: string;
   backendApiBaseUrl: string;
+  driveAppApiBaseUrl: string;
   defaultLocale: WebserverLocale;
   deploymentProfile: WebserverDeploymentProfile;
   environment: WebserverLifecycleEnvironment;
@@ -28,7 +29,7 @@ export function parseWebserverPcRuntimeConfig(value: unknown): WebserverPcRuntim
   const defaultLocale = readEnum(value.defaultLocale, ["en-US", "zh-CN"] as const, "defaultLocale");
   const fallbackLocale = readEnum(value.fallbackLocale, ["en-US", "zh-CN"] as const, "fallbackLocale");
   if (!supportedLocales.includes(defaultLocale) || !supportedLocales.includes(fallbackLocale) || activeLocales.some((locale) => !supportedLocales.includes(locale))) throw new Error("Locale configuration is inconsistent");
-  return { activeLocales, appApiBaseUrl: readUrl(value.appApiBaseUrl, "appApiBaseUrl", environment), appbaseAppApiBaseUrl: readUrl(value.appbaseAppApiBaseUrl, "appbaseAppApiBaseUrl", environment), backendApiBaseUrl: readUrl(value.backendApiBaseUrl, "backendApiBaseUrl", environment), defaultLocale, deploymentProfile: readEnum(value.deploymentProfile, ["standalone", "cloud"] as const, "deploymentProfile"), environment, fallbackLocale, supportedLocales };
+  return { activeLocales, appApiBaseUrl: readUrl(value.appApiBaseUrl, "appApiBaseUrl", environment), appbaseAppApiBaseUrl: readUrl(value.appbaseAppApiBaseUrl, "appbaseAppApiBaseUrl", environment), backendApiBaseUrl: readUrl(value.backendApiBaseUrl, "backendApiBaseUrl", environment), driveAppApiBaseUrl: readUrl(value.driveAppApiBaseUrl, "driveAppApiBaseUrl", environment), defaultLocale, deploymentProfile: readEnum(value.deploymentProfile, ["standalone", "cloud"] as const, "deploymentProfile"), environment, fallbackLocale, supportedLocales };
 }
 
 export function resolveWebserverLocale(config: WebserverPcRuntimeConfig, preferredLocales: readonly string[]): WebserverLocale {

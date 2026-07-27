@@ -16,7 +16,7 @@
     },
     {
       "path": "api/certificate.go",
-      "sha256": "3c207b1619128d07bcf2ca3d067e8b1c459558b584d07fb3c27d80b7476eb192"
+      "sha256": "d6fac8d0dc06b60bd80c6e872677ff3d59676db89af610b2aa518ffe01937958"
     },
     {
       "path": "api/deployment.go",
@@ -84,7 +84,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "5d5a1dd13a21f82c3888a94d62a641a34fa76a8d6578d8ff73c11e852d6b2ada"
+      "sha256": "f6766c8de531f88eed77b3ac5e77d692c2a9aaae1efe9f83c71bcd71407dfc15"
     },
     {
       "path": "sdk.go",
@@ -100,7 +100,7 @@
     },
     {
       "path": "types/certificate_response.go",
-      "sha256": "5ba6741ed28f90cf58d9d040fd49910d66357693058ac5bb8c179183097be52e"
+      "sha256": "84176b4e1fc2625df3b085cd790a00bbf1d2aeae022872985ed0dad0a0f78f21"
     },
     {
       "path": "types/certificates_create_response201.go",
@@ -120,7 +120,7 @@
     },
     {
       "path": "types/create_deployment_request.go",
-      "sha256": "5a0b8ae19da2400a665c7951ba4053c16a8f0e3d5ea4a527757db4ea5e5e600c"
+      "sha256": "a09be15da09c6a6e3646a57ce8924f62c1c552991e80a890053b29ecaffe753e"
     },
     {
       "path": "types/create_domain_request.go",
@@ -144,7 +144,7 @@
     },
     {
       "path": "types/deployment_response.go",
-      "sha256": "6f09e5426ec02d989fe5dbea776e6b2432a0df0ba7dfa940265faa9484047c64"
+      "sha256": "c3563abdeb27b7fd8cab8b55ca33114eeac5aff8fefc96cb7bda56aa990435fe"
     },
     {
       "path": "types/doc.go",

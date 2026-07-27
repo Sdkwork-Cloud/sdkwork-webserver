@@ -37,6 +37,14 @@ namespace SDKWork.Web.BackendSdk.Api
             return await _client.PostAsync<SDKWork.Web.BackendSdk.Models.ApplicationsDeploymentsCreateResponse201>(ApiPaths.BackendPath($"/applications/{SerializePathParameter(applicationId, new PathParameterSpec("applicationId", "simple", false))}/deployments"), body, null, null, "application/json");
         }
 
+        /// <summary>
+        /// Roll back a managed application deployment
+        /// </summary>
+        public async Task<SDKWork.Web.BackendSdk.Models.ApplicationsDeploymentsRollbackResponse?> ApplicationsDeploymentsRollbackAsync(string applicationId, string deploymentId)
+        {
+            return await _client.PostAsync<SDKWork.Web.BackendSdk.Models.ApplicationsDeploymentsRollbackResponse>(ApiPaths.BackendPath($"/applications/{SerializePathParameter(applicationId, new PathParameterSpec("applicationId", "simple", false))}/deployments/{SerializePathParameter(deploymentId, new PathParameterSpec("deploymentId", "simple", false))}/rollback"), null);
+        }
+
         private sealed record PathParameterSpec(string Name, string Style, bool Explode);
 
         private static string SerializePathParameter(object? value, PathParameterSpec spec)

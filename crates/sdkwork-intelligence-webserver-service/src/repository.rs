@@ -69,6 +69,7 @@ pub trait WebRepositoryPort: Send + Sync {
     async fn list_sites(
         &self,
         tenant_id: i64,
+        owner_id: Option<i64>,
         query: &ListSitesQuery,
     ) -> WebServiceResult<SitePage>;
 
@@ -76,11 +77,16 @@ pub trait WebRepositoryPort: Send + Sync {
         &self,
         tenant_id: i64,
         organization_id: Option<i64>,
-        actor_id: Option<i64>,
+        owner_id: Option<i64>,
         request: &CreateSiteRequest,
     ) -> WebServiceResult<SiteResponse>;
 
-    async fn retrieve_site(&self, tenant_id: i64, site_id: &str) -> WebServiceResult<SiteResponse>;
+    async fn retrieve_site(
+        &self,
+        tenant_id: i64,
+        owner_id: Option<i64>,
+        site_id: &str,
+    ) -> WebServiceResult<SiteResponse>;
 
     async fn update_site(
         &self,
@@ -188,6 +194,8 @@ pub trait WebRepositoryPort: Send + Sync {
     async fn list_certificates(
         &self,
         tenant_id: i64,
+        owner_id: Option<i64>,
+        site_id: Option<&str>,
         page: i32,
         page_size: i32,
     ) -> WebServiceResult<CertificatePage>;
@@ -195,12 +203,14 @@ pub trait WebRepositoryPort: Send + Sync {
     async fn create_certificate(
         &self,
         tenant_id: i64,
+        owner_id: Option<i64>,
         request: &CreateCertificateRequest,
     ) -> WebServiceResult<CertificateResponse>;
 
     async fn insert_certificate_pending(
         &self,
         tenant_id: i64,
+        owner_id: Option<i64>,
         domain_id: &str,
         cert_type: i32,
         auto_renew: bool,

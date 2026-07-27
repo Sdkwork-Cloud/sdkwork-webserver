@@ -389,6 +389,9 @@ class CreateDeploymentRequest {
   final String? versionTag;
   final String? commitHash;
   final String? sourceRef;
+  final String? artifactDriveUri;
+  final String? artifactSize;
+  final String? artifactHash;
   final String? environment;
   final String? idempotencyKey;
 
@@ -397,6 +400,9 @@ class CreateDeploymentRequest {
     this.versionTag,
     this.commitHash,
     this.sourceRef,
+    this.artifactDriveUri,
+    this.artifactSize,
+    this.artifactHash,
     this.environment,
     this.idempotencyKey
   });
@@ -407,6 +413,9 @@ class CreateDeploymentRequest {
       versionTag: json['versionTag']?.toString(),
       commitHash: json['commitHash']?.toString(),
       sourceRef: json['sourceRef']?.toString(),
+      artifactDriveUri: json['artifactDriveUri']?.toString(),
+      artifactSize: json['artifactSize']?.toString(),
+      artifactHash: json['artifactHash']?.toString(),
       environment: json['environment']?.toString(),
       idempotencyKey: json['idempotencyKey']?.toString()
     );
@@ -418,6 +427,9 @@ class CreateDeploymentRequest {
       'versionTag': versionTag,
       'commitHash': commitHash,
       'sourceRef': sourceRef,
+      'artifactDriveUri': artifactDriveUri,
+      'artifactSize': artifactSize,
+      'artifactHash': artifactHash,
       'environment': environment,
       'idempotencyKey': idempotencyKey,
     };
@@ -429,6 +441,12 @@ class DeploymentResponse {
   final String? siteId;
   final int? deployType;
   final String? versionTag;
+  final String? commitHash;
+  final String? sourceRef;
+  final String? environment;
+  final String? artifactDriveUri;
+  final String? artifactSize;
+  final String? artifactHash;
   final int? status;
   final String? startedAt;
   final String? completedAt;
@@ -440,6 +458,12 @@ class DeploymentResponse {
     this.siteId,
     this.deployType,
     this.versionTag,
+    this.commitHash,
+    this.sourceRef,
+    this.environment,
+    this.artifactDriveUri,
+    this.artifactSize,
+    this.artifactHash,
     this.status,
     this.startedAt,
     this.completedAt,
@@ -453,6 +477,12 @@ class DeploymentResponse {
       siteId: json['siteId']?.toString(),
       deployType: json['deployType'] is int ? json['deployType'] : null,
       versionTag: json['versionTag']?.toString(),
+      commitHash: json['commitHash']?.toString(),
+      sourceRef: json['sourceRef']?.toString(),
+      environment: json['environment']?.toString(),
+      artifactDriveUri: json['artifactDriveUri']?.toString(),
+      artifactSize: json['artifactSize']?.toString(),
+      artifactHash: json['artifactHash']?.toString(),
       status: json['status'] is int ? json['status'] : null,
       startedAt: json['startedAt']?.toString(),
       completedAt: json['completedAt']?.toString(),
@@ -467,6 +497,12 @@ class DeploymentResponse {
       'siteId': siteId,
       'deployType': deployType,
       'versionTag': versionTag,
+      'commitHash': commitHash,
+      'sourceRef': sourceRef,
+      'environment': environment,
+      'artifactDriveUri': artifactDriveUri,
+      'artifactSize': artifactSize,
+      'artifactHash': artifactHash,
       'status': status,
       'startedAt': startedAt,
       'completedAt': completedAt,
@@ -647,22 +683,28 @@ class CreateCertificateRequest {
 class CertificateResponse {
   final String? id;
   final String? certName;
+  final String? domain;
   final int? certType;
   final String? issuer;
+  final String? fingerprint;
   final String? notBefore;
   final String? notAfter;
   final bool? autoRenew;
+  final int? renewalStatus;
   final int? status;
   final String? createdAt;
 
   CertificateResponse({
     this.id,
     this.certName,
+    this.domain,
     this.certType,
     this.issuer,
+    this.fingerprint,
     this.notBefore,
     this.notAfter,
     this.autoRenew,
+    this.renewalStatus,
     this.status,
     this.createdAt
   });
@@ -671,11 +713,14 @@ class CertificateResponse {
     return CertificateResponse(
       id: json['id']?.toString(),
       certName: json['certName']?.toString(),
+      domain: json['domain']?.toString(),
       certType: json['certType'] is int ? json['certType'] : null,
       issuer: json['issuer']?.toString(),
+      fingerprint: json['fingerprint']?.toString(),
       notBefore: json['notBefore']?.toString(),
       notAfter: json['notAfter']?.toString(),
       autoRenew: json['autoRenew'] is bool ? json['autoRenew'] : null,
+      renewalStatus: json['renewalStatus'] is int ? json['renewalStatus'] : null,
       status: json['status'] is int ? json['status'] : null,
       createdAt: json['createdAt']?.toString()
     );
@@ -685,11 +730,14 @@ class CertificateResponse {
     return <String, dynamic>{
       'id': id,
       'certName': certName,
+      'domain': domain,
       'certType': certType,
       'issuer': issuer,
+      'fingerprint': fingerprint,
       'notBefore': notBefore,
       'notAfter': notAfter,
       'autoRenew': autoRenew,
+      'renewalStatus': renewalStatus,
       'status': status,
       'createdAt': createdAt,
     };

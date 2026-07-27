@@ -4,12 +4,22 @@ use serde::{Deserialize, Serialize};
 use crate::dto::*;
 use crate::problem::WebServiceResult;
 
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum WebAppResourceScope {
+    #[default]
+    Owner,
+    Tenant,
+}
+
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct WebAppRequestContext {
     pub tenant_id: i64,
     pub actor_id: Option<i64>,
     pub organization_id: Option<i64>,
     pub session_id: Option<String>,
+    #[serde(default)]
+    pub resource_scope: WebAppResourceScope,
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
@@ -164,6 +174,7 @@ pub trait WebAppApi: Send + Sync {
     async fn list_certificates(
         &self,
         context: &WebAppRequestContext,
+        site_id: Option<&str>,
         page: i32,
         page_size: i32,
     ) -> WebServiceResult<CertificatePage>;
@@ -202,6 +213,37 @@ pub trait WebBackendApi: Send + Sync {
         request: &CreateSiteRequest,
     ) -> WebServiceResult<SiteResponse>;
 
+    async fn retrieve_application(
+        &self,
+        context: &WebBackendRequestContext,
+        application_id: &str,
+    ) -> WebServiceResult<SiteResponse>;
+
+    async fn update_application(
+        &self,
+        context: &WebBackendRequestContext,
+        application_id: &str,
+        request: &UpdateSiteRequest,
+    ) -> WebServiceResult<SiteResponse>;
+
+    async fn delete_application(
+        &self,
+        context: &WebBackendRequestContext,
+        application_id: &str,
+    ) -> WebServiceResult<()>;
+
+    async fn activate_application(
+        &self,
+        context: &WebBackendRequestContext,
+        application_id: &str,
+    ) -> WebServiceResult<SiteResponse>;
+
+    async fn pause_application(
+        &self,
+        context: &WebBackendRequestContext,
+        application_id: &str,
+    ) -> WebServiceResult<SiteResponse>;
+
     async fn list_application_domains(
         &self,
         context: &WebBackendRequestContext,
@@ -224,6 +266,13 @@ pub trait WebBackendApi: Send + Sync {
         domain_id: &str,
     ) -> WebServiceResult<DomainVerifyResponse>;
 
+    async fn delete_application_domain(
+        &self,
+        context: &WebBackendRequestContext,
+        application_id: &str,
+        domain_id: &str,
+    ) -> WebServiceResult<()>;
+
     async fn list_application_deployments(
         &self,
         context: &WebBackendRequestContext,
@@ -238,6 +287,13 @@ pub trait WebBackendApi: Send + Sync {
         context: &WebBackendRequestContext,
         application_id: &str,
         request: &CreateDeploymentRequest,
+    ) -> WebServiceResult<DeploymentResponse>;
+
+    async fn rollback_application_deployment(
+        &self,
+        context: &WebBackendRequestContext,
+        application_id: &str,
+        deployment_id: &str,
     ) -> WebServiceResult<DeploymentResponse>;
 
     async fn list_managed_certificates(

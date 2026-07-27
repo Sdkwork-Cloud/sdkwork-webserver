@@ -4,9 +4,14 @@ declare(strict_types=1);
 
 namespace SDKWork\Web\BackendSdk\Api;
 
+use SDKWork\Web\BackendSdk\Models\ApplicationsActivateResponse;
 use SDKWork\Web\BackendSdk\Models\ApplicationsCreateResponse201;
 use SDKWork\Web\BackendSdk\Models\ApplicationsListResponse;
+use SDKWork\Web\BackendSdk\Models\ApplicationsPauseResponse;
+use SDKWork\Web\BackendSdk\Models\ApplicationsRetrieveResponse;
+use SDKWork\Web\BackendSdk\Models\ApplicationsUpdateResponse;
 use SDKWork\Web\BackendSdk\Models\CreateApplicationRequest;
+use SDKWork\Web\BackendSdk\Models\UpdateApplicationRequest;
 
 final class ApplicationApi extends BaseApi
 {
@@ -36,6 +41,49 @@ final class ApplicationApi extends BaseApi
             'json' => $payload,
         ]);
         return is_array($result) ? ApplicationsCreateResponse201::fromArray($result) : null;
+    }
+
+    /** Retrieve a managed application */
+    public function applicationsRetrieve(string $applicationId): ?ApplicationsRetrieveResponse
+    {
+        $path = $this->interpolatePath('/backend/v3/api/applications/{applicationId}', ['applicationId' => $this->serializePathParameter($applicationId, new PathParameterSpec('applicationId', 'simple', false))]);
+        $result = $this->client->request('GET', $path, []);
+        return is_array($result) ? ApplicationsRetrieveResponse::fromArray($result) : null;
+    }
+
+    /** Update a managed application */
+    public function applicationsUpdate(string $applicationId, array|UpdateApplicationRequest $body): ?ApplicationsUpdateResponse
+    {
+        $path = $this->interpolatePath('/backend/v3/api/applications/{applicationId}', ['applicationId' => $this->serializePathParameter($applicationId, new PathParameterSpec('applicationId', 'simple', false))]);
+        $payload = $body instanceof UpdateApplicationRequest ? $body->toArray() : $body;
+        $result = $this->client->request('PATCH', $path, [
+            'json' => $payload,
+        ]);
+        return is_array($result) ? ApplicationsUpdateResponse::fromArray($result) : null;
+    }
+
+    /** Delete a managed application */
+    public function applicationsDelete(string $applicationId): mixed
+    {
+        $path = $this->interpolatePath('/backend/v3/api/applications/{applicationId}', ['applicationId' => $this->serializePathParameter($applicationId, new PathParameterSpec('applicationId', 'simple', false))]);
+        $result = $this->client->request('DELETE', $path, []);
+        return $result;
+    }
+
+    /** Activate a managed application */
+    public function applicationsActivate(string $applicationId): ?ApplicationsActivateResponse
+    {
+        $path = $this->interpolatePath('/backend/v3/api/applications/{applicationId}/activate', ['applicationId' => $this->serializePathParameter($applicationId, new PathParameterSpec('applicationId', 'simple', false))]);
+        $result = $this->client->request('POST', $path, []);
+        return is_array($result) ? ApplicationsActivateResponse::fromArray($result) : null;
+    }
+
+    /** Pause a managed application */
+    public function applicationsPause(string $applicationId): ?ApplicationsPauseResponse
+    {
+        $path = $this->interpolatePath('/backend/v3/api/applications/{applicationId}/pause', ['applicationId' => $this->serializePathParameter($applicationId, new PathParameterSpec('applicationId', 'simple', false))]);
+        $result = $this->client->request('POST', $path, []);
+        return is_array($result) ? ApplicationsPauseResponse::fromArray($result) : null;
     }
 
 }

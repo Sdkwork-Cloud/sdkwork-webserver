@@ -2,7 +2,7 @@ module Sdkwork
   module AppSdk
     module Models
       class CreateDeploymentRequest
-              attr_accessor :deploy_type, :version_tag, :commit_hash, :source_ref, :environment, :idempotency_key
+              attr_accessor :deploy_type, :version_tag, :commit_hash, :source_ref, :artifact_drive_uri, :artifact_size, :artifact_hash, :environment, :idempotency_key
 
               def initialize(attributes = {})
                 attributes = (attributes || {}).transform_keys(&:to_s)
@@ -10,6 +10,9 @@ module Sdkwork
                 @version_tag = attributes['versionTag']
                 @commit_hash = attributes['commitHash']
                 @source_ref = attributes['sourceRef']
+                @artifact_drive_uri = attributes['artifactDriveUri']
+                @artifact_size = attributes['artifactSize']
+                @artifact_hash = attributes['artifactHash']
                 @environment = attributes['environment']
                 @idempotency_key = attributes['idempotencyKey']
               end
@@ -26,6 +29,9 @@ module Sdkwork
                   'versionTag' => @version_tag,
                   'commitHash' => @commit_hash,
                   'sourceRef' => @source_ref,
+                  'artifactDriveUri' => @artifact_drive_uri,
+                  'artifactSize' => @artifact_size,
+                  'artifactHash' => @artifact_hash,
                   'environment' => @environment,
                   'idempotencyKey' => @idempotency_key,
                 }

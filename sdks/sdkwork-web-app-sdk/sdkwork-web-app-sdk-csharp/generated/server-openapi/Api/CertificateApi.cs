@@ -18,12 +18,13 @@ namespace SDKWork.Web.AppSdk.Api
         /// <summary>
         /// 获取证书列表
         /// </summary>
-        public async Task<SDKWork.Web.AppSdk.Models.CertificatesListResponse?> CertificatesListAsync(int? page = null, int? pageSize = null)
+        public async Task<SDKWork.Web.AppSdk.Models.CertificatesListResponse?> CertificatesListAsync(int? page = null, int? pageSize = null, string? siteId = null)
         {
             var queryString = BuildQueryString(new[]
             {
                 new QueryParameterSpec("page", page, "form", true, false, null),
                 new QueryParameterSpec("page_size", pageSize, "form", true, false, null),
+                new QueryParameterSpec("siteId", siteId, "form", true, false, null),
             });
             return await _client.GetAsync<SDKWork.Web.AppSdk.Models.CertificatesListResponse>(ApiPaths.AppendQueryString(ApiPaths.AppPath("/certificates"), queryString));
         }

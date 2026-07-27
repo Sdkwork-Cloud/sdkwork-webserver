@@ -172,6 +172,34 @@ class CreateApplicationRequest {
   }
 }
 
+class UpdateApplicationRequest {
+  final String? name;
+  final String? description;
+  final Map<String, dynamic>? runtimeConfig;
+
+  UpdateApplicationRequest({
+    this.name,
+    this.description,
+    this.runtimeConfig
+  });
+
+  factory UpdateApplicationRequest.fromJson(Map<String, dynamic> json) {
+    return UpdateApplicationRequest(
+      name: json['name']?.toString(),
+      description: json['description']?.toString(),
+      runtimeConfig: _sdkworkAsMap(json['runtimeConfig'])
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'name': name,
+      'description': description,
+      'runtimeConfig': runtimeConfig,
+    };
+  }
+}
+
 class ApplicationResponse {
   final String? id;
   final String? name;
@@ -335,11 +363,23 @@ class ApplicationDomainVerifyResponse {
 class CreateApplicationDeploymentRequest {
   final int? deployType;
   final String? environment;
+  final String? versionTag;
+  final String? commitHash;
+  final String? sourceRef;
+  final String? artifactDriveUri;
+  final String? artifactSize;
+  final String? artifactHash;
   final String? idempotencyKey;
 
   CreateApplicationDeploymentRequest({
     this.deployType,
     this.environment,
+    this.versionTag,
+    this.commitHash,
+    this.sourceRef,
+    this.artifactDriveUri,
+    this.artifactSize,
+    this.artifactHash,
     this.idempotencyKey
   });
 
@@ -347,6 +387,12 @@ class CreateApplicationDeploymentRequest {
     return CreateApplicationDeploymentRequest(
       deployType: json['deployType'] is int ? json['deployType'] : null,
       environment: json['environment']?.toString(),
+      versionTag: json['versionTag']?.toString(),
+      commitHash: json['commitHash']?.toString(),
+      sourceRef: json['sourceRef']?.toString(),
+      artifactDriveUri: json['artifactDriveUri']?.toString(),
+      artifactSize: json['artifactSize']?.toString(),
+      artifactHash: json['artifactHash']?.toString(),
       idempotencyKey: json['idempotencyKey']?.toString()
     );
   }
@@ -355,6 +401,12 @@ class CreateApplicationDeploymentRequest {
     return <String, dynamic>{
       'deployType': deployType,
       'environment': environment,
+      'versionTag': versionTag,
+      'commitHash': commitHash,
+      'sourceRef': sourceRef,
+      'artifactDriveUri': artifactDriveUri,
+      'artifactSize': artifactSize,
+      'artifactHash': artifactHash,
       'idempotencyKey': idempotencyKey,
     };
   }
@@ -365,6 +417,16 @@ class ApplicationDeploymentResponse {
   final String? siteId;
   final int? status;
   final int? deployType;
+  final String? environment;
+  final String? versionTag;
+  final String? commitHash;
+  final String? sourceRef;
+  final String? artifactDriveUri;
+  final String? artifactSize;
+  final String? artifactHash;
+  final String? startedAt;
+  final String? completedAt;
+  final String? durationMs;
   final String? createdAt;
 
   ApplicationDeploymentResponse({
@@ -372,6 +434,16 @@ class ApplicationDeploymentResponse {
     this.siteId,
     this.status,
     this.deployType,
+    this.environment,
+    this.versionTag,
+    this.commitHash,
+    this.sourceRef,
+    this.artifactDriveUri,
+    this.artifactSize,
+    this.artifactHash,
+    this.startedAt,
+    this.completedAt,
+    this.durationMs,
     this.createdAt
   });
 
@@ -381,6 +453,16 @@ class ApplicationDeploymentResponse {
       siteId: json['siteId']?.toString(),
       status: json['status'] is int ? json['status'] : null,
       deployType: json['deployType'] is int ? json['deployType'] : null,
+      environment: json['environment']?.toString(),
+      versionTag: json['versionTag']?.toString(),
+      commitHash: json['commitHash']?.toString(),
+      sourceRef: json['sourceRef']?.toString(),
+      artifactDriveUri: json['artifactDriveUri']?.toString(),
+      artifactSize: json['artifactSize']?.toString(),
+      artifactHash: json['artifactHash']?.toString(),
+      startedAt: json['startedAt']?.toString(),
+      completedAt: json['completedAt']?.toString(),
+      durationMs: json['durationMs']?.toString(),
       createdAt: json['createdAt']?.toString()
     );
   }
@@ -391,6 +473,16 @@ class ApplicationDeploymentResponse {
       'siteId': siteId,
       'status': status,
       'deployType': deployType,
+      'environment': environment,
+      'versionTag': versionTag,
+      'commitHash': commitHash,
+      'sourceRef': sourceRef,
+      'artifactDriveUri': artifactDriveUri,
+      'artifactSize': artifactSize,
+      'artifactHash': artifactHash,
+      'startedAt': startedAt,
+      'completedAt': completedAt,
+      'durationMs': durationMs,
       'createdAt': createdAt,
     };
   }
@@ -1557,6 +1649,118 @@ class ApplicationsCreateResponse201 {
   }
 }
 
+class ApplicationsRetrieveResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  ApplicationsRetrieveResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory ApplicationsRetrieveResponse.fromJson(Map<String, dynamic> json) {
+    return ApplicationsRetrieveResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class ApplicationsUpdateResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  ApplicationsUpdateResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory ApplicationsUpdateResponse.fromJson(Map<String, dynamic> json) {
+    return ApplicationsUpdateResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class ApplicationsActivateResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  ApplicationsActivateResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory ApplicationsActivateResponse.fromJson(Map<String, dynamic> json) {
+    return ApplicationsActivateResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class ApplicationsPauseResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  ApplicationsPauseResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory ApplicationsPauseResponse.fromJson(Map<String, dynamic> json) {
+    return ApplicationsPauseResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
 class ApplicationsDomainsListResponse {
   final int? code;
   final dynamic data;
@@ -1682,6 +1886,34 @@ class ApplicationsDeploymentsCreateResponse201 {
 
   factory ApplicationsDeploymentsCreateResponse201.fromJson(Map<String, dynamic> json) {
     return ApplicationsDeploymentsCreateResponse201(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class ApplicationsDeploymentsRollbackResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  ApplicationsDeploymentsRollbackResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory ApplicationsDeploymentsRollbackResponse.fromJson(Map<String, dynamic> json) {
+    return ApplicationsDeploymentsRollbackResponse(
       code: json['code'] is int ? json['code'] : null,
       data: _sdkworkAsMap(json['data']),
       traceId: json['traceId']?.toString()

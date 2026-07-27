@@ -29,6 +29,12 @@ public class ApplicationDomainApi {
         return client.convertValue(raw, new TypeReference<ApplicationsDomainsCreateResponse201>() {});
     }
 
+    /** Unbind an application public domain */
+    public Void applicationsDomainsDelete(String applicationId, String domainId) throws Exception {
+        client.delete(ApiPaths.backendPath("/applications/" + serializePathParameter(applicationId, new PathParameterSpec("applicationId", "simple", false)) + "/domains/" + serializePathParameter(domainId, new PathParameterSpec("domainId", "simple", false)) + ""));
+        return null;
+    }
+
     /** Verify an application public domain */
     public ApplicationsDomainsVerifyResponse applicationsDomainsVerify(String applicationId, String domainId) throws Exception {
         Object raw = client.post(ApiPaths.backendPath("/applications/" + serializePathParameter(applicationId, new PathParameterSpec("applicationId", "simple", false)) + "/domains/" + serializePathParameter(domainId, new PathParameterSpec("domainId", "simple", false)) + "/verify"), null);

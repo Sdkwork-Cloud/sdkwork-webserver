@@ -389,11 +389,7 @@ export class HttpClient extends BaseHttpClient {
       accessTokenOnly,
       ...rest
     } = options;
-    const authHeaders = accessTokenOnly
-      ? this.applyAccessTokenOnlyHeaders(headers)
-      : skipAuth
-        ? headers
-        : this.applySdkworkAuthHeaders(headers);
+    const authHeaders = headers;
     const requestBody = this.buildRequestBody(body, contentType);
     const requestHeaders = await this.applySdkworkRequestBodyFingerprint(
       this.buildRequestHeaders(

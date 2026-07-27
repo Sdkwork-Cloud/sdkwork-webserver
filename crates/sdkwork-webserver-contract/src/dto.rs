@@ -121,6 +121,35 @@ pub struct DeploymentResponse {
     pub status: i32,
     #[serde(rename = "deployType")]
     pub deploy_type: i32,
+    pub environment: String,
+    #[serde(rename = "versionTag", skip_serializing_if = "Option::is_none")]
+    pub version_tag: Option<String>,
+    #[serde(rename = "commitHash", skip_serializing_if = "Option::is_none")]
+    pub commit_hash: Option<String>,
+    #[serde(rename = "sourceRef", skip_serializing_if = "Option::is_none")]
+    pub source_ref: Option<String>,
+    #[serde(rename = "artifactDriveUri", skip_serializing_if = "Option::is_none")]
+    pub artifact_drive_uri: Option<String>,
+    #[serde(
+        rename = "artifactSize",
+        with = "sdkwork_utils_rust::serde_int64::option",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub artifact_size: Option<i64>,
+    #[serde(rename = "artifactHash", skip_serializing_if = "Option::is_none")]
+    pub artifact_hash: Option<String>,
+    #[serde(rename = "startedAt", skip_serializing_if = "Option::is_none")]
+    pub started_at: Option<String>,
+    #[serde(rename = "completedAt", skip_serializing_if = "Option::is_none")]
+    pub completed_at: Option<String>,
+    #[serde(
+        rename = "durationMs",
+        with = "sdkwork_utils_rust::serde_int64::option",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub duration_ms: Option<i64>,
     #[serde(rename = "createdAt")]
     pub created_at: String,
 }
@@ -140,6 +169,22 @@ pub struct CreateDeploymentRequest {
     pub deploy_type: i32,
     #[serde(default)]
     pub environment: Option<String>,
+    #[serde(rename = "versionTag", default)]
+    pub version_tag: Option<String>,
+    #[serde(rename = "commitHash", default)]
+    pub commit_hash: Option<String>,
+    #[serde(rename = "sourceRef", default)]
+    pub source_ref: Option<String>,
+    #[serde(rename = "artifactDriveUri", default)]
+    pub artifact_drive_uri: Option<String>,
+    #[serde(
+        rename = "artifactSize",
+        with = "sdkwork_utils_rust::serde_int64::option",
+        default
+    )]
+    pub artifact_size: Option<i64>,
+    #[serde(rename = "artifactHash", default)]
+    pub artifact_hash: Option<String>,
     /// 客户端提供的幂等键。相同 (tenant_id, idempotency_key) 的请求会返回已创建的 deployment，
     /// 保证网络重试场景下不会产生重复部署记录。
     #[serde(rename = "idempotencyKey", default)]

@@ -1,9 +1,9 @@
+use super::{EngineRow, WebRepository};
 use sdkwork_utils_rust::slugify;
 use sdkwork_webserver_contract::{
     CreateSiteRequest, ListSitesQuery, SitePage, SiteResponse, UpdateSiteRequest, WebServiceError,
     WebServiceResult,
 };
-use super::{EngineRow, WebRepository};
 use sqlx::Row;
 
 use super::support::{
@@ -15,6 +15,7 @@ impl WebRepository {
     pub(super) async fn list_sites_repo(
         &self,
         tenant_id: i64,
+        owner_id: Option<i64>,
         query: &ListSitesQuery,
     ) -> WebServiceResult<SitePage> {
         let (page, page_size, offset) = pagination(query.page, query.page_size);
@@ -29,7 +30,8 @@ impl WebRepository {
                AND ($2 IS NULL OR status = $2)
                AND ($3 IS NULL OR application_type = $3)
                AND ($4 IS NULL OR site_type = $4)
-               AND ($5 IS NULL OR name LIKE $5 OR slug LIKE $5)";
+               AND ($5 IS NULL OR name LIKE $5 OR slug LIKE $5)
+               AND ($6 IS NULL OR (data_scope = 3 AND user_id = $6))";
         let list_sql = "SELECT uuid, name, slug, description, application_type, site_type, status,
                     CAST(runtime_config AS TEXT) AS runtime_config,
                     CAST(created_at AS TEXT) AS created_at,
@@ -40,20 +42,23 @@ impl WebRepository {
                AND ($3 IS NULL OR application_type = $3)
                AND ($4 IS NULL OR site_type = $4)
                AND ($5 IS NULL OR name LIKE $5 OR slug LIKE $5)
-             ORDER BY updated_at DESC, id DESC LIMIT $6 OFFSET $7";
+               AND ($6 IS NULL OR (data_scope = 3 AND user_id = $6))
+             ORDER BY updated_at DESC, id DESC LIMIT $7 OFFSET $8";
 
         let count_query = sqlx::query(count_sql)
             .bind(tenant_id)
             .bind(query.status)
             .bind(query.application_type.as_deref())
             .bind(query.site_type)
-            .bind(keyword.as_deref());
+            .bind(keyword.as_deref())
+            .bind(owner_id);
         let list_query = sqlx::query(list_sql)
             .bind(tenant_id)
             .bind(query.status)
             .bind(query.application_type.as_deref())
             .bind(query.site_type)
             .bind(keyword.as_deref())
+            .bind(owner_id)
             .bind(page_size)
             .bind(offset);
 
@@ -87,7 +92,7 @@ impl WebRepository {
         &self,
         tenant_id: i64,
         organization_id: Option<i64>,
-        actor_id: Option<i64>,
+        owner_id: Option<i64>,
         request: &CreateSiteRequest,
     ) -> WebServiceResult<SiteResponse> {
         let id = next_id(self.id_generator())?;
@@ -108,15 +113,16 @@ impl WebRepository {
             .clone()
             .unwrap_or_else(|| serde_json::json!({}));
         let org_id = organization_id.unwrap_or(0);
+        let data_scope = if owner_id.is_some() { 3 } else { 1 };
         let engine = self.database_engine().await?;
-        let runtime_config_expression = json_write_expression(engine, "$11");
-        let now_expression = instant_write_expression(engine, "$12");
+        let runtime_config_expression = json_write_expression(engine, "$12");
+        let now_expression = instant_write_expression(engine, "$13");
         let insert_sql = format!(
             "INSERT INTO web_site (
-                id, uuid, tenant_id, organization_id, user_id, name, slug, description,
+                id, uuid, tenant_id, organization_id, data_scope, user_id, name, slug, description,
                 application_type, site_type, status, runtime_config, metadata, created_at, updated_at, version
              ) VALUES (
-                $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 0,
+                $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 0,
                 {runtime_config_expression}, '{{}}', {now_expression}, {now_expression}, 0
              )"
         );
@@ -126,7 +132,8 @@ impl WebRepository {
             .bind(&uuid)
             .bind(tenant_id)
             .bind(org_id)
-            .bind(actor_id)
+            .bind(data_scope)
+            .bind(owner_id)
             .bind(&request.name)
             .bind(&slug)
             .bind(&request.description)
@@ -138,12 +145,13 @@ impl WebRepository {
             .await
             .map_err(|error| store_error("insert web_site", error))?;
 
-        self.retrieve_site_repo(tenant_id, &uuid).await
+        self.retrieve_site_repo(tenant_id, owner_id, &uuid).await
     }
 
     pub(super) async fn retrieve_site_repo(
         &self,
         tenant_id: i64,
+        owner_id: Option<i64>,
         site_id: &str,
     ) -> WebServiceResult<SiteResponse> {
         let row = sqlx::query(
@@ -152,10 +160,12 @@ impl WebRepository {
                     CAST(created_at AS TEXT) AS created_at,
                     CAST(updated_at AS TEXT) AS updated_at
              FROM web_site
-             WHERE tenant_id = $1 AND uuid = $2 AND deleted_at IS NULL",
+             WHERE tenant_id = $1 AND uuid = $2 AND deleted_at IS NULL
+               AND ($3 IS NULL OR (data_scope = 3 AND user_id = $3))",
         )
         .bind(tenant_id)
         .bind(site_id)
+        .bind(owner_id)
         .fetch_optional(&self.pool)
         .await
         .map_err(|error| store_error("retrieve web_site", error))?
@@ -170,7 +180,7 @@ impl WebRepository {
         site_id: &str,
         request: &UpdateSiteRequest,
     ) -> WebServiceResult<SiteResponse> {
-        let existing = self.retrieve_site_repo(tenant_id, site_id).await?;
+        let existing = self.retrieve_site_repo(tenant_id, None, site_id).await?;
         let name = request.name.as_ref().unwrap_or(&existing.name);
         let description = request
             .description
@@ -207,7 +217,7 @@ impl WebRepository {
             return Err(WebServiceError::not_found("site not found"));
         }
 
-        self.retrieve_site_repo(tenant_id, site_id).await
+        self.retrieve_site_repo(tenant_id, None, site_id).await
     }
 
     pub(super) async fn delete_site_repo(
@@ -216,6 +226,24 @@ impl WebRepository {
         site_id: &str,
         actor_id: Option<i64>,
     ) -> WebServiceResult<()> {
+        let status: i32 = sqlx::query_scalar(
+            "SELECT status
+             FROM web_site
+             WHERE tenant_id = $1 AND uuid = $2 AND deleted_at IS NULL",
+        )
+        .bind(tenant_id)
+        .bind(site_id)
+        .fetch_optional(&self.pool)
+        .await
+        .map_err(|error| store_error("delete web_site status lookup", error))?
+        .ok_or_else(|| WebServiceError::not_found("site not found"))?;
+
+        if status == 1 {
+            return Err(WebServiceError::conflict(
+                "active applications must be disabled before deletion",
+            ));
+        }
+
         let now = now_rfc3339();
         let engine = self.database_engine().await?;
         let now_expression = instant_write_expression(engine, "$3");
@@ -223,7 +251,7 @@ impl WebRepository {
             "UPDATE web_site
              SET deleted_at = {now_expression}, deleted_by = $4,
                  updated_at = {now_expression}, version = version + 1
-             WHERE tenant_id = $1 AND uuid = $2 AND deleted_at IS NULL"
+             WHERE tenant_id = $1 AND uuid = $2 AND deleted_at IS NULL AND status <> 1"
         );
         let result = sqlx::query(&update_sql)
             .bind(tenant_id)
@@ -235,7 +263,9 @@ impl WebRepository {
             .map_err(|error| store_error("delete web_site", error))?;
 
         if result.rows_affected() == 0 {
-            return Err(WebServiceError::not_found("site not found"));
+            return Err(WebServiceError::conflict(
+                "application state changed; disable it before deletion",
+            ));
         }
         Ok(())
     }
@@ -267,7 +297,7 @@ impl WebRepository {
             return Err(WebServiceError::not_found("site not found"));
         }
 
-        self.retrieve_site_repo(tenant_id, site_id).await
+        self.retrieve_site_repo(tenant_id, None, site_id).await
     }
 }
 

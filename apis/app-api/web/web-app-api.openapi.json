@@ -1540,6 +1540,16 @@
           },
           {
             "$ref": "#/components/parameters/PageSizeParam"
+          },
+          {
+            "name": "siteId",
+            "in": "query",
+            "required": false,
+            "description": "Limit certificates to one application owned by the authenticated user.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "responses": {
@@ -2166,10 +2176,30 @@
             "type": "string"
           },
           "sourceRef": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 500
+          },
+          "artifactDriveUri": {
+            "type": "string",
+            "maxLength": 500,
+            "pattern": "^drive://spaces/[^/?#]+/nodes/[^/?#]+$",
+            "description": "Stable Drive resource identity. Signed delivery URLs are forbidden."
+          },
+          "artifactSize": {
+            "type": "string",
+            "format": "int64",
+            "pattern": "^[1-9][0-9]*$",
+            "x-sdkwork-int64-string": true,
+            "x-sdkwork-rust-type": "i64"
+          },
+          "artifactHash": {
+            "type": "string",
+            "pattern": "^[A-Fa-f0-9]{64}$",
+            "description": "SHA-256 hexadecimal digest of the uploaded package."
           },
           "environment": {
             "type": "string",
+            "maxLength": 32,
             "default": "production"
           },
           "idempotencyKey": {
@@ -2180,6 +2210,15 @@
       },
       "DeploymentResponse": {
         "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "siteId",
+          "status",
+          "deployType",
+          "environment",
+          "createdAt"
+        ],
         "properties": {
           "id": {
             "type": "string",
@@ -2194,6 +2233,30 @@
           },
           "versionTag": {
             "type": "string"
+          },
+          "commitHash": {
+            "type": "string"
+          },
+          "sourceRef": {
+            "type": "string"
+          },
+          "environment": {
+            "type": "string"
+          },
+          "artifactDriveUri": {
+            "type": "string",
+            "pattern": "^drive://spaces/[^/?#]+/nodes/[^/?#]+$"
+          },
+          "artifactSize": {
+            "type": "string",
+            "format": "int64",
+            "pattern": "^[1-9][0-9]*$",
+            "x-sdkwork-int64-string": true,
+            "x-sdkwork-rust-type": "i64"
+          },
+          "artifactHash": {
+            "type": "string",
+            "pattern": "^[A-Fa-f0-9]{64}$"
           },
           "status": {
             "type": "integer"
@@ -2331,6 +2394,13 @@
       },
       "CertificateResponse": {
         "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "certName",
+          "status",
+          "createdAt"
+        ],
         "properties": {
           "id": {
             "type": "string",
@@ -2339,11 +2409,18 @@
           "certName": {
             "type": "string"
           },
+          "domain": {
+            "type": "string"
+          },
           "certType": {
             "type": "integer"
           },
           "issuer": {
             "type": "string"
+          },
+          "fingerprint": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
           },
           "notBefore": {
             "type": "string",
@@ -2356,8 +2433,13 @@
           "autoRenew": {
             "type": "boolean"
           },
+          "renewalStatus": {
+            "type": "integer",
+            "description": "0=idle, 1=renewing, 2=pending, 3=failed"
+          },
           "status": {
-            "type": "integer"
+            "type": "integer",
+            "description": "0=pending, 1=active, 2=expired, 3=revoked, 4=archived"
           },
           "createdAt": {
             "type": "string",

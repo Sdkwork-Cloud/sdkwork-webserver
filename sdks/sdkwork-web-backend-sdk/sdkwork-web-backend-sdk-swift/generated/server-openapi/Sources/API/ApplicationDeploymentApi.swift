@@ -22,6 +22,11 @@ public class ApplicationDeploymentApi {
         return try await client.post(ApiPaths.backendPath("/applications/\(serializePathParameter(applicationId, PathParameterSpec(name: "applicationId", style: "simple", explode: false)))/deployments"), body: body, params: nil, headers: nil, contentType: "application/json", responseType: ApplicationsDeploymentsCreateResponse201.self)
     }
 
+    /// Roll back a managed application deployment
+    public func applicationsDeploymentsRollback(applicationId: String, deploymentId: String) async throws -> ApplicationsDeploymentsRollbackResponse? {
+        return try await client.post(ApiPaths.backendPath("/applications/\(serializePathParameter(applicationId, PathParameterSpec(name: "applicationId", style: "simple", explode: false)))/deployments/\(serializePathParameter(deploymentId, PathParameterSpec(name: "deploymentId", style: "simple", explode: false)))/rollback"), body: nil, responseType: ApplicationsDeploymentsRollbackResponse.self)
+    }
+
     private struct PathParameterSpec {
         let name: String
         let style: String

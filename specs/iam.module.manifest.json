@@ -126,5 +126,24 @@
         "replacementCode": null
       }
     ]
+  },
+  "roles": {
+    "domainStandardRoles": [],
+    "roleGrantExtensions": [
+      {
+        "roleCode": "app_user",
+        "patterns": [
+          "web.sites.*",
+          "web.certificates.*"
+        ]
+      },
+      {
+        "roleCode": "org_admin",
+        "patterns": [
+          "web.*"
+        ]
+      }
+    ],
+    "roleExclusions": []
   }
 }

@@ -10,6 +10,16 @@ namespace SDKWork.Web.BackendSdk.Models
         public string SiteId { get; set; }
         public int Status { get; set; }
         public int DeployType { get; set; }
+        public string Environment { get; set; }
+        public string? VersionTag { get; set; }
+        public string? CommitHash { get; set; }
+        public string? SourceRef { get; set; }
+        public string? ArtifactDriveUri { get; set; }
+        public string? ArtifactSize { get; set; }
+        public string? ArtifactHash { get; set; }
+        public string? StartedAt { get; set; }
+        public string? CompletedAt { get; set; }
+        public string? DurationMs { get; set; }
         public string CreatedAt { get; set; }
     }
 }

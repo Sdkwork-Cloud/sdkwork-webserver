@@ -44,7 +44,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "b3864defd99ec42c7da627379bf5208c5662ba2035d25e6162f91a0a54957876"
+      "sha256": "b4b4855c72e0ec9dca4cda6b935e439e684011b123480fe419291bfa8e694e7b"
     },
     {
       "path": "sdkwork-sdk.json",
@@ -56,7 +56,7 @@
     },
     {
       "path": "src/api/certificate.ts",
-      "sha256": "4affddc6baa61fdb65d1391db094678b85ccd145b893a017d70ccc7908d52fd0"
+      "sha256": "ecbcb08c3088eed4e9d046ae6b7fab9e9fbc7a31c3ccf69213bc69886bec1d62"
     },
     {
       "path": "src/api/deployment.ts",
@@ -112,7 +112,7 @@
     },
     {
       "path": "src/types/certificate-response.ts",
-      "sha256": "b3f98cfbddf2433c871e43a8e291b3b7724427ecb975aa95ac205f7efa8a2419"
+      "sha256": "8b34caee2378a219cb32b3f7179e64f5d8d9f2281ac32cfea7bcd55925997058"
     },
     {
       "path": "src/types/certificates-create-response201.ts",
@@ -132,7 +132,7 @@
     },
     {
       "path": "src/types/create-deployment-request.ts",
-      "sha256": "b3a7dc28f4b25cf27a7caaa7629d7a29f60547541811ec392d6c5759bf46aa07"
+      "sha256": "6604f0937d532633d2e2a3aebc65ddefac40cb09e4833166fc488bae4d1cca53"
     },
     {
       "path": "src/types/create-domain-request.ts",
@@ -156,7 +156,7 @@
     },
     {
       "path": "src/types/deployment-response.ts",
-      "sha256": "0f5baf97aed539820e26157bc9b2648c3564cb60454dca4a3e2e3987a12e1ad7"
+      "sha256": "8a54fbd761b373486b5e918c3ffa59890f384a2b5bf4d6be3736aee72c6872ba"
     },
     {
       "path": "src/types/domain-page.ts",

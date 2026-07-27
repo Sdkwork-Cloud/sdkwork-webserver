@@ -6,6 +6,7 @@ namespace SDKWork\Web\BackendSdk\Api;
 
 use SDKWork\Web\BackendSdk\Models\ApplicationsDeploymentsCreateResponse201;
 use SDKWork\Web\BackendSdk\Models\ApplicationsDeploymentsListResponse;
+use SDKWork\Web\BackendSdk\Models\ApplicationsDeploymentsRollbackResponse;
 use SDKWork\Web\BackendSdk\Models\CreateApplicationDeploymentRequest;
 
 final class ApplicationDeploymentApi extends BaseApi
@@ -33,6 +34,14 @@ final class ApplicationDeploymentApi extends BaseApi
             'json' => $payload,
         ]);
         return is_array($result) ? ApplicationsDeploymentsCreateResponse201::fromArray($result) : null;
+    }
+
+    /** Roll back a managed application deployment */
+    public function applicationsDeploymentsRollback(string $applicationId, string $deploymentId): ?ApplicationsDeploymentsRollbackResponse
+    {
+        $path = $this->interpolatePath('/backend/v3/api/applications/{applicationId}/deployments/{deploymentId}/rollback', ['applicationId' => $this->serializePathParameter($applicationId, new PathParameterSpec('applicationId', 'simple', false)), 'deploymentId' => $this->serializePathParameter($deploymentId, new PathParameterSpec('deploymentId', 'simple', false))]);
+        $result = $this->client->request('POST', $path, []);
+        return is_array($result) ? ApplicationsDeploymentsRollbackResponse::fromArray($result) : null;
     }
 
 }

@@ -4,7 +4,11 @@
 
 Supported environments are `development`, `test`, `staging`, and `production`. Browser runtime sources use `browser/runtime-env.<deployment-profile>.<environment>.json` when a profile needs distinct values and otherwise fall back to `browser/runtime-env.<environment>.json`. Every selected source must declare the requested `deploymentProfile` and `environment`; `sdkwork.app.config.json` remains application identity metadata and is not a runtime-value source.
 
+Browser profiles declare separate authenticated API authorities. `appApiBaseUrl` owns Web Server tenant operations, `backendApiBaseUrl` owns the lazy admin surface, `appbaseAppApiBaseUrl` owns IAM bootstrap, and `driveAppApiBaseUrl` owns application-package upload. The Console shares one bootstrap TokenManager across the Web and Drive App SDK clients; the Web Server endpoint must not be assumed to proxy Drive routes.
+
 The schema authority is `CONFIG_SPEC.md`, `SOURCE_CONFIG_SPEC.md`, and `ENVIRONMENT_SPEC.md` in `sdkwork-specs`. Local overrides must use ignored local files or process-local environment input and must never modify tracked profiles. Secrets, access tokens, refresh tokens, API keys, certificate private keys, and bootstrap credentials are forbidden in browser runtime configuration; authenticated state comes from IAM and the shared TokenManager.
+
+The tracked `../.env.development.example` declares a blank `SDKWORK_ACCESS_TOKEN=` for the private credential-entry bootstrap input. A live development value is process-local or written only to an ignored local override by the shared IAM tooling; it must not use a `VITE_*` key or be materialized into `public/runtime-env.json`.
 
 `scripts/materialize-runtime-env.mjs --deployment-profile <standalone|cloud> --environment <environment>` materializes exactly one selected source to `public/runtime-env.json` before Vite starts or builds. Add `--check` to verify the tracked output without writing. Validate this root with:
 

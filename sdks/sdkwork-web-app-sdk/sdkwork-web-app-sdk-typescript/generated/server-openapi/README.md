@@ -30,6 +30,7 @@ client.setAccessToken('your-access-token');
 const params = {
   page: 1,
   page_size: 2,
+  siteId: 'siteId',
 };
 const result = await client.certificate.list(params);
 ```
@@ -125,6 +126,7 @@ const result = await client.envVariable.sites.envVariables.list(siteId, params);
 const params = {
   page: 1,
   page_size: 2,
+  siteId: 'siteId',
 };
 const result = await client.certificate.list(params);
 ```
@@ -146,6 +148,7 @@ try {
   const params = {
     page: 1,
     page_size: 2,
+    siteId: 'siteId',
   };
   const result = await client.certificate.list(params);
 } catch (error) {

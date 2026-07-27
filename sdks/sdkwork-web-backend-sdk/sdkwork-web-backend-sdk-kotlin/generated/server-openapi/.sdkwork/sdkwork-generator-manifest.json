@@ -80,15 +80,15 @@
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/api/ApplicationApi.kt",
-      "sha256": "9829cadb1768fc46e52b224484c69988c43ff0e9d2259f89e96d45771b011ea1"
+      "sha256": "bbcdc1202f92e62a1b92d264bc132cd3e7152d74a8750662d7bf1579114ccd46"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/api/ApplicationDeploymentApi.kt",
-      "sha256": "fe2feb19075c5f26d0121bd3cd1c33719cb6e981b11108b3469c312f35a76040"
+      "sha256": "71c6e1660f45e4b484f0037a45bbbc5684b3b017c8e694989e44803498605b70"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/api/ApplicationDomainApi.kt",
-      "sha256": "d2f45f05bda63012de97d7cf7814b1a1a4f65eda5adae8d8dfce868d1a4462d3"
+      "sha256": "5db65e7d6e9d52821272e4bf9f3b33aa8865f18795a58c8fa6c9afca25b736c8"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/api/AuditApi.kt",
@@ -112,7 +112,7 @@
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationDeploymentResponse.kt",
-      "sha256": "47eac462b97709efb42977e4feef3212a3d67f3ceca1513b36986e37883154c2"
+      "sha256": "751917cd329c490b025b4c1bb33cb0d00187170430f852b3efc38c4c0f6ea937"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationDomainResponse.kt",
@@ -127,6 +127,10 @@
       "sha256": "fa71a6afaa004721de6e7cd33af050cf024a37892c947248695bbe5918c89ca5"
     },
     {
+      "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationsActivateResponse.kt",
+      "sha256": "cc4077199a71e53a5c61725d899f2ae0ebf09d66e2925431bbbb5832f2afa5c7"
+    },
+    {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationsCreateResponse201.kt",
       "sha256": "eaa8fa5825ce66a1ebea7dc4bc1261d8b8843e3eb0877ff48b7497585e28d268"
     },
@@ -137,6 +141,10 @@
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationsDeploymentsListResponse.kt",
       "sha256": "f81de405150d8a4fc265939198f5af01b5a2bbd4e972a1fcf5af5f5826bc1562"
+    },
+    {
+      "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationsDeploymentsRollbackResponse.kt",
+      "sha256": "de752d24b7b5e903cda334a211f22800bf1ad741d869e093219cda2ad2089b6b"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationsDomainsCreateResponse201.kt",
@@ -153,6 +161,18 @@
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationsListResponse.kt",
       "sha256": "ef9931b70ade50ff8e5f395a930cbc0977da7e8ba347bd81bdc900f68cd719f8"
+    },
+    {
+      "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationsPauseResponse.kt",
+      "sha256": "1cd077f8b5fa3fd53e8a03e0abd79d51297b0dbea8407c3d657fc9c9aa10221a"
+    },
+    {
+      "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationsRetrieveResponse.kt",
+      "sha256": "41abf58bba12f926207fe9648b6589416ad77b225260c5bdc1f4454f6701f69a"
+    },
+    {
+      "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationsUpdateResponse.kt",
+      "sha256": "e8231d5e2a82b07e9f495b7ef723ae1ab723c64619ecc771e3bc6a5d19d76829"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/AuditLogPage.kt",
@@ -220,7 +240,7 @@
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/CreateApplicationDeploymentRequest.kt",
-      "sha256": "43c5562e8ca173bae82104e4ff2ca8b627ee7603746f5fe1f857ad3221f691cd"
+      "sha256": "00f5d37a1ded8a543360bda5eb624080051be3f258cde235248ddfbd88bde5c1"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/CreateApplicationDomainRequest.kt",
@@ -349,6 +369,10 @@
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/StatusRetrieveResponse.kt",
       "sha256": "12dfcc87c25c1fe37397ddc890353e68f40a66c82a32951b9590c01163aaf62b"
+    },
+    {
+      "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/UpdateApplicationRequest.kt",
+      "sha256": "302f5fcf4d3530480d8a6bcafe7b0ee1e199ada915dd4bd78ccc3588e7212950"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/UpdateCertificateRequest.kt",

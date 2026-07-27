@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional
 from ..http_client import HttpClient
-from ..models import ApplicationsDeploymentsCreateResponse201, ApplicationsDeploymentsListResponse, CreateApplicationDeploymentRequest
+from ..models import ApplicationsDeploymentsCreateResponse201, ApplicationsDeploymentsListResponse, ApplicationsDeploymentsRollbackResponse, CreateApplicationDeploymentRequest
 
 def _append_query_string(path: str, raw_query_string: str) -> str:
     query = raw_query_string.lstrip('?')
@@ -219,3 +219,7 @@ class ApplicationDeploymentApplicationsDeploymentsApi:
     def create(self, application_id: str, body: CreateApplicationDeploymentRequest) -> ApplicationsDeploymentsCreateResponse201:
         """Deploy an application"""
         return self._client.post(f"/backend/v3/api/applications/{serialize_path_parameter(application_id, {'name': 'applicationId', 'style': 'simple', 'explode': False})}/deployments", json=body)
+
+    def rollback(self, application_id: str, deployment_id: str) -> ApplicationsDeploymentsRollbackResponse:
+        """Roll back a managed application deployment"""
+        return self._client.post(f"/backend/v3/api/applications/{serialize_path_parameter(application_id, {'name': 'applicationId', 'style': 'simple', 'explode': False})}/deployments/{serialize_path_parameter(deployment_id, {'name': 'deploymentId', 'style': 'simple', 'explode': False})}/rollback")

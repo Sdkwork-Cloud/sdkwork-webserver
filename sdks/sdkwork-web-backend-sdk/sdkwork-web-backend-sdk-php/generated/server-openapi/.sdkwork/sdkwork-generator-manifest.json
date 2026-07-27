@@ -48,15 +48,15 @@
     },
     {
       "path": "src/Api/Application.php",
-      "sha256": "a9ec20d694022238298f7ca2a1eecc0a636479038949922002f56613589cceda"
+      "sha256": "66d17e7ffbb4132c1b5abbf65ba4541d348f6f3b022cf04796c549784bcc2183"
     },
     {
       "path": "src/Api/ApplicationDeployment.php",
-      "sha256": "95eaebb4f8fe05876586e579226df2b3fd4ce79e6587cd3e86d017c35f5ddc82"
+      "sha256": "587c20dc52a0ed3941444ade75017d6ca8232f9d6192ca36876d4f590722ac5e"
     },
     {
       "path": "src/Api/ApplicationDomain.php",
-      "sha256": "2928a962497f0eba71486cc887e7c1478fcb0bd07834083a9e55154017aac3ab"
+      "sha256": "2e15816d4f74345865bfabf88bb7db966355d5654c6b1b097d7acc3cb21c61bc"
     },
     {
       "path": "src/Api/Audit.php",
@@ -108,7 +108,7 @@
     },
     {
       "path": "src/Models/ApplicationDeploymentResponse.php",
-      "sha256": "957f81fa5d12cb8a192ec65a72677952cf70cf8d95d5f0cf741326c3d9ffa37d"
+      "sha256": "6e65887bf353ed4eb705b75caaf4b61cb83504b868c97410f4d274d68f88fcfa"
     },
     {
       "path": "src/Models/ApplicationDomainResponse.php",
@@ -123,6 +123,10 @@
       "sha256": "f17e0c60d16f0329a93a10f938bd42df138ababbcd889b71ba8946d39ce56062"
     },
     {
+      "path": "src/Models/ApplicationsActivateResponse.php",
+      "sha256": "7c18a1730dc7fdc6959fa99d33b29702a1004fdef2fe3136a84820ade549c702"
+    },
+    {
       "path": "src/Models/ApplicationsCreateResponse201.php",
       "sha256": "3fd9f6ecbdeee8eb7b0b5c7f43eda661ed73ddda05a20abaadc446432805e1a7"
     },
@@ -133,6 +137,10 @@
     {
       "path": "src/Models/ApplicationsDeploymentsListResponse.php",
       "sha256": "494fbb938e90e6624df54ac75cd982f5be223343ac8253f7e2557e62700e36b9"
+    },
+    {
+      "path": "src/Models/ApplicationsDeploymentsRollbackResponse.php",
+      "sha256": "2b363b6d1e6fb53987e518dbe8edbc06b2645a649db4308abcb727688a4a6aa7"
     },
     {
       "path": "src/Models/ApplicationsDomainsCreateResponse201.php",
@@ -149,6 +157,18 @@
     {
       "path": "src/Models/ApplicationsListResponse.php",
       "sha256": "fdbd6e03cc65b0a346a7865b9e63a818a694b6b5985c9cff1967cd30dee798d5"
+    },
+    {
+      "path": "src/Models/ApplicationsPauseResponse.php",
+      "sha256": "6a8efd50bc4cfa1932a7e4573ab6025f5c8035c02f8061bc56e86cdc28eaf5f7"
+    },
+    {
+      "path": "src/Models/ApplicationsRetrieveResponse.php",
+      "sha256": "1b386a3ba37f2da3b3e085452f48a9763db6dcbab143b80376b69b955e5949a8"
+    },
+    {
+      "path": "src/Models/ApplicationsUpdateResponse.php",
+      "sha256": "4e9c1a673681593f30307bb734e18df9bc6572c650f97c644716833b35f9b6aa"
     },
     {
       "path": "src/Models/AuditLogPage.php",
@@ -216,7 +236,7 @@
     },
     {
       "path": "src/Models/CreateApplicationDeploymentRequest.php",
-      "sha256": "966a35b188ecd4ff6e07b20f688a75c1ab3d8c98aef6129ef5aefddb1a516f9f"
+      "sha256": "5cf5b6080b292bf9538db3d2cc8e9333233b49f25a72e71003893af415667250"
     },
     {
       "path": "src/Models/CreateApplicationDomainRequest.php",
@@ -337,6 +357,10 @@
     {
       "path": "src/Models/StatusRetrieveResponse.php",
       "sha256": "271c7942b9b4fb6a8cb5a3bbbc53f138c955bac2d7ccd707d0ec1f2a5817f08c"
+    },
+    {
+      "path": "src/Models/UpdateApplicationRequest.php",
+      "sha256": "4a2072a581d717f42f8ba12e1046b2b007a398688b5f7942a14623f37e75c1dc"
     },
     {
       "path": "src/Models/UpdateCertificateRequest.php",

@@ -17,11 +17,13 @@ impl WebService {
         if tenant_id <= 0 {
             return Err(WebServiceError::Forbidden);
         }
+        let owner_id = Self::owner_filter(context)?;
 
         let (certificate_id, hostname) = self
             .repository
             .insert_certificate_pending(
                 tenant_id,
+                owner_id,
                 &request.domain_id,
                 request.cert_type,
                 request.auto_renew,

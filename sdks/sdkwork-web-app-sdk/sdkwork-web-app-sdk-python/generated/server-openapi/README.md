@@ -25,6 +25,7 @@ client.set_access_token("your-access-token")
 params = {
     'page': 1,
     'page_size': 2,
+    'siteId': 'siteId',
 }
 result = client.certificate.list(params)
 ```
@@ -123,6 +124,7 @@ print(result)
 params = {
     'page': 1,
     'page_size': 2,
+    'siteId': 'siteId',
 }
 result = client.certificate.list(params)
 print(result)
@@ -144,6 +146,7 @@ try:
     params = {
         'page': 1,
         'page_size': 2,
+        'siteId': 'siteId',
     }
     client.certificate.list(params)
 except Exception as error:

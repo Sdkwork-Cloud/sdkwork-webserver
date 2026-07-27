@@ -31,4 +31,3 @@
   "security": { "checksumRequired": true, "signatureRequired": true, "sbomRequired": true },
   "metadata": { "standardOwner": "sdkwork-platform", "component": "sdkwork-webserver-pc", "surface": "pc", "deploymentConfig": "etc/sdkwork.deployment.config.json" }
 }
-

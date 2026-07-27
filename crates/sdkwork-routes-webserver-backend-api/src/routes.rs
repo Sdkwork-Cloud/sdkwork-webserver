@@ -7,17 +7,17 @@ use axum::{
 use sdkwork_webserver_contract::{
     CreateCertificateRequest, CreateDeploymentRequest, CreateDomainRequest,
     CreateNginxConfigRequest, CreateServerRequest, CreateSiteRequest, ListNginxConfigsQuery,
-    ListSitesQuery, UpdateCertificateRequest, UpdateNginxConfigRequest, WebBackendApi,
-    WebBackendRequestContext,
+    ListSitesQuery, UpdateCertificateRequest, UpdateNginxConfigRequest, UpdateSiteRequest,
+    WebBackendApi, WebBackendRequestContext,
 };
 use serde::Deserialize;
 use std::sync::Arc;
 
 use crate::{agent_routes, auth::require_backend_context, paths};
 use sdkwork_routes_webserver_common::{
-    created_resource, ok_audit_log_page, ok_certificate_distribution_page, ok_certificate_page,
-    ok_deployment_page, ok_domain_page, ok_nginx_config_page, ok_resource, ok_server_page,
-    ok_site_page, WebApiError,
+    created_resource, no_content, ok_audit_log_page, ok_certificate_distribution_page,
+    ok_certificate_page, ok_deployment_page, ok_domain_page, ok_nginx_config_page, ok_resource,
+    ok_server_page, ok_site_page, WebApiError,
 };
 
 #[derive(Clone)]
@@ -39,8 +39,20 @@ pub fn build_router_with_shared_backend_api(api: Arc<dyn WebBackendApi>) -> Rout
             get(list_applications).post(create_application),
         )
         .route(
+            paths::APPLICATION,
+            get(retrieve_application)
+                .patch(update_application)
+                .delete(delete_application),
+        )
+        .route(paths::APPLICATION_ACTIVATE, post(activate_application))
+        .route(paths::APPLICATION_PAUSE, post(pause_application))
+        .route(
             paths::APPLICATION_DOMAINS,
             get(list_application_domains).post(create_application_domain),
+        )
+        .route(
+            paths::APPLICATION_DOMAIN,
+            axum::routing::delete(delete_application_domain),
         )
         .route(
             paths::APPLICATION_DOMAIN_VERIFY,
@@ -49,6 +61,10 @@ pub fn build_router_with_shared_backend_api(api: Arc<dyn WebBackendApi>) -> Rout
         .route(
             paths::APPLICATION_DEPLOYMENTS,
             get(list_application_deployments).post(create_application_deployment),
+        )
+        .route(
+            paths::APPLICATION_DEPLOYMENT_ROLLBACK,
+            post(rollback_application_deployment),
         )
         .route(
             paths::CERTIFICATES,
@@ -128,6 +144,72 @@ async fn create_application(
     created_resource(state.api.create_application(&context, &request).await)
 }
 
+async fn retrieve_application(
+    State(state): State<BackendState>,
+    context: Option<Extension<WebBackendRequestContext>>,
+    Path(application_id): Path<String>,
+) -> Result<Response, WebApiError> {
+    let context = require_backend_context(context)?;
+    ok_resource(
+        state
+            .api
+            .retrieve_application(&context, &application_id)
+            .await,
+    )
+}
+
+async fn update_application(
+    State(state): State<BackendState>,
+    context: Option<Extension<WebBackendRequestContext>>,
+    Path(application_id): Path<String>,
+    Json(request): Json<UpdateSiteRequest>,
+) -> Result<Response, WebApiError> {
+    let context = require_backend_context(context)?;
+    ok_resource(
+        state
+            .api
+            .update_application(&context, &application_id, &request)
+            .await,
+    )
+}
+
+async fn delete_application(
+    State(state): State<BackendState>,
+    context: Option<Extension<WebBackendRequestContext>>,
+    Path(application_id): Path<String>,
+) -> Result<Response, WebApiError> {
+    let context = require_backend_context(context)?;
+    no_content(
+        state
+            .api
+            .delete_application(&context, &application_id)
+            .await,
+    )
+}
+
+async fn activate_application(
+    State(state): State<BackendState>,
+    context: Option<Extension<WebBackendRequestContext>>,
+    Path(application_id): Path<String>,
+) -> Result<Response, WebApiError> {
+    let context = require_backend_context(context)?;
+    ok_resource(
+        state
+            .api
+            .activate_application(&context, &application_id)
+            .await,
+    )
+}
+
+async fn pause_application(
+    State(state): State<BackendState>,
+    context: Option<Extension<WebBackendRequestContext>>,
+    Path(application_id): Path<String>,
+) -> Result<Response, WebApiError> {
+    let context = require_backend_context(context)?;
+    ok_resource(state.api.pause_application(&context, &application_id).await)
+}
+
 async fn list_application_domains(
     State(state): State<BackendState>,
     context: Option<Extension<WebBackendRequestContext>>,
@@ -174,6 +256,20 @@ async fn verify_application_domain(
     )
 }
 
+async fn delete_application_domain(
+    State(state): State<BackendState>,
+    context: Option<Extension<WebBackendRequestContext>>,
+    Path((application_id, domain_id)): Path<(String, String)>,
+) -> Result<Response, WebApiError> {
+    let context = require_backend_context(context)?;
+    no_content(
+        state
+            .api
+            .delete_application_domain(&context, &application_id, &domain_id)
+            .await,
+    )
+}
+
 async fn list_application_deployments(
     State(state): State<BackendState>,
     context: Option<Extension<WebBackendRequestContext>>,
@@ -206,6 +302,20 @@ async fn create_application_deployment(
         state
             .api
             .create_application_deployment(&context, &application_id, &request)
+            .await,
+    )
+}
+
+async fn rollback_application_deployment(
+    State(state): State<BackendState>,
+    context: Option<Extension<WebBackendRequestContext>>,
+    Path((application_id, deployment_id)): Path<(String, String)>,
+) -> Result<Response, WebApiError> {
+    let context = require_backend_context(context)?;
+    ok_resource(
+        state
+            .api
+            .rollback_application_deployment(&context, &application_id, &deployment_id)
             .await,
     )
 }

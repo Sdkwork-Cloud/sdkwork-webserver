@@ -45,7 +45,160 @@ func (a *ApplicationApi) ApplicationsCreate(body sdktypes.CreateApplicationReque
     return decodeResult[sdktypes.ApplicationsCreateResponse201](raw)
 }
 
+// Retrieve a managed application
+func (a *ApplicationApi) ApplicationsRetrieve(applicationId string) (sdktypes.ApplicationsRetrieveResponse, error) {
+    raw, err := a.client.Get(BackendApiPath(fmt.Sprintf("/applications/%s", SerializePathParameter(applicationId, PathParameterSpec{Name: "applicationId", Style: "simple", Explode: false}))), nil, nil)
+    if err != nil {
+        var zero sdktypes.ApplicationsRetrieveResponse
+        return zero, err
+    }
+    return decodeResult[sdktypes.ApplicationsRetrieveResponse](raw)
+}
 
+// Update a managed application
+func (a *ApplicationApi) ApplicationsUpdate(applicationId string, body sdktypes.UpdateApplicationRequest) (sdktypes.ApplicationsUpdateResponse, error) {
+    raw, err := a.client.Patch(BackendApiPath(fmt.Sprintf("/applications/%s", SerializePathParameter(applicationId, PathParameterSpec{Name: "applicationId", Style: "simple", Explode: false}))), body, nil, nil, "application/json")
+    if err != nil {
+        var zero sdktypes.ApplicationsUpdateResponse
+        return zero, err
+    }
+    return decodeResult[sdktypes.ApplicationsUpdateResponse](raw)
+}
+
+// Delete a managed application
+func (a *ApplicationApi) ApplicationsDelete(applicationId string) (struct{}, error) {
+    raw, err := a.client.Delete(BackendApiPath(fmt.Sprintf("/applications/%s", SerializePathParameter(applicationId, PathParameterSpec{Name: "applicationId", Style: "simple", Explode: false}))), nil, nil)
+    if err != nil {
+        var zero struct{}
+        return zero, err
+    }
+    return decodeResult[struct{}](raw)
+}
+
+// Activate a managed application
+func (a *ApplicationApi) ApplicationsActivate(applicationId string) (sdktypes.ApplicationsActivateResponse, error) {
+    raw, err := a.client.Post(BackendApiPath(fmt.Sprintf("/applications/%s/activate", SerializePathParameter(applicationId, PathParameterSpec{Name: "applicationId", Style: "simple", Explode: false}))), nil, nil, nil, "")
+    if err != nil {
+        var zero sdktypes.ApplicationsActivateResponse
+        return zero, err
+    }
+    return decodeResult[sdktypes.ApplicationsActivateResponse](raw)
+}
+
+// Pause a managed application
+func (a *ApplicationApi) ApplicationsPause(applicationId string) (sdktypes.ApplicationsPauseResponse, error) {
+    raw, err := a.client.Post(BackendApiPath(fmt.Sprintf("/applications/%s/pause", SerializePathParameter(applicationId, PathParameterSpec{Name: "applicationId", Style: "simple", Explode: false}))), nil, nil, nil, "")
+    if err != nil {
+        var zero sdktypes.ApplicationsPauseResponse
+        return zero, err
+    }
+    return decodeResult[sdktypes.ApplicationsPauseResponse](raw)
+}
+
+type PathParameterSpec struct {
+    Name    string
+    Style   string
+    Explode bool
+}
+
+func SerializePathParameter(value interface{}, spec PathParameterSpec) string {
+    if value == nil {
+        return ""
+    }
+    style := spec.Style
+    if style == "" {
+        style = "simple"
+    }
+
+    switch typed := value.(type) {
+    case []string:
+        return SerializePathArray(spec.Name, stringSliceToInterface(typed), style, spec.Explode)
+    case []int:
+        return SerializePathArray(spec.Name, intSliceToInterface(typed), style, spec.Explode)
+    case []interface{}:
+        return SerializePathArray(spec.Name, typed, style, spec.Explode)
+    case map[string]string:
+        return SerializePathObject(spec.Name, stringMapToInterface(typed), style, spec.Explode)
+    case map[string]int:
+        return SerializePathObject(spec.Name, intMapToInterface(typed), style, spec.Explode)
+    case map[string]interface{}:
+        return SerializePathObject(spec.Name, typed, style, spec.Explode)
+    default:
+        return PathPrefix(spec.Name, style) + url.PathEscape(fmt.Sprint(value))
+    }
+}
+
+func SerializePathArray(name string, values []interface{}, style string, explode bool) string {
+    serialized := make([]string, 0, len(values))
+    for _, item := range values {
+        if item != nil {
+            serialized = append(serialized, url.PathEscape(fmt.Sprint(item)))
+        }
+    }
+    if len(serialized) == 0 {
+        return PathPrefix(name, style)
+    }
+    if style == "matrix" {
+        if explode {
+            parts := make([]string, 0, len(serialized))
+            for _, item := range serialized {
+                parts = append(parts, ";"+name+"="+item)
+            }
+            return strings.Join(parts, "")
+        }
+        return ";" + name + "=" + strings.Join(serialized, ",")
+    }
+    separator := ","
+    if explode {
+        separator = "."
+    }
+    return PathPrefix(name, style) + strings.Join(serialized, separator)
+}
+
+func SerializePathObject(name string, values map[string]interface{}, style string, explode bool) string {
+    entries := make([]string, 0, len(values)*2)
+    exploded := make([]string, 0, len(values))
+    for key, value := range values {
+        if value == nil {
+            continue
+        }
+        escapedKey := url.PathEscape(key)
+        escapedValue := url.PathEscape(fmt.Sprint(value))
+        if explode {
+            if style == "matrix" {
+                exploded = append(exploded, ";"+escapedKey+"="+escapedValue)
+            } else {
+                exploded = append(exploded, escapedKey+"="+escapedValue)
+            }
+        } else {
+            entries = append(entries, escapedKey, escapedValue)
+        }
+    }
+    if style == "matrix" {
+        if explode {
+            return strings.Join(exploded, "")
+        }
+        return ";" + name + "=" + strings.Join(entries, ",")
+    }
+    if explode {
+        separator := ","
+        if style == "label" {
+            separator = "."
+        }
+        return PathPrefix(name, style) + strings.Join(exploded, separator)
+    }
+    return PathPrefix(name, style) + strings.Join(entries, ",")
+}
+
+func PathPrefix(name string, style string) string {
+    if style == "label" {
+        return "."
+    }
+    if style == "matrix" {
+        return ";" + name
+    }
+    return ""
+}
 type QueryParameterSpec struct {
     Name          string
     Value         interface{}

@@ -6,6 +6,12 @@ type DeploymentResponse struct {
 	SiteId string `json:"siteId"`
 	DeployType int `json:"deployType"`
 	VersionTag string `json:"versionTag"`
+	CommitHash string `json:"commitHash"`
+	SourceRef string `json:"sourceRef"`
+	Environment string `json:"environment"`
+	ArtifactDriveUri string `json:"artifactDriveUri"`
+	ArtifactSize string `json:"artifactSize"`
+	ArtifactHash string `json:"artifactHash"`
 	Status int `json:"status"`
 	StartedAt string `json:"startedAt"`
 	CompletedAt string `json:"completedAt"`

@@ -164,15 +164,21 @@ public struct CreateDeploymentRequest: Codable {
     public let versionTag: String?
     public let commitHash: String?
     public let sourceRef: String?
+    public let artifactDriveUri: String?
+    public let artifactSize: String?
+    public let artifactHash: String?
     public let environment: String?
     public let idempotencyKey: String?
 
 
-    public init(deployType: Int? = nil, versionTag: String? = nil, commitHash: String? = nil, sourceRef: String? = nil, environment: String? = nil, idempotencyKey: String? = nil) {
+    public init(deployType: Int? = nil, versionTag: String? = nil, commitHash: String? = nil, sourceRef: String? = nil, artifactDriveUri: String? = nil, artifactSize: String? = nil, artifactHash: String? = nil, environment: String? = nil, idempotencyKey: String? = nil) {
         self.deployType = deployType
         self.versionTag = versionTag
         self.commitHash = commitHash
         self.sourceRef = sourceRef
+        self.artifactDriveUri = artifactDriveUri
+        self.artifactSize = artifactSize
+        self.artifactHash = artifactHash
         self.environment = environment
         self.idempotencyKey = idempotencyKey
     }
@@ -183,6 +189,12 @@ public struct DeploymentResponse: Codable {
     public let siteId: String?
     public let deployType: Int?
     public let versionTag: String?
+    public let commitHash: String?
+    public let sourceRef: String?
+    public let environment: String?
+    public let artifactDriveUri: String?
+    public let artifactSize: String?
+    public let artifactHash: String?
     public let status: Int?
     public let startedAt: String?
     public let completedAt: String?
@@ -190,11 +202,17 @@ public struct DeploymentResponse: Codable {
     public let createdAt: String?
 
 
-    public init(id: String? = nil, siteId: String? = nil, deployType: Int? = nil, versionTag: String? = nil, status: Int? = nil, startedAt: String? = nil, completedAt: String? = nil, durationMs: String? = nil, createdAt: String? = nil) {
+    public init(id: String? = nil, siteId: String? = nil, deployType: Int? = nil, versionTag: String? = nil, commitHash: String? = nil, sourceRef: String? = nil, environment: String? = nil, artifactDriveUri: String? = nil, artifactSize: String? = nil, artifactHash: String? = nil, status: Int? = nil, startedAt: String? = nil, completedAt: String? = nil, durationMs: String? = nil, createdAt: String? = nil) {
         self.id = id
         self.siteId = siteId
         self.deployType = deployType
         self.versionTag = versionTag
+        self.commitHash = commitHash
+        self.sourceRef = sourceRef
+        self.environment = environment
+        self.artifactDriveUri = artifactDriveUri
+        self.artifactSize = artifactSize
+        self.artifactHash = artifactHash
         self.status = status
         self.startedAt = startedAt
         self.completedAt = completedAt
@@ -273,23 +291,29 @@ public struct CreateCertificateRequest: Codable {
 public struct CertificateResponse: Codable {
     public let id: String?
     public let certName: String?
+    public let domain: String?
     public let certType: Int?
     public let issuer: String?
+    public let fingerprint: String?
     public let notBefore: String?
     public let notAfter: String?
     public let autoRenew: Bool?
+    public let renewalStatus: Int?
     public let status: Int?
     public let createdAt: String?
 
 
-    public init(id: String? = nil, certName: String? = nil, certType: Int? = nil, issuer: String? = nil, notBefore: String? = nil, notAfter: String? = nil, autoRenew: Bool? = nil, status: Int? = nil, createdAt: String? = nil) {
+    public init(id: String? = nil, certName: String? = nil, domain: String? = nil, certType: Int? = nil, issuer: String? = nil, fingerprint: String? = nil, notBefore: String? = nil, notAfter: String? = nil, autoRenew: Bool? = nil, renewalStatus: Int? = nil, status: Int? = nil, createdAt: String? = nil) {
         self.id = id
         self.certName = certName
+        self.domain = domain
         self.certType = certType
         self.issuer = issuer
+        self.fingerprint = fingerprint
         self.notBefore = notBefore
         self.notAfter = notAfter
         self.autoRenew = autoRenew
+        self.renewalStatus = renewalStatus
         self.status = status
         self.createdAt = createdAt
     }

@@ -191,6 +191,327 @@
         "x-sdkwork-route-auth": "dual-token"
       }
     },
+    "/backend/v3/api/applications/{applicationId}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ApplicationIdParam"
+        }
+      ],
+      "get": {
+        "operationId": "applications.retrieve",
+        "summary": "Retrieve a managed application",
+        "tags": [
+          "application"
+        ],
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-api-surface": "backend-api",
+        "x-sdkwork-api-authority": "sdkwork-web.backend",
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-permission": "web.sites.read",
+        "x-sdkwork-owner": "sdkwork-web-server",
+        "responses": {
+          "200": {
+            "description": "Managed application returned successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SdkWorkApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "required": [
+                            "item"
+                          ],
+                          "properties": {
+                            "item": {
+                              "$ref": "#/components/schemas/ApplicationResponse"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        },
+        "x-sdkwork-route-auth": "dual-token"
+      },
+      "patch": {
+        "operationId": "applications.update",
+        "summary": "Update a managed application",
+        "tags": [
+          "application"
+        ],
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-api-surface": "backend-api",
+        "x-sdkwork-api-authority": "sdkwork-web.backend",
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-permission": "web.sites.write",
+        "x-sdkwork-idempotent": true,
+        "x-sdkwork-owner": "sdkwork-web-server",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateApplicationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Managed application updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SdkWorkApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "required": [
+                            "item"
+                          ],
+                          "properties": {
+                            "item": {
+                              "$ref": "#/components/schemas/ApplicationResponse"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        },
+        "x-sdkwork-route-auth": "dual-token"
+      },
+      "delete": {
+        "operationId": "applications.delete",
+        "summary": "Delete a managed application",
+        "tags": [
+          "application"
+        ],
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-api-surface": "backend-api",
+        "x-sdkwork-api-authority": "sdkwork-web.backend",
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-permission": "web.sites.write",
+        "x-sdkwork-idempotent": true,
+        "x-sdkwork-rate-limit-tier": "auth-critical",
+        "x-sdkwork-owner": "sdkwork-web-server",
+        "responses": {
+          "204": {
+            "description": "Managed application deleted successfully."
+          },
+          "404": {
+            "description": "Resource not found.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        },
+        "x-sdkwork-route-auth": "dual-token"
+      }
+    },
+    "/backend/v3/api/applications/{applicationId}/activate": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ApplicationIdParam"
+        }
+      ],
+      "post": {
+        "operationId": "applications.activate",
+        "summary": "Activate a managed application",
+        "tags": [
+          "application"
+        ],
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-api-surface": "backend-api",
+        "x-sdkwork-api-authority": "sdkwork-web.backend",
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-permission": "web.sites.write",
+        "x-sdkwork-idempotent": true,
+        "x-sdkwork-rate-limit-tier": "auth-critical",
+        "x-sdkwork-owner": "sdkwork-web-server",
+        "responses": {
+          "200": {
+            "description": "Managed application activated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SdkWorkApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "required": [
+                            "item"
+                          ],
+                          "properties": {
+                            "item": {
+                              "$ref": "#/components/schemas/ApplicationResponse"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        },
+        "x-sdkwork-route-auth": "dual-token"
+      }
+    },
+    "/backend/v3/api/applications/{applicationId}/pause": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ApplicationIdParam"
+        }
+      ],
+      "post": {
+        "operationId": "applications.pause",
+        "summary": "Pause a managed application",
+        "tags": [
+          "application"
+        ],
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-api-surface": "backend-api",
+        "x-sdkwork-api-authority": "sdkwork-web.backend",
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-permission": "web.sites.write",
+        "x-sdkwork-idempotent": true,
+        "x-sdkwork-rate-limit-tier": "auth-critical",
+        "x-sdkwork-owner": "sdkwork-web-server",
+        "responses": {
+          "200": {
+            "description": "Managed application paused successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SdkWorkApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "required": [
+                            "item"
+                          ],
+                          "properties": {
+                            "item": {
+                              "$ref": "#/components/schemas/ApplicationResponse"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        },
+        "x-sdkwork-route-auth": "dual-token"
+      }
+    },
     "/backend/v3/api/applications/{applicationId}/domains": {
       "parameters": [
         {
@@ -320,6 +641,53 @@
                       }
                     }
                   ]
+                }
+              }
+            }
+          }
+        },
+        "x-sdkwork-route-auth": "dual-token"
+      }
+    },
+    "/backend/v3/api/applications/{applicationId}/domains/{domainId}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ApplicationIdParam"
+        },
+        {
+          "$ref": "#/components/parameters/DomainIdParam"
+        }
+      ],
+      "delete": {
+        "operationId": "applications.domains.delete",
+        "summary": "Unbind an application public domain",
+        "tags": [
+          "applicationDomain"
+        ],
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-api-surface": "backend-api",
+        "x-sdkwork-api-authority": "sdkwork-web.backend",
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-permission": "web.sites.write",
+        "x-sdkwork-idempotent": true,
+        "x-sdkwork-rate-limit-tier": "auth-critical",
+        "x-sdkwork-owner": "sdkwork-web-server",
+        "responses": {
+          "204": {
+            "description": "Application domain unbound successfully."
+          },
+          "404": {
+            "description": "Resource not found.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -530,6 +898,80 @@
                       }
                     }
                   ]
+                }
+              }
+            }
+          }
+        },
+        "x-sdkwork-route-auth": "dual-token"
+      }
+    },
+    "/backend/v3/api/applications/{applicationId}/deployments/{deploymentId}/rollback": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ApplicationIdParam"
+        },
+        {
+          "$ref": "#/components/parameters/DeploymentIdParam"
+        }
+      ],
+      "post": {
+        "operationId": "applications.deployments.rollback",
+        "summary": "Roll back a managed application deployment",
+        "tags": [
+          "applicationDeployment"
+        ],
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-api-surface": "backend-api",
+        "x-sdkwork-api-authority": "sdkwork-web.backend",
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-permission": "web.sites.write",
+        "x-sdkwork-idempotent": true,
+        "x-sdkwork-rate-limit-tier": "auth-critical",
+        "x-sdkwork-owner": "sdkwork-web-server",
+        "responses": {
+          "200": {
+            "description": "Application rollback command created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SdkWorkApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "required": [
+                            "item"
+                          ],
+                          "properties": {
+                            "item": {
+                              "$ref": "#/components/schemas/ApplicationDeploymentResponse"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -1903,6 +2345,15 @@
           "format": "uuid"
         }
       },
+      "DeploymentIdParam": {
+        "name": "deploymentId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
       "CertificateIdParam": {
         "name": "certificateId",
         "in": "path",
@@ -2060,6 +2511,25 @@
             "type": "integer",
             "minimum": 1,
             "maximum": 6
+          },
+          "runtimeConfig": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "UpdateApplicationRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 500
           },
           "runtimeConfig": {
             "type": "object",
@@ -2227,8 +2697,38 @@
           },
           "environment": {
             "type": "string",
-            "maxLength": 100,
+            "maxLength": 32,
             "default": "production"
+          },
+          "versionTag": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "commitHash": {
+            "type": "string",
+            "maxLength": 64
+          },
+          "sourceRef": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "artifactDriveUri": {
+            "type": "string",
+            "maxLength": 500,
+            "pattern": "^drive://spaces/[^/?#]+/nodes/[^/?#]+$",
+            "description": "Stable Drive resource identity. Signed delivery URLs are forbidden."
+          },
+          "artifactSize": {
+            "type": "string",
+            "format": "int64",
+            "pattern": "^[1-9][0-9]*$",
+            "x-sdkwork-int64-string": true,
+            "x-sdkwork-rust-type": "i64"
+          },
+          "artifactHash": {
+            "type": "string",
+            "pattern": "^[A-Fa-f0-9]{64}$",
+            "description": "SHA-256 hexadecimal digest of the uploaded package."
           },
           "idempotencyKey": {
             "type": "string",
@@ -2245,6 +2745,7 @@
           "siteId",
           "status",
           "deployType",
+          "environment",
           "createdAt"
         ],
         "properties": {
@@ -2261,6 +2762,48 @@
           },
           "deployType": {
             "type": "integer"
+          },
+          "environment": {
+            "type": "string"
+          },
+          "versionTag": {
+            "type": "string"
+          },
+          "commitHash": {
+            "type": "string"
+          },
+          "sourceRef": {
+            "type": "string"
+          },
+          "artifactDriveUri": {
+            "type": "string",
+            "pattern": "^drive://spaces/[^/?#]+/nodes/[^/?#]+$"
+          },
+          "artifactSize": {
+            "type": "string",
+            "format": "int64",
+            "pattern": "^[1-9][0-9]*$",
+            "x-sdkwork-int64-string": true,
+            "x-sdkwork-rust-type": "i64"
+          },
+          "artifactHash": {
+            "type": "string",
+            "pattern": "^[A-Fa-f0-9]{64}$"
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "durationMs": {
+            "type": "string",
+            "format": "int64",
+            "pattern": "^[0-9]+$",
+            "x-sdkwork-int64-string": true,
+            "x-sdkwork-rust-type": "i64"
           },
           "createdAt": {
             "type": "string",

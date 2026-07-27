@@ -24,15 +24,15 @@
     },
     {
       "path": "Api/ApplicationApi.cs",
-      "sha256": "5019204638c928cea2da5a14832d297130192b9cfb693498c3f8df639b7ff027"
+      "sha256": "833c11649fab26ea81e50378b175823e3f7644c42fa84a546a10f2971976327e"
     },
     {
       "path": "Api/ApplicationDeploymentApi.cs",
-      "sha256": "a60a5948168ec82fe1d6c3672ae109afa5701cf370c3481d008a58e8562bdd93"
+      "sha256": "86f275ccec6efd31ae567da4d5b785bbd194aef5c8aa82abd6454d3a83d81a4f"
     },
     {
       "path": "Api/ApplicationDomainApi.cs",
-      "sha256": "9d2153a95b292847b23c013f7016c97ef3690ce42603231d67e37aa9a75154e5"
+      "sha256": "aded1f9dcd91d3710b4c29bc01c418f4766957e698e89c3fe9a52d326a56667b"
     },
     {
       "path": "Api/AuditApi.cs",
@@ -100,7 +100,7 @@
     },
     {
       "path": "Models/ApplicationDeploymentResponse.cs",
-      "sha256": "99975d2f921e52ce7a8befff1b541b81735314e0900c03ab596fb130b5dc18df"
+      "sha256": "2917f71c6633f12abfae0cf368c024dd4719665908a3569e2e54f25c699c93f4"
     },
     {
       "path": "Models/ApplicationDomainResponse.cs",
@@ -115,6 +115,10 @@
       "sha256": "94fdd2bb61e99734efef2d314677132009a8963d0c6cbb31140f69e1743cceb6"
     },
     {
+      "path": "Models/ApplicationsActivateResponse.cs",
+      "sha256": "b9d683ca902a02698c33b0ee27bafa78ad7b2ba82da3b5a0f2e6adcb8d0b73b0"
+    },
+    {
       "path": "Models/ApplicationsCreateResponse201.cs",
       "sha256": "a5aec3fb913e2f77e39d7299dd6c33477dc0b78f5b6f178b41eb71a00d61b7c5"
     },
@@ -125,6 +129,10 @@
     {
       "path": "Models/ApplicationsDeploymentsListResponse.cs",
       "sha256": "a400443e5ac1ec53e788669632ce7ef628ca92394acc0bce12b85594fbae9849"
+    },
+    {
+      "path": "Models/ApplicationsDeploymentsRollbackResponse.cs",
+      "sha256": "6e8e1f5329f7ba0ec1089d8764608f81ccdfd5c5b4150114c63f2b254d3e8137"
     },
     {
       "path": "Models/ApplicationsDomainsCreateResponse201.cs",
@@ -141,6 +149,18 @@
     {
       "path": "Models/ApplicationsListResponse.cs",
       "sha256": "d7c8c77bab76a76dd5e5b81c22dce6b93063ef748762e3e046596df2bdabda19"
+    },
+    {
+      "path": "Models/ApplicationsPauseResponse.cs",
+      "sha256": "f414bdbdd31f84a9df53fb9210ab766698f2239778882221ba01b42304bb8d13"
+    },
+    {
+      "path": "Models/ApplicationsRetrieveResponse.cs",
+      "sha256": "9e7e16c3503e247c6a1418dda17abb9a1ba9cc07ebee763db2b2f87000e70ceb"
+    },
+    {
+      "path": "Models/ApplicationsUpdateResponse.cs",
+      "sha256": "01f17c93168f0013387215c508243b8ca330a3f1e0c3765cdc63fdbe85b67a5a"
     },
     {
       "path": "Models/AuditLogPage.cs",
@@ -208,7 +228,7 @@
     },
     {
       "path": "Models/CreateApplicationDeploymentRequest.cs",
-      "sha256": "4211c42fc5ae6e6d2ea03355d1b70efe92996bc6cd0d6a1f1ef9be63ad32da86"
+      "sha256": "508d7d8a7edea3b82ed98f66aa3ba625be41e15452c5e4a0ac1aa66163ef1569"
     },
     {
       "path": "Models/CreateApplicationDomainRequest.cs",
@@ -329,6 +349,10 @@
     {
       "path": "Models/StatusRetrieveResponse.cs",
       "sha256": "dcbcada4a6fba13ed6999b9658054c4f339b7ea03439f7e58ece882a79532a5a"
+    },
+    {
+      "path": "Models/UpdateApplicationRequest.cs",
+      "sha256": "63bcde8e42d7dbea6186fc37ef2db067be3326906f417cd3c665bbd39091e31f"
     },
     {
       "path": "Models/UpdateCertificateRequest.cs",

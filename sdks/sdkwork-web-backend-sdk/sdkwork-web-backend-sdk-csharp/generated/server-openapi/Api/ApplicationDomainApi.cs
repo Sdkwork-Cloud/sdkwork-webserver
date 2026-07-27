@@ -37,6 +37,14 @@ namespace SDKWork.Web.BackendSdk.Api
         }
 
         /// <summary>
+        /// Unbind an application public domain
+        /// </summary>
+        public async Task ApplicationsDomainsDeleteAsync(string applicationId, string domainId)
+        {
+            await _client.DeleteAsync<object>(ApiPaths.BackendPath($"/applications/{SerializePathParameter(applicationId, new PathParameterSpec("applicationId", "simple", false))}/domains/{SerializePathParameter(domainId, new PathParameterSpec("domainId", "simple", false))}"));
+        }
+
+        /// <summary>
         /// Verify an application public domain
         /// </summary>
         public async Task<SDKWork.Web.BackendSdk.Models.ApplicationsDomainsVerifyResponse?> ApplicationsDomainsVerifyAsync(string applicationId, string domainId)

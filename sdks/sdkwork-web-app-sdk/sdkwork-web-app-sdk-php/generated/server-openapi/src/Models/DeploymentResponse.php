@@ -14,6 +14,18 @@ final class DeploymentResponse
 
     public ?string $versionTag = null;
 
+    public ?string $commitHash = null;
+
+    public ?string $sourceRef = null;
+
+    public ?string $environment = null;
+
+    public ?string $artifactDriveUri = null;
+
+    public ?string $artifactSize = null;
+
+    public ?string $artifactHash = null;
+
     public ?int $status = null;
 
     public ?string $startedAt = null;
@@ -38,6 +50,24 @@ final class DeploymentResponse
             : null;
         $this->versionTag = array_key_exists('versionTag', $data)
             ? $data['versionTag']
+            : null;
+        $this->commitHash = array_key_exists('commitHash', $data)
+            ? $data['commitHash']
+            : null;
+        $this->sourceRef = array_key_exists('sourceRef', $data)
+            ? $data['sourceRef']
+            : null;
+        $this->environment = array_key_exists('environment', $data)
+            ? $data['environment']
+            : null;
+        $this->artifactDriveUri = array_key_exists('artifactDriveUri', $data)
+            ? $data['artifactDriveUri']
+            : null;
+        $this->artifactSize = array_key_exists('artifactSize', $data)
+            ? $data['artifactSize']
+            : null;
+        $this->artifactHash = array_key_exists('artifactHash', $data)
+            ? $data['artifactHash']
             : null;
         $this->status = array_key_exists('status', $data)
             ? $data['status']
@@ -68,6 +98,12 @@ final class DeploymentResponse
             'siteId' => $this->siteId,
             'deployType' => $this->deployType,
             'versionTag' => $this->versionTag,
+            'commitHash' => $this->commitHash,
+            'sourceRef' => $this->sourceRef,
+            'environment' => $this->environment,
+            'artifactDriveUri' => $this->artifactDriveUri,
+            'artifactSize' => $this->artifactSize,
+            'artifactHash' => $this->artifactHash,
             'status' => $this->status,
             'startedAt' => $this->startedAt,
             'completedAt' => $this->completedAt,

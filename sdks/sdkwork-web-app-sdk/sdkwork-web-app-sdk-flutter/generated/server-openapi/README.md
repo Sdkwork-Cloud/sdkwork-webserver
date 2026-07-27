@@ -24,6 +24,7 @@ client.setAccessToken('your-access-token');
 final params = <String, dynamic>{
   'page': 1,
   'page_size': 2,
+  'siteId': '00000000-0000-0000-0000-000000000001',
 };
 final result = await client.certificate.certificatesList(params);
 print(result);
@@ -114,6 +115,7 @@ print(result);
 final params = <String, dynamic>{
   'page': 1,
   'page_size': 2,
+  'siteId': '00000000-0000-0000-0000-000000000001',
 };
 final result = await client.certificate.certificatesList(params);
 print(result);
@@ -134,6 +136,7 @@ try {
   final params = <String, dynamic>{
     'page': 1,
     'page_size': 2,
+    'siteId': '00000000-0000-0000-0000-000000000001',
   };
   final result = await client.certificate.certificatesList(params);
   print(result);

@@ -224,6 +224,9 @@
       "knowledgebase.wiki.search.changed.v1"
     ],
     "configKeys": [
+      "SDKWORK_ENVIRONMENT",
+      "SDKWORK_WEB_ENVIRONMENT",
+      "SDKWORK_CORS_ALLOWED_ORIGINS",
       "SDKWORK_WEB_RUNTIME_ASSIGNMENT_SOURCE",
       "SDKWORK_WEB_INTERNAL_API_BASE_URL",
       "SDKWORK_WEB_NODE_TOKEN_FILE",

@@ -25,6 +25,12 @@ class ApplicationDeploymentApi(private val client: HttpClient) {
         return client.convertValue(raw, object : TypeReference<ApplicationsDeploymentsCreateResponse201>() {})
     }
 
+    /** Roll back a managed application deployment */
+    suspend fun applicationsDeploymentsRollback(applicationId: String, deploymentId: String): ApplicationsDeploymentsRollbackResponse? {
+        val raw = client.post(ApiPaths.backendPath("/applications/${serializePathParameter(applicationId, PathParameterSpec("applicationId", "simple", false))}/deployments/${serializePathParameter(deploymentId, PathParameterSpec("deploymentId", "simple", false))}/rollback"), null)
+        return client.convertValue(raw, object : TypeReference<ApplicationsDeploymentsRollbackResponse>() {})
+    }
+
     private data class PathParameterSpec(val name: String, val style: String, val explode: Boolean)
 
     private fun serializePathParameter(value: Any?, spec: PathParameterSpec): String {

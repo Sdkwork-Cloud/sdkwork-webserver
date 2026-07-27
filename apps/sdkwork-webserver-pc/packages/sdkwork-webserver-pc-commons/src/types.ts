@@ -44,31 +44,64 @@ export interface WebserverResourcePage {
 }
 
 export interface WebserverResourceQuery {
+  filters?: Readonly<Record<string, string>>;
   page: number;
   pageSize: number;
   scopeId?: string;
   search?: string;
 }
 
+export interface WebserverResourceFilter {
+  fieldOptions?: readonly WebserverResourceFieldOptionValue[];
+  id: string;
+  type: "date" | "select" | "text";
+}
+
 export interface WebserverResourceActionContext {
   body: Record<string, unknown>;
+  file?: File;
+  idempotencyKey?: string;
+  onProgress?(progress: number): void;
   selectedItem?: Record<string, unknown>;
   scopeId?: string;
 }
 
+export interface WebserverResourceFieldOption {
+  label: string;
+  value: number | string;
+}
+
+export type WebserverResourceFieldOptionValue =
+  | number
+  | string
+  | WebserverResourceFieldOption;
+
+export type WebserverResourceFieldOptions = Readonly<
+  Record<string, readonly WebserverResourceFieldOptionValue[]>
+>;
+
 export interface WebserverResourceAction {
+  acceptedFileTypes?: string;
+  availableWhen?(context: WebserverResourceActionContext): boolean;
   bodyTemplate: Record<string, unknown>;
   dangerous?: boolean;
   execute(context: WebserverResourceActionContext): Promise<unknown>;
-  fieldOptions?: Readonly<Record<string, readonly (number | string)[]>>;
+  fieldOptions?: WebserverResourceFieldOptions;
   id: string;
   label: string;
+  loadFieldOptions?(context: WebserverResourceActionContext): Promise<WebserverResourceFieldOptions>;
+  permission?: string;
+  requiredFields?: readonly string[];
+  resultFields?: readonly string[];
+  requiresConfirmation?: boolean;
+  requiresFile?: boolean;
   requiresScope?: boolean;
   requiresSelection?: boolean;
 }
 
 export interface WebserverResourceDataSource {
   actions: readonly WebserverResourceAction[];
+  filters?: readonly WebserverResourceFilter[];
   load(query: WebserverResourceQuery): Promise<WebserverResourcePage>;
   requiresScope?: boolean;
   scopeKind?: "application" | "site";

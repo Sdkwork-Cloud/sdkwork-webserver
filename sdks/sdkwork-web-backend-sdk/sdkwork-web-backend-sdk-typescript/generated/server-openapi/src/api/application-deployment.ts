@@ -32,6 +32,11 @@ export class ApplicationDeploymentApplicationsDeploymentsApi {
   async create(applicationId: string, body: CreateApplicationDeploymentRequest, requestOptions?: ApiRequestOptions): Promise<ApplicationDeploymentResponse> {
     return this.client.request<ApplicationDeploymentResponse>(backendApiPath(`/applications/${serializePathParameter(applicationId, { name: 'applicationId', style: 'simple', explode: false })}/deployments`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, body, contentType: 'application/json' });
   }
+
+/** Roll back a managed application deployment */
+  async rollback(applicationId: string, deploymentId: string, requestOptions?: ApiRequestOptions): Promise<ApplicationDeploymentResponse> {
+    return this.client.request<ApplicationDeploymentResponse>(backendApiPath(`/applications/${serializePathParameter(applicationId, { name: 'applicationId', style: 'simple', explode: false })}/deployments/${serializePathParameter(deploymentId, { name: 'deploymentId', style: 'simple', explode: false })}/rollback`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any });
+  }
 }
 
 export class ApplicationDeploymentApplicationsApi {

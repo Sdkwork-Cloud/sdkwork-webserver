@@ -24,6 +24,7 @@ client.set_access_token("your-access-token");
     let mut query = HashMap::new();
     query.insert("page".to_string(), serde_json::json!(1));
     query.insert("page_size".to_string(), serde_json::json!(2));
+    query.insert("siteId".to_string(), serde_json::json!("00000000-0000-0000-0000-000000000001"));
     let result = client.certificate().certificates_list(Some(&query)).await?;
     println!("{result:?}");
     Ok(())
@@ -119,6 +120,7 @@ use std::collections::HashMap;
 let mut query = HashMap::new();
 query.insert("page".to_string(), serde_json::json!(1));
 query.insert("page_size".to_string(), serde_json::json!(2));
+query.insert("siteId".to_string(), serde_json::json!("00000000-0000-0000-0000-000000000001"));
 let result = client.certificate().certificates_list(Some(&query)).await?;
 println!("{result:?}");
 ```
@@ -145,6 +147,7 @@ let outcome: Result<(), _> = async {
     let mut query = HashMap::new();
     query.insert("page".to_string(), serde_json::json!(1));
     query.insert("page_size".to_string(), serde_json::json!(2));
+    query.insert("siteId".to_string(), serde_json::json!("00000000-0000-0000-0000-000000000001"));
     client.certificate().certificates_list(Some(&query)).await?;
     Ok(())
 }.await;

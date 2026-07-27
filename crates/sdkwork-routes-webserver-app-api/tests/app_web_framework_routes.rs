@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use axum::body::Body;
-use axum::http::{Request, StatusCode};
+use axum::http::{header, Request, StatusCode};
 use http_body_util::BodyExt;
 use sdkwork_iam_web_adapter::IamWebRequestContextResolver;
 use sdkwork_routes_webserver_app_api::{
@@ -33,6 +33,73 @@ async fn app_router_web_framework_rejects_unauthenticated_requests() {
         .unwrap();
 
     assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
+}
+
+#[tokio::test]
+async fn app_router_handles_sdk_browser_preflight_through_the_framework_policy() {
+    let app = wrap_router_with_web_framework_and_metrics(
+        DefaultWebRequestContextResolver::default(),
+        build_router_with_shared_app_api(Arc::new(StubAppApi)),
+        HttpMetricsRegistry::new(),
+    );
+    let response = app
+        .clone()
+        .oneshot(
+            Request::builder()
+                .method("OPTIONS")
+                .uri("/app/v3/api/sites")
+                .header(header::ORIGIN, "http://127.0.0.1:5182")
+                .header(header::ACCESS_CONTROL_REQUEST_METHOD, "GET")
+                .header(
+                    header::ACCESS_CONTROL_REQUEST_HEADERS,
+                    "authorization,access-token,content-type,idempotency-key,x-content-sha256,x-idempotency-fingerprint",
+                )
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(response.status(), StatusCode::NO_CONTENT);
+    assert_eq!(
+        response
+            .headers()
+            .get(header::ACCESS_CONTROL_ALLOW_ORIGIN)
+            .and_then(|value| value.to_str().ok()),
+        Some("http://127.0.0.1:5182")
+    );
+    assert_eq!(
+        response
+            .headers()
+            .get(header::ACCESS_CONTROL_ALLOW_CREDENTIALS)
+            .and_then(|value| value.to_str().ok()),
+        Some("true")
+    );
+    assert!(response
+        .headers()
+        .get(header::VARY)
+        .and_then(|value| value.to_str().ok())
+        .is_some_and(|value| value
+            .split(',')
+            .any(|part| part.trim().eq_ignore_ascii_case("origin"))));
+
+    let rejected = app
+        .oneshot(
+            Request::builder()
+                .method("OPTIONS")
+                .uri("/app/v3/api/sites")
+                .header(header::ORIGIN, "https://evil.example.com")
+                .header(header::ACCESS_CONTROL_REQUEST_METHOD, "GET")
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    assert_eq!(rejected.status(), StatusCode::FORBIDDEN);
+    assert!(rejected
+        .headers()
+        .get(header::ACCESS_CONTROL_ALLOW_ORIGIN)
+        .is_none());
 }
 
 #[tokio::test]
@@ -286,6 +353,7 @@ impl WebAppApi for StubAppApi {
     async fn list_certificates(
         &self,
         _context: &WebAppRequestContext,
+        _site_id: Option<&str>,
         _page: i32,
         _page_size: i32,
     ) -> WebServiceResult<sdkwork_webserver_contract::CertificatePage> {

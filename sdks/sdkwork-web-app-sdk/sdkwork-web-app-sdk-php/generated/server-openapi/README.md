@@ -19,7 +19,7 @@ use SDKWork\Web\AppSdk\SdkConfig;
 
 $config = new SdkConfig(baseUrl: 'http://localhost:3800');
 $client = new SdkworkAppClient($config);
-$$params = ['page' => 1, 'page_size' => 2];
+$$params = ['page' => 1, 'page_size' => 2, 'siteId' => '00000000-0000-0000-0000-000000000001'];
 $result = $client->certificate->certificatesList($params);
 
 
@@ -113,7 +113,7 @@ var_dump($result);
 <?php
 
 // 获取证书列表
-$params = ['page' => 1, 'page_size' => 2];
+$params = ['page' => 1, 'page_size' => 2, 'siteId' => '00000000-0000-0000-0000-000000000001'];
 $result = $client->certificate->certificatesList($params);
 var_dump($result);
 ```
@@ -142,7 +142,7 @@ $config = new SdkConfig(baseUrl: 'http://localhost:3800');
 $client = new SdkworkAppClient($config);
 
 try {
-    $params = ['page' => 1, 'page_size' => 2];
+    $params = ['page' => 1, 'page_size' => 2, 'siteId' => '00000000-0000-0000-0000-000000000001'];
     $client->certificate->certificatesList($params);
 } catch (\Throwable $e) {
     echo "Error: {$e->getMessage()}\n";

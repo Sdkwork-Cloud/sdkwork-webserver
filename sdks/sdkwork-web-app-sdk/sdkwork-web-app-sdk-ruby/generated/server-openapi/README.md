@@ -15,7 +15,7 @@ require 'sdkwork/app_sdk'
 
 config = Sdkwork::AppSdk::SdkConfig.new(base_url: 'http://localhost:3800')
 client = Sdkwork::AppSdk::SdkworkAppClient.new(config)
-params = { 'page' => 1, 'page_size' => 2 }
+params = { 'page' => 1, 'page_size' => 2, 'siteId' => '00000000-0000-0000-0000-000000000001' }
 result = client.certificate.certificates_list(params: params)
 
 
@@ -94,7 +94,7 @@ puts result.inspect
 
 ```ruby
 # 获取证书列表
-params = { 'page' => 1, 'page_size' => 2 }
+params = { 'page' => 1, 'page_size' => 2, 'siteId' => '00000000-0000-0000-0000-000000000001' }
 result = client.certificate.certificates_list(params: params)
 puts result.inspect
 ```
@@ -112,7 +112,7 @@ puts result.inspect
 
 ```ruby
 begin
-  params = { 'page' => 1, 'page_size' => 2 }
+  params = { 'page' => 1, 'page_size' => 2, 'siteId' => '00000000-0000-0000-0000-000000000001' }
   client.certificate.certificates_list(params: params)
 rescue StandardError => e
   warn("Error: #{e.message}")

@@ -75,6 +75,16 @@ struct PageQuery {
 }
 
 #[derive(Debug, Deserialize)]
+struct CertificatePageQuery {
+    #[serde(default = "default_page")]
+    page: i32,
+    #[serde(default = "default_page_size")]
+    page_size: i32,
+    #[serde(rename = "siteId", alias = "site_id")]
+    site_id: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
 struct DeploymentListQuery {
     #[serde(default = "default_page")]
     page: i32,
@@ -326,13 +336,18 @@ async fn create_env_variable(
 async fn list_certificates(
     State(state): State<AppState>,
     context: Option<Extension<WebAppRequestContext>>,
-    Query(query): Query<PageQuery>,
+    Query(query): Query<CertificatePageQuery>,
 ) -> Result<Response, WebApiError> {
     let context = require_app_context(context)?;
     ok_certificate_page(
         state
             .api
-            .list_certificates(&context, query.page, query.page_size)
+            .list_certificates(
+                &context,
+                query.site_id.as_deref(),
+                query.page,
+                query.page_size,
+            )
             .await,
         query.page,
         query.page_size,

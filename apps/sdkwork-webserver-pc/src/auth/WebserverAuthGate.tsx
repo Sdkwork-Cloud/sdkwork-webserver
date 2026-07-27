@@ -70,7 +70,7 @@ export function WebserverAuthGate({
   if (onAuthRoute && state.isAuthenticated) {
     const redirectTarget = resolveAuthRedirectTarget(
       new URLSearchParams(location.search).get("redirect"),
-      "/console",
+      "/",
       "/auth",
     );
     return <Navigate to={redirectTarget} replace />;

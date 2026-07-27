@@ -2,7 +2,7 @@ module Sdkwork
   module AppSdk
     module Models
       class DeploymentResponse
-              attr_accessor :id, :site_id, :deploy_type, :version_tag, :status, :started_at, :completed_at, :duration_ms, :created_at
+              attr_accessor :id, :site_id, :deploy_type, :version_tag, :commit_hash, :source_ref, :environment, :artifact_drive_uri, :artifact_size, :artifact_hash, :status, :started_at, :completed_at, :duration_ms, :created_at
 
               def initialize(attributes = {})
                 attributes = (attributes || {}).transform_keys(&:to_s)
@@ -10,6 +10,12 @@ module Sdkwork
                 @site_id = attributes['siteId']
                 @deploy_type = attributes['deployType']
                 @version_tag = attributes['versionTag']
+                @commit_hash = attributes['commitHash']
+                @source_ref = attributes['sourceRef']
+                @environment = attributes['environment']
+                @artifact_drive_uri = attributes['artifactDriveUri']
+                @artifact_size = attributes['artifactSize']
+                @artifact_hash = attributes['artifactHash']
                 @status = attributes['status']
                 @started_at = attributes['startedAt']
                 @completed_at = attributes['completedAt']
@@ -29,6 +35,12 @@ module Sdkwork
                   'siteId' => @site_id,
                   'deployType' => @deploy_type,
                   'versionTag' => @version_tag,
+                  'commitHash' => @commit_hash,
+                  'sourceRef' => @source_ref,
+                  'environment' => @environment,
+                  'artifactDriveUri' => @artifact_drive_uri,
+                  'artifactSize' => @artifact_size,
+                  'artifactHash' => @artifact_hash,
                   'status' => @status,
                   'startedAt' => @started_at,
                   'completedAt' => @completed_at,

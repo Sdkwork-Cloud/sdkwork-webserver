@@ -20,6 +20,48 @@ const HTTP_ROUTES: &[HttpRoute] = &[
     .with_idempotent(true),
     HttpRoute::dual_token(
         HttpMethod::Get,
+        "/backend/v3/api/applications/{applicationId}",
+        "application",
+        "applications.retrieve",
+    )
+    .with_required_permission("web.sites.read"),
+    HttpRoute::dual_token(
+        HttpMethod::Patch,
+        "/backend/v3/api/applications/{applicationId}",
+        "application",
+        "applications.update",
+    )
+    .with_required_permission("web.sites.write")
+    .with_idempotent(true),
+    HttpRoute::dual_token(
+        HttpMethod::Delete,
+        "/backend/v3/api/applications/{applicationId}",
+        "application",
+        "applications.delete",
+    )
+    .with_required_permission("web.sites.write")
+    .with_idempotent(true)
+    .with_rate_limit_tier(RateLimitTier::AuthCritical),
+    HttpRoute::dual_token(
+        HttpMethod::Post,
+        "/backend/v3/api/applications/{applicationId}/activate",
+        "application",
+        "applications.activate",
+    )
+    .with_required_permission("web.sites.write")
+    .with_idempotent(true)
+    .with_rate_limit_tier(RateLimitTier::AuthCritical),
+    HttpRoute::dual_token(
+        HttpMethod::Post,
+        "/backend/v3/api/applications/{applicationId}/pause",
+        "application",
+        "applications.pause",
+    )
+    .with_required_permission("web.sites.write")
+    .with_idempotent(true)
+    .with_rate_limit_tier(RateLimitTier::AuthCritical),
+    HttpRoute::dual_token(
+        HttpMethod::Get,
         "/backend/v3/api/applications/{applicationId}/domains",
         "applicationDomain",
         "applications.domains.list",
@@ -33,6 +75,15 @@ const HTTP_ROUTES: &[HttpRoute] = &[
     )
     .with_required_permission("web.sites.write")
     .with_idempotent(true),
+    HttpRoute::dual_token(
+        HttpMethod::Delete,
+        "/backend/v3/api/applications/{applicationId}/domains/{domainId}",
+        "applicationDomain",
+        "applications.domains.delete",
+    )
+    .with_required_permission("web.sites.write")
+    .with_idempotent(true)
+    .with_rate_limit_tier(RateLimitTier::AuthCritical),
     HttpRoute::dual_token(
         HttpMethod::Post,
         "/backend/v3/api/applications/{applicationId}/domains/{domainId}/verify",
@@ -53,6 +104,15 @@ const HTTP_ROUTES: &[HttpRoute] = &[
         "/backend/v3/api/applications/{applicationId}/deployments",
         "applicationDeployment",
         "applications.deployments.create",
+    )
+    .with_required_permission("web.sites.write")
+    .with_idempotent(true)
+    .with_rate_limit_tier(RateLimitTier::AuthCritical),
+    HttpRoute::dual_token(
+        HttpMethod::Post,
+        "/backend/v3/api/applications/{applicationId}/deployments/{deploymentId}/rollback",
+        "applicationDeployment",
+        "applications.deployments.rollback",
     )
     .with_required_permission("web.sites.write")
     .with_idempotent(true)
@@ -201,4 +261,94 @@ const HTTP_ROUTES: &[HttpRoute] = &[
 
 pub fn backend_route_manifest() -> HttpRouteManifest {
     HttpRouteManifest::new(HTTP_ROUTES)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use sdkwork_web_core::RouteAuth;
+
+    #[test]
+    fn application_control_plane_routes_keep_authorization_contracts() {
+        let expected = [
+            (
+                HttpMethod::Get,
+                "applications.retrieve",
+                "web.sites.read",
+                false,
+                None,
+            ),
+            (
+                HttpMethod::Patch,
+                "applications.update",
+                "web.sites.write",
+                true,
+                None,
+            ),
+            (
+                HttpMethod::Delete,
+                "applications.delete",
+                "web.sites.write",
+                true,
+                Some(RateLimitTier::AuthCritical),
+            ),
+            (
+                HttpMethod::Post,
+                "applications.activate",
+                "web.sites.write",
+                true,
+                Some(RateLimitTier::AuthCritical),
+            ),
+            (
+                HttpMethod::Post,
+                "applications.pause",
+                "web.sites.write",
+                true,
+                Some(RateLimitTier::AuthCritical),
+            ),
+            (
+                HttpMethod::Delete,
+                "applications.domains.delete",
+                "web.sites.write",
+                true,
+                Some(RateLimitTier::AuthCritical),
+            ),
+            (
+                HttpMethod::Post,
+                "applications.deployments.rollback",
+                "web.sites.write",
+                true,
+                Some(RateLimitTier::AuthCritical),
+            ),
+        ];
+        let manifest = backend_route_manifest();
+
+        for (method, operation_id, permission, idempotent, rate_limit_tier) in expected {
+            let route = manifest
+                .routes()
+                .iter()
+                .find(|route| route.operation_id == operation_id)
+                .unwrap_or_else(|| panic!("missing route manifest entry for {operation_id}"));
+
+            assert_eq!(route.method, method, "method mismatch for {operation_id}");
+            assert_eq!(
+                route.auth,
+                RouteAuth::DualToken,
+                "auth mismatch for {operation_id}"
+            );
+            assert_eq!(
+                route.required_permission,
+                Some(permission),
+                "permission mismatch for {operation_id}"
+            );
+            assert_eq!(
+                route.idempotent, idempotent,
+                "idempotency mismatch for {operation_id}"
+            );
+            assert_eq!(
+                route.rate_limit_tier, rate_limit_tier,
+                "rate limit mismatch for {operation_id}"
+            );
+        }
+    }
 }

@@ -14,6 +14,14 @@ final class CreateDeploymentRequest
 
     public ?string $sourceRef = null;
 
+    /** Stable Drive resource identity. Signed delivery URLs are forbidden. */
+    public ?string $artifactDriveUri = null;
+
+    public ?string $artifactSize = null;
+
+    /** SHA-256 hexadecimal digest of the uploaded package. */
+    public ?string $artifactHash = null;
+
     public ?string $environment = null;
 
     public ?string $idempotencyKey = null;
@@ -31,6 +39,15 @@ final class CreateDeploymentRequest
             : null;
         $this->sourceRef = array_key_exists('sourceRef', $data)
             ? $data['sourceRef']
+            : null;
+        $this->artifactDriveUri = array_key_exists('artifactDriveUri', $data)
+            ? $data['artifactDriveUri']
+            : null;
+        $this->artifactSize = array_key_exists('artifactSize', $data)
+            ? $data['artifactSize']
+            : null;
+        $this->artifactHash = array_key_exists('artifactHash', $data)
+            ? $data['artifactHash']
             : null;
         $this->environment = array_key_exists('environment', $data)
             ? $data['environment']
@@ -52,6 +69,9 @@ final class CreateDeploymentRequest
             'versionTag' => $this->versionTag,
             'commitHash' => $this->commitHash,
             'sourceRef' => $this->sourceRef,
+            'artifactDriveUri' => $this->artifactDriveUri,
+            'artifactSize' => $this->artifactSize,
+            'artifactHash' => $this->artifactHash,
             'environment' => $this->environment,
             'idempotencyKey' => $this->idempotencyKey,
         ];

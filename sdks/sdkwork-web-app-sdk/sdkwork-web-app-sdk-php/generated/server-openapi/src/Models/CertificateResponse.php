@@ -10,9 +10,13 @@ final class CertificateResponse
 
     public ?string $certName = null;
 
+    public ?string $domain = null;
+
     public ?int $certType = null;
 
     public ?string $issuer = null;
+
+    public ?string $fingerprint = null;
 
     public ?string $notBefore = null;
 
@@ -20,6 +24,10 @@ final class CertificateResponse
 
     public ?bool $autoRenew = null;
 
+    /** 0=idle, 1=renewing, 2=pending, 3=failed */
+    public ?int $renewalStatus = null;
+
+    /** 0=pending, 1=active, 2=expired, 3=revoked, 4=archived */
     public ?int $status = null;
 
     public ?string $createdAt = null;
@@ -32,11 +40,17 @@ final class CertificateResponse
         $this->certName = array_key_exists('certName', $data)
             ? $data['certName']
             : null;
+        $this->domain = array_key_exists('domain', $data)
+            ? $data['domain']
+            : null;
         $this->certType = array_key_exists('certType', $data)
             ? $data['certType']
             : null;
         $this->issuer = array_key_exists('issuer', $data)
             ? $data['issuer']
+            : null;
+        $this->fingerprint = array_key_exists('fingerprint', $data)
+            ? $data['fingerprint']
             : null;
         $this->notBefore = array_key_exists('notBefore', $data)
             ? $data['notBefore']
@@ -46,6 +60,9 @@ final class CertificateResponse
             : null;
         $this->autoRenew = array_key_exists('autoRenew', $data)
             ? $data['autoRenew']
+            : null;
+        $this->renewalStatus = array_key_exists('renewalStatus', $data)
+            ? $data['renewalStatus']
             : null;
         $this->status = array_key_exists('status', $data)
             ? $data['status']
@@ -65,11 +82,14 @@ final class CertificateResponse
         return [
             'id' => $this->id,
             'certName' => $this->certName,
+            'domain' => $this->domain,
             'certType' => $this->certType,
             'issuer' => $this->issuer,
+            'fingerprint' => $this->fingerprint,
             'notBefore' => $this->notBefore,
             'notAfter' => $this->notAfter,
             'autoRenew' => $this->autoRenew,
+            'renewalStatus' => $this->renewalStatus,
             'status' => $this->status,
             'createdAt' => $this->createdAt,
         ];

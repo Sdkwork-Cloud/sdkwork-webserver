@@ -37,6 +37,7 @@
     }
   },
   "dependencies": {
+    "@sdkwork/drive-app-sdk": "workspace:*",
     "@sdkwork/sdk-common": "workspace:*",
     "@sdkwork/web-app-sdk": "workspace:*",
     "@sdkwork/webserver-pc-commons": "workspace:*",

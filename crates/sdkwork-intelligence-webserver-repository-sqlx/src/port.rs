@@ -36,24 +36,30 @@ impl WebRepositoryPort for WebRepository {
     async fn list_sites(
         &self,
         tenant_id: i64,
+        owner_id: Option<i64>,
         query: &ListSitesQuery,
     ) -> WebServiceResult<SitePage> {
-        self.list_sites_repo(tenant_id, query).await
+        self.list_sites_repo(tenant_id, owner_id, query).await
     }
 
     async fn create_site(
         &self,
         tenant_id: i64,
         organization_id: Option<i64>,
-        actor_id: Option<i64>,
+        owner_id: Option<i64>,
         request: &CreateSiteRequest,
     ) -> WebServiceResult<SiteResponse> {
-        self.create_site_repo(tenant_id, organization_id, actor_id, request)
+        self.create_site_repo(tenant_id, organization_id, owner_id, request)
             .await
     }
 
-    async fn retrieve_site(&self, tenant_id: i64, site_id: &str) -> WebServiceResult<SiteResponse> {
-        self.retrieve_site_repo(tenant_id, site_id).await
+    async fn retrieve_site(
+        &self,
+        tenant_id: i64,
+        owner_id: Option<i64>,
+        site_id: &str,
+    ) -> WebServiceResult<SiteResponse> {
+        self.retrieve_site_repo(tenant_id, owner_id, site_id).await
     }
 
     async fn update_site(
@@ -198,29 +204,39 @@ impl WebRepositoryPort for WebRepository {
     async fn list_certificates(
         &self,
         tenant_id: i64,
+        owner_id: Option<i64>,
+        site_id: Option<&str>,
         page: i32,
         page_size: i32,
     ) -> WebServiceResult<CertificatePage> {
-        self.list_certificates_repo(tenant_id, page, page_size)
+        self.list_certificates_repo(tenant_id, owner_id, site_id, page, page_size)
             .await
     }
 
     async fn create_certificate(
         &self,
         tenant_id: i64,
+        owner_id: Option<i64>,
         request: &CreateCertificateRequest,
     ) -> WebServiceResult<CertificateResponse> {
-        self.create_certificate_repo(tenant_id, request).await
+        self.create_certificate_repo(tenant_id, owner_id, request).await
     }
 
     async fn insert_certificate_pending(
         &self,
         tenant_id: i64,
+        owner_id: Option<i64>,
         domain_id: &str,
         cert_type: i32,
         auto_renew: bool,
     ) -> WebServiceResult<(String, String)> {
-        self.insert_certificate_pending_repo(tenant_id, domain_id, cert_type, auto_renew)
+        self.insert_certificate_pending_repo(
+            tenant_id,
+            owner_id,
+            domain_id,
+            cert_type,
+            auto_renew,
+        )
             .await
     }
 

@@ -33,7 +33,8 @@ client.setAccessToken("your-access-token")
     // Use the SDK
     val params = linkedMapOf<String, Any>(
         "page" to 1,
-        "page_size" to 2
+        "page_size" to 2,
+        "siteId" to "00000000-0000-0000-0000-000000000001"
     )
     val result = client.certificate.certificatesList(params)
     println(result)
@@ -127,7 +128,8 @@ println(result)
 // 获取证书列表
 val params = linkedMapOf<String, Any>(
     "page" to 1,
-    "page_size" to 2
+    "page_size" to 2,
+    "siteId" to "00000000-0000-0000-0000-000000000001"
 )
 val result = client.certificate.certificatesList(params)
 println(result)
@@ -151,7 +153,8 @@ fun main() = runBlocking {
     try {
         val params = linkedMapOf<String, Any>(
             "page" to 1,
-            "page_size" to 2
+            "page_size" to 2,
+            "siteId" to "00000000-0000-0000-0000-000000000001"
         )
         val result = client.certificate.certificatesList(params)
         println(result)

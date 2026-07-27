@@ -7,7 +7,8 @@ pub mod problem;
 pub mod provider;
 
 pub use app_ports::{
-    ListSitesQuery, WebAppApi, WebAppRequestContext, WebBackendApi, WebBackendRequestContext,
+    ListSitesQuery, WebAppApi, WebAppRequestContext, WebAppResourceScope, WebBackendApi,
+    WebBackendRequestContext,
 };
 pub use dto::*;
 pub use internal_ports::*;

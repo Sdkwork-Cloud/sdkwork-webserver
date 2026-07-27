@@ -34,6 +34,15 @@ class ApplicationDeploymentApi {
       return map == null ? null : ApplicationsDeploymentsCreateResponse201.fromJson(map);
     })();
   }
+
+  /// Roll back a managed application deployment
+  Future<ApplicationsDeploymentsRollbackResponse?> applicationsDeploymentsRollback(String applicationId, String deploymentId) async {
+    final response = await _client.post(ApiPaths.backendPath('/applications/${serializePathParameter(applicationId, const PathParameterSpec('applicationId', 'simple', false))}/deployments/${serializePathParameter(deploymentId, const PathParameterSpec('deploymentId', 'simple', false))}/rollback'));
+    return (() {
+      final map = sdkworkResponseAsMap(response);
+      return map == null ? null : ApplicationsDeploymentsRollbackResponse.fromJson(map);
+    })();
+  }
 }
 
 class PathParameterSpec {

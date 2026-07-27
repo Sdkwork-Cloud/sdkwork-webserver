@@ -3021,6 +3021,7 @@ dependencies = [
  "axum",
  "sdkwork-iam-web-adapter",
  "sdkwork-utils-rust",
+ "sdkwork-web-bootstrap",
  "sdkwork-web-core",
  "sdkwork-webserver-contract",
  "serde",

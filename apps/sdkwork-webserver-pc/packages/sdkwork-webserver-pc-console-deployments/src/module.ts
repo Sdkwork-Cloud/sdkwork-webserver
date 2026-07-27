@@ -5,6 +5,6 @@ export const webserverModule = {
   label: "deployments",
   surface: "app-console",
   entries: [
-    { resource: "deployments", label: "Deployments", description: "Standalone deployment history and rollback", permission: "web.sites.read", order: 1 }
+    { resource: "deployments", label: "Deployments", description: "Drive-backed package release, status history, and rollback", permission: "web.sites.write", order: 1 }
   ],
 } as const satisfies WebserverPcModuleDefinition;

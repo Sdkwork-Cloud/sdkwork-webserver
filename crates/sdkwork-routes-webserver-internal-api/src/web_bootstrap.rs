@@ -2,8 +2,8 @@ use std::sync::Arc;
 
 use axum::Router;
 use sdkwork_routes_webserver_common::{
-    web_auth_mode_from_env, with_problem_correlation, MachineCredentialResolverDecorator,
-    ProductionFailClosedResolver, WebAuthMode,
+    web_auth_mode_from_env, web_framework_runtime_policy_from_env, with_problem_correlation,
+    MachineCredentialResolverDecorator, ProductionFailClosedResolver, WebAuthMode,
 };
 use sdkwork_web_axum::{with_web_request_context, WebFrameworkLayer};
 use sdkwork_web_core::{
@@ -49,8 +49,13 @@ fn build_web_internal_api_framework_layer<R>(
 where
     R: WebRequestContextResolver + Clone,
 {
+    let (environment, security_policy) = web_framework_runtime_policy_from_env();
     let layer = WebFrameworkLayer::new(resolver)
-        .with_profile(WebRequestContextProfile::default())
+        .with_profile(WebRequestContextProfile {
+            environment,
+            ..WebRequestContextProfile::default()
+        })
+        .with_security_policy(security_policy)
         .with_route_manifest(internal_route_manifest())
         .with_domain_injector(Arc::new(WebInternalContextInjector));
     match metrics {

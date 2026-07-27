@@ -18,10 +18,11 @@ func NewCertificateApi(client *sdkhttp.Client) *CertificateApi {
 }
 
 // 获取证书列表
-func (a *CertificateApi) CertificatesList(page *int, pageSize *int) (sdktypes.CertificatesListResponse, error) {
+func (a *CertificateApi) CertificatesList(page *int, pageSize *int, siteId *string) (sdktypes.CertificatesListResponse, error) {
     query := BuildQueryString([]QueryParameterSpec{
         {Name: "page", Value: func() interface{} { if page == nil { return nil }; return *page }(), Style: "form", Explode: true, AllowReserved: false},
         {Name: "page_size", Value: func() interface{} { if pageSize == nil { return nil }; return *pageSize }(), Style: "form", Explode: true, AllowReserved: false},
+        {Name: "siteId", Value: func() interface{} { if siteId == nil { return nil }; return *siteId }(), Style: "form", Explode: true, AllowReserved: false},
     })
     raw, err := a.client.Get(AppendQueryString(AppApiPath("/certificates"), query), nil, nil)
     if err != nil {

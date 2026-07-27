@@ -42,6 +42,16 @@ func (a *ApplicationDeploymentApi) ApplicationsDeploymentsCreate(applicationId s
     return decodeResult[sdktypes.ApplicationsDeploymentsCreateResponse201](raw)
 }
 
+// Roll back a managed application deployment
+func (a *ApplicationDeploymentApi) ApplicationsDeploymentsRollback(applicationId string, deploymentId string) (sdktypes.ApplicationsDeploymentsRollbackResponse, error) {
+    raw, err := a.client.Post(BackendApiPath(fmt.Sprintf("/applications/%s/deployments/%s/rollback", SerializePathParameter(applicationId, PathParameterSpec{Name: "applicationId", Style: "simple", Explode: false}), SerializePathParameter(deploymentId, PathParameterSpec{Name: "deploymentId", Style: "simple", Explode: false}))), nil, nil, nil, "")
+    if err != nil {
+        var zero sdktypes.ApplicationsDeploymentsRollbackResponse
+        return zero, err
+    }
+    return decodeResult[sdktypes.ApplicationsDeploymentsRollbackResponse](raw)
+}
+
 type PathParameterSpec struct {
     Name    string
     Style   string

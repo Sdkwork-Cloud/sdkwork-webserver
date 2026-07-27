@@ -1,11 +1,18 @@
 pub const PREFIX: &str = "/backend/v3/api";
 
 pub const APPLICATIONS: &str = "/backend/v3/api/applications";
+pub const APPLICATION: &str = "/backend/v3/api/applications/{applicationId}";
+pub const APPLICATION_ACTIVATE: &str = "/backend/v3/api/applications/{applicationId}/activate";
+pub const APPLICATION_PAUSE: &str = "/backend/v3/api/applications/{applicationId}/pause";
 pub const APPLICATION_DOMAINS: &str = "/backend/v3/api/applications/{applicationId}/domains";
+pub const APPLICATION_DOMAIN: &str =
+    "/backend/v3/api/applications/{applicationId}/domains/{domainId}";
 pub const APPLICATION_DOMAIN_VERIFY: &str =
     "/backend/v3/api/applications/{applicationId}/domains/{domainId}/verify";
 pub const APPLICATION_DEPLOYMENTS: &str =
     "/backend/v3/api/applications/{applicationId}/deployments";
+pub const APPLICATION_DEPLOYMENT_ROLLBACK: &str =
+    "/backend/v3/api/applications/{applicationId}/deployments/{deploymentId}/rollback";
 pub const CERTIFICATES: &str = "/backend/v3/api/certificates";
 pub const CERTIFICATE: &str = "/backend/v3/api/certificates/{certificateId}";
 pub const CERTIFICATE_RENEW: &str = "/backend/v3/api/certificates/{certificateId}/renew";

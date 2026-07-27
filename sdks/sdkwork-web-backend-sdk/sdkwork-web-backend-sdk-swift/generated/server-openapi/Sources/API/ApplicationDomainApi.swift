@@ -21,6 +21,11 @@ public class ApplicationDomainApi {
         return try await client.post(ApiPaths.backendPath("/applications/\(serializePathParameter(applicationId, PathParameterSpec(name: "applicationId", style: "simple", explode: false)))/domains"), body: body, params: nil, headers: nil, contentType: "application/json", responseType: ApplicationsDomainsCreateResponse201.self)
     }
 
+    /// Unbind an application public domain
+    public func applicationsDomainsDelete(applicationId: String, domainId: String) async throws -> Void {
+        _ = try await client.delete(ApiPaths.backendPath("/applications/\(serializePathParameter(applicationId, PathParameterSpec(name: "applicationId", style: "simple", explode: false)))/domains/\(serializePathParameter(domainId, PathParameterSpec(name: "domainId", style: "simple", explode: false)))"))
+    }
+
     /// Verify an application public domain
     public func applicationsDomainsVerify(applicationId: String, domainId: String) async throws -> ApplicationsDomainsVerifyResponse? {
         return try await client.post(ApiPaths.backendPath("/applications/\(serializePathParameter(applicationId, PathParameterSpec(name: "applicationId", style: "simple", explode: false)))/domains/\(serializePathParameter(domainId, PathParameterSpec(name: "domainId", style: "simple", explode: false)))/verify"), body: nil, responseType: ApplicationsDomainsVerifyResponse.self)

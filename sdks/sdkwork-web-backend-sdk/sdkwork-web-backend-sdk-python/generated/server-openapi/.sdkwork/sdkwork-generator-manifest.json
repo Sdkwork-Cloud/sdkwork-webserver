@@ -60,15 +60,15 @@
     },
     {
       "path": "sdkwork_web_backend_sdk/api/application_deployment.py",
-      "sha256": "0ef77613cbe594e356c5987ab6b03b642357d18683f1147666f4979e709c4f0c"
+      "sha256": "15bd971c6a86b6761ca3fd9b715171beba19906e9f6dc4f5b2d3fa8afa223bec"
     },
     {
       "path": "sdkwork_web_backend_sdk/api/application_domain.py",
-      "sha256": "a43eedfe323fa0b7c43d0b38065132edfde60c847a9110b46b4e803d074cc487"
+      "sha256": "52ec908929b2e028542cda0526f3755e5abca4aba02e85dd80ceea2fd737e11d"
     },
     {
       "path": "sdkwork_web_backend_sdk/api/application.py",
-      "sha256": "0bbde7a985f0f9dceb9b5b09367317ac72976bca83e3975e86f2e6dd91699957"
+      "sha256": "f1ae2229b6b6802efb6e0e740ebbbe4782762641971fd20c69648f24632a6110"
     },
     {
       "path": "sdkwork_web_backend_sdk/api/audit.py",
@@ -100,7 +100,7 @@
     },
     {
       "path": "sdkwork_web_backend_sdk/models/__init__.py",
-      "sha256": "16f458da4b782fba1c8c41bebd1f885bd9b0f65f13af37a933eec16dfdd1adca"
+      "sha256": "f5d415d012516b78b323a15cd2cdd293ca2662407c006e4259e04b09a23ca37d"
     },
     {
       "path": "sdkwork_web_backend_sdk/models/agent_certificate_bundle.py",
@@ -124,7 +124,7 @@
     },
     {
       "path": "sdkwork_web_backend_sdk/models/application_deployment_response.py",
-      "sha256": "3588d5d986ab32b732164d641e607d2cdc901a437425b9cf8789556b1ee98fb1"
+      "sha256": "5382ac1f773647a155f678211fcbe73c66d3c93dfcdce5d80aad2bb4560dc07a"
     },
     {
       "path": "sdkwork_web_backend_sdk/models/application_domain_response.py",
@@ -139,6 +139,10 @@
       "sha256": "392527ba10b4f4af362c00a5c1b51b40f7284bd4bf137cd2cd2fe5781b3f8b2e"
     },
     {
+      "path": "sdkwork_web_backend_sdk/models/applications_activate_response.py",
+      "sha256": "742770349967b0cd7cc33becacbf42e58eccecf50d9c4f00d96cdc2b83ab6556"
+    },
+    {
       "path": "sdkwork_web_backend_sdk/models/applications_create_response201.py",
       "sha256": "db77a364c766adf64cb0a2124470ddeeafbc30aebe26f29993b48884b618e3c4"
     },
@@ -149,6 +153,10 @@
     {
       "path": "sdkwork_web_backend_sdk/models/applications_deployments_list_response.py",
       "sha256": "f5f25f1e87ba8f9a99e0009403115e8016af5127a64434b88ec74f1de7c24959"
+    },
+    {
+      "path": "sdkwork_web_backend_sdk/models/applications_deployments_rollback_response.py",
+      "sha256": "eeddf49f7f808db297e3b47e6df0805389759c438e6e8568e7c6e55d594d19e6"
     },
     {
       "path": "sdkwork_web_backend_sdk/models/applications_domains_create_response201.py",
@@ -165,6 +173,18 @@
     {
       "path": "sdkwork_web_backend_sdk/models/applications_list_response.py",
       "sha256": "b85402a6ddb5e18b3e78285e00dbd5ae65301f744acfc07523b7bcf83a42916a"
+    },
+    {
+      "path": "sdkwork_web_backend_sdk/models/applications_pause_response.py",
+      "sha256": "8e245f3bf95f3d09e96ed7b09aaef498819f3b13d02c17abe7f65aa7e95f0098"
+    },
+    {
+      "path": "sdkwork_web_backend_sdk/models/applications_retrieve_response.py",
+      "sha256": "c9fa47921dcfc93103409afa10d0af39125cee7481d02290575bdb601800a7e7"
+    },
+    {
+      "path": "sdkwork_web_backend_sdk/models/applications_update_response.py",
+      "sha256": "efc74a7ec4ae7d74051ffe30ceae3e528c68ad2479bcd6b2352b79d346a5dce0"
     },
     {
       "path": "sdkwork_web_backend_sdk/models/audit_log_page.py",
@@ -232,7 +252,7 @@
     },
     {
       "path": "sdkwork_web_backend_sdk/models/create_application_deployment_request.py",
-      "sha256": "62bd271330974a189a62f28ef533a36ca87c74c6314ebbd7393e94ea1acbaea9"
+      "sha256": "fc809c823e7c453eecad643e9662df1be572f35fbb7f1c90e7332595ba3c3d19"
     },
     {
       "path": "sdkwork_web_backend_sdk/models/create_application_domain_request.py",
@@ -353,6 +373,10 @@
     {
       "path": "sdkwork_web_backend_sdk/models/status_retrieve_response.py",
       "sha256": "66d161a5501b0bcd93c3834e6844c67a4ebda51f972f6cad8e2c063ddeea48d3"
+    },
+    {
+      "path": "sdkwork_web_backend_sdk/models/update_application_request.py",
+      "sha256": "0848c236fba859b9141c7663575f9a62ebf858c96e5886a5e4100257424093ac"
     },
     {
       "path": "sdkwork_web_backend_sdk/models/update_certificate_request.py",

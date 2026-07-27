@@ -41,6 +41,16 @@ func (a *ApplicationDomainApi) ApplicationsDomainsCreate(applicationId string, b
     return decodeResult[sdktypes.ApplicationsDomainsCreateResponse201](raw)
 }
 
+// Unbind an application public domain
+func (a *ApplicationDomainApi) ApplicationsDomainsDelete(applicationId string, domainId string) (struct{}, error) {
+    raw, err := a.client.Delete(BackendApiPath(fmt.Sprintf("/applications/%s/domains/%s", SerializePathParameter(applicationId, PathParameterSpec{Name: "applicationId", Style: "simple", Explode: false}), SerializePathParameter(domainId, PathParameterSpec{Name: "domainId", Style: "simple", Explode: false}))), nil, nil)
+    if err != nil {
+        var zero struct{}
+        return zero, err
+    }
+    return decodeResult[struct{}](raw)
+}
+
 // Verify an application public domain
 func (a *ApplicationDomainApi) ApplicationsDomainsVerify(applicationId string, domainId string) (sdktypes.ApplicationsDomainsVerifyResponse, error) {
     raw, err := a.client.Post(BackendApiPath(fmt.Sprintf("/applications/%s/domains/%s/verify", SerializePathParameter(applicationId, PathParameterSpec{Name: "applicationId", Style: "simple", Explode: false}), SerializePathParameter(domainId, PathParameterSpec{Name: "domainId", Style: "simple", Explode: false}))), nil, nil, nil, "")

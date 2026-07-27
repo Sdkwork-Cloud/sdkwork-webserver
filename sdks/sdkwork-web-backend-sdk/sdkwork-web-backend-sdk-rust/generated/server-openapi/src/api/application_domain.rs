@@ -31,6 +31,12 @@ impl ApplicationDomainApi {
         self.client.post(&path, Some(body), None, None, Some("application/json")).await
     }
 
+    /// Unbind an application public domain
+    pub async fn applications_domains_delete(&self, application_id: &str, domain_id: &str) -> Result<(), SdkworkError> {
+        let path = backend_path(&format!("/applications/{}/domains/{}", serialize_path_parameter(application_id, PathParameterSpec::new("applicationId", "simple", false)), serialize_path_parameter(domain_id, PathParameterSpec::new("domainId", "simple", false))));
+        self.client.delete(&path, None, None).await
+    }
+
     /// Verify an application public domain
     pub async fn applications_domains_verify(&self, application_id: &str, domain_id: &str) -> Result<ApplicationDomainVerifyResponse, SdkworkError> {
         let path = backend_path(&format!("/applications/{}/domains/{}/verify", serialize_path_parameter(application_id, PathParameterSpec::new("applicationId", "simple", false)), serialize_path_parameter(domain_id, PathParameterSpec::new("domainId", "simple", false))));

@@ -16,10 +16,11 @@ impl CertificateApi {
     }
 
     /// 获取证书列表
-    pub async fn certificates_list(&self, page: Option<i64>, page_size: Option<i64>) -> Result<serde_json::Value, SdkworkError> {
+    pub async fn certificates_list(&self, page: Option<i64>, page_size: Option<i64>, site_id: Option<&str>) -> Result<serde_json::Value, SdkworkError> {
         let query = build_query_string(&[
             QueryParameterSpec::new("page", page, "form", true, false, None),
             QueryParameterSpec::new("page_size", page_size, "form", true, false, None),
+            QueryParameterSpec::new("siteId", site_id, "form", true, false, None),
         ]);
         let path = append_query_string(app_path(&"/certificates".to_string()), &query);
         self.client.get(&path, None, None).await
