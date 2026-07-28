@@ -60,9 +60,11 @@ export interface WebserverResourceFilter {
 export interface WebserverResourceActionContext {
   body: Record<string, unknown>;
   file?: File;
+  files?: readonly File[];
   idempotencyKey?: string;
   onProgress?(progress: number): void;
   selectedItem?: Record<string, unknown>;
+  sourceInputMode?: "archive" | "directory";
   scopeId?: string;
 }
 
@@ -97,6 +99,7 @@ export interface WebserverResourceAction {
   requiresFile?: boolean;
   requiresScope?: boolean;
   requiresSelection?: boolean;
+  sourceInput?: "archive-or-directory";
 }
 
 export interface WebserverResourceDataSource {

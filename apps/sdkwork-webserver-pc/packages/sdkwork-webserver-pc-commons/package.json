@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@sdkwork/iam-contracts": "workspace:*",
+    "fflate": "^0.8.2",
     "react": "catalog:",
     "react-router-dom": "^7.15.0",
     "lucide-react": "catalog:"
