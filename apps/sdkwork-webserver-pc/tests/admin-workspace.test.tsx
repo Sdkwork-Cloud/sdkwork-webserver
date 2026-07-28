@@ -27,7 +27,10 @@ describe("admin workspace application controls", () => {
     fireEvent.change(screen.getByLabelText("Application name"), { target: { value: "Public API" } });
     fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
 
-    await waitFor(() => expect(create).toHaveBeenCalledWith({ name: "Public API", applicationType: "API", siteType: 6 }));
+    await waitFor(() => expect(create).toHaveBeenCalledWith(
+      { name: "Public API", applicationType: "API", siteType: 6 },
+      { idempotencyKey: expect.any(String) },
+    ));
   });
 
   it("uses an application-specific scope for domain management", async () => {
@@ -56,10 +59,11 @@ describe("admin workspace application controls", () => {
     fireEvent.change(screen.getByLabelText("Application name"), { target: { value: "Public API v2" } });
     fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
 
-    await waitFor(() => expect(update).toHaveBeenCalledWith("app-1", {
-      name: "Public API v2",
-      description: "Current description",
-    }));
+    await waitFor(() => expect(update).toHaveBeenCalledWith(
+      "app-1",
+      { name: "Public API v2", description: "Current description" },
+      { idempotencyKey: expect.any(String) },
+    ));
   });
 
   it("requires explicit confirmation before disabling an active application", async () => {
@@ -77,7 +81,7 @@ describe("admin workspace application controls", () => {
     fireEvent.click(screen.getByText("I understand the impact and want to continue."));
     fireEvent.click(confirm);
 
-    await waitFor(() => expect(pause).toHaveBeenCalledWith("app-1"));
+    await waitFor(() => expect(pause).toHaveBeenCalledWith("app-1", { idempotencyKey: expect.any(String) }));
   });
 
   it("offers rollback only for a successful deployment and confirms the command", async () => {
@@ -95,7 +99,11 @@ describe("admin workspace application controls", () => {
     fireEvent.click(screen.getByText("I understand the impact and want to continue."));
     fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
 
-    await waitFor(() => expect(rollback).toHaveBeenCalledWith("app-1", "deployment-1"));
+    await waitFor(() => expect(rollback).toHaveBeenCalledWith(
+      "app-1",
+      "deployment-1",
+      { idempotencyKey: expect.any(String) },
+    ));
   });
 
   it("hides lifecycle commands without write permission", async () => {
