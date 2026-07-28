@@ -7,6 +7,8 @@ import {
   ChevronRight,
   Clipboard,
   Filter,
+  FileArchive,
+  FolderOpen,
   Inbox,
   LoaderCircle,
   LockKeyhole,
@@ -24,7 +26,7 @@ import {
   Upload,
   X,
 } from "lucide-react";
-import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import { translateWebserver, type WebserverLocale, type WebserverMessageKey } from "./i18n/index.ts";
@@ -132,7 +134,9 @@ export function WebserverWorkspace({
 }
 
 function SurfaceAccessState({ locale }: { locale: WebserverLocale }) {
-  const t = (key: WebserverMessageKey) => translateWebserver(locale, key);
+  const t = (key: WebserverMessageKey, values: Record<string, string | number> = {}) => (
+    translateWebserver(locale, key, values)
+  );
   return (
     <section className="surface-access-state" role="alert">
       <Shield aria-hidden="true" size={22} />
@@ -568,13 +572,29 @@ function ActionDialog({
   const [error, setError] = useState<string>();
   const [busy, setBusy] = useState(false);
   const [file, setFile] = useState<File>();
+  const [files, setFiles] = useState<readonly File[]>([]);
   const [fieldOptions, setFieldOptions] = useState<WebserverResourceFieldOptions>(action.fieldOptions ?? {});
   const [idempotencyKey] = useState(() => globalThis.crypto.randomUUID());
   const [optionsBusy, setOptionsBusy] = useState(Boolean(action.loadFieldOptions));
   const [progress, setProgress] = useState(0);
   const [result, setResult] = useState<Record<string, unknown>>();
   const [copiedField, setCopiedField] = useState<string>();
+  const [sourceInputMode, setSourceInputMode] = useState<"archive" | "directory">("archive");
+  const sourceInputRef = useRef<HTMLInputElement>(null);
   const confirmationRequired = Boolean(action.dangerous || action.requiresConfirmation);
+  const sourceInputRequired = Boolean(action.sourceInput);
+
+  useEffect(() => {
+    const input = sourceInputRef.current;
+    if (!input) return;
+    if (sourceInputMode === "directory") {
+      input.setAttribute("webkitdirectory", "");
+      input.setAttribute("directory", "");
+      return;
+    }
+    input.removeAttribute("webkitdirectory");
+    input.removeAttribute("directory");
+  }, [sourceInputMode]);
 
   useEffect(() => {
     if (!action.loadFieldOptions) return undefined;
@@ -609,7 +629,11 @@ function ActionDialog({
 
   async function submit(event: FormEvent): Promise<void> {
     event.preventDefault();
-    if ((confirmationRequired && !confirmed) || (action.requiresFile && !file)) return;
+    if (
+      (confirmationRequired && !confirmed)
+      || (action.requiresFile && !file)
+      || (sourceInputRequired && files.length === 0)
+    ) return;
     setBusy(true);
     setError(undefined);
     setProgress(0);
@@ -617,10 +641,12 @@ function ActionDialog({
       const response = await action.execute({
         body,
         file,
+        files,
         idempotencyKey,
         onProgress: (value) => setProgress(Math.max(0, Math.min(100, Math.round(value)))),
         scopeId,
         selectedItem: selected,
+        sourceInputMode,
       });
       if (action.resultFields?.length && isRecord(response)) {
         setResult(response);
@@ -717,7 +743,58 @@ function ActionDialog({
             />
           </label>
         ) : null}
-        {!result && busy && action.requiresFile ? (
+        {!result && action.sourceInput ? (
+          <div className="source-picker">
+            <div aria-label={t("dialog.sourceMode")} className="source-mode-toggle" role="group">
+              <button
+                aria-pressed={sourceInputMode === "archive"}
+                className={sourceInputMode === "archive" ? "active" : ""}
+                disabled={busy}
+                onClick={() => {
+                  setSourceInputMode("archive");
+                  setFiles([]);
+                }}
+                type="button"
+              >
+                <FileArchive aria-hidden="true" size={16} />
+                {t("dialog.sourceArchive")}
+              </button>
+              <button
+                aria-pressed={sourceInputMode === "directory"}
+                className={sourceInputMode === "directory" ? "active" : ""}
+                disabled={busy}
+                onClick={() => {
+                  setSourceInputMode("directory");
+                  setFiles([]);
+                }}
+                type="button"
+              >
+                <FolderOpen aria-hidden="true" size={16} />
+                {t("dialog.sourceDirectory")}
+              </button>
+            </div>
+            <label className="file-field">
+              <span><Upload aria-hidden="true" size={16} />{t("dialog.sourceSelect")}</span>
+              <input
+                accept={sourceInputMode === "archive" ? ".zip,application/zip" : undefined}
+                disabled={busy}
+                key={sourceInputMode}
+                multiple={sourceInputMode === "directory"}
+                onChange={(event) => setFiles(Array.from(event.target.files ?? []))}
+                ref={sourceInputRef}
+                type="file"
+              />
+            </label>
+            {files.length > 0 ? (
+              <div className="source-selection" role="status">
+                {sourceInputMode === "archive"
+                  ? files[0].name
+                  : t("dialog.sourceSelectionCount", { count: files.length })}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+        {!result && busy && (action.requiresFile || action.sourceInput) ? (
           <div className="upload-progress" role="status">
             <div>
               <span>{t("dialog.uploadProgress")}</span>
@@ -749,6 +826,7 @@ function ActionDialog({
               || optionsBusy
               || Boolean(confirmationRequired && !confirmed)
               || Boolean(action.requiresFile && !file)
+              || Boolean(sourceInputRequired && files.length === 0)
               || hasMissingRequiredFields(body, action.requiredFields)
               || hasUnavailableOptions(body, fieldOptions)}
             type="submit"
