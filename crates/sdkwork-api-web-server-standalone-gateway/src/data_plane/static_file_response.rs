@@ -13,7 +13,7 @@ use super::static_path::OpenedStaticFile;
 
 const FILE_CHUNK_BYTES: usize = 64 * 1024;
 
-pub(super) async fn serve_opened_file(
+pub(crate) async fn serve_opened_file(
     opened: OpenedStaticFile,
     method: &Method,
     headers: &HeaderMap,

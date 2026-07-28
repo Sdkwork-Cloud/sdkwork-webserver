@@ -28,14 +28,11 @@
     "layerRole": "backend-route",
     "publicExports": ["crate-root"],
     "providedPorts": [
-      {"name": "webApiResponses", "export": "crate-root"},
-      {"name": "webApiAuthResolver", "export": "crate-root"},
-      {"name": "webApiSecurityPolicy", "export": "crate-root"}
+      {"name": "webApiResponses", "export": "crate-root"}
     ],
     "requiredPorts": [
-      {"name": "iamWebRequestContextResolver", "export": "crate-root", "provider": "sdkwork-iam-web-adapter"},
       {"name": "webServerContracts", "export": "crate-root", "provider": "sdkwork-webserver-contract"},
-      {"name": "webFrameworkBootstrap", "export": "crate-root", "provider": "sdkwork-web-bootstrap"}
+      {"name": "webserverHttpHost", "export": "crate-root", "provider": "sdkwork-webserver-http-host"}
     ],
     "runtimeEntrypoints": [],
     "routeManifest": null,
@@ -45,13 +42,7 @@
     "dependencyApiExports": [],
     "dependencyApiSurfaces": [],
     "events": [],
-    "configKeys": [
-      "SDKWORK_ENVIRONMENT",
-      "SDKWORK_WEB_ENVIRONMENT",
-      "SDKWORK_CORS_ALLOWED_ORIGINS",
-      "SDKWORK_IAM_DATABASE_URL",
-      "SDKWORK_IAM_DATABASE_ENGINE"
-    ]
+    "configKeys": []
   },
   "verification": {
     "commands": ["cargo test -p sdkwork-routes-webserver-common"]

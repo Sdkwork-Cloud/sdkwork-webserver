@@ -42,7 +42,7 @@
       { "workspace": "sdkwork-iam-app-sdk", "surface": "app-api", "credentialMode": "authenticated-app-api" }
     ],
     "events": [],
-    "configKeys": ["appApiBaseUrl", "backendApiBaseUrl", "driveAppApiBaseUrl", "appbaseAppApiBaseUrl", "environment", "deploymentProfile"]
+    "configKeys": ["appApiBaseUrl", "backendApiBaseUrl", "driveAppApiBaseUrl", "appbaseAppApiBaseUrl", "messagingPcUrl", "browserOriginMode", "environment", "deploymentProfile", "profileId", "runtimeTarget"]
   },
   "integration": {
     "authority": "Root SDKWork specs remain authoritative.",

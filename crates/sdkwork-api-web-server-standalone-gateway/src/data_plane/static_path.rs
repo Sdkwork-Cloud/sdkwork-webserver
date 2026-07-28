@@ -8,19 +8,19 @@ use cap_fs_ext::{
 };
 use cap_std::fs::{Dir, OpenOptions};
 
-pub(super) struct OpenedStaticFile {
-    pub(super) file: std::fs::File,
-    pub(super) metadata: std::fs::Metadata,
-    pub(super) path_hint: PathBuf,
+pub(crate) struct OpenedStaticFile {
+    pub(crate) file: std::fs::File,
+    pub(crate) metadata: std::fs::Metadata,
+    pub(crate) path_hint: PathBuf,
 }
 
-pub(super) enum StaticPathTarget {
+pub(crate) enum StaticPathTarget {
     File(OpenedStaticFile),
     RedirectToDirectory,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub(super) enum StaticPathError {
+pub(crate) enum StaticPathError {
     Invalid,
     Forbidden,
     NotFound,
@@ -32,7 +32,7 @@ enum OpenedEntry {
     Directory(Dir),
 }
 
-pub(super) async fn open_static_path(
+pub(crate) async fn open_static_path(
     root: &Path,
     relative: &str,
     request_path_has_trailing_slash: bool,

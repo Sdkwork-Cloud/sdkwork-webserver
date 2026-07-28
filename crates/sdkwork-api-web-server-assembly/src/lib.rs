@@ -4,7 +4,10 @@
 mod bootstrap;
 mod generated;
 
-pub use bootstrap::{assemble_api_router, ApiAssembly};
+pub use bootstrap::{
+    assemble_api_router, migrate_database_from_env, ApiAssembly, ApiAssemblyContext,
+    ApiAssemblyError,
+};
 
 pub fn assembly_route_count() -> usize {
     generated::ROUTE_CRATE_COUNT

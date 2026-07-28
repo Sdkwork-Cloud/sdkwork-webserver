@@ -9,6 +9,8 @@ const APP_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..'
 const REPO_ROOT = path.resolve(APP_ROOT, '../..');
 const BUILD_SOURCES = [
   'apps/sdkwork-webserver-pc/package.json',
+  'apps/sdkwork-webserver-pc/scripts/browser-topology.d.mts',
+  'apps/sdkwork-webserver-pc/scripts/browser-topology.mjs',
   'apps/sdkwork-webserver-pc/tsconfig.json',
   'apps/sdkwork-webserver-pc/vite.config.ts',
   'apps/sdkwork-webserver-pc/src/main.tsx',

@@ -8,6 +8,7 @@
   "profiles": {
     "standalone.development": { "source": "browser/runtime-env.development.json" },
     "standalone.test": { "source": "browser/runtime-env.test.json" },
+    "standalone.production": { "source": "browser/runtime-env.standalone.production.json" },
     "cloud.development": { "source": "browser/runtime-env.cloud.development.json" },
     "cloud.staging": { "source": "browser/runtime-env.staging.json" },
     "cloud.production": { "source": "browser/runtime-env.production.json" }

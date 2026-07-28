@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "kind": "sdkwork.component.spec",
+  "component": {
+    "name": "sdkwork-webserver-http-host",
+    "displayName": "SDKWork Web Server HTTP Host",
+    "version": "0.1.0",
+    "type": "rust-crate",
+    "root": "sdkwork-web-server/crates/sdkwork-webserver-http-host",
+    "domain": "platform",
+    "capability": "webserver-http-host",
+    "surface": "runtime-composition",
+    "languages": ["rust"],
+    "generated": false,
+    "status": "active",
+    "manifests": ["Cargo.toml", "specs/component.spec.json"]
+  },
+  "canonicalSpecs": [
+    {"file": "CODE_STYLE_SPEC.md", "path": "../../../sdkwork-specs/CODE_STYLE_SPEC.md", "purpose": "Authored HTTP host boundaries."},
+    {"file": "NAMING_SPEC.md", "path": "../../../sdkwork-specs/NAMING_SPEC.md", "purpose": "HTTP host naming."},
+    {"file": "RUST_CODE_SPEC.md", "path": "../../../sdkwork-specs/RUST_CODE_SPEC.md", "purpose": "Rust crate structure."},
+    {"file": "WEB_FRAMEWORK_SPEC.md", "path": "../../../sdkwork-specs/WEB_FRAMEWORK_SPEC.md", "purpose": "Process-wide framework and request-context integration."},
+    {"file": "SECURITY_SPEC.md", "path": "../../../sdkwork-specs/SECURITY_SPEC.md", "purpose": "Fail-closed authentication and origin policy."},
+    {"file": "TEST_SPEC.md", "path": "../../../sdkwork-specs/TEST_SPEC.md", "purpose": "Host adapter verification."}
+  ],
+  "contracts": {
+    "layerRole": "runtime-composition",
+    "publicExports": ["crate-root"],
+    "providedPorts": [
+      {"name": "webFrameworkRuntimePolicy", "export": "crate-root"},
+      {"name": "webFrameworkAuthResolver", "export": "crate-root"},
+      {"name": "webProblemCorrelation", "export": "crate-root"}
+    ],
+    "requiredPorts": [
+      {"name": "iamWebRequestContextResolver", "export": "crate-root", "provider": "sdkwork-iam-web-adapter"},
+      {"name": "webServerContracts", "export": "crate-root", "provider": "sdkwork-webserver-contract"},
+      {"name": "webFrameworkBootstrap", "export": "crate-root", "provider": "sdkwork-web-bootstrap"}
+    ],
+    "runtimeEntrypoints": [],
+    "routeManifest": null,
+    "sdkClients": [],
+    "sdkDependencies": [],
+    "permissionComposition": {},
+    "dependencyApiExports": [],
+    "dependencyApiSurfaces": [],
+    "events": [],
+    "configKeys": [
+      "SDKWORK_ENVIRONMENT",
+      "SDKWORK_WEB_ENVIRONMENT",
+      "SDKWORK_CORS_ALLOWED_ORIGINS",
+      "SDKWORK_IAM_DATABASE_URL",
+      "SDKWORK_IAM_DATABASE_ENGINE"
+    ]
+  },
+  "verification": {
+    "commands": ["cargo test -p sdkwork-webserver-http-host"]
+  }
+}

@@ -1,12 +1,16 @@
 {
   "environment": "development",
   "deploymentProfile": "standalone",
+  "profileId": "standalone.development",
+  "runtimeTarget": "browser",
+  "browserOriginMode": "same-origin",
   "defaultLocale": "zh-CN",
   "fallbackLocale": "en-US",
   "supportedLocales": ["zh-CN", "en-US"],
   "activeLocales": ["zh-CN", "en-US"],
-  "appApiBaseUrl": "http://127.0.0.1:3800",
-  "backendApiBaseUrl": "http://127.0.0.1:3800",
-  "driveAppApiBaseUrl": "http://127.0.0.1:3900",
-  "appbaseAppApiBaseUrl": "http://127.0.0.1:3900"
+  "appApiBaseUrl": "/",
+  "backendApiBaseUrl": "/",
+  "driveAppApiBaseUrl": "/",
+  "appbaseAppApiBaseUrl": "/",
+  "messagingPcUrl": "http://127.0.0.1:5184/notifications"
 }

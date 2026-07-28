@@ -1,12 +1,16 @@
 {
   "environment": "test",
   "deploymentProfile": "standalone",
+  "profileId": "standalone.test",
+  "runtimeTarget": "browser",
+  "browserOriginMode": "same-origin",
   "defaultLocale": "zh-CN",
   "fallbackLocale": "en-US",
   "supportedLocales": ["zh-CN", "en-US"],
   "activeLocales": ["zh-CN", "en-US"],
-  "appApiBaseUrl": "https://web.test.sdkwork.com",
-  "backendApiBaseUrl": "https://web.test.sdkwork.com",
-  "driveAppApiBaseUrl": "https://api-test.sdkwork.com",
-  "appbaseAppApiBaseUrl": "https://iam.test.sdkwork.com"
+  "appApiBaseUrl": "/",
+  "backendApiBaseUrl": "/",
+  "driveAppApiBaseUrl": "/",
+  "appbaseAppApiBaseUrl": "/",
+  "messagingPcUrl": "http://127.0.0.1:5184/notifications"
 }

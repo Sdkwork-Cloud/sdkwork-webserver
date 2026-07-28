@@ -12,6 +12,7 @@ import {
   mkdirSync,
   openSync,
   readFileSync,
+  readdirSync,
   readSync,
   renameSync,
   rmSync,
@@ -31,7 +32,10 @@ const OUTPUT_ROOT = path.join(REPO_ROOT, 'dist', 'release');
 const MAX_ARCHIVE_BYTES = 512 * 1024 * 1024;
 const MAX_PACKAGE_FILE_BYTES = 256 * 1024 * 1024;
 const MAX_PACKAGE_CONTENT_BYTES = 1024 * 1024 * 1024;
-const MAX_PACKAGE_ENTRIES = 64;
+const MAX_PACKAGE_ENTRIES = 2048;
+const MAX_PC_STATIC_FILES = 256;
+const MAX_DEPENDENCY_RUNTIME_FILES = 256;
+const MAX_PC_BOOTSTRAP_FILE_BYTES = 4 * 1024 * 1024;
 const MAX_MANIFEST_BYTES = 256 * 1024;
 const MAX_CHECKSUM_BYTES = 256;
 const HASH_BUFFER_BYTES = 64 * 1024;
@@ -39,8 +43,46 @@ const PROCESS_OUTPUT_BYTES = 1024 * 1024;
 const GIT_TIMEOUT_MS = 30 * 1000;
 const TAR_TIMEOUT_MS = 5 * 60 * 1000;
 const CARGO_BUILD_TIMEOUT_MS = 30 * 60 * 1000;
+const PC_BUILD_TIMEOUT_MS = 15 * 60 * 1000;
 const SBOM_TIMEOUT_MS = 3 * 60 * 1000;
 const SUPPORTED_ARCHITECTURES = new Set(['x64', 'arm64']);
+const PC_APP_RELATIVE_ROOT = 'apps/sdkwork-webserver-pc';
+const PC_APP_ROOT = path.join(REPO_ROOT, 'apps', 'sdkwork-webserver-pc');
+const PC_BUILD_OUTPUT = path.join(PC_APP_ROOT, 'dist');
+const PC_PACKAGE_PREFIX = 'share/sdkwork/webserver-pc';
+const PC_PACKAGE_INDEX = `${PC_PACKAGE_PREFIX}/index.html`;
+const PC_PACKAGE_RUNTIME_ENV = `${PC_PACKAGE_PREFIX}/runtime-env.json`;
+const PC_PACKAGE_ASSETS_PREFIX = `${PC_PACKAGE_PREFIX}/assets/`;
+const DEPENDENCY_RUNTIME_ASSETS = Object.freeze([
+  {
+    id: 'iam',
+    sourceRoot: path.resolve(REPO_ROOT, '..', 'sdkwork-iam'),
+    sourceDirectories: ['database', 'iam'],
+    packagePrefix: 'share/sdkwork/iam',
+    requiredPaths: [
+      'database/database.manifest.json',
+      'iam/registry/iam-registry.config.json',
+    ],
+    requiredPrefix: 'iam/modules/',
+    requiredSuffix: '/iam.module.manifest.json',
+  },
+  {
+    id: 'drive',
+    sourceRoot: path.resolve(REPO_ROOT, '..', 'sdkwork-drive'),
+    sourceDirectories: ['database'],
+    packagePrefix: 'share/sdkwork/drive',
+    requiredPaths: ['database/database.manifest.json'],
+  },
+]);
+const DEPENDENCY_PACKAGE_PREFIXES = DEPENDENCY_RUNTIME_ASSETS.map(
+  (dependency) => `${dependency.packagePrefix}/`,
+);
+const SDK_BASE_URL_FIELDS = [
+  'appApiBaseUrl',
+  'backendApiBaseUrl',
+  'driveAppApiBaseUrl',
+  'appbaseAppApiBaseUrl',
+];
 const BINARIES = [
   'sdkwork-api-web-server-standalone-gateway',
   'sdkwork-web-server-website-delivery-edge-runtime',
@@ -50,6 +92,10 @@ const BINARIES = [
 ];
 const PACKAGE_ASSETS = [
   { source: 'sdkwork.app.config.json', target: 'sdkwork.app.config.json' },
+  {
+    source: 'specs/iam.module.manifest.json',
+    target: 'specs/iam.module.manifest.json',
+  },
   {
     source: 'specs/sdkwork.webserver.config.schema.json',
     target: 'specs/sdkwork.webserver.config.schema.json',
@@ -104,20 +150,23 @@ const PACKAGE_ASSETS = [
     target: 'database/seeds/common/001_bootstrap.sql',
   },
 ];
-const EXPECTED_CONTENT_PATHS = [
+const EXPECTED_FIXED_CONTENT_PATHS = [
   ...BINARIES.map((binary) => `bin/${binary}`),
   ...PACKAGE_ASSETS.map((asset) => asset.target),
 ].sort();
-const EXPECTED_ARCHIVE_DIRECTORIES = Array.from(
-  new Set(
-    EXPECTED_CONTENT_PATHS.flatMap((contentPath) => {
-      const segments = contentPath.split('/');
-      return segments.slice(0, -1).map((_, index) =>
-        ['sdkwork-web', ...segments.slice(0, index + 1)].join('/'),
-      );
-    }).concat('sdkwork-web'),
-  ),
-).sort();
+
+function archiveDirectoriesFor(contentPaths) {
+  return Array.from(
+    new Set(
+      contentPaths.flatMap((contentPath) => {
+        const segments = contentPath.split('/');
+        return segments.slice(0, -1).map((_, index) =>
+          ['sdkwork-web', ...segments.slice(0, index + 1)].join('/'),
+        );
+      }).concat('sdkwork-web'),
+    ),
+  ).sort();
+}
 
 function parseArgs(argv) {
   const settings = {
@@ -335,6 +384,232 @@ function copyPackageAsset(asset, stageRoot) {
   return target;
 }
 
+function normalizePackageContentPath(value, label) {
+  if (typeof value !== 'string' || value.length === 0 || value.length > 500) {
+    throw new Error(`${label} must contain 1..=500 characters`);
+  }
+  if (value.includes('\\') || value.includes('\0') || value.startsWith('/')) {
+    throw new Error(`${label} is unsafe: ${JSON.stringify(value)}`);
+  }
+  const segments = value.split('/');
+  if (
+    [...value].some((character) => character.charCodeAt(0) <= 0x1f || character === '\u007f') ||
+    segments.some((segment) => segment === '' || segment === '.' || segment === '..') ||
+    path.posix.normalize(value) !== value
+  ) {
+    throw new Error(`${label} is unsafe: ${JSON.stringify(value)}`);
+  }
+  return value;
+}
+
+function validateStandaloneRuntimeEnv(value, label) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new Error(`${label} must contain a JSON object`);
+  }
+  for (const [field, expected] of [
+    ['environment', 'production'],
+    ['deploymentProfile', 'standalone'],
+    ['profileId', 'standalone.production'],
+    ['runtimeTarget', 'browser'],
+    ['browserOriginMode', 'same-origin'],
+  ]) {
+    if (value[field] !== expected) {
+      throw new Error(`${label}.${field} must equal ${expected}`);
+    }
+  }
+  for (const field of SDK_BASE_URL_FIELDS) {
+    if (value[field] !== '/') {
+      throw new Error(`${label}.${field} must use the canonical same-origin root /`);
+    }
+  }
+}
+
+function decodeUtf8(bytes, label) {
+  try {
+    return new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+  } catch {
+    throw new Error(`${label} must be valid UTF-8`);
+  }
+}
+
+function validatePcBootstrapFiles(indexBytes, runtimeEnvBytes, label) {
+  if (!indexBytes || indexBytes.length === 0) {
+    throw new Error(`${label} is missing index.html`);
+  }
+  if (!runtimeEnvBytes || runtimeEnvBytes.length === 0) {
+    throw new Error(`${label} is missing runtime-env.json`);
+  }
+  if (
+    indexBytes.length > MAX_PC_BOOTSTRAP_FILE_BYTES ||
+    runtimeEnvBytes.length > MAX_PC_BOOTSTRAP_FILE_BYTES
+  ) {
+    throw new Error(`${label} bootstrap files exceed ${MAX_PC_BOOTSTRAP_FILE_BYTES} bytes`);
+  }
+  const index = decodeUtf8(indexBytes, `${label} index.html`);
+  const lowerIndex = index.toLowerCase();
+  if (!index.trim() || (!lowerIndex.includes('<!doctype html') && !lowerIndex.includes('<html'))) {
+    throw new Error(`${label} index.html must contain an HTML document`);
+  }
+  let runtimeEnv;
+  try {
+    runtimeEnv = JSON.parse(decodeUtf8(runtimeEnvBytes, `${label} runtime-env.json`));
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      throw new Error(`${label} runtime-env.json must contain valid JSON`);
+    }
+    throw error;
+  }
+  validateStandaloneRuntimeEnv(runtimeEnv, `${label} runtime-env.json`);
+}
+
+function inspectPcBuildOutput() {
+  const rootMetadata = lstatSync(PC_BUILD_OUTPUT);
+  if (rootMetadata.isSymbolicLink() || !rootMetadata.isDirectory()) {
+    throw new Error('PC standalone build output must be a non-symlink directory');
+  }
+  const files = [];
+  let inspectedEntries = 0;
+  const walk = (directory, relativeDirectory) => {
+    const entries = readdirSync(directory, { withFileTypes: true }).sort((left, right) =>
+      left.name < right.name ? -1 : left.name > right.name ? 1 : 0,
+    );
+    for (const entry of entries) {
+      inspectedEntries += 1;
+      if (inspectedEntries > MAX_PACKAGE_ENTRIES) {
+        throw new Error(`PC build contains more than ${MAX_PACKAGE_ENTRIES} filesystem entries`);
+      }
+      const source = path.join(directory, entry.name);
+      assertSafeOwnedPath(source, PC_BUILD_OUTPUT, `PC build entry ${entry.name}`);
+      const metadata = lstatSync(source);
+      if (metadata.isSymbolicLink()) {
+        throw new Error(`PC build entry ${source} must not be a symbolic link`);
+      }
+      const relative = relativeDirectory ? `${relativeDirectory}/${entry.name}` : entry.name;
+      normalizePackageContentPath(relative, `PC build path ${relative}`);
+      if (metadata.isDirectory()) {
+        walk(source, relative);
+      } else if (metadata.isFile()) {
+        inspectRegularFile(source, `PC build file ${relative}`);
+        files.push({
+          source,
+          target: `${PC_PACKAGE_PREFIX}/${relative}`,
+          relative,
+        });
+        if (files.length > MAX_PC_STATIC_FILES) {
+          throw new Error(`PC build contains more than ${MAX_PC_STATIC_FILES} files`);
+        }
+      } else {
+        throw new Error(`PC build entry ${source} must be a regular file or directory`);
+      }
+    }
+  };
+  walk(PC_BUILD_OUTPUT, '');
+
+  const index = files.find((file) => file.relative === 'index.html');
+  const runtimeEnv = files.find((file) => file.relative === 'runtime-env.json');
+  validatePcBootstrapFiles(
+    index ? readFileSync(index.source) : undefined,
+    runtimeEnv ? readFileSync(runtimeEnv.source) : undefined,
+    'PC standalone build',
+  );
+  if (!files.some((file) => file.relative.startsWith('assets/'))) {
+    throw new Error('PC standalone build must contain at least one assets/ file');
+  }
+  return files;
+}
+
+function copyPcStaticFile(file, stageRoot) {
+  const target = path.join(stageRoot, ...file.target.split('/'));
+  assertSafeOwnedPath(target, stageRoot, `PC package target ${file.target}`);
+  mkdirSync(path.dirname(target), { recursive: true, mode: 0o755 });
+  copyFileSync(file.source, target);
+  chmodSync(target, 0o644);
+  return target;
+}
+
+function inspectDependencyRuntimeAssets() {
+  const files = [];
+  for (const dependency of DEPENDENCY_RUNTIME_ASSETS) {
+    for (const sourceDirectory of dependency.sourceDirectories) {
+      const sourceRoot = path.join(dependency.sourceRoot, sourceDirectory);
+      const rootMetadata = lstatSync(sourceRoot);
+      if (rootMetadata.isSymbolicLink() || !rootMetadata.isDirectory()) {
+        throw new Error(
+          `${dependency.id} runtime source ${sourceDirectory} must be a non-symlink directory`,
+        );
+      }
+      const walk = (directory, relativeDirectory) => {
+        const entries = readdirSync(directory, { withFileTypes: true }).sort((left, right) =>
+          left.name < right.name ? -1 : left.name > right.name ? 1 : 0,
+        );
+        for (const entry of entries) {
+          const source = path.join(directory, entry.name);
+          assertSafeOwnedPath(
+            source,
+            dependency.sourceRoot,
+            `${dependency.id} runtime source ${entry.name}`,
+          );
+          const metadata = lstatSync(source);
+          if (metadata.isSymbolicLink()) {
+            throw new Error(`${dependency.id} runtime source ${source} must not be a symbolic link`);
+          }
+          const relative = relativeDirectory
+            ? `${relativeDirectory}/${entry.name}`
+            : `${sourceDirectory}/${entry.name}`;
+          normalizePackageContentPath(relative, `${dependency.id} runtime path ${relative}`);
+          if (metadata.isDirectory()) {
+            walk(source, relative);
+          } else if (metadata.isFile()) {
+            inspectRegularFile(source, `${dependency.id} runtime file ${relative}`);
+            files.push({
+              dependencyId: dependency.id,
+              source,
+              target: `${dependency.packagePrefix}/${relative}`,
+              relative,
+            });
+            if (files.length > MAX_DEPENDENCY_RUNTIME_FILES) {
+              throw new Error(
+                `dependency runtime assets contain more than ${MAX_DEPENDENCY_RUNTIME_FILES} files`,
+              );
+            }
+          } else {
+            throw new Error(
+              `${dependency.id} runtime source ${source} must be a regular file or directory`,
+            );
+          }
+        }
+      };
+      walk(sourceRoot, '');
+    }
+
+    const dependencyFiles = files.filter((file) => file.dependencyId === dependency.id);
+    for (const requiredPath of dependency.requiredPaths) {
+      if (!dependencyFiles.some((file) => file.relative === requiredPath)) {
+        throw new Error(`${dependency.id} runtime assets are missing ${requiredPath}`);
+      }
+    }
+    if (
+      dependency.requiredPrefix
+      && !dependencyFiles.some((file) => (
+        file.relative.startsWith(dependency.requiredPrefix)
+          && file.relative.endsWith(dependency.requiredSuffix)
+      ))
+    ) {
+      throw new Error(`${dependency.id} runtime assets are missing module manifests`);
+    }
+  }
+  return files;
+}
+
+function copyDependencyRuntimeFile(file, stageRoot) {
+  const target = path.join(stageRoot, ...file.target.split('/'));
+  assertSafeOwnedPath(target, stageRoot, `dependency runtime package target ${file.target}`);
+  mkdirSync(path.dirname(target), { recursive: true, mode: 0o755 });
+  copyFileSync(file.source, target);
+  chmodSync(target, 0o644);
+  return target;
+}
+
 function normalizeArchivePath(value) {
   if (typeof value !== 'string' || value.length === 0 || value.length > 512) {
     throw new Error('archive entry path must contain 1..=512 characters');
@@ -358,6 +633,7 @@ function normalizeArchivePath(value) {
 
 async function inspectArchiveEntries(archive) {
   const records = new Map();
+  const capturedBuffers = new Map();
   const order = [];
   const entryCompletions = [];
   let manifestBuffer;
@@ -431,7 +707,14 @@ async function inspectArchiveEntries(archive) {
 
         const hash = createHash('sha256');
         let actualBytes = 0;
-        const manifestChunks = [];
+        const captureLimit = entryPath === 'sdkwork-web/package.manifest.json'
+          ? MAX_MANIFEST_BYTES
+          : [PC_PACKAGE_INDEX, PC_PACKAGE_RUNTIME_ENV]
+              .map((item) => `sdkwork-web/${item}`)
+              .includes(entryPath)
+            ? MAX_PC_BOOTSTRAP_FILE_BYTES
+            : undefined;
+        const capturedChunks = [];
         const completion = new Promise((resolve, reject) => {
           entry.on('data', (chunk) => {
             actualBytes += chunk.length;
@@ -440,20 +723,24 @@ async function inspectArchiveEntries(archive) {
               return;
             }
             hash.update(chunk);
-            if (entryPath === 'sdkwork-web/package.manifest.json') {
-              if (actualBytes > MAX_MANIFEST_BYTES) {
-                fail(new Error(`package manifest exceeds ${MAX_MANIFEST_BYTES} bytes`));
+            if (captureLimit !== undefined) {
+              if (actualBytes > captureLimit) {
+                fail(new Error(`archive file ${entryPath} exceeds ${captureLimit} bytes`));
                 return;
               }
-              manifestChunks.push(Buffer.from(chunk));
+              capturedChunks.push(Buffer.from(chunk));
             }
           });
           entry.once('error', reject);
           entry.once('end', () => {
             record.actualBytes = actualBytes;
             record.sha256 = hash.digest('hex');
-            if (entryPath === 'sdkwork-web/package.manifest.json') {
-              manifestBuffer = Buffer.concat(manifestChunks, actualBytes);
+            if (captureLimit !== undefined) {
+              const captured = Buffer.concat(capturedChunks, actualBytes);
+              capturedBuffers.set(entryPath, captured);
+              if (entryPath === 'sdkwork-web/package.manifest.json') {
+                manifestBuffer = captured;
+              }
             }
             resolve();
           });
@@ -469,10 +756,10 @@ async function inspectArchiveEntries(archive) {
   if (validationError) {
     throw validationError;
   }
-  return { records, order, manifestBuffer };
+  return { records, order, manifestBuffer, capturedBuffers };
 }
 
-function validatePackageManifest(manifestBuffer, records, order, expected) {
+function validatePackageManifest(manifestBuffer, records, order, capturedBuffers, expected) {
   if (!manifestBuffer || manifestBuffer.length === 0) {
     throw new Error('archive is missing package.manifest.json');
   }
@@ -517,8 +804,15 @@ function validatePackageManifest(manifestBuffer, records, order, expected) {
   if (!Number.isSafeInteger(manifest.sourceDateEpoch) || manifest.sourceDateEpoch < 0) {
     throw new Error('package manifest sourceDateEpoch must be a non-negative safe integer');
   }
-  if (!Array.isArray(manifest.content) || manifest.content.length !== EXPECTED_CONTENT_PATHS.length) {
-    throw new Error(`package manifest must contain exactly ${EXPECTED_CONTENT_PATHS.length} files`);
+  if (
+    !Array.isArray(manifest.content) ||
+    manifest.content.length < EXPECTED_FIXED_CONTENT_PATHS.length ||
+    manifest.content.length
+      > EXPECTED_FIXED_CONTENT_PATHS.length
+        + MAX_PC_STATIC_FILES
+        + MAX_DEPENDENCY_RUNTIME_FILES
+  ) {
+    throw new Error('package manifest file count is outside the deployment-profile contract');
   }
 
   const manifestPaths = [];
@@ -533,6 +827,7 @@ function validatePackageManifest(manifestBuffer, records, order, expected) {
     ) {
       throw new Error(`package manifest content[${index}] is invalid`);
     }
+    normalizePackageContentPath(item.path, `package manifest content[${index}].path`);
     manifestPaths.push(item.path);
     const record = records.get(`sdkwork-web/${item.path}`);
     if (
@@ -545,14 +840,91 @@ function validatePackageManifest(manifestBuffer, records, order, expected) {
       throw new Error(`package content does not match manifest for ${item.path}`);
     }
   }
-  if (JSON.stringify(manifestPaths) !== JSON.stringify(EXPECTED_CONTENT_PATHS)) {
+  const fixedPaths = new Set(EXPECTED_FIXED_CONTENT_PATHS);
+  const pcPaths = manifestPaths.filter((item) => item.startsWith(`${PC_PACKAGE_PREFIX}/`));
+  const dependencyPaths = manifestPaths.filter((item) => (
+    DEPENDENCY_PACKAGE_PREFIXES.some((prefix) => item.startsWith(prefix))
+  ));
+  const unexpectedPaths = manifestPaths.filter(
+    (item) => (
+      !fixedPaths.has(item)
+        && !item.startsWith(`${PC_PACKAGE_PREFIX}/`)
+        && !DEPENDENCY_PACKAGE_PREFIXES.some((prefix) => item.startsWith(prefix))
+    ),
+  );
+  if (unexpectedPaths.length > 0) {
+    throw new Error(`package manifest contains unsupported files: ${unexpectedPaths.join(', ')}`);
+  }
+  if (expected.deploymentProfile === 'cloud' && pcPaths.length > 0) {
+    throw new Error('cloud package must not contain PC standalone static assets');
+  }
+  if (expected.deploymentProfile === 'cloud' && dependencyPaths.length > 0) {
+    throw new Error('cloud package must not contain standalone dependency runtime assets');
+  }
+  if (expected.deploymentProfile === 'standalone') {
+    if (pcPaths.length === 0 || pcPaths.length > MAX_PC_STATIC_FILES) {
+      throw new Error(`standalone package must contain 1..=${MAX_PC_STATIC_FILES} PC files`);
+    }
+    if (!pcPaths.includes(PC_PACKAGE_INDEX) || !pcPaths.includes(PC_PACKAGE_RUNTIME_ENV)) {
+      throw new Error('standalone package must contain PC index.html and runtime-env.json');
+    }
+    if (!pcPaths.some((item) => item.startsWith(PC_PACKAGE_ASSETS_PREFIX))) {
+      throw new Error('standalone package must contain at least one PC assets/ file');
+    }
+    validatePcBootstrapFiles(
+      capturedBuffers.get(`sdkwork-web/${PC_PACKAGE_INDEX}`),
+      capturedBuffers.get(`sdkwork-web/${PC_PACKAGE_RUNTIME_ENV}`),
+      'standalone package',
+    );
+    if (
+      dependencyPaths.length === 0
+      || dependencyPaths.length > MAX_DEPENDENCY_RUNTIME_FILES
+    ) {
+      throw new Error(
+        `standalone package must contain 1..=${MAX_DEPENDENCY_RUNTIME_FILES} dependency runtime files`,
+      );
+    }
+    for (const dependency of DEPENDENCY_RUNTIME_ASSETS) {
+      const packagePaths = dependencyPaths.filter((item) => (
+        item.startsWith(`${dependency.packagePrefix}/`)
+      ));
+      for (const requiredPath of dependency.requiredPaths) {
+        const packagePath = `${dependency.packagePrefix}/${requiredPath}`;
+        const record = records.get(`sdkwork-web/${packagePath}`);
+        if (!packagePaths.includes(packagePath) || !record || record.actualBytes === 0) {
+          throw new Error(
+            `standalone package ${dependency.id} runtime assets require non-empty ${requiredPath}`,
+          );
+        }
+      }
+      if (
+        dependency.requiredPrefix
+        && !packagePaths.some((item) => (
+          item.startsWith(`${dependency.packagePrefix}/${dependency.requiredPrefix}`)
+            && item.endsWith(dependency.requiredSuffix)
+            && records.get(`sdkwork-web/${item}`)?.actualBytes > 0
+        ))
+      ) {
+        throw new Error(
+          `standalone package ${dependency.id} runtime assets require module manifests`,
+        );
+      }
+    }
+  }
+  const expectedContentPaths = [
+    ...EXPECTED_FIXED_CONTENT_PATHS,
+    ...(expected.deploymentProfile === 'standalone' ? pcPaths : []),
+    ...(expected.deploymentProfile === 'standalone' ? dependencyPaths : []),
+  ].sort();
+  if (JSON.stringify(manifestPaths) !== JSON.stringify(expectedContentPaths)) {
     throw new Error('package manifest content paths are missing, unexpected, duplicated, or unsorted');
   }
 
   const expectedFiles = [
     'sdkwork-web/package.manifest.json',
-    ...EXPECTED_CONTENT_PATHS.map((item) => `sdkwork-web/${item}`),
+    ...expectedContentPaths.map((item) => `sdkwork-web/${item}`),
   ].sort();
+  const expectedDirectories = archiveDirectoriesFor(expectedContentPaths);
   const actualFiles = [...records.values()]
     .filter((record) => record.type === 'File')
     .map((record) => record.path)
@@ -564,10 +936,10 @@ function validatePackageManifest(manifestBuffer, records, order, expected) {
   if (JSON.stringify(actualFiles) !== JSON.stringify(expectedFiles)) {
     throw new Error('archive file inventory does not match the package contract');
   }
-  if (JSON.stringify(actualDirectories) !== JSON.stringify(EXPECTED_ARCHIVE_DIRECTORIES)) {
+  if (JSON.stringify(actualDirectories) !== JSON.stringify(expectedDirectories)) {
     throw new Error('archive directory inventory does not match the package contract');
   }
-  const expectedOrder = [...expectedFiles, ...EXPECTED_ARCHIVE_DIRECTORIES].sort();
+  const expectedOrder = [...expectedFiles, ...expectedDirectories].sort();
   if (JSON.stringify(order) !== JSON.stringify(expectedOrder)) {
     throw new Error('archive entries are not in deterministic path order');
   }
@@ -611,11 +983,17 @@ async function validateReleaseArchive(settings, resolved = resolveArtifact(setti
     throw new Error('release archive SHA-256 does not match its sidecar');
   }
   const inspected = await inspectArchiveEntries(archive);
-  validatePackageManifest(inspected.manifestBuffer, inspected.records, inspected.order, {
-    deploymentProfile: settings.deploymentProfile,
-    architecture: resolved.architecture,
-    version,
-  });
+  validatePackageManifest(
+    inspected.manifestBuffer,
+    inspected.records,
+    inspected.order,
+    inspected.capturedBuffers,
+    {
+      deploymentProfile: settings.deploymentProfile,
+      architecture: resolved.architecture,
+      version,
+    },
+  );
   console.log(
     `[sdkwork-web-release] validated artifact=${artifactBase}.tar.gz bytes=${archiveStat.size} entries=${inspected.records.size}`,
   );
@@ -639,6 +1017,15 @@ async function packageArchive(settings) {
 
   ensureCriticalSources();
   run('cargo', ['build', '--workspace', '--release'], { timeoutMs: CARGO_BUILD_TIMEOUT_MS });
+  let pcStaticFiles = [];
+  let dependencyRuntimeFiles = [];
+  if (settings.deploymentProfile === 'standalone') {
+    run('pnpm', ['--dir', PC_APP_RELATIVE_ROOT, 'run', 'build:standalone'], {
+      timeoutMs: PC_BUILD_TIMEOUT_MS,
+    });
+    pcStaticFiles = inspectPcBuildOutput();
+    dependencyRuntimeFiles = inspectDependencyRuntimeAssets();
+  }
   const cargoTargetRoot = resolveCargoTargetRoot();
   const stageContainer = path.join(STAGE_PARENT, `${artifactBase}-${process.pid}`);
   const stageRoot = path.join(stageContainer, 'sdkwork-web');
@@ -661,6 +1048,16 @@ async function packageArchive(settings) {
     }
     for (const asset of PACKAGE_ASSETS) {
       const target = copyPackageAsset(asset, stageRoot);
+      packageContentBytes += statSync(target).size;
+      packagedFiles.push(target);
+    }
+    for (const file of pcStaticFiles) {
+      const target = copyPcStaticFile(file, stageRoot);
+      packageContentBytes += statSync(target).size;
+      packagedFiles.push(target);
+    }
+    for (const file of dependencyRuntimeFiles) {
+      const target = copyDependencyRuntimeFile(file, stageRoot);
       packageContentBytes += statSync(target).size;
       packagedFiles.push(target);
     }

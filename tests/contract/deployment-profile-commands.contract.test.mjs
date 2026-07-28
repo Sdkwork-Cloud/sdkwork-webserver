@@ -206,4 +206,12 @@ test('release workflow and archive implementation preserve immutable bounded pac
   assert.ok(source.indexOf("process.platform !== 'linux'") < source.indexOf('ensureCriticalSources();'));
   assert.match(source, /source: 'etc\/examples\/public\/index\.html'/u);
   assert.match(source, /target: 'etc\/node-daemon\/development\.env\.example'/u);
+  assert.match(source, /PC_PACKAGE_PREFIX = 'share\/sdkwork\/webserver-pc'/u);
+  assert.match(source, /settings\.deploymentProfile === 'standalone'/u);
+  assert.match(source, /'run', 'build:standalone'/u);
+  assert.match(source, /inspectPcBuildOutput\(\)/u);
+  assert.match(source, /inspectDependencyRuntimeAssets\(\)/u);
+  assert.match(source, /share\/sdkwork\/iam/u);
+  assert.match(source, /share\/sdkwork\/drive/u);
+  assert.match(source, /cloud package must not contain PC standalone static assets/u);
 });

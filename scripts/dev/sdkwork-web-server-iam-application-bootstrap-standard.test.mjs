@@ -34,33 +34,61 @@ test('credential entry uses the PC manifest identity in every client profile', (
   }
 });
 
-test('standalone startup provisions tenant applications before API assembly', () => {
-  const bootstrap = read(
-    'crates/sdkwork-api-web-server-standalone-gateway/src/iam_application_bootstrap.rs',
-  );
+test('standalone startup embeds IAM App API through its owner assembly', () => {
   const gatewayBootstrap = read(
     'crates/sdkwork-api-web-server-standalone-gateway/src/bootstrap.rs',
+  );
+  const profile = read(
+    'crates/sdkwork-api-web-server-standalone-gateway/src/profile.rs',
   );
   const gatewayCargo = read('crates/sdkwork-api-web-server-standalone-gateway/Cargo.toml');
   const workspaceCargo = read('Cargo.toml');
 
-  assert.match(
-    bootstrap,
-    /ensure_tenant_application_from_app_root_with_env_and_fallback/u,
-  );
-  assert.match(bootstrap, /bootstrap_iam_database_from_env/u);
-  assert.match(gatewayCargo, /sdkwork-iam-embedded-application-bootstrap/u);
-  assert.match(gatewayCargo, /sdkwork-iam-database-host/u);
-  assert.match(workspaceCargo, /sdkwork-iam-embedded-application-bootstrap/u);
-  assert.match(workspaceCargo, /sdkwork-iam-database-host/u);
-  assert.ok(
-    gatewayBootstrap.indexOf('ensure_web_tenant_application_bootstrap().await?')
-      < gatewayBootstrap.indexOf('assemble_api_router().await?'),
-    'tenant application bootstrap must finish before the Web API assembly is built',
-  );
+  assert.match(profile, /sdkwork_api_iam_assembly::assemble_app_api_contribution\(\)/u);
+  assert.match(profile, /sdkwork_api_drive_assembly::assemble_app_api_contribution\(\)/u);
+  assert.match(profile, /compose_owner_contributions/u);
+  assert.match(gatewayBootstrap, /assemble_standalone_profile\(\)\.await/u);
+  assert.match(gatewayBootstrap, /with_web_request_context/u);
+  assert.match(gatewayCargo, /sdkwork-api-iam-assembly/u);
+  assert.match(gatewayCargo, /sdkwork-api-drive-assembly/u);
+  assert.match(workspaceCargo, /sdkwork-api-iam-assembly/u);
+  assert.match(workspaceCargo, /sdkwork-api-drive-assembly/u);
+  assert.doesNotMatch(gatewayCargo, /sdkwork-iam-standalone-gateway/u);
 });
 
-test('standalone runner injects shared IAM roots and keeps real auth enabled', () => {
+test('standalone profile governs the temporary Drive database driver exception', () => {
+  const developmentProfile = read('etc/topology/standalone.development.env');
+  const productionProfile = read('etc/topology/standalone.production.env');
+  const poolContract = readJson('specs/process-database-pool.spec.json');
+  const processContract = poolContract.processes.find(
+    (entry) => entry.id === 'sdkwork-api-web-server-standalone-gateway',
+  );
+
+  for (const profile of [developmentProfile, productionProfile]) {
+    assert.match(profile, /^SDKWORK_DATABASE_TEMPORARY_ANY_POOL_EXCEPTION=true$/mu);
+    assert.match(profile, /^SDKWORK_DATABASE_TEMPORARY_DRIVER_POOL_COUNT=1$/mu);
+  }
+
+  assert.equal(
+    processContract.temporaryDriverPoolCountEnv,
+    'SDKWORK_DATABASE_TEMPORARY_DRIVER_POOL_COUNT',
+  );
+  assert.deepEqual(processContract.temporaryDriverExceptions, [
+    {
+      driver: 'sqlx::AnyPool',
+      owner: 'sdkwork-drive maintainers',
+      removalMilestone:
+        'Migrate Drive PostgreSQL App API repositories to sqlx::PgPool before the next Web Server production release',
+      combinedConnectionBudget: 'SDKWORK_CLAW_DATABASE_MAX_CONNECTIONS',
+      adr: 'docs/architecture/decisions/ADR-20260728-embedded-standalone-dependency-assemblies.md',
+      evidence: [
+        '../sdkwork-drive/crates/sdkwork-drive-workspace-service/src/infrastructure/sql/installer.rs',
+      ],
+    },
+  ]);
+});
+
+test('standalone runner injects owner runtime roots and keeps real auth enabled', () => {
   const topologyHelper = read('scripts/lib/webserver-topology.mjs');
   const devRunner = read('scripts/webserver-dev.mjs');
   const topology = readJson('specs/topology.spec.json');
@@ -71,6 +99,7 @@ test('standalone runner injects shared IAM roots and keeps real auth enabled', (
   assert.equal(gateway.script, '_sdkwork:gateway:standalone');
   assert.match(topologyHelper, /SDKWORK_APP_ROOT:\s*REPO_ROOT/u);
   assert.match(topologyHelper, /SDKWORK_IAM_APP_ROOT:\s*IAM_REPO_ROOT/u);
+  assert.match(topologyHelper, /SDKWORK_DRIVE_APP_ROOT:\s*DRIVE_REPO_ROOT/u);
   assert.match(devRunner, /resolveIamDevEnv/u);
   assert.match(devRunner, /IAM_APPLICATION_BOOTSTRAP_ENV/u);
   assert.doesNotMatch(devRunner, /SDKWORK_WEB_DEV_AUTH_BYPASS/u);

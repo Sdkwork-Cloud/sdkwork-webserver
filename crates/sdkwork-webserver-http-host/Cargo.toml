@@ -1,0 +1,15 @@
+[package]
+name = "sdkwork-webserver-http-host"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+async-trait.workspace = true
+axum.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+sdkwork-iam-web-adapter.workspace = true
+sdkwork-web-bootstrap.workspace = true
+sdkwork-web-core.workspace = true
+sdkwork-webserver-contract.workspace = true
+

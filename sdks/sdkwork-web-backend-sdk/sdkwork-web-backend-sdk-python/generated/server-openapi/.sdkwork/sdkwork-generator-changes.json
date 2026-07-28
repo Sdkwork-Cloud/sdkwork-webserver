@@ -9,22 +9,10 @@
     "protocol": "http",
     "packageName": "sdkwork-web-backend-sdk"
   },
-  "changeFingerprint": "fdbd5e2e123d07af75245c908bf21bdfe23b1c9a15db952dbbc99f51c6364ccb",
+  "changeFingerprint": "29dcbeb4d9f184814ba4c04bd3a7ca4c1b7c6d0277ef253c39b82dfaabfc3941",
   "changes": {
-    "createdGeneratedFiles": [
-      "sdkwork_web_backend_sdk/models/applications_activate_response.py",
-      "sdkwork_web_backend_sdk/models/applications_deployments_rollback_response.py",
-      "sdkwork_web_backend_sdk/models/applications_pause_response.py",
-      "sdkwork_web_backend_sdk/models/applications_retrieve_response.py",
-      "sdkwork_web_backend_sdk/models/applications_update_response.py",
-      "sdkwork_web_backend_sdk/models/update_application_request.py"
-    ],
-    "updatedGeneratedFiles": [
-      "sdkwork_web_backend_sdk/api/application_deployment.py",
-      "sdkwork_web_backend_sdk/api/application_domain.py",
-      "sdkwork_web_backend_sdk/api/application.py",
-      "sdkwork_web_backend_sdk/models/__init__.py"
-    ],
+    "createdGeneratedFiles": [],
+    "updatedGeneratedFiles": [],
     "unchangedGeneratedFiles": [
       "bin/publish-core.mjs",
       "bin/publish.ps1",
@@ -38,6 +26,9 @@
       "sdkwork_web_backend_sdk/__init__.py",
       "sdkwork_web_backend_sdk/api/__init__.py",
       "sdkwork_web_backend_sdk/api/agent.py",
+      "sdkwork_web_backend_sdk/api/application_deployment.py",
+      "sdkwork_web_backend_sdk/api/application_domain.py",
+      "sdkwork_web_backend_sdk/api/application.py",
       "sdkwork_web_backend_sdk/api/audit.py",
       "sdkwork_web_backend_sdk/api/certificate_distribution.py",
       "sdkwork_web_backend_sdk/api/certificate.py",
@@ -45,6 +36,7 @@
       "sdkwork_web_backend_sdk/api/server.py",
       "sdkwork_web_backend_sdk/client.py",
       "sdkwork_web_backend_sdk/http_client.py",
+      "sdkwork_web_backend_sdk/models/__init__.py",
       "sdkwork_web_backend_sdk/models/agent_certificate_bundle.py",
       "sdkwork_web_backend_sdk/models/agent_heartbeat_request.py",
       "sdkwork_web_backend_sdk/models/agent_heartbeat_response.py",
@@ -54,13 +46,18 @@
       "sdkwork_web_backend_sdk/models/application_domain_response.py",
       "sdkwork_web_backend_sdk/models/application_domain_verify_response.py",
       "sdkwork_web_backend_sdk/models/application_response.py",
+      "sdkwork_web_backend_sdk/models/applications_activate_response.py",
       "sdkwork_web_backend_sdk/models/applications_create_response201.py",
       "sdkwork_web_backend_sdk/models/applications_deployments_create_response201.py",
       "sdkwork_web_backend_sdk/models/applications_deployments_list_response.py",
+      "sdkwork_web_backend_sdk/models/applications_deployments_rollback_response.py",
       "sdkwork_web_backend_sdk/models/applications_domains_create_response201.py",
       "sdkwork_web_backend_sdk/models/applications_domains_list_response.py",
       "sdkwork_web_backend_sdk/models/applications_domains_verify_response.py",
       "sdkwork_web_backend_sdk/models/applications_list_response.py",
+      "sdkwork_web_backend_sdk/models/applications_pause_response.py",
+      "sdkwork_web_backend_sdk/models/applications_retrieve_response.py",
+      "sdkwork_web_backend_sdk/models/applications_update_response.py",
       "sdkwork_web_backend_sdk/models/audit_log_page.py",
       "sdkwork_web_backend_sdk/models/audit_log_response.py",
       "sdkwork_web_backend_sdk/models/audit_logs_list_response.py",
@@ -108,6 +105,7 @@
       "sdkwork_web_backend_sdk/models/servers_create_response201.py",
       "sdkwork_web_backend_sdk/models/servers_list_response.py",
       "sdkwork_web_backend_sdk/models/status_retrieve_response.py",
+      "sdkwork_web_backend_sdk/models/update_application_request.py",
       "sdkwork_web_backend_sdk/models/update_certificate_request.py",
       "sdkwork_web_backend_sdk/models/update_nginx_config_request.py",
       "sdkwork-sdk.json",
@@ -122,70 +120,26 @@
   },
   "impact": {
     "schemaVersion": 1,
-    "areas": [
-      "api-surface",
-      "models"
-    ],
-    "details": [
-      {
-        "area": "api-surface",
-        "paths": [
-          "sdkwork_web_backend_sdk/api/application_deployment.py",
-          "sdkwork_web_backend_sdk/api/application_domain.py",
-          "sdkwork_web_backend_sdk/api/application.py",
-          "sdkwork_web_backend_sdk/models/__init__.py"
-        ]
-      },
-      {
-        "area": "models",
-        "paths": [
-          "sdkwork_web_backend_sdk/models/__init__.py",
-          "sdkwork_web_backend_sdk/models/applications_activate_response.py",
-          "sdkwork_web_backend_sdk/models/applications_deployments_rollback_response.py",
-          "sdkwork_web_backend_sdk/models/applications_pause_response.py",
-          "sdkwork_web_backend_sdk/models/applications_retrieve_response.py",
-          "sdkwork_web_backend_sdk/models/applications_update_response.py",
-          "sdkwork_web_backend_sdk/models/update_application_request.py"
-        ]
-      }
-    ],
-    "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, models. Verification is required."
+    "areas": [],
+    "details": [],
+    "requiresVerification": false,
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
   },
   "verificationPlan": {
-    "shouldRun": true,
-    "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
-    "steps": [
-      {
-        "id": "check",
-        "title": "Unified package check",
-        "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
-        "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-python\\generated\\server-openapi",
-        "command": "node",
-        "args": [
-          "./bin/publish-core.mjs",
-          "--language",
-          "python",
-          "--project-dir",
-          ".",
-          "--action",
-          "check"
-        ],
-        "displayCommand": "node ./bin/publish-core.mjs --language python --project-dir . --action check"
-      }
-    ]
+    "shouldRun": false,
+    "runPhase": "skip",
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
+    "steps": []
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "medium",
-    "nextAction": "verify",
+    "riskLevel": "low",
+    "nextAction": "skip",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
-    "summary": "Changes have been applied. Run the required verification plan now.",
+    "summary": "No actionable changes were detected. No apply or verification step is required.",
     "reasons": [
-      "verification-required"
+      "no-actionable-changes"
     ]
   },
   "preservedLegacyFiles": false

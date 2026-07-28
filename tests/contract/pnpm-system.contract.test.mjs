@@ -82,6 +82,10 @@ test('PC app surface delegates dev and stop while keeping its local lifecycle sc
   const deployment = readJson(`${appRoot}/etc/sdkwork.deployment.config.json`);
   const cloudDevelopment = readJson(`${appRoot}/etc/browser/runtime-env.cloud.development.json`);
   const cloudProduction = readJson(`${appRoot}/etc/browser/runtime-env.production.json`);
+  const standaloneDevelopment = readJson(`${appRoot}/etc/browser/runtime-env.development.json`);
+  const standaloneProduction = readJson(
+    `${appRoot}/etc/browser/runtime-env.standalone.production.json`,
+  );
   const scripts = readJson(`${appRoot}/package.json`).scripts;
   assert.equal(deployment.kind, 'sdkwork.component-deployment');
   assert.equal(deployment.parentDeploymentConfig, '../../../etc/sdkwork.deployment.config.json');
@@ -94,6 +98,18 @@ test('PC app surface delegates dev and stop while keeping its local lifecycle sc
     cloudProduction.appbaseAppApiBaseUrl,
     parentDeployment.environments.production.cloudApiBaseUrl,
   );
+  for (const runtimeConfig of [standaloneDevelopment, standaloneProduction]) {
+    assert.equal(runtimeConfig.browserOriginMode, 'same-origin');
+    for (const key of [
+      'appApiBaseUrl',
+      'backendApiBaseUrl',
+      'driveAppApiBaseUrl',
+      'appbaseAppApiBaseUrl',
+    ]) {
+      assert.equal(runtimeConfig[key], '/');
+    }
+    assert.doesNotMatch(JSON.stringify(runtimeConfig), /:(?:3800|3900)\b/u);
+  }
   assert.equal(scripts.dev, 'pnpm dev:standalone');
   assert.equal(
     scripts['dev:standalone'],
@@ -104,9 +120,58 @@ test('PC app surface delegates dev and stop while keeping its local lifecycle sc
     'pnpm exec sdkwork-app dev --root ../.. --deployment-profile cloud',
   );
   assert.equal(scripts.stop, 'pnpm exec sdkwork-app stop --root ../..');
+  assert.match(scripts['build:standalone'], /--deployment-profile standalone/u);
+  assert.match(scripts['build:standalone'], /--mode standalone\.production/u);
+  assert.match(scripts['build:cloud'], /--deployment-profile cloud/u);
+  assert.match(scripts['build:cloud'], /--mode cloud\.production/u);
   assert.doesNotMatch(scripts.build, /sdkwork-app/u);
   assert.doesNotMatch(scripts.test, /sdkwork-app/u);
   assert.doesNotMatch(scripts.clean, /sdkwork-app/u);
+});
+
+test('standalone profile exposes only the application gateway to browser clients', () => {
+  const topology = readJson('specs/topology.spec.json');
+  const env = readFileSync(
+    path.join(REPO_ROOT, topology.profileFiles['standalone.development']),
+    'utf8',
+  );
+  assert.doesNotMatch(env, /PLATFORM_API_GATEWAY_HTTP_URL/u);
+  assert.match(env, /SDKWORK_WEB_APPLICATION_PUBLIC_HTTP_URL=http:\/\/127\.0\.0\.1:3800/u);
+
+  const development = topology.orchestration.profiles['standalone.development'];
+  assert.deepEqual(development.browserDeliveries, [
+    {
+      id: 'webserver-pc-browser',
+      applicationRoot: 'apps/sdkwork-webserver-pc',
+      clientArchitectures: ['pc-web'],
+      originMode: 'same-origin',
+      deliveryMode: 'dev-server-proxy',
+      apiSurfaceId: 'application.public-ingress',
+      clientProcessId: 'webserver-pc-browser',
+      preserveCanonicalPaths: true,
+    },
+  ]);
+
+  const production = topology.orchestration.profiles['standalone.production'];
+  assert.deepEqual(production.browserDeliveries, [
+    {
+      id: 'webserver-pc-browser',
+      applicationRoot: 'apps/sdkwork-webserver-pc',
+      clientArchitectures: ['pc-web'],
+      originMode: 'same-origin',
+      deliveryMode: 'gateway-static',
+      apiSurfaceId: 'application.public-ingress',
+      hostProcessId: 'application.public-ingress',
+      buildOutput: 'apps/sdkwork-webserver-pc/dist',
+      runtimeRootEnv: 'SDKWORK_WEB_PC_STATIC_ROOT',
+      mountPath: '/',
+      spaFallback: '/index.html',
+    },
+  ]);
+  assert.match(
+    readFileSync(path.join(REPO_ROOT, topology.profileFiles['standalone.production']), 'utf8'),
+    /SDKWORK_WEB_PC_STATIC_ROOT=share\/sdkwork\/webserver-pc/u,
+  );
 });
 
 test('parent topology starts the browser client in both development profiles only', () => {
@@ -166,7 +231,7 @@ test('materialization checks are deterministic and do not rewrite tracked output
   const apiCheck = runNode(['tools/materialize_web_phase1_contracts.mjs', '--check']);
   assert.equal(apiCheck.status, 0, apiCheck.stderr);
   const pcCheck = runNode(
-    ['scripts/materialize-runtime-env.mjs', '--deployment-profile', 'cloud', '--environment', 'production', '--check'],
+    ['scripts/materialize-runtime-env.mjs', '--deployment-profile', 'standalone', '--environment', 'production', '--check'],
     path.join(REPO_ROOT, 'apps', 'sdkwork-webserver-pc'),
   );
   assert.equal(pcCheck.status, 0, pcCheck.stderr);

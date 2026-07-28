@@ -1,16 +1,22 @@
 #[cfg(feature = "management")]
+mod app_shell;
+#[cfg(feature = "management")]
 mod bootstrap;
 mod data_plane;
 #[cfg(feature = "management")]
-mod iam_application_bootstrap;
+mod iam_module_bootstrap;
 mod metric_dimensions;
-mod provider_event_ingress;
 #[cfg(feature = "management")]
-mod readiness;
+mod packaged_runtime;
+#[cfg(feature = "management")]
+mod profile;
+mod provider_event_ingress;
 mod website;
 mod website_runtime_cloud;
 mod website_runtime_recovery;
 
+#[cfg(feature = "management")]
+pub use app_shell::validate_pc_app_shell_from_env;
 #[cfg(feature = "management")]
 pub use bootstrap::{build_router, run_database_migrate_only};
 pub use data_plane::{
@@ -21,6 +27,8 @@ pub use data_plane::{
     DataPlaneError, DataPlaneOperationsConfig, DataPlaneReloadReport, FileTlsRuntimeConfig,
     FileTlsRuntimeController, FileTlsRuntimeError,
 };
+#[cfg(feature = "management")]
+pub use packaged_runtime::configure_packaged_runtime_roots_from_env;
 pub use website::{
     run_website_data_plane_from_config_until, WebsiteDataPlaneBootstrapError,
     DRIVE_INTERNAL_API_BASE_URL_ENV, DRIVE_INTERNAL_API_INGRESS_TOKEN_FILE_ENV,

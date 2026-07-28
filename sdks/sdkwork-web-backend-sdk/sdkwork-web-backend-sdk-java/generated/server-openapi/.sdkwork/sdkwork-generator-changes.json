@@ -9,21 +9,10 @@
     "protocol": "http",
     "packageName": "com.sdkwork:sdkwork-web-backend-sdk"
   },
-  "changeFingerprint": "42a098df996652a2960979b43c90f1fb6158b70f1347a3d8fc2c8208cb731d6d",
+  "changeFingerprint": "b10318d2328c2eb6a2a95ed91b08777ecdd1d542a84d8ab4a71fa59c1dc95120",
   "changes": {
-    "createdGeneratedFiles": [
-      "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsActivateResponse.java",
-      "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsDeploymentsRollbackResponse.java",
-      "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsPauseResponse.java",
-      "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsRetrieveResponse.java",
-      "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsUpdateResponse.java",
-      "src/main/java/com/sdkwork/web/backend/sdk/model/UpdateApplicationRequest.java"
-    ],
-    "updatedGeneratedFiles": [
-      "src/main/java/com/sdkwork/web/backend/sdk/api/ApplicationApi.java",
-      "src/main/java/com/sdkwork/web/backend/sdk/api/ApplicationDeploymentApi.java",
-      "src/main/java/com/sdkwork/web/backend/sdk/api/ApplicationDomainApi.java"
-    ],
+    "createdGeneratedFiles": [],
+    "updatedGeneratedFiles": [],
     "unchangedGeneratedFiles": [
       "bin/publish-core.mjs",
       "bin/publish.ps1",
@@ -35,6 +24,9 @@
       "sdkwork-sdk.json",
       "src/main/java/com/sdkwork/web/backend/sdk/api/AgentApi.java",
       "src/main/java/com/sdkwork/web/backend/sdk/api/ApiPaths.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/api/ApplicationApi.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/api/ApplicationDeploymentApi.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/api/ApplicationDomainApi.java",
       "src/main/java/com/sdkwork/web/backend/sdk/api/AuditApi.java",
       "src/main/java/com/sdkwork/web/backend/sdk/api/CertificateApi.java",
       "src/main/java/com/sdkwork/web/backend/sdk/api/CertificateDistributionApi.java",
@@ -51,13 +43,18 @@
       "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationDomainResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationDomainVerifyResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationResponse.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsActivateResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsCreateResponse201.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsDeploymentsCreateResponse201.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsDeploymentsListResponse.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsDeploymentsRollbackResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsDomainsCreateResponse201.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsDomainsListResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsDomainsVerifyResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsListResponse.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsPauseResponse.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsRetrieveResponse.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsUpdateResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/AuditLogPage.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/AuditLogResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/AuditLogsListResponse.java",
@@ -105,6 +102,7 @@
       "src/main/java/com/sdkwork/web/backend/sdk/model/ServersCreateResponse201.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/ServersListResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/StatusRetrieveResponse.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/model/UpdateApplicationRequest.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/UpdateCertificateRequest.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/UpdateNginxConfigRequest.java",
       "src/main/java/com/sdkwork/web/backend/sdk/SdkworkBackendClient.java"
@@ -118,68 +116,26 @@
   },
   "impact": {
     "schemaVersion": 1,
-    "areas": [
-      "api-surface",
-      "models"
-    ],
-    "details": [
-      {
-        "area": "api-surface",
-        "paths": [
-          "src/main/java/com/sdkwork/web/backend/sdk/api/ApplicationApi.java",
-          "src/main/java/com/sdkwork/web/backend/sdk/api/ApplicationDeploymentApi.java",
-          "src/main/java/com/sdkwork/web/backend/sdk/api/ApplicationDomainApi.java"
-        ]
-      },
-      {
-        "area": "models",
-        "paths": [
-          "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsActivateResponse.java",
-          "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsDeploymentsRollbackResponse.java",
-          "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsPauseResponse.java",
-          "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsRetrieveResponse.java",
-          "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsUpdateResponse.java",
-          "src/main/java/com/sdkwork/web/backend/sdk/model/UpdateApplicationRequest.java"
-        ]
-      }
-    ],
-    "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, models. Verification is required."
+    "areas": [],
+    "details": [],
+    "requiresVerification": false,
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
   },
   "verificationPlan": {
-    "shouldRun": true,
-    "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
-    "steps": [
-      {
-        "id": "check",
-        "title": "Unified package check",
-        "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
-        "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-java\\generated\\server-openapi",
-        "command": "node",
-        "args": [
-          "./bin/publish-core.mjs",
-          "--language",
-          "java",
-          "--project-dir",
-          ".",
-          "--action",
-          "check"
-        ],
-        "displayCommand": "node ./bin/publish-core.mjs --language java --project-dir . --action check"
-      }
-    ]
+    "shouldRun": false,
+    "runPhase": "skip",
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
+    "steps": []
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "medium",
-    "nextAction": "verify",
+    "riskLevel": "low",
+    "nextAction": "skip",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
-    "summary": "Changes have been applied. Run the required verification plan now.",
+    "summary": "No actionable changes were detected. No apply or verification step is required.",
     "reasons": [
-      "verification-required"
+      "no-actionable-changes"
     ]
   },
   "preservedLegacyFiles": false

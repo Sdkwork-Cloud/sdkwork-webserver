@@ -10,6 +10,7 @@ pub use http_route_manifest::internal_route_manifest;
 pub use routes::{build_router_with_internal_api, build_router_with_shared_internal_api};
 pub use sdkwork_webserver_contract::{WebInternalApi, WebInternalRequestContext};
 pub use web_bootstrap::{
+    domain_context_injectors as web_internal_domain_context_injectors,
     wrap_router_with_web_framework_from_env, wrap_router_with_web_framework_from_env_and_metrics,
 };
 

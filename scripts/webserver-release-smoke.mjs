@@ -2,8 +2,10 @@
 
 import { spawn, spawnSync } from 'node:child_process';
 import {
+  existsSync,
   mkdtempSync,
   readFileSync,
+  readdirSync,
   rmSync,
   statSync,
   writeFileSync,
@@ -17,6 +19,11 @@ import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { extract as extractTar } from 'tar';
 
+import {
+  IAM_APPLICATION_BOOTSTRAP_ENV,
+  resolveIamDevEnv,
+} from './lib/webserver-topology.mjs';
+
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUTPUT_ROOT = path.join(REPO_ROOT, 'dist', 'release');
 const MAX_PROCESS_OUTPUT_BYTES = 256 * 1024;
@@ -25,6 +32,17 @@ const COMMAND_TIMEOUT_MS = 30 * 1000;
 const START_TIMEOUT_MS = 15 * 1000;
 const STOP_TIMEOUT_MS = 10 * 1000;
 const SUPPORTED_ARCHITECTURES = new Set(['x64', 'arm64']);
+const STANDALONE_PC_ROOT = 'share/sdkwork/webserver-pc';
+const STANDALONE_IAM_ROOT = 'share/sdkwork/iam';
+const STANDALONE_DRIVE_ROOT = 'share/sdkwork/drive';
+const STANDALONE_SAME_ORIGIN_PATHS = Object.freeze({
+  shell: '/',
+  runtimeEnv: '/runtime-env.json',
+  navigation: '/console/sites',
+  openapi: '/openapi.json',
+  iamSession: '/app/v3/api/auth/sessions/current',
+  missingApi: '/app/v3/api/__sdkwork_release_smoke_missing__',
+});
 const EXPECTED_BINARIES = [
   'sdkwork-api-web-server-standalone-gateway',
   'sdkwork-web-server-website-delivery-edge-runtime',
@@ -183,6 +201,43 @@ function requestHealth(protocol, port) {
   });
 }
 
+function requestHttp(port, requestPath, headers = {}) {
+  return new Promise((resolve, reject) => {
+    const request = http.request(
+      {
+        host: '127.0.0.1',
+        port,
+        path: requestPath,
+        method: 'GET',
+        headers: { host: 'localhost', ...headers },
+      },
+      (response) => {
+        const chunks = [];
+        let bytes = 0;
+        response.on('data', (chunk) => {
+          bytes += chunk.length;
+          if (bytes > MAX_RESPONSE_BYTES) {
+            request.destroy(new Error(`smoke response exceeds ${MAX_RESPONSE_BYTES} bytes`));
+            return;
+          }
+          chunks.push(Buffer.from(chunk));
+        });
+        response.once('error', reject);
+        response.once('end', () => {
+          resolve({
+            statusCode: response.statusCode,
+            headers: response.headers,
+            body: Buffer.concat(chunks, bytes).toString('utf8'),
+          });
+        });
+      },
+    );
+    request.setTimeout(2_000, () => request.destroy(new Error('smoke request timed out')));
+    request.once('error', reject);
+    request.end();
+  });
+}
+
 async function waitForHealth(protocol, port, child, readOutput) {
   const deadline = Date.now() + START_TIMEOUT_MS;
   let lastError;
@@ -204,6 +259,172 @@ async function waitForHealth(protocol, port, child, readOutput) {
     await delay(100);
   }
   throw new Error(`${protocol} health did not become ready: ${lastError?.message ?? 'unknown'}`);
+}
+
+async function waitForManagementIngress(port, child, readOutput) {
+  const deadline = Date.now() + START_TIMEOUT_MS;
+  let lastError;
+  while (Date.now() < deadline) {
+    if (child.exitCode !== null || child.signalCode !== null) {
+      throw new Error(`packaged standalone ingress exited before readiness: ${readOutput()}`);
+    }
+    try {
+      const response = await requestHttp(port, '/readyz');
+      if (response.statusCode === 200) {
+        return;
+      }
+      lastError = new Error(
+        `standalone readiness returned status=${response.statusCode} body=${JSON.stringify(response.body)}`,
+      );
+    } catch (error) {
+      lastError = error;
+    }
+    await delay(100);
+  }
+  throw new Error(
+    `standalone application ingress did not become ready: ${lastError?.message ?? 'unknown'}`,
+  );
+}
+
+function assertContentType(response, expected, label) {
+  const contentType = String(response.headers['content-type'] ?? '').toLowerCase();
+  if (!contentType.includes(expected)) {
+    throw new Error(`${label} must use ${expected}; received ${JSON.stringify(contentType)}`);
+  }
+}
+
+function assertStatus(response, expected, label) {
+  if (response.statusCode !== expected) {
+    throw new Error(
+      `${label} returned status=${response.statusCode} body=${JSON.stringify(response.body)}`,
+    );
+  }
+}
+
+function standaloneManagementEnv(packageRoot, port) {
+  const iamRoot = path.join(packageRoot, ...STANDALONE_IAM_ROOT.split('/'));
+  const driveRoot = path.join(packageRoot, ...STANDALONE_DRIVE_ROOT.split('/'));
+  const databaseEnv = resolveIamDevEnv(process.env, {
+    postgresEnvFile: '.env.postgres',
+  });
+  return {
+    ...databaseEnv,
+    ...IAM_APPLICATION_BOOTSTRAP_ENV,
+    RUST_LOG: 'info',
+    SDKWORK_APP_ROOT: packageRoot,
+    SDKWORK_WEB_APP_ROOT: packageRoot,
+    SDKWORK_WEB_SERVER_APP_ROOT: packageRoot,
+    SDKWORK_IAM_APP_ROOT: iamRoot,
+    SDKWORK_DRIVE_APP_ROOT: driveRoot,
+    SDKWORK_DEPLOYMENT_PROFILE: 'standalone',
+    SDKWORK_ENVIRONMENT: 'production',
+    SDKWORK_PROFILE_ID: 'standalone.production',
+    SDKWORK_WEB_DEPLOYMENT_PROFILE: 'standalone',
+    SDKWORK_WEB_ENVIRONMENT: 'production',
+    SDKWORK_WEB_PROFILE_ID: 'standalone.production',
+    SDKWORK_WEB_RUNTIME_TARGET: 'server',
+    SDKWORK_WEB_SNOWFLAKE_NODE_ID: '0',
+    SDKWORK_WEB_APPLICATION_PUBLIC_INGRESS_BIND: `127.0.0.1:${port}`,
+    SDKWORK_WEB_APPLICATION_PUBLIC_HTTP_URL: `http://127.0.0.1:${port}`,
+    SDKWORK_WEB_APPLICATION_APP_HTTP_URL: `http://127.0.0.1:${port}`,
+    SDKWORK_WEB_APPLICATION_BACKEND_HTTP_URL: `http://127.0.0.1:${port}`,
+    SDKWORK_WEB_PC_STATIC_ROOT: STANDALONE_PC_ROOT,
+    SDKWORK_WEB_DATABASE_AUTO_MIGRATE: 'true',
+    SDKWORK_IAM_DATABASE_AUTO_MIGRATE: 'true',
+    SDKWORK_DATABASE_TEMPORARY_ANY_POOL_EXCEPTION: 'true',
+    SDKWORK_DATABASE_TEMPORARY_DRIVER_POOL_COUNT: '1',
+    SDKWORK_WEB_SECRET_ENCRYPTION_KEY:
+      'sdkwork-release-smoke-web-secret-encryption-key-2026',
+    SDKWORK_WEB_ACME_PROFILE: 'staging',
+    SDKWORK_WEB_ACME_CONTACT_EMAIL: 'release-smoke@example.invalid',
+    SDKWORK_WEB_CERT_ENCRYPTION_KEY:
+      'sdkwork-release-smoke-certificate-encryption-key-2026',
+    SDKWORK_DRIVE_DOWNLOAD_TOKEN_HMAC_SECRET:
+      'sdkwork-release-smoke-drive-download-token-secret-2026',
+  };
+}
+
+async function verifyStandaloneSameOriginIngress({ gateway, packageRoot, temporaryRoot }) {
+  const port = await reservePort();
+  const child = spawn(gateway, ['serve-management'], {
+    cwd: temporaryRoot,
+    env: standaloneManagementEnv(packageRoot, port),
+    stdio: ['ignore', 'pipe', 'pipe'],
+    windowsHide: true,
+  });
+  const readStdout = captureBounded(child.stdout);
+  const readStderr = captureBounded(child.stderr);
+  const readOutput = () => `${readStdout()}\n${readStderr()}`.trim();
+
+  try {
+    await waitForManagementIngress(port, child, readOutput);
+
+    const shell = await requestHttp(port, STANDALONE_SAME_ORIGIN_PATHS.shell, {
+      accept: 'text/html',
+    });
+    assertStatus(shell, 200, 'standalone shell');
+    assertContentType(shell, 'text/html', 'standalone shell');
+
+    const runtimeEnv = await requestHttp(port, STANDALONE_SAME_ORIGIN_PATHS.runtimeEnv);
+    assertStatus(runtimeEnv, 200, 'standalone runtime config');
+    assertContentType(runtimeEnv, 'application/json', 'standalone runtime config');
+    const runtimeConfig = JSON.parse(runtimeEnv.body);
+    if (
+      runtimeConfig.browserOriginMode !== 'same-origin'
+      || runtimeConfig.deploymentProfile !== 'standalone'
+      || [
+        runtimeConfig.appApiBaseUrl,
+        runtimeConfig.backendApiBaseUrl,
+        runtimeConfig.driveAppApiBaseUrl,
+        runtimeConfig.appbaseAppApiBaseUrl,
+      ].some((baseUrl) => baseUrl !== '/')
+    ) {
+      throw new Error('standalone runtime config does not preserve the canonical same-origin root');
+    }
+
+    const navigation = await requestHttp(port, STANDALONE_SAME_ORIGIN_PATHS.navigation, {
+      accept: 'text/html',
+    });
+    assertStatus(navigation, 200, 'standalone SPA navigation');
+    assertContentType(navigation, 'text/html', 'standalone SPA navigation');
+
+    const openapi = await requestHttp(port, STANDALONE_SAME_ORIGIN_PATHS.openapi);
+    assertStatus(openapi, 200, 'standalone OpenAPI');
+    assertContentType(openapi, 'application/json', 'standalone OpenAPI');
+    const openapiDocument = JSON.parse(openapi.body);
+    if (!openapiDocument.paths?.[STANDALONE_SAME_ORIGIN_PATHS.iamSession]) {
+      throw new Error('standalone OpenAPI is missing the embedded IAM current-session route');
+    }
+
+    const iamSession = await requestHttp(port, STANDALONE_SAME_ORIGIN_PATHS.iamSession);
+    assertStatus(iamSession, 401, 'standalone unauthenticated IAM current session');
+    if (String(iamSession.headers['content-type'] ?? '').toLowerCase().includes('text/html')) {
+      throw new Error('standalone IAM route must not return the SPA shell');
+    }
+
+    const missingApi = await requestHttp(port, STANDALONE_SAME_ORIGIN_PATHS.missingApi, {
+      accept: 'text/html',
+    });
+    assertStatus(missingApi, 404, 'standalone unknown API');
+    if (String(missingApi.headers['content-type'] ?? '').toLowerCase().includes('text/html')) {
+      throw new Error('standalone unknown API must not return the SPA shell');
+    }
+
+    child.kill('SIGTERM');
+    const exit = await waitForExit(child, STOP_TIMEOUT_MS);
+    if (exit.code !== 0 || exit.signal !== null) {
+      throw new Error(
+        `packaged standalone ingress exited unexpectedly code=${exit.code} signal=${exit.signal}: ${readOutput()}`,
+      );
+    }
+    return port;
+  } catch (error) {
+    if (child.exitCode === null && child.signalCode === null) {
+      child.kill('SIGKILL');
+      await waitForExit(child, 5_000).catch(() => {});
+    }
+    throw error;
+  }
 }
 
 function waitForExit(child, timeoutMs) {
@@ -358,6 +579,44 @@ async function smoke(settings) {
     run(websiteEdgeRuntime, ['--help'], { cwd: packageRoot });
     run(gateway, ['validate', packagedExample], { cwd: packageRoot });
     run(websiteEdgeRuntime, ['validate', packagedWebsiteHostConfig], { cwd: packageRoot });
+    const pcStaticRoot = path.join(packageRoot, 'share', 'sdkwork', 'webserver-pc');
+    let sameOriginPort;
+    if (settings.deploymentProfile === 'standalone') {
+      for (const bootstrapFile of ['index.html', 'runtime-env.json']) {
+        const metadata = statSync(path.join(pcStaticRoot, bootstrapFile));
+        if (!metadata.isFile() || metadata.size === 0) {
+          throw new Error(`packaged PC ${bootstrapFile} is not a non-empty regular file`);
+        }
+      }
+      const assets = readdirSync(path.join(pcStaticRoot, 'assets'), { withFileTypes: true });
+      if (!assets.some((entry) => entry.isFile())) {
+        throw new Error('packaged PC app shell does not contain an assets/ file');
+      }
+      run(gateway, ['validate-app-shell'], {
+        cwd: packageRoot,
+        env: {
+          ...process.env,
+          SDKWORK_DEPLOYMENT_PROFILE: 'standalone',
+          SDKWORK_WEB_DEPLOYMENT_PROFILE: 'standalone',
+          SDKWORK_WEB_ENVIRONMENT: 'production',
+          SDKWORK_WEB_PC_STATIC_ROOT: 'share/sdkwork/webserver-pc',
+        },
+      });
+      sameOriginPort = await verifyStandaloneSameOriginIngress({
+        gateway,
+        packageRoot,
+        temporaryRoot,
+      });
+    } else {
+      if (existsSync(pcStaticRoot)) {
+        throw new Error('cloud release must not contain the standalone PC app shell');
+      }
+      for (const dependencyRoot of [STANDALONE_IAM_ROOT, STANDALONE_DRIVE_ROOT]) {
+        if (existsSync(path.join(packageRoot, ...dependencyRoot.split('/')))) {
+          throw new Error('cloud release must not contain standalone dependency runtime assets');
+        }
+      }
+    }
 
     const certificateFile = path.join(temporaryRoot, 'smoke-cert.pem');
     const privateKeyFile = path.join(temporaryRoot, 'smoke-key.pem');
@@ -433,8 +692,11 @@ async function smoke(settings) {
       );
     }
     child = undefined;
+    const sameOrigin = sameOriginPort
+      ? ` sameOrigin=http://127.0.0.1:${sameOriginPort}`
+      : '';
     console.log(
-      `[sdkwork-web-release-smoke] passed artifact=${resolved.artifactBase}.tar.gz http=${httpPort} https=${httpsPort}`,
+      `[sdkwork-web-release-smoke] passed artifact=${resolved.artifactBase}.tar.gz http=${httpPort} https=${httpsPort}${sameOrigin}`,
     );
   } finally {
     if (child && child.exitCode === null && child.signalCode === null) {

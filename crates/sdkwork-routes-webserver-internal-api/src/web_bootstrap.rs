@@ -28,6 +28,10 @@ impl DomainContextInjector for WebInternalContextInjector {
     }
 }
 
+pub fn domain_context_injectors() -> Vec<Arc<dyn DomainContextInjector>> {
+    vec![Arc::new(WebInternalContextInjector)]
+}
+
 fn web_internal_context_from_web_request(
     context: &WebRequestContext,
 ) -> Option<WebInternalRequestContext> {

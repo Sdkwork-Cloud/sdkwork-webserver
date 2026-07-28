@@ -27,6 +27,10 @@ impl DomainContextInjector for WebBackendContextInjector {
     }
 }
 
+pub fn domain_context_injectors() -> Vec<Arc<dyn DomainContextInjector>> {
+    vec![Arc::new(WebBackendContextInjector)]
+}
+
 fn web_backend_context_from_web_request(
     context: &WebRequestContext,
 ) -> Option<WebBackendRequestContext> {

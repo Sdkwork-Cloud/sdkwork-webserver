@@ -9,16 +9,9 @@
     "protocol": "http",
     "packageName": "sdkwork-web-backend-sdk"
   },
-  "changeFingerprint": "86817bd254b851f20e9539fb5fc981190b7ccc21168c007fec9fc13cc0d644ef",
+  "changeFingerprint": "d1f2ec0637901a321bbc6bac57c104c6801c2bb8a17dc0595ac8048f7b28d87b",
   "changes": {
-    "createdGeneratedFiles": [
-      "src/models/applications_activate_response.rs",
-      "src/models/applications_deployments_rollback_response.rs",
-      "src/models/applications_pause_response.rs",
-      "src/models/applications_retrieve_response.rs",
-      "src/models/applications_update_response.rs",
-      "src/models/update_application_request.rs"
-    ],
+    "createdGeneratedFiles": [],
     "updatedGeneratedFiles": [
       "src/api/agent.rs",
       "src/api/application_deployment.rs",
@@ -36,7 +29,6 @@
       "src/http/mod.rs",
       "src/lib.rs",
       "src/models/audit_log_page.rs",
-      "src/models/mod.rs",
       "src/models/nginx_config_page.rs",
       "src/models/problem_detail.rs",
       "src/models/sdk_work_page_data.rs",
@@ -61,13 +53,18 @@
       "src/models/application_domain_response.rs",
       "src/models/application_domain_verify_response.rs",
       "src/models/application_response.rs",
+      "src/models/applications_activate_response.rs",
       "src/models/applications_create_response201.rs",
       "src/models/applications_deployments_create_response201.rs",
       "src/models/applications_deployments_list_response.rs",
+      "src/models/applications_deployments_rollback_response.rs",
       "src/models/applications_domains_create_response201.rs",
       "src/models/applications_domains_list_response.rs",
       "src/models/applications_domains_verify_response.rs",
       "src/models/applications_list_response.rs",
+      "src/models/applications_pause_response.rs",
+      "src/models/applications_retrieve_response.rs",
+      "src/models/applications_update_response.rs",
       "src/models/audit_log_response.rs",
       "src/models/audit_logs_list_response.rs",
       "src/models/certificate_distribution_response.rs",
@@ -93,6 +90,7 @@
       "src/models/create_server_response.rs",
       "src/models/field_error.rs",
       "src/models/heartbeat_response.rs",
+      "src/models/mod.rs",
       "src/models/nginx_config_response.rs",
       "src/models/nginx_deploy_response.rs",
       "src/models/nginx_reload_response.rs",
@@ -111,6 +109,7 @@
       "src/models/servers_create_response201.rs",
       "src/models/servers_list_response.rs",
       "src/models/status_retrieve_response.rs",
+      "src/models/update_application_request.rs",
       "src/models/update_certificate_request.rs",
       "src/models/update_nginx_config_request.rs"
     ],
@@ -171,18 +170,11 @@
       {
         "area": "models",
         "paths": [
-          "src/models/applications_activate_response.rs",
-          "src/models/applications_deployments_rollback_response.rs",
-          "src/models/applications_pause_response.rs",
-          "src/models/applications_retrieve_response.rs",
-          "src/models/applications_update_response.rs",
           "src/models/audit_log_page.rs",
-          "src/models/mod.rs",
           "src/models/nginx_config_page.rs",
           "src/models/problem_detail.rs",
           "src/models/sdk_work_page_data.rs",
-          "src/models/server_page.rs",
-          "src/models/update_application_request.rs"
+          "src/models/server_page.rs"
         ]
       },
       {

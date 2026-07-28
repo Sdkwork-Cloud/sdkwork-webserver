@@ -14,10 +14,11 @@ import { webserverModule as configurationModule } from "@sdkwork/webserver-pc-co
 import { webserverModule as sitesModule } from "@sdkwork/webserver-pc-console-sites";
 import { SdkworkThemeProvider } from "@sdkwork/ui-pc-react/theme";
 import type { SdkworkThemeSelection } from "@sdkwork/ui-pc-react/theme";
-import { lazy, Suspense, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import type { BootstrappedWebserverPcRuntime } from "./bootstrap/runtime.ts";
 import { WebserverAuthGate } from "./auth/WebserverAuthGate.tsx";
+import { browserPortalClipboard } from "./bootstrap/portalHost.ts";
 import {
   commitWebserverTheme,
   resolveInitialWebserverTheme,
@@ -29,6 +30,7 @@ const consoleModules = [sitesModule, configurationModule, deliveryModule, deploy
 const adminModules = [applicationsModule, certificatesModule, nginxModule, serversModule, diagnosticsModule, auditModule] satisfies readonly WebserverPcModuleDefinition[];
 const LazyAuthRoutes = lazy(() => import("./auth/WebserverAuthRoutes.tsx").then((module) => ({ default: module.WebserverAuthRoutes })));
 const LazyAdminSurface = lazy(() => import("./surfaces/WebserverAdminSurface.tsx").then((module) => ({ default: module.WebserverAdminSurface })));
+const LazyWebserverPortal = lazy(() => import("@sdkwork/webserver-pc-portal").then((module) => ({ default: module.WebserverPortal })));
 
 export function App({ runtime }: { runtime: BootstrappedWebserverPcRuntime }) {
   const [themeSelection, setThemeSelection] = useState(resolveInitialWebserverTheme);
@@ -47,11 +49,47 @@ export function App({ runtime }: { runtime: BootstrappedWebserverPcRuntime }) {
       themeSelection={themeSelection}
     >
       <BrowserRouter>
-        <AuthenticatedApplication runtime={runtime} />
+        <Routes>
+          <Route
+            path="/"
+            element={<PublicPortalApplication runtime={runtime} />}
+          />
+          <Route path="/*" element={<AuthenticatedApplication runtime={runtime} />} />
+        </Routes>
       </BrowserRouter>
     </SdkworkThemeProvider>
   );
 }
+
+function PublicPortalApplication({ runtime }: { runtime: BootstrappedWebserverPcRuntime }) {
+  const authState = useSdkworkAuthControllerState(runtime.authController);
+
+  useEffect(() => {
+    if (authState.isBootstrapped) return;
+    void runtime.authController.bootstrap().catch(() => undefined);
+  }, [authState.isBootstrapped, runtime.authController]);
+
+  const viewer = authState.isAuthenticated
+    ? { label: authState.user?.displayName || authState.user?.email }
+    : undefined;
+
+  return (
+    <Suspense fallback={<div className="bootstrap-state">SDKWork Web Server</div>}>
+      <LazyWebserverPortal
+        clipboard={browserPortalClipboard}
+        locale={runtime.locale}
+        navigation={{
+          consoleHref: "/console",
+          createApplicationHref: "/console/sites",
+          deploymentsHref: "/console/deployments",
+          notificationsHref: runtime.config.messagingPcUrl,
+        }}
+        viewer={viewer}
+      />
+    </Suspense>
+  );
+}
+
 function AuthenticatedApplication({ runtime }: { runtime: BootstrappedWebserverPcRuntime }) {
   const authState = useSdkworkAuthControllerState(runtime.authController);
   const registry = useMemo(() => createWebserverConsoleRegistry(runtime.consoleClients), [runtime.consoleClients]);

@@ -1,6 +1,9 @@
 {
   "environment": "staging",
   "deploymentProfile": "cloud",
+  "profileId": "cloud.staging",
+  "runtimeTarget": "browser",
+  "browserOriginMode": "cross-origin",
   "defaultLocale": "zh-CN",
   "fallbackLocale": "en-US",
   "supportedLocales": ["zh-CN", "en-US"],
@@ -8,5 +11,6 @@
   "appApiBaseUrl": "https://web.staging.sdkwork.com",
   "backendApiBaseUrl": "https://web.staging.sdkwork.com",
   "driveAppApiBaseUrl": "https://api-staging.sdkwork.com",
-  "appbaseAppApiBaseUrl": "https://iam.staging.sdkwork.com"
+  "appbaseAppApiBaseUrl": "https://iam.staging.sdkwork.com",
+  "messagingPcUrl": "https://messaging-staging.sdkwork.com/notifications"
 }

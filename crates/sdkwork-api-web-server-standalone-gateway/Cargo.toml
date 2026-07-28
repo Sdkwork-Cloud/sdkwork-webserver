@@ -7,11 +7,12 @@ edition.workspace = true
 default = ["management"]
 management = [
   "dep:sdkwork-api-web-server-assembly",
+  "dep:sdkwork-api-iam-assembly",
+  "dep:sdkwork-api-drive-assembly",
   "dep:sdkwork-database-sqlx",
-  "dep:sdkwork-iam-database-host",
-  "dep:sdkwork-iam-embedded-application-bootstrap",
-  "dep:sdkwork-intelligence-webserver-service",
-  "dep:sdkwork-webserver-database-host",
+  "dep:sdkwork-web-axum",
+  "dep:sdkwork-web-contract",
+  "dep:sdkwork-webserver-http-host",
 ]
 
 [lib]
@@ -26,6 +27,8 @@ required-features = ["management"]
 
 [dependencies]
 sdkwork-api-web-server-assembly = { workspace = true, optional = true }
+sdkwork-api-iam-assembly = { workspace = true, optional = true }
+sdkwork-api-drive-assembly = { workspace = true, optional = true }
 atomic-waker.workspace = true
 arc-swap.workspace = true
 axum.workspace = true
@@ -66,11 +69,8 @@ x509-parser.workspace = true
 windows-sys.workspace = true
 woothee.workspace = true
 zeroize.workspace = true
-sdkwork-intelligence-webserver-service = { workspace = true, optional = true }
 sdkwork-database-sqlx = { workspace = true, optional = true }
-sdkwork-iam-database-host = { workspace = true, optional = true }
-sdkwork-iam-embedded-application-bootstrap = { workspace = true, optional = true }
-sdkwork-webserver-database-host = { workspace = true, optional = true }
+sdkwork-webserver-http-host = { workspace = true, optional = true }
 sdkwork-webserver-core.workspace = true
 sdkwork-webserver-contract.workspace = true
 sdkwork-webserver-delivery-runtime.workspace = true
@@ -81,8 +81,11 @@ sdkwork-drive-internal-sdk.workspace = true
 sdkwork-knowledgebase-internal-sdk.workspace = true
 sdkwork-web-internal-sdk.workspace = true
 sdkwork-web-bootstrap.workspace = true
+sdkwork-web-axum = { workspace = true, optional = true }
+sdkwork-web-contract = { workspace = true, optional = true }
 sdkwork-utils-rust.workspace = true
 sdkwork-web-core.workspace = true
+sdkwork-iam-web-adapter.workspace = true
 
 [dev-dependencies]
 async-trait.workspace = true

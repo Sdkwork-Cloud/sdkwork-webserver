@@ -102,7 +102,10 @@ and production monitoring evidence.
 
 ```text
 sdkwork-api-web-server-standalone-gateway
-  |-- management bootstrap -> app/backend route crates -> service -> repository -> database
+  |-- one Web Framework + IAM authorization + readiness/metrics/OpenAPI boundary
+  |-- Web Server owner assembly -> app/backend/internal route crates -> service -> repository -> database
+  |-- IAM owner App API assembly contribution (same process, same application ingress)
+  |-- Drive owner App API assembly contribution (same process, same application ingress)
   |-- data-plane bootstrap -> compiled Web Server config -> legacy HTTP/HTTPS/static/proxy
   `-- host operations -> config, signals, readiness, drain, runtime paths
 
@@ -164,6 +167,13 @@ The request path does not call management services or repositories. Management r
 
 - `standalone`: one packaged gateway runs the composed management and data plane; server-grade
   deployments default to PostgreSQL, with an explicit SQLite single-node development exception.
+  IAM and Drive browser dependency APIs are dependency-owned Rust assembly contributions linked
+  into this gateway and use `application.public-ingress`; no dependency gateway or port 3900 is
+  required. Development keeps Vite only as the browser-visible origin and proxies canonical API
+  paths to the private gateway target. Production serves the packaged PC shell, runtime config,
+  and composed APIs from the application ingress itself. The archive carries IAM and Drive
+  runtime assets under `share/sdkwork`; packaged relative application/static roots resolve from
+  the parent of `bin/`, independent of the process working directory.
 - `cloud`: the dedicated website delivery edge-runtime nodes consume node-scoped immutable
   configuration and secret assignments; management assemblies are hosted by the platform cloud
   gateway and the application standalone gateway is not started.
@@ -178,6 +188,8 @@ The request path does not call management services or repositories. Management r
 
 ## 8. Architecture Decision Index
 
+- [ADR-20260728 Standalone Browser Same-Origin Delivery](../decisions/ADR-20260728-standalone-browser-same-origin-delivery.md) - accepted topology-derived development proxy and production gateway-static delivery for one browser-visible origin.
+- [ADR-20260728 Embedded Standalone Dependency Assemblies](../decisions/ADR-20260728-embedded-standalone-dependency-assemblies.md) - accepted one-process IAM/Drive owner assembly composition and one standalone browser API ingress.
 - [ADR-20260721 Compiled Website Runtime Descriptor](../decisions/ADR-20260721-compiled-website-runtime-descriptor.md) - accepted cloud data-plane input and authority boundary.
 
 | ADR | Topic | Status |

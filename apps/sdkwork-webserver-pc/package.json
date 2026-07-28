@@ -12,8 +12,9 @@
     "dev:browser:postgres:standalone": "pnpm exec sdkwork-app dev --root ../.. --runtime-target browser --deployment-profile standalone",
     "dev:browser:cloud": "pnpm exec sdkwork-app dev --root ../.. --runtime-target browser --deployment-profile cloud",
     "stop": "pnpm exec sdkwork-app stop --root ../..",
-    "prebuild": "node scripts/verify-build-sources.mjs && node scripts/materialize-runtime-env.mjs --deployment-profile cloud --environment production",
-    "build": "tsc -p tsconfig.json --noEmit && vite build",
+    "build": "pnpm build:standalone",
+    "build:standalone": "node scripts/verify-build-sources.mjs && node scripts/materialize-runtime-env.mjs --deployment-profile standalone --environment production && tsc -p tsconfig.json --noEmit && vite build --mode standalone.production",
+    "build:cloud": "node scripts/verify-build-sources.mjs && node scripts/materialize-runtime-env.mjs --deployment-profile cloud --environment production && tsc -p tsconfig.json --noEmit && vite build --mode cloud.production",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "check:source-config": "node ../../../sdkwork-specs/tools/check-source-config-standard.mjs --root .",
@@ -23,8 +24,8 @@
     "preview": "vite preview --host 127.0.0.1",
     "start": "pnpm preview",
     "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
-    "_sdkwork:dev:standalone": "node scripts/verify-build-sources.mjs && node scripts/materialize-runtime-env.mjs --deployment-profile standalone --environment development && vite --host 127.0.0.1 --port 5182 --strictPort",
-    "_sdkwork:dev:cloud": "node scripts/verify-build-sources.mjs && node scripts/materialize-runtime-env.mjs --deployment-profile cloud --environment development && vite --host 127.0.0.1 --port 5182 --strictPort"
+    "_sdkwork:dev:standalone": "node scripts/verify-build-sources.mjs && node scripts/materialize-runtime-env.mjs --deployment-profile standalone --environment development && vite --mode standalone.development",
+    "_sdkwork:dev:cloud": "node scripts/verify-build-sources.mjs && node scripts/materialize-runtime-env.mjs --deployment-profile cloud --environment development && vite --mode cloud.development"
   },
   "dependencies": {
     "@sdkwork/auth-pc-react": "workspace:*",
@@ -55,6 +56,7 @@
     "@sdkwork/webserver-pc-console-site-configuration": "workspace:*",
     "@sdkwork/webserver-pc-console-sites": "workspace:*",
     "@sdkwork/webserver-pc-core": "workspace:*",
+    "@sdkwork/webserver-pc-portal": "workspace:*",
     "@tailwindcss/typography": "catalog:",
     "@tailwindcss/vite": "catalog:",
     "lucide-react": "catalog:",

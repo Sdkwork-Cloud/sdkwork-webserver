@@ -9,15 +9,10 @@
     "protocol": "http",
     "packageName": "sdkwork-web-backend-sdk"
   },
-  "changeFingerprint": "81171d60fcfb3542b24ca8dc429862ea1cb31aa83b26538deb61ea8f21fb9f0e",
+  "changeFingerprint": "80e697dd72a581beb8941068ed1c82e7fa2ae24fcdadd98b677b588a9c2fbffe",
   "changes": {
     "createdGeneratedFiles": [],
-    "updatedGeneratedFiles": [
-      "Sources/API/ApplicationApi.swift",
-      "Sources/API/ApplicationDeploymentApi.swift",
-      "Sources/API/ApplicationDomainApi.swift",
-      "Sources/Models.swift"
-    ],
+    "updatedGeneratedFiles": [],
     "unchangedGeneratedFiles": [
       "bin/publish-core.mjs",
       "bin/publish.ps1",
@@ -30,12 +25,16 @@
       "Sources/API/AgentApi.swift",
       "Sources/API/API.swift",
       "Sources/API/ApiPaths.swift",
+      "Sources/API/ApplicationApi.swift",
+      "Sources/API/ApplicationDeploymentApi.swift",
+      "Sources/API/ApplicationDomainApi.swift",
       "Sources/API/AuditApi.swift",
       "Sources/API/CertificateApi.swift",
       "Sources/API/CertificateDistributionApi.swift",
       "Sources/API/NginxApi.swift",
       "Sources/API/ServerApi.swift",
       "Sources/HTTP/HttpClient.swift",
+      "Sources/Models.swift",
       "Sources/SdkworkBackendClient.swift"
     ],
     "deletedGeneratedFiles": [],
@@ -47,63 +46,26 @@
   },
   "impact": {
     "schemaVersion": 1,
-    "areas": [
-      "api-surface",
-      "models"
-    ],
-    "details": [
-      {
-        "area": "api-surface",
-        "paths": [
-          "Sources/API/ApplicationApi.swift",
-          "Sources/API/ApplicationDeploymentApi.swift",
-          "Sources/API/ApplicationDomainApi.swift"
-        ]
-      },
-      {
-        "area": "models",
-        "paths": [
-          "Sources/Models.swift"
-        ]
-      }
-    ],
-    "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, models. Verification is required."
+    "areas": [],
+    "details": [],
+    "requiresVerification": false,
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
   },
   "verificationPlan": {
-    "shouldRun": true,
-    "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
-    "steps": [
-      {
-        "id": "check",
-        "title": "Unified package check",
-        "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
-        "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-swift\\generated\\server-openapi",
-        "command": "node",
-        "args": [
-          "./bin/publish-core.mjs",
-          "--language",
-          "swift",
-          "--project-dir",
-          ".",
-          "--action",
-          "check"
-        ],
-        "displayCommand": "node ./bin/publish-core.mjs --language swift --project-dir . --action check"
-      }
-    ]
+    "shouldRun": false,
+    "runPhase": "skip",
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
+    "steps": []
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "medium",
-    "nextAction": "verify",
+    "riskLevel": "low",
+    "nextAction": "skip",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
-    "summary": "Changes have been applied. Run the required verification plan now.",
+    "summary": "No actionable changes were detected. No apply or verification step is required.",
     "reasons": [
-      "verification-required"
+      "no-actionable-changes"
     ]
   },
   "preservedLegacyFiles": false

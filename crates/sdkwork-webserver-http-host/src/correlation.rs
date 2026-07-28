@@ -59,7 +59,7 @@ impl WebProblemCorrelation {
     }
 }
 
-pub(crate) fn resolved_trace_id() -> String {
+pub fn resolved_trace_id() -> String {
     WebProblemCorrelation::current()
         .and_then(|correlation| correlation.trace_id)
         .filter(|value| !value.is_empty())

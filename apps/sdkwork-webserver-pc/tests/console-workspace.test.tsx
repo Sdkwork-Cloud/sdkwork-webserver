@@ -7,6 +7,8 @@ import {
   WebserverWorkspace,
   type WebserverResourceRegistry,
 } from "@sdkwork/webserver-pc-commons";
+import { webserverModule as configurationModule } from "@sdkwork/webserver-pc-console-site-configuration";
+import { webserverModule as deliveryModule } from "@sdkwork/webserver-pc-console-delivery";
 import { webserverModule as deploymentsModule } from "@sdkwork/webserver-pc-console-deployments";
 import { webserverModule as sitesModule } from "@sdkwork/webserver-pc-console-sites";
 import {
@@ -17,20 +19,36 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/re
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+const consoleModules = [sitesModule, configurationModule, deliveryModule, deploymentsModule];
+const appUserPermissionScope = ["web.sites.*", "web.certificates.*"];
+
 afterEach(() => {
   cleanup();
   sessionStorage.clear();
 });
 
 describe("console workspace access", () => {
-  it("keeps the console shell and sign-out available without capability permissions", () => {
+  it.each([
+    ["/console/sites", "My applications"],
+    ["/console/configuration", "Configuration"],
+    ["/console/domains", "Custom domains"],
+    ["/console/certificates", "Certificates"],
+    ["/console/deployments", "Deployment history"],
+  ])("authorizes the app_user role for %s", (path, heading) => {
+    renderWorkspace(path, {}, appUserPermissionScope);
+
+    expect(screen.getByRole("heading", { name: heading })).toBeTruthy();
+    expect(screen.queryByText("This feature is not authorized")).toBeNull();
+  });
+
+  it("keeps the console shell and sign-out available for an app user", () => {
     const onSignOut = vi.fn();
 
-    renderWorkspace("/console/sites", {}, [], onSignOut);
+    renderWorkspace("/console/sites", {}, appUserPermissionScope, onSignOut);
 
     expect(screen.getByRole("link", { name: "My applications" })).toBeTruthy();
     expect(screen.getByRole("link", { name: "Deployment history" })).toBeTruthy();
-    expect(screen.getByText("This feature is not authorized")).toBeTruthy();
+    expect(screen.queryByText("This feature is not authorized")).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "Sign out" }));
     expect(onSignOut).toHaveBeenCalledOnce();
   });
@@ -232,7 +250,7 @@ function renderWorkspace(
           element={(
             <WebserverWorkspace
               locale={locale}
-              modules={[sitesModule, deploymentsModule]}
+              modules={consoleModules}
               onSignOut={onSignOut}
               permissionScope={permissionScope}
               registry={registry}

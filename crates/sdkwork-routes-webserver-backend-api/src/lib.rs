@@ -11,6 +11,7 @@ pub use http_route_manifest::backend_route_manifest;
 pub use routes::{build_router_with_backend_api, build_router_with_shared_backend_api};
 pub use sdkwork_webserver_contract::{WebBackendApi, WebBackendRequestContext};
 pub use web_bootstrap::{
+    domain_context_injectors as web_backend_domain_context_injectors,
     wrap_router_with_web_framework_from_env, wrap_router_with_web_framework_from_env_and_metrics,
 };
 

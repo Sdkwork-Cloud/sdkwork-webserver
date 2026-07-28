@@ -173,6 +173,8 @@ Health or SLO checks detect a failed canary. The control plane stops rollout, re
 - `PRD-FR-029`: Runtime-affecting Admin actions require explicit confirmation, selected-resource state constraints, route-level IAM authorization, tenant-scoped service enforcement, and durable audit evidence.
 - `PRD-FR-030`: The tenant-bound Backend context never becomes cross-tenant because an account has `web.*` or `*`; cross-tenant platform administration requires a separate platform-admin route and authorization chain.
 - `PRD-FR-031`: The PC host must bootstrap IAM before protected routes, create one shared TokenManager, lazy-load backend-admin code, and keep machine heartbeat/sync operations out of human operator navigation.
+- `PRD-FR-032`: In standalone deployments, IAM and Drive App APIs consumed by the PC host must be linked as owner Rust assembly contributions into the Web Server standalone gateway and served from the one application public ingress; the browser must not require a dependency gateway on port 3900.
+- `PRD-FR-033`: A standalone PC deployment must expose the page and all generated SDK requests through one browser-visible origin. Development may retain Vite HMR only through a canonical-path same-origin proxy, while production must serve the packaged PC shell and composed APIs from application public ingress.
 
 ## 8. Non-Functional Requirements
 
@@ -257,6 +259,8 @@ Health or SLO checks detect a failed canary. The control plane stops rollout, re
 
 ## 11. Linked Requirements
 
+- [REQ-2026-0065 Standalone browser same-origin delivery](../requirements/REQ-2026-0065-standalone-browser-same-origin-delivery.md) - makes page/API browser origin explicit, uses a topology-derived Vite proxy for development, and packages the PC shell behind the production Rust application ingress.
+- [REQ-2026-0064 Embedded standalone dependency APIs](../requirements/REQ-2026-0064-embedded-standalone-dependency-apis.md) - links IAM and Drive owner App API assemblies into the Web Server standalone gateway, unifies browser SDK origins on application public ingress, and rejects standalone platform-gateway URL drift.
 - [REQ-2026-0061 Admin application deployment and certificate distribution](../requirements/REQ-2026-0061-admin-application-deployment-and-certificate-distribution.md) - adds backend-admin WEB/API application deployment, public-domain binding, canonical certificate lifecycle management, and observable one-authority multi-node manifest convergence.
 - [REQ-2026-0062 Owner-scoped Console release and TLS workflow](../requirements/REQ-2026-0062-owner-scoped-console-release-and-tls-workflow.md) - defines owner isolation, Drive-backed package intake, truthful deployment status, custom-domain certificate selection, persistent Console access, Admin routing, and sign-out behavior.
 - [REQ-2026-0063 Tenant super administrator control plane](../requirements/REQ-2026-0063-tenant-super-admin-control-plane.md) - completes tenant-scoped application lifecycle, domain removal, successful-version rollback, audit filtering, administrator-tier identity, canonical Nginx/server forms, one-time Node credential handling, and dangerous-action controls without claiming cross-tenant or deployment-worker authority.

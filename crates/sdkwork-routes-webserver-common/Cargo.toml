@@ -4,16 +4,11 @@ version.workspace = true
 edition.workspace = true
 
 [dependencies]
-async-trait.workspace = true
 axum.workspace = true
 serde.workspace = true
-tokio.workspace = true
 sdkwork-webserver-contract.workspace = true
-sdkwork-iam-web-adapter.workspace = true
+sdkwork-webserver-http-host.workspace = true
 sdkwork-utils-rust.workspace = true
-sdkwork-web-bootstrap.workspace = true
-sdkwork-web-core.workspace = true
-tracing.workspace = true
 
 [dev-dependencies]
 serde_json.workspace = true

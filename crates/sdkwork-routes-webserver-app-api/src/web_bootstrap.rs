@@ -35,6 +35,10 @@ impl DomainContextInjector for WebAppContextInjector {
     }
 }
 
+pub fn domain_context_injectors() -> Vec<Arc<dyn DomainContextInjector>> {
+    vec![Arc::new(WebAppContextInjector)]
+}
+
 fn web_app_context_from_web_request(context: &WebRequestContext) -> Option<WebAppRequestContext> {
     let principal = context.principal.as_ref()?;
     let tenant_id = principal.tenant_id().parse().ok()?;

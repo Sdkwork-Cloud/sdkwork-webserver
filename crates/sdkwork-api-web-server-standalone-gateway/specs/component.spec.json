@@ -37,6 +37,11 @@
       "purpose": "Rust gateway composition."
     },
     {
+      "file": "API_ASSEMBLY_SPEC.md",
+      "path": "../../../sdkwork-specs/API_ASSEMBLY_SPEC.md",
+      "purpose": "Application and dependency API contribution composition."
+    },
+    {
       "file": "APPLICATION_GATEWAY_SPEC.md",
       "path": "../../../sdkwork-specs/APPLICATION_GATEWAY_SPEC.md",
       "purpose": "Application gateway responsibility."
@@ -82,6 +87,11 @@
       "purpose": "Fail-closed embedded tenant application provisioning."
     },
     {
+      "file": "IAM_RBAC_FEDERATION_SPEC.md",
+      "path": "../../../sdkwork-specs/IAM_RBAC_FEDERATION_SPEC.md",
+      "purpose": "Application-owned permission catalog materialization."
+    },
+    {
       "file": "CONFIG_SPEC.md",
       "path": "../../../sdkwork-specs/CONFIG_SPEC.md",
       "purpose": "Runtime-set, dependency origin, and secret-file configuration."
@@ -104,6 +114,10 @@
         "export": "crate-root"
       },
       {
+        "name": "pcAppShellStaticDelivery",
+        "export": "crate-root"
+      },
+      {
         "name": "standaloneDataPlane",
         "export": "crate-root"
       },
@@ -121,6 +135,23 @@
       }
     ],
     "requiredPorts": [
+      {
+        "name": "webServerApiAssembly",
+        "export": "sdkwork_api_web_server_assembly::assemble_api_router"
+      },
+      {
+        "name": "iamAppApiContribution",
+        "export": "sdkwork_api_iam_assembly::assemble_app_api_contribution_with_module_manifests"
+      },
+      {
+        "name": "driveAppApiContribution",
+        "export": "sdkwork_api_drive_assembly::assemble_app_api_contribution"
+      },
+      {
+        "name": "webserverHttpHost",
+        "export": "crate-root",
+        "provider": "sdkwork-webserver-http-host"
+      },
       {
         "name": "webServerConfigCompiler",
         "export": "crate-root",
@@ -180,20 +211,12 @@
         "name": "driveInternalWebsiteSdk",
         "export": "crate-root",
         "provider": "sdkwork-drive-internal-sdk"
-      },
-      {
-        "name": "iamApplicationBootstrap",
-        "export": "crate-root",
-        "provider": "sdkwork-iam-embedded-application-bootstrap"
-      },
-      {
-        "name": "iamDatabaseLifecycle",
-        "export": "crate-root",
-        "provider": "sdkwork-iam-database-host"
       }
     ],
     "runtimeEntrypoints": [
+      "crate-root#build_router",
       "binary#serve-management",
+      "binary#validate-app-shell",
       "binary#validate",
       "binary#data-plane",
       "binary#db-migrate"
@@ -241,6 +264,32 @@
     "permissionComposition": {},
     "dependencyApiExports": [],
     "dependencyApiSurfaces": [
+      {
+        "workspace": "sdkwork-iam",
+        "sdkFamily": "sdkwork-iam-app-sdk",
+        "apiAuthority": "sdkwork-iam-app-api",
+        "surface": "app-api",
+        "apiPrefix": "/app/v3/api",
+        "runtimeMode": "same-origin",
+        "sameOriginAllowed": true,
+        "cargoDependency": "sdkwork-api-iam-assembly",
+        "embeddedExecutableExport": "sdkwork_api_iam_assembly::assemble_app_api_contribution_with_module_manifests",
+        "profileCoverage": ["standalone"],
+        "coverageEvidence": ["src/profile.rs"]
+      },
+      {
+        "workspace": "sdkwork-drive",
+        "sdkFamily": "sdkwork-drive-app-sdk",
+        "apiAuthority": "sdkwork-drive-app-api",
+        "surface": "app-api",
+        "apiPrefix": "/app/v3/api",
+        "runtimeMode": "same-origin",
+        "sameOriginAllowed": true,
+        "cargoDependency": "sdkwork-api-drive-assembly",
+        "embeddedExecutableExport": "sdkwork_api_drive_assembly::assemble_app_api_contribution",
+        "profileCoverage": ["standalone"],
+        "coverageEvidence": ["src/profile.rs"]
+      },
       {
         "workspace": "sdkwork-web-internal-sdk",
         "sdkFamily": "sdkwork-web-internal-sdk",
@@ -300,11 +349,14 @@
     ],
     "configKeys": [
       "SDKWORK_APP_ROOT",
+      "SDKWORK_WEB_APP_ROOT",
       "SDKWORK_WEB_SERVER_APP_ROOT",
       "SDKWORK_IAM_APP_ROOT",
+      "SDKWORK_DRIVE_APP_ROOT",
       "SDKWORK_IAM_DATABASE_URL",
       "SDKWORK_IAM_DATABASE_AUTO_MIGRATE",
       "SDKWORK_WEB_APPLICATION_PUBLIC_INGRESS_BIND",
+      "SDKWORK_WEB_PC_STATIC_ROOT",
       "SDKWORK_WEB_SERVER_CONFIG_FILE",
       "SDKWORK_WEB_RUNTIME_ASSIGNMENT_SOURCE",
       "SDKWORK_WEB_INTERNAL_API_BASE_URL",

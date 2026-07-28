@@ -39,7 +39,16 @@
   "contracts": {
     "layerRole": "runtime-composition",
     "publicExports": [
-      "."
+      "sdkwork_api_web_server_assembly::assemble_api_router",
+      "sdkwork_api_web_server_assembly::migrate_database_from_env"
+    ],
+    "providedPorts": [
+      {"name": "webServerApiAssembly", "export": "sdkwork_api_web_server_assembly::assemble_api_router"},
+      {"name": "webServerDatabaseMigration", "export": "sdkwork_api_web_server_assembly::migrate_database_from_env"}
+    ],
+    "requiredPorts": [
+      {"name": "webServerRepositoryRuntime", "export": "crate-root", "provider": "sdkwork-intelligence-webserver-repository-sqlx"},
+      {"name": "webServerDatabaseLifecycle", "export": "crate-root", "provider": "sdkwork-webserver-database-host"}
     ],
     "runtimeEntrypoints": [],
     "routeManifest": "assembly-manifest.json",

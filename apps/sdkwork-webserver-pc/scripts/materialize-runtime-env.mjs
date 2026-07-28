@@ -9,13 +9,20 @@ const APP_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..'
 const DEPLOYMENT_CONFIG_PATH = path.join(APP_ROOT, 'etc', 'sdkwork.deployment.config.json');
 const SUPPORTED_ENVIRONMENTS = new Set(['development', 'test', 'staging', 'production']);
 const SUPPORTED_PROFILES = new Set(['standalone', 'cloud']);
+const SDK_BASE_URL_KEYS = [
+  'appApiBaseUrl',
+  'backendApiBaseUrl',
+  'driveAppApiBaseUrl',
+  'appbaseAppApiBaseUrl',
+];
+const NAVIGATION_URL_KEYS = ['messagingPcUrl'];
 
 function option(argv, name, fallback) {
   const index = argv.indexOf(name);
   return index >= 0 ? argv[index + 1] : fallback;
 }
 
-function resolveSource(deploymentProfile, environment) {
+export function resolveSource(deploymentProfile, environment) {
   const profileId = `${deploymentProfile}.${environment}`;
   const deployment = JSON.parse(readFileSync(DEPLOYMENT_CONFIG_PATH, 'utf8'));
   const sourcePath = deployment.profiles?.[profileId]?.source;
@@ -27,10 +34,55 @@ function resolveSource(deploymentProfile, environment) {
     throw new Error(`browser runtime source does not exist for ${profileId}: ${sourcePath}`);
   }
   const value = JSON.parse(readFileSync(source, 'utf8'));
+  validateRuntimeSource(value, { deploymentProfile, environment, sourcePath });
+  return { path: source, value };
+}
+
+export function validateRuntimeSource(value, { deploymentProfile, environment, sourcePath = '<runtime-source>' }) {
+  const profileId = `${deploymentProfile}.${environment}`;
   if (value.deploymentProfile !== deploymentProfile || value.environment !== environment) {
     throw new Error(`browser runtime source identity does not match ${profileId}: ${sourcePath}`);
   }
-  return { path: source, value };
+  if (value.profileId !== profileId) {
+    throw new Error(`browser runtime source profileId must equal ${profileId}: ${sourcePath}`);
+  }
+  if (value.runtimeTarget !== 'browser') {
+    throw new Error(`browser runtime source runtimeTarget must equal browser: ${sourcePath}`);
+  }
+  if (deploymentProfile === 'standalone') {
+    if (value.browserOriginMode !== 'same-origin') {
+      throw new Error(`${profileId}.browserOriginMode must equal same-origin`);
+    }
+    for (const key of SDK_BASE_URL_KEYS) {
+      if (value[key] !== '/') {
+        throw new Error(`${profileId}.${key} must use the canonical same-origin root /`);
+      }
+    }
+  } else {
+    if (value.browserOriginMode !== 'cross-origin') {
+      throw new Error(`${profileId}.browserOriginMode must equal cross-origin`);
+    }
+    for (const key of SDK_BASE_URL_KEYS) validateAbsoluteHttpUrl(value[key], `${profileId}.${key}`);
+  }
+  for (const key of NAVIGATION_URL_KEYS) validateAbsoluteHttpUrl(value[key], `${profileId}.${key}`, environment);
+}
+
+function validateAbsoluteHttpUrl(value, field, environment) {
+  if (typeof value !== 'string' || value.length === 0) {
+    throw new Error(`${field} must be an absolute HTTP(S) URL`);
+  }
+  let url;
+  try {
+    url = new URL(value);
+  } catch {
+    throw new Error(`${field} must be an absolute HTTP(S) URL`);
+  }
+  if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password) {
+    throw new Error(`${field} must be an absolute HTTP(S) URL`);
+  }
+  if (environment === 'production' && ['localhost', '127.0.0.1', '::1'].includes(url.hostname)) {
+    throw new Error(`${field} cannot use a loopback host in production`);
+  }
 }
 
 function main() {
@@ -69,9 +121,11 @@ function main() {
   );
 }
 
-try {
-  main();
-} catch (error) {
-  console.error(`[sdkwork-webserver-pc] ${error instanceof Error ? error.message : String(error)}`);
-  process.exitCode = 1;
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  try {
+    main();
+  } catch (error) {
+    console.error(`[sdkwork-webserver-pc] ${error instanceof Error ? error.message : String(error)}`);
+    process.exitCode = 1;
+  }
 }

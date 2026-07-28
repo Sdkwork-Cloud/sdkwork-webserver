@@ -5,6 +5,22 @@ canon:
   prd: docs/product/prd/PRD.md
   techArchitecture: docs/architecture/tech/TECH_ARCHITECTURE.md
 entries:
+  - id: REQ-2026-0065
+    path: docs/product/requirements/REQ-2026-0065-standalone-browser-same-origin-delivery.md
+    kind: req
+    status: accepted
+  - id: ADR-20260728-standalone-browser-same-origin-delivery
+    path: docs/architecture/decisions/ADR-20260728-standalone-browser-same-origin-delivery.md
+    kind: adr
+    status: accepted
+  - id: REQ-2026-0064
+    path: docs/product/requirements/REQ-2026-0064-embedded-standalone-dependency-apis.md
+    kind: req
+    status: accepted
+  - id: ADR-20260728-embedded-standalone-dependency-assemblies
+    path: docs/architecture/decisions/ADR-20260728-embedded-standalone-dependency-assemblies.md
+    kind: adr
+    status: accepted
   - id: REVIEW-20260723-web-server-production-readiness
     path: docs/engineering/reviews/REVIEW-20260723-web-server-production-readiness.md
     kind: review

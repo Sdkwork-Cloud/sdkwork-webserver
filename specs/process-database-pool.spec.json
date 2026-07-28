@@ -16,6 +16,7 @@
       "databaseUrlEnv": "SDKWORK_WEB_DATABASE_URL or SDKWORK_CLAW_DATABASE_*",
       "schemaEnv": "SDKWORK_WEB_DATABASE_SCHEMA or SDKWORK_CLAW_DATABASE_SCHEMA",
       "maxConnectionsEnv": "SDKWORK_WEB_DATABASE_MAX_CONNECTIONS or SDKWORK_CLAW_DATABASE_MAX_CONNECTIONS",
+      "temporaryDriverPoolCountEnv": "SDKWORK_DATABASE_TEMPORARY_DRIVER_POOL_COUNT",
       "productionSourceRoots": [
         "crates/sdkwork-api-web-server-standalone-gateway/src",
         "crates/sdkwork-api-web-server-assembly/src",
@@ -32,9 +33,34 @@
           "module": "Web SQLx repository",
           "poolMode": "installed-process-pool",
           "evidence": ["crates/sdkwork-intelligence-webserver-repository-sqlx/src/runtime.rs"]
+        },
+        {
+          "module": "sdkwork-iam App API",
+          "poolMode": "installed-process-pool",
+          "evidence": [
+            "../sdkwork-iam/crates/sdkwork-api-iam-assembly/src/bootstrap.rs"
+          ]
+        },
+        {
+          "module": "sdkwork-drive App API",
+          "poolMode": "installed-process-pool",
+          "evidence": [
+            "../sdkwork-drive/crates/sdkwork-api-drive-assembly/src/bootstrap.rs"
+          ]
         }
       ],
-      "temporaryDriverExceptions": []
+      "temporaryDriverExceptions": [
+        {
+          "driver": "sqlx::AnyPool",
+          "owner": "sdkwork-drive maintainers",
+          "removalMilestone": "Migrate Drive PostgreSQL App API repositories to sqlx::PgPool before the next Web Server production release",
+          "combinedConnectionBudget": "SDKWORK_CLAW_DATABASE_MAX_CONNECTIONS",
+          "adr": "docs/architecture/decisions/ADR-20260728-embedded-standalone-dependency-assemblies.md",
+          "evidence": [
+            "../sdkwork-drive/crates/sdkwork-drive-workspace-service/src/infrastructure/sql/installer.rs"
+          ]
+        }
+      ]
     },
     {
       "id": "sdkwork-webserver-certificate-worker",
@@ -67,6 +93,7 @@
   ],
   "verification": [
     "node ../sdkwork-specs/tools/check-process-shared-database-pool.mjs --root .",
+    "node --test scripts/dev/sdkwork-web-server-iam-application-bootstrap-standard.test.mjs",
     "cargo test -p sdkwork-webserver-database-host",
     "cargo test -p sdkwork-intelligence-webserver-repository-sqlx"
   ]

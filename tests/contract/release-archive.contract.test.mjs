@@ -31,6 +31,7 @@ const PACKAGE_FILES = new Map([
   ['bin/sdkwork-web-agent', 'node daemon fixture\n'],
   ['bin/sdkwork-webserver-certificate-worker', 'certificate worker fixture\n'],
   ['sdkwork.app.config.json', '{}\n'],
+  ['specs/iam.module.manifest.json', '{}\n'],
   ['specs/sdkwork.webserver.config.schema.json', '{}\n'],
   ['etc/examples/sdkwork.webserver.config.json', '{}\n'],
   ['etc/examples/public/index.html', '<h1>release fixture</h1>\n'],
@@ -46,17 +47,73 @@ const PACKAGE_FILES = new Map([
   ['database/seeds/seed.manifest.json', '{}\n'],
   ['database/seeds/common/001_bootstrap.sql', '-- common seed\n'],
 ]);
-const ARCHIVE_DIRECTORIES = Array.from(
-  new Set(
-    [...PACKAGE_FILES.keys()].flatMap((contentPath) => {
-      const segments = contentPath.split('/');
-      return segments.slice(0, -1).map((_, index) =>
-        ['sdkwork-web', ...segments.slice(0, index + 1)].join('/'),
-      );
-    }).concat('sdkwork-web'),
-  ),
-).sort();
-const EXPECTED_ARCHIVE_ENTRIES = ARCHIVE_DIRECTORIES.length + PACKAGE_FILES.size + 1;
+const STANDALONE_PC_FILES = new Map([
+  [
+    'share/sdkwork/webserver-pc/index.html',
+    '<!doctype html><html><body><div id="root"></div></body></html>\n',
+  ],
+  [
+    'share/sdkwork/webserver-pc/runtime-env.json',
+    `${JSON.stringify(
+      {
+        environment: 'production',
+        deploymentProfile: 'standalone',
+        profileId: 'standalone.production',
+        runtimeTarget: 'browser',
+        browserOriginMode: 'same-origin',
+        appApiBaseUrl: '/',
+        backendApiBaseUrl: '/',
+        driveAppApiBaseUrl: '/',
+        appbaseAppApiBaseUrl: '/',
+      },
+      null,
+      2,
+    )}\n`,
+  ],
+  ['share/sdkwork/webserver-pc/assets/index-AbCd1234.js', 'console.log("fixture");\n'],
+]);
+const STANDALONE_DEPENDENCY_FILES = new Map([
+  ['share/sdkwork/iam/database/database.manifest.json', '{}\n'],
+  ['share/sdkwork/iam/iam/registry/iam-registry.config.json', '{}\n'],
+  ['share/sdkwork/iam/iam/modules/iam-kernel/iam.module.manifest.json', '{}\n'],
+  ['share/sdkwork/drive/database/database.manifest.json', '{}\n'],
+]);
+
+function packageFilesFor(profile, options = {}) {
+  const files = new Map(PACKAGE_FILES);
+  if (profile === 'standalone' || options.includePcAssets) {
+    for (const [relativePath, text] of STANDALONE_PC_FILES) {
+      files.set(relativePath, options.fileOverrides?.get(relativePath) ?? text);
+    }
+  }
+  if (profile === 'standalone' || options.includeDependencyAssets) {
+    for (const [relativePath, text] of STANDALONE_DEPENDENCY_FILES) {
+      files.set(relativePath, options.fileOverrides?.get(relativePath) ?? text);
+    }
+  }
+  for (const relativePath of options.omitFiles ?? []) {
+    files.delete(relativePath);
+  }
+  return files;
+}
+
+function archiveDirectoriesFor(packageFiles) {
+  return Array.from(
+    new Set(
+      [...packageFiles.keys()].flatMap((contentPath) => {
+        const segments = contentPath.split('/');
+        return segments.slice(0, -1).map((_, index) =>
+          ['sdkwork-web', ...segments.slice(0, index + 1)].join('/'),
+        );
+      }).concat('sdkwork-web'),
+    ),
+  ).sort();
+}
+
+function expectedArchiveEntries(profile) {
+  const files = packageFilesFor(profile);
+  return archiveDirectoriesFor(files).length + files.size + 1;
+}
 
 function sha256(value) {
   return createHash('sha256').update(value).digest('hex');
@@ -504,8 +561,10 @@ async function createFixture(options) {
   const temporaryRoot = mkdtempSync(path.join(tmpdir(), 'sdkwork-web-release-fixture-'));
   const stageRoot = path.join(temporaryRoot, 'sdkwork-web');
   const content = [];
+  const packageFiles = packageFilesFor(profile, options);
+  const archiveDirectories = archiveDirectoriesFor(packageFiles);
 
-  for (const [relativePath, text] of PACKAGE_FILES) {
+  for (const [relativePath, text] of packageFiles) {
     const filePath = path.join(stageRoot, ...relativePath.split('/'));
     mkdirSync(path.dirname(filePath), { recursive: true });
     writeFileSync(filePath, text, 'utf8');
@@ -547,7 +606,7 @@ async function createFixture(options) {
     additionalEntries.push('sdkwork-web/etc/unsafe-link');
   }
   const entries = [
-    ...ARCHIVE_DIRECTORIES,
+    ...archiveDirectories,
     'sdkwork-web/package.manifest.json',
     ...content.map((item) => `sdkwork-web/${item.path}`),
     ...additionalEntries,
@@ -672,6 +731,16 @@ test('Linux release smoke validates, extracts, serves HTTP and HTTPS, and cleans
   assert.match(source, /sdkwork-web-server-website-delivery-edge-runtime/u);
   assert.match(source, /run\(websiteEdgeRuntime, \['--help'\]/u);
   assert.match(source, /run\(websiteEdgeRuntime, \['validate', packagedWebsiteHostConfig\]/u);
+  assert.match(source, /share', 'sdkwork', 'webserver-pc'/u);
+  assert.match(source, /run\(gateway, \['validate-app-shell'\]/u);
+  assert.match(source, /SDKWORK_IAM_APP_ROOT/u);
+  assert.match(source, /SDKWORK_DRIVE_APP_ROOT/u);
+  assert.match(source, /SDKWORK_WEB_SNOWFLAKE_NODE_ID: '0'/u);
+  assert.match(source, /SDKWORK_WEB_SECRET_ENCRYPTION_KEY/u);
+  assert.match(source, /SDKWORK_WEB_ACME_PROFILE: 'staging'/u);
+  assert.match(source, /SDKWORK_WEB_ACME_CONTACT_EMAIL/u);
+  assert.match(source, /SDKWORK_WEB_CERT_ENCRYPTION_KEY/u);
+  assert.match(source, /SDKWORK_DRIVE_DOWNLOAD_TOKEN_HMAC_SECRET/u);
   assert.match(source, /\['data-plane', smokeConfigPath\]/u);
   assert.match(source, /waitForHealth\('http'/u);
   assert.match(source, /waitForHealth\('https'/u);
@@ -687,10 +756,114 @@ test('bounded release validator accepts an exact immutable archive', async () =>
     assert.equal(result.status, 0, result.stderr);
     assert.match(
       result.stdout,
-      new RegExp(`validated artifact=.* bytes=[0-9]+ entries=${EXPECTED_ARCHIVE_ENTRIES}`, 'u'),
+      new RegExp(
+        `validated artifact=.* bytes=[0-9]+ entries=${expectedArchiveEntries('standalone')}`,
+        'u',
+      ),
     );
   } finally {
     fixture.cleanup();
+  }
+});
+
+test('bounded release validator accepts cloud only when PC assets are absent', async () => {
+  const validVersion = '9.8.7-cloud-valid';
+  const valid = await createFixture({ profile: 'cloud', version: validVersion });
+  try {
+    const result = runValidator('cloud', validVersion);
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(
+      result.stdout,
+      new RegExp(
+        `validated artifact=.* bytes=[0-9]+ entries=${expectedArchiveEntries('cloud')}`,
+        'u',
+      ),
+    );
+  } finally {
+    valid.cleanup();
+  }
+
+  const invalidVersion = '9.8.7-cloud-with-pc';
+  const invalid = await createFixture({
+    profile: 'cloud',
+    version: invalidVersion,
+    includePcAssets: true,
+  });
+  try {
+    const result = runValidator('cloud', invalidVersion);
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /cloud package must not contain PC standalone static assets/u);
+  } finally {
+    invalid.cleanup();
+  }
+
+  const invalidDependencyVersion = '9.8.7-cloud-with-dependencies';
+  const invalidDependency = await createFixture({
+    profile: 'cloud',
+    version: invalidDependencyVersion,
+    includeDependencyAssets: true,
+  });
+  try {
+    const result = runValidator('cloud', invalidDependencyVersion);
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /cloud package must not contain standalone dependency runtime assets/u);
+  } finally {
+    invalidDependency.cleanup();
+  }
+});
+
+test('standalone release requires valid same-origin PC bootstrap files', async () => {
+  for (const [name, options, expectedError] of [
+    [
+      'missing-index',
+      { omitFiles: new Set(['share/sdkwork/webserver-pc/index.html']) },
+      /must contain PC index\.html and runtime-env\.json/u,
+    ],
+    [
+      'missing-runtime-env',
+      { omitFiles: new Set(['share/sdkwork/webserver-pc/runtime-env.json']) },
+      /must contain PC index\.html and runtime-env\.json/u,
+    ],
+    [
+      'missing-web-iam-module',
+      { omitFiles: new Set(['specs/iam.module.manifest.json']) },
+      /package manifest content paths are missing, unexpected, duplicated, or unsorted/u,
+    ],
+    [
+      'cross-origin-runtime-env',
+      {
+        fileOverrides: new Map([
+          [
+            'share/sdkwork/webserver-pc/runtime-env.json',
+            STANDALONE_PC_FILES.get('share/sdkwork/webserver-pc/runtime-env.json').replace(
+              '"appApiBaseUrl": "/"',
+              '"appApiBaseUrl": "http://127.0.0.1:3900"',
+            ),
+          ],
+        ]),
+      },
+      /runtime-env\.json\.appApiBaseUrl must use the canonical same-origin root/u,
+    ],
+    [
+      'missing-iam-runtime',
+      { omitFiles: new Set(['share/sdkwork/iam/database/database.manifest.json']) },
+      /iam runtime assets require non-empty database\/database\.manifest\.json/u,
+    ],
+    [
+      'missing-drive-runtime',
+      { omitFiles: new Set(['share/sdkwork/drive/database/database.manifest.json']) },
+      /drive runtime assets require non-empty database\/database\.manifest\.json/u,
+    ],
+  ]) {
+    const version = `9.8.7-${name}`;
+    const fixture = await createFixture({ version, ...options });
+    try {
+      const result = runValidator('standalone', version);
+      assert.notEqual(result.status, 0, name);
+      assert.match(result.stderr, expectedError, name);
+    } finally {
+      fixture.cleanup();
+    }
   }
 });
 

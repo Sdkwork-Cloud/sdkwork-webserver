@@ -9,23 +9,15 @@
     "protocol": "http",
     "packageName": "github.com/sdkwork/sdkwork-web-backend-sdk"
   },
-  "changeFingerprint": "bd9c3405ad57966f5a37ade14f88668f847449dc57e602fa16ff02baf2c5848f",
+  "changeFingerprint": "8fe9d86e18a402d0d22c0b4bc891f654890353c97d02bd9745ffa94881331206",
   "changes": {
-    "createdGeneratedFiles": [
-      "types/applications_activate_response.go",
-      "types/applications_deployments_rollback_response.go",
-      "types/applications_pause_response.go",
-      "types/applications_retrieve_response.go",
-      "types/applications_update_response.go",
-      "types/update_application_request.go"
-    ],
-    "updatedGeneratedFiles": [
-      "api/application_deployment.go",
-      "api/application_domain.go",
-      "api/application.go"
-    ],
+    "createdGeneratedFiles": [],
+    "updatedGeneratedFiles": [],
     "unchangedGeneratedFiles": [
       "api/agent.go",
+      "api/application_deployment.go",
+      "api/application_domain.go",
+      "api/application.go",
       "api/audit.go",
       "api/base.go",
       "api/certificate_distribution.go",
@@ -55,13 +47,18 @@
       "types/application_domain_response.go",
       "types/application_domain_verify_response.go",
       "types/application_response.go",
+      "types/applications_activate_response.go",
       "types/applications_create_response201.go",
       "types/applications_deployments_create_response201.go",
       "types/applications_deployments_list_response.go",
+      "types/applications_deployments_rollback_response.go",
       "types/applications_domains_create_response201.go",
       "types/applications_domains_list_response.go",
       "types/applications_domains_verify_response.go",
       "types/applications_list_response.go",
+      "types/applications_pause_response.go",
+      "types/applications_retrieve_response.go",
+      "types/applications_update_response.go",
       "types/audit_log_page.go",
       "types/audit_log_response.go",
       "types/audit_logs_list_response.go",
@@ -112,6 +109,7 @@
       "types/servers_create_response201.go",
       "types/servers_list_response.go",
       "types/status_retrieve_response.go",
+      "types/update_application_request.go",
       "types/update_certificate_request.go",
       "types/update_nginx_config_request.go"
     ],
@@ -124,68 +122,26 @@
   },
   "impact": {
     "schemaVersion": 1,
-    "areas": [
-      "api-surface",
-      "models"
-    ],
-    "details": [
-      {
-        "area": "api-surface",
-        "paths": [
-          "api/application_deployment.go",
-          "api/application_domain.go",
-          "api/application.go"
-        ]
-      },
-      {
-        "area": "models",
-        "paths": [
-          "types/applications_activate_response.go",
-          "types/applications_deployments_rollback_response.go",
-          "types/applications_pause_response.go",
-          "types/applications_retrieve_response.go",
-          "types/applications_update_response.go",
-          "types/update_application_request.go"
-        ]
-      }
-    ],
-    "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, models. Verification is required."
+    "areas": [],
+    "details": [],
+    "requiresVerification": false,
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
   },
   "verificationPlan": {
-    "shouldRun": true,
-    "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
-    "steps": [
-      {
-        "id": "check",
-        "title": "Unified package check",
-        "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
-        "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-go\\generated\\server-openapi",
-        "command": "node",
-        "args": [
-          "./bin/publish-core.mjs",
-          "--language",
-          "go",
-          "--project-dir",
-          ".",
-          "--action",
-          "check"
-        ],
-        "displayCommand": "node ./bin/publish-core.mjs --language go --project-dir . --action check"
-      }
-    ]
+    "shouldRun": false,
+    "runPhase": "skip",
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
+    "steps": []
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "medium",
-    "nextAction": "verify",
+    "riskLevel": "low",
+    "nextAction": "skip",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
-    "summary": "Changes have been applied. Run the required verification plan now.",
+    "summary": "No actionable changes were detected. No apply or verification step is required.",
     "reasons": [
-      "verification-required"
+      "no-actionable-changes"
     ]
   },
   "preservedLegacyFiles": false
