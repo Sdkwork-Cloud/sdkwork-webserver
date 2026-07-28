@@ -987,6 +987,9 @@ function displayValue(value: unknown, column: string, resource: WebserverResourc
   if (column === "artifactHash" && typeof value === "string") {
     return <span title={value}>{value.length > 16 ? `${value.slice(0, 12)}...${value.slice(-4)}` : value}</span>;
   }
+  if (column === "rollbackFromDeploymentId" && typeof value === "string") {
+    return <span title={value}>{value.length > 18 ? `${value.slice(0, 8)}...${value.slice(-6)}` : value}</span>;
+  }
   if (column === "artifactDriveUri" && typeof value === "string") {
     const nodeId = value.split("/nodes/")[1];
     return <span title={value}>{nodeId ? `Drive / ${nodeId}` : value}</span>;
@@ -1049,6 +1052,7 @@ function fieldLabel(value: string, locale: WebserverLocale): string {
       notAfter: "Expires at",
       notBefore: "Valid from",
       renewalStatus: "Renewal status",
+      rollbackFromDeploymentId: "Restored from",
       retryCount: "Retry count",
       siteType: "Runtime type",
       sourceRef: "Source ref",
@@ -1114,6 +1118,7 @@ function fieldLabel(value: string, locale: WebserverLocale): string {
       notAfter: "到期时间",
       notBefore: "生效时间",
       renewalStatus: "续期状态",
+      rollbackFromDeploymentId: "还原来源版本",
       retryCount: "重试次数",
       siteType: "运行类型",
       sourceRef: "源码分支",
@@ -1285,8 +1290,8 @@ function resourceColumns(
     certificates: ["id", "domain", "certName", "issuer", "status", "renewalStatus", "notAfter", "autoRenew"],
     "managed-certificates": ["id", "domain", "certName", "issuer", "status", "renewalStatus", "notAfter", "autoRenew"],
     "certificate-distribution": ["serverName", "host", "desiredSyncVersion", "appliedSyncVersion", "status", "lastHeartbeatAt"],
-    deployments: ["id", "environment", "versionTag", "status", "artifactDriveUri", "artifactSize", "startedAt", "completedAt", "durationMs"],
-    "application-deployments": ["id", "environment", "versionTag", "status", "artifactDriveUri", "artifactSize", "startedAt", "completedAt", "durationMs"],
+    deployments: ["versionTag", "environment", "status", "rollbackFromDeploymentId", "artifactHash", "createdAt", "startedAt", "completedAt", "durationMs"],
+    "application-deployments": ["versionTag", "environment", "status", "rollbackFromDeploymentId", "artifactHash", "createdAt", "startedAt", "completedAt", "durationMs"],
     nginx: ["id", "configName", "configType", "isActive", "status", "versionNo", "deployedAt", "updatedAt"],
     servers: ["id", "name", "host", "sshPort", "status", "lastHeartbeatAt", "createdAt"],
     audit: ["operatorId", "operatorType", "action", "targetType", "targetUuid", "ipAddress", "createdAt"],
