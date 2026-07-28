@@ -32,7 +32,8 @@ impl WebApiError {
 impl From<WebServiceError> for WebApiError {
     fn from(error: WebServiceError) -> Self {
         use sdkwork_webserver_contract::WebServiceErrorKind;
-        let code = match error.kind() {
+        let kind = error.kind();
+        let code = match kind {
             WebServiceErrorKind::NotFound => SdkWorkResultCode::NotFound,
             WebServiceErrorKind::Conflict => SdkWorkResultCode::Conflict,
             WebServiceErrorKind::Validation => SdkWorkResultCode::ValidationError,
@@ -40,7 +41,14 @@ impl From<WebServiceError> for WebApiError {
             WebServiceErrorKind::DatabaseUnavailable => SdkWorkResultCode::ServiceUnavailable,
             WebServiceErrorKind::Internal => SdkWorkResultCode::InternalError,
         };
-        Self::new(code, error.to_string())
+        let detail = match kind {
+            WebServiceErrorKind::DatabaseUnavailable => {
+                "database service is unavailable".to_string()
+            }
+            WebServiceErrorKind::Internal => "internal server error".to_string(),
+            _ => error.to_string(),
+        };
+        Self::new(code, detail)
     }
 }
 
@@ -68,8 +76,9 @@ impl IntoResponse for WebApiError {
 
 #[cfg(test)]
 mod tests {
-    use axum::response::IntoResponse;
+    use axum::{body::to_bytes, response::IntoResponse};
     use sdkwork_utils_rust::{SdkWorkResultCode, SDKWORK_TRACE_ID_HEADER};
+    use sdkwork_webserver_contract::WebServiceError;
 
     use super::WebApiError;
 
@@ -79,5 +88,22 @@ mod tests {
             WebApiError::new(SdkWorkResultCode::ValidationError, "invalid request").into_response();
 
         assert!(response.headers().get(SDKWORK_TRACE_ID_HEADER).is_some());
+    }
+
+    #[tokio::test]
+    async fn internal_problem_response_does_not_expose_dependency_details() {
+        let error = WebApiError::from(WebServiceError::Internal(
+            "postgres password=should-not-leak".to_string(),
+        ));
+        assert_eq!(error.detail, "internal server error");
+
+        let response = error.into_response();
+        let body = to_bytes(response.into_body(), 64 * 1024)
+            .await
+            .expect("bounded problem body");
+        let body = String::from_utf8(body.to_vec()).expect("UTF-8 problem body");
+
+        assert!(!body.contains("password"));
+        assert!(!body.contains("should-not-leak"));
     }
 }

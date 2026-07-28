@@ -52,6 +52,13 @@
     "publicExports": [
       "src/index.ts"
     ],
+    "requiredPorts": [
+      {
+        "name": "applicationSourceStorage",
+        "export": ".",
+        "provider": "@sdkwork/webserver-pc-commons"
+      }
+    ],
     "runtimeEntrypoints": [],
     "routeManifest": null,
     "sdkClients": [],

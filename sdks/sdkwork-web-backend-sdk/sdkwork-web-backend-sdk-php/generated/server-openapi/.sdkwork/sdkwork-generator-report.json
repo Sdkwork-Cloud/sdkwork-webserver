@@ -12,29 +12,22 @@
   "mode": "apply",
   "hasChanges": true,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "5baa7977782809d1eabc326243847ccde721574b4254e101f56b50b7e50ad217",
+  "changeFingerprint": "25d9596cd4a1a3555f82a30e588e4a332e86942863e16a4b027022e493a1686c",
   "changeImpact": {
     "schemaVersion": 1,
     "areas": [
-      "api-surface",
       "models"
     ],
     "details": [
       {
-        "area": "api-surface",
-        "paths": [
-          "src/Api/ApplicationDeployment.php"
-        ]
-      },
-      {
         "area": "models",
         "paths": [
-          "src/Models/ApplicationDeploymentResponse.php"
+          "src/Models/CreateNginxConfigRequest.php"
         ]
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, models. Verification is required."
+    "summary": "Detected impact areas: models. Verification is required."
   },
   "executionDecision": {
     "schemaVersion": 1,
@@ -55,7 +48,7 @@
         "id": "verify-check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-php\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -74,13 +67,13 @@
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-php\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -119,17 +112,16 @@
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 2,
+    "writtenFiles": 1,
     "skippedScaffoldFiles": 1,
-    "skippedUnchangedGeneratedFiles": 90,
+    "skippedUnchangedGeneratedFiles": 91,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "5baa7977782809d1eabc326243847ccde721574b4254e101f56b50b7e50ad217",
+    "changeFingerprint": "25d9596cd4a1a3555f82a30e588e4a332e86942863e16a4b027022e493a1686c",
     "changes": {
       "createdGeneratedFiles": [],
       "updatedGeneratedFiles": [
-        "src/Api/ApplicationDeployment.php",
-        "src/Models/ApplicationDeploymentResponse.php"
+        "src/Models/CreateNginxConfigRequest.php"
       ],
       "unchangedGeneratedFiles": [
         "bin/publish-core.mjs",
@@ -142,6 +134,7 @@
         "sdkwork-sdk.json",
         "src/Api/Agent.php",
         "src/Api/Application.php",
+        "src/Api/ApplicationDeployment.php",
         "src/Api/ApplicationDomain.php",
         "src/Api/Audit.php",
         "src/Api/BaseApi.php",
@@ -155,6 +148,7 @@
         "src/Models/AgentHeartbeatResponse.php",
         "src/Models/AgentNginxConfigBundle.php",
         "src/Models/AgentSyncResponse.php",
+        "src/Models/ApplicationDeploymentResponse.php",
         "src/Models/ApplicationDomainResponse.php",
         "src/Models/ApplicationDomainVerifyResponse.php",
         "src/Models/ApplicationResponse.php",
@@ -190,7 +184,6 @@
         "src/Models/CreateApplicationDomainRequest.php",
         "src/Models/CreateApplicationRequest.php",
         "src/Models/CreateCertificateRequest.php",
-        "src/Models/CreateNginxConfigRequest.php",
         "src/Models/CreateServerRequest.php",
         "src/Models/CreateServerResponse.php",
         "src/Models/FieldError.php",
@@ -233,36 +226,29 @@
     "impact": {
       "schemaVersion": 1,
       "areas": [
-        "api-surface",
         "models"
       ],
       "details": [
         {
-          "area": "api-surface",
-          "paths": [
-            "src/Api/ApplicationDeployment.php"
-          ]
-        },
-        {
           "area": "models",
           "paths": [
-            "src/Models/ApplicationDeploymentResponse.php"
+            "src/Models/CreateNginxConfigRequest.php"
           ]
         }
       ],
       "requiresVerification": true,
-      "summary": "Detected impact areas: api-surface, models. Verification is required."
+      "summary": "Detected impact areas: models. Verification is required."
     },
     "verificationPlan": {
       "shouldRun": true,
       "runPhase": "now",
-      "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
+      "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
       "steps": [
         {
           "id": "check",
           "title": "Unified package check",
           "required": true,
-          "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
+          "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
           "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-php\\generated\\server-openapi",
           "command": "node",
           "args": [

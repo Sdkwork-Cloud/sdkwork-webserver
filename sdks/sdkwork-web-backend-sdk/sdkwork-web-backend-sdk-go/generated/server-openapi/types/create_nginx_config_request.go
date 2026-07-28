@@ -6,5 +6,4 @@ type CreateNginxConfigRequest struct {
 	ConfigName string `json:"configName"`
 	ConfigContent string `json:"configContent"`
 	SiteId string `json:"siteId"`
-	DomainId string `json:"domainId"`
 }

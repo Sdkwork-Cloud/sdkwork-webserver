@@ -236,7 +236,7 @@
     },
     {
       "path": "src/Models/CreateApplicationDeploymentRequest.php",
-      "sha256": "72d0a368823dc4a5b9871a566944bd0002088ec3a797952a1f220816ef6e1c3f"
+      "sha256": "28d42c3c071521a4a58fc2bf1831bd88d90ec6f2bbcff798feccf0b9ac723159"
     },
     {
       "path": "src/Models/CreateApplicationDomainRequest.php",
@@ -252,7 +252,7 @@
     },
     {
       "path": "src/Models/CreateNginxConfigRequest.php",
-      "sha256": "654030a373737ad399c8eb58379644ed1232345008f17d80789fda426c968e12"
+      "sha256": "ea488edf740f212bcc18747e5d7cec49479ade7808b54aa99a33d691ba82c2e9"
     },
     {
       "path": "src/Models/CreateServerRequest.php",

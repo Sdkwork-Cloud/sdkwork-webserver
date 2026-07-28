@@ -1,5 +1,21 @@
 export type WebserverPcSurface = "app-console" | "backend-admin";
 
+export type WebserverActionErrorCode =
+  | "application-draft-source-failed"
+  | "application-draft-deployment-failed"
+  | "deployment-source-stored";
+
+export class WebserverActionError extends Error {
+  constructor(
+    readonly code: WebserverActionErrorCode,
+    readonly details: Readonly<Record<string, string | number>> = {},
+    options?: ErrorOptions,
+  ) {
+    super(code, options);
+    this.name = "WebserverActionError";
+  }
+}
+
 export type WebserverResourceKey =
   | "sites"
   | "configuration"
@@ -64,6 +80,7 @@ export interface WebserverResourceActionContext {
   idempotencyKey?: string;
   onProgress?(progress: number): void;
   selectedItem?: Record<string, unknown>;
+  signal?: AbortSignal;
   sourceInputMode?: "archive" | "directory";
   scopeId?: string;
 }

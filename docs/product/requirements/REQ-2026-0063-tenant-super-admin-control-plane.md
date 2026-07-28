@@ -76,10 +76,16 @@ verification:
   - cargo test -p sdkwork-routes-webserver-backend-api
   - pnpm sdk:generate:check
   - pnpm --dir apps/sdkwork-webserver-pc check
-  - node ../sdkwork-specs/tools/check-backend-sdk-consumer-imports.mjs --workspace .
+  - pnpm --dir apps/sdkwork-webserver-pc exec vitest run tests/architecture-boundary.test.ts
+  - node ../sdkwork-specs/tools/check-application-layering.mjs --root .
   - node ../sdkwork-specs/tools/check-permission-composition.mjs --workspace .
   - node ../sdkwork-specs/tools/check-pagination.mjs --workspace .
 ```
+
+`tests/architecture-boundary.test.ts` is the executable application-owned check that prevents
+Backend SDK imports from crossing into Console packages. The workspace standards tools do not
+currently provide a `check-backend-sdk-consumer-imports.mjs` command, so this requirement records
+only commands that exist and can produce repeatable evidence.
 
 ## Decision
 

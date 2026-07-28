@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use async_trait::async_trait;
+use sdkwork_iam_web_adapter::IamWebRequestContextResolver;
 use sdkwork_web_core::{
     JwtProductionClaimPolicy, ResolverProductionProfile, WebAuthLevel, WebDeploymentMode,
     WebEnvironment, WebFrameworkError, WebLoginScope, WebRequestContextResolver,
@@ -15,6 +16,7 @@ where
 {
     inner: R,
     authenticator: Arc<dyn MachineCredentialAuthenticator>,
+    production_profile: Option<ResolverProductionProfile>,
 }
 
 impl<R> MachineCredentialResolverDecorator<R>
@@ -25,6 +27,20 @@ where
         Self {
             inner,
             authenticator,
+            production_profile: None,
+        }
+    }
+}
+
+impl MachineCredentialResolverDecorator<IamWebRequestContextResolver> {
+    pub fn new_standalone_iam(
+        inner: IamWebRequestContextResolver,
+        authenticator: Arc<dyn MachineCredentialAuthenticator>,
+    ) -> Self {
+        Self {
+            inner,
+            authenticator,
+            production_profile: Some(ResolverProductionProfile::TenantBoundBootstrap),
         }
     }
 }
@@ -35,7 +51,8 @@ where
     R: WebRequestContextResolver,
 {
     fn resolver_production_profile(&self) -> ResolverProductionProfile {
-        self.inner.resolver_production_profile()
+        self.production_profile
+            .unwrap_or_else(|| self.inner.resolver_production_profile())
     }
 
     fn jwt_production_claim_policy(&self) -> Option<JwtProductionClaimPolicy> {
@@ -188,6 +205,19 @@ mod tests {
         );
         assert!(resolver.uses_default_api_key_lookup());
         assert!(resolver.resolve_api_key("machine-invalid").await.is_err());
+    }
+
+    #[test]
+    fn standalone_iam_resolver_reports_verified_bootstrap_profile() {
+        let resolver = MachineCredentialResolverDecorator::new_standalone_iam(
+            IamWebRequestContextResolver::from_database_pool(None),
+            Arc::new(TestMachineAuthenticator),
+        );
+
+        assert_eq!(
+            resolver.resolver_production_profile(),
+            ResolverProductionProfile::TenantBoundBootstrap
+        );
     }
 
     fn principal(subject_id: &str, app_id: &str) -> WebRequestPrincipal {

@@ -84,6 +84,7 @@ pub struct DomainPage {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct CreateDomainRequest {
     pub hostname: String,
     #[serde(rename = "isPrimary", default)]
@@ -168,7 +169,7 @@ pub struct DeploymentPage {
     pub page_size: i32,
 }
 
-#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct CreateDeploymentRequest {
     #[serde(rename = "deployType", default = "default_deploy_type")]
     pub deploy_type: i32,
@@ -200,6 +201,22 @@ fn default_deploy_type() -> i32 {
     1
 }
 
+impl Default for CreateDeploymentRequest {
+    fn default() -> Self {
+        Self {
+            deploy_type: default_deploy_type(),
+            environment: None,
+            version_tag: None,
+            commit_hash: None,
+            source_ref: None,
+            artifact_drive_uri: None,
+            artifact_size: None,
+            artifact_hash: None,
+            idempotency_key: None,
+        }
+    }
+}
+
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct EnvVariableResponse {
     pub id: String,
@@ -218,6 +235,7 @@ pub struct EnvVariablePage {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct CreateEnvVariableRequest {
     pub key: String,
     pub value: String,
@@ -265,6 +283,7 @@ pub struct CertificatePage {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct CreateCertificateRequest {
     #[serde(rename = "domainId")]
     pub domain_id: String,
@@ -329,8 +348,17 @@ pub struct HealthCheckResponse {
     pub id: String,
     #[serde(rename = "checkType")]
     pub check_type: i32,
-    pub url: String,
+    #[serde(rename = "checkUrl")]
+    pub check_url: String,
+    #[serde(rename = "checkInterval")]
+    pub check_interval: i32,
+    #[serde(rename = "timeoutMs")]
+    pub timeout_ms: i32,
+    #[serde(rename = "retryCount")]
+    pub retry_count: i32,
     pub status: i32,
+    #[serde(rename = "createdAt")]
+    pub created_at: String,
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
@@ -341,10 +369,30 @@ pub struct HealthCheckPage {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct CreateHealthCheckRequest {
     #[serde(rename = "checkType")]
     pub check_type: i32,
-    pub url: String,
+    #[serde(rename = "checkUrl")]
+    pub check_url: String,
+    #[serde(rename = "checkInterval", default = "default_health_check_interval")]
+    pub check_interval: i32,
+    #[serde(rename = "timeoutMs", default = "default_health_check_timeout_ms")]
+    pub timeout_ms: i32,
+    #[serde(rename = "retryCount", default = "default_health_check_retry_count")]
+    pub retry_count: i32,
+}
+
+fn default_health_check_interval() -> i32 {
+    60
+}
+
+fn default_health_check_timeout_ms() -> i32 {
+    5_000
+}
+
+fn default_health_check_retry_count() -> i32 {
+    3
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
@@ -385,6 +433,7 @@ pub struct ListNginxConfigsQuery {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct CreateNginxConfigRequest {
     #[serde(rename = "siteId")]
     pub site_id: String,
@@ -397,6 +446,7 @@ pub struct CreateNginxConfigRequest {
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct UpdateNginxConfigRequest {
     #[serde(rename = "configName", default)]
     pub config_name: Option<String>,
@@ -455,6 +505,7 @@ pub struct ServerPage {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct CreateServerRequest {
     pub name: String,
     pub host: String,

@@ -2,25 +2,25 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct HealthCheckResponse {
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub id: Option<String>,
+    pub id: String,
 
     #[serde(rename = "checkType")]
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub check_type: Option<i64>,
+    pub check_type: i64,
 
     #[serde(rename = "checkUrl")]
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub check_url: Option<String>,
+    pub check_url: String,
 
     #[serde(rename = "checkInterval")]
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub check_interval: Option<i64>,
+    pub check_interval: i64,
 
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub status: Option<i64>,
+    #[serde(rename = "timeoutMs")]
+    pub timeout_ms: i64,
+
+    #[serde(rename = "retryCount")]
+    pub retry_count: i64,
+
+    pub status: i64,
 
     #[serde(rename = "createdAt")]
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub created_at: Option<String>,
+    pub created_at: String,
 }

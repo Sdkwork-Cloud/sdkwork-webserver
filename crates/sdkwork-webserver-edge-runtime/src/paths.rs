@@ -1,4 +1,4 @@
-use std::fs::OpenOptions;
+use std::fs::{File, OpenOptions};
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicUsize, Ordering};
@@ -16,6 +16,7 @@ use crate::{EdgeRuntimeError, EdgeRuntimeResult};
 const MAX_CERTIFICATE_PEM_BYTES: usize = 1024 * 1024;
 const MAX_PRIVATE_KEY_PEM_BYTES: usize = 128 * 1024;
 const MAX_PROCESS_CERTIFICATE_ACTIVATIONS: usize = 8;
+const CERTIFICATE_ACTIVATION_LOCK_FILE: &str = ".certificate-activation.lock";
 static ACTIVE_CERTIFICATE_ACTIVATIONS: AtomicUsize = AtomicUsize::new(0);
 
 pub fn nginx_site_path(config: &EdgeRuntimeConfig, domain: &str) -> PathBuf {
@@ -31,16 +32,38 @@ pub fn write_certificate_bundle(
     cert_live_root: &Path,
     material: &sdkwork_webserver_acme_service::IssuedCertificateMaterial,
 ) -> EdgeRuntimeResult<()> {
-    write_certificate_bundle_with_activator(cert_live_root, material, |staged, target| {
+    activate_certificate_bundle_with_activator(cert_live_root, material, |staged, target| {
+        std::fs::rename(staged, target)
+    })?
+    .commit()
+}
+
+pub(crate) fn activate_certificate_bundle(
+    cert_live_root: &Path,
+    material: &sdkwork_webserver_acme_service::IssuedCertificateMaterial,
+) -> EdgeRuntimeResult<CertificateBundleActivation> {
+    activate_certificate_bundle_with_activator(cert_live_root, material, |staged, target| {
         std::fs::rename(staged, target)
     })
 }
 
+#[cfg(test)]
 fn write_certificate_bundle_with_activator<F>(
     cert_live_root: &Path,
     material: &sdkwork_webserver_acme_service::IssuedCertificateMaterial,
     activate: F,
 ) -> EdgeRuntimeResult<()>
+where
+    F: FnOnce(&Path, &Path) -> std::io::Result<()>,
+{
+    activate_certificate_bundle_with_activator(cert_live_root, material, activate)?.commit()
+}
+
+fn activate_certificate_bundle_with_activator<F>(
+    cert_live_root: &Path,
+    material: &sdkwork_webserver_acme_service::IssuedCertificateMaterial,
+    activate: F,
+) -> EdgeRuntimeResult<CertificateBundleActivation>
 where
     F: FnOnce(&Path, &Path) -> std::io::Result<()>,
 {
@@ -54,6 +77,7 @@ where
             cert_live_root.display()
         ))
     })?;
+    let process_lock = acquire_certificate_activation_lock(cert_live_root)?;
 
     let target = cert_live_root.join(&material.cert_name);
     if let Ok(metadata) = std::fs::symlink_metadata(&target) {
@@ -73,9 +97,39 @@ where
         })?;
     write_staged_bundle(&staged, material)?;
     sync_directory(staged.path())?;
-    activate_staged_generation(cert_live_root, staged, &target, activate)?;
+    let activation =
+        activate_staged_generation(cert_live_root, staged, &target, process_lock, activate)?;
     sync_directory(cert_live_root)?;
-    Ok(())
+    Ok(activation)
+}
+
+fn acquire_certificate_activation_lock(cert_live_root: &Path) -> EdgeRuntimeResult<File> {
+    let lock_path = cert_live_root.join(CERTIFICATE_ACTIVATION_LOCK_FILE);
+    if let Ok(metadata) = std::fs::symlink_metadata(&lock_path) {
+        if metadata.file_type().is_symlink() || !metadata.is_file() {
+            return Err(EdgeRuntimeError::Filesystem(format!(
+                "certificate activation lock {} must be a real file",
+                lock_path.display()
+            )));
+        }
+    }
+    let lock = OpenOptions::new()
+        .create(true)
+        .read(true)
+        .write(true)
+        .open(&lock_path)
+        .map_err(|error| {
+            EdgeRuntimeError::Filesystem(format!(
+                "open certificate activation lock {}: {error}",
+                lock_path.display()
+            ))
+        })?;
+    lock.try_lock().map_err(|error| {
+        EdgeRuntimeError::Filesystem(format!(
+            "certificate bundle activation capacity exhausted by another process: {error}"
+        ))
+    })?;
+    Ok(lock)
 }
 
 struct CertificateActivationGuard;
@@ -98,6 +152,79 @@ impl CertificateActivationGuard {
 impl Drop for CertificateActivationGuard {
     fn drop(&mut self) {
         ACTIVE_CERTIFICATE_ACTIVATIONS.fetch_sub(1, Ordering::AcqRel);
+    }
+}
+
+#[derive(Debug)]
+pub(crate) struct CertificateBundleActivation {
+    cert_live_root: PathBuf,
+    target: PathBuf,
+    backup: Option<(TempDir, PathBuf)>,
+    _process_lock: File,
+    decided: bool,
+}
+
+impl CertificateBundleActivation {
+    pub(crate) fn commit(mut self) -> EdgeRuntimeResult<()> {
+        self.decided = true;
+        if let Some((holder, _previous)) = self.backup.take() {
+            let backup_path = holder.keep();
+            std::fs::remove_dir_all(&backup_path).map_err(|error| {
+                EdgeRuntimeError::Filesystem(format!(
+                    "remove committed certificate backup {}: {error}",
+                    backup_path.display()
+                ))
+            })?;
+        }
+        sync_directory(&self.cert_live_root)
+    }
+
+    pub(crate) fn rollback(mut self) -> EdgeRuntimeResult<()> {
+        self.rollback_inner()?;
+        self.decided = true;
+        Ok(())
+    }
+
+    fn rollback_inner(&mut self) -> EdgeRuntimeResult<()> {
+        if let Ok(metadata) = std::fs::symlink_metadata(&self.target) {
+            if metadata.file_type().is_symlink() || !metadata.is_dir() {
+                return Err(EdgeRuntimeError::Filesystem(format!(
+                    "refuse to roll back unsafe certificate target {}",
+                    self.target.display()
+                )));
+            }
+            std::fs::remove_dir_all(&self.target).map_err(|error| {
+                EdgeRuntimeError::Filesystem(format!(
+                    "remove uncommitted certificate bundle {}: {error}",
+                    self.target.display()
+                ))
+            })?;
+        }
+
+        if let Some((_holder, previous)) = self.backup.as_ref() {
+            std::fs::rename(previous, &self.target).map_err(|error| {
+                EdgeRuntimeError::Filesystem(format!(
+                    "restore previous certificate bundle {}: {error}",
+                    self.target.display()
+                ))
+            })?;
+            self.backup.take();
+        }
+        sync_directory(&self.cert_live_root)
+    }
+}
+
+impl Drop for CertificateBundleActivation {
+    fn drop(&mut self) {
+        if !self.decided {
+            if let Err(error) = self.rollback_inner() {
+                tracing::error!(
+                    target = %self.target.display(),
+                    error = %error,
+                    "failed to roll back an undecided certificate activation"
+                );
+            }
+        }
     }
 }
 
@@ -150,8 +277,9 @@ fn activate_staged_generation<F>(
     cert_live_root: &Path,
     staged: TempDir,
     target: &Path,
+    process_lock: File,
     activate: F,
-) -> EdgeRuntimeResult<()>
+) -> EdgeRuntimeResult<CertificateBundleActivation>
 where
     F: FnOnce(&Path, &Path) -> std::io::Result<()>,
 {
@@ -196,8 +324,13 @@ where
         }));
     }
 
-    drop(backup);
-    Ok(())
+    Ok(CertificateBundleActivation {
+        cert_live_root: cert_live_root.to_path_buf(),
+        target: target.to_path_buf(),
+        backup,
+        _process_lock: process_lock,
+        decided: false,
+    })
 }
 
 fn validate_certificate_name(cert_name: &str) -> EdgeRuntimeResult<()> {
@@ -383,10 +516,68 @@ mod tests {
             std::fs::read_to_string(dir.join("privkey.pem")).expect("read privkey"),
             expected_key
         );
+        assert_eq!(certificate_generation_count(temp.path()), 1);
+    }
+
+    #[test]
+    fn pending_activation_can_commit_or_restore_the_previous_generation() {
+        let temp = TempDir::new().expect("tempdir");
+        let old = sample_material("dev-localhost", "generation-1");
+        let old_certificate = old.cert_pem.clone();
+        write_certificate_bundle(temp.path(), &old).expect("first bundle");
+
+        let replacement = sample_material("dev-localhost", "generation-2");
+        let replacement_certificate = replacement.cert_pem.clone();
+        let pending = activate_certificate_bundle(temp.path(), &replacement)
+            .expect("activate replacement pending database commit");
         assert_eq!(
-            std::fs::read_dir(temp.path()).expect("read root").count(),
-            1
+            std::fs::read_to_string(temp.path().join("dev-localhost/fullchain.pem"))
+                .expect("read pending certificate"),
+            replacement_certificate
         );
+        pending.rollback().expect("restore previous generation");
+        assert_eq!(
+            std::fs::read_to_string(temp.path().join("dev-localhost/fullchain.pem"))
+                .expect("read restored certificate"),
+            old_certificate
+        );
+
+        let committed = sample_material("dev-localhost", "generation-3");
+        let committed_certificate = committed.cert_pem.clone();
+        activate_certificate_bundle(temp.path(), &committed)
+            .expect("activate committed replacement")
+            .commit()
+            .expect("commit replacement");
+        assert_eq!(
+            std::fs::read_to_string(temp.path().join("dev-localhost/fullchain.pem"))
+                .expect("read committed certificate"),
+            committed_certificate
+        );
+        assert_eq!(certificate_generation_count(temp.path()), 1);
+    }
+
+    #[test]
+    fn pending_activation_holds_the_cross_process_file_lock() {
+        let temp = TempDir::new().expect("tempdir");
+        let first = activate_certificate_bundle(
+            temp.path(),
+            &sample_material("first-localhost", "generation-1"),
+        )
+        .expect("first pending activation");
+        let error = activate_certificate_bundle(
+            temp.path(),
+            &sample_material("second-localhost", "generation-1"),
+        )
+        .expect_err("a second process-level activation must fail without queuing");
+        assert!(error.to_string().contains("capacity exhausted"));
+        first.rollback().expect("release first activation");
+        activate_certificate_bundle(
+            temp.path(),
+            &sample_material("second-localhost", "generation-2"),
+        )
+        .expect("activation succeeds after lock release")
+        .commit()
+        .expect("commit second activation");
     }
 
     #[test]
@@ -412,10 +603,7 @@ mod tests {
             std::fs::read_to_string(dir.join("privkey.pem")).expect("read privkey"),
             old_key
         );
-        assert_eq!(
-            std::fs::read_dir(temp.path()).expect("read root").count(),
-            1
-        );
+        assert_eq!(certificate_generation_count(temp.path()), 1);
     }
 
     #[test]
@@ -478,5 +666,13 @@ mod tests {
                 "{invalid} must be rejected"
             );
         }
+    }
+
+    fn certificate_generation_count(root: &Path) -> usize {
+        std::fs::read_dir(root)
+            .expect("read certificate root")
+            .filter_map(Result::ok)
+            .filter(|entry| entry.file_type().is_ok_and(|file_type| file_type.is_dir()))
+            .count()
     }
 }

@@ -57,6 +57,12 @@
       "./session",
       "./composition"
     ],
+    "providedPorts": [
+      {
+        "name": "applicationSourceStorageAdapter",
+        "export": "."
+      }
+    ],
     "runtimeEntrypoints": [],
     "routeManifest": null,
     "sdkClients": [

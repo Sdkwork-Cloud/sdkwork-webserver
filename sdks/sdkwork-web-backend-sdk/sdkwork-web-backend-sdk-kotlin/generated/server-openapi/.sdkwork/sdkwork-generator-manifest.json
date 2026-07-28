@@ -256,7 +256,7 @@
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/CreateNginxConfigRequest.kt",
-      "sha256": "8d53b1e9aed8308e6fee33d5f0727bc8bd9b7149ba3ebe464c0e593d13c90c68"
+      "sha256": "504313f3cc5497c4b357c1d11b3ee8c8e8bfd4d16b077b7d1ee5b144c77f9d74"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/CreateServerRequest.kt",

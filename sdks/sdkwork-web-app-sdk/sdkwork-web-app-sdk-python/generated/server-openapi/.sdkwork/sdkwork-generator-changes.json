@@ -9,13 +9,10 @@
     "protocol": "http",
     "packageName": "sdkwork-web-app-sdk"
   },
-  "changeFingerprint": "3872c185d39ce965f2f124e31488b3443266b1750a8d454465cf61ae68cbb7e0",
+  "changeFingerprint": "a2ef4cbf2a6402f56a5514ba458e4b0ebd7b03ea657821e5373a9a1878274050",
   "changes": {
     "createdGeneratedFiles": [],
-    "updatedGeneratedFiles": [
-      "sdkwork_web_app_sdk/api/deployment.py",
-      "sdkwork_web_app_sdk/models/deployment_response.py"
-    ],
+    "updatedGeneratedFiles": [],
     "unchangedGeneratedFiles": [
       "bin/publish-core.mjs",
       "bin/publish.ps1",
@@ -29,6 +26,7 @@
       "sdkwork_web_app_sdk/__init__.py",
       "sdkwork_web_app_sdk/api/__init__.py",
       "sdkwork_web_app_sdk/api/certificate.py",
+      "sdkwork_web_app_sdk/api/deployment.py",
       "sdkwork_web_app_sdk/api/domain.py",
       "sdkwork_web_app_sdk/api/env_variable.py",
       "sdkwork_web_app_sdk/api/monitor.py",
@@ -47,6 +45,7 @@
       "sdkwork_web_app_sdk/models/create_health_check_request.py",
       "sdkwork_web_app_sdk/models/create_site_request.py",
       "sdkwork_web_app_sdk/models/deployment_page.py",
+      "sdkwork_web_app_sdk/models/deployment_response.py",
       "sdkwork_web_app_sdk/models/domain_page.py",
       "sdkwork_web_app_sdk/models/domain_response.py",
       "sdkwork_web_app_sdk/models/domain_verify_response.py",
@@ -97,61 +96,26 @@
   },
   "impact": {
     "schemaVersion": 1,
-    "areas": [
-      "api-surface",
-      "models"
-    ],
-    "details": [
-      {
-        "area": "api-surface",
-        "paths": [
-          "sdkwork_web_app_sdk/api/deployment.py"
-        ]
-      },
-      {
-        "area": "models",
-        "paths": [
-          "sdkwork_web_app_sdk/models/deployment_response.py"
-        ]
-      }
-    ],
-    "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, models. Verification is required."
+    "areas": [],
+    "details": [],
+    "requiresVerification": false,
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
   },
   "verificationPlan": {
-    "shouldRun": true,
-    "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
-    "steps": [
-      {
-        "id": "check",
-        "title": "Unified package check",
-        "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
-        "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-python\\generated\\server-openapi",
-        "command": "node",
-        "args": [
-          "./bin/publish-core.mjs",
-          "--language",
-          "python",
-          "--project-dir",
-          ".",
-          "--action",
-          "check"
-        ],
-        "displayCommand": "node ./bin/publish-core.mjs --language python --project-dir . --action check"
-      }
-    ]
+    "shouldRun": false,
+    "runPhase": "skip",
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
+    "steps": []
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "medium",
-    "nextAction": "verify",
+    "riskLevel": "low",
+    "nextAction": "skip",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
-    "summary": "Changes have been applied. Run the required verification plan now.",
+    "summary": "No actionable changes were detected. No apply or verification step is required.",
     "reasons": [
-      "verification-required"
+      "no-actionable-changes"
     ]
   },
   "preservedLegacyFiles": false

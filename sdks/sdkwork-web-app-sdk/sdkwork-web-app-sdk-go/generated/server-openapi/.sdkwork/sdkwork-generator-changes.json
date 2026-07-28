@@ -9,16 +9,14 @@
     "protocol": "http",
     "packageName": "github.com/sdkwork/sdkwork-web-app-sdk"
   },
-  "changeFingerprint": "59c162b5f779749e02506e79e90a83ce58745215ca1bca79df242e02fa72da17",
+  "changeFingerprint": "b0a18db87ad83ee196b7e3192defaaf5a0b617e00af577d3bf1ecea330d08c99",
   "changes": {
     "createdGeneratedFiles": [],
-    "updatedGeneratedFiles": [
-      "api/deployment.go",
-      "types/deployment_response.go"
-    ],
+    "updatedGeneratedFiles": [],
     "unchangedGeneratedFiles": [
       "api/base.go",
       "api/certificate.go",
+      "api/deployment.go",
       "api/doc.go",
       "api/domain.go",
       "api/env_variable.go",
@@ -49,6 +47,7 @@
       "types/create_health_check_request.go",
       "types/create_site_request.go",
       "types/deployment_page.go",
+      "types/deployment_response.go",
       "types/doc.go",
       "types/domain_page.go",
       "types/domain_response.go",
@@ -99,61 +98,26 @@
   },
   "impact": {
     "schemaVersion": 1,
-    "areas": [
-      "api-surface",
-      "models"
-    ],
-    "details": [
-      {
-        "area": "api-surface",
-        "paths": [
-          "api/deployment.go"
-        ]
-      },
-      {
-        "area": "models",
-        "paths": [
-          "types/deployment_response.go"
-        ]
-      }
-    ],
-    "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, models. Verification is required."
+    "areas": [],
+    "details": [],
+    "requiresVerification": false,
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
   },
   "verificationPlan": {
-    "shouldRun": true,
-    "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
-    "steps": [
-      {
-        "id": "check",
-        "title": "Unified package check",
-        "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
-        "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-go\\generated\\server-openapi",
-        "command": "node",
-        "args": [
-          "./bin/publish-core.mjs",
-          "--language",
-          "go",
-          "--project-dir",
-          ".",
-          "--action",
-          "check"
-        ],
-        "displayCommand": "node ./bin/publish-core.mjs --language go --project-dir . --action check"
-      }
-    ]
+    "shouldRun": false,
+    "runPhase": "skip",
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
+    "steps": []
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "medium",
-    "nextAction": "verify",
+    "riskLevel": "low",
+    "nextAction": "skip",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
-    "summary": "Changes have been applied. Run the required verification plan now.",
+    "summary": "No actionable changes were detected. No apply or verification step is required.",
     "reasons": [
-      "verification-required"
+      "no-actionable-changes"
     ]
   },
   "preservedLegacyFiles": false

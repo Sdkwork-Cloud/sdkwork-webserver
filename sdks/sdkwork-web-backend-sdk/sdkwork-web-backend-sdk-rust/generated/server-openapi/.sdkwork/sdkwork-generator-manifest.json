@@ -260,7 +260,7 @@
     },
     {
       "path": "src/models/create_application_deployment_request.rs",
-      "sha256": "28237f70c632cc0cb1b620c35694bad7ac9ebb6f043ee991833f63efb9790f82"
+      "sha256": "fc53b0eb6fd5878a8f3ef943c715dad07d2c7c63167306fa06c16b0cfc82ad64"
     },
     {
       "path": "src/models/create_application_domain_request.rs",
@@ -276,7 +276,7 @@
     },
     {
       "path": "src/models/create_nginx_config_request.rs",
-      "sha256": "4b44141fa08aa0797b1a59a281fffd778e39d53d26f25f916b54ba0883eb7795"
+      "sha256": "74fa25a35cd54dc0a14bf71111c53a395e094ebadf4bc995f81139f8e27a1bc2"
     },
     {
       "path": "src/models/create_server_request.rs",

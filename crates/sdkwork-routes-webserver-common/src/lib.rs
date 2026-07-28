@@ -23,5 +23,5 @@ pub use response::{
 };
 pub use sdkwork_webserver_http_host::{
     web_auth_mode_from_env, web_framework_runtime_policy_from_env, ProductionFailClosedResolver,
-    WebAuthMode,
+    WebAuthMode, WebServerTenantIsolationPolicy,
 };

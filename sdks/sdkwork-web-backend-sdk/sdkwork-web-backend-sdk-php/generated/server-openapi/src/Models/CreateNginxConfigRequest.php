@@ -14,8 +14,6 @@ final class CreateNginxConfigRequest
 
     public ?string $siteId = null;
 
-    public ?string $domainId = null;
-
     public function __construct(array $data = [])
     {
         $this->configType = array_key_exists('configType', $data)
@@ -29,9 +27,6 @@ final class CreateNginxConfigRequest
             : null;
         $this->siteId = array_key_exists('siteId', $data)
             ? $data['siteId']
-            : null;
-        $this->domainId = array_key_exists('domainId', $data)
-            ? $data['domainId']
             : null;
     }
 
@@ -47,7 +42,6 @@ final class CreateNginxConfigRequest
             'configName' => $this->configName,
             'configContent' => $this->configContent,
             'siteId' => $this->siteId,
-            'domainId' => $this->domainId,
         ];
     }
 }

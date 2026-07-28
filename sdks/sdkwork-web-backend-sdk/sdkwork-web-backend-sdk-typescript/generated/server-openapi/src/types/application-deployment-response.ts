@@ -3,7 +3,7 @@ export interface ApplicationDeploymentResponse {
   siteId: string;
   status: number;
   deployType: number;
-  environment: string;
+  environment: 'development' | 'test' | 'staging' | 'production';
   versionTag?: string;
   commitHash?: string;
   sourceRef?: string;

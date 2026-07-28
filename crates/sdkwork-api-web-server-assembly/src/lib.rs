@@ -2,6 +2,7 @@
 //! Application bootstrap lives in `bootstrap.rs`; route inventory is in `assembly-manifest.json`.
 
 mod bootstrap;
+mod framework_observability;
 mod generated;
 
 pub use bootstrap::{

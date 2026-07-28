@@ -12,7 +12,40 @@ pub use paths::{cert_bundle_paths, nginx_site_path};
 
 use sdkwork_webserver_acme_service::IssuedCertificateMaterial;
 use std::sync::Arc;
-use tokio::sync::Semaphore;
+use tokio::sync::{OwnedSemaphorePermit, Semaphore};
+
+pub struct PendingCertificateBundleActivation {
+    activation: paths::CertificateBundleActivation,
+    permit: OwnedSemaphorePermit,
+}
+
+impl PendingCertificateBundleActivation {
+    pub async fn commit(self) -> Result<(), EdgeRuntimeError> {
+        let Self { activation, permit } = self;
+        tokio::task::spawn_blocking(move || {
+            let _permit = permit;
+            activation.commit()
+        })
+        .await
+        .map_err(|error| {
+            EdgeRuntimeError::Filesystem(format!("certificate bundle commit task failed: {error}"))
+        })?
+    }
+
+    pub async fn rollback(self) -> Result<(), EdgeRuntimeError> {
+        let Self { activation, permit } = self;
+        tokio::task::spawn_blocking(move || {
+            let _permit = permit;
+            activation.rollback()
+        })
+        .await
+        .map_err(|error| {
+            EdgeRuntimeError::Filesystem(format!(
+                "certificate bundle rollback task failed: {error}"
+            ))
+        })?
+    }
+}
 
 pub struct EdgeRuntime {
     config: EdgeRuntimeConfig,
@@ -46,6 +79,16 @@ impl EdgeRuntime {
         &self,
         material: &IssuedCertificateMaterial,
     ) -> Result<(), EdgeRuntimeError> {
+        self.activate_certificate_bundle_async(material)
+            .await?
+            .commit()
+            .await
+    }
+
+    pub async fn activate_certificate_bundle_async(
+        &self,
+        material: &IssuedCertificateMaterial,
+    ) -> Result<PendingCertificateBundleActivation, EdgeRuntimeError> {
         let permit = self
             .certificate_activation_admission
             .clone()
@@ -57,14 +100,14 @@ impl EdgeRuntime {
             })?;
         let cert_live_root = self.config.cert_live_root.clone();
         let material = material.clone();
-        tokio::task::spawn_blocking(move || {
-            let _permit = permit;
-            paths::write_certificate_bundle(&cert_live_root, &material)
+        let activation = tokio::task::spawn_blocking(move || {
+            paths::activate_certificate_bundle(&cert_live_root, &material)
         })
         .await
         .map_err(|error| {
             EdgeRuntimeError::Filesystem(format!("certificate bundle task failed: {error}"))
-        })?
+        })??;
+        Ok(PendingCertificateBundleActivation { activation, permit })
     }
 
     pub fn deploy_site_config(

@@ -352,15 +352,19 @@ public struct HealthCheckResponse: Codable {
     public let checkType: Int?
     public let checkUrl: String?
     public let checkInterval: Int?
+    public let timeoutMs: Int?
+    public let retryCount: Int?
     public let status: Int?
     public let createdAt: String?
 
 
-    public init(id: String? = nil, checkType: Int? = nil, checkUrl: String? = nil, checkInterval: Int? = nil, status: Int? = nil, createdAt: String? = nil) {
+    public init(id: String? = nil, checkType: Int? = nil, checkUrl: String? = nil, checkInterval: Int? = nil, timeoutMs: Int? = nil, retryCount: Int? = nil, status: Int? = nil, createdAt: String? = nil) {
         self.id = id
         self.checkType = checkType
         self.checkUrl = checkUrl
         self.checkInterval = checkInterval
+        self.timeoutMs = timeoutMs
+        self.retryCount = retryCount
         self.status = status
         self.createdAt = createdAt
     }

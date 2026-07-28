@@ -2,6 +2,7 @@
 
 mod correlation;
 mod machine_credential;
+mod tenant_isolation;
 
 use async_trait::async_trait;
 use axum::http::Uri;
@@ -16,6 +17,7 @@ use sdkwork_webserver_contract::{
 
 pub use correlation::{resolved_trace_id, with_problem_correlation, WebProblemCorrelation};
 pub use machine_credential::MachineCredentialResolverDecorator;
+pub use tenant_isolation::WebServerTenantIsolationPolicy;
 
 const PRODUCTION_AUTH_UNAVAILABLE: &str = "production Web auth requires IAM PostgreSQL database";
 const SHARED_ENVIRONMENT_KEY: &str = "SDKWORK_ENVIRONMENT";

@@ -6,8 +6,7 @@ pub struct CreateHealthCheckRequest {
     pub check_type: i64,
 
     #[serde(rename = "checkUrl")]
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub check_url: Option<String>,
+    pub check_url: String,
 
     #[serde(rename = "checkInterval")]
     #[serde(default, skip_serializing_if = "Option::is_none")]

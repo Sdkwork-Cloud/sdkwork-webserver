@@ -96,7 +96,7 @@
     },
     {
       "path": "src/Models/CreateDeploymentRequest.php",
-      "sha256": "4980d68516aa3385df501c56460994eb34bf6690c4e166597acdfd57961e52f6"
+      "sha256": "fd11ab66327dc7ea78d5ccc6ced63386fec7c284d046b3488f4e975208910d39"
     },
     {
       "path": "src/Models/CreateDomainRequest.php",
@@ -152,7 +152,7 @@
     },
     {
       "path": "src/Models/HealthCheckResponse.php",
-      "sha256": "1d38e077ff27db17b5832a05d3c5917107d900eb44cd5c72a5c550c409f2996c"
+      "sha256": "a96b9e5d97ecbf1a49fbbcc4787db724fa2d3e80b46c7dc68891968cbd612994"
     },
     {
       "path": "src/Models/PageInfo.php",

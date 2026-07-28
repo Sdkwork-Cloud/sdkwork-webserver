@@ -106,15 +106,13 @@ class CreateNginxConfigRequest {
   final int configType;
   final String configName;
   final String configContent;
-  final String? siteId;
-  final String? domainId;
+  final String siteId;
 
   CreateNginxConfigRequest({
     required this.configType,
     required this.configName,
     required this.configContent,
-    this.siteId,
-    this.domainId
+    required this.siteId
   });
 
   factory CreateNginxConfigRequest.fromJson(Map<String, dynamic> json) {
@@ -140,8 +138,13 @@ class CreateNginxConfigRequest {
         }
         return value;
       })(),
-      siteId: json['siteId']?.toString(),
-      domainId: json['domainId']?.toString()
+      siteId: (() {
+        final value = json['siteId']?.toString();
+        if (value == null) {
+          throw FormatException('CreateNginxConfigRequest.siteId is required');
+        }
+        return value;
+      })()
     );
   }
 
@@ -151,7 +154,6 @@ class CreateNginxConfigRequest {
       'configName': configName,
       'configContent': configContent,
       'siteId': siteId,
-      'domainId': domainId,
     };
   }
 }

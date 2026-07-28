@@ -9,7 +9,7 @@ export interface SiteListParams {
   pageSize?: number;
   status?: 0 | 1 | 2 | 3;
   applicationType?: 'WEB' | 'API';
-  siteType?: 1 | 2 | 3 | 4 | 5 | 6;
+  siteType?: 1 | 2 | 3 | 4 | 5 | 6 | 6;
   keyword?: string;
 }
 

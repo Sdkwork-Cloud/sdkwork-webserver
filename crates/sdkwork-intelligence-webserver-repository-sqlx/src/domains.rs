@@ -30,7 +30,9 @@ impl WebRepository {
         .fetch_one(&self.pool)
         .await
         .map_err(|error| store_error("count web_domain", error))?;
-        let total: i64 = count_row.try_get("total").unwrap_or(0);
+        let total: i64 = count_row
+            .try_get("total")
+            .map_err(|error| store_error("map web_domain count", error))?;
 
         let rows = sqlx::query(
             "SELECT uuid, hostname, is_primary, is_verified, ssl_enabled, ssl_provider, status,
@@ -199,8 +201,11 @@ impl WebRepository {
         .map_err(|error| store_error("verify web_domain lookup", error))?
         .ok_or_else(|| WebServiceError::not_found("domain not found"))?;
 
-        let is_verified = bool_from_row(&row, "is_verified").unwrap_or(false);
-        let verify_token: Option<String> = row.try_get("verify_token").ok();
+        let is_verified = bool_from_row(&row, "is_verified")
+            .map_err(|error| store_error("map web_domain is_verified", error))?;
+        let verify_token: Option<String> = row
+            .try_get("verify_token")
+            .map_err(|error| store_error("map web_domain verify_token", error))?;
 
         if is_verified {
             return Ok(DomainVerifyResponse {
@@ -241,7 +246,7 @@ fn map_domain_row(row: &EngineRow) -> Result<DomainResponse, sqlx::Error> {
         is_primary: bool_from_row(row, "is_primary")?,
         is_verified: bool_from_row(row, "is_verified")?,
         ssl_enabled: bool_from_row(row, "ssl_enabled")?,
-        ssl_provider: row.try_get("ssl_provider").ok(),
+        ssl_provider: row.try_get("ssl_provider")?,
         status: row.try_get("status")?,
         created_at: instant_from_row(row, "created_at")?,
     })

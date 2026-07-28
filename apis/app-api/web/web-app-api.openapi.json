@@ -86,6 +86,7 @@
                 3,
                 4,
                 5,
+                6,
                 6
               ]
             }
@@ -1403,6 +1404,7 @@
       "get": {
         "operationId": "sites.envVariables.list",
         "summary": "获取环境变量列表",
+        "description": "Returns the complete active environment-variable collection for one authorized application. The collection is transactionally capped at 100 items per application.",
         "tags": [
           "envVariable"
         ],
@@ -1709,6 +1711,7 @@
       "get": {
         "operationId": "sites.healthChecks.list",
         "summary": "获取健康检查配置",
+        "description": "Returns the complete health-check configuration collection for one authorized application. The collection is transactionally capped at 100 items per application.",
         "tags": [
           "monitor"
         ],
@@ -2113,13 +2116,15 @@
       },
       "CreateDomainRequest": {
         "type": "object",
+        "additionalProperties": false,
         "required": [
           "hostname"
         ],
         "properties": {
           "hostname": {
             "type": "string",
-            "maxLength": 255
+            "minLength": 1,
+            "maxLength": 253
           },
           "isPrimary": {
             "type": "boolean",
@@ -2205,8 +2210,12 @@
       },
       "CreateDeploymentRequest": {
         "type": "object",
+        "additionalProperties": false,
         "required": [
-          "deployType"
+          "deployType",
+          "artifactDriveUri",
+          "artifactSize",
+          "artifactHash"
         ],
         "properties": {
           "deployType": {
@@ -2220,13 +2229,18 @@
           },
           "versionTag": {
             "type": "string",
+            "minLength": 1,
             "maxLength": 100
           },
           "commitHash": {
-            "type": "string"
+            "type": "string",
+            "minLength": 7,
+            "maxLength": 64,
+            "pattern": "^[a-f0-9]{7,64}$"
           },
           "sourceRef": {
             "type": "string",
+            "minLength": 1,
             "maxLength": 500
           },
           "artifactDriveUri": {
@@ -2244,12 +2258,17 @@
           },
           "artifactHash": {
             "type": "string",
-            "pattern": "^[A-Fa-f0-9]{64}$",
-            "description": "SHA-256 hexadecimal digest of the uploaded package."
+            "pattern": "^[a-f0-9]{64}$",
+            "description": "Lowercase SHA-256 hexadecimal digest of the uploaded package."
           },
           "environment": {
             "type": "string",
-            "maxLength": 32,
+            "enum": [
+              "development",
+              "test",
+              "staging",
+              "production"
+            ],
             "default": "production"
           }
         }
@@ -2307,7 +2326,7 @@
           },
           "artifactHash": {
             "type": "string",
-            "pattern": "^[A-Fa-f0-9]{64}$"
+            "pattern": "^[a-f0-9]{64}$"
           },
           "status": {
             "type": "integer"
@@ -2355,6 +2374,7 @@
       },
       "CreateEnvVariableRequest": {
         "type": "object",
+        "additionalProperties": false,
         "required": [
           "key",
           "value"
@@ -2362,13 +2382,22 @@
         "properties": {
           "key": {
             "type": "string",
-            "maxLength": 200
+            "minLength": 1,
+            "maxLength": 200,
+            "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
           },
           "value": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 65536
           },
           "environment": {
             "type": "string",
+            "enum": [
+              "development",
+              "test",
+              "staging",
+              "production"
+            ],
             "default": "production"
           },
           "isSecret": {
@@ -2420,6 +2449,7 @@
       },
       "CreateCertificateRequest": {
         "type": "object",
+        "additionalProperties": false,
         "required": [
           "domainId",
           "certType"
@@ -2433,7 +2463,6 @@
             "type": "integer",
             "enum": [
               1,
-              2,
               3
             ]
           },
@@ -2519,8 +2548,10 @@
       },
       "CreateHealthCheckRequest": {
         "type": "object",
+        "additionalProperties": false,
         "required": [
-          "checkType"
+          "checkType",
+          "checkUrl"
         ],
         "properties": {
           "checkType": {
@@ -2533,24 +2564,42 @@
           },
           "checkUrl": {
             "type": "string",
+            "minLength": 1,
             "maxLength": 2000
           },
           "checkInterval": {
             "type": "integer",
+            "minimum": 5,
+            "maximum": 86400,
             "default": 60
           },
           "timeoutMs": {
             "type": "integer",
+            "minimum": 100,
+            "maximum": 60000,
             "default": 5000
           },
           "retryCount": {
             "type": "integer",
+            "minimum": 0,
+            "maximum": 10,
             "default": 3
           }
         }
       },
       "HealthCheckResponse": {
         "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "checkType",
+          "checkUrl",
+          "checkInterval",
+          "timeoutMs",
+          "retryCount",
+          "status",
+          "createdAt"
+        ],
         "properties": {
           "id": {
             "type": "string",
@@ -2563,6 +2612,12 @@
             "type": "string"
           },
           "checkInterval": {
+            "type": "integer"
+          },
+          "timeoutMs": {
+            "type": "integer"
+          },
+          "retryCount": {
             "type": "integer"
           },
           "status": {

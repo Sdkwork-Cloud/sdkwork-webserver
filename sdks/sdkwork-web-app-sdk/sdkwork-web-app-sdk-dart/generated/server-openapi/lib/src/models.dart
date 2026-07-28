@@ -821,6 +821,8 @@ class HealthCheckResponse {
   final int? checkType;
   final String? checkUrl;
   final int? checkInterval;
+  final int? timeoutMs;
+  final int? retryCount;
   final int? status;
   final String? createdAt;
 
@@ -829,6 +831,8 @@ class HealthCheckResponse {
     this.checkType,
     this.checkUrl,
     this.checkInterval,
+    this.timeoutMs,
+    this.retryCount,
     this.status,
     this.createdAt
   });
@@ -839,6 +843,8 @@ class HealthCheckResponse {
       checkType: json['checkType'] is int ? json['checkType'] : null,
       checkUrl: json['checkUrl']?.toString(),
       checkInterval: json['checkInterval'] is int ? json['checkInterval'] : null,
+      timeoutMs: json['timeoutMs'] is int ? json['timeoutMs'] : null,
+      retryCount: json['retryCount'] is int ? json['retryCount'] : null,
       status: json['status'] is int ? json['status'] : null,
       createdAt: json['createdAt']?.toString()
     );
@@ -850,6 +856,8 @@ class HealthCheckResponse {
       'checkType': checkType,
       'checkUrl': checkUrl,
       'checkInterval': checkInterval,
+      'timeoutMs': timeoutMs,
+      'retryCount': retryCount,
       'status': status,
       'createdAt': createdAt,
     };

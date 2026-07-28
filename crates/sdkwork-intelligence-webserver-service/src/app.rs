@@ -9,6 +9,9 @@ use sdkwork_webserver_contract::{
 
 use crate::{AuditLogWrite, WebService};
 
+const MAX_DEPLOYMENT_ARTIFACT_BYTES: i64 = 64 * 1024 * 1024;
+const MAX_ENV_VARIABLE_VALUE_BYTES: usize = 64 * 1024;
+
 impl WebService {
     fn require_tenant(context: &WebAppRequestContext) -> WebServiceResult<i64> {
         if context.tenant_id <= 0 {
@@ -53,6 +56,51 @@ impl WebService {
     pub(crate) fn validate_deployment_request(
         request: &CreateDeploymentRequest,
     ) -> WebServiceResult<()> {
+        if !matches!(request.deploy_type, 1..=4) {
+            return Err(sdkwork_webserver_contract::WebServiceError::validation(
+                "deployType must be 1 (manual), 2 (git), 3 (ci-cd), or 4 (api)",
+            ));
+        }
+        if let Some(environment) = request.environment.as_deref() {
+            if environment != environment.trim()
+                || !matches!(
+                    environment,
+                    "development" | "test" | "staging" | "production"
+                )
+            {
+                return Err(sdkwork_webserver_contract::WebServiceError::validation(
+                    "environment must be development, test, staging, or production",
+                ));
+            }
+        }
+
+        validate_optional_deployment_text("versionTag", request.version_tag.as_deref(), 100)?;
+        validate_optional_deployment_text("sourceRef", request.source_ref.as_deref(), 500)?;
+        if let Some(commit_hash) = request.commit_hash.as_deref() {
+            let hash = commit_hash.trim();
+            if hash != commit_hash
+                || !(7..=64).contains(&hash.len())
+                || !hash
+                    .bytes()
+                    .all(|byte| byte.is_ascii_digit() || matches!(byte, b'a'..=b'f'))
+            {
+                return Err(sdkwork_webserver_contract::WebServiceError::validation(
+                    "commitHash must be a 7..64 character lowercase hexadecimal digest",
+                ));
+            }
+        }
+
+        let artifact_fields = [
+            request.artifact_drive_uri.is_some(),
+            request.artifact_size.is_some(),
+            request.artifact_hash.is_some(),
+        ];
+        if !artifact_fields.into_iter().all(|present| present) {
+            return Err(sdkwork_webserver_contract::WebServiceError::validation(
+                "artifactDriveUri, artifactSize, and artifactHash are required together",
+            ));
+        }
+
         if let Some(uri) = request.artifact_drive_uri.as_deref() {
             let uri = uri.trim();
             let Some((space_id, node_id)) = uri
@@ -68,24 +116,158 @@ impl WebService {
                 || space_id.contains('/')
                 || node_id.contains('/')
                 || uri.contains(['?', '#'])
+                || uri.len() > 500
+                || !space_id.bytes().all(is_safe_drive_identifier_byte)
+                || !node_id.bytes().all(is_safe_drive_identifier_byte)
             {
                 return Err(sdkwork_webserver_contract::WebServiceError::validation(
                     "artifactDriveUri must use drive://spaces/{spaceId}/nodes/{nodeId}",
                 ));
             }
         }
-        if request.artifact_size.is_some_and(|size| size <= 0) {
+        if request
+            .artifact_size
+            .is_some_and(|size| !(1..=MAX_DEPLOYMENT_ARTIFACT_BYTES).contains(&size))
+        {
             return Err(sdkwork_webserver_contract::WebServiceError::validation(
-                "artifactSize must be greater than zero",
+                "artifactSize must be between 1 byte and 64 MiB",
             ));
         }
         if let Some(hash) = request.artifact_hash.as_deref() {
             let hash = hash.trim();
-            if hash.len() != 64 || !hash.bytes().all(|byte| byte.is_ascii_hexdigit()) {
+            if hash.len() != 64
+                || !hash
+                    .bytes()
+                    .all(|byte| byte.is_ascii_digit() || matches!(byte, b'a'..=b'f'))
+            {
                 return Err(sdkwork_webserver_contract::WebServiceError::validation(
-                    "artifactHash must be a SHA-256 hexadecimal digest",
+                    "artifactHash must be a lowercase SHA-256 hexadecimal digest",
                 ));
             }
+        }
+        Ok(())
+    }
+
+    pub(crate) fn validate_health_check_request(
+        request: &CreateHealthCheckRequest,
+    ) -> WebServiceResult<()> {
+        if !matches!(request.check_type, 1..=3) {
+            return Err(sdkwork_webserver_contract::WebServiceError::validation(
+                "checkType must be 1 (HTTP), 2 (TCP), or 3 (ping)",
+            ));
+        }
+        if request.check_url.is_empty()
+            || request.check_url != request.check_url.trim()
+            || request.check_url.len() > 2_000
+            || request.check_url.chars().any(char::is_control)
+        {
+            return Err(sdkwork_webserver_contract::WebServiceError::validation(
+                "checkUrl must contain 1..2000 non-control characters",
+            ));
+        }
+        if !(5..=86_400).contains(&request.check_interval) {
+            return Err(sdkwork_webserver_contract::WebServiceError::validation(
+                "checkInterval must be between 5 and 86400 seconds",
+            ));
+        }
+        if !(100..=60_000).contains(&request.timeout_ms)
+            || i64::from(request.timeout_ms) > i64::from(request.check_interval) * 1_000
+        {
+            return Err(sdkwork_webserver_contract::WebServiceError::validation(
+                "timeoutMs must be between 100 and 60000 and not exceed checkInterval",
+            ));
+        }
+        if !(0..=10).contains(&request.retry_count) {
+            return Err(sdkwork_webserver_contract::WebServiceError::validation(
+                "retryCount must be between 0 and 10",
+            ));
+        }
+        Ok(())
+    }
+
+    pub(crate) fn validate_domain_request(request: &CreateDomainRequest) -> WebServiceResult<()> {
+        let hostname = request.hostname.as_str();
+        if hostname.is_empty()
+            || hostname != hostname.trim()
+            || hostname.len() > 253
+            || hostname.starts_with('.')
+            || hostname.ends_with('.')
+            || hostname.split('.').any(|label| {
+                label.is_empty()
+                    || label.len() > 63
+                    || label.starts_with('-')
+                    || label.ends_with('-')
+                    || !label
+                        .bytes()
+                        .all(|byte| byte.is_ascii_alphanumeric() || byte == b'-')
+            })
+        {
+            return Err(sdkwork_webserver_contract::WebServiceError::validation(
+                "hostname must be a safe ASCII DNS name",
+            ));
+        }
+        if request
+            .ssl_provider
+            .as_deref()
+            .is_some_and(|provider| !matches!(provider, "letsencrypt" | "custom" | "none"))
+        {
+            return Err(sdkwork_webserver_contract::WebServiceError::validation(
+                "sslProvider must be letsencrypt, custom, or none",
+            ));
+        }
+        Ok(())
+    }
+
+    pub(crate) fn validate_env_variable_request(
+        request: &CreateEnvVariableRequest,
+    ) -> WebServiceResult<()> {
+        if request.key.is_empty()
+            || request.key.len() > 200
+            || !request.key.bytes().enumerate().all(|(index, byte)| {
+                byte == b'_' || byte.is_ascii_alphabetic() || (index > 0 && byte.is_ascii_digit())
+            })
+        {
+            return Err(sdkwork_webserver_contract::WebServiceError::validation(
+                "key must be a 1..200 character environment variable name",
+            ));
+        }
+        if !matches!(
+            request.environment.as_str(),
+            "development" | "test" | "staging" | "production"
+        ) {
+            return Err(sdkwork_webserver_contract::WebServiceError::validation(
+                "environment must be development, test, staging, or production",
+            ));
+        }
+        if request.value.len() > MAX_ENV_VARIABLE_VALUE_BYTES || request.value.contains('\0') {
+            return Err(sdkwork_webserver_contract::WebServiceError::validation(
+                "value must not exceed 64 KiB or contain NUL",
+            ));
+        }
+        Ok(())
+    }
+
+    pub(crate) fn validate_certificate_request(
+        request: &CreateCertificateRequest,
+    ) -> WebServiceResult<()> {
+        if !matches!(request.cert_type, 1 | 3) {
+            return Err(sdkwork_webserver_contract::WebServiceError::validation(
+                "certType must be 1 (Let's Encrypt) or 3 (self-signed)",
+            ));
+        }
+        if request.cert_type == 3 && request.auto_renew {
+            return Err(sdkwork_webserver_contract::WebServiceError::validation(
+                "automatic renewal is unavailable for self-signed certificates",
+            ));
+        }
+        if request.domain_id.is_empty()
+            || request.domain_id != request.domain_id.trim()
+            || request.domain_id.len() > 64
+            || request.domain_id.chars().any(char::is_control)
+        {
+            return Err(sdkwork_webserver_contract::WebServiceError::validation(
+                "domainId is invalid",
+            ));
         }
         Ok(())
     }
@@ -95,20 +277,57 @@ impl WebService {
         context: &WebAppRequestContext,
         action: &str,
         target_uuid: &str,
-    ) -> WebServiceResult<()> {
+    ) {
         let operator_id = context.actor_id.unwrap_or(0);
-        self.repository
+        if let Err(error) = self
+            .repository
             .insert_audit_log(AuditLogWrite {
                 tenant_id: context.tenant_id,
                 organization_id: context.organization_id.unwrap_or(0),
                 operator_id,
+                operator_type: "USER",
                 action,
                 target_type: "site",
                 target_id: None,
                 target_uuid: Some(target_uuid),
+                request_id: None,
+                metadata_json: "{}",
             })
             .await
+        {
+            tracing::error!(
+                tenant_id = context.tenant_id,
+                operator_id,
+                action,
+                target_uuid,
+                error = ?error,
+                "failed to persist site business audit"
+            );
+        }
     }
+}
+
+fn validate_optional_deployment_text(
+    field: &str,
+    value: Option<&str>,
+    max_characters: usize,
+) -> WebServiceResult<()> {
+    if let Some(value) = value {
+        if value.is_empty()
+            || value != value.trim()
+            || value.chars().count() > max_characters
+            || value.chars().any(char::is_control)
+        {
+            return Err(sdkwork_webserver_contract::WebServiceError::validation(
+                format!("{field} must contain 1..{max_characters} non-control characters"),
+            ));
+        }
+    }
+    Ok(())
+}
+
+fn is_safe_drive_identifier_byte(byte: u8) -> bool {
+    byte.is_ascii_alphanumeric() || matches!(byte, b'-' | b'_' | b'.')
 }
 
 #[cfg(test)]
@@ -169,8 +388,7 @@ impl WebAppApi for WebService {
             .repository
             .create_site(tenant_id, context.organization_id, owner_id, request)
             .await?;
-        let _ = self
-            .audit_site_action(context, "sites.create", &site.id)
+        self.audit_site_action(context, "sites.create", &site.id)
             .await;
         Ok(site)
     }
@@ -198,8 +416,7 @@ impl WebAppApi for WebService {
             .repository
             .update_site(tenant_id, site_id, request)
             .await?;
-        let _ = self
-            .audit_site_action(context, "sites.update", site_id)
+        self.audit_site_action(context, "sites.update", site_id)
             .await;
         Ok(site)
     }
@@ -213,8 +430,7 @@ impl WebAppApi for WebService {
         self.repository
             .delete_site(tenant_id, site_id, context.actor_id)
             .await?;
-        let _ = self
-            .audit_site_action(context, "sites.delete", site_id)
+        self.audit_site_action(context, "sites.delete", site_id)
             .await;
         Ok(())
     }
@@ -229,8 +445,7 @@ impl WebAppApi for WebService {
             .repository
             .set_site_status(tenant_id, site_id, 1)
             .await?;
-        let _ = self
-            .audit_site_action(context, "sites.activate", site_id)
+        self.audit_site_action(context, "sites.activate", site_id)
             .await;
         Ok(site)
     }
@@ -245,8 +460,7 @@ impl WebAppApi for WebService {
             .repository
             .set_site_status(tenant_id, site_id, 2)
             .await?;
-        let _ = self
-            .audit_site_action(context, "sites.pause", site_id)
+        self.audit_site_action(context, "sites.pause", site_id)
             .await;
         Ok(site)
     }
@@ -270,6 +484,7 @@ impl WebAppApi for WebService {
         site_id: &str,
         request: &CreateDomainRequest,
     ) -> WebServiceResult<sdkwork_webserver_contract::DomainResponse> {
+        Self::validate_domain_request(request)?;
         let tenant_id = self.require_site_access(context, site_id).await?;
         self.repository
             .create_domain(tenant_id, site_id, request)
@@ -320,6 +535,11 @@ impl WebAppApi for WebService {
         page_size: i32,
         status: Option<i32>,
     ) -> WebServiceResult<sdkwork_webserver_contract::DeploymentPage> {
+        if status.is_some_and(|status| !(0..=6).contains(&status)) {
+            return Err(sdkwork_webserver_contract::WebServiceError::validation(
+                "status must be between 0 and 6",
+            ));
+        }
         let tenant_id = self.require_site_access(context, site_id).await?;
         self.repository
             .list_deployments(tenant_id, site_id, page, page_size, status)
@@ -391,6 +611,7 @@ impl WebAppApi for WebService {
         site_id: &str,
         request: &CreateEnvVariableRequest,
     ) -> WebServiceResult<sdkwork_webserver_contract::EnvVariableResponse> {
+        Self::validate_env_variable_request(request)?;
         let tenant_id = self.require_site_access(context, site_id).await?;
         self.repository
             .create_env_variable(tenant_id, site_id, request)
@@ -438,6 +659,7 @@ impl WebAppApi for WebService {
         site_id: &str,
         request: &CreateHealthCheckRequest,
     ) -> WebServiceResult<sdkwork_webserver_contract::HealthCheckResponse> {
+        Self::validate_health_check_request(request)?;
         let tenant_id = self.require_site_access(context, site_id).await?;
         self.repository
             .create_health_check(tenant_id, site_id, request)
@@ -447,8 +669,11 @@ impl WebAppApi for WebService {
 
 #[cfg(test)]
 mod tests {
-    use super::WebService;
-    use sdkwork_webserver_contract::CreateDeploymentRequest;
+    use super::{WebService, MAX_DEPLOYMENT_ARTIFACT_BYTES, MAX_ENV_VARIABLE_VALUE_BYTES};
+    use sdkwork_webserver_contract::{
+        CreateCertificateRequest, CreateDeploymentRequest, CreateDomainRequest,
+        CreateEnvVariableRequest, CreateHealthCheckRequest,
+    };
 
     #[test]
     fn application_type_is_limited_to_public_business_types() {
@@ -469,6 +694,39 @@ mod tests {
         };
         assert!(WebService::validate_deployment_request(&valid).is_ok());
 
+        for invalid in [
+            CreateDeploymentRequest {
+                deploy_type: 0,
+                ..valid.clone()
+            },
+            CreateDeploymentRequest {
+                environment: Some("prod".to_string()),
+                ..valid.clone()
+            },
+            CreateDeploymentRequest {
+                artifact_hash: Some("A".repeat(64)),
+                ..valid.clone()
+            },
+            CreateDeploymentRequest {
+                artifact_size: Some(MAX_DEPLOYMENT_ARTIFACT_BYTES + 1),
+                ..valid.clone()
+            },
+            CreateDeploymentRequest {
+                artifact_hash: None,
+                ..valid.clone()
+            },
+            CreateDeploymentRequest {
+                version_tag: Some(" release ".to_string()),
+                ..valid.clone()
+            },
+            CreateDeploymentRequest {
+                commit_hash: Some("not-a-commit".to_string()),
+                ..valid.clone()
+            },
+        ] {
+            assert!(WebService::validate_deployment_request(&invalid).is_err());
+        }
+
         for artifact_drive_uri in [
             "https://example.test/package.zip",
             "drive://spaces/space-1/nodes/",
@@ -482,5 +740,97 @@ mod tests {
                 .is_err()
             );
         }
+    }
+
+    #[test]
+    fn health_check_configuration_is_bounded() {
+        let valid = CreateHealthCheckRequest {
+            check_type: 1,
+            check_url: "https://example.test/ready".to_string(),
+            check_interval: 30,
+            timeout_ms: 5_000,
+            retry_count: 3,
+        };
+        assert!(WebService::validate_health_check_request(&valid).is_ok());
+
+        for invalid in [
+            CreateHealthCheckRequest {
+                check_type: 0,
+                ..valid.clone()
+            },
+            CreateHealthCheckRequest {
+                check_url: "".to_string(),
+                ..valid.clone()
+            },
+            CreateHealthCheckRequest {
+                check_interval: 4,
+                ..valid.clone()
+            },
+            CreateHealthCheckRequest {
+                timeout_ms: 30_001,
+                ..valid.clone()
+            },
+            CreateHealthCheckRequest {
+                retry_count: 11,
+                ..valid.clone()
+            },
+        ] {
+            assert!(WebService::validate_health_check_request(&invalid).is_err());
+        }
+    }
+
+    #[test]
+    fn domain_environment_and_certificate_inputs_are_fail_closed() {
+        let domain = CreateDomainRequest {
+            hostname: "api.example.test".to_owned(),
+            is_primary: false,
+            ssl_enabled: true,
+            ssl_provider: Some("letsencrypt".to_owned()),
+        };
+        assert!(WebService::validate_domain_request(&domain).is_ok());
+        assert!(WebService::validate_domain_request(&CreateDomainRequest {
+            hostname: "bad host".to_owned(),
+            ..domain.clone()
+        })
+        .is_err());
+
+        let variable = CreateEnvVariableRequest {
+            key: "API_BASE_URL".to_owned(),
+            value: "https://api.example.test".to_owned(),
+            environment: "production".to_owned(),
+            is_secret: false,
+        };
+        assert!(WebService::validate_env_variable_request(&variable).is_ok());
+        assert!(
+            WebService::validate_env_variable_request(&CreateEnvVariableRequest {
+                key: "INVALID-KEY".to_owned(),
+                ..variable.clone()
+            })
+            .is_err()
+        );
+        assert!(
+            WebService::validate_env_variable_request(&CreateEnvVariableRequest {
+                value: "x".repeat(MAX_ENV_VARIABLE_VALUE_BYTES + 1),
+                ..variable
+            })
+            .is_err()
+        );
+
+        assert!(
+            WebService::validate_certificate_request(&CreateCertificateRequest {
+                domain_id: "domain-1".to_owned(),
+                cert_type: 1,
+                auto_renew: true,
+            })
+            .is_ok()
+        );
+        assert!(
+            WebService::validate_certificate_request(&CreateCertificateRequest {
+                domain_id: "domain-1".to_owned(),
+                cert_type: 3,
+                auto_renew: true,
+            })
+            .is_err()
+        );
     }
 }

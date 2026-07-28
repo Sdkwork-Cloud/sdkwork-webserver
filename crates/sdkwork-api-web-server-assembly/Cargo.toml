@@ -10,6 +10,7 @@ name = "sdkwork_api_web_server_assembly"
 path = "src/lib.rs"
 
 [dependencies]
+async-trait.workspace = true
 axum.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true

@@ -7,17 +7,20 @@ use sdkwork_database_sqlx::{create_any_pool_from_config, create_pool_from_config
 use sdkwork_intelligence_webserver_repository_sqlx::{PostgresWebRepository, SqliteWebRepository};
 use sdkwork_intelligence_webserver_service::{
     AuditLogWrite, RuntimeAssignmentTarget, RuntimeAssignmentWrite, RuntimeObservationWrite,
-    WebRepositoryPort,
+    WebRepositoryPort, WebService,
 };
+use sdkwork_webserver_acme_service::{AcmeConfig, CertificateIssuer};
 use sdkwork_webserver_contract::{
     AgentHeartbeatRequest, CertificateIssueUpdate, CreateCertificateRequest,
     CreateDeploymentRequest, CreateDomainRequest, CreateEnvVariableRequest,
     CreateHealthCheckRequest, CreateNginxConfigRequest, CreateServerRequest, CreateSiteRequest,
     ListNginxConfigsQuery, ListSitesQuery, RuntimeObservationState, UpdateNginxConfigRequest,
-    UpdateSiteRequest, WebServiceErrorKind, WebsiteRuntimeSetSnapshot,
+    UpdateSiteRequest, WebAppRequestContext, WebAppResourceScope, WebServiceErrorKind,
+    WebsiteRuntimeSetSnapshot,
 };
 use sdkwork_webserver_core::website_runtime::website_runtime_set_snapshot_sha256;
 use sdkwork_webserver_database_host::bootstrap_web_database;
+use sdkwork_webserver_edge_runtime::{EdgeRuntime, EdgeRuntimeConfig};
 use sqlx::{AnyPool, Row};
 use tempfile::TempDir;
 
@@ -84,6 +87,7 @@ async fn sqlite_repository_transactions_tenants_idempotency_and_pagination_are_b
     .await;
 
     verify_repository_contract(&context).await;
+    verify_certificate_activation_compensation(&context).await;
     context.pool.close().await;
 }
 
@@ -110,7 +114,124 @@ async fn postgres_repository_transactions_tenants_idempotency_and_pagination_are
     .await;
 
     verify_repository_contract(&context).await;
+    verify_certificate_activation_compensation(&context).await;
     context.pool.close().await;
+}
+
+async fn verify_certificate_activation_compensation(context: &TestContext) {
+    let site = context
+        .repository
+        .create_site(
+            TENANT_A,
+            Some(31),
+            Some(93),
+            &CreateSiteRequest {
+                name: "Certificate Compensation Site".to_string(),
+                slug: Some("certificate-compensation".to_string()),
+                description: None,
+                application_type: "WEB".to_string(),
+                site_type: 1,
+                runtime_config: None,
+            },
+        )
+        .await
+        .expect("create certificate compensation site");
+    let domain = context
+        .repository
+        .create_domain(
+            TENANT_A,
+            &site.id,
+            &CreateDomainRequest {
+                hostname: "compensation.example.test".to_string(),
+                is_primary: true,
+                ssl_enabled: true,
+                ssl_provider: Some("self-signed".to_string()),
+            },
+        )
+        .await
+        .expect("create certificate compensation domain");
+
+    install_certificate_finalize_failure_trigger(&context.pool, context.engine).await;
+    let runtime_directory = TempDir::new().expect("create certificate runtime directory");
+    let issuer = CertificateIssuer::new(
+        AcmeConfig::new(
+            "https://acme-staging-v02.api.letsencrypt.org/directory".to_string(),
+            "admin@example.test".to_string(),
+            30,
+            None,
+            b"repository-parity-certificate-key",
+            false,
+            false,
+        )
+        .expect("build test ACME config"),
+        runtime_directory.path().to_string_lossy(),
+    )
+    .expect("build test certificate issuer");
+    let edge_runtime = EdgeRuntime::new(EdgeRuntimeConfig {
+        nginx_enabled: false,
+        nginx_binary: "nginx".to_string(),
+        nginx_main_config: runtime_directory.path().join("nginx.conf"),
+        nginx_sites_root: runtime_directory.path().join("sites"),
+        cert_live_root: runtime_directory.path().join("certificates"),
+        site_family: "sdkwork".to_string(),
+        nginx_command_timeout_ms: 10_000,
+    });
+    let service = WebService::new(
+        context.repository.clone(),
+        Arc::new(issuer),
+        Arc::new(edge_runtime),
+    );
+    let result = service
+        .issue_certificate(
+            &WebAppRequestContext {
+                tenant_id: TENANT_A,
+                actor_id: Some(93),
+                organization_id: None,
+                session_id: Some("certificate-compensation-session".to_string()),
+                idempotency_key: Some("certificate-compensation".to_string()),
+                resource_scope: WebAppResourceScope::Owner,
+            },
+            &CreateCertificateRequest {
+                domain_id: domain.id,
+                cert_type: 3,
+                auto_renew: true,
+            },
+        )
+        .await;
+    assert_eq!(
+        result
+            .expect_err("database finalization failure must fail issuance")
+            .kind(),
+        WebServiceErrorKind::Internal
+    );
+
+    let generation_count = std::fs::read_dir(runtime_directory.path().join("certificates"))
+        .expect("read certificate runtime root")
+        .filter_map(Result::ok)
+        .filter(|entry| entry.file_type().is_ok_and(|file_type| file_type.is_dir()))
+        .count();
+    assert_eq!(
+        generation_count, 0,
+        "failed database finalization must remove the uncommitted certificate generation"
+    );
+    let row = sqlx::query(
+        "SELECT status, renewal_status, CAST(metadata AS TEXT) AS metadata
+         FROM web_certificate WHERE tenant_id = $1 ORDER BY id DESC LIMIT 1",
+    )
+    .bind(TENANT_A)
+    .fetch_one(&context.pool)
+    .await
+    .expect("load compensated certificate row");
+    assert_eq!(row.try_get::<i32, _>("status").expect("status"), 0);
+    assert_eq!(
+        row.try_get::<i32, _>("renewal_status")
+            .expect("renewal status"),
+        3
+    );
+    let metadata: String = row.try_get("metadata").expect("failure metadata");
+    assert!(metadata.contains("certificate database finalization failed"));
+    assert!(!metadata.contains("forced certificate finalize failure"));
+    remove_certificate_finalize_failure_trigger(&context.pool, context.engine).await;
 }
 
 async fn prepare_database(
@@ -405,9 +526,114 @@ async fn verify_repository_contract(context: &TestContext) {
     assert!(deep_page.items.is_empty());
     assert_eq!(deep_page.page_size, 100);
 
-    verify_deployment_idempotency(repository.as_ref(), &sites[0].id, &sites[1].id).await;
+    verify_deployment_idempotency(context, &sites[0].id, &sites[1].id).await;
     verify_rollback_atomicity(context, &sites[0].id).await;
+    verify_bounded_config_collections(context, &sites[2].id, &sites[3].id).await;
     verify_public_repository_surface(context, &sites[0].id).await;
+}
+
+async fn verify_bounded_config_collections(
+    context: &TestContext,
+    env_site_id: &str,
+    health_site_id: &str,
+) {
+    let repository = &context.repository;
+    for index in 0..99 {
+        repository
+            .create_env_variable(
+                TENANT_A,
+                env_site_id,
+                &CreateEnvVariableRequest {
+                    key: format!("CAPACITY_ENV_{index:03}"),
+                    value: "bounded".to_string(),
+                    environment: "production".to_string(),
+                    is_secret: false,
+                },
+            )
+            .await
+            .expect("seed bounded environment-variable collection");
+    }
+
+    let first_env = CreateEnvVariableRequest {
+        key: "CAPACITY_ENV_FINAL_A".to_string(),
+        value: "bounded".to_string(),
+        environment: "production".to_string(),
+        is_secret: false,
+    };
+    let second_env = CreateEnvVariableRequest {
+        key: "CAPACITY_ENV_FINAL_B".to_string(),
+        ..first_env.clone()
+    };
+    let (first_result, second_result) = tokio::join!(
+        repository.create_env_variable(TENANT_A, env_site_id, &first_env),
+        repository.create_env_variable(TENANT_A, env_site_id, &second_env),
+    );
+    assert_eq!(
+        usize::from(first_result.is_ok()) + usize::from(second_result.is_ok()),
+        1,
+        "the site lock must serialize concurrent environment-variable capacity checks"
+    );
+    for result in [first_result, second_result] {
+        if let Err(error) = result {
+            assert_eq!(error.kind(), WebServiceErrorKind::Conflict);
+        }
+    }
+    let env_page = repository
+        .list_env_variables(TENANT_A, env_site_id, None)
+        .await
+        .expect("list the maximum bounded environment-variable collection");
+    assert_eq!(env_page.total, 100);
+    assert_eq!(env_page.items.len(), 100);
+
+    for index in 0..99 {
+        repository
+            .create_health_check(
+                TENANT_A,
+                health_site_id,
+                &CreateHealthCheckRequest {
+                    check_type: 1,
+                    check_url: format!("https://health-{index:03}.example.test/ready"),
+                    check_interval: 60,
+                    timeout_ms: 5_000,
+                    retry_count: 3,
+                },
+            )
+            .await
+            .expect("seed bounded health-check collection");
+    }
+
+    let first_health = CreateHealthCheckRequest {
+        check_type: 1,
+        check_url: "https://health-final-a.example.test/ready".to_string(),
+        check_interval: 60,
+        timeout_ms: 5_000,
+        retry_count: 3,
+    };
+    let second_health = CreateHealthCheckRequest {
+        check_type: 1,
+        check_url: "https://health-final-b.example.test/ready".to_string(),
+        ..first_health.clone()
+    };
+    let (first_result, second_result) = tokio::join!(
+        repository.create_health_check(TENANT_A, health_site_id, &first_health),
+        repository.create_health_check(TENANT_A, health_site_id, &second_health),
+    );
+    assert_eq!(
+        usize::from(first_result.is_ok()) + usize::from(second_result.is_ok()),
+        1,
+        "the site lock must serialize concurrent health-check capacity checks"
+    );
+    for result in [first_result, second_result] {
+        if let Err(error) = result {
+            assert_eq!(error.kind(), WebServiceErrorKind::Conflict);
+        }
+    }
+    let health_page = repository
+        .list_health_checks(TENANT_A, health_site_id)
+        .await
+        .expect("list the maximum bounded health-check collection");
+    assert_eq!(health_page.total, 100);
+    assert_eq!(health_page.items.len(), 100);
 }
 
 async fn verify_public_repository_surface(context: &TestContext, site_id: &str) {
@@ -526,7 +752,10 @@ async fn verify_public_repository_surface(context: &TestContext, site_id: &str) 
             site_id,
             &CreateHealthCheckRequest {
                 check_type: 1,
-                url: "https://parity.example.test/healthz".to_string(),
+                check_url: "https://parity.example.test/healthz".to_string(),
+                check_interval: 30,
+                timeout_ms: 5_000,
+                retry_count: 2,
             },
         )
         .await
@@ -838,10 +1067,13 @@ async fn verify_public_repository_surface(context: &TestContext, site_id: &str) 
             tenant_id: TENANT_A,
             organization_id: 31,
             operator_id: 91,
+            operator_type: "USER",
             action: "repository.parity",
             target_type: "site",
             target_id: None,
             target_uuid: Some(site_id),
+            request_id: Some("request-parity-1"),
+            metadata_json: "{\"source\":\"repository-parity\"}",
         })
         .await
         .expect("insert audit timestamp");
@@ -1310,10 +1542,11 @@ async fn verify_node_sync_database_bounds(
 }
 
 async fn verify_deployment_idempotency(
-    repository: &dyn WebRepositoryPort,
+    context: &TestContext,
     first_site_id: &str,
     second_site_id: &str,
 ) {
+    let repository = context.repository.as_ref();
     let request = CreateDeploymentRequest {
         deploy_type: 1,
         environment: Some("production".to_owned()),
@@ -1345,6 +1578,24 @@ async fn verify_deployment_idempotency(
         .artifact_hash
         .as_deref()
         .is_some_and(|hash| hash == "a".repeat(64)));
+    let stored = sqlx::query(
+        "SELECT idempotency_key, organization_id FROM web_deployment
+         WHERE tenant_id = $1 AND uuid = $2",
+    )
+    .bind(TENANT_A)
+    .bind(&first.id)
+    .fetch_one(&context.pool)
+    .await
+    .expect("load persisted deployment idempotency identity");
+    let stored_key: String = stored.try_get("idempotency_key").expect("idempotency hash");
+    assert_eq!(stored_key.len(), 64);
+    assert_ne!(stored_key, "deploy-idempotency-1");
+    assert_eq!(
+        stored
+            .try_get::<i64, _>("organization_id")
+            .expect("deployment organization"),
+        31
+    );
 
     let conflicting_input = repository
         .create_deployment(
@@ -1580,6 +1831,68 @@ async fn remove_rollback_failure_trigger(pool: &AnyPool, engine: TestEngine) {
                 .execute(pool)
                 .await
                 .expect("remove PostgreSQL rollback failure function");
+        }
+    }
+}
+
+async fn install_certificate_finalize_failure_trigger(pool: &AnyPool, engine: TestEngine) {
+    match engine {
+        TestEngine::Sqlite => {
+            sqlx::query(
+                "CREATE TRIGGER sdkwork_test_reject_certificate_finalize
+                 BEFORE UPDATE OF status ON web_certificate
+                 WHEN OLD.status = 0 AND NEW.status = 1
+                 BEGIN
+                   SELECT RAISE(ABORT, 'forced certificate finalize failure');
+                 END",
+            )
+            .execute(pool)
+            .await
+            .expect("install SQLite certificate finalize failure trigger");
+        }
+        TestEngine::Postgres => {
+            sqlx::query(
+                "CREATE FUNCTION sdkwork_test_reject_certificate_finalize() RETURNS trigger AS $$
+                 BEGIN
+                   IF OLD.status = 0 AND NEW.status = 1 THEN
+                     RAISE EXCEPTION 'forced certificate finalize failure';
+                   END IF;
+                   RETURN NEW;
+                 END;
+                 $$ LANGUAGE plpgsql",
+            )
+            .execute(pool)
+            .await
+            .expect("install PostgreSQL certificate finalize failure function");
+            sqlx::query(
+                "CREATE TRIGGER sdkwork_test_reject_certificate_finalize
+                 BEFORE UPDATE OF status ON web_certificate
+                 FOR EACH ROW EXECUTE FUNCTION sdkwork_test_reject_certificate_finalize()",
+            )
+            .execute(pool)
+            .await
+            .expect("install PostgreSQL certificate finalize failure trigger");
+        }
+    }
+}
+
+async fn remove_certificate_finalize_failure_trigger(pool: &AnyPool, engine: TestEngine) {
+    match engine {
+        TestEngine::Sqlite => {
+            sqlx::query("DROP TRIGGER sdkwork_test_reject_certificate_finalize")
+                .execute(pool)
+                .await
+                .expect("remove SQLite certificate finalize failure trigger");
+        }
+        TestEngine::Postgres => {
+            sqlx::query("DROP TRIGGER sdkwork_test_reject_certificate_finalize ON web_certificate")
+                .execute(pool)
+                .await
+                .expect("remove PostgreSQL certificate finalize failure trigger");
+            sqlx::query("DROP FUNCTION sdkwork_test_reject_certificate_finalize()")
+                .execute(pool)
+                .await
+                .expect("remove PostgreSQL certificate finalize failure function");
         }
     }
 }

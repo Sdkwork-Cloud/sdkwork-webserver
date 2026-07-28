@@ -12,29 +12,22 @@
   "mode": "apply",
   "hasChanges": true,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "087b11ec8b42d2d49c8838eef852aba3be633945a7f0a9049340ca128eb21cff",
+  "changeFingerprint": "e4f3c96b6ff2ee7a050b86c47083dfef0f8b03208550fcd61fca135fe740816d",
   "changeImpact": {
     "schemaVersion": 1,
     "areas": [
-      "api-surface",
       "models"
     ],
     "details": [
       {
-        "area": "api-surface",
-        "paths": [
-          "Api/ApplicationDeploymentApi.cs"
-        ]
-      },
-      {
         "area": "models",
         "paths": [
-          "Models/ApplicationDeploymentResponse.cs"
+          "Models/CreateNginxConfigRequest.cs"
         ]
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, models. Verification is required."
+    "summary": "Detected impact areas: models. Verification is required."
   },
   "executionDecision": {
     "schemaVersion": 1,
@@ -55,7 +48,7 @@
         "id": "verify-check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-csharp\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -74,13 +67,13 @@
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-csharp\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -119,23 +112,23 @@
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 2,
+    "writtenFiles": 1,
     "skippedScaffoldFiles": 1,
-    "skippedUnchangedGeneratedFiles": 90,
+    "skippedUnchangedGeneratedFiles": 91,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "087b11ec8b42d2d49c8838eef852aba3be633945a7f0a9049340ca128eb21cff",
+    "changeFingerprint": "e4f3c96b6ff2ee7a050b86c47083dfef0f8b03208550fcd61fca135fe740816d",
     "changes": {
       "createdGeneratedFiles": [],
       "updatedGeneratedFiles": [
-        "Api/ApplicationDeploymentApi.cs",
-        "Models/ApplicationDeploymentResponse.cs"
+        "Models/CreateNginxConfigRequest.cs"
       ],
       "unchangedGeneratedFiles": [
         "Api/AgentApi.cs",
         "Api/Api.cs",
         "Api/ApiPaths.cs",
         "Api/ApplicationApi.cs",
+        "Api/ApplicationDeploymentApi.cs",
         "Api/ApplicationDomainApi.cs",
         "Api/AuditApi.cs",
         "Api/CertificateApi.cs",
@@ -153,6 +146,7 @@
         "Models/AgentHeartbeatResponse.cs",
         "Models/AgentNginxConfigBundle.cs",
         "Models/AgentSyncResponse.cs",
+        "Models/ApplicationDeploymentResponse.cs",
         "Models/ApplicationDomainResponse.cs",
         "Models/ApplicationDomainVerifyResponse.cs",
         "Models/ApplicationResponse.cs",
@@ -188,7 +182,6 @@
         "Models/CreateApplicationDomainRequest.cs",
         "Models/CreateApplicationRequest.cs",
         "Models/CreateCertificateRequest.cs",
-        "Models/CreateNginxConfigRequest.cs",
         "Models/CreateServerRequest.cs",
         "Models/CreateServerResponse.cs",
         "Models/FieldError.cs",
@@ -233,36 +226,29 @@
     "impact": {
       "schemaVersion": 1,
       "areas": [
-        "api-surface",
         "models"
       ],
       "details": [
         {
-          "area": "api-surface",
-          "paths": [
-            "Api/ApplicationDeploymentApi.cs"
-          ]
-        },
-        {
           "area": "models",
           "paths": [
-            "Models/ApplicationDeploymentResponse.cs"
+            "Models/CreateNginxConfigRequest.cs"
           ]
         }
       ],
       "requiresVerification": true,
-      "summary": "Detected impact areas: api-surface, models. Verification is required."
+      "summary": "Detected impact areas: models. Verification is required."
     },
     "verificationPlan": {
       "shouldRun": true,
       "runPhase": "now",
-      "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
+      "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
       "steps": [
         {
           "id": "check",
           "title": "Unified package check",
           "required": true,
-          "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
+          "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
           "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-csharp\\generated\\server-openapi",
           "command": "node",
           "args": [

@@ -276,7 +276,7 @@
     },
     {
       "path": "types/create_nginx_config_request.go",
-      "sha256": "577895075d88f90544f8ed459b03eb423a8cebcf3cb640977609b03e8b910f7d"
+      "sha256": "bd11b5eff9ac695a704b288e23f3a1a4cf363ca4b14c3059aa3adfd5a1682c06"
     },
     {
       "path": "types/create_server_request.go",

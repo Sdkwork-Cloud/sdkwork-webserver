@@ -26,10 +26,11 @@ export const browserPortalClipboard: PortalClipboardPort = {
 };
 
 export function createBrowserPortalStatistics(
-  client: WebserverConsoleSdkClient,
+  loadClient: () => Promise<WebserverConsoleSdkClient>,
 ): PortalStatisticsPort {
   return {
     async load() {
+      const client = await loadClient();
       const result = await client.site.list({ page: 1, pageSize: 1, status: 1 });
       const totalItems = result.pageInfo.totalItems?.trim();
       if (totalItems && /^\d+$/.test(totalItems)) {

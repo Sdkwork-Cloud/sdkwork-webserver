@@ -6,7 +6,6 @@ public class CreateNginxConfigRequest {
     private String configName;
     private String configContent;
     private String siteId;
-    private String domainId;
 
     public Integer getConfigType() {
         return this.configType;
@@ -38,13 +37,5 @@ public class CreateNginxConfigRequest {
 
     public void setSiteId(String siteId) {
         this.siteId = siteId;
-    }
-
-    public String getDomainId() {
-        return this.domainId;
-    }
-
-    public void setDomainId(String domainId) {
-        this.domainId = domainId;
     }
 }

@@ -88,7 +88,7 @@
     },
     {
       "path": "Models/CreateDeploymentRequest.cs",
-      "sha256": "c6fe337e9ae59938bf921458cfb3ef15358bad00320b62ffdf2beb914ec3b89d"
+      "sha256": "99c07d3a96972351b3f5db207967052792772d8a20eab7c7183d416aba042c86"
     },
     {
       "path": "Models/CreateDomainRequest.cs",
@@ -100,7 +100,7 @@
     },
     {
       "path": "Models/CreateHealthCheckRequest.cs",
-      "sha256": "ecb5430ba9b361d76b106b3a8ae950f174e18e9dce60edbd35e6dc6ca867fbe0"
+      "sha256": "61df998e3db19370e0a4fa171d42d28f53ef9a56cdf1bf6b9f0dc5fe3903ed42"
     },
     {
       "path": "Models/CreateSiteRequest.cs",
@@ -144,7 +144,7 @@
     },
     {
       "path": "Models/HealthCheckResponse.cs",
-      "sha256": "1a50ca4fa5686d6d73774d1c0623023e40326bd3f3f969b46876d4d07eea1b5d"
+      "sha256": "2957c8d74e04f8e947de883dd948d2f6fcbceea1644a2e9b2cb640bf3cb6f73a"
     },
     {
       "path": "Models/PageInfo.cs",

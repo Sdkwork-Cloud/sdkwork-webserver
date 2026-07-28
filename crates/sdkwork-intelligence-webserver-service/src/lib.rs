@@ -43,4 +43,8 @@ impl WebService {
     pub async fn ready_check(&self) -> WebServiceResult<()> {
         self.repository.ready_check().await
     }
+
+    pub async fn record_audit_log(&self, entry: AuditLogWrite<'_>) -> WebServiceResult<()> {
+        self.repository.insert_audit_log(entry).await
+    }
 }

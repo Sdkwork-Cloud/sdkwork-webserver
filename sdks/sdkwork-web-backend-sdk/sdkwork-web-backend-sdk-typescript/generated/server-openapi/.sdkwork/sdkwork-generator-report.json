@@ -12,29 +12,22 @@
   "mode": "apply",
   "hasChanges": true,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "fc5fc589f97c3cddf19ee721c5283c0a6940a91a189bbda50906d0029100e83c",
+  "changeFingerprint": "ea850f128d62cccfc08ec564b1c7a4ba389fc990ee4e432327e26d23dc2899cc",
   "changeImpact": {
     "schemaVersion": 1,
     "areas": [
-      "api-surface",
       "models"
     ],
     "details": [
       {
-        "area": "api-surface",
-        "paths": [
-          "src/api/application-deployment.ts"
-        ]
-      },
-      {
         "area": "models",
         "paths": [
-          "src/types/application-deployment-response.ts"
+          "src/types/create-nginx-config-request.ts"
         ]
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, models. Verification is required."
+    "summary": "Detected impact areas: models. Verification is required."
   },
   "executionDecision": {
     "schemaVersion": 1,
@@ -55,7 +48,7 @@
         "id": "verify-check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-typescript\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -73,7 +66,7 @@
         "id": "verify-build",
         "title": "Unified package build",
         "required": true,
-        "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: api-surface, models.",
+        "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-typescript\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -92,13 +85,13 @@
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-typescript\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -116,7 +109,7 @@
         "id": "build",
         "title": "Unified package build",
         "required": true,
-        "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: api-surface, models.",
+        "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-typescript\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -155,17 +148,16 @@
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 2,
+    "writtenFiles": 1,
     "skippedScaffoldFiles": 2,
-    "skippedUnchangedGeneratedFiles": 100,
+    "skippedUnchangedGeneratedFiles": 101,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "fc5fc589f97c3cddf19ee721c5283c0a6940a91a189bbda50906d0029100e83c",
+    "changeFingerprint": "ea850f128d62cccfc08ec564b1c7a4ba389fc990ee4e432327e26d23dc2899cc",
     "changes": {
       "createdGeneratedFiles": [],
       "updatedGeneratedFiles": [
-        "src/api/application-deployment.ts",
-        "src/types/application-deployment-response.ts"
+        "src/types/create-nginx-config-request.ts"
       ],
       "unchangedGeneratedFiles": [
         "bin/publish-core.mjs",
@@ -179,6 +171,7 @@
         "README.md",
         "sdkwork-sdk.json",
         "src/api/agent.ts",
+        "src/api/application-deployment.ts",
         "src/api/application-domain.ts",
         "src/api/application.ts",
         "src/api/audit.ts",
@@ -199,6 +192,7 @@
         "src/types/agent-heartbeat-response.ts",
         "src/types/agent-nginx-config-bundle.ts",
         "src/types/agent-sync-response.ts",
+        "src/types/application-deployment-response.ts",
         "src/types/application-domain-response.ts",
         "src/types/application-domain-verify-response.ts",
         "src/types/application-response.ts",
@@ -235,7 +229,6 @@
         "src/types/create-application-domain-request.ts",
         "src/types/create-application-request.ts",
         "src/types/create-certificate-request.ts",
-        "src/types/create-nginx-config-request.ts",
         "src/types/create-server-request.ts",
         "src/types/create-server-response.ts",
         "src/types/field-error.ts",
@@ -280,36 +273,29 @@
     "impact": {
       "schemaVersion": 1,
       "areas": [
-        "api-surface",
         "models"
       ],
       "details": [
         {
-          "area": "api-surface",
-          "paths": [
-            "src/api/application-deployment.ts"
-          ]
-        },
-        {
           "area": "models",
           "paths": [
-            "src/types/application-deployment-response.ts"
+            "src/types/create-nginx-config-request.ts"
           ]
         }
       ],
       "requiresVerification": true,
-      "summary": "Detected impact areas: api-surface, models. Verification is required."
+      "summary": "Detected impact areas: models. Verification is required."
     },
     "verificationPlan": {
       "shouldRun": true,
       "runPhase": "now",
-      "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
+      "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
       "steps": [
         {
           "id": "check",
           "title": "Unified package check",
           "required": true,
-          "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
+          "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
           "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-typescript\\generated\\server-openapi",
           "command": "node",
           "args": [
@@ -327,7 +313,7 @@
           "id": "build",
           "title": "Unified package build",
           "required": true,
-          "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: api-surface, models.",
+          "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: models.",
           "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-typescript\\generated\\server-openapi",
           "command": "node",
           "args": [

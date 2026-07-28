@@ -71,7 +71,9 @@ impl WebRepository {
             .fetch_one(&self.pool)
             .await
             .map_err(|error| store_error("count web_nginx_config", error))?;
-        let total: i64 = count_row.try_get("total").unwrap_or(0);
+        let total: i64 = count_row
+            .try_get("total")
+            .map_err(|error| store_error("map web_nginx_config count", error))?;
 
         let mut list_query = apply_binds(sqlx::query(&list_sql), &binds);
         list_query = list_query.bind(page_size).bind(offset);
@@ -178,9 +180,6 @@ impl WebRepository {
         config_id: &str,
         request: &UpdateNginxConfigRequest,
     ) -> WebServiceResult<NginxConfigResponse> {
-        let existing = self
-            .retrieve_nginx_config_repo(tenant_id, config_id)
-            .await?;
         let row = if let Some(tenant_id) = tenant_id {
             sqlx::query(
                 "SELECT config_name, config_content FROM web_nginx_config
@@ -200,18 +199,22 @@ impl WebRepository {
         }
         .ok_or_else(|| WebServiceError::not_found("nginx config not found"))?;
 
+        let stored_config_name: String = row
+            .try_get("config_name")
+            .map_err(|error| store_error("map web_nginx_config config_name", error))?;
+        let stored_config_content: String = row
+            .try_get("config_content")
+            .map_err(|error| store_error("map web_nginx_config config_content", error))?;
         let config_name = request
             .config_name
             .as_ref()
             .cloned()
-            .or_else(|| row.try_get("config_name").ok())
-            .unwrap_or(existing.config_name);
+            .unwrap_or(stored_config_name);
         let config_content = request
             .config_content
             .as_ref()
             .cloned()
-            .or_else(|| row.try_get("config_content").ok())
-            .unwrap_or_default();
+            .unwrap_or(stored_config_content);
         let config_hash = sha256_hex(&config_content);
         let now = now_rfc3339();
         let engine = self.database_engine().await?;
@@ -431,7 +434,8 @@ impl WebRepository {
             .fetch_one(&self.pool)
             .await
             .map_err(|error| store_error("count active web_nginx_config", error))?;
-            row.try_get::<i64, _>("total").unwrap_or(0)
+            row.try_get::<i64, _>("total")
+                .map_err(|error| store_error("map active web_nginx_config count", error))?
         } else {
             let row = sqlx::query(
                 "SELECT COUNT(*) AS total FROM web_nginx_config WHERE is_active = TRUE AND status = 1",
@@ -439,7 +443,8 @@ impl WebRepository {
             .fetch_one(&self.pool)
             .await
             .map_err(|error| store_error("count active web_nginx_config", error))?;
-            row.try_get::<i64, _>("total").unwrap_or(0)
+            row.try_get::<i64, _>("total")
+                .map_err(|error| store_error("map active web_nginx_config count", error))?
         };
 
         Ok(NginxStatusResponse {

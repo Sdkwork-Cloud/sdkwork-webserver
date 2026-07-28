@@ -84,7 +84,7 @@
     },
     {
       "path": "src/api/site.ts",
-      "sha256": "d78af345ea5cb9fbd0c796439c2923d22ddb1ec8db5e131a41d2452a2979a792"
+      "sha256": "e95b97470864e34ac1511f887f09ea3b454ed5f90287785e95d0a74d473fca8a"
     },
     {
       "path": "src/auth/index.ts",
@@ -128,11 +128,11 @@
     },
     {
       "path": "src/types/create-certificate-request.ts",
-      "sha256": "b362d10f74f20c22f8876534f49b2deee4d90509dd895fd239c0a459e7393213"
+      "sha256": "1fd7ca4a8aa67edec24d184d3a2196ba47ab5522d3fe52bf14138bc936d5fe42"
     },
     {
       "path": "src/types/create-deployment-request.ts",
-      "sha256": "e83bb699707ee8712de757df0e394bf44b5cb7ca647b4f98b6376cbdc5e2c238"
+      "sha256": "61361fe7dee1bea78c4982dc917dfddf1e41831890afecf10ec49d3c85cae617"
     },
     {
       "path": "src/types/create-domain-request.ts",
@@ -140,11 +140,11 @@
     },
     {
       "path": "src/types/create-env-variable-request.ts",
-      "sha256": "d0e42d87ea9a62e76ab9ade2cd2b3bb9e601246b4a4d6fc5d0fbf4fcbbf073bc"
+      "sha256": "713eab4af74b9ca1556c006e6295090a4060b59fb6bf94a520daffa9826e4c96"
     },
     {
       "path": "src/types/create-health-check-request.ts",
-      "sha256": "297b6f2dcd0dc7e8244f122b60832d6d7daea8c3949a9eb5af3a306a1d0bb3dc"
+      "sha256": "d6efb2e4dc81dda58b5203ad812be6acf428456b3e318a1c19750e0382d47c2d"
     },
     {
       "path": "src/types/create-site-request.ts",
@@ -188,7 +188,7 @@
     },
     {
       "path": "src/types/health-check-response.ts",
-      "sha256": "008ce04a4012beea2685a43709ac2f330b09764cb5b3762bdc5fb8b2ab2d4a83"
+      "sha256": "1a3ccef44eaf917fc387112ed2a5dfa9233c259d4bc222b63a1cb4d22b6b6767"
     },
     {
       "path": "src/types/index.ts",

@@ -180,7 +180,7 @@
     },
     {
       "path": "types/health_check_response.go",
-      "sha256": "a2e77c6e373910baa83c39cbbd2682629ea14db0b20d4cb097b6c8a95890bc4e"
+      "sha256": "99daa0bb6337434d0efeb03cebef62143c518cdd373c8b91181605be5a0376c2"
     },
     {
       "path": "types/page_info.go",

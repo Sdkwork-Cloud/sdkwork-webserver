@@ -14,6 +14,10 @@ final class HealthCheckResponse
 
     public ?int $checkInterval = null;
 
+    public ?int $timeoutMs = null;
+
+    public ?int $retryCount = null;
+
     public ?int $status = null;
 
     public ?string $createdAt = null;
@@ -31,6 +35,12 @@ final class HealthCheckResponse
             : null;
         $this->checkInterval = array_key_exists('checkInterval', $data)
             ? $data['checkInterval']
+            : null;
+        $this->timeoutMs = array_key_exists('timeoutMs', $data)
+            ? $data['timeoutMs']
+            : null;
+        $this->retryCount = array_key_exists('retryCount', $data)
+            ? $data['retryCount']
             : null;
         $this->status = array_key_exists('status', $data)
             ? $data['status']
@@ -52,6 +62,8 @@ final class HealthCheckResponse
             'checkType' => $this->checkType,
             'checkUrl' => $this->checkUrl,
             'checkInterval' => $this->checkInterval,
+            'timeoutMs' => $this->timeoutMs,
+            'retryCount' => $this->retryCount,
             'status' => $this->status,
             'createdAt' => $this->createdAt,
         ];

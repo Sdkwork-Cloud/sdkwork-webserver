@@ -4,11 +4,14 @@ use axum::Router;
 use sdkwork_routes_webserver_common::{
     web_auth_mode_from_env, web_framework_runtime_policy_from_env, with_problem_correlation,
     MachineCredentialResolverDecorator, ProductionFailClosedResolver, WebAuthMode,
+    WebServerTenantIsolationPolicy,
 };
 use sdkwork_web_axum::{with_web_request_context, WebFrameworkLayer};
+use sdkwork_web_bootstrap::WebFrameworkBuilder;
 use sdkwork_web_core::{
     DefaultWebRequestContextResolver, DomainContextInjector, HttpMetricsRegistry,
-    WebRequestContext, WebRequestContextProfile, WebRequestContextResolver,
+    ManifestAuthorizationPolicy, WebRequestContext, WebRequestContextProfile,
+    WebRequestContextResolver,
 };
 use sdkwork_webserver_contract::{MachineCredentialAuthenticator, WebInternalRequestContext};
 
@@ -54,18 +57,21 @@ where
     R: WebRequestContextResolver + Clone,
 {
     let (environment, security_policy) = web_framework_runtime_policy_from_env();
-    let layer = WebFrameworkLayer::new(resolver)
-        .with_profile(WebRequestContextProfile {
+    let route_manifest = internal_route_manifest();
+    let mut builder = WebFrameworkBuilder::new(resolver)
+        .profile(WebRequestContextProfile {
             environment,
             ..WebRequestContextProfile::default()
         })
-        .with_security_policy(security_policy)
-        .with_route_manifest(internal_route_manifest())
-        .with_domain_injector(Arc::new(WebInternalContextInjector));
-    match metrics {
-        Some(metrics) => layer.with_metrics(metrics),
-        None => layer,
+        .security_policy(security_policy)
+        .route_manifest(route_manifest.clone())
+        .authorization_policy(Arc::new(ManifestAuthorizationPolicy::new(route_manifest)))
+        .tenant_isolation_policy(Arc::new(WebServerTenantIsolationPolicy))
+        .domain_injector(Arc::new(WebInternalContextInjector));
+    if let Some(metrics) = metrics {
+        builder = builder.metrics_registry(metrics);
     }
+    builder.build().into_layer()
 }
 
 pub async fn wrap_router_with_web_framework_from_env(
@@ -127,5 +133,120 @@ async fn wrap_router_with_web_framework_from_env_and_optional_metrics(
                 metrics,
             ),
         ),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::build_web_internal_api_framework_layer;
+    use async_trait::async_trait;
+    use axum::body::Body;
+    use axum::http::{Request, StatusCode};
+    use axum::routing::get;
+    use axum::Router;
+    use sdkwork_web_axum::with_web_request_context;
+    use sdkwork_web_core::{
+        access_token_jwt, WebAuthLevel, WebDeploymentMode, WebEnvironment, WebFrameworkError,
+        WebLoginScope, WebRequestContextResolver, WebRequestPrincipal, WebSubjectType,
+    };
+    use tower::ServiceExt;
+
+    #[derive(Clone)]
+    struct TestResolver {
+        tenant_id: &'static str,
+        permissions: Vec<String>,
+    }
+
+    #[async_trait]
+    impl WebRequestContextResolver for TestResolver {
+        async fn resolve_api_key(
+            &self,
+            _raw_api_key: &str,
+        ) -> Result<WebRequestPrincipal, WebFrameworkError> {
+            Ok(self.principal())
+        }
+
+        async fn resolve_dual_token(
+            &self,
+            _raw_auth_token: &str,
+            _raw_access_token: &str,
+        ) -> Result<WebRequestPrincipal, WebFrameworkError> {
+            Ok(self.principal())
+        }
+
+        async fn resolve_access_token(
+            &self,
+            _raw_access_token: &str,
+        ) -> Result<WebRequestPrincipal, WebFrameworkError> {
+            Ok(self.principal())
+        }
+    }
+
+    impl TestResolver {
+        fn principal(&self) -> WebRequestPrincipal {
+            WebRequestPrincipal::builder()
+                .tenant_id(self.tenant_id)
+                .login_scope(WebLoginScope::Tenant)
+                .user_id("node-1")
+                .app_id("sdkwork-web-agent")
+                .environment(WebEnvironment::Dev)
+                .deployment_mode(WebDeploymentMode::Local)
+                .auth_level(WebAuthLevel::ApiKey)
+                .permission_scope(self.permissions.clone())
+                .subject_type(WebSubjectType::Service)
+                .build()
+        }
+    }
+
+    #[tokio::test]
+    async fn internal_framework_enforces_permission_and_tenant_scope() {
+        assert_eq!(
+            call_current_assignment(TestResolver {
+                tenant_id: "42",
+                permissions: Vec::new(),
+            })
+            .await,
+            StatusCode::FORBIDDEN
+        );
+        assert_eq!(
+            call_current_assignment(TestResolver {
+                tenant_id: "",
+                permissions: vec!["web.agent.read".to_owned()],
+            })
+            .await,
+            StatusCode::FORBIDDEN
+        );
+        assert_eq!(
+            call_current_assignment(TestResolver {
+                tenant_id: "42",
+                permissions: vec!["web.agent.read".to_owned()],
+            })
+            .await,
+            StatusCode::OK
+        );
+    }
+
+    async fn call_current_assignment(resolver: TestResolver) -> StatusCode {
+        let app = with_web_request_context(
+            Router::new().route(
+                "/internal/v3/api/web/runtime_assignments/current",
+                get(|| async { StatusCode::OK }),
+            ),
+            build_web_internal_api_framework_layer(resolver, None),
+        );
+        app.oneshot(
+            Request::builder()
+                .uri("/internal/v3/api/web/runtime_assignments/current")
+                .header("x-sdkwork-ingress-token", "ingress-test")
+                .header(
+                    "access-token",
+                    access_token_jwt("42", "7", "session-1", "web"),
+                )
+                .body(Body::empty())
+                .expect("valid internal request"),
+        )
+        .await
+        .expect("internal framework response")
+        .status()
     }
 }

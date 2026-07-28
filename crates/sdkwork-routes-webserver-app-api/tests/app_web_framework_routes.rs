@@ -8,7 +8,10 @@ use sdkwork_routes_webserver_app_api::{
     wrap_router_with_web_framework_and_metrics,
 };
 use sdkwork_web_bootstrap::{service_router, ServiceRouterConfig};
-use sdkwork_web_core::{DefaultWebRequestContextResolver, HttpMetricsRegistry};
+use sdkwork_web_core::{
+    access_token_jwt, auth_token_jwt, auth_token_jwt_with_permissions,
+    DefaultWebRequestContextResolver, HttpMetricsRegistry,
+};
 use sdkwork_webserver_contract::{
     ListSitesQuery, SitePage, WebAppApi, WebAppRequestContext, WebServiceResult,
 };
@@ -33,6 +36,51 @@ async fn app_router_web_framework_rejects_unauthenticated_requests() {
         .unwrap();
 
     assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
+}
+
+#[tokio::test]
+async fn app_router_enforces_manifest_permissions_before_business_logic() {
+    let app = wrap_router_with_web_framework_and_metrics(
+        DefaultWebRequestContextResolver::default(),
+        build_router_with_shared_app_api(Arc::new(StubAppApi)),
+        HttpMetricsRegistry::new(),
+    );
+
+    let denied = app
+        .clone()
+        .oneshot(authorized_request(auth_token_jwt(
+            "42",
+            "7",
+            "session-1",
+            "web",
+        )))
+        .await
+        .unwrap();
+    assert_eq!(denied.status(), StatusCode::FORBIDDEN);
+
+    let allowed = app
+        .oneshot(authorized_request(auth_token_jwt_with_permissions(
+            "42",
+            "7",
+            "session-1",
+            "web",
+            "web.sites.read",
+        )))
+        .await
+        .unwrap();
+    assert_eq!(allowed.status(), StatusCode::OK);
+}
+
+fn authorized_request(auth_token: String) -> Request<Body> {
+    Request::builder()
+        .uri("/app/v3/api/sites")
+        .header(header::AUTHORIZATION, format!("Bearer {auth_token}"))
+        .header(
+            "access-token",
+            access_token_jwt("42", "7", "session-1", "web"),
+        )
+        .body(Body::empty())
+        .unwrap()
 }
 
 #[tokio::test]

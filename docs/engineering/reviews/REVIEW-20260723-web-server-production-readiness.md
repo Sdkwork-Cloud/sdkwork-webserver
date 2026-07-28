@@ -3,6 +3,7 @@
 Status: changes-requested
 Owner: SDKWork Web Platform
 Reviewed: 2026-07-23
+Last updated: 2026-07-28
 Application: `sdkwork-web`
 Risk: critical
 Specs: [CODE_REVIEW_SPEC.md](../../../../sdkwork-specs/CODE_REVIEW_SPEC.md),
@@ -394,3 +395,196 @@ workstation.
 This review supersedes any informal statement that the entire Web Server, native TLS deployment,
 all `sdkwork-space` projects, or commercial production readiness is complete. Component-level
 accepted requirements remain valid within their documented boundaries.
+
+## 13. 2026-07-28 Application Release Workflow Addendum
+
+Outcome: changes requested for commercial release; implementation ready for owner review.
+
+The application creation and release workflow now accepts either one ZIP package or one browser
+directory selection. Directory packaging applies root and nested `.gitignore` rules, excludes VCS
+metadata, validates portable paths and case/Unicode collisions, and bounds source input to the
+active Drive extraction profile: 500 files, 16 MiB per file, and 64 MiB total uncompressed bytes.
+The browser uploads through the injected generated Drive App SDK, lists the uploaded archive,
+extracts only validated entry paths, verifies the extraction count, and creates the Web deployment
+record only after artifact identity is stable. Content-fingerprinted Drive task ids, one dialog
+idempotency key, duplicate-submit exclusion, abort checkpoints, safe recoverable draft errors,
+version history, successful-version restore, and localized runtime/deployment labels are present.
+
+The implementation evidence passed on 2026-07-28:
+
+```text
+pnpm --dir apps/sdkwork-webserver-pc check
+  15 test files and 94 tests passed, including the final cancellation-boundary tests
+pnpm --dir apps/sdkwork-webserver-pc exec vitest run tests/console-workspace.test.tsx tests/application-source-package.test.ts tests/admin-workspace.test.tsx
+  3 test files and 48 tests passed after the final cancellation-boundary tests
+pnpm --dir apps/sdkwork-webserver-pc typecheck
+pnpm test:contracts
+  59 tests passed and 1 portable NTFS symlink fixture was skipped by contract
+pnpm install --frozen-lockfile
+node ../sdkwork-specs/tools/check-app-sdk-consumer-imports.mjs --workspace .
+node ../sdkwork-specs/tools/check-application-layering.mjs --root .
+node --check tools/materialize_webserver_pc.mjs
+git diff --check
+```
+
+Browser evidence covered the create and deploy dialogs at the normal desktop viewport and at
+390 by 844 pixels. Runtime type values rendered as product labels rather than numeric codes; the
+mobile dialog had no horizontal overflow; deployment history rendered version, status, artifact
+hash, completion, duration, and restore provenance; and the fixture emitted no console warnings or
+errors.
+
+Supply-chain review closed `GHSA-mh99-v99m-4gvg` by resolving `brace-expansion` to `5.0.8` through
+the repository-root package-manager override and closed `GHSA-r292-9mhp-454m` by upgrading the direct `tar`
+dependency to `7.5.21`. The synchronized lockfile no longer contains either vulnerable version.
+`GHSA-qwww-vcr4-c8h2` remains reported for
+`react-router@7.18.1`. The advisory states that only unstable RSC APIs are affected, and static
+source review found browser `BrowserRouter`, `MemoryRouter`, `Routes`, and navigation consumers but
+no RSC server, server action, or unstable RSC API. A React Router 8.3 migration is cross-repository
+because the consumed IAM React packages currently require React Router below 8.
+
+The following exception candidate is recorded for human decision and is not approved:
+
+| Field | Candidate value |
+| --- | --- |
+| Owner | SDKWork Web Platform with SDKWork IAM maintainers |
+| Reason | The patched major version conflicts with the current shared IAM peer contract; the vulnerable RSC surface is not enabled by this Vite SPA. |
+| Risk | A future introduction of unstable RSC server/action APIs before dependency closure could make the CSRF advisory reachable. |
+| Expiry | 2026-08-31 |
+| Compensating controls | Keep the app browser-only, prohibit unstable RSC/server-action imports, retain source scans and `pnpm audit` in release review, and require a joint Router 8 migration or renewed human decision before expiry. |
+| Removal plan | Upgrade Web Server and shared IAM consumers to React Router 8.3 or later, update peer contracts, and rerun both repositories' UI/auth suites. |
+
+No audit ignore or package-manager advisory mute was added. Until a human owner approves this
+bounded exception or the shared migration lands, the dependency audit remains a deliberate release
+gate failure.
+
+Additional commercial release blockers remain:
+
+1. Standalone SBOM validation rejects the existing release archive because `sdkwork-web` is
+   group/world writable.
+2. Cloud SBOM validation rejects the existing release archive because its package-manifest file
+   count is outside the deployment-profile contract.
+3. Drive archive extraction currently strips leading dots from path segments. The immutable ZIP
+   retains source fidelity, and VCS metadata is excluded, but extracted paths such as
+   `.well-known` are not faithful until the Drive owner changes and reviews its archive policy.
+4. Every blocker and closure requirement in sections 1 and 11 remains active, including artifact
+   signing/provenance, deployment execution convergence, provider streaming, load/soak evidence,
+   and owner approval.
+
+Therefore this addendum accepts the application release workflow as a bounded implementation
+increment but does not change the overall release gate from blocked or grant a security exception.
+
+## 14. 2026-07-28 Runtime And Request-Boundary Hardening Addendum
+
+Outcome: additional implementation accepted for review; release remains blocked.
+
+This hardening round closed request-boundary and runtime retry defects that were not visible in
+mock-only happy paths:
+
+1. Console and Admin application creation/deployment validate runtime type, deployment method,
+   environment, version metadata, application identity, and idempotency before source packaging,
+   Drive upload/extraction, or deployment command creation. Invalid metadata has negative tests
+   proving that no source or SDK side effect occurs.
+2. Production PC packages no longer coerce generic action bodies through
+   `as unknown as Parameters<...>`. Generated App/Backend SDK request types drive explicit
+   request builders for application updates, domains, environment variables, health checks,
+   certificates, Nginx configurations, and Web Node registration. Preflight failures and SDK
+   failures now use the same asynchronous rejection path.
+3. Nginx creation is aligned with persistence reality: `siteId` is required, the unused
+   `domainId` field is removed, configuration names/types are validated, updates cannot be empty,
+   and content is bounded to 1 MiB with NUL rejection. Web Node registration validates trimmed
+   names/hosts, lowercase tenant-scope SHA-256, and ports in `1..=65535` before credential
+   generation or database insertion.
+4. Environment-variable keys use canonical process-variable syntax, environments are restricted
+   to `development`, `test`, `staging`, or `production`, and values are bounded to 64 KiB before
+   encryption and persistence. Health-check interval/timeout/retry relations are validated in the
+   UI and service. Domain inputs use the same safe ASCII DNS shape required by the current ACME
+   issuer.
+5. Certificate requests now expose only implemented types 1 (Let's Encrypt) and 3 (self-signed).
+   Self-signed requests cannot claim automatic renewal because the current renewal selector only
+   processes type 1. Unsupported requests fail before a pending certificate row or provider call.
+6. The certificate worker rejects scan intervals outside `60..=86400` seconds and handles
+   SIGINT/SIGTERM/Ctrl-C without abandoning an in-flight renewal cycle after it has claimed work.
+7. The file runtime-set watcher clears its accepted fingerprint after transient provider
+   validation or activation-probe failure. An unchanged candidate is retried on the next bounded
+   polling tick; a fail-once provider regression test proves recovery and atomic activation without
+   touching the file again.
+8. Backend deployment OpenAPI now agrees with the strict Rust request contract for deployment
+   environment and lowercase artifact/commit hashes. All App/Backend changes were regenerated
+   from owner OpenAPI across 26 SDK targets; generated transport was not edited manually.
+9. The public PC route no longer synchronously imports the authenticated Console/Admin workspace.
+   Web/Drive App SDK clients are created through a single-flight, retryable lazy loader only when
+   an authenticated workspace renders or an authenticated portal statistic is requested. The
+   loader preserves the shared `TokenManager` and attaches the standard session-unauthorized
+   boundary, so deferred loading does not weaken 401 session cleanup. Console/Admin modules, App
+   SDKs, Drive SDKs, and Backend SDKs are absent from the production `index.html` preload graph.
+   A second authorization boundary keeps those chunks out of the unauthenticated Console-to-login
+   redirect; the login route loads the 2.73 kB authentication shell, while the 4.62 kB authorized
+   workspace entry and its SDK dependencies remain deferred until authentication succeeds.
+
+The following evidence passed in this round:
+
+```text
+cargo test -p sdkwork-intelligence-webserver-service
+  17 tests passed
+cargo test -p sdkwork-webserver-contract
+  9 tests passed across library and provider-port targets
+cargo test -p sdkwork-api-web-server-standalone-gateway --lib \
+  website::tests::watcher_retries_an_unchanged_candidate_after_transient_provider_failure -- --exact
+cargo test -p sdkwork-api-web-server-standalone-gateway --lib
+  170 tests passed
+pnpm --dir apps/sdkwork-webserver-pc typecheck
+pnpm --dir apps/sdkwork-webserver-pc test
+  15 test files and 101 tests passed
+pnpm --dir apps/sdkwork-webserver-pc exec vitest run tests/admin-capabilities.test.ts
+  7 tests passed
+pnpm --dir apps/sdkwork-webserver-pc exec vitest run tests/console-workspace.test.tsx
+  20 tests passed
+pnpm --dir apps/sdkwork-webserver-pc build
+  production main entry reduced from 501.24 kB / gzip 136.07 kB to
+  320.77 kB / gzip 93.41 kB; the Vite 500 kB warning is closed
+  Web/Drive App SDK shared chunk: 150.24 kB / gzip 32.04 kB, lazy
+pnpm sdk:generate
+pnpm sdk:generate:check
+  26 generated targets current
+pnpm api:materialize:check
+node ../sdkwork-specs/tools/check-api-response-envelope.mjs --workspace .
+node ../sdkwork-specs/tools/check-api-operation-patterns.mjs --workspace .
+node ../sdkwork-specs/tools/check-pagination.mjs --workspace .
+node ../sdkwork-specs/tools/check-application-layering.mjs --root .
+node ../sdkwork-specs/tools/check-rust-backend-composition.mjs --root .
+node ../sdkwork-specs/tools/validate-api-assembly.mjs --root .
+node ../sdkwork-specs/tools/check-single-http-ingress.mjs --root .
+node ../sdkwork-specs/tools/check-route-path-collisions.mjs --root .
+```
+
+`check-api-runtime-parity.mjs` remains failed because no
+`api-runtime-parity.*.evidence.json` artifact exists. This is evidence absence, not a validator
+waiver; no placeholder evidence was created.
+
+The standalone production gateway explicitly identifies itself as a single-node standalone
+control plane. Its framework rate-limit, request-idempotency, and concurrent-admission stores are
+process memory unless a host injects durable/shared adapters. This is not multi-replica HA
+evidence. Cloud/SaaS release requires the platform cloud gateway to demonstrate Redis-backed
+`RedisRateLimitStore`, `RedisIdempotencyStore`, and `RedisConcurrentAdmissionStore`; this
+repository must not silently add Web Framework tables to its application schema.
+
+The following blockers remain active in addition to sections 1, 11, and 13:
+
+1. Deployment records and rollback commands have no production deployment executor, authoritative
+   state-transition API, traffic switch, or convergence evidence.
+2. Health-check records are durable, but no executor exists and HTTP/TCP/ping checks have no
+   approved SSRF/egress policy.
+3. Certificate activation is not crash-consistent across filesystem activation and database
+   finalization; stale renewal claims are not durably recovered after process death; certificate
+   mutations and business audit inserts are not one atomic transaction.
+4. PostgreSQL repository parity is still ignored without an explicitly configured disposable
+   PostgreSQL instance. SQLite success is not PostgreSQL transaction/isolation evidence.
+5. Multi-replica Redis framework-store, signing, provenance, SBOM, load, soak, rolling upgrade,
+   backup/restore, and multi-Node failure evidence remain absent.
+6. Drive extraction still has the leading-dot path defect, React Router RSC advisory review is
+   unresolved, Linux packages remain disabled/BETA, and AGPL/legal review remains required.
+7. The tightened public App/Backend SDK request contracts and Rust DTO unknown-field rejection
+   require human compatibility review before merge or release.
+
+No database migration, release exception, generated-ownership change, or production-readiness
+claim is approved by this addendum.

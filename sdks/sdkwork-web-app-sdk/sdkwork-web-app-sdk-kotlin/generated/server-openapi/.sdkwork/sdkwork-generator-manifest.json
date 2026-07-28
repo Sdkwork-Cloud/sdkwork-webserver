@@ -156,7 +156,7 @@
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/HealthCheckResponse.kt",
-      "sha256": "3bfc35d531b7f2f1a77cfc605674d827ded90756b277d5dd6f547c53cfbc9d8e"
+      "sha256": "4a2620b1190b7fffbcda4f6711e355254e454d9eec7d34b048bab63fd74dc16c"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/http/HttpClient.kt",

@@ -7,6 +7,9 @@ import {
   type WebserverResourceRegistry,
 } from "@sdkwork/webserver-pc-commons";
 
+type CertificateCreateRequest = Parameters<WebserverAdminSdkClient["certificate"]["create"]>[0];
+type CertificateUpdateRequest = Parameters<WebserverAdminSdkClient["certificate"]["update"]>[1];
+
 export function createWebserverAdminCertificateRegistry(client: WebserverAdminSdkClient): WebserverResourceRegistry {
   return {
     "managed-certificates": source(
@@ -16,14 +19,14 @@ export function createWebserverAdminCertificateRegistry(client: WebserverAdminSd
           "create",
           "Issue certificate",
           { domainId: "", certType: 1, autoRenew: true },
-          (context) => client.certificate.create(context.body as unknown as Parameters<typeof client.certificate.create>[0], idempotencyParams(context)),
+          async (context) => client.certificate.create(createCertificateRequest(context.body), idempotencyParams(context)),
           { fieldOptions: { certType: [1, 3] }, permission: "web.certificates.write" },
         ),
         action(
           "update-renewal",
           "Update automatic renewal",
           { autoRenew: true },
-          (context) => client.certificate.update(selectedId(context), context.body as unknown as Parameters<typeof client.certificate.update>[1], idempotencyParams(context)),
+          async (context) => client.certificate.update(selectedId(context), updateCertificateRequest(context.body), idempotencyParams(context)),
           { requiresSelection: true, permission: "web.certificates.write" },
         ),
         action(
@@ -69,4 +72,42 @@ function idempotencyParams(context: WebserverResourceActionContext): { idempoten
   const idempotencyKey = context.idempotencyKey?.trim();
   if (!idempotencyKey) throw new Error("Idempotency key is required");
   return { idempotencyKey };
+}
+
+function createCertificateRequest(body: Readonly<Record<string, unknown>>): CertificateCreateRequest {
+  const certType = certificateType(body.certType);
+  const autoRenew = optionalBoolean(body.autoRenew, "Automatic renewal");
+  if (certType === 3 && autoRenew === true) {
+    throw new Error("Automatic renewal is unavailable for self-signed certificates");
+  }
+  return {
+    domainId: requiredText(body.domainId, "Domain ID"),
+    certType,
+    autoRenew,
+  };
+}
+
+function updateCertificateRequest(body: Readonly<Record<string, unknown>>): CertificateUpdateRequest {
+  return { autoRenew: requiredBoolean(body.autoRenew, "Automatic renewal") };
+}
+
+function certificateType(value: unknown): 1 | 3 {
+  const parsed = Number(value);
+  if (parsed === 1 || parsed === 3) return parsed;
+  throw new Error("Certificate type is invalid");
+}
+
+function requiredText(value: unknown, label: string): string {
+  if (typeof value !== "string" || !value.trim()) throw new Error(`${label} is required`);
+  return value.trim();
+}
+
+function requiredBoolean(value: unknown, label: string): boolean {
+  if (typeof value !== "boolean") throw new Error(`${label} is invalid`);
+  return value;
+}
+
+function optionalBoolean(value: unknown, label: string): boolean | undefined {
+  if (value === undefined) return undefined;
+  return requiredBoolean(value, label);
 }

@@ -9,12 +9,11 @@
     "protocol": "http",
     "packageName": "sdkwork-web-backend-sdk"
   },
-  "changeFingerprint": "566935a987ebb7e7b71f4ec2e0670f2072e112a13526824f488de4ec5bf32235",
+  "changeFingerprint": "a43f545c98e4a2a28671c7c9771b5d029a98407bb16556f3d12ff5a62f078f9f",
   "changes": {
     "createdGeneratedFiles": [],
     "updatedGeneratedFiles": [
-      "src/api/application_deployment.rs",
-      "src/models/application_deployment_response.rs"
+      "src/models/create_nginx_config_request.rs"
     ],
     "unchangedGeneratedFiles": [
       "bin/publish-core.mjs",
@@ -26,6 +25,7 @@
       "README.md",
       "sdkwork-sdk.json",
       "src/api/agent.rs",
+      "src/api/application_deployment.rs",
       "src/api/application_domain.rs",
       "src/api/application.rs",
       "src/api/audit.rs",
@@ -45,6 +45,7 @@
       "src/models/agent_heartbeat_response.rs",
       "src/models/agent_nginx_config_bundle.rs",
       "src/models/agent_sync_response.rs",
+      "src/models/application_deployment_response.rs",
       "src/models/application_domain_response.rs",
       "src/models/application_domain_verify_response.rs",
       "src/models/application_response.rs",
@@ -81,7 +82,6 @@
       "src/models/create_application_domain_request.rs",
       "src/models/create_application_request.rs",
       "src/models/create_certificate_request.rs",
-      "src/models/create_nginx_config_request.rs",
       "src/models/create_server_request.rs",
       "src/models/create_server_response.rs",
       "src/models/field_error.rs",
@@ -123,36 +123,29 @@
   "impact": {
     "schemaVersion": 1,
     "areas": [
-      "api-surface",
       "models"
     ],
     "details": [
       {
-        "area": "api-surface",
-        "paths": [
-          "src/api/application_deployment.rs"
-        ]
-      },
-      {
         "area": "models",
         "paths": [
-          "src/models/application_deployment_response.rs"
+          "src/models/create_nginx_config_request.rs"
         ]
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, models. Verification is required."
+    "summary": "Detected impact areas: models. Verification is required."
   },
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-rust\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -170,7 +163,7 @@
         "id": "build",
         "title": "Unified package build",
         "required": true,
-        "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: api-surface, models.",
+        "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-rust\\generated\\server-openapi",
         "command": "node",
         "args": [

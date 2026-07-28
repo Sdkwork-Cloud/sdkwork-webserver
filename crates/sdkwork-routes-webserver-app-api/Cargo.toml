@@ -11,6 +11,7 @@ sdkwork-webserver-contract.workspace = true
 sdkwork-iam-web-adapter.workspace = true
 sdkwork-routes-webserver-common.workspace = true
 sdkwork-web-axum.workspace = true
+sdkwork-web-bootstrap.workspace = true
 sdkwork-web-core.workspace = true
 tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
 tower.workspace = true
@@ -20,5 +21,4 @@ async-trait.workspace = true
 axum.workspace = true
 http-body-util.workspace = true
 sdkwork-iam-web-adapter.workspace = true
-sdkwork-web-bootstrap.workspace = true
 tower.workspace = true

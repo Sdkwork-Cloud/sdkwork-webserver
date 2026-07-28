@@ -268,7 +268,7 @@
     },
     {
       "path": "sdkwork_web_backend_sdk/models/create_nginx_config_request.py",
-      "sha256": "51fc96a8c063ab412f6dbdb9407726073ee2b1a5028b724e151683d6eb88523f"
+      "sha256": "12b1f48a1c81453110f8a12abe521b08416d16a5b516000150104fa3914d7745"
     },
     {
       "path": "sdkwork_web_backend_sdk/models/create_server_request.py",

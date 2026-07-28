@@ -9,12 +9,11 @@
     "protocol": "http",
     "packageName": "com.sdkwork:sdkwork-web-backend-sdk"
   },
-  "changeFingerprint": "c155c130150f9950450b936b9636df10d0b4146a38f8e5180c78fd541548d8ac",
+  "changeFingerprint": "05d226c4a04a0e7b1cfccbd1f5fbe9b6096d5dc6a1e07af6f75a46591988bb04",
   "changes": {
     "createdGeneratedFiles": [],
     "updatedGeneratedFiles": [
-      "src/main/kotlin/com/sdkwork/web/backend/sdk/api/ApplicationDeploymentApi.kt",
-      "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationDeploymentResponse.kt"
+      "src/main/kotlin/com/sdkwork/web/backend/sdk/CreateNginxConfigRequest.kt"
     ],
     "unchangedGeneratedFiles": [
       "bin/publish-core.mjs",
@@ -35,12 +34,14 @@
       "src/main/kotlin/com/sdkwork/web/backend/sdk/api/Api.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/api/ApiPaths.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/api/ApplicationApi.kt",
+      "src/main/kotlin/com/sdkwork/web/backend/sdk/api/ApplicationDeploymentApi.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/api/ApplicationDomainApi.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/api/AuditApi.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/api/CertificateApi.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/api/CertificateDistributionApi.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/api/NginxApi.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/api/ServerApi.kt",
+      "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationDeploymentResponse.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationDomainResponse.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationDomainVerifyResponse.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationResponse.kt",
@@ -76,7 +77,6 @@
       "src/main/kotlin/com/sdkwork/web/backend/sdk/CreateApplicationDomainRequest.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/CreateApplicationRequest.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/CreateCertificateRequest.kt",
-      "src/main/kotlin/com/sdkwork/web/backend/sdk/CreateNginxConfigRequest.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/CreateServerRequest.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/CreateServerResponse.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/FieldError.kt",
@@ -119,36 +119,29 @@
   "impact": {
     "schemaVersion": 1,
     "areas": [
-      "api-surface",
       "unknown"
     ],
     "details": [
       {
-        "area": "api-surface",
-        "paths": [
-          "src/main/kotlin/com/sdkwork/web/backend/sdk/api/ApplicationDeploymentApi.kt"
-        ]
-      },
-      {
         "area": "unknown",
         "paths": [
-          "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationDeploymentResponse.kt"
+          "src/main/kotlin/com/sdkwork/web/backend/sdk/CreateNginxConfigRequest.kt"
         ]
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, unknown. Verification is required."
+    "summary": "Detected impact areas: unknown. Verification is required."
   },
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, unknown. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: unknown. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, unknown.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: unknown.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-kotlin\\generated\\server-openapi",
         "command": "node",
         "args": [

@@ -19,17 +19,14 @@ pub struct CreateDeploymentRequest {
 
     /// Stable Drive resource identity. Signed delivery URLs are forbidden.
     #[serde(rename = "artifactDriveUri")]
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub artifact_drive_uri: Option<String>,
+    pub artifact_drive_uri: String,
 
     #[serde(rename = "artifactSize")]
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub artifact_size: Option<String>,
+    pub artifact_size: String,
 
-    /// SHA-256 hexadecimal digest of the uploaded package.
+    /// Lowercase SHA-256 hexadecimal digest of the uploaded package.
     #[serde(rename = "artifactHash")]
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub artifact_hash: Option<String>,
+    pub artifact_hash: String,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub environment: Option<String>,

@@ -30,7 +30,7 @@ pub struct CreateApplicationDeploymentRequest {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub artifact_size: Option<String>,
 
-    /// SHA-256 hexadecimal digest of the uploaded package.
+    /// Lowercase SHA-256 hexadecimal digest of the uploaded package.
     #[serde(rename = "artifactHash")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub artifact_hash: Option<String>,

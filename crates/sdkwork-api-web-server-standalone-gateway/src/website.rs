@@ -1385,6 +1385,7 @@ async fn watch_runtime_set(
                     .validate_runtime_set(candidate.runtime_set(), context.validation_concurrency)
                     .await
                 {
+                    observed = None;
                     log_watcher_error_once(
                         &mut last_error,
                         &WebsiteDataPlaneBootstrapError::ProviderValidation(error),
@@ -1396,6 +1397,7 @@ async fn watch_runtime_set(
                     Arc::clone(&context.providers),
                     context.validation_concurrency,
                 ).await {
+                    observed = None;
                     log_watcher_error_once(
                         &mut last_error,
                         &WebsiteDataPlaneBootstrapError::RuntimeActivationProbe(error),
@@ -1723,9 +1725,18 @@ mod tests {
         Mutex,
     };
 
+    use async_trait::async_trait;
     use axum::{http::StatusCode, routing::any, Json, Router};
+    use sdkwork_webserver_contract::provider::{
+        OpenWebsiteContentRequest, OpenedWebsiteContent, ResolveWebsiteStaticPathRequest,
+        ResolvedWebsiteContent, ValidateWebsiteResourceRequest, ValidatedWebsiteResource,
+        WebsiteContentMetadata, WebsiteContentResolution, WebsiteProviderContentHandle,
+        WebsiteProviderError, WebsiteProviderErrorKind, WebsiteProviderResult,
+        WebsiteResourceProvider, WebsiteStaticContentProvider,
+    };
     use sdkwork_webserver_core::website_runtime::{
-        website_runtime_set_snapshot_sha256, WebsiteRuntimeSetSnapshot,
+        website_runtime_descriptor_sha256, website_runtime_set_snapshot_sha256,
+        WebsiteProviderType, WebsiteRuntimeDescriptor, WebsiteRuntimeSetSnapshot,
     };
     use serde_json::{json, Value};
 
@@ -2172,6 +2183,119 @@ mod tests {
         );
     }
 
+    struct FlakyStaticProvider {
+        validations: AtomicUsize,
+    }
+
+    #[async_trait]
+    impl WebsiteResourceProvider for FlakyStaticProvider {
+        fn maximum_content_bytes(&self) -> u64 {
+            1024
+        }
+
+        async fn validate_resource(
+            &self,
+            request: &ValidateWebsiteResourceRequest,
+        ) -> WebsiteProviderResult<ValidatedWebsiteResource> {
+            if self.validations.fetch_add(1, Ordering::SeqCst) == 0 {
+                return Err(WebsiteProviderError::new(
+                    WebsiteProviderErrorKind::Unavailable,
+                ));
+            }
+            Ok(ValidatedWebsiteResource {
+                provider_resource_uuid: request.provider.provider_resource_uuid.clone(),
+                provider_generation: "2".to_owned(),
+                public_generation: "2".to_owned(),
+                capabilities: request.required_capabilities.clone(),
+            })
+        }
+    }
+
+    #[async_trait]
+    impl WebsiteStaticContentProvider for FlakyStaticProvider {
+        async fn resolve_static_path(
+            &self,
+            _request: &ResolveWebsiteStaticPathRequest,
+        ) -> WebsiteProviderResult<WebsiteContentResolution> {
+            Ok(WebsiteContentResolution::Found(ResolvedWebsiteContent {
+                content_handle: WebsiteProviderContentHandle::new("activation-content").unwrap(),
+                metadata: WebsiteContentMetadata {
+                    content_type: "text/html".to_owned(),
+                    content_length: 16,
+                    etag: "\"activation\"".to_owned(),
+                    last_modified: "2026-07-22T00:00:00Z".to_owned(),
+                    content_version: "2".to_owned(),
+                    provider_generation: "2".to_owned(),
+                    range_supported: true,
+                },
+            }))
+        }
+
+        async fn open_static_content(
+            &self,
+            _request: &OpenWebsiteContentRequest,
+        ) -> WebsiteProviderResult<OpenedWebsiteContent> {
+            unreachable!("HEAD activation probes must not open response bodies")
+        }
+    }
+
+    #[tokio::test]
+    async fn watcher_retries_an_unchanged_candidate_after_transient_provider_failure() {
+        let root = tempfile::tempdir().unwrap();
+        let source = root.path().join("runtime-set.json");
+        std::fs::write(&source, empty_runtime_set(1)).unwrap();
+        let (initial, fingerprint) = load_runtime_set(&source).unwrap();
+        let registry = Arc::new(WebsiteRuntimeRegistry::new(
+            initial.runtime_set().node_uuid(),
+            initial.runtime_set().environment(),
+        ));
+        registry
+            .activate(Arc::clone(initial.runtime_set()))
+            .unwrap();
+        let provider = Arc::new(FlakyStaticProvider {
+            validations: AtomicUsize::new(0),
+        });
+        let mut providers = WebsiteProviderRegistry::new();
+        providers
+            .register_static(WebsiteProviderType::Drive, provider.clone())
+            .unwrap();
+        let (stop_tx, stop_rx) = watch::channel(false);
+        let watcher_registry = Arc::clone(&registry);
+        let watcher_source = source.clone();
+        let watcher = tokio::spawn(async move {
+            watch_runtime_set(
+                RuntimeSetWatchContext {
+                    registry: watcher_registry,
+                    path: watcher_source,
+                    recovery_store: None,
+                    providers: Arc::new(providers),
+                    tenant_scope_hash: "1".repeat(64),
+                    validation_concurrency: 1,
+                    poll_interval: Duration::from_millis(10),
+                },
+                Some(fingerprint),
+                stop_rx,
+            )
+            .await;
+        });
+
+        std::fs::write(&source, provider_runtime_set(2)).unwrap();
+        tokio::time::timeout(Duration::from_secs(2), async {
+            loop {
+                if registry.current().unwrap().generation() == 2 {
+                    break;
+                }
+                tokio::time::sleep(Duration::from_millis(10)).await;
+            }
+        })
+        .await
+        .unwrap();
+
+        stop_tx.send(true).unwrap();
+        watcher.await.unwrap();
+        assert_eq!(provider.validations.load(Ordering::SeqCst), 2);
+    }
+
     fn empty_runtime_set(generation: u64) -> Vec<u8> {
         runtime_set(
             generation,
@@ -2179,6 +2303,99 @@ mod tests {
             WebsiteRuntimeEnvironment::Production,
             "default",
         )
+    }
+
+    fn provider_runtime_set(generation: u64) -> Vec<u8> {
+        let mut value: Value = serde_json::from_slice(&runtime_set(
+            generation,
+            "node-0001",
+            WebsiteRuntimeEnvironment::Production,
+            "provider",
+        ))
+        .unwrap();
+        let mut descriptor = json!({
+            "schemaVersion": "sdkwork.website-runtime.v1",
+            "kind": "sdkwork.website-runtime.descriptor",
+            "revisionUuid": format!("revision-{generation:04}"),
+            "siteUuid": "site-provider-retry",
+            "tenantScopeHash": "1".repeat(64),
+            "environment": "production",
+            "generatedAt": "2026-07-22T00:00:00Z",
+            "compilerVersion": "sdkwork-deploy-runtime-compiler/1",
+            "descriptorSha256": "0".repeat(64),
+            "siteDefaultVariantUuid": "variant-default",
+            "bindings": [{
+                "bindingUuid": "binding-primary",
+                "hostname": "retry.example.com",
+                "pathPrefix": "/",
+                "action": { "type": "SERVE" }
+            }],
+            "variants": [{
+                "variantUuid": "variant-default",
+                "label": "Default"
+            }],
+            "variantRules": [],
+            "resources": [{
+                "resourceUuid": "resource-drive",
+                "provider": {
+                    "providerType": "DRIVE",
+                    "providerResourceUuid": "website-root-0001",
+                    "providerContractVersion": "drive.website-root.v1"
+                },
+                "capabilities": {
+                    "staticContent": true,
+                    "wikiRoutes": false,
+                    "wikiSearch": false,
+                    "rangeRequests": true
+                }
+            }],
+            "mounts": [{
+                "mountUuid": "mount-default",
+                "variantUuid": "variant-default",
+                "pathPrefix": "/",
+                "resourceUuid": "resource-drive",
+                "handler": "STATIC",
+                "translation": { "mode": "ROOT", "resourceSubpath": "/" },
+                "indexFiles": ["index.html"]
+            }],
+            "deliveryPolicy": {
+                "providerTimeoutMs": 2500,
+                "metadataCacheTtlSeconds": 60,
+                "negativeCacheTtlSeconds": 5,
+                "staleWhileRevalidateSeconds": 30,
+                "maximumObjectBytes": 1024
+            },
+            "securityPolicy": {
+                "forceHttps": true,
+                "denyDotFiles": true,
+                "deniedPathPrefixes": []
+            },
+            "limits": {
+                "maximumBindings": 8,
+                "maximumVariants": 8,
+                "maximumVariantRules": 8,
+                "maximumResources": 8,
+                "maximumMounts": 8,
+                "maximumIndexFilesPerMount": 8,
+                "maximumPathBytes": 2048,
+                "maximumPathSegments": 64
+            },
+            "observabilityPolicy": {
+                "accessLogEnabled": true,
+                "usageMeteringEnabled": true,
+                "traceSampleRatePerMille": 10
+            }
+        });
+        let descriptor_contract: WebsiteRuntimeDescriptor =
+            serde_json::from_value(descriptor.clone()).unwrap();
+        descriptor["descriptorSha256"] =
+            Value::String(website_runtime_descriptor_sha256(&descriptor_contract).unwrap());
+        value["descriptors"] = json!([descriptor]);
+        value["snapshotSha256"] = Value::String("0".repeat(64));
+        let snapshot: WebsiteRuntimeSetSnapshot = serde_json::from_value(value.clone()).unwrap();
+        value["snapshotSha256"] =
+            Value::String(website_runtime_set_snapshot_sha256(&snapshot).unwrap());
+        serde_json::to_vec(&value).unwrap()
     }
 
     fn runtime_set(

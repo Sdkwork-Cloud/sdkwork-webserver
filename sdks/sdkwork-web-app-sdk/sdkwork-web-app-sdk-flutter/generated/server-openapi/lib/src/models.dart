@@ -437,9 +437,9 @@ class CreateDeploymentRequest {
   final String? versionTag;
   final String? commitHash;
   final String? sourceRef;
-  final String? artifactDriveUri;
-  final String? artifactSize;
-  final String? artifactHash;
+  final String artifactDriveUri;
+  final String artifactSize;
+  final String artifactHash;
   final String? environment;
 
   CreateDeploymentRequest({
@@ -447,9 +447,9 @@ class CreateDeploymentRequest {
     this.versionTag,
     this.commitHash,
     this.sourceRef,
-    this.artifactDriveUri,
-    this.artifactSize,
-    this.artifactHash,
+    required this.artifactDriveUri,
+    required this.artifactSize,
+    required this.artifactHash,
     this.environment
   });
 
@@ -465,9 +465,27 @@ class CreateDeploymentRequest {
       versionTag: json['versionTag']?.toString(),
       commitHash: json['commitHash']?.toString(),
       sourceRef: json['sourceRef']?.toString(),
-      artifactDriveUri: json['artifactDriveUri']?.toString(),
-      artifactSize: json['artifactSize']?.toString(),
-      artifactHash: json['artifactHash']?.toString(),
+      artifactDriveUri: (() {
+        final value = json['artifactDriveUri']?.toString();
+        if (value == null) {
+          throw FormatException('CreateDeploymentRequest.artifactDriveUri is required');
+        }
+        return value;
+      })(),
+      artifactSize: (() {
+        final value = json['artifactSize']?.toString();
+        if (value == null) {
+          throw FormatException('CreateDeploymentRequest.artifactSize is required');
+        }
+        return value;
+      })(),
+      artifactHash: (() {
+        final value = json['artifactHash']?.toString();
+        if (value == null) {
+          throw FormatException('CreateDeploymentRequest.artifactHash is required');
+        }
+        return value;
+      })(),
       environment: json['environment']?.toString()
     );
   }
@@ -920,14 +938,14 @@ class CertificatePage {
 
 class CreateHealthCheckRequest {
   final int checkType;
-  final String? checkUrl;
+  final String checkUrl;
   final int? checkInterval;
   final int? timeoutMs;
   final int? retryCount;
 
   CreateHealthCheckRequest({
     required this.checkType,
-    this.checkUrl,
+    required this.checkUrl,
     this.checkInterval,
     this.timeoutMs,
     this.retryCount
@@ -942,7 +960,13 @@ class CreateHealthCheckRequest {
         }
         return value;
       })(),
-      checkUrl: json['checkUrl']?.toString(),
+      checkUrl: (() {
+        final value = json['checkUrl']?.toString();
+        if (value == null) {
+          throw FormatException('CreateHealthCheckRequest.checkUrl is required');
+        }
+        return value;
+      })(),
       checkInterval: json['checkInterval'] is int ? json['checkInterval'] : null,
       timeoutMs: json['timeoutMs'] is int ? json['timeoutMs'] : null,
       retryCount: json['retryCount'] is int ? json['retryCount'] : null
@@ -961,30 +985,84 @@ class CreateHealthCheckRequest {
 }
 
 class HealthCheckResponse {
-  final String? id;
-  final int? checkType;
-  final String? checkUrl;
-  final int? checkInterval;
-  final int? status;
-  final String? createdAt;
+  final String id;
+  final int checkType;
+  final String checkUrl;
+  final int checkInterval;
+  final int timeoutMs;
+  final int retryCount;
+  final int status;
+  final String createdAt;
 
   HealthCheckResponse({
-    this.id,
-    this.checkType,
-    this.checkUrl,
-    this.checkInterval,
-    this.status,
-    this.createdAt
+    required this.id,
+    required this.checkType,
+    required this.checkUrl,
+    required this.checkInterval,
+    required this.timeoutMs,
+    required this.retryCount,
+    required this.status,
+    required this.createdAt
   });
 
   factory HealthCheckResponse.fromJson(Map<String, dynamic> json) {
     return HealthCheckResponse(
-      id: json['id']?.toString(),
-      checkType: json['checkType'] is int ? json['checkType'] : null,
-      checkUrl: json['checkUrl']?.toString(),
-      checkInterval: json['checkInterval'] is int ? json['checkInterval'] : null,
-      status: json['status'] is int ? json['status'] : null,
-      createdAt: json['createdAt']?.toString()
+      id: (() {
+        final value = json['id']?.toString();
+        if (value == null) {
+          throw FormatException('HealthCheckResponse.id is required');
+        }
+        return value;
+      })(),
+      checkType: (() {
+        final value = json['checkType'];
+        if (value is! int) {
+          throw FormatException('HealthCheckResponse.checkType is required');
+        }
+        return value;
+      })(),
+      checkUrl: (() {
+        final value = json['checkUrl']?.toString();
+        if (value == null) {
+          throw FormatException('HealthCheckResponse.checkUrl is required');
+        }
+        return value;
+      })(),
+      checkInterval: (() {
+        final value = json['checkInterval'];
+        if (value is! int) {
+          throw FormatException('HealthCheckResponse.checkInterval is required');
+        }
+        return value;
+      })(),
+      timeoutMs: (() {
+        final value = json['timeoutMs'];
+        if (value is! int) {
+          throw FormatException('HealthCheckResponse.timeoutMs is required');
+        }
+        return value;
+      })(),
+      retryCount: (() {
+        final value = json['retryCount'];
+        if (value is! int) {
+          throw FormatException('HealthCheckResponse.retryCount is required');
+        }
+        return value;
+      })(),
+      status: (() {
+        final value = json['status'];
+        if (value is! int) {
+          throw FormatException('HealthCheckResponse.status is required');
+        }
+        return value;
+      })(),
+      createdAt: (() {
+        final value = json['createdAt']?.toString();
+        if (value == null) {
+          throw FormatException('HealthCheckResponse.createdAt is required');
+        }
+        return value;
+      })()
     );
   }
 
@@ -994,6 +1072,8 @@ class HealthCheckResponse {
       'checkType': checkType,
       'checkUrl': checkUrl,
       'checkInterval': checkInterval,
+      'timeoutMs': timeoutMs,
+      'retryCount': retryCount,
       'status': status,
       'createdAt': createdAt,
     };

@@ -40,7 +40,9 @@ impl WebRepository {
                 .fetch_one(&self.pool)
                 .await
                 .map_err(|error| store_error("count web_certificate", error))?;
-        let total: i64 = count_row.try_get("total").unwrap_or(0);
+        let total: i64 = count_row
+            .try_get("total")
+            .map_err(|error| store_error("map web_certificate count", error))?;
 
         let rows = sqlx::query(
             "SELECT c.uuid, c.cert_name, d.hostname AS domain, c.cert_type, c.issuer,
@@ -155,7 +157,17 @@ impl WebRepository {
             let not_after: String = row.try_get("not_after").map_err(|error| {
                 WebServiceError::Internal(format!("renewal candidate not_after: {error}"))
             })?;
-            if !certificate_due_for_renewal(&not_after, renew_before_days) {
+            let due_for_renewal = certificate_due_for_renewal(&not_after, renew_before_days)
+                .ok_or_else(|| {
+                    tracing::error!(
+                        not_after,
+                        "active certificate has an invalid expiry timestamp"
+                    );
+                    WebServiceError::Internal(
+                        "active certificate has an invalid expiry timestamp".to_string(),
+                    )
+                })?;
+            if !due_for_renewal {
                 continue;
             }
             items.push(CertificateRenewalCandidate {
@@ -479,25 +491,23 @@ fn map_certificate_row(row: &EngineRow) -> Result<CertificateResponse, sqlx::Err
     Ok(CertificateResponse {
         id: row.try_get("uuid")?,
         cert_name: row.try_get("cert_name")?,
-        domain: row.try_get("domain").ok(),
-        cert_type: row.try_get("cert_type").ok(),
-        issuer: row.try_get("issuer").ok(),
-        fingerprint: row.try_get("fingerprint").ok(),
+        domain: row.try_get("domain")?,
+        cert_type: row.try_get("cert_type")?,
+        issuer: row.try_get("issuer")?,
+        fingerprint: row.try_get("fingerprint")?,
         not_before: optional_instant_from_row(row, "not_before")?,
         not_after: optional_instant_from_row(row, "not_after")?,
-        auto_renew: bool_from_row(row, "auto_renew").ok(),
-        renewal_status: row.try_get("renewal_status").ok(),
+        auto_renew: Some(bool_from_row(row, "auto_renew")?),
+        renewal_status: row.try_get("renewal_status")?,
         status: row.try_get("status")?,
         created_at: instant_from_row(row, "created_at")?,
     })
 }
 
-fn certificate_due_for_renewal(not_after: &str, renew_before_days: u32) -> bool {
-    let Some(not_after) = parse_database_instant(not_after) else {
-        return false;
-    };
+fn certificate_due_for_renewal(not_after: &str, renew_before_days: u32) -> Option<bool> {
+    let not_after = parse_database_instant(not_after)?;
     let threshold = Utc::now() + Duration::days(i64::from(renew_before_days));
-    not_after.with_timezone(&Utc) <= threshold
+    Some(not_after.with_timezone(&Utc) <= threshold)
 }
 
 fn parse_database_instant(value: &str) -> Option<DateTime<chrono::FixedOffset>> {

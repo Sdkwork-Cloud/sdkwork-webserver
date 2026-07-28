@@ -10,13 +10,17 @@ pub(crate) fn now_rfc3339() -> String {
 }
 
 pub(crate) fn store_error(context: &str, error: SqlxError) -> WebServiceError {
-    tracing::error!("{context}: {error}");
+    tracing::error!(context, error = ?error, "database operation failed");
     match error {
         SqlxError::Database(db) if db.is_unique_violation() => {
-            WebServiceError::conflict(db.message())
+            WebServiceError::conflict("resource already exists")
         }
         SqlxError::RowNotFound => WebServiceError::not_found("resource not found"),
-        _ => WebServiceError::Internal(format!("{context}: {error}")),
+        SqlxError::PoolTimedOut
+        | SqlxError::PoolClosed
+        | SqlxError::Io(_)
+        | SqlxError::Tls(_) => WebServiceError::DatabaseUnavailable,
+        _ => WebServiceError::Internal("database operation failed".to_string()),
     }
 }
 
@@ -62,7 +66,8 @@ pub(crate) fn json_from_row(
     column: &str,
 ) -> Result<Option<serde_json::Value>, SqlxError> {
     let raw: Option<String> = row.try_get(column)?;
-    Ok(raw.and_then(|text| serde_json::from_str(&text).ok()))
+    raw.map(|text| serde_json::from_str(&text).map_err(|error| SqlxError::Decode(Box::new(error))))
+        .transpose()
 }
 
 pub(crate) fn json_write_expression(engine: DatabaseEngine, placeholder: &str) -> String {
@@ -130,8 +135,9 @@ pub(crate) async fn resolve_site_internal_id(
     .await
     .map_err(|error| store_error("resolve web_site id", error))?;
 
-    row.and_then(|row| row.try_get::<i64, _>("id").ok())
-        .ok_or_else(|| WebServiceError::not_found("site not found"))
+    let row = row.ok_or_else(|| WebServiceError::not_found("site not found"))?;
+    row.try_get("id")
+        .map_err(|error| store_error("map web_site id", error))
 }
 
 pub(crate) async fn resolve_site_uuid(
@@ -149,8 +155,9 @@ pub(crate) async fn resolve_site_uuid(
     .await
     .map_err(|error| store_error("resolve web_site uuid", error))?;
 
-    row.and_then(|row| row.try_get::<String, _>("uuid").ok())
-        .ok_or_else(|| WebServiceError::not_found("site not found"))
+    let row = row.ok_or_else(|| WebServiceError::not_found("site not found"))?;
+    row.try_get("uuid")
+        .map_err(|error| store_error("map web_site uuid", error))
 }
 
 #[cfg(test)]

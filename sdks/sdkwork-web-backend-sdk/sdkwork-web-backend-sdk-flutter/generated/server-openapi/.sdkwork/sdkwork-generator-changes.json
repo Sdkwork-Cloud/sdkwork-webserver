@@ -9,11 +9,10 @@
     "protocol": "http",
     "packageName": "sdkwork_web_backend_sdk"
   },
-  "changeFingerprint": "be874d6afd8184ba12cc945df384e63b6e3a2f416e9d7b6995d36792e265a81e",
+  "changeFingerprint": "a2b0f3ef23f3065308ced86605151d79d94e72deefe863446c4d8127371c298e",
   "changes": {
     "createdGeneratedFiles": [],
     "updatedGeneratedFiles": [
-      "lib/src/api/application_deployment.dart",
       "lib/src/models.dart"
     ],
     "unchangedGeneratedFiles": [
@@ -25,6 +24,7 @@
       "lib/sdkwork_web_backend_sdk.dart",
       "lib/src/api/agent.dart",
       "lib/src/api/api.dart",
+      "lib/src/api/application_deployment.dart",
       "lib/src/api/application_domain.dart",
       "lib/src/api/application.dart",
       "lib/src/api/audit.dart",
@@ -51,16 +51,9 @@
   "impact": {
     "schemaVersion": 1,
     "areas": [
-      "api-surface",
       "models"
     ],
     "details": [
-      {
-        "area": "api-surface",
-        "paths": [
-          "lib/src/api/application_deployment.dart"
-        ]
-      },
       {
         "area": "models",
         "paths": [
@@ -69,18 +62,18 @@
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, models. Verification is required."
+    "summary": "Detected impact areas: models. Verification is required."
   },
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-flutter\\generated\\server-openapi",
         "command": "node",
         "args": [

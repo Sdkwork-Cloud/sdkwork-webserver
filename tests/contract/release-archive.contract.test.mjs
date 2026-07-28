@@ -661,11 +661,11 @@ test('workspace and workflow close the frozen release dependency graph', () => {
   const workflow = JSON.parse(readFileSync(path.join(REPO_ROOT, 'sdkwork.workflow.json'), 'utf8'));
   const thinWorkflow = readFileSync(path.join(REPO_ROOT, '.github/workflows/package.yml'), 'utf8');
 
-  assert.equal(packageJson.dependencies.tar, '7.5.20');
+  assert.equal(packageJson.dependencies.tar, '7.5.21');
   assert.equal(packageJson.dependencies['@sdkwork/app-topology'], 'workspace:*');
   assert.ok(workspace.packages.includes('../sdkwork-app-topology'));
   assert.ok(workspace.packages.includes('../sdkwork-sdk-commons/sdkwork-sdk-common-typescript'));
-  assert.equal(lockfile.importers['.'].dependencies.tar.specifier, '7.5.20');
+  assert.equal(lockfile.importers['.'].dependencies.tar.specifier, '7.5.21');
   assert.equal(
     lockfile.importers['.'].dependencies['@sdkwork/app-topology'].version,
     'link:../sdkwork-app-topology',

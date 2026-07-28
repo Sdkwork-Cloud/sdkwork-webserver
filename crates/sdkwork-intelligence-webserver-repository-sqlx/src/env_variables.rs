@@ -3,9 +3,9 @@ use sdkwork_webserver_contract::{
     CreateEnvVariableRequest, EnvVariablePage, EnvVariableResponse, WebServiceError,
     WebServiceResult,
 };
-use super::{EngineRow, WebRepository};
 use sqlx::Row;
 
+use super::{EngineRow, WebRepository};
 use super::support::{
     bool_from_row, instant_write_expression, new_uuid, next_id, now_rfc3339,
     resolve_site_internal_id, store_error,
@@ -13,6 +13,7 @@ use super::support::{
 
 /// 机密值在 list/retrieve 响应中的掩码占位符。
 /// 真实值仅通过 create 接口接收并加密落库，永不在查询响应中返回明文。
+const MAX_SITE_ENV_VARIABLES: i64 = 100;
 const SECRET_VALUE_MASK: &str = "***";
 
 impl WebRepository {
@@ -40,7 +41,8 @@ impl WebRepository {
                 "SELECT uuid, key, value_encrypted, environment, is_secret
                  FROM web_env_variable
                  WHERE tenant_id = $1 AND site_id = $2 AND environment = $3 AND status = 1
-                 ORDER BY key ASC",
+                 ORDER BY key ASC
+                 LIMIT 100",
             )
             .bind(tenant_id)
             .bind(site_internal_id)
@@ -65,7 +67,8 @@ impl WebRepository {
                 "SELECT uuid, key, value_encrypted, environment, is_secret
                  FROM web_env_variable
                  WHERE tenant_id = $1 AND site_id = $2 AND status = 1
-                 ORDER BY environment ASC, key ASC",
+                 ORDER BY environment ASC, key ASC
+                 LIMIT 100",
             )
             .bind(tenant_id)
             .bind(site_internal_id)
@@ -76,7 +79,21 @@ impl WebRepository {
             (count_row, rows)
         };
 
-        let total: i64 = count_row.try_get("total").unwrap_or(0);
+        let total: i64 = count_row
+            .try_get("total")
+            .map_err(|error| store_error("map web_env_variable count", error))?;
+        if total > MAX_SITE_ENV_VARIABLES {
+            tracing::error!(
+                tenant_id,
+                site_id,
+                total,
+                maximum = MAX_SITE_ENV_VARIABLES,
+                "web environment-variable cardinality invariant violated"
+            );
+            return Err(WebServiceError::Internal(
+                "environment-variable collection exceeds its configured capacity".to_string(),
+            ));
+        }
         let mut items = Vec::with_capacity(rows.len());
         for row in &rows {
             items.push(map_env_variable_row(row).map_err(|error| {
@@ -118,6 +135,43 @@ impl WebRepository {
              )"
         );
 
+        let mut transaction = self.pool.begin().await.map_err(|error| {
+            store_error("begin create web_env_variable transaction", error)
+        })?;
+        let locked = sqlx::query(
+            "UPDATE web_site SET version = version
+             WHERE tenant_id = $1 AND id = $2 AND deleted_at IS NULL",
+        )
+        .bind(tenant_id)
+        .bind(site_internal_id)
+        .execute(&mut *transaction)
+        .await
+        .map_err(|error| store_error("lock web_env_variable site capacity", error))?;
+        if locked.rows_affected() != 1 {
+            return Err(WebServiceError::not_found("site not found"));
+        }
+
+        let count_row = sqlx::query(
+            "SELECT COUNT(*) AS total FROM web_env_variable
+             WHERE tenant_id = $1 AND site_id = $2 AND status = 1",
+        )
+        .bind(tenant_id)
+        .bind(site_internal_id)
+        .fetch_one(&mut *transaction)
+        .await
+        .map_err(|error| store_error("count web_env_variable capacity", error))?;
+        let total: i64 = count_row
+            .try_get("total")
+            .map_err(|error| store_error("map web_env_variable capacity", error))?;
+        if total >= MAX_SITE_ENV_VARIABLES {
+            transaction.rollback().await.map_err(|error| {
+                store_error("rollback full web_env_variable collection", error)
+            })?;
+            return Err(WebServiceError::conflict(
+                "a site supports at most 100 active environment variables",
+            ));
+        }
+
         sqlx::query(&insert_sql)
             .bind(id)
             .bind(&uuid)
@@ -128,9 +182,13 @@ impl WebRepository {
             .bind(&stored_value)
             .bind(request.is_secret)
             .bind(&now)
-            .execute(&self.pool)
+            .execute(&mut *transaction)
             .await
             .map_err(|error| store_error("insert web_env_variable", error))?;
+
+        transaction.commit().await.map_err(|error| {
+            store_error("commit create web_env_variable transaction", error)
+        })?;
 
         // 响应中机密值返回掩码，不回传明文/密文，避免泄漏。
         Ok(EnvVariableResponse {

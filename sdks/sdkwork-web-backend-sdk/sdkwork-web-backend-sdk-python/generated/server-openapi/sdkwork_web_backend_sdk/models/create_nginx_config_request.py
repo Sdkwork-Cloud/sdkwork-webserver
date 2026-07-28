@@ -8,5 +8,4 @@ class CreateNginxConfigRequest:
     config_type: int
     config_name: str
     config_content: str
-    site_id: Optional[str] = None
-    domain_id: Optional[str] = None
+    site_id: str

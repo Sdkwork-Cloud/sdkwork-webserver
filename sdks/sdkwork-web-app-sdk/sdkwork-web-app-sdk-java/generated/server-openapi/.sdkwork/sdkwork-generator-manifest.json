@@ -156,7 +156,7 @@
     },
     {
       "path": "src/main/java/com/sdkwork/web/app/sdk/model/HealthCheckResponse.java",
-      "sha256": "4848d64a6a6f6e087983f4152c8ef98505e5f52d8cf03bdc95e2d6c349802a6b"
+      "sha256": "c9917552249c3da11933cc52057999a75913306a5fa54d3c1fe4379975f7c0c6"
     },
     {
       "path": "src/main/java/com/sdkwork/web/app/sdk/model/PageInfo.java",

@@ -47,6 +47,7 @@ import type {
   WebserverResourceRegistry,
 } from "./types.ts";
 import { WorkspaceHeader, WorkspaceSidebar } from "./WebserverWorkspaceChrome.tsx";
+import { WebserverActionError } from "./types.ts";
 
 export interface WebserverWorkspaceProps {
   locale: WebserverLocale;
@@ -566,7 +567,9 @@ function ActionDialog({
   scopeId?: string;
   selected?: Record<string, unknown>;
 }) {
-  const t = (key: WebserverMessageKey) => translateWebserver(locale, key);
+  const t = (key: WebserverMessageKey, values: Record<string, string | number> = {}) => (
+    translateWebserver(locale, key, values)
+  );
   const [body, setBody] = useState<Record<string, unknown>>(() => initialActionBody(action, selected));
   const [confirmed, setConfirmed] = useState(false);
   const [error, setError] = useState<string>();
@@ -580,7 +583,9 @@ function ActionDialog({
   const [result, setResult] = useState<Record<string, unknown>>();
   const [copiedField, setCopiedField] = useState<string>();
   const [sourceInputMode, setSourceInputMode] = useState<"archive" | "directory">("archive");
+  const abortControllerRef = useRef<AbortController | undefined>(undefined);
   const sourceInputRef = useRef<HTMLInputElement>(null);
+  const submitInFlightRef = useRef(false);
   const confirmationRequired = Boolean(action.dangerous || action.requiresConfirmation);
   const sourceInputRequired = Boolean(action.sourceInput);
 
@@ -595,6 +600,8 @@ function ActionDialog({
     input.removeAttribute("webkitdirectory");
     input.removeAttribute("directory");
   }, [sourceInputMode]);
+
+  useEffect(() => () => abortControllerRef.current?.abort(), []);
 
   useEffect(() => {
     if (!action.loadFieldOptions) return undefined;
@@ -629,11 +636,15 @@ function ActionDialog({
 
   async function submit(event: FormEvent): Promise<void> {
     event.preventDefault();
+    if (submitInFlightRef.current) return;
     if (
       (confirmationRequired && !confirmed)
       || (action.requiresFile && !file)
       || (sourceInputRequired && files.length === 0)
     ) return;
+    submitInFlightRef.current = true;
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
     setBusy(true);
     setError(undefined);
     setProgress(0);
@@ -646,6 +657,7 @@ function ActionDialog({
         onProgress: (value) => setProgress(Math.max(0, Math.min(100, Math.round(value)))),
         scopeId,
         selectedItem: selected,
+        signal: abortController.signal,
         sourceInputMode,
       });
       if (action.resultFields?.length && isRecord(response)) {
@@ -654,9 +666,11 @@ function ActionDialog({
         return;
       }
       onComplete();
-    } catch {
-      setError(t("error.operation"));
+    } catch (caught) {
+      setError(actionErrorMessage(caught, t));
     } finally {
+      submitInFlightRef.current = false;
+      if (abortControllerRef.current === abortController) abortControllerRef.current = undefined;
       setBusy(false);
     }
   }
@@ -665,7 +679,7 @@ function ActionDialog({
     <div
       className="dialog-backdrop"
       onMouseDown={(event) => {
-        if (event.currentTarget === event.target) onClose();
+        if (!busy && event.currentTarget === event.target) onClose();
       }}
       role="presentation"
     >
@@ -684,6 +698,7 @@ function ActionDialog({
           <button
             aria-label={t("dialog.close")}
             className="icon-button"
+            disabled={busy}
             onClick={onClose}
             title={t("dialog.close")}
             type="button"
@@ -819,7 +834,7 @@ function ActionDialog({
             <button className="command-button" onClick={onClose} type="button">{t("dialog.close")}</button>
           </footer>
         ) : <footer>
-          <button className="secondary-button" onClick={onClose} type="button">{t("dialog.cancel")}</button>
+          <button className="secondary-button" disabled={busy} onClick={onClose} type="button">{t("dialog.cancel")}</button>
           <button
             className={action.dangerous ? "danger-button" : "command-button"}
             disabled={busy
@@ -1146,6 +1161,19 @@ function fieldLabel(value: string, locale: WebserverLocale): string {
   return labels[locale][value] ?? humanize(value);
 }
 
+function actionErrorMessage(
+  error: unknown,
+  translate: (key: WebserverMessageKey, values?: Record<string, string | number>) => string,
+): string {
+  if (!(error instanceof WebserverActionError)) return translate("error.operation");
+  const keys: Record<typeof error.code, WebserverMessageKey> = {
+    "application-draft-source-failed": "error.applicationDraftSource",
+    "application-draft-deployment-failed": "error.applicationDraftDeployment",
+    "deployment-source-stored": "error.deploymentSourceStored",
+  };
+  return translate(keys[error.code], { ...error.details });
+}
+
 function sensitive(value: string): boolean {
   return /secret|password|token|private|key/i.test(value);
 }
@@ -1178,6 +1206,12 @@ function codedValueLabel(name: string, value: unknown, locale: WebserverLocale):
       "deployType:2": "Git",
       "deployType:3": "CI/CD",
       "deployType:4": "API",
+      "siteType:1": "Static site",
+      "siteType:2": "Single-page application (SPA)",
+      "siteType:3": "Node.js",
+      "siteType:4": "PHP",
+      "siteType:5": "Python",
+      "siteType:6": "Other",
       "environment:development": "Development",
       "environment:production": "Production",
       "environment:staging": "Staging",
@@ -1201,6 +1235,12 @@ function codedValueLabel(name: string, value: unknown, locale: WebserverLocale):
       "deployType:2": "Git",
       "deployType:3": "CI/CD",
       "deployType:4": "API",
+      "siteType:1": "静态站点",
+      "siteType:2": "单页应用（SPA）",
+      "siteType:3": "Node.js",
+      "siteType:4": "PHP",
+      "siteType:5": "Python",
+      "siteType:6": "其他",
       "environment:development": "开发环境",
       "environment:production": "生产环境",
       "environment:staging": "预发布环境",

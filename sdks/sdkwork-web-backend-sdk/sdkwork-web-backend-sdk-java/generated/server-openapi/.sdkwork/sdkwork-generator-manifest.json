@@ -256,7 +256,7 @@
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/model/CreateNginxConfigRequest.java",
-      "sha256": "acfd67ed16ccc7fc33e1e8d8b70c5fd8f1b51c532e5d4fb746470ec0d7bc8c85"
+      "sha256": "3b7c1b0566a0c8490551151fcefcea8c5f6d884a7cdfcd21d91edaa981cc6478"
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/model/CreateServerRequest.java",

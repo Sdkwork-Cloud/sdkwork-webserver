@@ -11,6 +11,8 @@ use sdkwork_webserver_contract::{
 
 use crate::{AuditLogWrite, WebService};
 
+const MAX_NGINX_CONFIG_BYTES: usize = 1024 * 1024;
+
 impl WebService {
     /// 统一的 fail-closed 租户上下文校验。
     ///
@@ -45,18 +47,45 @@ impl WebService {
         action: &str,
         target_type: &str,
         target_uuid: &str,
-    ) -> WebServiceResult<()> {
-        self.repository
+    ) {
+        let tenant_id = match Self::require_backend_tenant(context) {
+            Ok(tenant_id) => tenant_id,
+            Err(error) => {
+                tracing::error!(
+                    action,
+                    target_type,
+                    target_uuid,
+                    error = ?error,
+                    "failed to resolve tenant for backend business audit"
+                );
+                return;
+            }
+        };
+        if let Err(error) = self
+            .repository
             .insert_audit_log(AuditLogWrite {
-                tenant_id: Self::require_backend_tenant(context)?,
+                tenant_id,
                 organization_id: 0,
                 operator_id: context.operator_id.unwrap_or(0),
+                operator_type: "ADMIN",
                 action,
                 target_type,
                 target_id: None,
                 target_uuid: Some(target_uuid),
+                request_id: None,
+                metadata_json: "{}",
             })
             .await
+        {
+            tracing::error!(
+                tenant_id,
+                action,
+                target_type,
+                target_uuid,
+                error = ?error,
+                "failed to persist backend business audit"
+            );
+        }
     }
 }
 
@@ -230,14 +259,13 @@ impl WebBackendApi for WebService {
             .repository
             .update_certificate_auto_renew(tenant_id, certificate_id, request.auto_renew)
             .await?;
-        let _ = self
-            .audit_backend_action(
-                context,
-                "certificates.auto_renew.update",
-                "certificate",
-                certificate_id,
-            )
-            .await;
+        self.audit_backend_action(
+            context,
+            "certificates.auto_renew.update",
+            "certificate",
+            certificate_id,
+        )
+        .await;
         Ok(certificate)
     }
 
@@ -252,14 +280,13 @@ impl WebBackendApi for WebService {
             .retrieve_certificate_renewal_candidate(tenant_id, certificate_id)
             .await?;
         let certificate = self.renew_certificate(&candidate, false).await?;
-        let _ = self
-            .audit_backend_action(
-                context,
-                "certificates.renew.manual",
-                "certificate",
-                certificate_id,
-            )
-            .await;
+        self.audit_backend_action(
+            context,
+            "certificates.renew.manual",
+            "certificate",
+            certificate_id,
+        )
+        .await;
         Ok(certificate)
     }
 
@@ -291,6 +318,7 @@ impl WebBackendApi for WebService {
         context: &WebBackendRequestContext,
         request: &CreateNginxConfigRequest,
     ) -> WebServiceResult<sdkwork_webserver_contract::NginxConfigResponse> {
+        validate_create_nginx_config_request(request)?;
         let tenant_id = Self::require_backend_tenant(context)?;
         self.repository
             .create_nginx_config(tenant_id, request)
@@ -314,6 +342,7 @@ impl WebBackendApi for WebService {
         config_id: &str,
         request: &UpdateNginxConfigRequest,
     ) -> WebServiceResult<sdkwork_webserver_contract::NginxConfigResponse> {
+        validate_update_nginx_config_request(request)?;
         let tenant_id = Self::require_backend_tenant(context)?;
         self.repository
             .update_nginx_config(Some(tenant_id), config_id, request)
@@ -406,7 +435,7 @@ impl WebBackendApi for WebService {
         request: &CreateServerRequest,
     ) -> WebServiceResult<sdkwork_webserver_contract::CreateServerResponse> {
         let tenant_id = Self::require_backend_tenant(context)?;
-        validate_tenant_scope_hash(&request.tenant_scope_hash)?;
+        validate_create_server_request(request)?;
         self.repository.create_server(tenant_id, request).await
     }
 
@@ -421,6 +450,74 @@ impl WebBackendApi for WebService {
             .list_audit_logs(Some(tenant_id), page, page_size)
             .await
     }
+}
+
+fn validate_create_nginx_config_request(
+    request: &CreateNginxConfigRequest,
+) -> WebServiceResult<()> {
+    if !matches!(request.config_type, 1..=4) {
+        return Err(WebServiceError::validation(
+            "configType must be 1 (server), 2 (location), 3 (ssl), or 4 (upstream)",
+        ));
+    }
+    validate_bounded_text("siteId", &request.site_id, 64)?;
+    validate_bounded_text("configName", &request.config_name, 200)?;
+    validate_nginx_config_content(&request.config_content)
+}
+
+fn validate_update_nginx_config_request(
+    request: &UpdateNginxConfigRequest,
+) -> WebServiceResult<()> {
+    if request.config_name.is_none() && request.config_content.is_none() {
+        return Err(WebServiceError::validation(
+            "at least one Nginx configuration field is required",
+        ));
+    }
+    if let Some(config_name) = request.config_name.as_deref() {
+        validate_bounded_text("configName", config_name, 200)?;
+    }
+    if let Some(config_content) = request.config_content.as_deref() {
+        validate_nginx_config_content(config_content)?;
+    }
+    Ok(())
+}
+
+fn validate_nginx_config_content(value: &str) -> WebServiceResult<()> {
+    if value.is_empty() || value.len() > MAX_NGINX_CONFIG_BYTES || value.contains('\0') {
+        return Err(WebServiceError::validation(
+            "configContent must contain 1 byte to 1 MiB and must not contain NUL",
+        ));
+    }
+    Ok(())
+}
+
+fn validate_create_server_request(request: &CreateServerRequest) -> WebServiceResult<()> {
+    validate_bounded_text("name", &request.name, 100)?;
+    validate_bounded_text("host", &request.host, 255)?;
+    if request.host.chars().any(char::is_whitespace) {
+        return Err(WebServiceError::validation(
+            "host must not contain whitespace",
+        ));
+    }
+    if !(1..=65_535).contains(&request.ssh_port) {
+        return Err(WebServiceError::validation(
+            "sshPort must be between 1 and 65535",
+        ));
+    }
+    validate_tenant_scope_hash(&request.tenant_scope_hash)
+}
+
+fn validate_bounded_text(field: &str, value: &str, maximum: usize) -> WebServiceResult<()> {
+    if value.is_empty()
+        || value != value.trim()
+        || value.chars().count() > maximum
+        || value.chars().any(char::is_control)
+    {
+        return Err(WebServiceError::validation(format!(
+            "{field} must contain 1..{maximum} trimmed non-control characters"
+        )));
+    }
+    Ok(())
 }
 
 fn validate_tenant_scope_hash(value: &str) -> WebServiceResult<()> {
@@ -438,14 +535,91 @@ fn validate_tenant_scope_hash(value: &str) -> WebServiceResult<()> {
 
 #[cfg(test)]
 mod tests {
-    use super::{validate_tenant_scope_hash, WebService};
-    use sdkwork_webserver_contract::{WebAppResourceScope, WebBackendRequestContext};
+    use super::{
+        validate_create_nginx_config_request, validate_create_server_request,
+        validate_tenant_scope_hash, validate_update_nginx_config_request, WebService,
+        MAX_NGINX_CONFIG_BYTES,
+    };
+    use sdkwork_webserver_contract::{
+        CreateNginxConfigRequest, CreateServerRequest, UpdateNginxConfigRequest,
+        WebAppResourceScope, WebBackendRequestContext,
+    };
 
     #[test]
     fn tenant_scope_hash_is_exact_lowercase_sha256_shape() {
         validate_tenant_scope_hash(&"a".repeat(64)).unwrap();
         for invalid in ["a".repeat(63), "A".repeat(64), "g".repeat(64)] {
             assert!(validate_tenant_scope_hash(&invalid).is_err());
+        }
+    }
+
+    #[test]
+    fn nginx_configuration_requests_are_bounded_and_site_scoped() {
+        validate_create_nginx_config_request(&CreateNginxConfigRequest {
+            site_id: "site-1".to_owned(),
+            config_name: "edge".to_owned(),
+            config_type: 1,
+            config_content: "server {}".to_owned(),
+        })
+        .unwrap();
+        for request in [
+            CreateNginxConfigRequest {
+                site_id: String::new(),
+                config_name: "edge".to_owned(),
+                config_type: 1,
+                config_content: "server {}".to_owned(),
+            },
+            CreateNginxConfigRequest {
+                site_id: "site-1".to_owned(),
+                config_name: "edge".to_owned(),
+                config_type: 0,
+                config_content: "server {}".to_owned(),
+            },
+            CreateNginxConfigRequest {
+                site_id: "site-1".to_owned(),
+                config_name: "edge".to_owned(),
+                config_type: 1,
+                config_content: "x".repeat(MAX_NGINX_CONFIG_BYTES + 1),
+            },
+        ] {
+            assert!(validate_create_nginx_config_request(&request).is_err());
+        }
+        assert!(
+            validate_update_nginx_config_request(&UpdateNginxConfigRequest::default()).is_err()
+        );
+        assert!(
+            validate_update_nginx_config_request(&UpdateNginxConfigRequest {
+                config_name: None,
+                config_content: Some("location / {}".to_owned()),
+            })
+            .is_ok()
+        );
+    }
+
+    #[test]
+    fn server_registration_rejects_unbounded_hosts_and_invalid_ports() {
+        let valid = CreateServerRequest {
+            name: "edge-1".to_owned(),
+            host: "10.0.0.8".to_owned(),
+            tenant_scope_hash: "a".repeat(64),
+            ssh_port: 22,
+        };
+        validate_create_server_request(&valid).unwrap();
+        for request in [
+            CreateServerRequest {
+                ssh_port: 0,
+                ..valid.clone()
+            },
+            CreateServerRequest {
+                host: "edge host".to_owned(),
+                ..valid.clone()
+            },
+            CreateServerRequest {
+                name: " ".to_owned(),
+                ..valid.clone()
+            },
+        ] {
+            assert!(validate_create_server_request(&request).is_err());
         }
     }
 

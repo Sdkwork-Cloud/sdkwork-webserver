@@ -2,7 +2,7 @@ module Sdkwork
   module BackendSdk
     module Models
       class CreateNginxConfigRequest
-              attr_accessor :config_type, :config_name, :config_content, :site_id, :domain_id
+              attr_accessor :config_type, :config_name, :config_content, :site_id
 
               def initialize(attributes = {})
                 attributes = (attributes || {}).transform_keys(&:to_s)
@@ -10,7 +10,6 @@ module Sdkwork
                 @config_name = attributes['configName']
                 @config_content = attributes['configContent']
                 @site_id = attributes['siteId']
-                @domain_id = attributes['domainId']
               end
 
               def self.from_hash(data)
@@ -25,7 +24,6 @@ module Sdkwork
                   'configName' => @config_name,
                   'configContent' => @config_content,
                   'siteId' => @site_id,
-                  'domainId' => @domain_id,
                 }
               end
             end

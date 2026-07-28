@@ -11,6 +11,8 @@ goals:
   - Keep the complete Console shell and sign-out command visible for every authenticated account, with resource-level unauthorized states for unavailable capabilities.
   - List and mutate only sites owned by the authenticated app user, including configuration, domains, deployments, and certificates.
   - Upload a non-empty application archive through the generated Drive App SDK before creating the Web Server deployment command.
+  - Apply one bounded application-source policy to browser directory packages and uploaded ZIP archives before Drive extraction.
+  - Keep source preparation, upload, archive inspection, and extraction cancellable or fail-closed without allowing duplicate UI submission.
   - Persist a stable Drive resource URI, package size, lowercase SHA-256 digest, environment, version metadata, and idempotency key without storing signed URLs, object keys, or provider credentials.
   - Select certificate domains from the currently selected owned application and filter certificate queries by that application at the repository boundary.
   - Show deployment history and asynchronous status truthfully, and permit rollback only from a successful deployment while preserving artifact identity.
@@ -20,6 +22,7 @@ non_goals:
   - Treating package upload or deployment-command acceptance as proof that a version is serving traffic.
   - Storing signed delivery URLs, storage-provider object keys, access tokens, certificate private keys, or ambient tenant/user identity in deployment requests.
   - Adding a database migration; the existing deployment artifact and version columns remain authoritative.
+  - Replacing Drive archive validation, malware scanning, retention, quota, or access-control authority with browser-only checks.
 users:
   - application owners publishing Web and API applications
   - application owners configuring custom domains and TLS certificates
@@ -29,6 +32,13 @@ acceptance_criteria:
   - Certificate list accepts an optional siteId, verifies owner access, and performs owner plus site filtering in SQL.
   - Certificate creation rejects a domain owned by another app user in the same tenant.
   - The Console release action requires an archive, reports upload progress, computes SHA-256, uploads through Drive, and submits the stable Drive URI and artifact metadata through the generated Web App SDK.
+  - Directory packaging applies root and nested `.gitignore` files with Git-compatible ordering, negation, anchoring, escaping, and ignored-parent semantics.
+  - Directory and ZIP source packages exclude VCS metadata directories and reject unsafe, duplicate, excessively deep, excessively long, or control-character paths before extraction.
+  - Application source extraction is bounded to at most 500 files, 16 MiB per file, and 64 MiB total uncompressed content, matching the active Drive extraction profile.
+  - Uploaded ZIP archives are inspected through the generated Drive App SDK and only validated file entry paths are submitted to Drive extraction.
+  - The client rejects incomplete archive listings and mismatched extraction counts before creating a deployment command.
+  - A release dialog cannot submit twice or close while a command is running; unmounting aborts an active multipart upload.
+  - When application creation succeeds but source storage or initial deployment creation fails, the UI reports the recoverable draft state without exposing stack traces or provider details.
   - Deployment responses expose environment, version and source metadata, artifact identity, status, start/completion timestamps, and duration.
   - Rollback records inherit the selected deployment's version, source, and artifact fields and are unavailable in the Console unless the selected deployment succeeded.
   - The Console shell and sign-out command remain visible without Web permissions; unavailable resources show an IAM access state.
@@ -37,8 +47,8 @@ acceptance_criteria:
 non_functional_requirements:
   security: Owner scope is enforced by service and repository boundaries, not by frontend filtering. Drive and Web SDK clients share the IAM bootstrap TokenManager.
   privacy: Cross-owner data is not returned even when users share a tenant.
-  performance: Application, domain, deployment, and certificate lists remain store-paginated; browser uploads use the Drive multipart uploader.
-  reliability: Deployment state remains pending until an execution authority advances it; retries use an idempotency key and rollbacks preserve immutable artifact provenance.
+  performance: Application, domain, deployment, and certificate lists remain store-paginated; browser uploads use the Drive multipart uploader; raw directory selection and archive path depth are bounded; repeated ancestor ignore checks are cached.
+  reliability: Deployment state remains pending until an execution authority advances it; retries use an idempotency key and content fingerprint, incomplete extraction fails closed, and rollbacks preserve immutable artifact provenance.
 affected_surfaces:
   - api
   - sdk
@@ -54,6 +64,7 @@ trace:
     - APP_SDK_INTEGRATION_SPEC.md
     - IAM_SPEC.md
     - SECURITY_SPEC.md
+    - SUPPLY_CHAIN_SECURITY_SPEC.md
     - DEPLOYMENT_SPEC.md
     - FRONTEND_CODE_SPEC.md
     - TEST_SPEC.md
@@ -72,8 +83,11 @@ verification:
   - pnpm --dir apps/sdkwork-webserver-pc check
   - node ../sdkwork-specs/tools/check-app-sdk-consumer-imports.mjs --workspace .
   - node ../sdkwork-specs/tools/check-permission-composition.mjs --workspace .
+  - pnpm --dir apps/sdkwork-webserver-pc test
+  - pnpm --dir apps/sdkwork-webserver-pc typecheck
+  - pnpm --dir apps/sdkwork-webserver-pc build
 ```
 
 ## Decision
 
-The Web Server remains the authority for sites, domains, certificates, and deployment records. Drive owns browser package upload and returns the stable resource identity stored by Web Server. A separate deployment execution authority is still required to advance accepted records from pending to running, successful, or failed; until that authority reports evidence, the Console must show the command as pending rather than published.
+The Web Server remains the authority for sites, domains, certificates, and deployment records. Drive owns browser package upload, archive safety enforcement, extraction, and the stable resource identity stored by Web Server. The PC client applies an application-source admission policy and selects validated archive entry paths through the generated Drive App SDK so unsafe or irrelevant content fails before extraction; these checks do not replace Drive's server-side limits, ACLs, scanning, retention, or checksum authority. A separate deployment execution authority is still required to advance accepted records from pending to running, successful, or failed; until that authority reports evidence, the Console must show the command as pending rather than published.

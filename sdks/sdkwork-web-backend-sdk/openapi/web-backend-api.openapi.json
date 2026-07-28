@@ -2531,10 +2531,12 @@
       },
       "CreateNginxConfigRequest": {
         "type": "object",
+        "additionalProperties": false,
         "required": [
           "configType",
           "configName",
-          "configContent"
+          "configContent",
+          "siteId"
         ],
         "properties": {
           "configType": {
@@ -2548,16 +2550,15 @@
           },
           "configName": {
             "type": "string",
+            "minLength": 1,
             "maxLength": 200
           },
           "configContent": {
-            "type": "string"
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1048576
           },
           "siteId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "domainId": {
             "type": "string",
             "format": "uuid"
           }
@@ -2565,12 +2566,17 @@
       },
       "UpdateNginxConfigRequest": {
         "type": "object",
+        "additionalProperties": false,
+        "minProperties": 1,
         "properties": {
           "configContent": {
-            "type": "string"
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1048576
           },
           "configName": {
             "type": "string",
+            "minLength": 1,
             "maxLength": 200
           }
         }
@@ -2797,19 +2803,28 @@
           },
           "environment": {
             "type": "string",
-            "maxLength": 32,
+            "enum": [
+              "development",
+              "test",
+              "staging",
+              "production"
+            ],
             "default": "production"
           },
           "versionTag": {
             "type": "string",
+            "minLength": 1,
             "maxLength": 100
           },
           "commitHash": {
             "type": "string",
-            "maxLength": 64
+            "minLength": 7,
+            "maxLength": 64,
+            "pattern": "^[a-f0-9]{7,64}$"
           },
           "sourceRef": {
             "type": "string",
+            "minLength": 1,
             "maxLength": 500
           },
           "artifactDriveUri": {
@@ -2827,8 +2842,8 @@
           },
           "artifactHash": {
             "type": "string",
-            "pattern": "^[A-Fa-f0-9]{64}$",
-            "description": "SHA-256 hexadecimal digest of the uploaded package."
+            "pattern": "^[a-f0-9]{64}$",
+            "description": "Lowercase SHA-256 hexadecimal digest of the uploaded package."
           }
         }
       },
@@ -2859,7 +2874,13 @@
             "type": "integer"
           },
           "environment": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "development",
+              "test",
+              "staging",
+              "production"
+            ]
           },
           "versionTag": {
             "type": "string"
@@ -2888,7 +2909,7 @@
           },
           "artifactHash": {
             "type": "string",
-            "pattern": "^[A-Fa-f0-9]{64}$"
+            "pattern": "^[a-f0-9]{64}$"
           },
           "startedAt": {
             "type": "string",
@@ -3205,6 +3226,7 @@
       },
       "CreateServerRequest": {
         "type": "object",
+        "additionalProperties": false,
         "required": [
           "name",
           "host",
@@ -3214,10 +3236,12 @@
         "properties": {
           "name": {
             "type": "string",
+            "minLength": 1,
             "maxLength": 100
           },
           "host": {
             "type": "string",
+            "minLength": 1,
             "maxLength": 255
           },
           "tenantScopeHash": {
@@ -3229,6 +3253,8 @@
           },
           "sshPort": {
             "type": "integer",
+            "minimum": 1,
+            "maximum": 65535,
             "default": 22
           }
         }

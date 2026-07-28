@@ -1,12 +1,13 @@
 use std::sync::Arc;
 
 use axum::Router;
-use sdkwork_iam_web_adapter::IamWebRequestContextResolver;
+use sdkwork_iam_web_adapter::{IamAuthorizationPolicy, IamWebRequestContextResolver};
 use sdkwork_routes_webserver_common::{
     web_auth_mode_from_env, web_framework_runtime_policy_from_env, with_problem_correlation,
-    ProductionFailClosedResolver, WebAuthMode,
+    ProductionFailClosedResolver, WebAuthMode, WebServerTenantIsolationPolicy,
 };
 use sdkwork_web_axum::{with_web_request_context, WebFrameworkLayer};
+use sdkwork_web_bootstrap::WebFrameworkBuilder;
 use sdkwork_web_core::{
     DefaultWebRequestContextResolver, DomainContextInjector, HttpMetricsRegistry,
     WebRequestContext, WebRequestContextProfile,
@@ -101,20 +102,22 @@ where
         .validate_public_path_prefixes(&web_app_api_public_path_prefixes())
         .expect("Web app-api public prefixes must not cover protected manifest routes");
 
-    let layer = WebFrameworkLayer::new(resolver)
-        .with_profile(WebRequestContextProfile {
+    let mut builder = WebFrameworkBuilder::new(resolver)
+        .profile(WebRequestContextProfile {
             app_api_prefix: paths::PREFIX.to_owned(),
             public_path_prefixes: web_app_api_public_path_prefixes(),
             environment,
             ..WebRequestContextProfile::default()
         })
-        .with_security_policy(security_policy)
-        .with_route_manifest(route_manifest)
-        .with_domain_injector(Arc::new(WebAppContextInjector));
-    match metrics {
-        Some(metrics) => layer.with_metrics(metrics),
-        None => layer,
+        .security_policy(security_policy)
+        .route_manifest(route_manifest.clone())
+        .authorization_policy(Arc::new(IamAuthorizationPolicy::new(route_manifest)))
+        .tenant_isolation_policy(Arc::new(WebServerTenantIsolationPolicy))
+        .domain_injector(Arc::new(WebAppContextInjector));
+    if let Some(metrics) = metrics {
+        builder = builder.metrics_registry(metrics);
     }
+    builder.build().into_layer()
 }
 
 pub async fn wrap_router_with_web_framework_from_env(router: Router) -> Router {

@@ -1,7 +1,28 @@
-import { normalizeWebserverPage, type WebserverResourceAction, type WebserverResourceActionContext, type WebserverResourceDataSource, type WebserverResourceRegistry } from "@sdkwork/webserver-pc-commons";
+import {
+  normalizeWebserverPage,
+  prepareApplicationSourcePackage,
+  validateApplicationArchiveEntries,
+  WebserverActionError,
+  type ApplicationSourceStorage,
+  type PreparedApplicationSource,
+  type StoredApplicationSource,
+  type WebserverResourceAction,
+  type WebserverResourceActionContext,
+  type WebserverResourceDataSource,
+  type WebserverResourceRegistry,
+} from "@sdkwork/webserver-pc-commons";
 import { createDriveAppClient, type SdkworkDriveAppClient } from "@sdkwork/drive-app-sdk";
 import type { AuthTokenManager } from "@sdkwork/sdk-common";
-import { createClient as createWebAppClient, type SdkworkAppClient as SdkworkWebAppClient } from "@sdkwork/web-app-sdk";
+import {
+  createClient as createWebAppClient,
+  type CreateCertificateRequest,
+  type CreateDeploymentRequest,
+  type CreateDomainRequest,
+  type CreateEnvVariableRequest,
+  type CreateHealthCheckRequest,
+  type SdkworkAppClient as SdkworkWebAppClient,
+  type UpdateSiteRequest,
+} from "@sdkwork/web-app-sdk";
 import { createContext, useContext, type ReactNode } from "react";
 
 export type WebserverConsoleSdkClient = SdkworkWebAppClient;
@@ -18,27 +39,139 @@ export function createWebserverConsoleSdkClients(baseUrls: { driveAppApiBaseUrl:
 export function WebserverConsoleSdkProvider({ children, clients }: { children: ReactNode; clients: WebserverConsoleSdkClients }) { return <Context.Provider value={clients}>{children}</Context.Provider>; }
 export function useWebserverConsoleSdk(): WebserverConsoleSdkClients { const clients = useContext(Context); if (!clients) throw new Error("WebserverConsoleSdkProvider is required"); return clients; }
 
-export function createWebserverConsoleRegistry(clients: WebserverConsoleSdkClients): WebserverResourceRegistry {
+export function createApplicationSourceStorage(
+  driveClient: SdkworkDriveAppClient,
+): ApplicationSourceStorage {
+  return {
+    prepare: prepareApplicationSourcePackage,
+    async store(request): Promise<StoredApplicationSource> {
+      const { archive, archiveHash } = request.package;
+      request.signal?.throwIfAborted();
+      request.onProgress?.(0);
+      const taskId = await applicationSourceUploadTaskId(request.applicationId, archiveHash);
+      request.signal?.throwIfAborted();
+      const uploaded = await driveClient.uploader.uploadArchive({
+        appResourceId: request.applicationId,
+        appResourceType: "web.application.source",
+        checksumSha256Hex: `sha256:${archiveHash}`,
+        contentType: archive.type || "application/zip",
+        file: archive,
+        fileFingerprint: archiveHash,
+        onProgress: (progress) => {
+          const ratio = progress.totalBytes > 0
+            ? progress.uploadedBytes / progress.totalBytes
+            : 0;
+          request.onProgress?.(Math.round(ratio * 88));
+        },
+        originalFileName: archive.name,
+        scene: "application-source",
+        source: "sdkwork-webserver-pc",
+        signal: request.signal,
+        taskId,
+      });
+      request.signal?.throwIfAborted();
+      const { nodeId, spaceId } = uploaded.uploadSession;
+      if (!nodeId || !spaceId) throw new Error("Drive did not return the source archive identity");
+      request.onProgress?.(90);
+      const archiveEntries = await driveClient.drive.archiveEntries.list(nodeId);
+      request.signal?.throwIfAborted();
+      const validated = validateApplicationArchiveEntries(archiveEntries.items, {
+        excludeDriveSanitizedVcs: request.package.inputMode === "archive",
+        hasMore: archiveEntries.pageInfo.hasMore,
+      });
+      if (
+        request.package.inputMode === "directory"
+        && (validated.sourceFileCount !== request.package.sourceFileCount
+          || validated.uncompressedSize !== request.package.uncompressedSize)
+      ) {
+        throw new Error("Drive archive inspection did not match the prepared source package");
+      }
+      request.onProgress?.(94);
+      const extracted = await driveClient.drive.archiveEntries.extract(nodeId, {
+        entryPaths: [...validated.entryPaths],
+      });
+      request.signal?.throwIfAborted();
+      const extractedCount = parseExtractedCount(extracted.extractedCount);
+      if (extractedCount !== validated.sourceFileCount) {
+        throw new Error("Drive did not extract every validated application source file");
+      }
+      request.onProgress?.(100);
+      return {
+        archiveDriveUri: `drive://spaces/${spaceId}/nodes/${nodeId}`,
+        archiveHash,
+        archiveSize: String(archive.size),
+        extractedCount: String(extractedCount),
+      };
+    },
+  };
+}
+
+async function applicationSourceUploadTaskId(applicationId: string, archiveHash: string): Promise<string> {
+  const material = UTF8_ENCODER.encode(`${applicationId}\0${archiveHash}`);
+  const digest = await globalThis.crypto.subtle.digest("SHA-256", material);
+  const hash = Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+  return `web-source-${hash}`;
+}
+
+function parseExtractedCount(value: string): number {
+  if (!/^(0|[1-9][0-9]*)$/.test(value)) {
+    throw new Error("Drive returned an invalid extracted file count");
+  }
+  const count = Number(value);
+  if (!Number.isSafeInteger(count)) {
+    throw new Error("Drive returned an unsupported extracted file count");
+  }
+  return count;
+}
+
+const UTF8_ENCODER = new TextEncoder();
+
+export function createWebserverConsoleRegistry(
+  clients: WebserverConsoleSdkClients,
+  sourceStorage: ApplicationSourceStorage = createApplicationSourceStorage(clients.drive),
+): WebserverResourceRegistry {
   const client = clients.web;
   return {
     sites: source((query) => client.site.list({ page: query.page, pageSize: query.pageSize, keyword: query.search }), [
-      action("create", "Create site", { name: "", applicationType: "WEB", siteType: 1 }, (context) => client.site.create(context.body as unknown as Parameters<typeof client.site.create>[0], idempotencyParams(context)), { fieldOptions: { applicationType: ["WEB", "API"], siteType: [1, 2, 3, 4, 5, 6] }, permission: "web.sites.write" }),
-      action("update", "Update", { name: "", description: "" }, (context) => client.site.update(selectedId(context, "siteId"), context.body as unknown as Parameters<typeof client.site.update>[1]), { permission: "web.sites.write", selection: true }),
+      action(
+        "create",
+        "Create application",
+        {
+          name: "",
+          description: "",
+          applicationType: "WEB",
+          siteType: 1,
+          environment: "production",
+          versionTag: "v1.0.0",
+        },
+        (context) => createApplicationWithInitialVersion(clients, sourceStorage, context),
+        {
+          fieldOptions: {
+            applicationType: ["WEB", "API"],
+            siteType: [1, 2, 3, 4, 5, 6],
+            environment: ["production", "staging", "test", "development"],
+          },
+          permission: "web.sites.write",
+          requiredFields: ["name", "versionTag"],
+          sourceInput: "archive-or-directory",
+        },
+      ),
+      action("update", "Update", { name: "", description: "" }, async (context) => client.site.update(selectedId(context, "siteId"), updateSiteRequest(context.body)), { permission: "web.sites.write", selection: true }),
       action("activate", "Activate", {}, (context) => client.site.activate(selectedId(context, "siteId")), { permission: "web.sites.write", selection: true }),
       action("pause", "Disable", {}, (context) => client.site.pause(selectedId(context, "siteId")), { dangerous: true, permission: "web.sites.write", selection: true }),
       action("delete", "Delete", {}, (context) => client.site.delete(selectedId(context, "siteId")), { dangerous: true, permission: "web.sites.write", selection: true }),
     ]),
     configuration: scopedSource((query) => client.envVariable.sites.envVariables.list(requiredScope(query.scopeId)), [
-      action("create-variable", "Add variable", { key: "", value: "", environment: "production", isSecret: false }, (context) => client.envVariable.sites.envVariables.create(requiredScope(context.scopeId), context.body as unknown as Parameters<typeof client.envVariable.sites.envVariables.create>[1], idempotencyParams(context)), { permission: "web.sites.write", scope: true }),
-      action("create-check", "Add health check", { checkType: 1, checkUrl: "/health", checkInterval: 30, timeoutMs: 5_000, retryCount: 3 }, (context) => client.monitor.sites.healthChecks.create(requiredScope(context.scopeId), context.body as unknown as Parameters<typeof client.monitor.sites.healthChecks.create>[1], idempotencyParams(context)), { fieldOptions: { checkType: [1, 2, 3] }, permission: "web.sites.write", scope: true }),
+      action("create-variable", "Add variable", { key: "", value: "", environment: "production", isSecret: false }, async (context) => client.envVariable.sites.envVariables.create(requiredScope(context.scopeId), createEnvVariableRequest(context.body), idempotencyParams(context)), { permission: "web.sites.write", scope: true }),
+      action("create-check", "Add health check", { checkType: 1, checkUrl: "/health", checkInterval: 30, timeoutMs: 5_000, retryCount: 3 }, async (context) => client.monitor.sites.healthChecks.create(requiredScope(context.scopeId), createHealthCheckRequest(context.body), idempotencyParams(context)), { fieldOptions: { checkType: [1, 2, 3] }, permission: "web.sites.write", scope: true }),
     ]),
     domains: scopedSource((query) => client.domain.sites.domains.list(requiredScope(query.scopeId), { page: query.page, pageSize: query.pageSize }), [
-      action("create", "Bind domain", { hostname: "", isPrimary: false, sslEnabled: true, sslProvider: "letsencrypt" }, (context) => client.domain.sites.domains.create(requiredScope(context.scopeId), context.body as unknown as Parameters<typeof client.domain.sites.domains.create>[1], idempotencyParams(context)), { fieldOptions: { sslProvider: ["letsencrypt", "custom", "none"] }, permission: "web.sites.write", scope: true }),
+      action("create", "Bind domain", { hostname: "", isPrimary: false, sslEnabled: true, sslProvider: "letsencrypt" }, async (context) => client.domain.sites.domains.create(requiredScope(context.scopeId), createDomainRequest(context.body), idempotencyParams(context)), { fieldOptions: { sslProvider: ["letsencrypt", "custom", "none"] }, permission: "web.sites.write", scope: true }),
       action("verify", "Verify", {}, (context) => client.domain.sites.domains.verify(requiredScope(context.scopeId), selectedId(context, "domainId"), idempotencyParams(context)), { permission: "web.sites.write", scope: true, selection: true }),
       action("delete", "Unbind", {}, (context) => client.domain.sites.domains.delete(requiredScope(context.scopeId), selectedId(context, "domainId")), { dangerous: true, permission: "web.sites.write", scope: true, selection: true }),
     ]),
     certificates: scopedSource((query) => client.certificate.list({ page: query.page, pageSize: query.pageSize, siteId: requiredScope(query.scopeId) }), [
-      action("create", "Request certificate", { domainId: "", certType: 1, autoRenew: true }, (context) => client.certificate.create(context.body as unknown as Parameters<typeof client.certificate.create>[0], idempotencyParams(context)), {
+      action("create", "Request certificate", { domainId: "", certType: 1, autoRenew: true }, async (context) => client.certificate.create(createCertificateRequest(context.body), idempotencyParams(context)), {
         fieldOptions: { certType: [1, 3], domainId: [] },
         loadFieldOptions: async (context) => {
           const result = await client.domain.sites.domains.list(requiredScope(context.scopeId), { page: 1, pageSize: 100 });
@@ -53,17 +186,17 @@ export function createWebserverConsoleRegistry(clients: WebserverConsoleSdkClien
       }),
     ]),
     deployments: scopedSource((query) => client.deployment.sites.deployments.list(requiredScope(query.scopeId), { page: query.page, pageSize: query.pageSize }), [
-      action("deploy", "Deploy", { deployType: 1, environment: "production", versionTag: "", sourceRef: "", commitHash: "" }, (context) => deployApplication(clients, context), {
-        acceptedFileTypes: ".zip,.tar,.tar.gz,.tgz,.gz",
+      action("deploy", "Deploy", { deployType: 1, environment: "production", versionTag: "", sourceRef: "", commitHash: "" }, (context) => deployApplication(clients, sourceStorage, context), {
         confirmation: true,
         fieldOptions: { deployType: [1], environment: ["production", "staging", "test", "development"] },
-        file: true,
         permission: "web.sites.write",
+        requiredFields: ["versionTag"],
         scope: true,
+        sourceInput: "archive-or-directory",
       }),
-      action("rollback", "Rollback", {}, (context) => client.deployment.sites.deployments.rollback(requiredScope(context.scopeId), selectedId(context, "deploymentId"), idempotencyParams(context)), {
+      action("rollback", "Restore this version", {}, (context) => client.deployment.sites.deployments.rollback(requiredScope(context.scopeId), selectedId(context, "deploymentId"), idempotencyParams(context)), {
         availableWhen: (context) => Number(context.selectedItem?.status) === 2,
-        dangerous: true,
+        confirmation: true,
         permission: "web.sites.write",
         scope: true,
         selection: true,
@@ -74,57 +207,321 @@ export function createWebserverConsoleRegistry(clients: WebserverConsoleSdkClien
 
 function source(load: WebserverResourceDataSource["load"] extends (query: infer Q) => Promise<unknown> ? (query: Q) => Promise<unknown> : never, actions: readonly WebserverResourceAction[]): WebserverResourceDataSource { return { actions, async load(query) { return normalizeWebserverPage(await load(query)); } }; }
 function scopedSource(load: Parameters<typeof source>[0], actions: readonly WebserverResourceAction[]): WebserverResourceDataSource { return { ...source(load, actions), requiresScope: true }; }
-function action(id: string, label: string, bodyTemplate: Record<string, unknown>, execute: WebserverResourceAction["execute"], options: { acceptedFileTypes?: string; availableWhen?: WebserverResourceAction["availableWhen"]; confirmation?: boolean; dangerous?: boolean; fieldOptions?: WebserverResourceAction["fieldOptions"]; file?: boolean; loadFieldOptions?: WebserverResourceAction["loadFieldOptions"]; permission?: string; scope?: boolean; selection?: boolean } = {}): WebserverResourceAction { return { id, label, bodyTemplate, execute, acceptedFileTypes: options.acceptedFileTypes, availableWhen: options.availableWhen, dangerous: options.dangerous, fieldOptions: options.fieldOptions, loadFieldOptions: options.loadFieldOptions, permission: options.permission, requiresConfirmation: options.confirmation, requiresFile: options.file, requiresScope: options.scope, requiresSelection: options.selection }; }
+function action(id: string, label: string, bodyTemplate: Record<string, unknown>, execute: WebserverResourceAction["execute"], options: { acceptedFileTypes?: string; availableWhen?: WebserverResourceAction["availableWhen"]; confirmation?: boolean; dangerous?: boolean; fieldOptions?: WebserverResourceAction["fieldOptions"]; file?: boolean; loadFieldOptions?: WebserverResourceAction["loadFieldOptions"]; permission?: string; requiredFields?: readonly string[]; scope?: boolean; selection?: boolean; sourceInput?: WebserverResourceAction["sourceInput"] } = {}): WebserverResourceAction { return { id, label, bodyTemplate, execute, acceptedFileTypes: options.acceptedFileTypes, availableWhen: options.availableWhen, dangerous: options.dangerous, fieldOptions: options.fieldOptions, loadFieldOptions: options.loadFieldOptions, permission: options.permission, requiredFields: options.requiredFields, requiresConfirmation: options.confirmation, requiresFile: options.file, requiresScope: options.scope, requiresSelection: options.selection, sourceInput: options.sourceInput }; }
 function selectedId(context: WebserverResourceActionContext, key: string): string { const value = context.selectedItem?.[key]; if (typeof value !== "string" && typeof value !== "number") throw new Error(`${key} is unavailable`); return String(value); }
 function requiredScope(value: string | undefined): string { if (!value?.trim()) throw new Error("Site ID is required"); return value.trim(); }
 function idempotencyParams(context: WebserverResourceActionContext): { idempotencyKey: string } { const idempotencyKey = context.idempotencyKey?.trim(); if (!idempotencyKey) throw new Error("Idempotency key is required"); return { idempotencyKey }; }
 
-async function deployApplication(clients: WebserverConsoleSdkClients, context: WebserverResourceActionContext): Promise<unknown> {
+async function deployApplication(clients: WebserverConsoleSdkClients, sourceStorage: ApplicationSourceStorage, context: WebserverResourceActionContext): Promise<unknown> {
   const siteId = requiredScope(context.scopeId);
-  const file = context.file;
-  if (!file || file.size <= 0) throw new Error("A non-empty application package is required");
-
-  context.onProgress?.(1);
-  const artifactHash = await sha256Hex(file);
-  context.onProgress?.(5);
-  const uploaded = await clients.drive.uploader.uploadArchive({
-    appResourceId: siteId,
-    appResourceType: "web.deployment",
-    checksumSha256Hex: `sha256:${artifactHash}`,
-    contentType: file.type || "application/octet-stream",
-    file,
-    onProgress: (progress) => {
-      const ratio = progress.totalBytes > 0 ? progress.uploadedBytes / progress.totalBytes : 0;
-      context.onProgress?.(5 + Math.round(ratio * 88));
-    },
-    originalFileName: file.name,
-    scene: "application-deployment",
-    source: "sdkwork-webserver-pc",
-  });
-  context.onProgress?.(95);
-
-  const deployType = Number(context.body.deployType);
-  if (![1, 2, 3, 4].includes(deployType)) throw new Error("deployType is invalid");
-  const request: Parameters<typeof clients.web.deployment.sites.deployments.create>[1] = {
-    deployType: deployType as 1 | 2 | 3 | 4,
-    environment: optionalText(context.body.environment),
-    versionTag: optionalText(context.body.versionTag),
-    sourceRef: optionalText(context.body.sourceRef),
-    commitHash: optionalText(context.body.commitHash),
-    artifactDriveUri: `drive://spaces/${uploaded.uploadSession.spaceId}/nodes/${uploaded.uploadSession.nodeId}`,
-    artifactSize: String(file.size),
-    artifactHash,
-  };
-  const deployment = await clients.web.deployment.sites.deployments.create(siteId, request, idempotencyParams(context));
+  const metadata = deploymentMetadata(context);
+  const idempotency = idempotencyParams(context);
+  const prepared = await prepareSource(sourceStorage, context, 0, 24);
+  const stored = await storeSource(sourceStorage, siteId, prepared, context, 24, 94);
+  const request = deploymentRequest(metadata, stored);
+  let deployment: unknown;
+  try {
+    deployment = await clients.web.deployment.sites.deployments.create(siteId, request, idempotency);
+  } catch (error) {
+    throw new WebserverActionError("deployment-source-stored", {}, { cause: error });
+  }
   context.onProgress?.(100);
   return deployment;
 }
 
-async function sha256Hex(file: File): Promise<string> {
-  const digest = await globalThis.crypto.subtle.digest("SHA-256", await file.arrayBuffer());
-  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+async function createApplicationWithInitialVersion(
+  clients: WebserverConsoleSdkClients,
+  sourceStorage: ApplicationSourceStorage,
+  context: WebserverResourceActionContext,
+): Promise<unknown> {
+  const siteRequest = {
+    name: requiredText(context.body.name, "Application name"),
+    description: optionalText(context.body.description),
+    applicationType: applicationType(context.body.applicationType),
+    siteType: siteType(context.body.siteType),
+  };
+  const metadata = deploymentMetadata(context);
+  const idempotency = idempotencyParams(context);
+  const prepared = await prepareSource(sourceStorage, context, 0, 22);
+  const site = await clients.web.site.create(siteRequest, idempotency);
+  const siteId = site.id?.trim();
+  if (!siteId) throw new Error("The created application did not return an ID");
+  context.onProgress?.(26);
+  let stored: StoredApplicationSource;
+  try {
+    stored = await storeSource(sourceStorage, siteId, prepared, context, 26, 92);
+  } catch (error) {
+    throw new WebserverActionError(
+      "application-draft-source-failed",
+      { applicationId: siteId },
+      { cause: error },
+    );
+  }
+  try {
+    const deployment = await clients.web.deployment.sites.deployments.create(
+      siteId,
+      deploymentRequest(metadata, stored),
+      idempotency,
+    );
+    context.onProgress?.(100);
+    return { ...deployment, applicationId: siteId };
+  } catch (error) {
+    throw new WebserverActionError(
+      "application-draft-deployment-failed",
+      { applicationId: siteId },
+      { cause: error },
+    );
+  }
+}
+
+async function prepareSource(
+  sourceStorage: ApplicationSourceStorage,
+  context: WebserverResourceActionContext,
+  start: number,
+  end: number,
+): Promise<PreparedApplicationSource> {
+  return sourceStorage.prepare({
+    files: sourceFiles(context),
+    mode: context.sourceInputMode ?? "archive",
+    onProgress: (progress) => context.onProgress?.(scaleProgress(progress, start, end)),
+    signal: context.signal,
+  });
+}
+
+async function storeSource(
+  sourceStorage: ApplicationSourceStorage,
+  applicationId: string,
+  prepared: PreparedApplicationSource,
+  context: WebserverResourceActionContext,
+  start: number,
+  end: number,
+): Promise<StoredApplicationSource> {
+  return sourceStorage.store({
+    applicationId,
+    package: prepared,
+    onProgress: (progress) => context.onProgress?.(scaleProgress(progress, start, end)),
+    signal: context.signal,
+  });
+}
+
+type DeploymentMetadata = Omit<
+  CreateDeploymentRequest,
+  "artifactDriveUri" | "artifactSize" | "artifactHash"
+>;
+
+function deploymentRequest(
+  metadata: DeploymentMetadata,
+  stored: StoredApplicationSource,
+): CreateDeploymentRequest {
+  return {
+    ...metadata,
+    artifactDriveUri: stored.archiveDriveUri,
+    artifactSize: stored.archiveSize,
+    artifactHash: stored.archiveHash,
+  };
+}
+
+function deploymentMetadata(context: WebserverResourceActionContext): DeploymentMetadata {
+  return {
+    deployType: deploymentType(context.body.deployType),
+    environment: deploymentEnvironment(context.body.environment),
+    versionTag: requiredText(context.body.versionTag, "Version"),
+    sourceRef: optionalText(context.body.sourceRef),
+    commitHash: optionalText(context.body.commitHash),
+  };
+}
+
+function deploymentType(value: unknown): 1 | 2 | 3 | 4 {
+  const normalized = Number(value ?? 1);
+  if (normalized === 1 || normalized === 2 || normalized === 3 || normalized === 4) {
+    return normalized;
+  }
+  throw new Error("deployType is invalid");
+}
+
+function deploymentEnvironment(
+  value: unknown,
+): "development" | "test" | "staging" | "production" | undefined {
+  const normalized = optionalText(value);
+  if (normalized === undefined) return undefined;
+  if (
+    normalized === "development"
+    || normalized === "test"
+    || normalized === "staging"
+    || normalized === "production"
+  ) {
+    return normalized;
+  }
+  throw new Error("environment is invalid");
+}
+
+function sourceFiles(context: WebserverResourceActionContext): readonly File[] {
+  if (context.files?.length) return context.files;
+  if (context.file) return [context.file];
+  throw new Error("Application source is required");
+}
+
+function scaleProgress(progress: number, start: number, end: number): number {
+  return start + Math.round((Math.max(0, Math.min(100, progress)) / 100) * (end - start));
+}
+
+function applicationType(value: unknown): "WEB" | "API" {
+  if (value === "WEB" || value === "API") return value;
+  throw new Error("Application type is invalid");
+}
+
+function siteType(value: unknown): 1 | 2 | 3 | 4 | 5 | 6 {
+  const parsed = Number(value);
+  if ([1, 2, 3, 4, 5, 6].includes(parsed)) return parsed as 1 | 2 | 3 | 4 | 5 | 6;
+  throw new Error("Runtime type is invalid");
+}
+
+function requiredText(value: unknown, label: string): string {
+  const text = optionalText(value);
+  if (!text) throw new Error(`${label} is required`);
+  return text;
 }
 
 function optionalText(value: unknown): string | undefined {
   return typeof value === "string" && value.trim() ? value.trim() : undefined;
 }
+
+function updateSiteRequest(body: Readonly<Record<string, unknown>>): UpdateSiteRequest {
+  const name = boundedOptionalText(body.name, "Application name", 100, false);
+  const description = boundedOptionalText(body.description, "Description", 500, true);
+  if (name === undefined && description === undefined) {
+    throw new Error("At least one application field is required");
+  }
+  return { name, description };
+}
+
+function createEnvVariableRequest(body: Readonly<Record<string, unknown>>): CreateEnvVariableRequest {
+  if (typeof body.value !== "string") throw new Error("Variable value is invalid");
+  if (UTF8_ENCODER.encode(body.value).byteLength > MAX_ENV_VALUE_BYTES) {
+    throw new Error("Variable value must not exceed 64 KiB");
+  }
+  const key = boundedRequiredText(body.key, "Variable key", 200);
+  if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(key)) {
+    throw new Error("Variable key is invalid");
+  }
+  return {
+    key,
+    value: body.value,
+    environment: environment(body.environment),
+    isSecret: optionalBoolean(body.isSecret, "Secret variable"),
+  };
+}
+
+function createHealthCheckRequest(body: Readonly<Record<string, unknown>>): CreateHealthCheckRequest {
+  const checkInterval = boundedInteger(body.checkInterval, "Check interval", 5, 86_400);
+  const timeoutMs = boundedInteger(body.timeoutMs, "Timeout", 100, 60_000);
+  if (timeoutMs > checkInterval * 1_000) {
+    throw new Error("Timeout must not exceed the check interval");
+  }
+  return {
+    checkType: healthCheckType(body.checkType),
+    checkUrl: boundedRequiredText(body.checkUrl, "Health check target", 2_000),
+    checkInterval,
+    timeoutMs,
+    retryCount: boundedInteger(body.retryCount, "Retry count", 0, 10),
+  };
+}
+
+function createDomainRequest(body: Readonly<Record<string, unknown>>): CreateDomainRequest {
+  return {
+    hostname: hostname(body.hostname),
+    isPrimary: optionalBoolean(body.isPrimary, "Primary domain"),
+    sslEnabled: optionalBoolean(body.sslEnabled, "TLS"),
+    sslProvider: sslProvider(body.sslProvider),
+  };
+}
+
+function hostname(value: unknown): string {
+  const text = boundedRequiredText(value, "Hostname", 253);
+  if (text.startsWith(".") || text.endsWith(".") || text.split(".").some((label) => (
+    !label
+    || label.length > 63
+    || label.startsWith("-")
+    || label.endsWith("-")
+    || !/^[A-Za-z0-9-]+$/.test(label)
+  ))) {
+    throw new Error("Hostname must be a safe ASCII DNS name");
+  }
+  return text;
+}
+
+function createCertificateRequest(body: Readonly<Record<string, unknown>>): CreateCertificateRequest {
+  const certType = certificateType(body.certType);
+  const autoRenew = optionalBoolean(body.autoRenew, "Automatic renewal");
+  if (certType === 3 && autoRenew === true) {
+    throw new Error("Automatic renewal is unavailable for self-signed certificates");
+  }
+  return {
+    domainId: boundedRequiredText(body.domainId, "Domain ID", 64),
+    certType,
+    autoRenew,
+  };
+}
+
+function healthCheckType(value: unknown): 1 | 2 | 3 {
+  const parsed = Number(value);
+  if (parsed === 1 || parsed === 2 || parsed === 3) return parsed;
+  throw new Error("Health check type is invalid");
+}
+
+function certificateType(value: unknown): 1 | 3 {
+  const parsed = Number(value);
+  if (parsed === 1 || parsed === 3) return parsed;
+  throw new Error("Certificate type is invalid");
+}
+
+function environment(value: unknown): "development" | "test" | "staging" | "production" | undefined {
+  if (value === undefined || value === null || value === "") return undefined;
+  if (value === "development" || value === "test" || value === "staging" || value === "production") {
+    return value;
+  }
+  throw new Error("Environment is invalid");
+}
+
+function sslProvider(value: unknown): "letsencrypt" | "custom" | "none" | undefined {
+  if (value === undefined || value === null || value === "") return undefined;
+  if (value === "letsencrypt" || value === "custom" || value === "none") return value;
+  throw new Error("TLS provider is invalid");
+}
+
+function boundedRequiredText(value: unknown, label: string, maximum: number): string {
+  const text = boundedOptionalText(value, label, maximum, false);
+  if (!text) throw new Error(`${label} is required`);
+  return text;
+}
+
+function boundedOptionalText(
+  value: unknown,
+  label: string,
+  maximum: number,
+  allowEmpty: boolean,
+): string | undefined {
+  if (value === undefined || value === null) return undefined;
+  if (typeof value !== "string") throw new Error(`${label} is invalid`);
+  const text = value.trim();
+  if ((!allowEmpty && !text) || text.length > maximum || /[\u0000-\u001f\u007f]/.test(text)) {
+    throw new Error(`${label} is invalid`);
+  }
+  return text;
+}
+
+function optionalBoolean(value: unknown, label: string): boolean | undefined {
+  if (value === undefined) return undefined;
+  if (typeof value !== "boolean") throw new Error(`${label} is invalid`);
+  return value;
+}
+
+function boundedInteger(value: unknown, label: string, minimum: number, maximum: number): number {
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed < minimum || parsed > maximum) {
+    throw new Error(`${label} must be between ${minimum} and ${maximum}`);
+  }
+  return parsed;
+}
+
+const MAX_ENV_VALUE_BYTES = 64 * 1024;

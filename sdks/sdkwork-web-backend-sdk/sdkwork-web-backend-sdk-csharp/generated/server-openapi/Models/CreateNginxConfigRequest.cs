@@ -9,7 +9,6 @@ namespace SDKWork.Web.BackendSdk.Models
         public int ConfigType { get; set; }
         public string ConfigName { get; set; }
         public string ConfigContent { get; set; }
-        public string? SiteId { get; set; }
-        public string? DomainId { get; set; }
+        public string SiteId { get; set; }
     }
 }

@@ -248,7 +248,7 @@
     },
     {
       "path": "lib/sdkwork/backend_sdk/models/create_nginx_config_request.rb",
-      "sha256": "9689bf49f6f8afb27a1afecdcc0acc7269912a9fb4a7788d51b620fdcfd0adf4"
+      "sha256": "115acd76e1074e1f1483efbdc380cc04c6e4df74eded9bd924c1f4d87f7bd651"
     },
     {
       "path": "lib/sdkwork/backend_sdk/models/create_server_request.rb",

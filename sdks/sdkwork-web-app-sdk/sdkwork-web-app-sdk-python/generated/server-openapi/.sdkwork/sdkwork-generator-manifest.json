@@ -112,7 +112,7 @@
     },
     {
       "path": "sdkwork_web_app_sdk/models/create_deployment_request.py",
-      "sha256": "bec835c301f35c92831de73217b3cd88290364ac87b1409e6b0c983719c93083"
+      "sha256": "0f7febb52d31427c368c003df707eec11be30f090e33bfcf5bcf2f704002c47d"
     },
     {
       "path": "sdkwork_web_app_sdk/models/create_domain_request.py",
@@ -124,7 +124,7 @@
     },
     {
       "path": "sdkwork_web_app_sdk/models/create_health_check_request.py",
-      "sha256": "c25008aa5cfd2c1b7b39ddc07da70a17a3305c980b730c76ed580027ea11d9d9"
+      "sha256": "cdc4fd3ab9c99b67a80411abcd98034013410fca16f81a7cefb0ffcfe04b77c8"
     },
     {
       "path": "sdkwork_web_app_sdk/models/create_site_request.py",
@@ -168,7 +168,7 @@
     },
     {
       "path": "sdkwork_web_app_sdk/models/health_check_response.py",
-      "sha256": "6610c9868279d3095f5939ed17686083b98fc6807ce05aeda758b745173c66a2"
+      "sha256": "95887234abd865239f6be0f4a4b5ff06749731be0e023dacfc07fa1d9dc0d816"
     },
     {
       "path": "sdkwork_web_app_sdk/models/page_info.py",

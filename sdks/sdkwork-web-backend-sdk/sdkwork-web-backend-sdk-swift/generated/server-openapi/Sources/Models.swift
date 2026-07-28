@@ -28,15 +28,13 @@ public struct CreateNginxConfigRequest: Codable {
     public let configName: String?
     public let configContent: String?
     public let siteId: String?
-    public let domainId: String?
 
 
-    public init(configType: Int? = nil, configName: String? = nil, configContent: String? = nil, siteId: String? = nil, domainId: String? = nil) {
+    public init(configType: Int? = nil, configName: String? = nil, configContent: String? = nil, siteId: String? = nil) {
         self.configType = configType
         self.configName = configName
         self.configContent = configContent
         self.siteId = siteId
-        self.domainId = domainId
     }
 }
 

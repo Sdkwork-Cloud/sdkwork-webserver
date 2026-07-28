@@ -66,7 +66,9 @@ impl WebRepository {
             .fetch_one(&self.pool)
             .await
             .map_err(|error| store_error("count web_site", error))?;
-        let total: i64 = count_row.try_get("total").unwrap_or(0);
+        let total: i64 = count_row
+            .try_get("total")
+            .map_err(|error| store_error("map web_site count", error))?;
 
         let rows = list_query
             .fetch_all(&self.pool)
@@ -306,7 +308,7 @@ fn map_site_row(row: &EngineRow) -> Result<SiteResponse, sqlx::Error> {
         id: row.try_get("uuid")?,
         name: row.try_get("name")?,
         slug: row.try_get("slug")?,
-        description: row.try_get("description").ok(),
+        description: row.try_get("description")?,
         application_type: row.try_get("application_type")?,
         site_type: row.try_get("site_type")?,
         status: row.try_get("status")?,

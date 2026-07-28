@@ -10,91 +10,37 @@
   },
   "status": "ok",
   "mode": "apply",
-  "hasChanges": true,
+  "hasChanges": false,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "773b91125afea1b7c1db5fe34fe732cff9e5786a4dbc14054407eefd246a8823",
+  "changeFingerprint": "b6daee0d0b6c16556c01f44559ce9e9228ca2a8a81bf4c643ae8f80cd0958216",
   "changeImpact": {
     "schemaVersion": 1,
-    "areas": [
-      "api-surface",
-      "models"
-    ],
-    "details": [
-      {
-        "area": "api-surface",
-        "paths": [
-          "src/main/java/com/sdkwork/web/app/sdk/api/DeploymentApi.java"
-        ]
-      },
-      {
-        "area": "models",
-        "paths": [
-          "src/main/java/com/sdkwork/web/app/sdk/model/DeploymentResponse.java"
-        ]
-      }
-    ],
-    "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, models. Verification is required."
+    "areas": [],
+    "details": [],
+    "requiresVerification": false,
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "medium",
-    "nextAction": "verify",
+    "riskLevel": "low",
+    "nextAction": "skip",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
-    "summary": "Changes have been applied. Run the required verification plan now.",
+    "summary": "No actionable changes were detected. No apply or verification step is required.",
     "reasons": [
-      "verification-required"
+      "no-actionable-changes"
     ]
   },
   "executionHandoff": {
     "schemaVersion": 1,
-    "summary": "Run the required verification commands now.",
-    "steps": [
-      {
-        "id": "verify-check",
-        "title": "Unified package check",
-        "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
-        "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-java\\generated\\server-openapi",
-        "command": "node",
-        "args": [
-          "./bin/publish-core.mjs",
-          "--language",
-          "java",
-          "--project-dir",
-          ".",
-          "--action",
-          "check"
-        ],
-        "displayCommand": "node ./bin/publish-core.mjs --language java --project-dir . --action check"
-      }
-    ]
+    "summary": "No further commands are required.",
+    "steps": []
   },
   "verificationPlan": {
-    "shouldRun": true,
-    "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
-    "steps": [
-      {
-        "id": "check",
-        "title": "Unified package check",
-        "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
-        "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-java\\generated\\server-openapi",
-        "command": "node",
-        "args": [
-          "./bin/publish-core.mjs",
-          "--language",
-          "java",
-          "--project-dir",
-          ".",
-          "--action",
-          "check"
-        ],
-        "displayCommand": "node ./bin/publish-core.mjs --language java --project-dir . --action check"
-      }
-    ]
+    "shouldRun": false,
+    "runPhase": "skip",
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
+    "steps": []
   },
   "sdk": {
     "name": "sdkwork-web-app-sdk",
@@ -119,18 +65,15 @@
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 2,
+    "writtenFiles": 0,
     "skippedScaffoldFiles": 1,
-    "skippedUnchangedGeneratedFiles": 66,
+    "skippedUnchangedGeneratedFiles": 68,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "773b91125afea1b7c1db5fe34fe732cff9e5786a4dbc14054407eefd246a8823",
+    "changeFingerprint": "b6daee0d0b6c16556c01f44559ce9e9228ca2a8a81bf4c643ae8f80cd0958216",
     "changes": {
       "createdGeneratedFiles": [],
-      "updatedGeneratedFiles": [
-        "src/main/java/com/sdkwork/web/app/sdk/api/DeploymentApi.java",
-        "src/main/java/com/sdkwork/web/app/sdk/model/DeploymentResponse.java"
-      ],
+      "updatedGeneratedFiles": [],
       "unchangedGeneratedFiles": [
         "bin/publish-core.mjs",
         "bin/publish.ps1",
@@ -142,6 +85,7 @@
         "sdkwork-sdk.json",
         "src/main/java/com/sdkwork/web/app/sdk/api/ApiPaths.java",
         "src/main/java/com/sdkwork/web/app/sdk/api/CertificateApi.java",
+        "src/main/java/com/sdkwork/web/app/sdk/api/DeploymentApi.java",
         "src/main/java/com/sdkwork/web/app/sdk/api/DomainApi.java",
         "src/main/java/com/sdkwork/web/app/sdk/api/EnvVariableApi.java",
         "src/main/java/com/sdkwork/web/app/sdk/api/MonitorApi.java",
@@ -159,6 +103,7 @@
         "src/main/java/com/sdkwork/web/app/sdk/model/CreateHealthCheckRequest.java",
         "src/main/java/com/sdkwork/web/app/sdk/model/CreateSiteRequest.java",
         "src/main/java/com/sdkwork/web/app/sdk/model/DeploymentPage.java",
+        "src/main/java/com/sdkwork/web/app/sdk/model/DeploymentResponse.java",
         "src/main/java/com/sdkwork/web/app/sdk/model/DomainPage.java",
         "src/main/java/com/sdkwork/web/app/sdk/model/DomainResponse.java",
         "src/main/java/com/sdkwork/web/app/sdk/model/DomainVerifyResponse.java",
@@ -208,61 +153,26 @@
     },
     "impact": {
       "schemaVersion": 1,
-      "areas": [
-        "api-surface",
-        "models"
-      ],
-      "details": [
-        {
-          "area": "api-surface",
-          "paths": [
-            "src/main/java/com/sdkwork/web/app/sdk/api/DeploymentApi.java"
-          ]
-        },
-        {
-          "area": "models",
-          "paths": [
-            "src/main/java/com/sdkwork/web/app/sdk/model/DeploymentResponse.java"
-          ]
-        }
-      ],
-      "requiresVerification": true,
-      "summary": "Detected impact areas: api-surface, models. Verification is required."
+      "areas": [],
+      "details": [],
+      "requiresVerification": false,
+      "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
     },
     "verificationPlan": {
-      "shouldRun": true,
-      "runPhase": "now",
-      "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
-      "steps": [
-        {
-          "id": "check",
-          "title": "Unified package check",
-          "required": true,
-          "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
-          "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-java\\generated\\server-openapi",
-          "command": "node",
-          "args": [
-            "./bin/publish-core.mjs",
-            "--language",
-            "java",
-            "--project-dir",
-            ".",
-            "--action",
-            "check"
-          ],
-          "displayCommand": "node ./bin/publish-core.mjs --language java --project-dir . --action check"
-        }
-      ]
+      "shouldRun": false,
+      "runPhase": "skip",
+      "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
+      "steps": []
     },
     "executionDecision": {
       "schemaVersion": 1,
-      "riskLevel": "medium",
-      "nextAction": "verify",
+      "riskLevel": "low",
+      "nextAction": "skip",
       "requiresManualReview": false,
       "applyRequiresExpectedFingerprint": false,
-      "summary": "Changes have been applied. Run the required verification plan now.",
+      "summary": "No actionable changes were detected. No apply or verification step is required.",
       "reasons": [
-        "verification-required"
+        "no-actionable-changes"
       ]
     },
     "backedUpFiles": [],

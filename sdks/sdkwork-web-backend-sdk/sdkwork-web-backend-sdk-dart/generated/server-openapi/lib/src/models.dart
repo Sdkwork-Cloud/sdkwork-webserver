@@ -77,14 +77,12 @@ class CreateNginxConfigRequest {
   final String? configName;
   final String? configContent;
   final String? siteId;
-  final String? domainId;
 
   CreateNginxConfigRequest({
     this.configType,
     this.configName,
     this.configContent,
-    this.siteId,
-    this.domainId
+    this.siteId
   });
 
   factory CreateNginxConfigRequest.fromJson(Map<String, dynamic> json) {
@@ -92,8 +90,7 @@ class CreateNginxConfigRequest {
       configType: json['configType'] is int ? json['configType'] : null,
       configName: json['configName']?.toString(),
       configContent: json['configContent']?.toString(),
-      siteId: json['siteId']?.toString(),
-      domainId: json['domainId']?.toString()
+      siteId: json['siteId']?.toString()
     );
   }
 
@@ -103,7 +100,6 @@ class CreateNginxConfigRequest {
       'configName': configName,
       'configContent': configContent,
       'siteId': siteId,
-      'domainId': domainId,
     };
   }
 }

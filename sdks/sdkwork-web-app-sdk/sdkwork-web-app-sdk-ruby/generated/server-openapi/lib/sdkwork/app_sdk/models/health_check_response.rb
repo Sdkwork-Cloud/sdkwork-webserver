@@ -2,7 +2,7 @@ module Sdkwork
   module AppSdk
     module Models
       class HealthCheckResponse
-              attr_accessor :id, :check_type, :check_url, :check_interval, :status, :created_at
+              attr_accessor :id, :check_type, :check_url, :check_interval, :timeout_ms, :retry_count, :status, :created_at
 
               def initialize(attributes = {})
                 attributes = (attributes || {}).transform_keys(&:to_s)
@@ -10,6 +10,8 @@ module Sdkwork
                 @check_type = attributes['checkType']
                 @check_url = attributes['checkUrl']
                 @check_interval = attributes['checkInterval']
+                @timeout_ms = attributes['timeoutMs']
+                @retry_count = attributes['retryCount']
                 @status = attributes['status']
                 @created_at = attributes['createdAt']
               end
@@ -26,6 +28,8 @@ module Sdkwork
                   'checkType' => @check_type,
                   'checkUrl' => @check_url,
                   'checkInterval' => @check_interval,
+                  'timeoutMs' => @timeout_ms,
+                  'retryCount' => @retry_count,
                   'status' => @status,
                   'createdAt' => @created_at,
                 }

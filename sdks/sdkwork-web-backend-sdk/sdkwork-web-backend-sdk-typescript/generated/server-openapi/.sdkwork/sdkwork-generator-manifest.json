@@ -140,7 +140,7 @@
     },
     {
       "path": "src/types/application-deployment-response.ts",
-      "sha256": "3a182f42a43432ab02bfc3cca6abeedb4137a7ccb3e0bebc4d4028269f4fbe54"
+      "sha256": "2b4667b4f022126a9a18614454ff813cf49a8b3d04d6e24038f11fd0d6674478"
     },
     {
       "path": "src/types/application-domain-response.ts",
@@ -272,7 +272,7 @@
     },
     {
       "path": "src/types/create-application-deployment-request.ts",
-      "sha256": "4c4a7c8463a68d94916c3ffd5ecb785afed51eeabe383077a249c15ba7c46b35"
+      "sha256": "7ea593509f9033a53effdfb32289e8bd05dff6b1124ebf98e6bff2c6342cd7f3"
     },
     {
       "path": "src/types/create-application-domain-request.ts",
@@ -288,7 +288,7 @@
     },
     {
       "path": "src/types/create-nginx-config-request.ts",
-      "sha256": "69fb4dd5e16d0d27843af7c78009b249b0983498cda04bb93852c1611e26f28b"
+      "sha256": "2862108c7f78927f7ff4204a653eaed5b6fee7a49e8b041858503235fa98bcd8"
     },
     {
       "path": "src/types/create-server-request.ts",

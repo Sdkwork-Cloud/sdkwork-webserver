@@ -16,9 +16,13 @@ use sdkwork_routes_webserver_internal_api::{
     web_internal_domain_context_injectors,
 };
 use sdkwork_web_bootstrap::{ReadinessCheck, ReadinessFuture};
-use sdkwork_web_core::{DomainContextInjector, HttpRoute, HttpRouteManifest};
+use sdkwork_web_core::{
+    AuditEmitter, DomainContextInjector, HttpRoute, HttpRouteManifest, SecurityEventEmitter,
+};
 use sdkwork_webserver_contract::MachineCredentialAuthenticator;
 use std::sync::Arc;
+
+use crate::framework_observability::{WebFrameworkAuditEmitter, WebFrameworkSecurityEventEmitter};
 
 #[derive(Clone, Copy, Debug, Default)]
 #[non_exhaustive]
@@ -48,6 +52,8 @@ pub struct ApiAssembly {
     pub domain_context_injectors: Vec<Arc<dyn DomainContextInjector>>,
     pub readiness_check: Arc<dyn ReadinessCheck>,
     pub machine_credential_authenticator: Arc<dyn MachineCredentialAuthenticator>,
+    pub audit_emitter: Arc<dyn AuditEmitter>,
+    pub security_event_emitter: Arc<dyn SecurityEventEmitter>,
 }
 
 struct WebServiceReadinessCheck {
@@ -73,6 +79,10 @@ pub async fn assemble_business_routes(
         .await
         .map_err(|detail| ApiAssemblyError::Initialization { detail })?;
     let service = Arc::new(runtime.service);
+    let audit_emitter: Arc<dyn AuditEmitter> =
+        Arc::new(WebFrameworkAuditEmitter::new(service.clone()));
+    let security_event_emitter: Arc<dyn SecurityEventEmitter> =
+        Arc::new(WebFrameworkSecurityEventEmitter::new(service.clone()));
     let mut routes = Vec::new();
     routes.extend_from_slice(app_route_manifest().routes());
     routes.extend_from_slice(backend_route_manifest().routes());
@@ -100,6 +110,8 @@ pub async fn assemble_business_routes(
             service: service.clone(),
         }),
         machine_credential_authenticator: service,
+        audit_emitter,
+        security_event_emitter,
     })
 }
 

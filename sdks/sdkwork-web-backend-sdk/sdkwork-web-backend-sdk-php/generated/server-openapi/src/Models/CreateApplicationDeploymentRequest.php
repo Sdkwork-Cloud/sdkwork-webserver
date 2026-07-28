@@ -21,7 +21,7 @@ final class CreateApplicationDeploymentRequest
 
     public ?string $artifactSize = null;
 
-    /** SHA-256 hexadecimal digest of the uploaded package. */
+    /** Lowercase SHA-256 hexadecimal digest of the uploaded package. */
     public ?string $artifactHash = null;
 
     public function __construct(array $data = [])

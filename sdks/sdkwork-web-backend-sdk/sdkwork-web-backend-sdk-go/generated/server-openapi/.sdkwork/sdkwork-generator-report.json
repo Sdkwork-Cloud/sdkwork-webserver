@@ -12,29 +12,22 @@
   "mode": "apply",
   "hasChanges": true,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "391e28ee4b3c8101052b704471a37ec740a35d2a5787ca2248d713cfd189c473",
+  "changeFingerprint": "17cc3bf937154a336d24585b02d89ae999f6b3df26a79f2809517402e9d312a4",
   "changeImpact": {
     "schemaVersion": 1,
     "areas": [
-      "api-surface",
       "models"
     ],
     "details": [
       {
-        "area": "api-surface",
-        "paths": [
-          "api/application_deployment.go"
-        ]
-      },
-      {
         "area": "models",
         "paths": [
-          "types/application_deployment_response.go"
+          "types/create_nginx_config_request.go"
         ]
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, models. Verification is required."
+    "summary": "Detected impact areas: models. Verification is required."
   },
   "executionDecision": {
     "schemaVersion": 1,
@@ -55,7 +48,7 @@
         "id": "verify-check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-go\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -74,13 +67,13 @@
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-go\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -119,20 +112,20 @@
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 2,
+    "writtenFiles": 1,
     "skippedScaffoldFiles": 1,
-    "skippedUnchangedGeneratedFiles": 96,
+    "skippedUnchangedGeneratedFiles": 97,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "391e28ee4b3c8101052b704471a37ec740a35d2a5787ca2248d713cfd189c473",
+    "changeFingerprint": "17cc3bf937154a336d24585b02d89ae999f6b3df26a79f2809517402e9d312a4",
     "changes": {
       "createdGeneratedFiles": [],
       "updatedGeneratedFiles": [
-        "api/application_deployment.go",
-        "types/application_deployment_response.go"
+        "types/create_nginx_config_request.go"
       ],
       "unchangedGeneratedFiles": [
         "api/agent.go",
+        "api/application_deployment.go",
         "api/application_domain.go",
         "api/application.go",
         "api/audit.go",
@@ -160,6 +153,7 @@
         "types/agent_heartbeat_response.go",
         "types/agent_nginx_config_bundle.go",
         "types/agent_sync_response.go",
+        "types/application_deployment_response.go",
         "types/application_domain_response.go",
         "types/application_domain_verify_response.go",
         "types/application_response.go",
@@ -196,7 +190,6 @@
         "types/create_application_domain_request.go",
         "types/create_application_request.go",
         "types/create_certificate_request.go",
-        "types/create_nginx_config_request.go",
         "types/create_server_request.go",
         "types/create_server_response.go",
         "types/doc.go",
@@ -239,36 +232,29 @@
     "impact": {
       "schemaVersion": 1,
       "areas": [
-        "api-surface",
         "models"
       ],
       "details": [
         {
-          "area": "api-surface",
-          "paths": [
-            "api/application_deployment.go"
-          ]
-        },
-        {
           "area": "models",
           "paths": [
-            "types/application_deployment_response.go"
+            "types/create_nginx_config_request.go"
           ]
         }
       ],
       "requiresVerification": true,
-      "summary": "Detected impact areas: api-surface, models. Verification is required."
+      "summary": "Detected impact areas: models. Verification is required."
     },
     "verificationPlan": {
       "shouldRun": true,
       "runPhase": "now",
-      "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
+      "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
       "steps": [
         {
           "id": "check",
           "title": "Unified package check",
           "required": true,
-          "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
+          "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
           "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-go\\generated\\server-openapi",
           "command": "node",
           "args": [

@@ -6,6 +6,8 @@ public class HealthCheckResponse {
     private Integer checkType;
     private String checkUrl;
     private Integer checkInterval;
+    private Integer timeoutMs;
+    private Integer retryCount;
     private Integer status;
     private String createdAt;
 
@@ -39,6 +41,22 @@ public class HealthCheckResponse {
 
     public void setCheckInterval(Integer checkInterval) {
         this.checkInterval = checkInterval;
+    }
+
+    public Integer getTimeoutMs() {
+        return this.timeoutMs;
+    }
+
+    public void setTimeoutMs(Integer timeoutMs) {
+        this.timeoutMs = timeoutMs;
+    }
+
+    public Integer getRetryCount() {
+        return this.retryCount;
+    }
+
+    public void setRetryCount(Integer retryCount) {
+        this.retryCount = retryCount;
     }
 
     public Integer getStatus() {

@@ -148,7 +148,7 @@
     },
     {
       "path": "lib/sdkwork/app_sdk/models/health_check_response.rb",
-      "sha256": "7d34aa4580881f1d3b36834696f976bc55bb0ffefd395bb01b6a242aa0b0c945"
+      "sha256": "bb2323b20e40a4ff01b76014d5322166787c6dc85a67ac6de2b2c02a5436758b"
     },
     {
       "path": "lib/sdkwork/app_sdk/models/page_info.rb",

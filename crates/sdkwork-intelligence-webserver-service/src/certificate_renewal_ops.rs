@@ -70,15 +70,22 @@ impl WebService {
         let material = match issue_result {
             Ok(material) => material,
             Err(error) => {
-                let _ = self
-                    .repository
-                    .fail_certificate_renewal(
-                        candidate.tenant_id,
-                        &candidate.certificate_id,
-                        &error.to_string(),
-                    )
-                    .await;
-                return Err(WebServiceError::Internal(error.to_string()));
+                tracing::error!(
+                    tenant_id = candidate.tenant_id,
+                    certificate_id = %candidate.certificate_id,
+                    error = ?error,
+                    "certificate renewal provider failed"
+                );
+                self.record_certificate_operation_failure(
+                    candidate.tenant_id,
+                    &candidate.certificate_id,
+                    false,
+                    "certificate renewal issuer failed",
+                )
+                .await;
+                return Err(WebServiceError::Internal(
+                    "certificate renewal failed".to_string(),
+                ));
             }
         };
 
@@ -100,29 +107,65 @@ impl WebService {
         material: sdkwork_webserver_acme_service::IssuedCertificateMaterial,
         audit_action: &str,
     ) -> WebServiceResult<CertificateResponse> {
-        let encrypted_private_key = self
+        let initial_issue = audit_action == "certificates.issue";
+        let activation = match self
+            .edge_runtime
+            .activate_certificate_bundle_async(&material)
+            .await
+        {
+            Ok(activation) => activation,
+            Err(error) => {
+                tracing::error!(
+                    tenant_id,
+                    certificate_id,
+                    error = ?error,
+                    "certificate bundle activation failed"
+                );
+                self.record_certificate_operation_failure(
+                    tenant_id,
+                    certificate_id,
+                    initial_issue,
+                    "certificate bundle activation failed",
+                )
+                .await;
+                return Err(WebServiceError::Internal(
+                    "certificate activation failed".to_string(),
+                ));
+            }
+        };
+
+        let encrypted_private_key = match self
             .certificate_issuer
             .encrypt_private_key(&material.private_key_pem)
-            .map_err(|error| WebServiceError::Internal(error.to_string()))?;
-
-        let write_result = self
-            .edge_runtime
-            .write_certificate_bundle_async(&material)
-            .await;
-        if let Err(error) = write_result {
-            if audit_action == "certificates.issue" {
-                let _ = self
-                    .repository
-                    .fail_certificate(tenant_id, certificate_id, &error.to_string())
-                    .await;
-            } else {
-                let _ = self
-                    .repository
-                    .fail_certificate_renewal(tenant_id, certificate_id, &error.to_string())
-                    .await;
+        {
+            Ok(encrypted) => encrypted,
+            Err(error) => {
+                tracing::error!(
+                    tenant_id,
+                    certificate_id,
+                    error = ?error,
+                    "certificate private-key encryption failed"
+                );
+                if let Err(rollback_error) = activation.rollback().await {
+                    tracing::error!(
+                        tenant_id,
+                        certificate_id,
+                        error = ?rollback_error,
+                        "critical: failed to compensate certificate activation after encryption failure"
+                    );
+                }
+                self.record_certificate_operation_failure(
+                    tenant_id,
+                    certificate_id,
+                    initial_issue,
+                    "certificate private-key encryption failed",
+                )
+                .await;
+                return Err(WebServiceError::Internal(
+                    "certificate persistence failed".to_string(),
+                ));
             }
-            return Err(WebServiceError::Internal(error.to_string()));
-        }
+        };
 
         let update = CertificateIssueUpdate {
             cert_name: material.cert_name,
@@ -142,25 +185,94 @@ impl WebService {
             encrypted_private_key,
         };
 
-        let response = self
+        let response = match self
             .repository
             .finalize_certificate(tenant_id, certificate_id, &update)
-            .await?;
+            .await
+        {
+            Ok(response) => response,
+            Err(error) => {
+                if let Err(rollback_error) = activation.rollback().await {
+                    tracing::error!(
+                        tenant_id,
+                        certificate_id,
+                        error = ?rollback_error,
+                        "critical: failed to compensate certificate activation after database failure"
+                    );
+                }
+                self.record_certificate_operation_failure(
+                    tenant_id,
+                    certificate_id,
+                    initial_issue,
+                    "certificate database finalization failed",
+                )
+                .await;
+                return Err(error);
+            }
+        };
 
-        let _ = self
+        if let Err(error) = activation.commit().await {
+            tracing::error!(
+                tenant_id,
+                certificate_id,
+                error = ?error,
+                "certificate activation committed but backup cleanup failed"
+            );
+        }
+
+        if let Err(error) = self
             .repository
             .insert_audit_log(AuditLogWrite {
                 tenant_id,
                 organization_id: 0,
                 operator_id: 0,
+                operator_type: "JOB",
                 action: audit_action,
                 target_type: "certificate",
                 target_id: None,
                 target_uuid: Some(&response.id),
+                request_id: None,
+                metadata_json: "{}",
             })
-            .await;
+            .await
+        {
+            tracing::error!(
+                tenant_id,
+                certificate_id,
+                audit_action,
+                error = ?error,
+                "failed to persist certificate business audit"
+            );
+        }
 
         Ok(response)
+    }
+
+    pub(crate) async fn record_certificate_operation_failure(
+        &self,
+        tenant_id: i64,
+        certificate_id: &str,
+        initial_issue: bool,
+        failure_reason: &'static str,
+    ) {
+        let result = if initial_issue {
+            self.repository
+                .fail_certificate(tenant_id, certificate_id, failure_reason)
+                .await
+        } else {
+            self.repository
+                .fail_certificate_renewal(tenant_id, certificate_id, failure_reason)
+                .await
+        };
+        if let Err(error) = result {
+            tracing::error!(
+                tenant_id,
+                certificate_id,
+                failure_reason,
+                error = ?error,
+                "failed to persist certificate operation failure state"
+            );
+        }
     }
 }
 

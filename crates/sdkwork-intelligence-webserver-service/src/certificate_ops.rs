@@ -13,6 +13,7 @@ impl WebService {
         context: &WebAppRequestContext,
         request: &CreateCertificateRequest,
     ) -> WebServiceResult<CertificateResponse> {
+        Self::validate_certificate_request(request)?;
         let tenant_id = context.tenant_id;
         if tenant_id <= 0 {
             return Err(WebServiceError::Forbidden);
@@ -40,11 +41,22 @@ impl WebService {
         let material = match issue_result {
             Ok(material) => material,
             Err(error) => {
-                let _ = self
-                    .repository
-                    .fail_certificate(tenant_id, &certificate_id, &error.to_string())
-                    .await;
-                return Err(WebServiceError::Internal(error.to_string()));
+                tracing::error!(
+                    tenant_id,
+                    certificate_id = %certificate_id,
+                    error = ?error,
+                    "certificate issuance provider failed"
+                );
+                self.record_certificate_operation_failure(
+                    tenant_id,
+                    &certificate_id,
+                    true,
+                    "certificate issuer failed",
+                )
+                .await;
+                return Err(WebServiceError::Internal(
+                    "certificate issuance failed".to_string(),
+                ));
             }
         };
 

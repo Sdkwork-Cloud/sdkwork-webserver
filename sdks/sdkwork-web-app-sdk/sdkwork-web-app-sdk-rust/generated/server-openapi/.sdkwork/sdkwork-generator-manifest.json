@@ -120,7 +120,7 @@
     },
     {
       "path": "src/models/create_deployment_request.rs",
-      "sha256": "95841ef8665cbe71f3a7c496a21625b4dbfe714f9ce21be02c35712f09aa3f6d"
+      "sha256": "d58b028b51cf02fba0939fd30606346fbd1c477aaacd07044a6ee42b2be483e7"
     },
     {
       "path": "src/models/create_domain_request.rs",
@@ -132,7 +132,7 @@
     },
     {
       "path": "src/models/create_health_check_request.rs",
-      "sha256": "3c86bc75120b38f74d718ec5e7496906a82181e33f803ffbac7b781d1b6d366e"
+      "sha256": "4a371ec91121a42bda2034411eb168972341b517342f6364506c60febd7bd844"
     },
     {
       "path": "src/models/create_site_request.rs",
@@ -176,7 +176,7 @@
     },
     {
       "path": "src/models/health_check_response.rs",
-      "sha256": "f14167e7fd1747fa478742dd00a317248e205c238fc0052d0a0a51a2e1de6514"
+      "sha256": "7ebdb3d77c667aa8280d50745904f113c4acd4e24aae63a78e48a472334840f6"
     },
     {
       "path": "src/models/mod.rs",

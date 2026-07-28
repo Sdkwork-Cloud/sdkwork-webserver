@@ -56,10 +56,13 @@ pub struct AuditLogWrite<'a> {
     pub tenant_id: i64,
     pub organization_id: i64,
     pub operator_id: i64,
+    pub operator_type: &'a str,
     pub action: &'a str,
     pub target_type: &'a str,
     pub target_id: Option<i64>,
     pub target_uuid: Option<&'a str>,
+    pub request_id: Option<&'a str>,
+    pub metadata_json: &'a str,
 }
 
 #[async_trait]

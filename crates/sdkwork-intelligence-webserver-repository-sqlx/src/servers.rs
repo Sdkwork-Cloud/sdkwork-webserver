@@ -27,7 +27,9 @@ impl WebRepository {
                 .fetch_one(&self.pool)
                 .await
                 .map_err(|error| store_error("count web_server", error))?;
-        let total: i64 = count_row.try_get("total").unwrap_or(0);
+        let total: i64 = count_row
+            .try_get("total")
+            .map_err(|error| store_error("map web_server count", error))?;
 
         let rows = sqlx::query(
             "SELECT uuid, name, host, tenant_scope_hash, ssh_port, status,

@@ -6,8 +6,8 @@ use super::{EngineRow, WebRepository};
 use sqlx::Row;
 
 use super::support::{
-    instant_from_row, instant_write_expression, new_uuid, next_id, now_rfc3339, pagination,
-    store_error,
+    instant_from_row, instant_write_expression, json_write_expression, new_uuid, next_id,
+    now_rfc3339, pagination, store_error,
 };
 
 impl WebRepository {
@@ -61,7 +61,9 @@ impl WebRepository {
             (count_row, rows)
         };
 
-        let total: i64 = count_row.try_get("total").unwrap_or(0);
+        let total: i64 = count_row
+            .try_get("total")
+            .map_err(|error| store_error("map web_audit_log count", error))?;
         let mut items = Vec::with_capacity(rows.len());
         for row in &rows {
             items.push(map_audit_log_row(row).map_err(|error| {
@@ -85,13 +87,15 @@ impl WebRepository {
         let uuid = new_uuid();
         let now = now_rfc3339();
         let engine = self.database_engine().await?;
-        let now_expression = instant_write_expression(engine, "$10");
+        let now_expression = instant_write_expression(engine, "$13");
+        let metadata_expression = json_write_expression(engine, "$12");
         let insert_sql = format!(
             "INSERT INTO web_audit_log (
-                id, uuid, tenant_id, organization_id, operator_id, action, target_type,
-                target_id, target_uuid, metadata, created_at
+                id, uuid, tenant_id, organization_id, operator_id, operator_type, action,
+                target_type, target_id, target_uuid, request_id, metadata, created_at
              ) VALUES (
-                $1, $2, $3, $4, $5, $6, $7, $8, $9, '{{}}', {now_expression}
+                $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11,
+                {metadata_expression}, {now_expression}
              )"
         );
 
@@ -101,10 +105,13 @@ impl WebRepository {
             .bind(entry.tenant_id)
             .bind(entry.organization_id)
             .bind(entry.operator_id)
+            .bind(entry.operator_type)
             .bind(entry.action)
             .bind(entry.target_type)
             .bind(entry.target_id)
             .bind(entry.target_uuid)
+            .bind(entry.request_id)
+            .bind(entry.metadata_json)
             .bind(&now)
             .execute(&self.pool)
             .await

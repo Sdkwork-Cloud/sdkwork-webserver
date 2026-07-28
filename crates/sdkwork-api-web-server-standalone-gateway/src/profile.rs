@@ -7,7 +7,9 @@ use sdkwork_web_contract::{
     merge_openapi_documents, route_inventory_from_openapi, route_inventory_from_routes, HttpRoute,
     OpenApiMergeError,
 };
-use sdkwork_web_core::{DomainContextInjector, HttpRouteManifest};
+use sdkwork_web_core::{
+    AuditEmitter, DomainContextInjector, HttpRouteManifest, SecurityEventEmitter,
+};
 use sdkwork_webserver_contract::MachineCredentialAuthenticator;
 
 const DEPENDENCY_UNAVAILABLE_CODE: i32 = 50301;
@@ -20,6 +22,8 @@ pub(crate) struct StandaloneApiProfile {
     pub domain_context_injectors: Vec<Arc<dyn DomainContextInjector>>,
     pub readiness_check: Arc<dyn ReadinessCheck>,
     pub machine_authenticator: Arc<dyn MachineCredentialAuthenticator>,
+    pub audit_emitter: Arc<dyn AuditEmitter>,
+    pub security_event_emitter: Arc<dyn SecurityEventEmitter>,
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -86,6 +90,8 @@ pub(crate) async fn assemble_standalone_profile(
         .await
         .map_err(|error| StandaloneProfileError::assembly_unavailable("sdkwork-drive", error))?;
     let machine_authenticator = web.machine_credential_authenticator.clone();
+    let audit_emitter = web.audit_emitter.clone();
+    let security_event_emitter = web.security_event_emitter.clone();
 
     compose_owner_contributions(
         vec![
@@ -118,12 +124,16 @@ pub(crate) async fn assemble_standalone_profile(
             },
         ],
         machine_authenticator,
+        audit_emitter,
+        security_event_emitter,
     )
 }
 
 fn compose_owner_contributions(
     contributions: Vec<OwnerApiContribution>,
     machine_authenticator: Arc<dyn MachineCredentialAuthenticator>,
+    audit_emitter: Arc<dyn AuditEmitter>,
+    security_event_emitter: Arc<dyn SecurityEventEmitter>,
 ) -> Result<StandaloneApiProfile, StandaloneProfileError> {
     for contribution in &contributions {
         validate_owner_contribution(contribution)?;
@@ -172,6 +182,8 @@ fn compose_owner_contributions(
         domain_context_injectors,
         readiness_check: Arc::new(CompositeReadinessCheck::new(readiness_checks)),
         machine_authenticator,
+        audit_emitter,
+        security_event_emitter,
     })
 }
 
@@ -253,7 +265,7 @@ mod tests {
     use async_trait::async_trait;
     use sdkwork_web_bootstrap::{AlwaysReady, ReadinessFuture};
     use sdkwork_web_contract::{build_openapi_document, HttpMethod};
-    use sdkwork_web_core::WebRequestContext;
+    use sdkwork_web_core::{NoOpAuditEmitter, NoOpSecurityEventEmitter, WebRequestContext};
     use sdkwork_webserver_contract::{AuthenticatedMachineCredential, WebServiceResult};
 
     struct NoopMachineAuthenticator;
@@ -312,6 +324,17 @@ mod tests {
         Arc::new(NoopMachineAuthenticator)
     }
 
+    fn compose_test_contributions(
+        contributions: Vec<OwnerApiContribution>,
+    ) -> Result<StandaloneApiProfile, StandaloneProfileError> {
+        compose_owner_contributions(
+            contributions,
+            authenticator(),
+            Arc::new(NoOpAuditEmitter),
+            Arc::new(NoOpSecurityEventEmitter),
+        )
+    }
+
     fn expect_profile_error(
         result: Result<StandaloneApiProfile, StandaloneProfileError>,
         message: &str,
@@ -333,21 +356,18 @@ mod tests {
     #[test]
     fn route_collisions_fail_before_router_merge() {
         let error = expect_profile_error(
-            compose_owner_contributions(
-                vec![
-                    contribution(
-                        "first",
-                        route("/app/v3/api/tests", "tests.list", "tests.read"),
-                        Arc::new(AlwaysReady),
-                    ),
-                    contribution(
-                        "second",
-                        route("/app/v3/api/tests", "other.list", "other.read"),
-                        Arc::new(AlwaysReady),
-                    ),
-                ],
-                authenticator(),
-            ),
+            compose_test_contributions(vec![
+                contribution(
+                    "first",
+                    route("/app/v3/api/tests", "tests.list", "tests.read"),
+                    Arc::new(AlwaysReady),
+                ),
+                contribution(
+                    "second",
+                    route("/app/v3/api/tests", "other.list", "other.read"),
+                    Arc::new(AlwaysReady),
+                ),
+            ]),
             "duplicate route must fail",
         );
         assert!(matches!(
@@ -365,7 +385,7 @@ mod tests {
         );
         contribution.openapi["paths"] = serde_json::json!({});
         let error = expect_profile_error(
-            compose_owner_contributions(vec![contribution], authenticator()),
+            compose_test_contributions(vec![contribution]),
             "OpenAPI drift must fail",
         );
         assert!(matches!(
@@ -383,7 +403,7 @@ mod tests {
         );
         contribution.permission_catalog.clear();
         let error = expect_profile_error(
-            compose_owner_contributions(vec![contribution], authenticator()),
+            compose_test_contributions(vec![contribution]),
             "permission drift must fail",
         );
         assert!(error.to_string().contains("permission catalog"));
@@ -405,8 +425,7 @@ mod tests {
             Arc::new(AlwaysReady),
         );
 
-        let profile = compose_owner_contributions(vec![first, second], authenticator())
-            .expect("valid contributions");
+        let profile = compose_test_contributions(vec![first, second]).expect("valid contributions");
         assert_eq!(profile.domain_context_injectors.len(), 2);
         assert_eq!(
             profile.permission_catalog,
@@ -423,21 +442,18 @@ mod tests {
 
     #[tokio::test]
     async fn dependency_readiness_failure_is_retained() {
-        let profile = compose_owner_contributions(
-            vec![
-                contribution(
-                    "first",
-                    route("/app/v3/api/first", "first.list", "first.read"),
-                    Arc::new(AlwaysReady),
-                ),
-                contribution(
-                    "second",
-                    route("/app/v3/api/second", "second.list", "second.read"),
-                    Arc::new(FailingReadiness),
-                ),
-            ],
-            authenticator(),
-        )
+        let profile = compose_test_contributions(vec![
+            contribution(
+                "first",
+                route("/app/v3/api/first", "first.list", "first.read"),
+                Arc::new(AlwaysReady),
+            ),
+            contribution(
+                "second",
+                route("/app/v3/api/second", "second.list", "second.read"),
+                Arc::new(FailingReadiness),
+            ),
+        ])
         .expect("valid contributions");
         let error = profile
             .readiness_check

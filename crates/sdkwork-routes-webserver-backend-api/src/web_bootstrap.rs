@@ -1,12 +1,15 @@
 use std::sync::Arc;
 
 use axum::{Extension, Router};
+use sdkwork_iam_web_adapter::IamAuthorizationPolicy;
 use sdkwork_intelligence_webserver_service::WebService;
 use sdkwork_routes_webserver_common::{
     web_auth_mode_from_env, web_framework_runtime_policy_from_env, with_problem_correlation,
     MachineCredentialResolverDecorator, ProductionFailClosedResolver, WebAuthMode,
+    WebServerTenantIsolationPolicy,
 };
 use sdkwork_web_axum::{with_web_request_context, WebFrameworkLayer};
+use sdkwork_web_bootstrap::WebFrameworkBuilder;
 use sdkwork_web_core::{
     DefaultWebRequestContextResolver, DomainContextInjector, HttpMetricsRegistry,
     WebRequestContext, WebRequestContextProfile, WebRequestContextResolver,
@@ -55,19 +58,22 @@ where
     R: WebRequestContextResolver + Clone,
 {
     let (environment, security_policy) = web_framework_runtime_policy_from_env();
-    let layer = WebFrameworkLayer::new(resolver)
-        .with_profile(WebRequestContextProfile {
+    let route_manifest = backend_route_manifest();
+    let mut builder = WebFrameworkBuilder::new(resolver)
+        .profile(WebRequestContextProfile {
             backend_api_prefix: paths::PREFIX.to_owned(),
             environment,
             ..WebRequestContextProfile::default()
         })
-        .with_security_policy(security_policy)
-        .with_route_manifest(backend_route_manifest())
-        .with_domain_injector(Arc::new(WebBackendContextInjector));
-    match metrics {
-        Some(metrics) => layer.with_metrics(metrics),
-        None => layer,
+        .security_policy(security_policy)
+        .route_manifest(route_manifest.clone())
+        .authorization_policy(Arc::new(IamAuthorizationPolicy::new(route_manifest)))
+        .tenant_isolation_policy(Arc::new(WebServerTenantIsolationPolicy))
+        .domain_injector(Arc::new(WebBackendContextInjector));
+    if let Some(metrics) = metrics {
+        builder = builder.metrics_registry(metrics);
     }
+    builder.build().into_layer()
 }
 
 pub async fn wrap_router_with_web_framework_from_env(
@@ -125,5 +131,141 @@ async fn wrap_router_with_web_framework_from_env_and_optional_metrics(
                 metrics,
             ),
         ),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::build_web_backend_api_framework_layer;
+    use async_trait::async_trait;
+    use axum::body::Body;
+    use axum::http::{header, Request, StatusCode};
+    use axum::routing::get;
+    use axum::Router;
+    use sdkwork_web_axum::with_web_request_context;
+    use sdkwork_web_core::{
+        access_token_jwt, auth_token_jwt, WebAuthLevel, WebDeploymentMode, WebEnvironment,
+        WebFrameworkError, WebLoginScope, WebRequestContextResolver, WebRequestPrincipal,
+        WebSubjectType,
+    };
+    use tower::ServiceExt;
+
+    #[derive(Clone)]
+    struct TestResolver {
+        tenant_id: &'static str,
+        login_scope: WebLoginScope,
+        permissions: Vec<String>,
+    }
+
+    #[async_trait]
+    impl WebRequestContextResolver for TestResolver {
+        async fn resolve_api_key(
+            &self,
+            _raw_api_key: &str,
+        ) -> Result<WebRequestPrincipal, WebFrameworkError> {
+            Ok(self.principal())
+        }
+
+        async fn resolve_dual_token(
+            &self,
+            _raw_auth_token: &str,
+            _raw_access_token: &str,
+        ) -> Result<WebRequestPrincipal, WebFrameworkError> {
+            Ok(self.principal())
+        }
+
+        async fn resolve_access_token(
+            &self,
+            _raw_access_token: &str,
+        ) -> Result<WebRequestPrincipal, WebFrameworkError> {
+            Ok(self.principal())
+        }
+    }
+
+    impl TestResolver {
+        fn principal(&self) -> WebRequestPrincipal {
+            let organization_id =
+                (self.login_scope == WebLoginScope::Organization).then(|| "9".to_owned());
+            WebRequestPrincipal::builder()
+                .tenant_id(self.tenant_id)
+                .organization_id(organization_id)
+                .login_scope(self.login_scope.clone())
+                .user_id("7")
+                .session_id(Some("session-1".to_owned()))
+                .app_id("web")
+                .environment(WebEnvironment::Dev)
+                .deployment_mode(WebDeploymentMode::Local)
+                .auth_level(WebAuthLevel::Password)
+                .permission_scope(self.permissions.clone())
+                .subject_type(WebSubjectType::User)
+                .build()
+        }
+    }
+
+    #[tokio::test]
+    async fn backend_framework_enforces_permission_and_tenant_scope() {
+        assert_eq!(
+            call_applications(TestResolver {
+                tenant_id: "42",
+                login_scope: WebLoginScope::Organization,
+                permissions: Vec::new(),
+            })
+            .await,
+            StatusCode::FORBIDDEN
+        );
+        assert_eq!(
+            call_applications(TestResolver {
+                tenant_id: "",
+                login_scope: WebLoginScope::Organization,
+                permissions: vec!["web.sites.read".to_owned()],
+            })
+            .await,
+            StatusCode::FORBIDDEN
+        );
+        assert_eq!(
+            call_applications(TestResolver {
+                tenant_id: "42",
+                login_scope: WebLoginScope::Tenant,
+                permissions: vec!["web.sites.read".to_owned()],
+            })
+            .await,
+            StatusCode::FORBIDDEN
+        );
+        assert_eq!(
+            call_applications(TestResolver {
+                tenant_id: "42",
+                login_scope: WebLoginScope::Organization,
+                permissions: vec!["web.sites.read".to_owned()],
+            })
+            .await,
+            StatusCode::OK
+        );
+    }
+
+    async fn call_applications(resolver: TestResolver) -> StatusCode {
+        let app = with_web_request_context(
+            Router::new().route(
+                "/backend/v3/api/applications",
+                get(|| async { StatusCode::OK }),
+            ),
+            build_web_backend_api_framework_layer(resolver, None),
+        );
+        app.oneshot(
+            Request::builder()
+                .uri("/backend/v3/api/applications")
+                .header(
+                    header::AUTHORIZATION,
+                    format!("Bearer {}", auth_token_jwt("42", "7", "session-1", "web")),
+                )
+                .header(
+                    "access-token",
+                    access_token_jwt("42", "7", "session-1", "web"),
+                )
+                .body(Body::empty())
+                .expect("valid backend request"),
+        )
+        .await
+        .expect("backend framework response")
+        .status()
     }
 }
