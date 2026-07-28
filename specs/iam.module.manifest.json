@@ -125,7 +125,8 @@
         "since": "1.0.0",
         "replacementCode": null
       }
-    ]
+    ],
+    "openapiAuthorities": []
   },
   "roles": {
     "domainStandardRoles": [],
@@ -144,6 +145,23 @@
         ]
       }
     ],
-    "roleExclusions": []
+    "roleExclusions": [],
+    "assignability": [],
+    "bootstrapDefaults": []
+  },
+  "directory": {
+    "organizationTemplates": [],
+    "departmentTemplates": [],
+    "positionTemplates": [],
+    "membershipTemplates": []
+  },
+  "policyConditions": {
+    "supportedAttributes": []
+  },
+  "oauthScopeMappings": [],
+  "dependencies": {
+    "requiresModules": [
+      "iam-kernel"
+    ]
   }
 }

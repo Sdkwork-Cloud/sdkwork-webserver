@@ -98,5 +98,56 @@ function AuthenticatedApplication({ runtime }: { runtime: BootstrappedWebserverP
   const landingPath = adminAccess ? "/admin" : "/console";
   const userLabel = authState.user?.displayName || authState.user?.email;
   const signOut = () => { void runtime.authController.signOut(); };
-  return <WebserverAuthGate controller={runtime.authController} locale={runtime.locale} authRoutes={<Suspense fallback={<div className="bootstrap-state">SDKWork Web Server</div>}><LazyAuthRoutes controller={runtime.authController} loadRuntimeConfig={runtime.loadAuthRuntimeConfig} locale={runtime.locale} /></Suspense>}><WebserverConsoleSdkProvider clients={runtime.consoleClients}><Routes><Route path="/console/*" element={<WebserverConsoleShell locale={runtime.locale} modules={consoleModules} permissionScope={permissionScope} registry={registry} userLabel={userLabel} onSignOut={signOut} />} /><Route path="/admin/*" element={adminAccess ? <Suspense fallback={<div className="bootstrap-state">SDKWork Web Server</div>}><LazyAdminSurface backendApiBaseUrl={runtime.config.backendApiBaseUrl} locale={runtime.locale} modules={adminModules} permissionScope={permissionScope} tokenManager={runtime.tokenManager} userLabel={userLabel} onSignOut={signOut} /></Suspense> : <Navigate to="/console" replace />} /><Route path="*" element={<Navigate to={landingPath} replace />} /></Routes></WebserverConsoleSdkProvider></WebserverAuthGate>;
+  return (
+    <WebserverAuthGate
+      authRoutes={(
+        <Suspense fallback={<div className="bootstrap-state">SDKWork Web Server</div>}>
+          <LazyAuthRoutes
+            controller={runtime.authController}
+            loadRuntimeConfig={runtime.loadAuthRuntimeConfig}
+            locale={runtime.locale}
+          />
+        </Suspense>
+      )}
+      controller={runtime.authController}
+      locale={runtime.locale}
+    >
+      <WebserverConsoleSdkProvider clients={runtime.consoleClients}>
+        <Routes>
+          <Route
+            path="/console/*"
+            element={(
+              <WebserverConsoleShell
+                locale={runtime.locale}
+                modules={consoleModules}
+                notificationsHref={runtime.config.messagingPcUrl}
+                onSignOut={signOut}
+                permissionScope={permissionScope}
+                portalHref="/"
+                registry={registry}
+                userLabel={userLabel}
+              />
+            )}
+          />
+          <Route
+            path="/admin/*"
+            element={adminAccess ? (
+              <Suspense fallback={<div className="bootstrap-state">SDKWork Web Server</div>}>
+                <LazyAdminSurface
+                  backendApiBaseUrl={runtime.config.backendApiBaseUrl}
+                  locale={runtime.locale}
+                  modules={adminModules}
+                  onSignOut={signOut}
+                  permissionScope={permissionScope}
+                  tokenManager={runtime.tokenManager}
+                  userLabel={userLabel}
+                />
+              </Suspense>
+            ) : <Navigate to="/console" replace />}
+          />
+          <Route path="*" element={<Navigate to={landingPath} replace />} />
+        </Routes>
+      </WebserverConsoleSdkProvider>
+    </WebserverAuthGate>
+  );
 }

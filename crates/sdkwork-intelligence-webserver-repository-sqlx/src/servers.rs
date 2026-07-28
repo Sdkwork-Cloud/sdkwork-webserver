@@ -8,8 +8,8 @@ use sqlx::Row;
 
 use super::agents::{generate_agent_token, hash_agent_token, parse_last_heartbeat_at};
 use super::support::{
-    instant_write_expression, json_from_row, json_write_expression, new_uuid, next_id, now_rfc3339,
-    pagination, store_error,
+    instant_from_row, instant_write_expression, json_from_row, json_write_expression, new_uuid,
+    next_id, now_rfc3339, pagination, store_error,
 };
 
 impl WebRepository {
@@ -121,6 +121,6 @@ fn map_server_row(row: &EngineRow) -> Result<ServerResponse, sqlx::Error> {
         ssh_port: row.try_get("ssh_port")?,
         status: row.try_get("status")?,
         last_heartbeat_at: parse_last_heartbeat_at(&metadata_raw),
-        created_at: row.try_get("created_at")?,
+        created_at: instant_from_row(row, "created_at")?,
     })
 }

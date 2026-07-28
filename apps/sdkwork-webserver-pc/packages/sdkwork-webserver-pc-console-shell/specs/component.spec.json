@@ -23,6 +23,26 @@
   },
   "canonicalSpecs": [
     {
+      "file": "CODE_STYLE_SPEC.md",
+      "path": "../../../../../sdkwork-specs/CODE_STYLE_SPEC.md",
+      "purpose": "Authored code and public export boundaries."
+    },
+    {
+      "file": "NAMING_SPEC.md",
+      "path": "../../../../../sdkwork-specs/NAMING_SPEC.md",
+      "purpose": "Console package naming."
+    },
+    {
+      "file": "TYPESCRIPT_CODE_SPEC.md",
+      "path": "../../../../../sdkwork-specs/TYPESCRIPT_CODE_SPEC.md",
+      "purpose": "TypeScript package structure."
+    },
+    {
+      "file": "FRONTEND_CODE_SPEC.md",
+      "path": "../../../../../sdkwork-specs/FRONTEND_CODE_SPEC.md",
+      "purpose": "Frontend implementation and verification."
+    },
+    {
       "file": "COMPONENT_SPEC.md",
       "path": "../../../../../sdkwork-specs/COMPONENT_SPEC.md",
       "purpose": "Component contract."
@@ -49,32 +69,45 @@
     }
   ],
   "contracts": {
+    "layerRole": "frontend-feature",
     "publicExports": [
-      "src/index.ts"
+      "."
+    ],
+    "providedPorts": [
+      {
+        "name": "webserverConsoleShell",
+        "export": "."
+      }
+    ],
+    "requiredPorts": [
+      {
+        "name": "webserverWorkspace",
+        "export": ".",
+        "provider": "@sdkwork/webserver-pc-commons"
+      },
+      {
+        "name": "portalNavigation",
+        "export": "."
+      },
+      {
+        "name": "notificationCenterNavigation",
+        "export": "."
+      }
     ],
     "runtimeEntrypoints": [],
     "routeManifest": null,
     "sdkClients": [],
     "sdkDependencies": [],
-    "permissionComposition": {
-      "inheritanceMode": "openapi-with-explicit-ui-hints",
-      "routePermissionHints": {
-        "inheritFromOpenApi": true,
-        "overrides": []
-      },
-      "consumerPolicy": {
-        "forbidLocalPermissionCatalogForDependencyDomains": true,
-        "allowFrontendHintsWithoutServerDuplication": true
-      }
-    },
+    "dependencyApiExports": [],
+    "dependencyApiSurfaces": [],
     "events": [],
     "configKeys": [],
     "permissions": []
   },
   "integration": {
     "authority": "Root SDKWork specs remain authoritative.",
-    "dependencyPolicy": "Consume sibling packages through public exports only.",
-    "sdkPolicy": "App SDK access is isolated behind console-core."
+    "dependencyPolicy": "The application root injects Portal and Messaging notification-center navigation while the shell consumes the shared workspace through its public root export.",
+    "sdkPolicy": "The shell owns no SDK client; app SDK access remains isolated behind console-core."
   },
   "verification": {
     "commands": [

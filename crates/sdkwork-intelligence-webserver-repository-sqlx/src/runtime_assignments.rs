@@ -9,7 +9,8 @@ use sdkwork_webserver_contract::{
 use sqlx::Row;
 
 use super::support::{
-    instant_write_expression, json_write_expression, new_uuid, next_id, now_rfc3339, store_error,
+    instant_from_row, instant_write_expression, json_write_expression, new_uuid, next_id,
+    now_rfc3339, store_error,
 };
 
 impl WebRepository {
@@ -445,7 +446,7 @@ fn map_assignment_row(row: &EngineRow) -> WebServiceResult<RuntimeAssignment> {
         generation: generation.to_string(),
         snapshot_uuid: row.try_get("snapshot_uuid").map_err(map_row_error)?,
         snapshot_sha256: row.try_get("snapshot_sha256").map_err(map_row_error)?,
-        assigned_at: row.try_get("assigned_at").map_err(map_row_error)?,
+        assigned_at: instant_from_row(row, "assigned_at").map_err(map_row_error)?,
     })
 }
 
@@ -470,7 +471,7 @@ fn map_observation_row(
         node_version: row.try_get("node_version").map_err(map_row_error)?,
         reason_code: row.try_get("reason_code").map_err(map_row_error)?,
         detail: row.try_get("detail").map_err(map_row_error)?,
-        observed_at: row.try_get("observed_at").map_err(map_row_error)?,
+        observed_at: instant_from_row(row, "observed_at").map_err(map_row_error)?,
     })
 }
 

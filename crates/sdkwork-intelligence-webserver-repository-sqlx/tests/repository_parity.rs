@@ -25,6 +25,31 @@ const POSTGRES_TEST_URL_ENV: &str = "SDKWORK_WEB_POSTGRES_TEST_DATABASE_URL";
 const TENANT_A: i64 = 410_001;
 const TENANT_B: i64 = 410_002;
 
+struct EnvironmentVariableGuard {
+    key: &'static str,
+    previous_value: Option<std::ffi::OsString>,
+}
+
+impl EnvironmentVariableGuard {
+    fn set(key: &'static str, value: &str) -> Self {
+        let previous_value = std::env::var_os(key);
+        std::env::set_var(key, value);
+        Self {
+            key,
+            previous_value,
+        }
+    }
+}
+
+impl Drop for EnvironmentVariableGuard {
+    fn drop(&mut self) {
+        match &self.previous_value {
+            Some(value) => std::env::set_var(self.key, value),
+            None => std::env::remove_var(self.key),
+        }
+    }
+}
+
 #[derive(Clone, Copy)]
 enum TestEngine {
     Sqlite,
@@ -108,6 +133,8 @@ async fn prepare_database(
             existing_tables, 0,
             "refusing to run repository parity against a non-empty PostgreSQL schema"
         );
+        let _auto_migrate =
+            EnvironmentVariableGuard::set("SDKWORK_WEB_DATABASE_AUTO_MIGRATE", "true");
         bootstrap_web_database(lifecycle_pool.clone())
             .await
             .expect("initialize PostgreSQL Web database lifecycle");

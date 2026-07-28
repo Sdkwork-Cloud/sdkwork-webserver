@@ -9,8 +9,9 @@ use sqlx::Row;
 
 use super::domains_lookup::{cert_name_from_hostname, resolve_domain_by_uuid};
 use super::support::{
-    bool_from_row, instant_write_expression, json_from_row, json_write_expression, new_uuid,
-    next_id, now_rfc3339, pagination, store_error,
+    bool_from_row, instant_from_row, instant_write_expression, json_from_row,
+    json_write_expression, new_uuid, next_id, now_rfc3339, optional_instant_from_row, pagination,
+    store_error,
 };
 
 impl WebRepository {
@@ -482,12 +483,12 @@ fn map_certificate_row(row: &EngineRow) -> Result<CertificateResponse, sqlx::Err
         cert_type: row.try_get("cert_type").ok(),
         issuer: row.try_get("issuer").ok(),
         fingerprint: row.try_get("fingerprint").ok(),
-        not_before: row.try_get("not_before").ok(),
-        not_after: row.try_get("not_after").ok(),
+        not_before: optional_instant_from_row(row, "not_before")?,
+        not_after: optional_instant_from_row(row, "not_after")?,
         auto_renew: bool_from_row(row, "auto_renew").ok(),
         renewal_status: row.try_get("renewal_status").ok(),
         status: row.try_get("status")?,
-        created_at: row.try_get("created_at")?,
+        created_at: instant_from_row(row, "created_at")?,
     })
 }
 

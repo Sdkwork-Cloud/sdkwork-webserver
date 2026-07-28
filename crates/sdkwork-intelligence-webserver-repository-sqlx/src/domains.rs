@@ -6,8 +6,8 @@ use super::{EngineRow, WebRepository};
 use sqlx::Row;
 
 use super::support::{
-    bool_from_row, instant_write_expression, new_uuid, next_id, now_rfc3339, pagination,
-    resolve_site_internal_id, store_error,
+    bool_from_row, instant_from_row, instant_write_expression, new_uuid, next_id, now_rfc3339,
+    pagination, resolve_site_internal_id, store_error,
 };
 
 impl WebRepository {
@@ -243,6 +243,6 @@ fn map_domain_row(row: &EngineRow) -> Result<DomainResponse, sqlx::Error> {
         ssl_enabled: bool_from_row(row, "ssl_enabled")?,
         ssl_provider: row.try_get("ssl_provider").ok(),
         status: row.try_get("status")?,
-        created_at: row.try_get("created_at")?,
+        created_at: instant_from_row(row, "created_at")?,
     })
 }

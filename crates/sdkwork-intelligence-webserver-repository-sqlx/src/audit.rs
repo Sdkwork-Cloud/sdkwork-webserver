@@ -6,7 +6,8 @@ use super::{EngineRow, WebRepository};
 use sqlx::Row;
 
 use super::support::{
-    instant_write_expression, new_uuid, next_id, now_rfc3339, pagination, store_error,
+    instant_from_row, instant_write_expression, new_uuid, next_id, now_rfc3339, pagination,
+    store_error,
 };
 
 impl WebRepository {
@@ -118,6 +119,6 @@ fn map_audit_log_row(row: &EngineRow) -> Result<AuditLogResponse, sqlx::Error> {
         id: row.try_get("uuid")?,
         action: row.try_get("action")?,
         resource: row.try_get("target_type")?,
-        created_at: row.try_get("created_at")?,
+        created_at: instant_from_row(row, "created_at")?,
     })
 }

@@ -48,6 +48,9 @@ describe("console workspace access", () => {
 
     expect(screen.getByRole("link", { name: "My applications" })).toBeTruthy();
     expect(screen.getByRole("link", { name: "Deployment history" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Back to Portal" }).getAttribute("href")).toBe("/");
+    expect(screen.getByRole("link", { name: "Notification center" }).getAttribute("href")).toBe("/notifications");
+    expect(screen.getByTitle("user@example.test account")).toBeTruthy();
     expect(screen.queryByText("This feature is not authorized")).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "Sign out" }));
     expect(onSignOut).toHaveBeenCalledOnce();
@@ -251,8 +254,10 @@ function renderWorkspace(
             <WebserverWorkspace
               locale={locale}
               modules={consoleModules}
+              notificationsHref="/notifications"
               onSignOut={onSignOut}
               permissionScope={permissionScope}
+              portalHref="/"
               registry={registry}
               surface="app-console"
               userLabel="user@example.test"

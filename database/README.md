@@ -15,9 +15,16 @@ Canonical lifecycle assets for the `sdkwork-web-server` PostgreSQL control-plane
 This module is in initialization state for greenfield PostgreSQL deployments:
 
 1. `database/ddl/baseline/postgres/0001_web_baseline.sql` is the full PostgreSQL DDL snapshot.
-2. `database/migrations/postgres/` is reserved for post-GA incremental changes and is empty at initialization.
+2. `database/migrations/postgres/` contains checksum-tracked forward migrations for every schema
+   change made after the initial baseline. Existing databases must never be upgraded by replaying
+   or editing the baseline.
 3. Production and staging use explicit migration commands; `lifecycle.autoMigrate` defaults to `false`.
 4. `pnpm db:drift:check` verifies the deployed schema before release.
+
+The pre-launch `1.1.0` reconciliation migration upgrades databases initialized before the Website
+runtime control plane and `application_type` were added. It preserves existing sites as `WEB` and
+refuses to invent tenant-scope hashes for legacy Web Nodes; operators must supply those hashes from
+their authoritative tenant assignments before rerunning the migration.
 
 SQLite is not an authoritative server engine or deployment profile. The historical SQLite DDL is
 retained under `tests/fixtures/database/sqlite/` only for isolated SQLx repository parity. It is not

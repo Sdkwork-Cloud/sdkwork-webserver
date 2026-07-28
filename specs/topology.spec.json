@@ -36,7 +36,8 @@
     "environment": "SDKWORK_WEB_ENVIRONMENT",
     "profileId": "SDKWORK_WEB_PROFILE_ID",
     "standaloneGatewayBind": "SDKWORK_WEB_APPLICATION_PUBLIC_INGRESS_BIND",
-    "apiGatewayBaseUrl": "SDKWORK_WEB_PLATFORM_API_GATEWAY_HTTP_URL"
+    "apiGatewayBaseUrl": "SDKWORK_WEB_PLATFORM_API_GATEWAY_HTTP_URL",
+    "clientApiGatewayBaseUrl": "VITE_SDKWORK_WEB_PLATFORM_API_GATEWAY_HTTP_URL"
   },
   "surfaces": {
     "application.public-ingress": {
@@ -104,8 +105,8 @@
   },
   "orchestration": {
     "profiles": {
-        "standalone.development": {
-          "processes": [
+      "standalone.development": {
+        "processes": [
           {
             "id": "application.public-ingress",
             "crate": "sdkwork-api-web-server-standalone-gateway",
@@ -126,26 +127,26 @@
             "clientArchitectures": [
               "pc-web"
             ],
-              "required": true
-            }
-          ],
-          "browserDeliveries": [
-            {
-              "id": "webserver-pc-browser",
-              "applicationRoot": "apps/sdkwork-webserver-pc",
-              "clientArchitectures": [
-                "pc-web"
-              ],
-              "originMode": "same-origin",
-              "deliveryMode": "dev-server-proxy",
-              "apiSurfaceId": "application.public-ingress",
-              "clientProcessId": "webserver-pc-browser",
-              "preserveCanonicalPaths": true
-            }
-          ],
-          "healthSurfaces": [
-            "application.public-ingress"
-          ]
+            "required": true
+          }
+        ],
+        "browserDeliveries": [
+          {
+            "id": "webserver-pc-browser",
+            "applicationRoot": "apps/sdkwork-webserver-pc",
+            "clientArchitectures": [
+              "pc-web"
+            ],
+            "originMode": "same-origin",
+            "deliveryMode": "dev-server-proxy",
+            "apiSurfaceId": "application.public-ingress",
+            "clientProcessId": "webserver-pc-browser",
+            "preserveCanonicalPaths": true
+          }
+        ],
+        "healthSurfaces": [
+          "application.public-ingress"
+        ]
       },
       "cloud.development": {
         "processes": [
@@ -193,36 +194,36 @@
           "platform.api-gateway"
         ]
       },
-        "standalone.production": {
-          "processes": [
+      "standalone.production": {
+        "processes": [
           {
             "id": "application.public-ingress",
             "crate": "sdkwork-api-web-server-standalone-gateway",
             "binary": "sdkwork-api-web-server-standalone-gateway",
             "required": true,
-              "role": "api-standalone-gateway"
-            }
-          ],
-          "browserDeliveries": [
-            {
-              "id": "webserver-pc-browser",
-              "applicationRoot": "apps/sdkwork-webserver-pc",
-              "clientArchitectures": [
-                "pc-web"
-              ],
-              "originMode": "same-origin",
-              "deliveryMode": "gateway-static",
-              "apiSurfaceId": "application.public-ingress",
-              "hostProcessId": "application.public-ingress",
-              "buildOutput": "apps/sdkwork-webserver-pc/dist",
-              "runtimeRootEnv": "SDKWORK_WEB_PC_STATIC_ROOT",
-              "mountPath": "/",
-              "spaFallback": "/index.html"
-            }
-          ],
-          "healthSurfaces": [
-            "application.public-ingress"
-          ]
+            "role": "api-standalone-gateway"
+          }
+        ],
+        "browserDeliveries": [
+          {
+            "id": "webserver-pc-browser",
+            "applicationRoot": "apps/sdkwork-webserver-pc",
+            "clientArchitectures": [
+              "pc-web"
+            ],
+            "originMode": "same-origin",
+            "deliveryMode": "gateway-static",
+            "apiSurfaceId": "application.public-ingress",
+            "hostProcessId": "application.public-ingress",
+            "buildOutput": "apps/sdkwork-webserver-pc/dist",
+            "runtimeRootEnv": "SDKWORK_WEB_PC_STATIC_ROOT",
+            "mountPath": "/",
+            "spaFallback": "/index.html"
+          }
+        ],
+        "healthSurfaces": [
+          "application.public-ingress"
+        ]
       }
     }
   },

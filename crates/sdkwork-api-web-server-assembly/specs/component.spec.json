@@ -40,7 +40,10 @@
     "layerRole": "runtime-composition",
     "publicExports": [
       "sdkwork_api_web_server_assembly::assemble_api_router",
-      "sdkwork_api_web_server_assembly::migrate_database_from_env"
+      "sdkwork_api_web_server_assembly::migrate_database_from_env",
+      "sdkwork_api_web_server_assembly::ApiAssembly",
+      "sdkwork_api_web_server_assembly::ApiAssemblyContext",
+      "sdkwork_api_web_server_assembly::ApiAssemblyError"
     ],
     "providedPorts": [
       {"name": "webServerApiAssembly", "export": "sdkwork_api_web_server_assembly::assemble_api_router"},

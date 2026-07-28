@@ -7,8 +7,8 @@ use sdkwork_webserver_contract::{
 use sqlx::Row;
 
 use super::support::{
-    instant_write_expression, json_from_row, json_write_expression, new_uuid, next_id, now_rfc3339,
-    pagination, store_error,
+    instant_from_row, instant_write_expression, json_from_row, json_write_expression, new_uuid,
+    next_id, now_rfc3339, pagination, store_error,
 };
 
 impl WebRepository {
@@ -311,7 +311,7 @@ fn map_site_row(row: &EngineRow) -> Result<SiteResponse, sqlx::Error> {
         site_type: row.try_get("site_type")?,
         status: row.try_get("status")?,
         runtime_config: json_from_row(row, "runtime_config")?,
-        created_at: row.try_get("created_at")?,
-        updated_at: row.try_get("updated_at")?,
+        created_at: instant_from_row(row, "created_at")?,
+        updated_at: instant_from_row(row, "updated_at")?,
     })
 }

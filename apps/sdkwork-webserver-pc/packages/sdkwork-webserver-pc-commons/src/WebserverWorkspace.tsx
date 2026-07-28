@@ -1,5 +1,4 @@
 import {
-  Activity,
   AppWindow,
   Check,
   ChevronLeft,
@@ -7,16 +6,14 @@ import {
   Clipboard,
   Filter,
   LockKeyhole,
-  LogOut,
   RefreshCw,
   Search,
   Shield,
-  ShieldCheck,
   Upload,
   X,
 } from "lucide-react";
 import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
-import { NavLink, Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 
 import { translateWebserver, type WebserverLocale, type WebserverMessageKey } from "./i18n/index.ts";
 import {
@@ -35,12 +32,15 @@ import type {
   WebserverResourceKey,
   WebserverResourceRegistry,
 } from "./types.ts";
+import { WorkspaceHeader, WorkspaceSidebar } from "./WebserverWorkspaceChrome.tsx";
 
 export interface WebserverWorkspaceProps {
   locale: WebserverLocale;
   modules: readonly WebserverPcModuleDefinition[];
+  notificationsHref?: string;
   onSignOut?(): void;
   permissionScope: readonly string[];
+  portalHref?: string;
   registry: WebserverResourceRegistry;
   surface: "app-console" | "backend-admin";
   userLabel?: string;
@@ -49,8 +49,10 @@ export interface WebserverWorkspaceProps {
 export function WebserverWorkspace({
   locale,
   modules,
+  notificationsHref,
   onSignOut,
   permissionScope,
+  portalHref,
   registry,
   surface,
   userLabel,
@@ -78,45 +80,17 @@ export function WebserverWorkspace({
 
   return (
     <div className="app-layout">
-      <aside className="sidebar">
-        <div className="brand">
-          <span className="brand-mark">W</span>
-          <div>
-            <strong>{t("brand.name")}</strong>
-            <small>{t(`surface.${surface}`)}</small>
-          </div>
-        </div>
-        <nav aria-label={t("nav.primary")}>
-          {entries.map((entry) => (
-            <NavLink
-              aria-label={resourceText(t, entry.resource, "label")}
-              key={entry.resource}
-              title={resourceText(t, entry.resource, "label")}
-              to={`${basePath}/${entry.resource}`}
-            >
-              <Activity aria-hidden="true" size={17} />
-              <span>{resourceText(t, entry.resource, "label")}</span>
-            </NavLink>
-          ))}
-        </nav>
-        <div className="sidebar-footer">
-          <div>
-            {adminRole ? <small><ShieldCheck aria-hidden="true" size={14} />{adminRole}</small> : null}
-            <span title={userLabel}>{userLabel ?? t("auth.user")}</span>
-          </div>
-          {onSignOut ? (
-            <button
-              aria-label={t("auth.signOut")}
-              className="icon-button"
-              onClick={onSignOut}
-              title={t("auth.signOut")}
-              type="button"
-            >
-              <LogOut aria-hidden="true" size={17} />
-            </button>
-          ) : null}
-        </div>
-      </aside>
+      <WorkspaceHeader
+        adminRole={adminRole}
+        basePath={basePath}
+        notificationsHref={notificationsHref}
+        onSignOut={onSignOut}
+        portalHref={portalHref}
+        surface={surface}
+        t={t}
+        userLabel={userLabel}
+      />
+      <WorkspaceSidebar basePath={basePath} entries={entries} t={t} />
       <main className="workspace">
         {defaultResource ? (
           <Routes>

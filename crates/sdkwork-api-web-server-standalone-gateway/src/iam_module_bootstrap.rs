@@ -47,6 +47,23 @@ mod tests {
                 "app_user must receive {expected}"
             );
         }
+        for templates in [
+            "organizationTemplates",
+            "departmentTemplates",
+            "positionTemplates",
+            "membershipTemplates",
+        ] {
+            assert!(
+                manifest["directory"][templates].is_array(),
+                "Web IMF directory.{templates} must be present"
+            );
+        }
+        assert!(
+            manifest["dependencies"]["requiresModules"]
+                .as_array()
+                .is_some_and(|modules| modules.iter().any(|module| module == "iam-kernel")),
+            "Web IMF must depend on iam-kernel"
+        );
         assert!(
             app_user_patterns.iter().all(|pattern| {
                 pattern.as_str().is_some_and(|pattern| {

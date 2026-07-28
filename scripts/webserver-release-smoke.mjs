@@ -40,7 +40,9 @@ const STANDALONE_SAME_ORIGIN_PATHS = Object.freeze({
   runtimeEnv: '/runtime-env.json',
   navigation: '/console/sites',
   openapi: '/openapi.json',
+  webSites: '/app/v3/api/sites',
   iamSession: '/app/v3/api/auth/sessions/current',
+  driveAssets: '/app/v3/api/assets',
   missingApi: '/app/v3/api/__sdkwork_release_smoke_missing__',
 });
 const EXPECTED_BINARIES = [
@@ -301,6 +303,30 @@ function assertStatus(response, expected, label) {
   }
 }
 
+function assertUnauthenticatedOwnerRoute(response, expected, label) {
+  assertStatus(response, 401, label);
+  assertContentType(response, 'application/problem+json', label);
+  let problem;
+  try {
+    problem = JSON.parse(response.body);
+  } catch (error) {
+    throw new Error(`${label} returned invalid problem JSON: ${error.message}`);
+  }
+  for (const [field, value] of Object.entries(expected)) {
+    if (problem[field] !== value) {
+      throw new Error(
+        `${label} problem.${field} must equal ${JSON.stringify(value)}; received ${JSON.stringify(problem[field])}`,
+      );
+    }
+  }
+  if (!Number.isInteger(problem.code) || problem.code !== 40101) {
+    throw new Error(`${label} problem.code must equal 40101`);
+  }
+  if (typeof problem.traceId !== 'string' || problem.traceId.length === 0) {
+    throw new Error(`${label} problem.traceId must be non-empty`);
+  }
+}
+
 function standaloneManagementEnv(packageRoot, port) {
   const iamRoot = path.join(packageRoot, ...STANDALONE_IAM_ROOT.split('/'));
   const driveRoot = path.join(packageRoot, ...STANDALONE_DRIVE_ROOT.split('/'));
@@ -392,14 +418,42 @@ async function verifyStandaloneSameOriginIngress({ gateway, packageRoot, tempora
     assertStatus(openapi, 200, 'standalone OpenAPI');
     assertContentType(openapi, 'application/json', 'standalone OpenAPI');
     const openapiDocument = JSON.parse(openapi.body);
-    if (!openapiDocument.paths?.[STANDALONE_SAME_ORIGIN_PATHS.iamSession]) {
-      throw new Error('standalone OpenAPI is missing the embedded IAM current-session route');
+    for (const ownerPath of [
+      STANDALONE_SAME_ORIGIN_PATHS.webSites,
+      STANDALONE_SAME_ORIGIN_PATHS.iamSession,
+      STANDALONE_SAME_ORIGIN_PATHS.driveAssets,
+    ]) {
+      if (!openapiDocument.paths?.[ownerPath]) {
+        throw new Error(`standalone OpenAPI is missing embedded owner route ${ownerPath}`);
+      }
     }
 
-    const iamSession = await requestHttp(port, STANDALONE_SAME_ORIGIN_PATHS.iamSession);
-    assertStatus(iamSession, 401, 'standalone unauthenticated IAM current session');
-    if (String(iamSession.headers['content-type'] ?? '').toLowerCase().includes('text/html')) {
-      throw new Error('standalone IAM route must not return the SPA shell');
+    for (const ownerRoute of [
+      {
+        label: 'standalone unauthenticated Web sites',
+        path: STANDALONE_SAME_ORIGIN_PATHS.webSites,
+        operationId: 'sites.list',
+      },
+      {
+        label: 'standalone unauthenticated IAM current session',
+        path: STANDALONE_SAME_ORIGIN_PATHS.iamSession,
+        operationId: 'sessions.current.retrieve',
+      },
+      {
+        label: 'standalone unauthenticated Drive assets',
+        path: STANDALONE_SAME_ORIGIN_PATHS.driveAssets,
+        operationId: 'assets.list',
+      },
+    ]) {
+      const response = await requestHttp(port, ownerRoute.path);
+      assertUnauthenticatedOwnerRoute(
+        response,
+        {
+          instance: `GET ${ownerRoute.path}`,
+          operationId: ownerRoute.operationId,
+        },
+        ownerRoute.label,
+      );
     }
 
     const missingApi = await requestHttp(port, STANDALONE_SAME_ORIGIN_PATHS.missingApi, {

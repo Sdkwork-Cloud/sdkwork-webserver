@@ -23,6 +23,26 @@
   },
   "canonicalSpecs": [
     {
+      "file": "CODE_STYLE_SPEC.md",
+      "path": "../../../../../sdkwork-specs/CODE_STYLE_SPEC.md",
+      "purpose": "Authored code and public export boundaries."
+    },
+    {
+      "file": "NAMING_SPEC.md",
+      "path": "../../../../../sdkwork-specs/NAMING_SPEC.md",
+      "purpose": "PC package and component naming."
+    },
+    {
+      "file": "TYPESCRIPT_CODE_SPEC.md",
+      "path": "../../../../../sdkwork-specs/TYPESCRIPT_CODE_SPEC.md",
+      "purpose": "TypeScript package structure."
+    },
+    {
+      "file": "FRONTEND_CODE_SPEC.md",
+      "path": "../../../../../sdkwork-specs/FRONTEND_CODE_SPEC.md",
+      "purpose": "Frontend implementation and verification."
+    },
+    {
       "file": "COMPONENT_SPEC.md",
       "path": "../../../../../sdkwork-specs/COMPONENT_SPEC.md",
       "purpose": "Component contract."
@@ -49,32 +69,39 @@
     }
   ],
   "contracts": {
+    "layerRole": "frontend-core",
     "publicExports": [
-      "src/index.ts"
+      "."
     ],
+    "providedPorts": [
+      {
+        "name": "webserverWorkspace",
+        "export": "."
+      },
+      {
+        "name": "webserverResourceContracts",
+        "export": "."
+      },
+      {
+        "name": "webserverWorkspaceI18n",
+        "export": "."
+      }
+    ],
+    "requiredPorts": [],
     "runtimeEntrypoints": [],
     "routeManifest": null,
     "sdkClients": [],
     "sdkDependencies": [],
-    "permissionComposition": {
-      "inheritanceMode": "openapi-with-explicit-ui-hints",
-      "routePermissionHints": {
-        "inheritFromOpenApi": true,
-        "overrides": []
-      },
-      "consumerPolicy": {
-        "forbidLocalPermissionCatalogForDependencyDomains": true,
-        "allowFrontendHintsWithoutServerDuplication": true
-      }
-    },
+    "dependencyApiExports": [],
+    "dependencyApiSurfaces": [],
     "events": [],
     "configKeys": [],
     "permissions": []
   },
   "integration": {
     "authority": "Root SDKWork specs remain authoritative.",
-    "dependencyPolicy": "Consume sibling packages through public exports only.",
-    "sdkPolicy": "App SDK access is isolated behind console-core."
+    "dependencyPolicy": "Console and admin shells consume the shared workspace, navigation, i18n, and resource contracts through the package root export.",
+    "sdkPolicy": "This package owns no SDK client; resource services remain injected by console-core or admin-core."
   },
   "verification": {
     "commands": [

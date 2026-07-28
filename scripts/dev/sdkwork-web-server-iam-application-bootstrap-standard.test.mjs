@@ -41,13 +41,23 @@ test('standalone startup embeds IAM App API through its owner assembly', () => {
   const profile = read(
     'crates/sdkwork-api-web-server-standalone-gateway/src/profile.rs',
   );
+  const iamModuleBootstrap = read(
+    'crates/sdkwork-api-web-server-standalone-gateway/src/iam_module_bootstrap.rs',
+  );
   const gatewayCargo = read('crates/sdkwork-api-web-server-standalone-gateway/Cargo.toml');
   const workspaceCargo = read('Cargo.toml');
 
-  assert.match(profile, /sdkwork_api_iam_assembly::assemble_app_api_contribution\(\)/u);
+  assert.match(profile, /crate::iam_module_bootstrap::web_iam_module_manifest_path\(\)/u);
+  assert.match(
+    profile,
+    /sdkwork_api_iam_assembly::assemble_app_api_contribution_with_module_manifests\(&\[\s*web_iam_manifest,\s*\]\)/u,
+  );
   assert.match(profile, /sdkwork_api_drive_assembly::assemble_app_api_contribution\(\)/u);
   assert.match(profile, /compose_owner_contributions/u);
-  assert.match(gatewayBootstrap, /assemble_standalone_profile\(\)\.await/u);
+  assert.match(profile, /const DEPENDENCY_UNAVAILABLE_CODE: i32 = 50301/u);
+  assert.match(profile, /assembly_unavailable\("sdkwork-iam"/u);
+  assert.match(iamModuleBootstrap, /specs\/iam\.module\.manifest\.json/u);
+  assert.match(gatewayBootstrap, /assemble_standalone_profile\(\)\s*\.await/u);
   assert.match(gatewayBootstrap, /with_web_request_context/u);
   assert.match(gatewayCargo, /sdkwork-api-iam-assembly/u);
   assert.match(gatewayCargo, /sdkwork-api-drive-assembly/u);

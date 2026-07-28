@@ -741,6 +741,12 @@ test('Linux release smoke validates, extracts, serves HTTP and HTTPS, and cleans
   assert.match(source, /SDKWORK_WEB_ACME_CONTACT_EMAIL/u);
   assert.match(source, /SDKWORK_WEB_CERT_ENCRYPTION_KEY/u);
   assert.match(source, /SDKWORK_DRIVE_DOWNLOAD_TOKEN_HMAC_SECRET/u);
+  assert.match(source, /sites\.list/u);
+  assert.match(source, /sessions\.current\.retrieve/u);
+  assert.match(source, /assets\.list/u);
+  assert.match(source, /application\/problem\+json/u);
+  assert.match(source, /instance: `GET \$\{ownerRoute\.path\}`/u);
+  assert.match(source, /operationId: ownerRoute\.operationId/u);
   assert.match(source, /\['data-plane', smokeConfigPath\]/u);
   assert.match(source, /waitForHealth\('http'/u);
   assert.match(source, /waitForHealth\('https'/u);

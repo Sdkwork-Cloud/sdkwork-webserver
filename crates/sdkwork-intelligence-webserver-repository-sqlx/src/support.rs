@@ -79,6 +79,42 @@ pub(crate) fn instant_write_expression(engine: DatabaseEngine, placeholder: &str
     }
 }
 
+pub(crate) fn instant_from_row(row: &EngineRow, column: &str) -> Result<String, SqlxError> {
+    let value: String = row.try_get(column)?;
+    normalize_database_instant(&value).ok_or_else(|| invalid_instant_error(column, &value))
+}
+
+pub(crate) fn optional_instant_from_row(
+    row: &EngineRow,
+    column: &str,
+) -> Result<Option<String>, SqlxError> {
+    let value: Option<String> = row.try_get(column)?;
+    value
+        .map(|value| {
+            normalize_database_instant(&value).ok_or_else(|| invalid_instant_error(column, &value))
+        })
+        .transpose()
+}
+
+fn normalize_database_instant(value: &str) -> Option<String> {
+    chrono::DateTime::parse_from_rfc3339(value)
+        .or_else(|_| chrono::DateTime::parse_from_str(value, "%Y-%m-%d %H:%M:%S%.f%#z"))
+        .ok()
+        .map(|value| {
+            sdkwork_utils_rust::datetime::format_datetime(value.with_timezone(&chrono::Utc), None)
+        })
+}
+
+fn invalid_instant_error(column: &str, value: &str) -> SqlxError {
+    SqlxError::ColumnDecode {
+        index: column.to_string(),
+        source: Box::new(std::io::Error::new(
+            std::io::ErrorKind::InvalidData,
+            format!("invalid database instant: {value}"),
+        )),
+    }
+}
+
 pub(crate) async fn resolve_site_internal_id(
     pool: &EnginePool,
     tenant_id: i64,
@@ -119,7 +155,7 @@ pub(crate) async fn resolve_site_uuid(
 
 #[cfg(test)]
 mod tests {
-    use super::pagination;
+    use super::{normalize_database_instant, pagination};
 
     #[test]
     fn pagination_clamps_inputs_and_computes_offset_without_i32_overflow() {
@@ -129,5 +165,16 @@ mod tests {
             pagination(i32::MAX, i32::MAX),
             (i32::MAX, 100, 214_748_364_600)
         );
+    }
+
+    #[test]
+    fn database_instants_are_normalized_to_rfc3339_utc() {
+        let expected = "2027-01-01T00:00:00.123Z";
+        assert_eq!(normalize_database_instant(expected).as_deref(), Some(expected));
+        assert_eq!(
+            normalize_database_instant("2027-01-01 08:00:00.123+08").as_deref(),
+            Some(expected)
+        );
+        assert!(normalize_database_instant("not-an-instant").is_none());
     }
 }

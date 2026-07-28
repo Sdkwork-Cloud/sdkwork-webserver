@@ -1,0 +1,165 @@
+import {
+  Activity,
+  AppWindow,
+  Bell,
+  Boxes,
+  Globe2,
+  House,
+  LogOut,
+  Rocket,
+  ScrollText,
+  Server,
+  ServerCog,
+  Settings2,
+  ShieldCheck,
+} from "lucide-react";
+import type { ReactNode } from "react";
+import { NavLink } from "react-router-dom";
+
+import type { WebserverMessageKey } from "./i18n/index.ts";
+import type { WebserverResourceKey } from "./types.ts";
+
+type WorkspaceSurface = "app-console" | "backend-admin";
+type WorkspaceTranslator = (key: WebserverMessageKey, values?: Record<string, string | number>) => string;
+
+interface WorkspaceHeaderProps {
+  adminRole?: string;
+  basePath: string;
+  notificationsHref?: string;
+  onSignOut?(): void;
+  portalHref?: string;
+  surface: WorkspaceSurface;
+  t: WorkspaceTranslator;
+  userLabel?: string;
+}
+
+interface WorkspaceSidebarProps {
+  basePath: string;
+  entries: readonly { resource: WebserverResourceKey }[];
+  t: WorkspaceTranslator;
+}
+
+export function WorkspaceHeader({
+  adminRole,
+  basePath,
+  notificationsHref,
+  onSignOut,
+  portalHref,
+  surface,
+  t,
+  userLabel,
+}: WorkspaceHeaderProps) {
+  const accountLabel = userLabel?.trim() || t("auth.user");
+  const accountInitial = Array.from(accountLabel)[0]?.toLocaleUpperCase() ?? "U";
+  const brandHref = portalHref ?? basePath;
+
+  return (
+    <header className="workspace-header">
+      <a
+        aria-label={`${t("brand.name")} ${t(`surface.${surface}`)}`}
+        className="workspace-brand"
+        href={brandHref}
+      >
+        <span className="workspace-brand-mark"><Boxes aria-hidden="true" size={19} strokeWidth={2.2} /></span>
+        <span className="workspace-brand-copy">
+          <strong>{t("brand.name")}</strong>
+          <small>{t(`surface.${surface}`)}</small>
+        </span>
+      </a>
+
+      <div className="workspace-header-actions">
+        {portalHref ? (
+          <a className="workspace-header-command" href={portalHref}>
+            <House aria-hidden="true" size={17} />
+            <span>{t("navigation.portal")}</span>
+          </a>
+        ) : null}
+        {notificationsHref ? (
+          <a
+            aria-label={t("navigation.notifications")}
+            className="workspace-header-icon"
+            href={notificationsHref}
+            title={t("navigation.notifications")}
+          >
+            <Bell aria-hidden="true" size={18} />
+          </a>
+        ) : null}
+        <span aria-hidden="true" className="workspace-header-divider" />
+        <div className="workspace-account" title={t("auth.account", { user: accountLabel })}>
+          <span aria-hidden="true" className="workspace-account-avatar">{accountInitial}</span>
+          <span className="workspace-account-copy">
+            <strong>{accountLabel}</strong>
+            <small>{adminRole ?? t(`surface.${surface}`)}</small>
+          </span>
+        </div>
+        {onSignOut ? (
+          <button
+            aria-label={t("auth.signOut")}
+            className="workspace-header-icon"
+            onClick={onSignOut}
+            title={t("auth.signOut")}
+            type="button"
+          >
+            <LogOut aria-hidden="true" size={17} />
+          </button>
+        ) : null}
+      </div>
+    </header>
+  );
+}
+
+export function WorkspaceSidebar({ basePath, entries, t }: WorkspaceSidebarProps) {
+  return (
+    <aside className="sidebar">
+      <span className="sidebar-label">{t("nav.workspace")}</span>
+      <nav aria-label={t("nav.primary")}>
+        {entries.map((entry) => (
+          <NavLink
+            aria-label={resourceText(t, entry.resource)}
+            key={entry.resource}
+            title={resourceText(t, entry.resource)}
+            to={`${basePath}/${entry.resource}`}
+          >
+            <ResourceIcon resource={entry.resource} />
+            <span>{resourceText(t, entry.resource)}</span>
+          </NavLink>
+        ))}
+      </nav>
+    </aside>
+  );
+}
+
+function ResourceIcon({ resource }: { resource: WebserverResourceKey }): ReactNode {
+  const iconProps = { "aria-hidden": true, size: 17 } as const;
+  switch (resource) {
+    case "sites":
+    case "applications":
+      return <AppWindow {...iconProps} />;
+    case "configuration":
+      return <Settings2 {...iconProps} />;
+    case "domains":
+    case "application-domains":
+      return <Globe2 {...iconProps} />;
+    case "certificates":
+    case "managed-certificates":
+    case "certificate-distribution":
+      return <ShieldCheck {...iconProps} />;
+    case "deployments":
+    case "application-deployments":
+      return <Rocket {...iconProps} />;
+    case "nginx":
+      return <ServerCog {...iconProps} />;
+    case "servers":
+      return <Server {...iconProps} />;
+    case "audit":
+      return <ScrollText {...iconProps} />;
+    case "diagnostics":
+      return <Activity {...iconProps} />;
+    default:
+      return <Activity {...iconProps} />;
+  }
+}
+
+function resourceText(t: WorkspaceTranslator, resource: WebserverResourceKey): string {
+  return t(`resource.${resource}.label` as WebserverMessageKey);
+}

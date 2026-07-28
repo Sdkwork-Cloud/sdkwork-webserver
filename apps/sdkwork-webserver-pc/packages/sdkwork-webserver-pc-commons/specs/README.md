@@ -1,3 +1,3 @@
 # shared-ui
 
-This package owns the shared-ui capability on the pc surface. Its component contract links the canonical SDKWork standards; normative text is not duplicated locally.
+This package owns shared resource contracts and the reusable PC workspace chrome for console and backend-admin surfaces. Shell packages provide navigation and SDK-backed resource registries through typed props; this package does not construct SDK clients or own runtime configuration.

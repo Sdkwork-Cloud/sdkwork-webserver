@@ -5,8 +5,8 @@ use sdkwork_webserver_contract::{
 use sqlx::Row;
 
 use super::support::{
-    instant_write_expression, is_unique_violation, new_uuid, next_id, now_rfc3339, pagination,
-    resolve_site_internal_id, store_error,
+    instant_from_row, instant_write_expression, is_unique_violation, new_uuid, next_id,
+    now_rfc3339, optional_instant_from_row, pagination, resolve_site_internal_id, store_error,
 };
 
 impl WebRepository {
@@ -446,10 +446,10 @@ fn map_deployment_row(row: &EngineRow, site_id: &str) -> Result<DeploymentRespon
         artifact_drive_uri: row.try_get("artifact_path").ok(),
         artifact_size: row.try_get("artifact_size").ok(),
         artifact_hash: row.try_get("artifact_hash").ok(),
-        started_at: row.try_get("started_at").ok(),
-        completed_at: row.try_get("completed_at").ok(),
+        started_at: optional_instant_from_row(row, "started_at")?,
+        completed_at: optional_instant_from_row(row, "completed_at")?,
         duration_ms: row.try_get("duration_ms").ok(),
-        created_at: row.try_get("created_at")?,
+        created_at: instant_from_row(row, "created_at")?,
     })
 }
 
