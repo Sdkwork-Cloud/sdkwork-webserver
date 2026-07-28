@@ -185,9 +185,9 @@ pub struct CreateDeploymentRequest {
     pub artifact_size: Option<i64>,
     #[serde(rename = "artifactHash", default)]
     pub artifact_hash: Option<String>,
-    /// 客户端提供的幂等键。相同 (tenant_id, idempotency_key) 的请求会返回已创建的 deployment，
-    /// 保证网络重试场景下不会产生重复部署记录。
-    #[serde(rename = "idempotencyKey", default)]
+    /// Framework-scoped idempotency identity used by the repository for durable deployment deduplication.
+    /// This value is injected from the validated Header context and is never accepted from JSON input.
+    #[serde(skip)]
     pub idempotency_key: Option<String>,
 }
 

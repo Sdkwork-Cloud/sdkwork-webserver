@@ -43,6 +43,7 @@ fn web_backend_context_from_web_request(
         operator_id,
         tenant_id: Some(tenant_id),
         subject_id,
+        idempotency_key: context.idempotency_key().map(str::to_owned),
     })
 }
 

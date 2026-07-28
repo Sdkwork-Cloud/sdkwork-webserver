@@ -34,6 +34,7 @@ impl WebService {
             actor_id: context.operator_id,
             organization_id: None,
             session_id: None,
+            idempotency_key: context.idempotency_key.clone(),
             resource_scope: WebAppResourceScope::Tenant,
         })
     }
@@ -454,12 +455,14 @@ mod tests {
             tenant_id: Some(42),
             operator_id: Some(7),
             subject_id: Some("7".to_owned()),
+            idempotency_key: Some("deployment-create-1".to_owned()),
         };
 
         let app_context = WebService::backend_app_context(&context).unwrap();
 
         assert_eq!(app_context.tenant_id, 42);
         assert_eq!(app_context.actor_id, Some(7));
+        assert_eq!(app_context.idempotency_key.as_deref(), Some("deployment-create-1"));
         assert_eq!(app_context.resource_scope, WebAppResourceScope::Tenant);
     }
 }

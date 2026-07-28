@@ -52,6 +52,7 @@ fn web_app_context_from_web_request(context: &WebRequestContext) -> Option<WebAp
         actor_id,
         organization_id,
         session_id,
+        idempotency_key: context.idempotency_key().map(str::to_owned),
         resource_scope: WebAppResourceScope::Owner,
     })
 }

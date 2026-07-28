@@ -332,10 +332,14 @@ impl WebAppApi for WebService {
         site_id: &str,
         request: &CreateDeploymentRequest,
     ) -> WebServiceResult<sdkwork_webserver_contract::DeploymentResponse> {
-        Self::validate_deployment_request(request)?;
+        let mut request = request.clone();
+        if let Some(idempotency_key) = &context.idempotency_key {
+            request.idempotency_key = Some(idempotency_key.clone());
+        }
+        Self::validate_deployment_request(&request)?;
         let tenant_id = self.require_site_access(context, site_id).await?;
         self.repository
-            .create_deployment(tenant_id, site_id, context.actor_id, request)
+            .create_deployment(tenant_id, site_id, context.actor_id, &request)
             .await
     }
 

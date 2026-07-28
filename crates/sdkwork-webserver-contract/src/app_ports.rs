@@ -18,6 +18,8 @@ pub struct WebAppRequestContext {
     pub actor_id: Option<i64>,
     pub organization_id: Option<i64>,
     pub session_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub idempotency_key: Option<String>,
     #[serde(default)]
     pub resource_scope: WebAppResourceScope,
 }
@@ -30,6 +32,8 @@ pub struct WebBackendRequestContext {
     /// Present when the framework resolves a principal; absent for anonymous/public contexts.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub subject_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub idempotency_key: Option<String>,
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
