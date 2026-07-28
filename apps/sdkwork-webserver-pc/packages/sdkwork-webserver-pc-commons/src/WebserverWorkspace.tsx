@@ -271,7 +271,6 @@ function ResourcePage({
               {source?.requiresScope ? (
                 <label className="scope-selector">
                   <AppWindow aria-hidden="true" size={16} />
-                  <span>{scopeLabel}</span>
                   <select
                     aria-label={scopeLabel}
                     disabled={scopeBusy || scopeOptions.length === 0}
