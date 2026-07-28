@@ -187,7 +187,7 @@ tbody tr:last-child td { border-bottom: 0; }
 .dialog textarea { width: 100%; min-height: 260px; resize: vertical; border: 1px solid var(--sdk-color-border-strong); border-radius: 5px; padding: 12px; font-family: "Cascadia Code", Consolas, monospace; font-size: 12px; line-height: 1.55; }
 .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 16px 0; }
 .form-grid label { margin: 0; min-width: 0; }
-.form-grid input:not([type="checkbox"]), .form-grid select, .form-grid textarea, .dialog > label input[type="file"] { width: 100%; min-height: 40px; color: var(--sdk-color-text-primary); border: 1px solid var(--sdk-color-border-strong); border-radius: 5px; padding: 9px 10px; background: var(--sdk-color-surface-panel-muted); caret-color: var(--sdk-color-brand-primary); }
+.form-grid input:not([type="checkbox"]), .form-grid select, .form-grid textarea, .dialog > label input[type="file"], .source-picker input[type="file"] { width: 100%; min-height: 40px; color: var(--sdk-color-text-primary); border: 1px solid var(--sdk-color-border-strong); border-radius: 5px; padding: 9px 10px; background: var(--sdk-color-surface-panel-muted); caret-color: var(--sdk-color-brand-primary); }
 .form-grid textarea { min-height: 104px; font-family: inherit; font-size: 13px; line-height: 1.45; }
 .form-grid label:has(textarea) { grid-column: 1 / -1; }
 .checkbox-field, .confirm-check { display: flex !important; grid-template-columns: none; align-items: center; gap: 9px !important; }
@@ -196,6 +196,13 @@ tbody tr:last-child td { border-bottom: 0; }
 .file-field > span { display: flex; align-items: center; gap: 7px; }
 .file-field input[type="file"] { cursor: pointer; font-weight: 500; }
 .file-field input[type="file"]::file-selector-button { min-height: 30px; margin: -5px 10px -5px -6px; padding: 0 10px; color: var(--sdk-color-text-primary); background: var(--sdk-color-surface-panel); border: 1px solid var(--sdk-color-border-strong); border-radius: 4px; cursor: pointer; }
+.source-picker { display: grid; gap: 12px; margin: 16px 0; }
+.source-picker .file-field { margin: 0; }
+.source-mode-toggle { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 3px; border: 1px solid var(--sdk-color-border-default); border-radius: 6px; background: var(--sdk-color-surface-panel-muted); }
+.source-mode-toggle button { min-width: 0; min-height: 38px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; color: var(--sdk-color-text-secondary); background: transparent; border: 0; border-radius: 4px; font-weight: 650; cursor: pointer; }
+.source-mode-toggle button.active { color: var(--sdk-color-text-primary); background: var(--sdk-color-surface-panel); box-shadow: var(--sdk-shadow-sm); }
+.source-mode-toggle button:disabled { cursor: not-allowed; opacity: .6; }
+.source-selection { min-width: 0; overflow-wrap: anywhere; color: var(--sdk-color-text-secondary); font-size: 12px; }
 .upload-progress { display: grid; gap: 8px; margin: 12px 0 16px; color: var(--sdk-color-text-secondary); font-size: 13px; }
 .upload-progress > div { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .upload-progress strong { color: var(--sdk-color-text-primary); font-variant-numeric: tabular-nums; }
