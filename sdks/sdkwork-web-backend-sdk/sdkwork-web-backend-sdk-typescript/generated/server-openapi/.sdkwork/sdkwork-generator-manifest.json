@@ -56,15 +56,15 @@
     },
     {
       "path": "src/api/application-deployment.ts",
-      "sha256": "8c08f3a88b26228dcf1ca664fbb4f1c1796cd497769f3da1ddf581e01d5dc3c9"
+      "sha256": "8f7ded277480abda5aadac03249c34c5b8912a80875312abf163a65a27be8d2b"
     },
     {
       "path": "src/api/application-domain.ts",
-      "sha256": "7e036c7dc25599bf59c629493b095411a7e3ea6c6fa57dbfb1926efec9051061"
+      "sha256": "d4bda35cf167b9cc432fabc2996c7426c044536082a31f8e10942d773a42347a"
     },
     {
       "path": "src/api/application.ts",
-      "sha256": "dc1386e0fa262d4530215e6a38ffb3c808831495647707ae60fedcc7b143fb94"
+      "sha256": "724569d98c58c5aa3d02096112939feaffaef2a6738bc5bd9920c70b7ef26534"
     },
     {
       "path": "src/api/audit.ts",
@@ -80,7 +80,7 @@
     },
     {
       "path": "src/api/certificate.ts",
-      "sha256": "f788b8e44840569cb582ae5935b593e66ca6ef59926a8c1c90b2ec84a11cdcf8"
+      "sha256": "3838a42677d6df663b172edf8480311ddd77902bfac4a76bcd95ae25e6dcc02e"
     },
     {
       "path": "src/api/index.ts",
@@ -88,7 +88,7 @@
     },
     {
       "path": "src/api/nginx.ts",
-      "sha256": "329dbb43cf8f976f679831dbdcb31913134046f706e2d9574e812ccab7702a2f"
+      "sha256": "a59026d5f21d7b6359bbe9460a42ce99915a4baac3e339781a36112ffdd50c29"
     },
     {
       "path": "src/api/paths.ts",
@@ -96,7 +96,7 @@
     },
     {
       "path": "src/api/server.ts",
-      "sha256": "643bcf831274c500c868def368dfaf7badd96425e36431a09a22fe1ae0586c23"
+      "sha256": "ed56dba9529193a7a27baaeeb797dd966cbc6aa47d10d881f6b8d432d53eac79"
     },
     {
       "path": "src/auth/index.ts",
@@ -272,7 +272,7 @@
     },
     {
       "path": "src/types/create-application-deployment-request.ts",
-      "sha256": "32ca4f30f20ad47a457fba0a5ac43aa8615c66e20e77cf9897970e8b09c03a71"
+      "sha256": "4c4a7c8463a68d94916c3ffd5ecb785afed51eeabe383077a249c15ba7c46b35"
     },
     {
       "path": "src/types/create-application-domain-request.ts",

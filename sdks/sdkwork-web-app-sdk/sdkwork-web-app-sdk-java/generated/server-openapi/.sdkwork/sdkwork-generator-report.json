@@ -12,22 +12,34 @@
   "mode": "apply",
   "hasChanges": true,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "5ae37bfed5cda89c9c6054e1b1456cdbda97bf475be4b8dd74e356b4566a9d7e",
+  "changeFingerprint": "d922dab4b38a8a6aeb05b546a85368a3ed226a4827bba5c11ec39b74ccbd6e8e",
   "changeImpact": {
     "schemaVersion": 1,
     "areas": [
+      "api-surface",
       "models"
     ],
     "details": [
       {
+        "area": "api-surface",
+        "paths": [
+          "src/main/java/com/sdkwork/web/app/sdk/api/CertificateApi.java",
+          "src/main/java/com/sdkwork/web/app/sdk/api/DeploymentApi.java",
+          "src/main/java/com/sdkwork/web/app/sdk/api/DomainApi.java",
+          "src/main/java/com/sdkwork/web/app/sdk/api/EnvVariableApi.java",
+          "src/main/java/com/sdkwork/web/app/sdk/api/MonitorApi.java",
+          "src/main/java/com/sdkwork/web/app/sdk/api/SiteApi.java"
+        ]
+      },
+      {
         "area": "models",
         "paths": [
-          "src/main/java/com/sdkwork/web/app/sdk/model/CertificateResponse.java"
+          "src/main/java/com/sdkwork/web/app/sdk/model/CreateDeploymentRequest.java"
         ]
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: models. Verification is required."
+    "summary": "Detected impact areas: api-surface, models. Verification is required."
   },
   "executionDecision": {
     "schemaVersion": 1,
@@ -48,7 +60,7 @@
         "id": "verify-check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-java\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -67,13 +79,13 @@
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-java\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -112,16 +124,22 @@
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 1,
+    "writtenFiles": 7,
     "skippedScaffoldFiles": 1,
-    "skippedUnchangedGeneratedFiles": 67,
+    "skippedUnchangedGeneratedFiles": 61,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "5ae37bfed5cda89c9c6054e1b1456cdbda97bf475be4b8dd74e356b4566a9d7e",
+    "changeFingerprint": "d922dab4b38a8a6aeb05b546a85368a3ed226a4827bba5c11ec39b74ccbd6e8e",
     "changes": {
       "createdGeneratedFiles": [],
       "updatedGeneratedFiles": [
-        "src/main/java/com/sdkwork/web/app/sdk/model/CertificateResponse.java"
+        "src/main/java/com/sdkwork/web/app/sdk/api/CertificateApi.java",
+        "src/main/java/com/sdkwork/web/app/sdk/api/DeploymentApi.java",
+        "src/main/java/com/sdkwork/web/app/sdk/api/DomainApi.java",
+        "src/main/java/com/sdkwork/web/app/sdk/api/EnvVariableApi.java",
+        "src/main/java/com/sdkwork/web/app/sdk/api/MonitorApi.java",
+        "src/main/java/com/sdkwork/web/app/sdk/api/SiteApi.java",
+        "src/main/java/com/sdkwork/web/app/sdk/model/CreateDeploymentRequest.java"
       ],
       "unchangedGeneratedFiles": [
         "bin/publish-core.mjs",
@@ -133,19 +151,13 @@
         "README.md",
         "sdkwork-sdk.json",
         "src/main/java/com/sdkwork/web/app/sdk/api/ApiPaths.java",
-        "src/main/java/com/sdkwork/web/app/sdk/api/CertificateApi.java",
-        "src/main/java/com/sdkwork/web/app/sdk/api/DeploymentApi.java",
-        "src/main/java/com/sdkwork/web/app/sdk/api/DomainApi.java",
-        "src/main/java/com/sdkwork/web/app/sdk/api/EnvVariableApi.java",
-        "src/main/java/com/sdkwork/web/app/sdk/api/MonitorApi.java",
         "src/main/java/com/sdkwork/web/app/sdk/api/package-info.java",
-        "src/main/java/com/sdkwork/web/app/sdk/api/SiteApi.java",
         "src/main/java/com/sdkwork/web/app/sdk/http/HttpClient.java",
         "src/main/java/com/sdkwork/web/app/sdk/model/CertificatePage.java",
+        "src/main/java/com/sdkwork/web/app/sdk/model/CertificateResponse.java",
         "src/main/java/com/sdkwork/web/app/sdk/model/CertificatesCreateResponse201.java",
         "src/main/java/com/sdkwork/web/app/sdk/model/CertificatesListResponse.java",
         "src/main/java/com/sdkwork/web/app/sdk/model/CreateCertificateRequest.java",
-        "src/main/java/com/sdkwork/web/app/sdk/model/CreateDeploymentRequest.java",
         "src/main/java/com/sdkwork/web/app/sdk/model/CreateDomainRequest.java",
         "src/main/java/com/sdkwork/web/app/sdk/model/CreateEnvVariableRequest.java",
         "src/main/java/com/sdkwork/web/app/sdk/model/CreateHealthCheckRequest.java",
@@ -202,29 +214,41 @@
     "impact": {
       "schemaVersion": 1,
       "areas": [
+        "api-surface",
         "models"
       ],
       "details": [
         {
+          "area": "api-surface",
+          "paths": [
+            "src/main/java/com/sdkwork/web/app/sdk/api/CertificateApi.java",
+            "src/main/java/com/sdkwork/web/app/sdk/api/DeploymentApi.java",
+            "src/main/java/com/sdkwork/web/app/sdk/api/DomainApi.java",
+            "src/main/java/com/sdkwork/web/app/sdk/api/EnvVariableApi.java",
+            "src/main/java/com/sdkwork/web/app/sdk/api/MonitorApi.java",
+            "src/main/java/com/sdkwork/web/app/sdk/api/SiteApi.java"
+          ]
+        },
+        {
           "area": "models",
           "paths": [
-            "src/main/java/com/sdkwork/web/app/sdk/model/CertificateResponse.java"
+            "src/main/java/com/sdkwork/web/app/sdk/model/CreateDeploymentRequest.java"
           ]
         }
       ],
       "requiresVerification": true,
-      "summary": "Detected impact areas: models. Verification is required."
+      "summary": "Detected impact areas: api-surface, models. Verification is required."
     },
     "verificationPlan": {
       "shouldRun": true,
       "runPhase": "now",
-      "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
+      "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
       "steps": [
         {
           "id": "check",
           "title": "Unified package check",
           "required": true,
-          "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
+          "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
           "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-java\\generated\\server-openapi",
           "command": "node",
           "args": [

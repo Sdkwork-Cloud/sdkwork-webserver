@@ -10,5 +10,4 @@ type CreateDeploymentRequest struct {
 	ArtifactSize string `json:"artifactSize"`
 	ArtifactHash string `json:"artifactHash"`
 	Environment string `json:"environment"`
-	IdempotencyKey string `json:"idempotencyKey"`
 }

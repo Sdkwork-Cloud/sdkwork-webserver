@@ -18,6 +18,10 @@ export class RuntimeRuntimeAssignmentsObservationsLatestApi {
   }
 }
 
+export interface RuntimeRuntimeAssignmentsObservationsCreateParams {
+  idempotencyKey: string;
+}
+
 export class RuntimeRuntimeAssignmentsObservationsApi {
   private client: HttpClient;
   public readonly latest: RuntimeRuntimeAssignmentsObservationsLatestApi;
@@ -29,8 +33,14 @@ export class RuntimeRuntimeAssignmentsObservationsApi {
 
 
 /** Record a Web Node runtime-set observation */
-  async create(snapshotUuid: string, body: CreateRuntimeObservationRequest, requestOptions?: ApiRequestOptions): Promise<RuntimeObservation> {
-    return this.client.request<RuntimeObservation>(customApiPath(`/web/runtime_assignments/${serializePathParameter(snapshotUuid, { name: 'snapshotUuid', style: 'simple', explode: false })}/observations`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, body, contentType: 'application/json' });
+  async create(snapshotUuid: string, body: CreateRuntimeObservationRequest, params: RuntimeRuntimeAssignmentsObservationsCreateParams, requestOptions?: ApiRequestOptions): Promise<RuntimeObservation> {
+    const requestHeaders = buildRequestHeaders(
+      {
+        'Idempotency-Key': { value: params.idempotencyKey, style: 'simple', explode: false },
+      },
+      {}
+    );
+    return this.client.request<RuntimeObservation>(customApiPath(`/web/runtime_assignments/${serializePathParameter(snapshotUuid, { name: 'snapshotUuid', style: 'simple', explode: false })}/observations`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, body, headers: requestHeaders, contentType: 'application/json' });
   }
 }
 
@@ -59,6 +69,10 @@ export class RuntimeRuntimeAssignmentsCurrentApi {
   }
 }
 
+export interface RuntimeRuntimeAssignmentsUpdateParams {
+  idempotencyKey: string;
+}
+
 export class RuntimeRuntimeAssignmentsApi {
   private client: HttpClient;
   public readonly current: RuntimeRuntimeAssignmentsCurrentApi;
@@ -72,8 +86,14 @@ export class RuntimeRuntimeAssignmentsApi {
 
 
 /** Publish the desired runtime-set for a Web Node */
-  async update(nodeUuid: string, environment: RuntimeEnvironment, body: PublishRuntimeAssignmentRequest, requestOptions?: ApiRequestOptions): Promise<RuntimeAssignment> {
-    return this.client.request<RuntimeAssignment>(customApiPath(`/web/runtime_assignments/${serializePathParameter(nodeUuid, { name: 'nodeUuid', style: 'simple', explode: false })}/${serializePathParameter(environment, { name: 'environment', style: 'simple', explode: false })}`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'PUT' as any, body, contentType: 'application/json' });
+  async update(nodeUuid: string, environment: RuntimeEnvironment, body: PublishRuntimeAssignmentRequest, params: RuntimeRuntimeAssignmentsUpdateParams, requestOptions?: ApiRequestOptions): Promise<RuntimeAssignment> {
+    const requestHeaders = buildRequestHeaders(
+      {
+        'Idempotency-Key': { value: params.idempotencyKey, style: 'simple', explode: false },
+      },
+      {}
+    );
+    return this.client.request<RuntimeAssignment>(customApiPath(`/web/runtime_assignments/${serializePathParameter(nodeUuid, { name: 'nodeUuid', style: 'simple', explode: false })}/${serializePathParameter(environment, { name: 'environment', style: 'simple', explode: false })}`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'PUT' as any, body, headers: requestHeaders, contentType: 'application/json' });
   }
 }
 
@@ -322,4 +342,79 @@ function encodeQueryValue(value: string, allowReserved: boolean): string {
     .replace(/%2C/gi, ',')
     .replace(/%3B/gi, ';')
     .replace(/%3D/gi, '=');
+}
+function buildRequestHeaders(
+  headers: Record<string, HeaderParameterSpec | undefined>,
+  cookies: Record<string, HeaderParameterSpec | undefined> = {},
+): Record<string, string> | undefined {
+  const requestHeaders: Record<string, string> = {};
+
+  for (const [name, parameter] of Object.entries(headers)) {
+    const serialized = serializeParameterValue(parameter);
+    if (serialized !== undefined) {
+      requestHeaders[name] = serialized;
+    }
+  }
+
+  const cookieHeader = buildCookieHeader(cookies);
+  if (cookieHeader) {
+    requestHeaders.Cookie = requestHeaders.Cookie
+      ? `${requestHeaders.Cookie}; ${cookieHeader}`
+      : cookieHeader;
+  }
+
+  return Object.keys(requestHeaders).length > 0 ? requestHeaders : undefined;
+}
+
+interface HeaderParameterSpec {
+  value: unknown;
+  style: string;
+  explode: boolean;
+  contentType?: string;
+}
+
+function buildCookieHeader(cookies: Record<string, HeaderParameterSpec | undefined>): string | undefined {
+  const pairs: string[] = [];
+  for (const [name, parameter] of Object.entries(cookies)) {
+    const serialized = serializeParameterValue(parameter);
+    if (serialized !== undefined) {
+      pairs.push(`${encodeURIComponent(name)}=${encodeURIComponent(serialized)}`);
+    }
+  }
+  return pairs.length > 0 ? pairs.join('; ') : undefined;
+}
+
+function serializeParameterValue(parameter: HeaderParameterSpec | undefined): string | undefined {
+  const value = parameter?.value;
+  if (value === undefined || value === null) {
+    return undefined;
+  }
+  if (parameter?.contentType) {
+    return JSON.stringify(value);
+  }
+  if (value instanceof Date) {
+    return value.toISOString();
+  }
+  if (Array.isArray(value)) {
+    return value.map((item) => serializeHeaderPrimitive(item)).join(',');
+  }
+  if (typeof value === 'object' && value !== null) {
+    return serializeHeaderObject(value as Record<string, unknown>, parameter?.explode === true);
+  }
+  return serializeHeaderPrimitive(value);
+}
+
+function serializeHeaderObject(value: Record<string, unknown>, explode: boolean): string {
+  const entries = Object.entries(value).filter(([, entryValue]) => entryValue !== undefined && entryValue !== null);
+  if (explode) {
+    return entries.map(([key, entryValue]) => `${key}=${serializeHeaderPrimitive(entryValue)}`).join(',');
+  }
+  return entries.flatMap(([key, entryValue]) => [key, serializeHeaderPrimitive(entryValue)]).join(',');
+}
+
+function serializeHeaderPrimitive(value: unknown): string {
+  if (value instanceof Date) {
+    return value.toISOString();
+  }
+  return String(value);
 }

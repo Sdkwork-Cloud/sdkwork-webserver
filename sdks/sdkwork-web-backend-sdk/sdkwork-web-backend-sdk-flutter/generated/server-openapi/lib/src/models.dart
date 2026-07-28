@@ -537,7 +537,6 @@ class CreateApplicationDeploymentRequest {
   final String? artifactDriveUri;
   final String? artifactSize;
   final String? artifactHash;
-  final String? idempotencyKey;
 
   CreateApplicationDeploymentRequest({
     this.deployType,
@@ -547,8 +546,7 @@ class CreateApplicationDeploymentRequest {
     this.sourceRef,
     this.artifactDriveUri,
     this.artifactSize,
-    this.artifactHash,
-    this.idempotencyKey
+    this.artifactHash
   });
 
   factory CreateApplicationDeploymentRequest.fromJson(Map<String, dynamic> json) {
@@ -560,8 +558,7 @@ class CreateApplicationDeploymentRequest {
       sourceRef: json['sourceRef']?.toString(),
       artifactDriveUri: json['artifactDriveUri']?.toString(),
       artifactSize: json['artifactSize']?.toString(),
-      artifactHash: json['artifactHash']?.toString(),
-      idempotencyKey: json['idempotencyKey']?.toString()
+      artifactHash: json['artifactHash']?.toString()
     );
   }
 
@@ -575,7 +572,6 @@ class CreateApplicationDeploymentRequest {
       'artifactDriveUri': artifactDriveUri,
       'artifactSize': artifactSize,
       'artifactHash': artifactHash,
-      'idempotencyKey': idempotencyKey,
     };
   }
 }

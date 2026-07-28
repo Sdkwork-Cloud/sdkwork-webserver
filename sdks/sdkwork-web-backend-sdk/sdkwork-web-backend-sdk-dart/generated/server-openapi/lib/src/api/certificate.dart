@@ -25,9 +25,15 @@ class CertificateApi {
   }
 
   /// Issue a canonical certificate
-  Future<CertificatesCreateResponse201?> certificatesCreate(CreateCertificateRequest body) async {
+  Future<CertificatesCreateResponse201?> certificatesCreate(CreateCertificateRequest body, String idempotencyKey) async {
+    final requestHeaders = buildRequestHeaders(
+      <String, HeaderParameterSpec>{
+        'Idempotency-Key': HeaderParameterSpec(idempotencyKey, 'simple', false, null),
+      },
+      <String, HeaderParameterSpec>{},
+    );
     final payload = body.toJson();
-    final response = await _client.post(ApiPaths.backendPath('/certificates'), body: payload, contentType: 'application/json');
+    final response = await _client.post(ApiPaths.backendPath('/certificates'), body: payload, headers: requestHeaders, contentType: 'application/json');
     return (() {
       final map = sdkworkResponseAsMap(response);
       return map == null ? null : CertificatesCreateResponse201.fromJson(map);
@@ -35,9 +41,15 @@ class CertificateApi {
   }
 
   /// Update certificate automatic renewal policy
-  Future<CertificatesUpdateResponse?> certificatesUpdate(String certificateId, UpdateCertificateRequest body) async {
+  Future<CertificatesUpdateResponse?> certificatesUpdate(String certificateId, UpdateCertificateRequest body, String idempotencyKey) async {
+    final requestHeaders = buildRequestHeaders(
+      <String, HeaderParameterSpec>{
+        'Idempotency-Key': HeaderParameterSpec(idempotencyKey, 'simple', false, null),
+      },
+      <String, HeaderParameterSpec>{},
+    );
     final payload = body.toJson();
-    final response = await _client.put(ApiPaths.backendPath('/certificates/${serializePathParameter(certificateId, const PathParameterSpec('certificateId', 'simple', false))}'), body: payload, contentType: 'application/json');
+    final response = await _client.put(ApiPaths.backendPath('/certificates/${serializePathParameter(certificateId, const PathParameterSpec('certificateId', 'simple', false))}'), body: payload, headers: requestHeaders, contentType: 'application/json');
     return (() {
       final map = sdkworkResponseAsMap(response);
       return map == null ? null : CertificatesUpdateResponse.fromJson(map);
@@ -45,8 +57,14 @@ class CertificateApi {
   }
 
   /// Renew a canonical certificate now
-  Future<CertificatesRenewResponse?> certificatesRenew(String certificateId) async {
-    final response = await _client.post(ApiPaths.backendPath('/certificates/${serializePathParameter(certificateId, const PathParameterSpec('certificateId', 'simple', false))}/renew'));
+  Future<CertificatesRenewResponse?> certificatesRenew(String certificateId, String idempotencyKey) async {
+    final requestHeaders = buildRequestHeaders(
+      <String, HeaderParameterSpec>{
+        'Idempotency-Key': HeaderParameterSpec(idempotencyKey, 'simple', false, null),
+      },
+      <String, HeaderParameterSpec>{},
+    );
+    final response = await _client.post(ApiPaths.backendPath('/certificates/${serializePathParameter(certificateId, const PathParameterSpec('certificateId', 'simple', false))}/renew'), headers: requestHeaders);
     return (() {
       final map = sdkworkResponseAsMap(response);
       return map == null ? null : CertificatesRenewResponse.fromJson(map);
@@ -257,3 +275,75 @@ String encodeQueryValue(String value, bool allowReserved) {
 }
 
 String urlEncode(String value) => Uri.encodeQueryComponent(value);
+class HeaderParameterSpec {
+  final dynamic value;
+  final String style;
+  final bool explode;
+  final String? contentType;
+
+  HeaderParameterSpec(this.value, this.style, this.explode, this.contentType);
+}
+
+Map<String, String>? buildRequestHeaders(
+  Map<String, HeaderParameterSpec> headers, [
+  Map<String, HeaderParameterSpec> cookies = const {},
+]) {
+  final requestHeaders = <String, String>{};
+
+  headers.forEach((name, parameter) {
+    final serialized = serializeParameterValue(parameter);
+    if (serialized != null) {
+      requestHeaders[name] = serialized;
+    }
+  });
+
+  final cookieHeader = buildCookieHeader(cookies);
+  if (cookieHeader != null && cookieHeader.isNotEmpty) {
+    requestHeaders['Cookie'] = requestHeaders.containsKey('Cookie')
+        ? '${requestHeaders['Cookie']}; $cookieHeader'
+        : cookieHeader;
+  }
+
+  return requestHeaders.isEmpty ? null : requestHeaders;
+}
+
+String? buildCookieHeader(Map<String, HeaderParameterSpec> cookies) {
+  final pairs = <String>[];
+  cookies.forEach((name, parameter) {
+    final serialized = serializeParameterValue(parameter);
+    if (serialized != null) {
+      pairs.add('${Uri.encodeComponent(name)}=${Uri.encodeComponent(serialized)}');
+    }
+  });
+  return pairs.isEmpty ? null : pairs.join('; ');
+}
+
+String? serializeParameterValue(HeaderParameterSpec? parameter) {
+  final value = parameter?.value;
+  if (value == null) return null;
+  if (parameter!.contentType != null && parameter.contentType!.trim().isNotEmpty) {
+    return jsonEncode(value);
+  }
+  if (value is DateTime) return value.toIso8601String();
+  if (value is Iterable) {
+    return value
+        .where((item) => item != null)
+        .map((item) => item.toString())
+        .whereType<String>()
+        .join(',');
+  }
+  if (value is Map) {
+    final serialized = <String>[];
+    value.forEach((key, item) {
+      if (item == null) return;
+      if (parameter.explode) {
+        serialized.add('$key=$item');
+      } else {
+        serialized.add(key.toString());
+        serialized.add(item.toString());
+      }
+    });
+    return serialized.join(',');
+  }
+  return value.toString();
+}

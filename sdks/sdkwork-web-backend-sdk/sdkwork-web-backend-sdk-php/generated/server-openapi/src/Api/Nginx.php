@@ -34,11 +34,18 @@ final class NginxApi extends BaseApi
     }
 
     /** Create an Nginx configuration */
-    public function configsCreate(array|CreateNginxConfigRequest $body): ?ConfigsCreateResponse201
+    public function configsCreate(array|CreateNginxConfigRequest $body, string $idempotencyKey): ?ConfigsCreateResponse201
     {
         $path = '/backend/v3/api/nginx/configs';
         $payload = $body instanceof CreateNginxConfigRequest ? $body->toArray() : $body;
+        $requestHeaders = $this->buildRequestHeaders(
+            [
+                'Idempotency-Key' => new HeaderParameterSpec($idempotencyKey, 'simple', false, null),
+            ],
+            []
+        );
         $result = $this->client->request('POST', $path, [
+            'headers' => $requestHeaders,
             'json' => $payload,
         ]);
         return is_array($result) ? ConfigsCreateResponse201::fromArray($result) : null;
@@ -53,11 +60,18 @@ final class NginxApi extends BaseApi
     }
 
     /** Update an Nginx configuration */
-    public function configsUpdate(string $configId, array|UpdateNginxConfigRequest $body): ?ConfigsUpdateResponse
+    public function configsUpdate(string $configId, array|UpdateNginxConfigRequest $body, string $idempotencyKey): ?ConfigsUpdateResponse
     {
         $path = $this->interpolatePath('/backend/v3/api/nginx/etc/{configId}', ['configId' => $this->serializePathParameter($configId, new PathParameterSpec('configId', 'simple', false))]);
         $payload = $body instanceof UpdateNginxConfigRequest ? $body->toArray() : $body;
+        $requestHeaders = $this->buildRequestHeaders(
+            [
+                'Idempotency-Key' => new HeaderParameterSpec($idempotencyKey, 'simple', false, null),
+            ],
+            []
+        );
         $result = $this->client->request('PUT', $path, [
+            'headers' => $requestHeaders,
             'json' => $payload,
         ]);
         return is_array($result) ? ConfigsUpdateResponse::fromArray($result) : null;
@@ -72,18 +86,34 @@ final class NginxApi extends BaseApi
     }
 
     /** Deploy an Nginx configuration */
-    public function configsDeploy(string $configId): ?ConfigsDeployResponse
+    public function configsDeploy(string $configId, string $idempotencyKey): ?ConfigsDeployResponse
     {
         $path = $this->interpolatePath('/backend/v3/api/nginx/etc/{configId}/deploy', ['configId' => $this->serializePathParameter($configId, new PathParameterSpec('configId', 'simple', false))]);
-        $result = $this->client->request('POST', $path, []);
+        $requestHeaders = $this->buildRequestHeaders(
+            [
+                'Idempotency-Key' => new HeaderParameterSpec($idempotencyKey, 'simple', false, null),
+            ],
+            []
+        );
+        $result = $this->client->request('POST', $path, [
+            'headers' => $requestHeaders,
+        ]);
         return is_array($result) ? ConfigsDeployResponse::fromArray($result) : null;
     }
 
     /** Reload Nginx */
-    public function reload(): ?ReloadResponse
+    public function reload(string $idempotencyKey): ?ReloadResponse
     {
         $path = '/backend/v3/api/nginx/reload';
-        $result = $this->client->request('POST', $path, []);
+        $requestHeaders = $this->buildRequestHeaders(
+            [
+                'Idempotency-Key' => new HeaderParameterSpec($idempotencyKey, 'simple', false, null),
+            ],
+            []
+        );
+        $result = $this->client->request('POST', $path, [
+            'headers' => $requestHeaders,
+        ]);
         return is_array($result) ? ReloadResponse::fromArray($result) : null;
     }
 
@@ -95,4 +125,69 @@ final class NginxApi extends BaseApi
         return is_array($result) ? StatusRetrieveResponse::fromArray($result) : null;
     }
 
+    private function buildRequestHeaders(array $headers, array $cookies): array
+    {
+        $requestHeaders = [];
+        foreach ($headers as $name => $parameter) {
+            $serialized = $this->serializeParameterValue($parameter);
+            if ($serialized !== null) {
+                $requestHeaders[(string) $name] = $serialized;
+            }
+        }
+
+        $cookieHeader = $this->buildCookieHeader($cookies);
+        if ($cookieHeader !== '') {
+            $requestHeaders['Cookie'] = isset($requestHeaders['Cookie']) && $requestHeaders['Cookie'] !== ''
+                ? $requestHeaders['Cookie'] . '; ' . $cookieHeader
+                : $cookieHeader;
+        }
+
+        return $requestHeaders;
+    }
+
+    private function buildCookieHeader(array $cookies): string
+    {
+        $pairs = [];
+        foreach ($cookies as $name => $parameter) {
+            $serialized = $this->serializeParameterValue($parameter);
+            if ($serialized !== null) {
+                $pairs[] = rawurlencode((string) $name) . '=' . rawurlencode($serialized);
+            }
+        }
+
+        return implode('; ', $pairs);
+    }
+
+    private function serializeParameterValue(?HeaderParameterSpec $parameter): ?string
+    {
+        $value = $parameter?->value;
+        if ($value === null) {
+            return null;
+        }
+        if ($parameter->contentType !== null && trim($parameter->contentType) !== '') {
+            return (string) json_encode($value, JSON_UNESCAPED_SLASHES);
+        }
+        if (is_array($value)) {
+            $serialized = [];
+            foreach ($value as $key => $item) {
+                if ($item === null) {
+                    continue;
+                }
+                if (!array_is_list($value) && $parameter->explode) {
+                    $serialized[] = (string) $key . '=' . (string) $item;
+                } elseif (!array_is_list($value)) {
+                    $serialized[] = (string) $key;
+                    $serialized[] = (string) $item;
+                } else {
+                    $serialized[] = (string) $item;
+                }
+            }
+            return implode(',', $serialized);
+        }
+        if ($value instanceof \Stringable) {
+            return (string) $value;
+        }
+
+        return (string) $value;
+    }
 }

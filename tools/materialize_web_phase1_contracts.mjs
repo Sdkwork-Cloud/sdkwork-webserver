@@ -130,16 +130,7 @@ function enrichOpenApi(openapi, profile) {
           : "write";
         operation["x-sdkwork-permission"] = `web.${resource}.${verb}`;
       }
-      if (
-        method === "post" &&
-        (operation.operationId?.includes("create") ||
-          operation.operationId?.includes("rollback") ||
-          operation.operationId?.includes("reload") ||
-          operation.operationId?.includes("deploy") ||
-          operation.operationId?.includes("verify"))
-      ) {
-        operation["x-sdkwork-idempotent"] = true;
-      }
+      validateIdempotencyContract(pathKey, method, pathItem, operation, enriched);
       // C4-C7: expand $ref responses to inline definitions for sdkgen compatibility.
       // sdkgen requires error responses (4xx/5xx) to include application/problem+json
       // content type, but cannot resolve $ref to #/components/responses.
@@ -159,6 +150,46 @@ function enrichOpenApi(openapi, profile) {
     }
   }
   return enriched;
+}
+
+function validateIdempotencyContract(pathKey, method, pathItem, operation, openapi) {
+  const marker = operation["x-sdkwork-idempotent"];
+  const parameters = [
+    ...(Array.isArray(pathItem.parameters) ? pathItem.parameters : []),
+    ...(Array.isArray(operation.parameters) ? operation.parameters : []),
+  ].map((parameter) => resolveLocalParameter(parameter, openapi));
+  const headers = parameters.filter(
+    (parameter) =>
+      parameter?.in === "header" &&
+      typeof parameter.name === "string" &&
+      parameter.name.toLowerCase() === "idempotency-key",
+  );
+  const label = `${method.toUpperCase()} ${pathKey}`;
+  if ((marker === true) !== (headers.length > 0)) {
+    throw new Error(
+      `${label} must declare x-sdkwork-idempotent: true and required Idempotency-Key together`,
+    );
+  }
+  for (const header of headers) {
+    if (
+      header.name !== "Idempotency-Key" ||
+      header.required !== true ||
+      header.schema?.type !== "string" ||
+      header.schema?.minLength !== 1 ||
+      header.schema?.maxLength !== 128
+    ) {
+      throw new Error(
+        `${label} Idempotency-Key must be required string with minLength 1 and maxLength 128`,
+      );
+    }
+  }
+}
+
+function resolveLocalParameter(parameter, openapi) {
+  const match = parameter?.$ref?.match(/^#\/components\/parameters\/([^/]+)$/u);
+  if (!match) return parameter;
+  const name = decodeURIComponent(match[1].replace(/~1/gu, "/").replace(/~0/gu, "~"));
+  return openapi.components?.parameters?.[name] ?? parameter;
 }
 
 function rewriteRuntimeSetSchemaReferences(value) {

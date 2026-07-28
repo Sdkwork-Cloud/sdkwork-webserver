@@ -18,6 +18,10 @@ export class NginxStatusApi {
   }
 }
 
+export interface NginxReloadCreateParams {
+  idempotencyKey: string;
+}
+
 export class NginxReloadApi {
   private client: HttpClient;
 
@@ -27,8 +31,14 @@ export class NginxReloadApi {
 
 
 /** Reload Nginx */
-  async create(requestOptions?: ApiRequestOptions): Promise<NginxReloadResponse> {
-    return this.client.request<NginxReloadResponse>(backendApiPath(`/nginx/reload`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any });
+  async create(params: NginxReloadCreateParams, requestOptions?: ApiRequestOptions): Promise<NginxReloadResponse> {
+    const requestHeaders = buildRequestHeaders(
+      {
+        'Idempotency-Key': { value: params.idempotencyKey, style: 'simple', explode: false },
+      },
+      {}
+    );
+    return this.client.request<NginxReloadResponse>(backendApiPath(`/nginx/reload`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, headers: requestHeaders });
   }
 }
 
@@ -38,6 +48,18 @@ export interface NginxConfigsListParams {
   siteId?: string;
   configType?: 1 | 2 | 3 | 4;
   isActive?: boolean;
+}
+
+export interface NginxConfigsCreateParams {
+  idempotencyKey: string;
+}
+
+export interface NginxConfigsUpdateParams {
+  idempotencyKey: string;
+}
+
+export interface NginxConfigsDeployParams {
+  idempotencyKey: string;
 }
 
 export class NginxConfigsApi {
@@ -61,8 +83,14 @@ export class NginxConfigsApi {
   }
 
 /** Create an Nginx configuration */
-  async create(body: CreateNginxConfigRequest, requestOptions?: ApiRequestOptions): Promise<NginxConfigResponse> {
-    return this.client.request<NginxConfigResponse>(backendApiPath(`/nginx/configs`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, body, contentType: 'application/json' });
+  async create(body: CreateNginxConfigRequest, params: NginxConfigsCreateParams, requestOptions?: ApiRequestOptions): Promise<NginxConfigResponse> {
+    const requestHeaders = buildRequestHeaders(
+      {
+        'Idempotency-Key': { value: params.idempotencyKey, style: 'simple', explode: false },
+      },
+      {}
+    );
+    return this.client.request<NginxConfigResponse>(backendApiPath(`/nginx/configs`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, body, headers: requestHeaders, contentType: 'application/json' });
   }
 
 /** Retrieve an Nginx configuration */
@@ -71,8 +99,14 @@ export class NginxConfigsApi {
   }
 
 /** Update an Nginx configuration */
-  async update(configId: string, body: UpdateNginxConfigRequest, requestOptions?: ApiRequestOptions): Promise<NginxConfigResponse> {
-    return this.client.request<NginxConfigResponse>(backendApiPath(`/nginx/etc/${serializePathParameter(configId, { name: 'configId', style: 'simple', explode: false })}`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'PUT' as any, body, contentType: 'application/json' });
+  async update(configId: string, body: UpdateNginxConfigRequest, params: NginxConfigsUpdateParams, requestOptions?: ApiRequestOptions): Promise<NginxConfigResponse> {
+    const requestHeaders = buildRequestHeaders(
+      {
+        'Idempotency-Key': { value: params.idempotencyKey, style: 'simple', explode: false },
+      },
+      {}
+    );
+    return this.client.request<NginxConfigResponse>(backendApiPath(`/nginx/etc/${serializePathParameter(configId, { name: 'configId', style: 'simple', explode: false })}`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'PUT' as any, body, headers: requestHeaders, contentType: 'application/json' });
   }
 
 /** Validate an Nginx configuration */
@@ -81,8 +115,14 @@ export class NginxConfigsApi {
   }
 
 /** Deploy an Nginx configuration */
-  async deploy(configId: string, requestOptions?: ApiRequestOptions): Promise<NginxDeployResponse> {
-    return this.client.request<NginxDeployResponse>(backendApiPath(`/nginx/etc/${serializePathParameter(configId, { name: 'configId', style: 'simple', explode: false })}/deploy`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any });
+  async deploy(configId: string, params: NginxConfigsDeployParams, requestOptions?: ApiRequestOptions): Promise<NginxDeployResponse> {
+    const requestHeaders = buildRequestHeaders(
+      {
+        'Idempotency-Key': { value: params.idempotencyKey, style: 'simple', explode: false },
+      },
+      {}
+    );
+    return this.client.request<NginxDeployResponse>(backendApiPath(`/nginx/etc/${serializePathParameter(configId, { name: 'configId', style: 'simple', explode: false })}/deploy`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, headers: requestHeaders });
   }
 }
 
@@ -335,4 +375,79 @@ function encodeQueryValue(value: string, allowReserved: boolean): string {
     .replace(/%2C/gi, ',')
     .replace(/%3B/gi, ';')
     .replace(/%3D/gi, '=');
+}
+function buildRequestHeaders(
+  headers: Record<string, HeaderParameterSpec | undefined>,
+  cookies: Record<string, HeaderParameterSpec | undefined> = {},
+): Record<string, string> | undefined {
+  const requestHeaders: Record<string, string> = {};
+
+  for (const [name, parameter] of Object.entries(headers)) {
+    const serialized = serializeParameterValue(parameter);
+    if (serialized !== undefined) {
+      requestHeaders[name] = serialized;
+    }
+  }
+
+  const cookieHeader = buildCookieHeader(cookies);
+  if (cookieHeader) {
+    requestHeaders.Cookie = requestHeaders.Cookie
+      ? `${requestHeaders.Cookie}; ${cookieHeader}`
+      : cookieHeader;
+  }
+
+  return Object.keys(requestHeaders).length > 0 ? requestHeaders : undefined;
+}
+
+interface HeaderParameterSpec {
+  value: unknown;
+  style: string;
+  explode: boolean;
+  contentType?: string;
+}
+
+function buildCookieHeader(cookies: Record<string, HeaderParameterSpec | undefined>): string | undefined {
+  const pairs: string[] = [];
+  for (const [name, parameter] of Object.entries(cookies)) {
+    const serialized = serializeParameterValue(parameter);
+    if (serialized !== undefined) {
+      pairs.push(`${encodeURIComponent(name)}=${encodeURIComponent(serialized)}`);
+    }
+  }
+  return pairs.length > 0 ? pairs.join('; ') : undefined;
+}
+
+function serializeParameterValue(parameter: HeaderParameterSpec | undefined): string | undefined {
+  const value = parameter?.value;
+  if (value === undefined || value === null) {
+    return undefined;
+  }
+  if (parameter?.contentType) {
+    return JSON.stringify(value);
+  }
+  if (value instanceof Date) {
+    return value.toISOString();
+  }
+  if (Array.isArray(value)) {
+    return value.map((item) => serializeHeaderPrimitive(item)).join(',');
+  }
+  if (typeof value === 'object' && value !== null) {
+    return serializeHeaderObject(value as Record<string, unknown>, parameter?.explode === true);
+  }
+  return serializeHeaderPrimitive(value);
+}
+
+function serializeHeaderObject(value: Record<string, unknown>, explode: boolean): string {
+  const entries = Object.entries(value).filter(([, entryValue]) => entryValue !== undefined && entryValue !== null);
+  if (explode) {
+    return entries.map(([key, entryValue]) => `${key}=${serializeHeaderPrimitive(entryValue)}`).join(',');
+  }
+  return entries.flatMap(([key, entryValue]) => [key, serializeHeaderPrimitive(entryValue)]).join(',');
+}
+
+function serializeHeaderPrimitive(value: unknown): string {
+  if (value instanceof Date) {
+    return value.toISOString();
+  }
+  return String(value);
 }

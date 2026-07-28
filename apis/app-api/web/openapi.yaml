@@ -106,6 +106,8 @@ paths:
       x-sdkwork-auth-mode: dual-token
       x-sdkwork-permission: web.sites.write
       x-sdkwork-idempotent: true
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
       x-sdkwork-owner: sdkwork-web-server
       requestBody:
         required: true
@@ -387,6 +389,8 @@ paths:
       x-sdkwork-auth-mode: dual-token
       x-sdkwork-permission: web.sites.write
       x-sdkwork-idempotent: true
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
       x-sdkwork-owner: sdkwork-web-server
       requestBody:
         required: true
@@ -493,6 +497,8 @@ paths:
       x-sdkwork-auth-mode: dual-token
       x-sdkwork-permission: web.sites.write
       x-sdkwork-idempotent: true
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
       x-sdkwork-owner: sdkwork-web-server
       x-sdkwork-rate-limit-tier: auth-critical
       responses:
@@ -590,6 +596,8 @@ paths:
       x-sdkwork-auth-mode: dual-token
       x-sdkwork-permission: web.sites.write
       x-sdkwork-idempotent: true
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
       x-sdkwork-owner: sdkwork-web-server
       x-sdkwork-rate-limit-tier: auth-critical
       requestBody:
@@ -678,6 +686,8 @@ paths:
       x-sdkwork-auth-mode: dual-token
       x-sdkwork-permission: web.sites.write
       x-sdkwork-idempotent: true
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
       x-sdkwork-owner: sdkwork-web-server
       x-sdkwork-rate-limit-tier: auth-critical
       responses:
@@ -763,6 +773,8 @@ paths:
       x-sdkwork-auth-mode: dual-token
       x-sdkwork-permission: web.sites.write
       x-sdkwork-idempotent: true
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
       x-sdkwork-owner: sdkwork-web-server
       requestBody:
         required: true
@@ -853,6 +865,8 @@ paths:
       x-sdkwork-auth-mode: dual-token
       x-sdkwork-permission: web.certificates.write
       x-sdkwork-idempotent: true
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
       x-sdkwork-owner: sdkwork-web-server
       x-sdkwork-rate-limit-tier: auth-critical
       requestBody:
@@ -936,6 +950,8 @@ paths:
       x-sdkwork-auth-mode: dual-token
       x-sdkwork-permission: web.sites.write
       x-sdkwork-idempotent: true
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
       x-sdkwork-owner: sdkwork-web-server
       requestBody:
         required: true
@@ -977,6 +993,14 @@ components:
       in: header
       name: X-API-Key
   parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 128
     PageParam:
       name: page
       in: query
@@ -1249,9 +1273,6 @@ components:
           type: string
           maxLength: 32
           default: production
-        idempotencyKey:
-          type: string
-          maxLength: 200
     DeploymentResponse:
       type: object
       additionalProperties: false

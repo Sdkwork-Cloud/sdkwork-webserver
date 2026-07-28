@@ -24,15 +24,15 @@
     },
     {
       "path": "Api/ApplicationApi.cs",
-      "sha256": "833c11649fab26ea81e50378b175823e3f7644c42fa84a546a10f2971976327e"
+      "sha256": "651ea3f4b665219c260e284e650e70593b28de3b6c8eb3ca238bf25e4b10f7eb"
     },
     {
       "path": "Api/ApplicationDeploymentApi.cs",
-      "sha256": "86f275ccec6efd31ae567da4d5b785bbd194aef5c8aa82abd6454d3a83d81a4f"
+      "sha256": "f07e6ca081dfcdee5b9d6480db665badbf2e733ffc34092a199a844a880c37d6"
     },
     {
       "path": "Api/ApplicationDomainApi.cs",
-      "sha256": "aded1f9dcd91d3710b4c29bc01c418f4766957e698e89c3fe9a52d326a56667b"
+      "sha256": "b47affdb144f3ffdb7ccd744116e0f77dbd680a9ada1f6057bfc9df1418e243d"
     },
     {
       "path": "Api/AuditApi.cs",
@@ -40,7 +40,7 @@
     },
     {
       "path": "Api/CertificateApi.cs",
-      "sha256": "f15c933aa5d4038325fe946d25e809a2b9398a741787b0a792202dd18e25f5ab"
+      "sha256": "a0a937d182ca440917d3da266f59435e8638e46ab8afdfa61059062f65428968"
     },
     {
       "path": "Api/CertificateDistributionApi.cs",
@@ -48,11 +48,11 @@
     },
     {
       "path": "Api/NginxApi.cs",
-      "sha256": "3a724bd60941be287d4f5d634e1c78b746129816fcccdf6a8307f5b2007de9ff"
+      "sha256": "970acd67a242429979e72e0e7c868b74249cf2ad1bd3d55be6440d36fc7f3d98"
     },
     {
       "path": "Api/ServerApi.cs",
-      "sha256": "acb12cf6f1db56ec3dfc2cabf65133c788ef8024562a2b28698316de98415e2b"
+      "sha256": "1a2c144b1b256fca4f809407bd28508892b8d26c93754296a14479eb9d0b62b3"
     },
     {
       "path": "bin/publish-core.mjs",
@@ -228,7 +228,7 @@
     },
     {
       "path": "Models/CreateApplicationDeploymentRequest.cs",
-      "sha256": "508d7d8a7edea3b82ed98f66aa3ba625be41e15452c5e4a0ac1aa66163ef1569"
+      "sha256": "21751927f9393127461bb8509b47082c4d7e6ae2c66239771f17b50ca1c3ad95"
     },
     {
       "path": "Models/CreateApplicationDomainRequest.cs",

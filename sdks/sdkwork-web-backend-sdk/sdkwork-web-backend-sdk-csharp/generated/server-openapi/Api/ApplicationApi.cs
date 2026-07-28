@@ -35,9 +35,16 @@ namespace SDKWork.Web.BackendSdk.Api
         /// <summary>
         /// Create a managed application
         /// </summary>
-        public async Task<SDKWork.Web.BackendSdk.Models.ApplicationsCreateResponse201?> ApplicationsCreateAsync(SDKWork.Web.BackendSdk.Models.CreateApplicationRequest body)
+        public async Task<SDKWork.Web.BackendSdk.Models.ApplicationsCreateResponse201?> ApplicationsCreateAsync(SDKWork.Web.BackendSdk.Models.CreateApplicationRequest body, string idempotencyKey)
         {
-            return await _client.PostAsync<SDKWork.Web.BackendSdk.Models.ApplicationsCreateResponse201>(ApiPaths.BackendPath("/applications"), body, null, null, "application/json");
+            var requestHeaders = BuildRequestHeaders(
+                new Dictionary<string, HeaderParameterSpec>
+                {
+                    ["Idempotency-Key"] = new HeaderParameterSpec(idempotencyKey, "simple", false, null),
+                },
+                new Dictionary<string, HeaderParameterSpec>()
+            );
+            return await _client.PostAsync<SDKWork.Web.BackendSdk.Models.ApplicationsCreateResponse201>(ApiPaths.BackendPath("/applications"), body, null, requestHeaders, "application/json");
         }
 
         /// <summary>
@@ -51,33 +58,61 @@ namespace SDKWork.Web.BackendSdk.Api
         /// <summary>
         /// Update a managed application
         /// </summary>
-        public async Task<SDKWork.Web.BackendSdk.Models.ApplicationsUpdateResponse?> ApplicationsUpdateAsync(string applicationId, SDKWork.Web.BackendSdk.Models.UpdateApplicationRequest body)
+        public async Task<SDKWork.Web.BackendSdk.Models.ApplicationsUpdateResponse?> ApplicationsUpdateAsync(string applicationId, SDKWork.Web.BackendSdk.Models.UpdateApplicationRequest body, string idempotencyKey)
         {
-            return await _client.PatchAsync<SDKWork.Web.BackendSdk.Models.ApplicationsUpdateResponse>(ApiPaths.BackendPath($"/applications/{SerializePathParameter(applicationId, new PathParameterSpec("applicationId", "simple", false))}"), body, null, null, "application/json");
+            var requestHeaders = BuildRequestHeaders(
+                new Dictionary<string, HeaderParameterSpec>
+                {
+                    ["Idempotency-Key"] = new HeaderParameterSpec(idempotencyKey, "simple", false, null),
+                },
+                new Dictionary<string, HeaderParameterSpec>()
+            );
+            return await _client.PatchAsync<SDKWork.Web.BackendSdk.Models.ApplicationsUpdateResponse>(ApiPaths.BackendPath($"/applications/{SerializePathParameter(applicationId, new PathParameterSpec("applicationId", "simple", false))}"), body, null, requestHeaders, "application/json");
         }
 
         /// <summary>
         /// Delete a managed application
         /// </summary>
-        public async Task ApplicationsDeleteAsync(string applicationId)
+        public async Task ApplicationsDeleteAsync(string applicationId, string idempotencyKey)
         {
-            await _client.DeleteAsync<object>(ApiPaths.BackendPath($"/applications/{SerializePathParameter(applicationId, new PathParameterSpec("applicationId", "simple", false))}"));
+            var requestHeaders = BuildRequestHeaders(
+                new Dictionary<string, HeaderParameterSpec>
+                {
+                    ["Idempotency-Key"] = new HeaderParameterSpec(idempotencyKey, "simple", false, null),
+                },
+                new Dictionary<string, HeaderParameterSpec>()
+            );
+            await _client.DeleteAsync<object>(ApiPaths.BackendPath($"/applications/{SerializePathParameter(applicationId, new PathParameterSpec("applicationId", "simple", false))}"), null, requestHeaders);
         }
 
         /// <summary>
         /// Activate a managed application
         /// </summary>
-        public async Task<SDKWork.Web.BackendSdk.Models.ApplicationsActivateResponse?> ApplicationsActivateAsync(string applicationId)
+        public async Task<SDKWork.Web.BackendSdk.Models.ApplicationsActivateResponse?> ApplicationsActivateAsync(string applicationId, string idempotencyKey)
         {
-            return await _client.PostAsync<SDKWork.Web.BackendSdk.Models.ApplicationsActivateResponse>(ApiPaths.BackendPath($"/applications/{SerializePathParameter(applicationId, new PathParameterSpec("applicationId", "simple", false))}/activate"), null);
+            var requestHeaders = BuildRequestHeaders(
+                new Dictionary<string, HeaderParameterSpec>
+                {
+                    ["Idempotency-Key"] = new HeaderParameterSpec(idempotencyKey, "simple", false, null),
+                },
+                new Dictionary<string, HeaderParameterSpec>()
+            );
+            return await _client.PostAsync<SDKWork.Web.BackendSdk.Models.ApplicationsActivateResponse>(ApiPaths.BackendPath($"/applications/{SerializePathParameter(applicationId, new PathParameterSpec("applicationId", "simple", false))}/activate"), null, null, requestHeaders);
         }
 
         /// <summary>
         /// Pause a managed application
         /// </summary>
-        public async Task<SDKWork.Web.BackendSdk.Models.ApplicationsPauseResponse?> ApplicationsPauseAsync(string applicationId)
+        public async Task<SDKWork.Web.BackendSdk.Models.ApplicationsPauseResponse?> ApplicationsPauseAsync(string applicationId, string idempotencyKey)
         {
-            return await _client.PostAsync<SDKWork.Web.BackendSdk.Models.ApplicationsPauseResponse>(ApiPaths.BackendPath($"/applications/{SerializePathParameter(applicationId, new PathParameterSpec("applicationId", "simple", false))}/pause"), null);
+            var requestHeaders = BuildRequestHeaders(
+                new Dictionary<string, HeaderParameterSpec>
+                {
+                    ["Idempotency-Key"] = new HeaderParameterSpec(idempotencyKey, "simple", false, null),
+                },
+                new Dictionary<string, HeaderParameterSpec>()
+            );
+            return await _client.PostAsync<SDKWork.Web.BackendSdk.Models.ApplicationsPauseResponse>(ApiPaths.BackendPath($"/applications/{SerializePathParameter(applicationId, new PathParameterSpec("applicationId", "simple", false))}/pause"), null, null, requestHeaders);
         }
 
         private sealed record PathParameterSpec(string Name, string Style, bool Explode);
@@ -307,5 +342,92 @@ namespace SDKWork.Web.BackendSdk.Api
                 .Replace("%3B", ";").Replace("%3D", "=");
         }
 
+        private sealed record HeaderParameterSpec(object? Value, string Style, bool Explode, string? ContentType);
+
+        private static Dictionary<string, string>? BuildRequestHeaders(
+            Dictionary<string, HeaderParameterSpec> headers,
+            Dictionary<string, HeaderParameterSpec> cookies)
+        {
+            var requestHeaders = new Dictionary<string, string>();
+            foreach (var item in headers)
+            {
+                var serialized = SerializeParameterValue(item.Value);
+                if (serialized is not null)
+                {
+                    requestHeaders[item.Key] = serialized;
+                }
+            }
+
+            var cookieHeader = BuildCookieHeader(cookies);
+            if (!string.IsNullOrEmpty(cookieHeader))
+            {
+                requestHeaders["Cookie"] = requestHeaders.TryGetValue("Cookie", out var existing) && !string.IsNullOrEmpty(existing)
+                    ? existing + "; " + cookieHeader
+                    : cookieHeader;
+            }
+
+            return requestHeaders.Count == 0 ? null : requestHeaders;
+        }
+
+        private static string BuildCookieHeader(Dictionary<string, HeaderParameterSpec> cookies)
+        {
+            var pairs = new List<string>();
+            foreach (var item in cookies)
+            {
+                var serialized = SerializeParameterValue(item.Value);
+                if (serialized is not null)
+                {
+                    pairs.Add(Uri.EscapeDataString(item.Key) + "=" + Uri.EscapeDataString(serialized));
+                }
+            }
+            return string.Join("; ", pairs);
+        }
+
+        private static string? SerializeParameterValue(HeaderParameterSpec? parameter)
+        {
+            var value = parameter?.Value;
+            if (value is null)
+            {
+                return null;
+            }
+            if (!string.IsNullOrWhiteSpace(parameter!.ContentType))
+            {
+                return System.Text.Json.JsonSerializer.Serialize(value);
+            }
+            if (value is System.Collections.IEnumerable enumerable && value is not string)
+            {
+                var values = new List<string>();
+                foreach (var item in enumerable)
+                {
+                    if (item is not null)
+                    {
+                        values.Add(item.ToString() ?? string.Empty);
+                    }
+                }
+                return string.Join(",", values);
+            }
+            if (value is System.Collections.IDictionary dictionary)
+            {
+                var values = new List<string>();
+                foreach (System.Collections.DictionaryEntry item in dictionary)
+                {
+                    if (item.Value is null)
+                    {
+                        continue;
+                    }
+                    if (parameter.Explode)
+                    {
+                        values.Add((item.Key.ToString() ?? string.Empty) + "=" + (item.Value.ToString() ?? string.Empty));
+                    }
+                    else
+                    {
+                        values.Add(item.Key.ToString() ?? string.Empty);
+                        values.Add(item.Value.ToString() ?? string.Empty);
+                    }
+                }
+                return string.Join(",", values);
+            }
+            return value.ToString();
+        }
     }
 }

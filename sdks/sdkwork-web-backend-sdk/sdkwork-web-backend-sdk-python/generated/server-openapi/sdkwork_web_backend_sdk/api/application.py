@@ -182,6 +182,59 @@ def encode_query_value(value: str, allow_reserved: bool) -> str:
 
     return quote(value, safe=':/?#[]@!$&\'()*+,;=' if allow_reserved else '')
 
+def build_request_headers(headers: Dict[str, Dict[str, Any]], cookies: Optional[Dict[str, Dict[str, Any]]] = None) -> Optional[Dict[str, str]]:
+    request_headers: Dict[str, str] = {}
+    for name, parameter in headers.items():
+        serialized = serialize_parameter_value(parameter)
+        if serialized is not None:
+            request_headers[name] = serialized
+
+    cookie_header = build_cookie_header(cookies or {})
+    if cookie_header:
+        request_headers['Cookie'] = (
+            f"{request_headers['Cookie']}; {cookie_header}"
+            if 'Cookie' in request_headers
+            else cookie_header
+        )
+
+    return request_headers or None
+
+
+def build_cookie_header(cookies: Dict[str, Dict[str, Any]]) -> Optional[str]:
+    from urllib.parse import quote
+
+    pairs: List[str] = []
+    for name, parameter in cookies.items():
+        serialized = serialize_parameter_value(parameter)
+        if serialized is not None:
+            pairs.append(f"{quote(str(name), safe='')}={quote(serialized, safe='')}")
+    return '; '.join(pairs) if pairs else None
+
+
+def serialize_parameter_value(parameter: Optional[Dict[str, Any]]) -> Optional[str]:
+    value = None if parameter is None else parameter.get('value')
+    if value is None:
+        return None
+    if parameter and parameter.get('content_type'):
+        import json
+
+        return json.dumps(value, separators=(',', ':'))
+    if isinstance(value, (list, tuple)):
+        return ','.join(serialize_header_primitive(item) for item in value if item is not None)
+    if isinstance(value, dict):
+        return serialize_header_object(value, bool(parameter and parameter.get('explode')))
+    return serialize_header_primitive(value)
+
+
+def serialize_header_object(value: Dict[str, Any], explode: bool) -> str:
+    entries = [(key, entry_value) for key, entry_value in value.items() if entry_value is not None]
+    if explode:
+        return ','.join(f"{key}={serialize_header_primitive(entry_value)}" for key, entry_value in entries)
+    return ','.join(item for key, entry_value in entries for item in (str(key), serialize_header_primitive(entry_value)))
+
+
+def serialize_header_primitive(value: Any) -> str:
+    return str(value)
 
 
 class ApplicationApi:
@@ -203,26 +256,56 @@ class ApplicationApi:
         ])
         return self._client.get(_append_query_string(f"/backend/v3/api/applications", query))
 
-    def create(self, body: CreateApplicationRequest) -> ApplicationsCreateResponse201:
+    def create(self, body: CreateApplicationRequest, idempotency_key: str) -> ApplicationsCreateResponse201:
         """Create a managed application"""
-        return self._client.post(f"/backend/v3/api/applications", json=body)
+        request_headers = build_request_headers(
+            {
+                'Idempotency-Key': {'value': idempotency_key, 'style': 'simple', 'explode': False},
+            },
+            {}
+        )
+        return self._client.post(f"/backend/v3/api/applications", json=body, headers=request_headers)
 
     def retrieve(self, application_id: str) -> ApplicationsRetrieveResponse:
         """Retrieve a managed application"""
         return self._client.get(f"/backend/v3/api/applications/{serialize_path_parameter(application_id, {'name': 'applicationId', 'style': 'simple', 'explode': False})}")
 
-    def update(self, application_id: str, body: UpdateApplicationRequest) -> ApplicationsUpdateResponse:
+    def update(self, application_id: str, body: UpdateApplicationRequest, idempotency_key: str) -> ApplicationsUpdateResponse:
         """Update a managed application"""
-        return self._client.patch(f"/backend/v3/api/applications/{serialize_path_parameter(application_id, {'name': 'applicationId', 'style': 'simple', 'explode': False})}", json=body)
+        request_headers = build_request_headers(
+            {
+                'Idempotency-Key': {'value': idempotency_key, 'style': 'simple', 'explode': False},
+            },
+            {}
+        )
+        return self._client.patch(f"/backend/v3/api/applications/{serialize_path_parameter(application_id, {'name': 'applicationId', 'style': 'simple', 'explode': False})}", json=body, headers=request_headers)
 
-    def delete(self, application_id: str) -> None:
+    def delete(self, application_id: str, idempotency_key: str) -> None:
         """Delete a managed application"""
-        return self._client.delete(f"/backend/v3/api/applications/{serialize_path_parameter(application_id, {'name': 'applicationId', 'style': 'simple', 'explode': False})}")
+        request_headers = build_request_headers(
+            {
+                'Idempotency-Key': {'value': idempotency_key, 'style': 'simple', 'explode': False},
+            },
+            {}
+        )
+        return self._client.delete(f"/backend/v3/api/applications/{serialize_path_parameter(application_id, {'name': 'applicationId', 'style': 'simple', 'explode': False})}", headers=request_headers)
 
-    def create_activate(self, application_id: str) -> ApplicationsActivateResponse:
+    def create_activate(self, application_id: str, idempotency_key: str) -> ApplicationsActivateResponse:
         """Activate a managed application"""
-        return self._client.post(f"/backend/v3/api/applications/{serialize_path_parameter(application_id, {'name': 'applicationId', 'style': 'simple', 'explode': False})}/activate")
+        request_headers = build_request_headers(
+            {
+                'Idempotency-Key': {'value': idempotency_key, 'style': 'simple', 'explode': False},
+            },
+            {}
+        )
+        return self._client.post(f"/backend/v3/api/applications/{serialize_path_parameter(application_id, {'name': 'applicationId', 'style': 'simple', 'explode': False})}/activate", headers=request_headers)
 
-    def pause(self, application_id: str) -> ApplicationsPauseResponse:
+    def pause(self, application_id: str, idempotency_key: str) -> ApplicationsPauseResponse:
         """Pause a managed application"""
-        return self._client.post(f"/backend/v3/api/applications/{serialize_path_parameter(application_id, {'name': 'applicationId', 'style': 'simple', 'explode': False})}/pause")
+        request_headers = build_request_headers(
+            {
+                'Idempotency-Key': {'value': idempotency_key, 'style': 'simple', 'explode': False},
+            },
+            {}
+        )
+        return self._client.post(f"/backend/v3/api/applications/{serialize_path_parameter(application_id, {'name': 'applicationId', 'style': 'simple', 'explode': False})}/pause", headers=request_headers)

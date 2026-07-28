@@ -38,6 +38,7 @@ describe("console workspace access", () => {
     renderWorkspace(path, {}, appUserPermissionScope);
 
     expect(screen.getByRole("heading", { name: heading })).toBeTruthy();
+    expect(document.querySelector(".page-header")).toBeNull();
     expect(screen.queryByText("This feature is not authorized")).toBeNull();
   });
 

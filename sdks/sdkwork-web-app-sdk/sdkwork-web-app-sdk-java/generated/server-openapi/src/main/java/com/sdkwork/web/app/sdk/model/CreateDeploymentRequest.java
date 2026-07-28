@@ -10,7 +10,6 @@ public class CreateDeploymentRequest {
     private String artifactSize;
     private String artifactHash;
     private String environment;
-    private String idempotencyKey;
 
     public Integer getDeployType() {
         return this.deployType;
@@ -74,13 +73,5 @@ public class CreateDeploymentRequest {
 
     public void setEnvironment(String environment) {
         this.environment = environment;
-    }
-
-    public String getIdempotencyKey() {
-        return this.idempotencyKey;
-    }
-
-    public void setIdempotencyKey(String idempotencyKey) {
-        this.idempotencyKey = idempotencyKey;
     }
 }

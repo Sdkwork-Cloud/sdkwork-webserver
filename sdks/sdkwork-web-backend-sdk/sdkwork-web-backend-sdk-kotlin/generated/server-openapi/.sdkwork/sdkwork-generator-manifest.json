@@ -80,15 +80,15 @@
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/api/ApplicationApi.kt",
-      "sha256": "bbcdc1202f92e62a1b92d264bc132cd3e7152d74a8750662d7bf1579114ccd46"
+      "sha256": "ba600b893a419570c2d1d8e9ff0bf00c93e0edd5336539d49d02f159c8df90b8"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/api/ApplicationDeploymentApi.kt",
-      "sha256": "71c6e1660f45e4b484f0037a45bbbc5684b3b017c8e694989e44803498605b70"
+      "sha256": "642bc48a1937adea32096a1c64cb0b0149666bde4885a87d209e24613635204a"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/api/ApplicationDomainApi.kt",
-      "sha256": "5db65e7d6e9d52821272e4bf9f3b33aa8865f18795a58c8fa6c9afca25b736c8"
+      "sha256": "c53cae8081dd8cd7b981e4afad9cd351fe27f9deed7a76ef9e3c2d0c7a466543"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/api/AuditApi.kt",
@@ -96,7 +96,7 @@
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/api/CertificateApi.kt",
-      "sha256": "9ec8e3a958f574016265f5a7c29b8ae06c502f85dec5477ea40dfa3411846043"
+      "sha256": "37a85272034eda362980989ed80b65a428af8b846bef9086350ac1a4dff0377f"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/api/CertificateDistributionApi.kt",
@@ -104,11 +104,11 @@
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/api/NginxApi.kt",
-      "sha256": "4c9235c758b34445975174b7136d20a5ddb09d715585c023ae13e5411b004402"
+      "sha256": "d260bc247da653b790b1341330275c4d5ab22209eca141aa74ce75ef3136b719"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/api/ServerApi.kt",
-      "sha256": "96091faaf87a9b1f0f76dd227a24e7812f67cf56187de329a362c755ac515e1a"
+      "sha256": "deea0ff9bbd4ae3208007f4a5a844de69b23cfc8b2a7e9e5dc9607b2aa0af8e5"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationDeploymentResponse.kt",
@@ -240,7 +240,7 @@
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/CreateApplicationDeploymentRequest.kt",
-      "sha256": "00f5d37a1ded8a543360bda5eb624080051be3f258cde235248ddfbd88bde5c1"
+      "sha256": "62282d6b1d5167ec660748e502120a5c56c760dd04e638cbf260f952643bf9c4"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/CreateApplicationDomainRequest.kt",

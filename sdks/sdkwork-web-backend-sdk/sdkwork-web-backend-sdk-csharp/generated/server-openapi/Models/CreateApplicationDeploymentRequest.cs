@@ -14,6 +14,5 @@ namespace SDKWork.Web.BackendSdk.Models
         public string? ArtifactDriveUri { get; set; }
         public string? ArtifactSize { get; set; }
         public string? ArtifactHash { get; set; }
-        public string? IdempotencyKey { get; set; }
     }
 }

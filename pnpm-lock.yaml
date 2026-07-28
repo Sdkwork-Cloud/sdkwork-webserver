@@ -667,6 +667,9 @@ importers:
       '@sdkwork/webserver-pc-core':
         specifier: workspace:*
         version: link:packages/sdkwork-webserver-pc-core
+      '@sdkwork/webserver-pc-documentation':
+        specifier: workspace:*
+        version: link:packages/sdkwork-webserver-pc-documentation
       '@sdkwork/webserver-pc-portal':
         specifier: workspace:*
         version: link:packages/sdkwork-webserver-pc-portal
@@ -850,6 +853,15 @@ importers:
         version: link:../sdkwork-webserver-pc-commons
 
   apps/sdkwork-webserver-pc/packages/sdkwork-webserver-pc-core: {}
+
+  apps/sdkwork-webserver-pc/packages/sdkwork-webserver-pc-documentation:
+    dependencies:
+      lucide-react:
+        specifier: 'catalog:'
+        version: 1.7.0(react@19.2.4)
+      react:
+        specifier: 'catalog:'
+        version: 19.2.4
 
   apps/sdkwork-webserver-pc/packages/sdkwork-webserver-pc-portal:
     dependencies:

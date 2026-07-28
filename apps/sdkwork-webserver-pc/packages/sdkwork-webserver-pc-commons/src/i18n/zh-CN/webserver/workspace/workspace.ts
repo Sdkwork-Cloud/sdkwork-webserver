@@ -35,6 +35,7 @@ export const webserverWorkspaceZhCn = {
   "scope.none.description": "当前账号下暂无可管理的应用。",
   "table.select": "选择",
   "table.selectRow": "选择第 {row} 行",
+  "table.loading": "正在加载资源...",
   "table.empty": "暂无资源。",
   "pagination.page": "第 {page} 页",
   "pagination.total": "共 {total} 条",

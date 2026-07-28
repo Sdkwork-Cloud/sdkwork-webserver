@@ -32,8 +32,12 @@ func (a *DomainApi) SitesDomainsList(siteId string, page *int, pageSize *int) (s
 }
 
 // 绑定域名
-func (a *DomainApi) SitesDomainsCreate(siteId string, body sdktypes.CreateDomainRequest) (sdktypes.SitesDomainsCreateResponse201, error) {
-    raw, err := a.client.Post(AppApiPath(fmt.Sprintf("/sites/%s/domains", SerializePathParameter(siteId, PathParameterSpec{Name: "siteId", Style: "simple", Explode: false}))), body, nil, nil, "application/json")
+func (a *DomainApi) SitesDomainsCreate(siteId string, body sdktypes.CreateDomainRequest, idempotencyKey string) (sdktypes.SitesDomainsCreateResponse201, error) {
+    headers := BuildRequestHeaders(
+        map[string]ParameterSpec{"Idempotency-Key": ParameterSpec{Value: idempotencyKey, Style: "simple", Explode: false},},
+        map[string]ParameterSpec{},
+    )
+    raw, err := a.client.Post(AppApiPath(fmt.Sprintf("/sites/%s/domains", SerializePathParameter(siteId, PathParameterSpec{Name: "siteId", Style: "simple", Explode: false}))), body, nil, headers, "application/json")
     if err != nil {
         var zero sdktypes.SitesDomainsCreateResponse201
         return zero, err
@@ -62,8 +66,12 @@ func (a *DomainApi) SitesDomainsDelete(siteId string, domainId string) (struct{}
 }
 
 // 验证域名所有权
-func (a *DomainApi) SitesDomainsVerify(siteId string, domainId string) (sdktypes.SitesDomainsVerifyResponse, error) {
-    raw, err := a.client.Post(AppApiPath(fmt.Sprintf("/sites/%s/domains/%s/verify", SerializePathParameter(siteId, PathParameterSpec{Name: "siteId", Style: "simple", Explode: false}), SerializePathParameter(domainId, PathParameterSpec{Name: "domainId", Style: "simple", Explode: false}))), nil, nil, nil, "")
+func (a *DomainApi) SitesDomainsVerify(siteId string, domainId string, idempotencyKey string) (sdktypes.SitesDomainsVerifyResponse, error) {
+    headers := BuildRequestHeaders(
+        map[string]ParameterSpec{"Idempotency-Key": ParameterSpec{Value: idempotencyKey, Style: "simple", Explode: false},},
+        map[string]ParameterSpec{},
+    )
+    raw, err := a.client.Post(AppApiPath(fmt.Sprintf("/sites/%s/domains/%s/verify", SerializePathParameter(siteId, PathParameterSpec{Name: "siteId", Style: "simple", Explode: false}), SerializePathParameter(domainId, PathParameterSpec{Name: "domainId", Style: "simple", Explode: false}))), nil, nil, headers, "")
     if err != nil {
         var zero sdktypes.SitesDomainsVerifyResponse
         return zero, err
@@ -297,7 +305,92 @@ func EncodeQueryValue(value string, allowReserved bool) string {
 }
 
 
+type ParameterSpec struct {
+    Value       interface{}
+    Style       string
+    Explode     bool
+    ContentType string
+}
 
+func BuildRequestHeaders(headers map[string]ParameterSpec, cookies map[string]ParameterSpec) map[string]string {
+    requestHeaders := map[string]string{}
+    for name, parameter := range headers {
+        if serialized, ok := SerializeParameterValue(parameter); ok {
+            requestHeaders[name] = serialized
+        }
+    }
+
+    if cookieHeader := BuildCookieHeader(cookies); cookieHeader != "" {
+        if existing, ok := requestHeaders["Cookie"]; ok && existing != "" {
+            requestHeaders["Cookie"] = existing + "; " + cookieHeader
+        } else {
+            requestHeaders["Cookie"] = cookieHeader
+        }
+    }
+
+    if len(requestHeaders) == 0 {
+        return nil
+    }
+    return requestHeaders
+}
+
+func BuildCookieHeader(cookies map[string]ParameterSpec) string {
+    pairs := make([]string, 0, len(cookies))
+    for name, parameter := range cookies {
+        if serialized, ok := SerializeParameterValue(parameter); ok {
+            pairs = append(pairs, url.QueryEscape(name)+"="+url.QueryEscape(serialized))
+        }
+    }
+    return strings.Join(pairs, "; ")
+}
+
+func SerializeParameterValue(parameter ParameterSpec) (string, bool) {
+    value := parameter.Value
+    if value == nil {
+        return "", false
+    }
+    if parameter.ContentType != "" {
+        encoded, _ := json.Marshal(value)
+        return string(encoded), true
+    }
+    switch typed := value.(type) {
+    case string:
+        return typed, true
+    case fmt.Stringer:
+        return typed.String(), true
+    case []string:
+        return strings.Join(typed, ","), true
+    case []int:
+        values := make([]string, 0, len(typed))
+        for _, item := range typed {
+            values = append(values, fmt.Sprint(item))
+        }
+        return strings.Join(values, ","), true
+    case map[string]string:
+        return SerializeHeaderObject(stringMapToInterface(typed), parameter.Explode), true
+    case map[string]int:
+        return SerializeHeaderObject(intMapToInterface(typed), parameter.Explode), true
+    case map[string]interface{}:
+        return SerializeHeaderObject(typed, parameter.Explode), true
+    default:
+        return fmt.Sprint(value), true
+    }
+}
+
+func SerializeHeaderObject(values map[string]interface{}, explode bool) string {
+    serialized := make([]string, 0, len(values)*2)
+    for key, value := range values {
+        if value == nil {
+            continue
+        }
+        if explode {
+            serialized = append(serialized, key+"="+fmt.Sprint(value))
+        } else {
+            serialized = append(serialized, key, fmt.Sprint(value))
+        }
+    }
+    return strings.Join(serialized, ",")
+}
 func stringSliceToInterface(values []string) []interface{} {
     result := make([]interface{}, 0, len(values))
     for _, value := range values {

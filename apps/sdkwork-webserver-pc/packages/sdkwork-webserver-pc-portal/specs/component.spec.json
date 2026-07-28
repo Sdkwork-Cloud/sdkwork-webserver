@@ -40,7 +40,9 @@
     "requiredPorts": [
       { "name": "portalClipboard", "export": "." },
       { "name": "portalNavigation", "export": "." },
+      { "name": "documentationNavigation", "export": "." },
       { "name": "notificationCenterNavigation", "export": "." },
+      { "name": "portalStatistics", "export": "." },
       { "name": "portalViewer", "export": "." }
     ],
     "runtimeEntrypoints": [],
@@ -54,7 +56,7 @@
   },
   "integration": {
     "authority": "Root SDKWork specs remain authoritative.",
-    "dependencyPolicy": "The application root injects Console, Messaging notification-center, clipboard, and optional read-only viewer ports through the package root export.",
+    "dependencyPolicy": "The application root injects Console, Documentation, Messaging notification-center, clipboard, optional read-only viewer, and authenticated statistics ports through the package root export.",
     "sdkPolicy": "The portal has no SDK dependency; publishing and deployment remain owned by existing console packages."
   },
   "verification": {

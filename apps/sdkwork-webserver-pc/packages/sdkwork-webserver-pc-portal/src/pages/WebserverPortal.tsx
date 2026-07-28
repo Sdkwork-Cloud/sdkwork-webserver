@@ -9,17 +9,17 @@ import { SkillIntegrationSection } from "../components/SkillIntegrationSection.t
 import { createPortalTranslator } from "../services/portal-translator.ts";
 import type { WebserverPortalProps } from "../types.ts";
 
-export function WebserverPortal({ clipboard, locale, navigation, viewer }: WebserverPortalProps) {
+export function WebserverPortal({ clipboard, locale, navigation, statistics, viewer }: WebserverPortalProps) {
   const t = useMemo(() => createPortalTranslator(locale), [locale]);
 
   return (
     <div className="min-h-screen bg-white text-zinc-950 dark:bg-[#0d1511] dark:text-white">
-      <PortalHeader consoleHref={navigation.consoleHref} notificationsHref={navigation.notificationsHref} t={t} viewer={viewer} />
+      <PortalHeader navigation={navigation} t={t} viewer={viewer} />
       <main>
-        <PortalHero navigation={navigation} t={t} />
+        <PortalHero navigation={navigation} statistics={statistics} t={t} />
+        <SkillIntegrationSection clipboard={clipboard} t={t} />
         <CapabilityBand t={t} />
         <DeploymentWorkflow t={t} />
-        <SkillIntegrationSection clipboard={clipboard} t={t} />
         <SecurityBand t={t} />
         <PortalClosing navigation={navigation} t={t} />
       </main>

@@ -182,6 +182,59 @@ def encode_query_value(value: str, allow_reserved: bool) -> str:
 
     return quote(value, safe=':/?#[]@!$&\'()*+,;=' if allow_reserved else '')
 
+def build_request_headers(headers: Dict[str, Dict[str, Any]], cookies: Optional[Dict[str, Dict[str, Any]]] = None) -> Optional[Dict[str, str]]:
+    request_headers: Dict[str, str] = {}
+    for name, parameter in headers.items():
+        serialized = serialize_parameter_value(parameter)
+        if serialized is not None:
+            request_headers[name] = serialized
+
+    cookie_header = build_cookie_header(cookies or {})
+    if cookie_header:
+        request_headers['Cookie'] = (
+            f"{request_headers['Cookie']}; {cookie_header}"
+            if 'Cookie' in request_headers
+            else cookie_header
+        )
+
+    return request_headers or None
+
+
+def build_cookie_header(cookies: Dict[str, Dict[str, Any]]) -> Optional[str]:
+    from urllib.parse import quote
+
+    pairs: List[str] = []
+    for name, parameter in cookies.items():
+        serialized = serialize_parameter_value(parameter)
+        if serialized is not None:
+            pairs.append(f"{quote(str(name), safe='')}={quote(serialized, safe='')}")
+    return '; '.join(pairs) if pairs else None
+
+
+def serialize_parameter_value(parameter: Optional[Dict[str, Any]]) -> Optional[str]:
+    value = None if parameter is None else parameter.get('value')
+    if value is None:
+        return None
+    if parameter and parameter.get('content_type'):
+        import json
+
+        return json.dumps(value, separators=(',', ':'))
+    if isinstance(value, (list, tuple)):
+        return ','.join(serialize_header_primitive(item) for item in value if item is not None)
+    if isinstance(value, dict):
+        return serialize_header_object(value, bool(parameter and parameter.get('explode')))
+    return serialize_header_primitive(value)
+
+
+def serialize_header_object(value: Dict[str, Any], explode: bool) -> str:
+    entries = [(key, entry_value) for key, entry_value in value.items() if entry_value is not None]
+    if explode:
+        return ','.join(f"{key}={serialize_header_primitive(entry_value)}" for key, entry_value in entries)
+    return ','.join(item for key, entry_value in entries for item in (str(key), serialize_header_primitive(entry_value)))
+
+
+def serialize_header_primitive(value: Any) -> str:
+    return str(value)
 
 
 class ApplicationDomainApi:
@@ -215,14 +268,32 @@ class ApplicationDomainApplicationsDomainsApi:
         ])
         return self._client.get(_append_query_string(f"/backend/v3/api/applications/{serialize_path_parameter(application_id, {'name': 'applicationId', 'style': 'simple', 'explode': False})}/domains", query))
 
-    def create(self, application_id: str, body: CreateApplicationDomainRequest) -> ApplicationsDomainsCreateResponse201:
+    def create(self, application_id: str, body: CreateApplicationDomainRequest, idempotency_key: str) -> ApplicationsDomainsCreateResponse201:
         """Bind a public domain to an application"""
-        return self._client.post(f"/backend/v3/api/applications/{serialize_path_parameter(application_id, {'name': 'applicationId', 'style': 'simple', 'explode': False})}/domains", json=body)
+        request_headers = build_request_headers(
+            {
+                'Idempotency-Key': {'value': idempotency_key, 'style': 'simple', 'explode': False},
+            },
+            {}
+        )
+        return self._client.post(f"/backend/v3/api/applications/{serialize_path_parameter(application_id, {'name': 'applicationId', 'style': 'simple', 'explode': False})}/domains", json=body, headers=request_headers)
 
-    def delete(self, application_id: str, domain_id: str) -> None:
+    def delete(self, application_id: str, domain_id: str, idempotency_key: str) -> None:
         """Unbind an application public domain"""
-        return self._client.delete(f"/backend/v3/api/applications/{serialize_path_parameter(application_id, {'name': 'applicationId', 'style': 'simple', 'explode': False})}/domains/{serialize_path_parameter(domain_id, {'name': 'domainId', 'style': 'simple', 'explode': False})}")
+        request_headers = build_request_headers(
+            {
+                'Idempotency-Key': {'value': idempotency_key, 'style': 'simple', 'explode': False},
+            },
+            {}
+        )
+        return self._client.delete(f"/backend/v3/api/applications/{serialize_path_parameter(application_id, {'name': 'applicationId', 'style': 'simple', 'explode': False})}/domains/{serialize_path_parameter(domain_id, {'name': 'domainId', 'style': 'simple', 'explode': False})}", headers=request_headers)
 
-    def verify(self, application_id: str, domain_id: str) -> ApplicationsDomainsVerifyResponse:
+    def verify(self, application_id: str, domain_id: str, idempotency_key: str) -> ApplicationsDomainsVerifyResponse:
         """Verify an application public domain"""
-        return self._client.post(f"/backend/v3/api/applications/{serialize_path_parameter(application_id, {'name': 'applicationId', 'style': 'simple', 'explode': False})}/domains/{serialize_path_parameter(domain_id, {'name': 'domainId', 'style': 'simple', 'explode': False})}/verify")
+        request_headers = build_request_headers(
+            {
+                'Idempotency-Key': {'value': idempotency_key, 'style': 'simple', 'explode': False},
+            },
+            {}
+        )
+        return self._client.post(f"/backend/v3/api/applications/{serialize_path_parameter(application_id, {'name': 'applicationId', 'style': 'simple', 'explode': False})}/domains/{serialize_path_parameter(domain_id, {'name': 'domainId', 'style': 'simple', 'explode': False})}/verify", headers=request_headers)

@@ -56,6 +56,7 @@
     "@sdkwork/webserver-pc-console-site-configuration": "workspace:*",
     "@sdkwork/webserver-pc-console-sites": "workspace:*",
     "@sdkwork/webserver-pc-core": "workspace:*",
+    "@sdkwork/webserver-pc-documentation": "workspace:*",
     "@sdkwork/webserver-pc-portal": "workspace:*",
     "@tailwindcss/typography": "catalog:",
     "@tailwindcss/vite": "catalog:",

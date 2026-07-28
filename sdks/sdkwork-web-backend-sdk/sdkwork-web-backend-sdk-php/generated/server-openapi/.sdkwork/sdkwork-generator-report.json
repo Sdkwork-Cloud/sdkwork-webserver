@@ -10,37 +10,96 @@
   },
   "status": "ok",
   "mode": "apply",
-  "hasChanges": false,
+  "hasChanges": true,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "dbd794ed950f9ebaaec45d1eaf5391e3f017411b968a6efd1356efc701b7d1b3",
+  "changeFingerprint": "b3d9364bfc9204a1cdf0fce2e0f72cf21f4b45869d98ed72472ee77c6ff57012",
   "changeImpact": {
     "schemaVersion": 1,
-    "areas": [],
-    "details": [],
-    "requiresVerification": false,
-    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
+    "areas": [
+      "api-surface",
+      "models"
+    ],
+    "details": [
+      {
+        "area": "api-surface",
+        "paths": [
+          "src/Api/Application.php",
+          "src/Api/ApplicationDeployment.php",
+          "src/Api/ApplicationDomain.php",
+          "src/Api/Certificate.php",
+          "src/Api/Nginx.php",
+          "src/Api/Server.php"
+        ]
+      },
+      {
+        "area": "models",
+        "paths": [
+          "src/Models/CreateApplicationDeploymentRequest.php"
+        ]
+      }
+    ],
+    "requiresVerification": true,
+    "summary": "Detected impact areas: api-surface, models. Verification is required."
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "low",
-    "nextAction": "skip",
+    "riskLevel": "medium",
+    "nextAction": "verify",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
-    "summary": "No actionable changes were detected. No apply or verification step is required.",
+    "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
-      "no-actionable-changes"
+      "verification-required"
     ]
   },
   "executionHandoff": {
     "schemaVersion": 1,
-    "summary": "No further commands are required.",
-    "steps": []
+    "summary": "Run the required verification commands now.",
+    "steps": [
+      {
+        "id": "verify-check",
+        "title": "Unified package check",
+        "required": true,
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
+        "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-php\\generated\\server-openapi",
+        "command": "node",
+        "args": [
+          "./bin/publish-core.mjs",
+          "--language",
+          "php",
+          "--project-dir",
+          ".",
+          "--action",
+          "check"
+        ],
+        "displayCommand": "node ./bin/publish-core.mjs --language php --project-dir . --action check"
+      }
+    ]
   },
   "verificationPlan": {
-    "shouldRun": false,
-    "runPhase": "skip",
-    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
-    "steps": []
+    "shouldRun": true,
+    "runPhase": "now",
+    "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "steps": [
+      {
+        "id": "check",
+        "title": "Unified package check",
+        "required": true,
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
+        "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-php\\generated\\server-openapi",
+        "command": "node",
+        "args": [
+          "./bin/publish-core.mjs",
+          "--language",
+          "php",
+          "--project-dir",
+          ".",
+          "--action",
+          "check"
+        ],
+        "displayCommand": "node ./bin/publish-core.mjs --language php --project-dir . --action check"
+      }
+    ]
   },
   "sdk": {
     "name": "sdkwork-web-backend-sdk",
@@ -65,15 +124,23 @@
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 0,
+    "writtenFiles": 7,
     "skippedScaffoldFiles": 1,
-    "skippedUnchangedGeneratedFiles": 92,
+    "skippedUnchangedGeneratedFiles": 85,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "dbd794ed950f9ebaaec45d1eaf5391e3f017411b968a6efd1356efc701b7d1b3",
+    "changeFingerprint": "b3d9364bfc9204a1cdf0fce2e0f72cf21f4b45869d98ed72472ee77c6ff57012",
     "changes": {
       "createdGeneratedFiles": [],
-      "updatedGeneratedFiles": [],
+      "updatedGeneratedFiles": [
+        "src/Api/Application.php",
+        "src/Api/ApplicationDeployment.php",
+        "src/Api/ApplicationDomain.php",
+        "src/Api/Certificate.php",
+        "src/Api/Nginx.php",
+        "src/Api/Server.php",
+        "src/Models/CreateApplicationDeploymentRequest.php"
+      ],
       "unchangedGeneratedFiles": [
         "bin/publish-core.mjs",
         "bin/publish.ps1",
@@ -84,15 +151,9 @@
         "README.md",
         "sdkwork-sdk.json",
         "src/Api/Agent.php",
-        "src/Api/Application.php",
-        "src/Api/ApplicationDeployment.php",
-        "src/Api/ApplicationDomain.php",
         "src/Api/Audit.php",
         "src/Api/BaseApi.php",
-        "src/Api/Certificate.php",
         "src/Api/CertificateDistribution.php",
-        "src/Api/Nginx.php",
-        "src/Api/Server.php",
         "src/Http/HttpClient.php",
         "src/Models/AgentCertificateBundle.php",
         "src/Models/AgentHeartbeatRequest.php",
@@ -131,7 +192,6 @@
         "src/Models/ConfigsRetrieveResponse.php",
         "src/Models/ConfigsUpdateResponse.php",
         "src/Models/ConfigsValidateResponse.php",
-        "src/Models/CreateApplicationDeploymentRequest.php",
         "src/Models/CreateApplicationDomainRequest.php",
         "src/Models/CreateApplicationRequest.php",
         "src/Models/CreateCertificateRequest.php",
@@ -177,26 +237,66 @@
     },
     "impact": {
       "schemaVersion": 1,
-      "areas": [],
-      "details": [],
-      "requiresVerification": false,
-      "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
+      "areas": [
+        "api-surface",
+        "models"
+      ],
+      "details": [
+        {
+          "area": "api-surface",
+          "paths": [
+            "src/Api/Application.php",
+            "src/Api/ApplicationDeployment.php",
+            "src/Api/ApplicationDomain.php",
+            "src/Api/Certificate.php",
+            "src/Api/Nginx.php",
+            "src/Api/Server.php"
+          ]
+        },
+        {
+          "area": "models",
+          "paths": [
+            "src/Models/CreateApplicationDeploymentRequest.php"
+          ]
+        }
+      ],
+      "requiresVerification": true,
+      "summary": "Detected impact areas: api-surface, models. Verification is required."
     },
     "verificationPlan": {
-      "shouldRun": false,
-      "runPhase": "skip",
-      "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
-      "steps": []
+      "shouldRun": true,
+      "runPhase": "now",
+      "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
+      "steps": [
+        {
+          "id": "check",
+          "title": "Unified package check",
+          "required": true,
+          "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
+          "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-php\\generated\\server-openapi",
+          "command": "node",
+          "args": [
+            "./bin/publish-core.mjs",
+            "--language",
+            "php",
+            "--project-dir",
+            ".",
+            "--action",
+            "check"
+          ],
+          "displayCommand": "node ./bin/publish-core.mjs --language php --project-dir . --action check"
+        }
+      ]
     },
     "executionDecision": {
       "schemaVersion": 1,
-      "riskLevel": "low",
-      "nextAction": "skip",
+      "riskLevel": "medium",
+      "nextAction": "verify",
       "requiresManualReview": false,
       "applyRequiresExpectedFingerprint": false,
-      "summary": "No actionable changes were detected. No apply or verification step is required.",
+      "summary": "Changes have been applied. Run the required verification plan now.",
       "reasons": [
-        "no-actionable-changes"
+        "verification-required"
       ]
     },
     "backedUpFiles": [],

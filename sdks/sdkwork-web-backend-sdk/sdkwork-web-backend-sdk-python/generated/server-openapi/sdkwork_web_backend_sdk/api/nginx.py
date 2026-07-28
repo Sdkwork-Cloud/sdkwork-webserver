@@ -182,6 +182,59 @@ def encode_query_value(value: str, allow_reserved: bool) -> str:
 
     return quote(value, safe=':/?#[]@!$&\'()*+,;=' if allow_reserved else '')
 
+def build_request_headers(headers: Dict[str, Dict[str, Any]], cookies: Optional[Dict[str, Dict[str, Any]]] = None) -> Optional[Dict[str, str]]:
+    request_headers: Dict[str, str] = {}
+    for name, parameter in headers.items():
+        serialized = serialize_parameter_value(parameter)
+        if serialized is not None:
+            request_headers[name] = serialized
+
+    cookie_header = build_cookie_header(cookies or {})
+    if cookie_header:
+        request_headers['Cookie'] = (
+            f"{request_headers['Cookie']}; {cookie_header}"
+            if 'Cookie' in request_headers
+            else cookie_header
+        )
+
+    return request_headers or None
+
+
+def build_cookie_header(cookies: Dict[str, Dict[str, Any]]) -> Optional[str]:
+    from urllib.parse import quote
+
+    pairs: List[str] = []
+    for name, parameter in cookies.items():
+        serialized = serialize_parameter_value(parameter)
+        if serialized is not None:
+            pairs.append(f"{quote(str(name), safe='')}={quote(serialized, safe='')}")
+    return '; '.join(pairs) if pairs else None
+
+
+def serialize_parameter_value(parameter: Optional[Dict[str, Any]]) -> Optional[str]:
+    value = None if parameter is None else parameter.get('value')
+    if value is None:
+        return None
+    if parameter and parameter.get('content_type'):
+        import json
+
+        return json.dumps(value, separators=(',', ':'))
+    if isinstance(value, (list, tuple)):
+        return ','.join(serialize_header_primitive(item) for item in value if item is not None)
+    if isinstance(value, dict):
+        return serialize_header_object(value, bool(parameter and parameter.get('explode')))
+    return serialize_header_primitive(value)
+
+
+def serialize_header_object(value: Dict[str, Any], explode: bool) -> str:
+    entries = [(key, entry_value) for key, entry_value in value.items() if entry_value is not None]
+    if explode:
+        return ','.join(f"{key}={serialize_header_primitive(entry_value)}" for key, entry_value in entries)
+    return ','.join(item for key, entry_value in entries for item in (str(key), serialize_header_primitive(entry_value)))
+
+
+def serialize_header_primitive(value: Any) -> str:
+    return str(value)
 
 
 class NginxApi:
@@ -212,25 +265,43 @@ class NginxConfigsApi:
         ])
         return self._client.get(_append_query_string(f"/backend/v3/api/nginx/configs", query))
 
-    def create(self, body: CreateNginxConfigRequest) -> ConfigsCreateResponse201:
+    def create(self, body: CreateNginxConfigRequest, idempotency_key: str) -> ConfigsCreateResponse201:
         """Create an Nginx configuration"""
-        return self._client.post(f"/backend/v3/api/nginx/configs", json=body)
+        request_headers = build_request_headers(
+            {
+                'Idempotency-Key': {'value': idempotency_key, 'style': 'simple', 'explode': False},
+            },
+            {}
+        )
+        return self._client.post(f"/backend/v3/api/nginx/configs", json=body, headers=request_headers)
 
     def retrieve(self, config_id: str) -> ConfigsRetrieveResponse:
         """Retrieve an Nginx configuration"""
         return self._client.get(f"/backend/v3/api/nginx/etc/{serialize_path_parameter(config_id, {'name': 'configId', 'style': 'simple', 'explode': False})}")
 
-    def update(self, config_id: str, body: UpdateNginxConfigRequest) -> ConfigsUpdateResponse:
+    def update(self, config_id: str, body: UpdateNginxConfigRequest, idempotency_key: str) -> ConfigsUpdateResponse:
         """Update an Nginx configuration"""
-        return self._client.put(f"/backend/v3/api/nginx/etc/{serialize_path_parameter(config_id, {'name': 'configId', 'style': 'simple', 'explode': False})}", json=body)
+        request_headers = build_request_headers(
+            {
+                'Idempotency-Key': {'value': idempotency_key, 'style': 'simple', 'explode': False},
+            },
+            {}
+        )
+        return self._client.put(f"/backend/v3/api/nginx/etc/{serialize_path_parameter(config_id, {'name': 'configId', 'style': 'simple', 'explode': False})}", json=body, headers=request_headers)
 
     def validate(self, config_id: str) -> ConfigsValidateResponse:
         """Validate an Nginx configuration"""
         return self._client.post(f"/backend/v3/api/nginx/etc/{serialize_path_parameter(config_id, {'name': 'configId', 'style': 'simple', 'explode': False})}/validate")
 
-    def deploy(self, config_id: str) -> ConfigsDeployResponse:
+    def deploy(self, config_id: str, idempotency_key: str) -> ConfigsDeployResponse:
         """Deploy an Nginx configuration"""
-        return self._client.post(f"/backend/v3/api/nginx/etc/{serialize_path_parameter(config_id, {'name': 'configId', 'style': 'simple', 'explode': False})}/deploy")
+        request_headers = build_request_headers(
+            {
+                'Idempotency-Key': {'value': idempotency_key, 'style': 'simple', 'explode': False},
+            },
+            {}
+        )
+        return self._client.post(f"/backend/v3/api/nginx/etc/{serialize_path_parameter(config_id, {'name': 'configId', 'style': 'simple', 'explode': False})}/deploy", headers=request_headers)
 
 class NginxReloadApi:
     """nginx nginx.reload API client."""
@@ -239,9 +310,15 @@ class NginxReloadApi:
         self._client = client
 
 
-    def create(self) -> ReloadResponse:
+    def create(self, idempotency_key: str) -> ReloadResponse:
         """Reload Nginx"""
-        return self._client.post(f"/backend/v3/api/nginx/reload")
+        request_headers = build_request_headers(
+            {
+                'Idempotency-Key': {'value': idempotency_key, 'style': 'simple', 'explode': False},
+            },
+            {}
+        )
+        return self._client.post(f"/backend/v3/api/nginx/reload", headers=request_headers)
 
 class NginxStatusApi:
     """nginx nginx.status API client."""

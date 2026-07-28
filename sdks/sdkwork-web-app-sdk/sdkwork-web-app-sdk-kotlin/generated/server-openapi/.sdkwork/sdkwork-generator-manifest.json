@@ -56,27 +56,27 @@
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/api/CertificateApi.kt",
-      "sha256": "33b65738d5af23671e7517fe0c25914348a3270262447b779be327cde3f401f8"
+      "sha256": "468585f19a1d2c56d64c31a3367392c0369b7b303b11b138cc808e58a8f18719"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/api/DeploymentApi.kt",
-      "sha256": "5b2b4591c9ab41fc24772a7dbb5f5a176b78b9907d707f62eaf3c2b9645ccf0f"
+      "sha256": "c2729593b89cf81168927036299a11ba7420242cbf37d6d0ccb6adb384dde1e2"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/api/DomainApi.kt",
-      "sha256": "4d380a3d04feaa83d9e162c6d4e259ed37dd4490c5d79603244551449076b9dc"
+      "sha256": "7776757fa7b3ec14fbd0c514c3d2b7dbaffe13905cbdac9e677709fd4f640ec5"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/api/EnvVariableApi.kt",
-      "sha256": "b3fa135e38946f0b8971473158d1cd657fd40b7ea79edc7c7edbc962c64ef478"
+      "sha256": "ddc5b5b28c23ccb6e16d10915ee57cffcc1b4834bae6b24c4e17ffa2ec52fc5e"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/api/MonitorApi.kt",
-      "sha256": "62c0748105a00051b1ecdcec3a078917f1fab61bdbbcb65a19e03d9b272a143c"
+      "sha256": "5b6e73b572ff2f4e63963723e4a3dde102ad79494edf377014bc191e62821291"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/api/SiteApi.kt",
-      "sha256": "ed7a95633f495b5a7256e148a56c9de31e04761af7bcd926b0943eff117908bc"
+      "sha256": "04df6a422a463b2f00aa5a3db5eb3596a8373980ba8c3a74fc9b9d588878335d"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatePage.kt",
@@ -100,7 +100,7 @@
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/CreateDeploymentRequest.kt",
-      "sha256": "36ae9e41a31e113939e664e5a73a0dd75f349a1029131039aea76710ac01255a"
+      "sha256": "17af8f2781b0e1a59c406684e93938d24d3c3a6590ce25435e649988eb8a2038"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/CreateDomainRequest.kt",

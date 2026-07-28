@@ -24,8 +24,6 @@ final class CreateDeploymentRequest
 
     public ?string $environment = null;
 
-    public ?string $idempotencyKey = null;
-
     public function __construct(array $data = [])
     {
         $this->deployType = array_key_exists('deployType', $data)
@@ -52,9 +50,6 @@ final class CreateDeploymentRequest
         $this->environment = array_key_exists('environment', $data)
             ? $data['environment']
             : null;
-        $this->idempotencyKey = array_key_exists('idempotencyKey', $data)
-            ? $data['idempotencyKey']
-            : null;
     }
 
     public static function fromArray(?array $data): ?self
@@ -73,7 +68,6 @@ final class CreateDeploymentRequest
             'artifactSize' => $this->artifactSize,
             'artifactHash' => $this->artifactHash,
             'environment' => $this->environment,
-            'idempotencyKey' => $this->idempotencyKey,
         ];
     }
 }

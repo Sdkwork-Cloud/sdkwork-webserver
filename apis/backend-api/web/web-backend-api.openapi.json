@@ -145,6 +145,11 @@
         "x-sdkwork-auth-mode": "dual-token",
         "x-sdkwork-permission": "web.sites.write",
         "x-sdkwork-idempotent": true,
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
         "x-sdkwork-owner": "sdkwork-web-server",
         "requestBody": {
           "required": true,
@@ -277,6 +282,11 @@
         "x-sdkwork-auth-mode": "dual-token",
         "x-sdkwork-permission": "web.sites.write",
         "x-sdkwork-idempotent": true,
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
         "x-sdkwork-owner": "sdkwork-web-server",
         "requestBody": {
           "required": true,
@@ -350,6 +360,11 @@
         "x-sdkwork-auth-mode": "dual-token",
         "x-sdkwork-permission": "web.sites.write",
         "x-sdkwork-idempotent": true,
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
         "x-sdkwork-rate-limit-tier": "auth-critical",
         "x-sdkwork-owner": "sdkwork-web-server",
         "responses": {
@@ -394,6 +409,11 @@
         "x-sdkwork-auth-mode": "dual-token",
         "x-sdkwork-permission": "web.sites.write",
         "x-sdkwork-idempotent": true,
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
         "x-sdkwork-rate-limit-tier": "auth-critical",
         "x-sdkwork-owner": "sdkwork-web-server",
         "responses": {
@@ -465,6 +485,11 @@
         "x-sdkwork-auth-mode": "dual-token",
         "x-sdkwork-permission": "web.sites.write",
         "x-sdkwork-idempotent": true,
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
         "x-sdkwork-rate-limit-tier": "auth-critical",
         "x-sdkwork-owner": "sdkwork-web-server",
         "responses": {
@@ -603,6 +628,11 @@
         "x-sdkwork-auth-mode": "dual-token",
         "x-sdkwork-permission": "web.sites.write",
         "x-sdkwork-idempotent": true,
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
         "x-sdkwork-owner": "sdkwork-web-server",
         "requestBody": {
           "required": true,
@@ -676,6 +706,11 @@
         "x-sdkwork-auth-mode": "dual-token",
         "x-sdkwork-permission": "web.sites.write",
         "x-sdkwork-idempotent": true,
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
         "x-sdkwork-rate-limit-tier": "auth-critical",
         "x-sdkwork-owner": "sdkwork-web-server",
         "responses": {
@@ -723,6 +758,11 @@
         "x-sdkwork-auth-mode": "dual-token",
         "x-sdkwork-permission": "web.sites.write",
         "x-sdkwork-idempotent": true,
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
         "x-sdkwork-owner": "sdkwork-web-server",
         "responses": {
           "200": {
@@ -859,6 +899,11 @@
         "x-sdkwork-auth-mode": "dual-token",
         "x-sdkwork-permission": "web.sites.write",
         "x-sdkwork-idempotent": true,
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
         "x-sdkwork-rate-limit-tier": "auth-critical",
         "x-sdkwork-owner": "sdkwork-web-server",
         "requestBody": {
@@ -933,6 +978,11 @@
         "x-sdkwork-auth-mode": "dual-token",
         "x-sdkwork-permission": "web.sites.write",
         "x-sdkwork-idempotent": true,
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
         "x-sdkwork-rate-limit-tier": "auth-critical",
         "x-sdkwork-owner": "sdkwork-web-server",
         "responses": {
@@ -1066,6 +1116,11 @@
         "x-sdkwork-auth-mode": "dual-token",
         "x-sdkwork-permission": "web.certificates.write",
         "x-sdkwork-idempotent": true,
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
         "x-sdkwork-rate-limit-tier": "auth-critical",
         "x-sdkwork-owner": "sdkwork-web-server",
         "requestBody": {
@@ -1137,6 +1192,11 @@
         "x-sdkwork-auth-mode": "dual-token",
         "x-sdkwork-permission": "web.certificates.write",
         "x-sdkwork-idempotent": true,
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
         "x-sdkwork-owner": "sdkwork-web-server",
         "requestBody": {
           "required": true,
@@ -1207,6 +1267,11 @@
         "x-sdkwork-auth-mode": "dual-token",
         "x-sdkwork-permission": "web.certificates.write",
         "x-sdkwork-idempotent": true,
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
         "x-sdkwork-rate-limit-tier": "auth-critical",
         "x-sdkwork-owner": "sdkwork-web-server",
         "responses": {
@@ -1431,6 +1496,11 @@
         "x-sdkwork-auth-mode": "dual-token",
         "x-sdkwork-permission": "web.nginx.write",
         "x-sdkwork-idempotent": true,
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
         "x-sdkwork-owner": "sdkwork-web-server",
         "requestBody": {
           "required": true,
@@ -1575,6 +1645,11 @@
         "x-sdkwork-auth-mode": "dual-token",
         "x-sdkwork-permission": "web.nginx.write",
         "x-sdkwork-idempotent": true,
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
         "x-sdkwork-owner": "sdkwork-web-server",
         "requestBody": {
           "required": true,
@@ -1732,6 +1807,11 @@
         "x-sdkwork-auth-mode": "dual-token",
         "x-sdkwork-permission": "web.nginx.write",
         "x-sdkwork-idempotent": true,
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
         "x-sdkwork-owner": "sdkwork-web-server",
         "x-sdkwork-rate-limit-tier": "auth-critical",
         "responses": {
@@ -1801,6 +1881,11 @@
         "x-sdkwork-auth-mode": "dual-token",
         "x-sdkwork-permission": "web.nginx.write",
         "x-sdkwork-idempotent": true,
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
         "x-sdkwork-owner": "sdkwork-web-server",
         "responses": {
           "200": {
@@ -1987,6 +2072,11 @@
         "x-sdkwork-auth-mode": "dual-token",
         "x-sdkwork-permission": "web.servers.write",
         "x-sdkwork-idempotent": true,
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
         "x-sdkwork-owner": "sdkwork-web-server",
         "x-sdkwork-rate-limit-tier": "auth-critical",
         "requestBody": {
@@ -2327,6 +2417,16 @@
       }
     },
     "parameters": {
+      "IdempotencyKey": {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      },
       "ApplicationIdParam": {
         "name": "applicationId",
         "in": "path",
@@ -2729,11 +2829,6 @@
             "type": "string",
             "pattern": "^[A-Fa-f0-9]{64}$",
             "description": "SHA-256 hexadecimal digest of the uploaded package."
-          },
-          "idempotencyKey": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 128
           }
         }
       },

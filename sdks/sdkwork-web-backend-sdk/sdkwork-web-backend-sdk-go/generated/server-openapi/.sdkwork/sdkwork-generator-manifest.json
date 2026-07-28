@@ -16,15 +16,15 @@
     },
     {
       "path": "api/application_deployment.go",
-      "sha256": "15d8de9934f82b58b71442d29fbd1c9fc06c422c94a2182a4636d752d9207860"
+      "sha256": "f61c908bd049e9e011e2ee52ddabb57e8aadc7a5e005805d15d77ad4d4068d2c"
     },
     {
       "path": "api/application_domain.go",
-      "sha256": "ba1b12935f5e463e5edda0e7238363b1d28d15e63aea209e29de5cfd744bb086"
+      "sha256": "31036ffc70a658d3483cc33dd700e8ee5ca0200c974903e8a3c6ddca5707460f"
     },
     {
       "path": "api/application.go",
-      "sha256": "56ebbb86d4d9ebf8e7d922af6266fbdfee92674e49fdafbd3f80f8df85ce666c"
+      "sha256": "9a91955965c042102784d43385415bc3898fd616ab9f1c29c2a9b0efe0271357"
     },
     {
       "path": "api/audit.go",
@@ -40,7 +40,7 @@
     },
     {
       "path": "api/certificate.go",
-      "sha256": "85e8230b7f7d625dca57d85a5c7c95662e96da9200d57e3b2ec2c4d8c1ed77d3"
+      "sha256": "c476de3a0b8f6474a1f57be1a128569683a2ad38afd4c9bfc3263bb5b4e5a784"
     },
     {
       "path": "api/doc.go",
@@ -48,7 +48,7 @@
     },
     {
       "path": "api/nginx.go",
-      "sha256": "8b847eba073448fd9411048e823ebbd20a7b56a993528809c551174aa68f65a8"
+      "sha256": "5e9f4e635d778c7f5a09087e421aa92cf7da8e7d9cdf6dbc8b1c2cf43a5747bc"
     },
     {
       "path": "api/paths.go",
@@ -56,7 +56,7 @@
     },
     {
       "path": "api/server.go",
-      "sha256": "2bb547d4c4bb96d2fe27728167a125996a6c956f431b1375935d55e88c733118"
+      "sha256": "dbd980113a5189372e879d239a6f44b9430a8c82d6a1f42bf23821e417aa2655"
     },
     {
       "path": "bin/publish-core.mjs",
@@ -260,7 +260,7 @@
     },
     {
       "path": "types/create_application_deployment_request.go",
-      "sha256": "af76e6fafb23515bdb4d147dbf754290d8d2a19ea3324646e2f62c6711567e63"
+      "sha256": "a8b92d6895e4829c69639f0d5b8b00f810580df177497ac13d69cdd747790bf5"
     },
     {
       "path": "types/create_application_domain_request.go",

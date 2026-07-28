@@ -36,8 +36,12 @@ func (a *ApplicationApi) ApplicationsList(page *int, pageSize *int, applicationT
 }
 
 // Create a managed application
-func (a *ApplicationApi) ApplicationsCreate(body sdktypes.CreateApplicationRequest) (sdktypes.ApplicationsCreateResponse201, error) {
-    raw, err := a.client.Post(BackendApiPath("/applications"), body, nil, nil, "application/json")
+func (a *ApplicationApi) ApplicationsCreate(body sdktypes.CreateApplicationRequest, idempotencyKey string) (sdktypes.ApplicationsCreateResponse201, error) {
+    headers := BuildRequestHeaders(
+        map[string]ParameterSpec{"Idempotency-Key": ParameterSpec{Value: idempotencyKey, Style: "simple", Explode: false},},
+        map[string]ParameterSpec{},
+    )
+    raw, err := a.client.Post(BackendApiPath("/applications"), body, nil, headers, "application/json")
     if err != nil {
         var zero sdktypes.ApplicationsCreateResponse201
         return zero, err
@@ -56,8 +60,12 @@ func (a *ApplicationApi) ApplicationsRetrieve(applicationId string) (sdktypes.Ap
 }
 
 // Update a managed application
-func (a *ApplicationApi) ApplicationsUpdate(applicationId string, body sdktypes.UpdateApplicationRequest) (sdktypes.ApplicationsUpdateResponse, error) {
-    raw, err := a.client.Patch(BackendApiPath(fmt.Sprintf("/applications/%s", SerializePathParameter(applicationId, PathParameterSpec{Name: "applicationId", Style: "simple", Explode: false}))), body, nil, nil, "application/json")
+func (a *ApplicationApi) ApplicationsUpdate(applicationId string, body sdktypes.UpdateApplicationRequest, idempotencyKey string) (sdktypes.ApplicationsUpdateResponse, error) {
+    headers := BuildRequestHeaders(
+        map[string]ParameterSpec{"Idempotency-Key": ParameterSpec{Value: idempotencyKey, Style: "simple", Explode: false},},
+        map[string]ParameterSpec{},
+    )
+    raw, err := a.client.Patch(BackendApiPath(fmt.Sprintf("/applications/%s", SerializePathParameter(applicationId, PathParameterSpec{Name: "applicationId", Style: "simple", Explode: false}))), body, nil, headers, "application/json")
     if err != nil {
         var zero sdktypes.ApplicationsUpdateResponse
         return zero, err
@@ -66,8 +74,12 @@ func (a *ApplicationApi) ApplicationsUpdate(applicationId string, body sdktypes.
 }
 
 // Delete a managed application
-func (a *ApplicationApi) ApplicationsDelete(applicationId string) (struct{}, error) {
-    raw, err := a.client.Delete(BackendApiPath(fmt.Sprintf("/applications/%s", SerializePathParameter(applicationId, PathParameterSpec{Name: "applicationId", Style: "simple", Explode: false}))), nil, nil)
+func (a *ApplicationApi) ApplicationsDelete(applicationId string, idempotencyKey string) (struct{}, error) {
+    headers := BuildRequestHeaders(
+        map[string]ParameterSpec{"Idempotency-Key": ParameterSpec{Value: idempotencyKey, Style: "simple", Explode: false},},
+        map[string]ParameterSpec{},
+    )
+    raw, err := a.client.Delete(BackendApiPath(fmt.Sprintf("/applications/%s", SerializePathParameter(applicationId, PathParameterSpec{Name: "applicationId", Style: "simple", Explode: false}))), nil, headers)
     if err != nil {
         var zero struct{}
         return zero, err
@@ -76,8 +88,12 @@ func (a *ApplicationApi) ApplicationsDelete(applicationId string) (struct{}, err
 }
 
 // Activate a managed application
-func (a *ApplicationApi) ApplicationsActivate(applicationId string) (sdktypes.ApplicationsActivateResponse, error) {
-    raw, err := a.client.Post(BackendApiPath(fmt.Sprintf("/applications/%s/activate", SerializePathParameter(applicationId, PathParameterSpec{Name: "applicationId", Style: "simple", Explode: false}))), nil, nil, nil, "")
+func (a *ApplicationApi) ApplicationsActivate(applicationId string, idempotencyKey string) (sdktypes.ApplicationsActivateResponse, error) {
+    headers := BuildRequestHeaders(
+        map[string]ParameterSpec{"Idempotency-Key": ParameterSpec{Value: idempotencyKey, Style: "simple", Explode: false},},
+        map[string]ParameterSpec{},
+    )
+    raw, err := a.client.Post(BackendApiPath(fmt.Sprintf("/applications/%s/activate", SerializePathParameter(applicationId, PathParameterSpec{Name: "applicationId", Style: "simple", Explode: false}))), nil, nil, headers, "")
     if err != nil {
         var zero sdktypes.ApplicationsActivateResponse
         return zero, err
@@ -86,8 +102,12 @@ func (a *ApplicationApi) ApplicationsActivate(applicationId string) (sdktypes.Ap
 }
 
 // Pause a managed application
-func (a *ApplicationApi) ApplicationsPause(applicationId string) (sdktypes.ApplicationsPauseResponse, error) {
-    raw, err := a.client.Post(BackendApiPath(fmt.Sprintf("/applications/%s/pause", SerializePathParameter(applicationId, PathParameterSpec{Name: "applicationId", Style: "simple", Explode: false}))), nil, nil, nil, "")
+func (a *ApplicationApi) ApplicationsPause(applicationId string, idempotencyKey string) (sdktypes.ApplicationsPauseResponse, error) {
+    headers := BuildRequestHeaders(
+        map[string]ParameterSpec{"Idempotency-Key": ParameterSpec{Value: idempotencyKey, Style: "simple", Explode: false},},
+        map[string]ParameterSpec{},
+    )
+    raw, err := a.client.Post(BackendApiPath(fmt.Sprintf("/applications/%s/pause", SerializePathParameter(applicationId, PathParameterSpec{Name: "applicationId", Style: "simple", Explode: false}))), nil, nil, headers, "")
     if err != nil {
         var zero sdktypes.ApplicationsPauseResponse
         return zero, err
@@ -321,7 +341,92 @@ func EncodeQueryValue(value string, allowReserved bool) string {
 }
 
 
+type ParameterSpec struct {
+    Value       interface{}
+    Style       string
+    Explode     bool
+    ContentType string
+}
 
+func BuildRequestHeaders(headers map[string]ParameterSpec, cookies map[string]ParameterSpec) map[string]string {
+    requestHeaders := map[string]string{}
+    for name, parameter := range headers {
+        if serialized, ok := SerializeParameterValue(parameter); ok {
+            requestHeaders[name] = serialized
+        }
+    }
+
+    if cookieHeader := BuildCookieHeader(cookies); cookieHeader != "" {
+        if existing, ok := requestHeaders["Cookie"]; ok && existing != "" {
+            requestHeaders["Cookie"] = existing + "; " + cookieHeader
+        } else {
+            requestHeaders["Cookie"] = cookieHeader
+        }
+    }
+
+    if len(requestHeaders) == 0 {
+        return nil
+    }
+    return requestHeaders
+}
+
+func BuildCookieHeader(cookies map[string]ParameterSpec) string {
+    pairs := make([]string, 0, len(cookies))
+    for name, parameter := range cookies {
+        if serialized, ok := SerializeParameterValue(parameter); ok {
+            pairs = append(pairs, url.QueryEscape(name)+"="+url.QueryEscape(serialized))
+        }
+    }
+    return strings.Join(pairs, "; ")
+}
+
+func SerializeParameterValue(parameter ParameterSpec) (string, bool) {
+    value := parameter.Value
+    if value == nil {
+        return "", false
+    }
+    if parameter.ContentType != "" {
+        encoded, _ := json.Marshal(value)
+        return string(encoded), true
+    }
+    switch typed := value.(type) {
+    case string:
+        return typed, true
+    case fmt.Stringer:
+        return typed.String(), true
+    case []string:
+        return strings.Join(typed, ","), true
+    case []int:
+        values := make([]string, 0, len(typed))
+        for _, item := range typed {
+            values = append(values, fmt.Sprint(item))
+        }
+        return strings.Join(values, ","), true
+    case map[string]string:
+        return SerializeHeaderObject(stringMapToInterface(typed), parameter.Explode), true
+    case map[string]int:
+        return SerializeHeaderObject(intMapToInterface(typed), parameter.Explode), true
+    case map[string]interface{}:
+        return SerializeHeaderObject(typed, parameter.Explode), true
+    default:
+        return fmt.Sprint(value), true
+    }
+}
+
+func SerializeHeaderObject(values map[string]interface{}, explode bool) string {
+    serialized := make([]string, 0, len(values)*2)
+    for key, value := range values {
+        if value == nil {
+            continue
+        }
+        if explode {
+            serialized = append(serialized, key+"="+fmt.Sprint(value))
+        } else {
+            serialized = append(serialized, key, fmt.Sprint(value))
+        }
+    }
+    return strings.Join(serialized, ",")
+}
 func stringSliceToInterface(values []string) []interface{} {
     result := make([]interface{}, 0, len(values))
     for _, value := range values {

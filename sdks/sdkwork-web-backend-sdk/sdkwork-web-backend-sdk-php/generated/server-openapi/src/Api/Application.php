@@ -33,11 +33,18 @@ final class ApplicationApi extends BaseApi
     }
 
     /** Create a managed application */
-    public function applicationsCreate(array|CreateApplicationRequest $body): ?ApplicationsCreateResponse201
+    public function applicationsCreate(array|CreateApplicationRequest $body, string $idempotencyKey): ?ApplicationsCreateResponse201
     {
         $path = '/backend/v3/api/applications';
         $payload = $body instanceof CreateApplicationRequest ? $body->toArray() : $body;
+        $requestHeaders = $this->buildRequestHeaders(
+            [
+                'Idempotency-Key' => new HeaderParameterSpec($idempotencyKey, 'simple', false, null),
+            ],
+            []
+        );
         $result = $this->client->request('POST', $path, [
+            'headers' => $requestHeaders,
             'json' => $payload,
         ]);
         return is_array($result) ? ApplicationsCreateResponse201::fromArray($result) : null;
@@ -52,38 +59,134 @@ final class ApplicationApi extends BaseApi
     }
 
     /** Update a managed application */
-    public function applicationsUpdate(string $applicationId, array|UpdateApplicationRequest $body): ?ApplicationsUpdateResponse
+    public function applicationsUpdate(string $applicationId, array|UpdateApplicationRequest $body, string $idempotencyKey): ?ApplicationsUpdateResponse
     {
         $path = $this->interpolatePath('/backend/v3/api/applications/{applicationId}', ['applicationId' => $this->serializePathParameter($applicationId, new PathParameterSpec('applicationId', 'simple', false))]);
         $payload = $body instanceof UpdateApplicationRequest ? $body->toArray() : $body;
+        $requestHeaders = $this->buildRequestHeaders(
+            [
+                'Idempotency-Key' => new HeaderParameterSpec($idempotencyKey, 'simple', false, null),
+            ],
+            []
+        );
         $result = $this->client->request('PATCH', $path, [
+            'headers' => $requestHeaders,
             'json' => $payload,
         ]);
         return is_array($result) ? ApplicationsUpdateResponse::fromArray($result) : null;
     }
 
     /** Delete a managed application */
-    public function applicationsDelete(string $applicationId): mixed
+    public function applicationsDelete(string $applicationId, string $idempotencyKey): mixed
     {
         $path = $this->interpolatePath('/backend/v3/api/applications/{applicationId}', ['applicationId' => $this->serializePathParameter($applicationId, new PathParameterSpec('applicationId', 'simple', false))]);
-        $result = $this->client->request('DELETE', $path, []);
+        $requestHeaders = $this->buildRequestHeaders(
+            [
+                'Idempotency-Key' => new HeaderParameterSpec($idempotencyKey, 'simple', false, null),
+            ],
+            []
+        );
+        $result = $this->client->request('DELETE', $path, [
+            'headers' => $requestHeaders,
+        ]);
         return $result;
     }
 
     /** Activate a managed application */
-    public function applicationsActivate(string $applicationId): ?ApplicationsActivateResponse
+    public function applicationsActivate(string $applicationId, string $idempotencyKey): ?ApplicationsActivateResponse
     {
         $path = $this->interpolatePath('/backend/v3/api/applications/{applicationId}/activate', ['applicationId' => $this->serializePathParameter($applicationId, new PathParameterSpec('applicationId', 'simple', false))]);
-        $result = $this->client->request('POST', $path, []);
+        $requestHeaders = $this->buildRequestHeaders(
+            [
+                'Idempotency-Key' => new HeaderParameterSpec($idempotencyKey, 'simple', false, null),
+            ],
+            []
+        );
+        $result = $this->client->request('POST', $path, [
+            'headers' => $requestHeaders,
+        ]);
         return is_array($result) ? ApplicationsActivateResponse::fromArray($result) : null;
     }
 
     /** Pause a managed application */
-    public function applicationsPause(string $applicationId): ?ApplicationsPauseResponse
+    public function applicationsPause(string $applicationId, string $idempotencyKey): ?ApplicationsPauseResponse
     {
         $path = $this->interpolatePath('/backend/v3/api/applications/{applicationId}/pause', ['applicationId' => $this->serializePathParameter($applicationId, new PathParameterSpec('applicationId', 'simple', false))]);
-        $result = $this->client->request('POST', $path, []);
+        $requestHeaders = $this->buildRequestHeaders(
+            [
+                'Idempotency-Key' => new HeaderParameterSpec($idempotencyKey, 'simple', false, null),
+            ],
+            []
+        );
+        $result = $this->client->request('POST', $path, [
+            'headers' => $requestHeaders,
+        ]);
         return is_array($result) ? ApplicationsPauseResponse::fromArray($result) : null;
     }
 
+    private function buildRequestHeaders(array $headers, array $cookies): array
+    {
+        $requestHeaders = [];
+        foreach ($headers as $name => $parameter) {
+            $serialized = $this->serializeParameterValue($parameter);
+            if ($serialized !== null) {
+                $requestHeaders[(string) $name] = $serialized;
+            }
+        }
+
+        $cookieHeader = $this->buildCookieHeader($cookies);
+        if ($cookieHeader !== '') {
+            $requestHeaders['Cookie'] = isset($requestHeaders['Cookie']) && $requestHeaders['Cookie'] !== ''
+                ? $requestHeaders['Cookie'] . '; ' . $cookieHeader
+                : $cookieHeader;
+        }
+
+        return $requestHeaders;
+    }
+
+    private function buildCookieHeader(array $cookies): string
+    {
+        $pairs = [];
+        foreach ($cookies as $name => $parameter) {
+            $serialized = $this->serializeParameterValue($parameter);
+            if ($serialized !== null) {
+                $pairs[] = rawurlencode((string) $name) . '=' . rawurlencode($serialized);
+            }
+        }
+
+        return implode('; ', $pairs);
+    }
+
+    private function serializeParameterValue(?HeaderParameterSpec $parameter): ?string
+    {
+        $value = $parameter?->value;
+        if ($value === null) {
+            return null;
+        }
+        if ($parameter->contentType !== null && trim($parameter->contentType) !== '') {
+            return (string) json_encode($value, JSON_UNESCAPED_SLASHES);
+        }
+        if (is_array($value)) {
+            $serialized = [];
+            foreach ($value as $key => $item) {
+                if ($item === null) {
+                    continue;
+                }
+                if (!array_is_list($value) && $parameter->explode) {
+                    $serialized[] = (string) $key . '=' . (string) $item;
+                } elseif (!array_is_list($value)) {
+                    $serialized[] = (string) $key;
+                    $serialized[] = (string) $item;
+                } else {
+                    $serialized[] = (string) $item;
+                }
+            }
+            return implode(',', $serialized);
+        }
+        if ($value instanceof \Stringable) {
+            return (string) $value;
+        }
+
+        return (string) $value;
+    }
 }

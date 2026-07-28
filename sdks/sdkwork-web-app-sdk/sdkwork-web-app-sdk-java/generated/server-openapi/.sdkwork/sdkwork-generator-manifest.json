@@ -48,23 +48,23 @@
     },
     {
       "path": "src/main/java/com/sdkwork/web/app/sdk/api/CertificateApi.java",
-      "sha256": "07770024db4ecfdeee17140d000499cfb2a0c6f08cbd2571759df6f1dac64c23"
+      "sha256": "d839b24746799710044103abdc87226b0bd5555a8d2853f06432895fa795d2d1"
     },
     {
       "path": "src/main/java/com/sdkwork/web/app/sdk/api/DeploymentApi.java",
-      "sha256": "ccb0c39357343ed5ccfc8220d3a5859aff6fe9da0c8c8fbef40f9d5114837bc3"
+      "sha256": "05b32ec78c48290e053d23cc6124ff54d8287cc6afa0a084424147fea1893177"
     },
     {
       "path": "src/main/java/com/sdkwork/web/app/sdk/api/DomainApi.java",
-      "sha256": "e0accc076e0e2f88d8b029d90be26a0e5e93c5c6641aa062c5604d3f11f1a992"
+      "sha256": "abbba74963e641bba373bf8e98f78f9611d3b9c10e6b2086b02271c7e9bebd0f"
     },
     {
       "path": "src/main/java/com/sdkwork/web/app/sdk/api/EnvVariableApi.java",
-      "sha256": "0c28a660f8f752d23ff5be81f00af0a9cebfca6e3fabff75fd38e527b5df0dd9"
+      "sha256": "10ec7dcff700bca1ca846b63b99593b4231350ccc6670027e5e188070fe6446b"
     },
     {
       "path": "src/main/java/com/sdkwork/web/app/sdk/api/MonitorApi.java",
-      "sha256": "ab64095887a8cee187778b7d4f64d59e165153a181cb8dc2a10aba4b617c4549"
+      "sha256": "89515a1594216f12df2c5f7b649ae700b63781d6d45915bbe37bd595886d436e"
     },
     {
       "path": "src/main/java/com/sdkwork/web/app/sdk/api/package-info.java",
@@ -72,7 +72,7 @@
     },
     {
       "path": "src/main/java/com/sdkwork/web/app/sdk/api/SiteApi.java",
-      "sha256": "129b37de19cfbb08dc141e1c79fe512bab009d16e42ac707c239fcc47547e5e8"
+      "sha256": "0219f1d294575f60c621edb042bb1d21dae11b3adf127f3f38e38e15b8a6ec57"
     },
     {
       "path": "src/main/java/com/sdkwork/web/app/sdk/http/HttpClient.java",
@@ -100,7 +100,7 @@
     },
     {
       "path": "src/main/java/com/sdkwork/web/app/sdk/model/CreateDeploymentRequest.java",
-      "sha256": "5fcfc7b980a1878bdf3a43d8e089ab010a5c3c8877f7c3998dcf9adefbfcf13f"
+      "sha256": "0c1df7ecd12d3ca22a0564c0ba44bed88757b93afaef8f914d86e851a5cf92f9"
     },
     {
       "path": "src/main/java/com/sdkwork/web/app/sdk/model/CreateDomainRequest.java",

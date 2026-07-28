@@ -27,8 +27,12 @@ public class NginxApi {
     }
 
     /** Create an Nginx configuration */
-    public ConfigsCreateResponse201 configsCreate(CreateNginxConfigRequest body) throws Exception {
-        Object raw = client.post(ApiPaths.backendPath("/nginx/configs"), body, null, null, "application/json");
+    public ConfigsCreateResponse201 configsCreate(CreateNginxConfigRequest body, String idempotencyKey) throws Exception {
+        Map<String, String> requestHeaders = buildRequestHeaders(
+                Map.of("Idempotency-Key", new HeaderParameterSpec(idempotencyKey, "simple", false, null)),
+                Map.of()
+        );
+        Object raw = client.post(ApiPaths.backendPath("/nginx/configs"), body, null, requestHeaders, "application/json");
         return client.convertValue(raw, new TypeReference<ConfigsCreateResponse201>() {});
     }
 
@@ -39,8 +43,12 @@ public class NginxApi {
     }
 
     /** Update an Nginx configuration */
-    public ConfigsUpdateResponse configsUpdate(String configId, UpdateNginxConfigRequest body) throws Exception {
-        Object raw = client.put(ApiPaths.backendPath("/nginx/etc/" + serializePathParameter(configId, new PathParameterSpec("configId", "simple", false)) + ""), body, null, null, "application/json");
+    public ConfigsUpdateResponse configsUpdate(String configId, UpdateNginxConfigRequest body, String idempotencyKey) throws Exception {
+        Map<String, String> requestHeaders = buildRequestHeaders(
+                Map.of("Idempotency-Key", new HeaderParameterSpec(idempotencyKey, "simple", false, null)),
+                Map.of()
+        );
+        Object raw = client.put(ApiPaths.backendPath("/nginx/etc/" + serializePathParameter(configId, new PathParameterSpec("configId", "simple", false)) + ""), body, null, requestHeaders, "application/json");
         return client.convertValue(raw, new TypeReference<ConfigsUpdateResponse>() {});
     }
 
@@ -51,14 +59,22 @@ public class NginxApi {
     }
 
     /** Deploy an Nginx configuration */
-    public ConfigsDeployResponse configsDeploy(String configId) throws Exception {
-        Object raw = client.post(ApiPaths.backendPath("/nginx/etc/" + serializePathParameter(configId, new PathParameterSpec("configId", "simple", false)) + "/deploy"), null);
+    public ConfigsDeployResponse configsDeploy(String configId, String idempotencyKey) throws Exception {
+        Map<String, String> requestHeaders = buildRequestHeaders(
+                Map.of("Idempotency-Key", new HeaderParameterSpec(idempotencyKey, "simple", false, null)),
+                Map.of()
+        );
+        Object raw = client.post(ApiPaths.backendPath("/nginx/etc/" + serializePathParameter(configId, new PathParameterSpec("configId", "simple", false)) + "/deploy"), null, null, requestHeaders);
         return client.convertValue(raw, new TypeReference<ConfigsDeployResponse>() {});
     }
 
     /** Reload Nginx */
-    public ReloadResponse reload() throws Exception {
-        Object raw = client.post(ApiPaths.backendPath("/nginx/reload"), null);
+    public ReloadResponse reload(String idempotencyKey) throws Exception {
+        Map<String, String> requestHeaders = buildRequestHeaders(
+                Map.of("Idempotency-Key", new HeaderParameterSpec(idempotencyKey, "simple", false, null)),
+                Map.of()
+        );
+        Object raw = client.post(ApiPaths.backendPath("/nginx/reload"), null, null, requestHeaders);
         return client.convertValue(raw, new TypeReference<ReloadResponse>() {});
     }
 
@@ -257,6 +273,74 @@ public class NginxApi {
         return new com.fasterxml.jackson.databind.ObjectMapper();
     }
 
+    private record HeaderParameterSpec(Object value, String style, boolean explode, String contentType) {}
+
+    private static Map<String, String> buildRequestHeaders(Map<String, HeaderParameterSpec> headers, Map<String, HeaderParameterSpec> cookies) throws Exception {
+        Map<String, String> requestHeaders = new java.util.LinkedHashMap<>();
+        for (Map.Entry<String, HeaderParameterSpec> entry : headers.entrySet()) {
+            String serialized = serializeParameterValue(entry.getValue());
+            if (serialized != null) {
+                requestHeaders.put(entry.getKey(), serialized);
+            }
+        }
+
+        String cookieHeader = buildCookieHeader(cookies);
+        if (cookieHeader != null && !cookieHeader.isEmpty()) {
+            requestHeaders.merge("Cookie", cookieHeader, (left, right) -> left + "; " + right);
+        }
+
+        return requestHeaders.isEmpty() ? null : requestHeaders;
+    }
+
+    private static String buildCookieHeader(Map<String, HeaderParameterSpec> cookies) throws Exception {
+        java.util.List<String> pairs = new java.util.ArrayList<>();
+        for (Map.Entry<String, HeaderParameterSpec> entry : cookies.entrySet()) {
+            String serialized = serializeParameterValue(entry.getValue());
+            if (serialized != null) {
+                pairs.add(urlEncode(entry.getKey()) + "=" + urlEncode(serialized));
+            }
+        }
+        return String.join("; ", pairs);
+    }
+
+    private static String serializeParameterValue(HeaderParameterSpec parameter) throws Exception {
+        if (parameter == null || parameter.value() == null) {
+            return null;
+        }
+        Object value = parameter.value();
+        if (parameter.contentType() != null && !parameter.contentType().isBlank()) {
+            return headerObjectMapper().writeValueAsString(value);
+        }
+        if (value instanceof Iterable<?> iterable) {
+            java.util.List<String> values = new java.util.ArrayList<>();
+            for (Object item : iterable) {
+                if (item != null) {
+                    values.add(String.valueOf(item));
+                }
+            }
+            return String.join(",", values);
+        }
+        if (value instanceof Map<?, ?> map) {
+            java.util.List<String> values = new java.util.ArrayList<>();
+            map.forEach((key, item) -> {
+                if (item == null) {
+                    return;
+                }
+                if (parameter.explode()) {
+                    values.add(String.valueOf(key) + "=" + String.valueOf(item));
+                } else {
+                    values.add(String.valueOf(key));
+                    values.add(String.valueOf(item));
+                }
+            });
+            return String.join(",", values);
+        }
+        return String.valueOf(value);
+    }
+
+    private static com.fasterxml.jackson.databind.ObjectMapper headerObjectMapper() {
+        return new com.fasterxml.jackson.databind.ObjectMapper();
+    }
 
     private static String urlEncode(String value) {
         return java.net.URLEncoder.encode(value, java.nio.charset.StandardCharsets.UTF_8);

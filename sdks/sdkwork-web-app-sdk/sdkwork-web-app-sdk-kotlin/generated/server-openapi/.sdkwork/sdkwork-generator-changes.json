@@ -9,11 +9,17 @@
     "protocol": "http",
     "packageName": "com.sdkwork:sdkwork-web-app-sdk"
   },
-  "changeFingerprint": "155dd566fb9a9825bacc08b485e4c9a0f88e2054a671259275c9f3560a7b6e89",
+  "changeFingerprint": "c33f3a72796bcaa56cf2caeff72b65aa23fe6200047d3c293187b2cf3651adeb",
   "changes": {
     "createdGeneratedFiles": [],
     "updatedGeneratedFiles": [
-      "src/main/kotlin/com/sdkwork/web/app/sdk/CertificateResponse.kt"
+      "src/main/kotlin/com/sdkwork/web/app/sdk/api/CertificateApi.kt",
+      "src/main/kotlin/com/sdkwork/web/app/sdk/api/DeploymentApi.kt",
+      "src/main/kotlin/com/sdkwork/web/app/sdk/api/DomainApi.kt",
+      "src/main/kotlin/com/sdkwork/web/app/sdk/api/EnvVariableApi.kt",
+      "src/main/kotlin/com/sdkwork/web/app/sdk/api/MonitorApi.kt",
+      "src/main/kotlin/com/sdkwork/web/app/sdk/api/SiteApi.kt",
+      "src/main/kotlin/com/sdkwork/web/app/sdk/CreateDeploymentRequest.kt"
     ],
     "unchangedGeneratedFiles": [
       "bin/publish-core.mjs",
@@ -27,17 +33,11 @@
       "settings.gradle.kts",
       "src/main/kotlin/com/sdkwork/web/app/sdk/api/Api.kt",
       "src/main/kotlin/com/sdkwork/web/app/sdk/api/ApiPaths.kt",
-      "src/main/kotlin/com/sdkwork/web/app/sdk/api/CertificateApi.kt",
-      "src/main/kotlin/com/sdkwork/web/app/sdk/api/DeploymentApi.kt",
-      "src/main/kotlin/com/sdkwork/web/app/sdk/api/DomainApi.kt",
-      "src/main/kotlin/com/sdkwork/web/app/sdk/api/EnvVariableApi.kt",
-      "src/main/kotlin/com/sdkwork/web/app/sdk/api/MonitorApi.kt",
-      "src/main/kotlin/com/sdkwork/web/app/sdk/api/SiteApi.kt",
       "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatePage.kt",
+      "src/main/kotlin/com/sdkwork/web/app/sdk/CertificateResponse.kt",
       "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatesCreateResponse201.kt",
       "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatesListResponse.kt",
       "src/main/kotlin/com/sdkwork/web/app/sdk/CreateCertificateRequest.kt",
-      "src/main/kotlin/com/sdkwork/web/app/sdk/CreateDeploymentRequest.kt",
       "src/main/kotlin/com/sdkwork/web/app/sdk/CreateDomainRequest.kt",
       "src/main/kotlin/com/sdkwork/web/app/sdk/CreateEnvVariableRequest.kt",
       "src/main/kotlin/com/sdkwork/web/app/sdk/CreateHealthCheckRequest.kt",
@@ -95,29 +95,41 @@
   "impact": {
     "schemaVersion": 1,
     "areas": [
+      "api-surface",
       "unknown"
     ],
     "details": [
       {
+        "area": "api-surface",
+        "paths": [
+          "src/main/kotlin/com/sdkwork/web/app/sdk/api/CertificateApi.kt",
+          "src/main/kotlin/com/sdkwork/web/app/sdk/api/DeploymentApi.kt",
+          "src/main/kotlin/com/sdkwork/web/app/sdk/api/DomainApi.kt",
+          "src/main/kotlin/com/sdkwork/web/app/sdk/api/EnvVariableApi.kt",
+          "src/main/kotlin/com/sdkwork/web/app/sdk/api/MonitorApi.kt",
+          "src/main/kotlin/com/sdkwork/web/app/sdk/api/SiteApi.kt"
+        ]
+      },
+      {
         "area": "unknown",
         "paths": [
-          "src/main/kotlin/com/sdkwork/web/app/sdk/CertificateResponse.kt"
+          "src/main/kotlin/com/sdkwork/web/app/sdk/CreateDeploymentRequest.kt"
         ]
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: unknown. Verification is required."
+    "summary": "Detected impact areas: api-surface, unknown. Verification is required."
   },
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: unknown. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: api-surface, unknown. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: unknown.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, unknown.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-kotlin\\generated\\server-openapi",
         "command": "node",
         "args": [

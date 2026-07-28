@@ -13,4 +13,3 @@ class CreateDeploymentRequest:
     artifact_size: Optional[str] = None
     artifact_hash: Optional[str] = None
     environment: Optional[str] = None
-    idempotency_key: Optional[str] = None

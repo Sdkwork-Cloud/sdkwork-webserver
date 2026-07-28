@@ -9,23 +9,25 @@
     "protocol": "http",
     "packageName": "github.com/sdkwork/sdkwork-web-backend-sdk"
   },
-  "changeFingerprint": "8fe9d86e18a402d0d22c0b4bc891f654890353c97d02bd9745ffa94881331206",
+  "changeFingerprint": "eb5fbf7ece690956d7152a7b7379c2214222a5897d0c77adc01001b1a317cd67",
   "changes": {
     "createdGeneratedFiles": [],
-    "updatedGeneratedFiles": [],
-    "unchangedGeneratedFiles": [
-      "api/agent.go",
+    "updatedGeneratedFiles": [
       "api/application_deployment.go",
       "api/application_domain.go",
       "api/application.go",
+      "api/certificate.go",
+      "api/nginx.go",
+      "api/server.go",
+      "types/create_application_deployment_request.go"
+    ],
+    "unchangedGeneratedFiles": [
+      "api/agent.go",
       "api/audit.go",
       "api/base.go",
       "api/certificate_distribution.go",
-      "api/certificate.go",
       "api/doc.go",
-      "api/nginx.go",
       "api/paths.go",
-      "api/server.go",
       "bin/publish-core.mjs",
       "bin/publish.ps1",
       "bin/publish.sh",
@@ -76,7 +78,6 @@
       "types/configs_retrieve_response.go",
       "types/configs_update_response.go",
       "types/configs_validate_response.go",
-      "types/create_application_deployment_request.go",
       "types/create_application_domain_request.go",
       "types/create_application_request.go",
       "types/create_certificate_request.go",
@@ -122,26 +123,66 @@
   },
   "impact": {
     "schemaVersion": 1,
-    "areas": [],
-    "details": [],
-    "requiresVerification": false,
-    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
+    "areas": [
+      "api-surface",
+      "models"
+    ],
+    "details": [
+      {
+        "area": "api-surface",
+        "paths": [
+          "api/application_deployment.go",
+          "api/application_domain.go",
+          "api/application.go",
+          "api/certificate.go",
+          "api/nginx.go",
+          "api/server.go"
+        ]
+      },
+      {
+        "area": "models",
+        "paths": [
+          "types/create_application_deployment_request.go"
+        ]
+      }
+    ],
+    "requiresVerification": true,
+    "summary": "Detected impact areas: api-surface, models. Verification is required."
   },
   "verificationPlan": {
-    "shouldRun": false,
-    "runPhase": "skip",
-    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
-    "steps": []
+    "shouldRun": true,
+    "runPhase": "now",
+    "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "steps": [
+      {
+        "id": "check",
+        "title": "Unified package check",
+        "required": true,
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
+        "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-go\\generated\\server-openapi",
+        "command": "node",
+        "args": [
+          "./bin/publish-core.mjs",
+          "--language",
+          "go",
+          "--project-dir",
+          ".",
+          "--action",
+          "check"
+        ],
+        "displayCommand": "node ./bin/publish-core.mjs --language go --project-dir . --action check"
+      }
+    ]
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "low",
-    "nextAction": "skip",
+    "riskLevel": "medium",
+    "nextAction": "verify",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
-    "summary": "No actionable changes were detected. No apply or verification step is required.",
+    "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
-      "no-actionable-changes"
+      "verification-required"
     ]
   },
   "preservedLegacyFiles": false

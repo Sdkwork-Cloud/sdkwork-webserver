@@ -35,8 +35,12 @@ func (a *NginxApi) ConfigsList(page *int, pageSize *int, siteId *string, configT
 }
 
 // Create an Nginx configuration
-func (a *NginxApi) ConfigsCreate(body sdktypes.CreateNginxConfigRequest) (sdktypes.ConfigsCreateResponse201, error) {
-    raw, err := a.client.Post(BackendApiPath("/nginx/configs"), body, nil, nil, "application/json")
+func (a *NginxApi) ConfigsCreate(body sdktypes.CreateNginxConfigRequest, idempotencyKey string) (sdktypes.ConfigsCreateResponse201, error) {
+    headers := BuildRequestHeaders(
+        map[string]ParameterSpec{"Idempotency-Key": ParameterSpec{Value: idempotencyKey, Style: "simple", Explode: false},},
+        map[string]ParameterSpec{},
+    )
+    raw, err := a.client.Post(BackendApiPath("/nginx/configs"), body, nil, headers, "application/json")
     if err != nil {
         var zero sdktypes.ConfigsCreateResponse201
         return zero, err
@@ -55,8 +59,12 @@ func (a *NginxApi) ConfigsRetrieve(configId string) (sdktypes.ConfigsRetrieveRes
 }
 
 // Update an Nginx configuration
-func (a *NginxApi) ConfigsUpdate(configId string, body sdktypes.UpdateNginxConfigRequest) (sdktypes.ConfigsUpdateResponse, error) {
-    raw, err := a.client.Put(BackendApiPath(fmt.Sprintf("/nginx/etc/%s", SerializePathParameter(configId, PathParameterSpec{Name: "configId", Style: "simple", Explode: false}))), body, nil, nil, "application/json")
+func (a *NginxApi) ConfigsUpdate(configId string, body sdktypes.UpdateNginxConfigRequest, idempotencyKey string) (sdktypes.ConfigsUpdateResponse, error) {
+    headers := BuildRequestHeaders(
+        map[string]ParameterSpec{"Idempotency-Key": ParameterSpec{Value: idempotencyKey, Style: "simple", Explode: false},},
+        map[string]ParameterSpec{},
+    )
+    raw, err := a.client.Put(BackendApiPath(fmt.Sprintf("/nginx/etc/%s", SerializePathParameter(configId, PathParameterSpec{Name: "configId", Style: "simple", Explode: false}))), body, nil, headers, "application/json")
     if err != nil {
         var zero sdktypes.ConfigsUpdateResponse
         return zero, err
@@ -75,8 +83,12 @@ func (a *NginxApi) ConfigsValidate(configId string) (sdktypes.ConfigsValidateRes
 }
 
 // Deploy an Nginx configuration
-func (a *NginxApi) ConfigsDeploy(configId string) (sdktypes.ConfigsDeployResponse, error) {
-    raw, err := a.client.Post(BackendApiPath(fmt.Sprintf("/nginx/etc/%s/deploy", SerializePathParameter(configId, PathParameterSpec{Name: "configId", Style: "simple", Explode: false}))), nil, nil, nil, "")
+func (a *NginxApi) ConfigsDeploy(configId string, idempotencyKey string) (sdktypes.ConfigsDeployResponse, error) {
+    headers := BuildRequestHeaders(
+        map[string]ParameterSpec{"Idempotency-Key": ParameterSpec{Value: idempotencyKey, Style: "simple", Explode: false},},
+        map[string]ParameterSpec{},
+    )
+    raw, err := a.client.Post(BackendApiPath(fmt.Sprintf("/nginx/etc/%s/deploy", SerializePathParameter(configId, PathParameterSpec{Name: "configId", Style: "simple", Explode: false}))), nil, nil, headers, "")
     if err != nil {
         var zero sdktypes.ConfigsDeployResponse
         return zero, err
@@ -85,8 +97,12 @@ func (a *NginxApi) ConfigsDeploy(configId string) (sdktypes.ConfigsDeployRespons
 }
 
 // Reload Nginx
-func (a *NginxApi) Reload() (sdktypes.ReloadResponse, error) {
-    raw, err := a.client.Post(BackendApiPath("/nginx/reload"), nil, nil, nil, "")
+func (a *NginxApi) Reload(idempotencyKey string) (sdktypes.ReloadResponse, error) {
+    headers := BuildRequestHeaders(
+        map[string]ParameterSpec{"Idempotency-Key": ParameterSpec{Value: idempotencyKey, Style: "simple", Explode: false},},
+        map[string]ParameterSpec{},
+    )
+    raw, err := a.client.Post(BackendApiPath("/nginx/reload"), nil, nil, headers, "")
     if err != nil {
         var zero sdktypes.ReloadResponse
         return zero, err
@@ -330,7 +346,92 @@ func EncodeQueryValue(value string, allowReserved bool) string {
 }
 
 
+type ParameterSpec struct {
+    Value       interface{}
+    Style       string
+    Explode     bool
+    ContentType string
+}
 
+func BuildRequestHeaders(headers map[string]ParameterSpec, cookies map[string]ParameterSpec) map[string]string {
+    requestHeaders := map[string]string{}
+    for name, parameter := range headers {
+        if serialized, ok := SerializeParameterValue(parameter); ok {
+            requestHeaders[name] = serialized
+        }
+    }
+
+    if cookieHeader := BuildCookieHeader(cookies); cookieHeader != "" {
+        if existing, ok := requestHeaders["Cookie"]; ok && existing != "" {
+            requestHeaders["Cookie"] = existing + "; " + cookieHeader
+        } else {
+            requestHeaders["Cookie"] = cookieHeader
+        }
+    }
+
+    if len(requestHeaders) == 0 {
+        return nil
+    }
+    return requestHeaders
+}
+
+func BuildCookieHeader(cookies map[string]ParameterSpec) string {
+    pairs := make([]string, 0, len(cookies))
+    for name, parameter := range cookies {
+        if serialized, ok := SerializeParameterValue(parameter); ok {
+            pairs = append(pairs, url.QueryEscape(name)+"="+url.QueryEscape(serialized))
+        }
+    }
+    return strings.Join(pairs, "; ")
+}
+
+func SerializeParameterValue(parameter ParameterSpec) (string, bool) {
+    value := parameter.Value
+    if value == nil {
+        return "", false
+    }
+    if parameter.ContentType != "" {
+        encoded, _ := json.Marshal(value)
+        return string(encoded), true
+    }
+    switch typed := value.(type) {
+    case string:
+        return typed, true
+    case fmt.Stringer:
+        return typed.String(), true
+    case []string:
+        return strings.Join(typed, ","), true
+    case []int:
+        values := make([]string, 0, len(typed))
+        for _, item := range typed {
+            values = append(values, fmt.Sprint(item))
+        }
+        return strings.Join(values, ","), true
+    case map[string]string:
+        return SerializeHeaderObject(stringMapToInterface(typed), parameter.Explode), true
+    case map[string]int:
+        return SerializeHeaderObject(intMapToInterface(typed), parameter.Explode), true
+    case map[string]interface{}:
+        return SerializeHeaderObject(typed, parameter.Explode), true
+    default:
+        return fmt.Sprint(value), true
+    }
+}
+
+func SerializeHeaderObject(values map[string]interface{}, explode bool) string {
+    serialized := make([]string, 0, len(values)*2)
+    for key, value := range values {
+        if value == nil {
+            continue
+        }
+        if explode {
+            serialized = append(serialized, key+"="+fmt.Sprint(value))
+        } else {
+            serialized = append(serialized, key, fmt.Sprint(value))
+        }
+    }
+    return strings.Join(serialized, ",")
+}
 func stringSliceToInterface(values []string) []interface{} {
     result := make([]interface{}, 0, len(values))
     for _, value := range values {

@@ -60,15 +60,15 @@
     },
     {
       "path": "sdkwork_web_backend_sdk/api/application_deployment.py",
-      "sha256": "15bd971c6a86b6761ca3fd9b715171beba19906e9f6dc4f5b2d3fa8afa223bec"
+      "sha256": "b3db65807f6ecb69b7db6befe609e259df04080bb9732067606e9b14a85b2792"
     },
     {
       "path": "sdkwork_web_backend_sdk/api/application_domain.py",
-      "sha256": "52ec908929b2e028542cda0526f3755e5abca4aba02e85dd80ceea2fd737e11d"
+      "sha256": "1a7aa4486d9ea1c93ed2d9200756ede92a427aabbf47ff3ebbb3ffde1208dad7"
     },
     {
       "path": "sdkwork_web_backend_sdk/api/application.py",
-      "sha256": "f1ae2229b6b6802efb6e0e740ebbbe4782762641971fd20c69648f24632a6110"
+      "sha256": "33fec255d81002c5774a3af6e61333db988b978b5d7f24db9799e4a8740d02d1"
     },
     {
       "path": "sdkwork_web_backend_sdk/api/audit.py",
@@ -80,15 +80,15 @@
     },
     {
       "path": "sdkwork_web_backend_sdk/api/certificate.py",
-      "sha256": "151ca44b1d470097751ceadc3b4199a51d7c873977c5ea7c4f7721032cbca82f"
+      "sha256": "d018bc62bca395ed1022e6b578d3e6685999efb39d7c97395dd3bfabf4ff9932"
     },
     {
       "path": "sdkwork_web_backend_sdk/api/nginx.py",
-      "sha256": "303a8d822e073f868c65430427ad3ab448866635c85c524e845f5c5d3cffaf25"
+      "sha256": "dfa83a81c8afae93e1aaa5d196b77efdad8888fd08221b17b0d1cff68e67d02e"
     },
     {
       "path": "sdkwork_web_backend_sdk/api/server.py",
-      "sha256": "3b7213f7a5b521b9a100a38b12855fa294ef4e27505e5be9fd7444f1f8d6fe4c"
+      "sha256": "e2b4051e1f603100e8fd20181e763b62093094a52f8fa1b3fc057300a398b459"
     },
     {
       "path": "sdkwork_web_backend_sdk/client.py",
@@ -252,7 +252,7 @@
     },
     {
       "path": "sdkwork_web_backend_sdk/models/create_application_deployment_request.py",
-      "sha256": "fc809c823e7c453eecad643e9662df1be572f35fbb7f1c90e7332595ba3c3d19"
+      "sha256": "b210f4a607785e332bcf77c81fb0aea08af9d73557f4112624fd45549a2e90f9"
     },
     {
       "path": "sdkwork_web_backend_sdk/models/create_application_domain_request.py",

@@ -48,19 +48,19 @@
     },
     {
       "path": "src/api/certificate.rs",
-      "sha256": "4ab9f2863f89f068b14f2fd37559f3ad8bf79d319f4c2a2d76de992d8f8bb1cf"
+      "sha256": "784c00aa93de2965db3aae12b08c4ace8723f4dac9996a254daae2403eea61e6"
     },
     {
       "path": "src/api/deployment.rs",
-      "sha256": "7fd4085b0aafa2658fd7c69328ec4c372a5ade3edf17ef7c8bc94fe7ee6278ba"
+      "sha256": "95e30658717ded83c56f91ff49edebe44c33cc02f4ab19c25ecfb4227e5af5e3"
     },
     {
       "path": "src/api/domain.rs",
-      "sha256": "3d8a46bfebbc1158a353b1c52a8469fa543c9d7aa7f2378dd3d1a6bd91e9d78e"
+      "sha256": "3b9077ec7471d46c714e40610e7e880dccd65d1e660d7f1b21d44e3e95373e7a"
     },
     {
       "path": "src/api/env_variable.rs",
-      "sha256": "b6ffc36e528065f88e4c8b471415beb3595e6fc2967c258b61b9d9eeee4896bd"
+      "sha256": "8855e0257fdbb4ebc412ff61bb6d145b8e70c787a6220e458af671c1d5bca96b"
     },
     {
       "path": "src/api/mod.rs",
@@ -68,7 +68,7 @@
     },
     {
       "path": "src/api/monitor.rs",
-      "sha256": "b272412a05f47e6492e78a0c6ee5b5622a573b3bc921868087372c1b9534f0f7"
+      "sha256": "547ca560b3f3a65ff75b9d74679e122c24a8b0ce0b74a1198a370177fcc7b11c"
     },
     {
       "path": "src/api/paths.rs",
@@ -76,7 +76,7 @@
     },
     {
       "path": "src/api/site.rs",
-      "sha256": "6af776a75f7c3de4521ef2df472a9344a98ec21d1dd9438a4e8481d5df922400"
+      "sha256": "fb4c81ce198abd0b68d566f8b492d759ef52b114073bc273a0e5d6f0c08457ae"
     },
     {
       "path": "src/client.rs",
@@ -120,7 +120,7 @@
     },
     {
       "path": "src/models/create_deployment_request.rs",
-      "sha256": "001a64d00301855671afba2c002c3d46abc8b60a7941124ad4087bb049d807f3"
+      "sha256": "95841ef8665cbe71f3a7c496a21625b4dbfe714f9ce21be02c35712f09aa3f6d"
     },
     {
       "path": "src/models/create_domain_request.rs",

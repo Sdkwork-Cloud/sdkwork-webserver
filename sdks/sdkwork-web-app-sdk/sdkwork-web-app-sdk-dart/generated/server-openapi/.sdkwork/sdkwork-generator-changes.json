@@ -9,10 +9,17 @@
     "protocol": "http",
     "packageName": "sdkwork_web_app_sdk"
   },
-  "changeFingerprint": "78da0ff4f69e30e00f855e33ab019600fd19e7ec77023e0c48e90e93315fbdaa",
+  "changeFingerprint": "0a2c41f1549904fbedc01f10672701141178468fede343531271d9a65ef3da0c",
   "changes": {
     "createdGeneratedFiles": [],
     "updatedGeneratedFiles": [
+      "lib/src/api/api.dart",
+      "lib/src/api/certificate.dart",
+      "lib/src/api/deployment.dart",
+      "lib/src/api/domain.dart",
+      "lib/src/api/env_variable.dart",
+      "lib/src/api/monitor.dart",
+      "lib/src/api/site.dart",
       "lib/src/models.dart"
     ],
     "unchangedGeneratedFiles": [
@@ -23,15 +30,8 @@
       "CHANGELOG.md",
       "lib/app_client.dart",
       "lib/sdkwork_web_app_sdk.dart",
-      "lib/src/api/api.dart",
-      "lib/src/api/certificate.dart",
-      "lib/src/api/deployment.dart",
-      "lib/src/api/domain.dart",
-      "lib/src/api/env_variable.dart",
-      "lib/src/api/monitor.dart",
       "lib/src/api/paths.dart",
       "lib/src/api/response_helpers.dart",
-      "lib/src/api/site.dart",
       "lib/src/http/client.dart",
       "lib/src/http/sdk_config.dart",
       "LICENSE",
@@ -49,9 +49,22 @@
   "impact": {
     "schemaVersion": 1,
     "areas": [
+      "api-surface",
       "models"
     ],
     "details": [
+      {
+        "area": "api-surface",
+        "paths": [
+          "lib/src/api/api.dart",
+          "lib/src/api/certificate.dart",
+          "lib/src/api/deployment.dart",
+          "lib/src/api/domain.dart",
+          "lib/src/api/env_variable.dart",
+          "lib/src/api/monitor.dart",
+          "lib/src/api/site.dart"
+        ]
+      },
       {
         "area": "models",
         "paths": [
@@ -60,18 +73,18 @@
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: models. Verification is required."
+    "summary": "Detected impact areas: api-surface, models. Verification is required."
   },
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-dart\\generated\\server-openapi",
         "command": "node",
         "args": [

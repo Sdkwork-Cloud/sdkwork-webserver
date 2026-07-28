@@ -12,22 +12,34 @@
   "mode": "apply",
   "hasChanges": true,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "b0a5c6e233131bd9cc3d627cd8e22bb3b15d9dfb3bdec579e80d9bdd56a36608",
+  "changeFingerprint": "9633e8561fb1971db6b92da046fabd194409446efc798ec08b983923461ef601",
   "changeImpact": {
     "schemaVersion": 1,
     "areas": [
+      "api-surface",
       "models"
     ],
     "details": [
       {
+        "area": "api-surface",
+        "paths": [
+          "src/api/certificate.rs",
+          "src/api/deployment.rs",
+          "src/api/domain.rs",
+          "src/api/env_variable.rs",
+          "src/api/monitor.rs",
+          "src/api/site.rs"
+        ]
+      },
+      {
         "area": "models",
         "paths": [
-          "src/models/certificate_response.rs"
+          "src/models/create_deployment_request.rs"
         ]
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: models. Verification is required."
+    "summary": "Detected impact areas: api-surface, models. Verification is required."
   },
   "executionDecision": {
     "schemaVersion": 1,
@@ -48,7 +60,7 @@
         "id": "verify-check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-rust\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -66,7 +78,7 @@
         "id": "verify-build",
         "title": "Unified package build",
         "required": true,
-        "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: models.",
+        "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: api-surface, models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-rust\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -85,13 +97,13 @@
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-rust\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -109,7 +121,7 @@
         "id": "build",
         "title": "Unified package build",
         "required": true,
-        "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: models.",
+        "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: api-surface, models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-rust\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -148,16 +160,22 @@
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 1,
+    "writtenFiles": 7,
     "skippedScaffoldFiles": 1,
-    "skippedUnchangedGeneratedFiles": 72,
+    "skippedUnchangedGeneratedFiles": 66,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "b0a5c6e233131bd9cc3d627cd8e22bb3b15d9dfb3bdec579e80d9bdd56a36608",
+    "changeFingerprint": "9633e8561fb1971db6b92da046fabd194409446efc798ec08b983923461ef601",
     "changes": {
       "createdGeneratedFiles": [],
       "updatedGeneratedFiles": [
-        "src/models/certificate_response.rs"
+        "src/api/certificate.rs",
+        "src/api/deployment.rs",
+        "src/api/domain.rs",
+        "src/api/env_variable.rs",
+        "src/api/monitor.rs",
+        "src/api/site.rs",
+        "src/models/create_deployment_request.rs"
       ],
       "unchangedGeneratedFiles": [
         "bin/publish-core.mjs",
@@ -169,24 +187,18 @@
         "README.md",
         "sdkwork-sdk.json",
         "src/api/base.rs",
-        "src/api/certificate.rs",
-        "src/api/deployment.rs",
-        "src/api/domain.rs",
-        "src/api/env_variable.rs",
         "src/api/mod.rs",
-        "src/api/monitor.rs",
         "src/api/paths.rs",
-        "src/api/site.rs",
         "src/client.rs",
         "src/http/client.rs",
         "src/http/mod.rs",
         "src/lib.rs",
         "src/models/certificate_page.rs",
+        "src/models/certificate_response.rs",
         "src/models/certificates_create_response201.rs",
         "src/models/certificates_list_response.rs",
         "src/models/common.rs",
         "src/models/create_certificate_request.rs",
-        "src/models/create_deployment_request.rs",
         "src/models/create_domain_request.rs",
         "src/models/create_env_variable_request.rs",
         "src/models/create_health_check_request.rs",
@@ -243,29 +255,41 @@
     "impact": {
       "schemaVersion": 1,
       "areas": [
+        "api-surface",
         "models"
       ],
       "details": [
         {
+          "area": "api-surface",
+          "paths": [
+            "src/api/certificate.rs",
+            "src/api/deployment.rs",
+            "src/api/domain.rs",
+            "src/api/env_variable.rs",
+            "src/api/monitor.rs",
+            "src/api/site.rs"
+          ]
+        },
+        {
           "area": "models",
           "paths": [
-            "src/models/certificate_response.rs"
+            "src/models/create_deployment_request.rs"
           ]
         }
       ],
       "requiresVerification": true,
-      "summary": "Detected impact areas: models. Verification is required."
+      "summary": "Detected impact areas: api-surface, models. Verification is required."
     },
     "verificationPlan": {
       "shouldRun": true,
       "runPhase": "now",
-      "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
+      "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
       "steps": [
         {
           "id": "check",
           "title": "Unified package check",
           "required": true,
-          "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
+          "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
           "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-rust\\generated\\server-openapi",
           "command": "node",
           "args": [
@@ -283,7 +307,7 @@
           "id": "build",
           "title": "Unified package build",
           "required": true,
-          "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: models.",
+          "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: api-surface, models.",
           "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-rust\\generated\\server-openapi",
           "command": "node",
           "args": [

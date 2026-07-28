@@ -14,6 +14,5 @@ namespace SDKWork.Web.AppSdk.Models
         public string? ArtifactSize { get; set; }
         public string? ArtifactHash { get; set; }
         public string? Environment { get; set; }
-        public string? IdempotencyKey { get; set; }
     }
 }

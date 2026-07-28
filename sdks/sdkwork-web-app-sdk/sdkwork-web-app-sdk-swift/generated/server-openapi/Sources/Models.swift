@@ -168,10 +168,9 @@ public struct CreateDeploymentRequest: Codable {
     public let artifactSize: String?
     public let artifactHash: String?
     public let environment: String?
-    public let idempotencyKey: String?
 
 
-    public init(deployType: Int? = nil, versionTag: String? = nil, commitHash: String? = nil, sourceRef: String? = nil, artifactDriveUri: String? = nil, artifactSize: String? = nil, artifactHash: String? = nil, environment: String? = nil, idempotencyKey: String? = nil) {
+    public init(deployType: Int? = nil, versionTag: String? = nil, commitHash: String? = nil, sourceRef: String? = nil, artifactDriveUri: String? = nil, artifactSize: String? = nil, artifactHash: String? = nil, environment: String? = nil) {
         self.deployType = deployType
         self.versionTag = versionTag
         self.commitHash = commitHash
@@ -180,7 +179,6 @@ public struct CreateDeploymentRequest: Codable {
         self.artifactSize = artifactSize
         self.artifactHash = artifactHash
         self.environment = environment
-        self.idempotencyKey = idempotencyKey
     }
 }
 

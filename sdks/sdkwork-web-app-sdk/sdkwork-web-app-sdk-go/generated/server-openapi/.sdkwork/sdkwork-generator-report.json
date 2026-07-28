@@ -12,22 +12,34 @@
   "mode": "apply",
   "hasChanges": true,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "7c62dfb35d7bc79a601501eb7e94370ac862ec3145d80048ea6a11a47e924b78",
+  "changeFingerprint": "269b07cb8f0f688d85ac37135ea7fd8fe5785ed22df17f64abb5a240ab489fa8",
   "changeImpact": {
     "schemaVersion": 1,
     "areas": [
+      "api-surface",
       "models"
     ],
     "details": [
       {
+        "area": "api-surface",
+        "paths": [
+          "api/certificate.go",
+          "api/deployment.go",
+          "api/domain.go",
+          "api/env_variable.go",
+          "api/monitor.go",
+          "api/site.go"
+        ]
+      },
+      {
         "area": "models",
         "paths": [
-          "types/certificate_response.go"
+          "types/create_deployment_request.go"
         ]
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: models. Verification is required."
+    "summary": "Detected impact areas: api-surface, models. Verification is required."
   },
   "executionDecision": {
     "schemaVersion": 1,
@@ -48,7 +60,7 @@
         "id": "verify-check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-go\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -67,13 +79,13 @@
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-go\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -112,27 +124,27 @@
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 1,
+    "writtenFiles": 7,
     "skippedScaffoldFiles": 1,
-    "skippedUnchangedGeneratedFiles": 73,
+    "skippedUnchangedGeneratedFiles": 67,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "7c62dfb35d7bc79a601501eb7e94370ac862ec3145d80048ea6a11a47e924b78",
+    "changeFingerprint": "269b07cb8f0f688d85ac37135ea7fd8fe5785ed22df17f64abb5a240ab489fa8",
     "changes": {
       "createdGeneratedFiles": [],
       "updatedGeneratedFiles": [
-        "types/certificate_response.go"
-      ],
-      "unchangedGeneratedFiles": [
-        "api/base.go",
         "api/certificate.go",
         "api/deployment.go",
-        "api/doc.go",
         "api/domain.go",
         "api/env_variable.go",
         "api/monitor.go",
-        "api/paths.go",
         "api/site.go",
+        "types/create_deployment_request.go"
+      ],
+      "unchangedGeneratedFiles": [
+        "api/base.go",
+        "api/doc.go",
+        "api/paths.go",
         "bin/publish-core.mjs",
         "bin/publish.ps1",
         "bin/publish.sh",
@@ -146,11 +158,11 @@
         "sdk.go",
         "sdkwork-sdk.json",
         "types/certificate_page.go",
+        "types/certificate_response.go",
         "types/certificates_create_response201.go",
         "types/certificates_list_response.go",
         "types/common.go",
         "types/create_certificate_request.go",
-        "types/create_deployment_request.go",
         "types/create_domain_request.go",
         "types/create_env_variable_request.go",
         "types/create_health_check_request.go",
@@ -208,29 +220,41 @@
     "impact": {
       "schemaVersion": 1,
       "areas": [
+        "api-surface",
         "models"
       ],
       "details": [
         {
+          "area": "api-surface",
+          "paths": [
+            "api/certificate.go",
+            "api/deployment.go",
+            "api/domain.go",
+            "api/env_variable.go",
+            "api/monitor.go",
+            "api/site.go"
+          ]
+        },
+        {
           "area": "models",
           "paths": [
-            "types/certificate_response.go"
+            "types/create_deployment_request.go"
           ]
         }
       ],
       "requiresVerification": true,
-      "summary": "Detected impact areas: models. Verification is required."
+      "summary": "Detected impact areas: api-surface, models. Verification is required."
     },
     "verificationPlan": {
       "shouldRun": true,
       "runPhase": "now",
-      "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
+      "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
       "steps": [
         {
           "id": "check",
           "title": "Unified package check",
           "required": true,
-          "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
+          "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
           "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-go\\generated\\server-openapi",
           "command": "node",
           "args": [

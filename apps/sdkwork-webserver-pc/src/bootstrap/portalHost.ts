@@ -1,4 +1,5 @@
-import type { PortalClipboardPort } from "@sdkwork/webserver-pc-portal";
+import type { WebserverConsoleSdkClient } from "@sdkwork/webserver-pc-console-core";
+import type { PortalClipboardPort, PortalStatisticsPort } from "@sdkwork/webserver-pc-portal";
 
 export const browserPortalClipboard: PortalClipboardPort = {
   async writeText(value) {
@@ -23,3 +24,22 @@ export const browserPortalClipboard: PortalClipboardPort = {
     if (!copied) throw new Error("Clipboard write is unavailable.");
   },
 };
+
+export function createBrowserPortalStatistics(
+  client: WebserverConsoleSdkClient,
+): PortalStatisticsPort {
+  return {
+    async load() {
+      const result = await client.site.list({ page: 1, pageSize: 1, status: 1 });
+      const totalItems = result.pageInfo.totalItems?.trim();
+      if (totalItems && /^\d+$/.test(totalItems)) {
+        return { deployedApplications: totalItems.replace(/^0+(?=\d)/, "") };
+      }
+      return {
+        deployedApplications: result.pageInfo.hasMore
+          ? `${result.items.length}+`
+          : String(result.items.length),
+      };
+    },
+  };
+}

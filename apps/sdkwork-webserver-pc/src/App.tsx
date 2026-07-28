@@ -13,12 +13,13 @@ import { WebserverConsoleShell } from "@sdkwork/webserver-pc-console-shell";
 import { webserverModule as configurationModule } from "@sdkwork/webserver-pc-console-site-configuration";
 import { webserverModule as sitesModule } from "@sdkwork/webserver-pc-console-sites";
 import { SdkworkThemeProvider } from "@sdkwork/ui-pc-react/theme";
+import { portalAgentCatalog } from "@sdkwork/webserver-pc-portal";
 import type { SdkworkThemeSelection } from "@sdkwork/ui-pc-react/theme";
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import type { BootstrappedWebserverPcRuntime } from "./bootstrap/runtime.ts";
 import { WebserverAuthGate } from "./auth/WebserverAuthGate.tsx";
-import { browserPortalClipboard } from "./bootstrap/portalHost.ts";
+import { browserPortalClipboard, createBrowserPortalStatistics } from "./bootstrap/portalHost.ts";
 import {
   commitWebserverTheme,
   resolveInitialWebserverTheme,
@@ -30,7 +31,9 @@ const consoleModules = [sitesModule, configurationModule, deliveryModule, deploy
 const adminModules = [applicationsModule, certificatesModule, nginxModule, serversModule, diagnosticsModule, auditModule] satisfies readonly WebserverPcModuleDefinition[];
 const LazyAuthRoutes = lazy(() => import("./auth/WebserverAuthRoutes.tsx").then((module) => ({ default: module.WebserverAuthRoutes })));
 const LazyAdminSurface = lazy(() => import("./surfaces/WebserverAdminSurface.tsx").then((module) => ({ default: module.WebserverAdminSurface })));
+const LazyWebserverDocumentation = lazy(() => import("@sdkwork/webserver-pc-documentation").then((module) => ({ default: module.WebserverDocumentation })));
 const LazyWebserverPortal = lazy(() => import("@sdkwork/webserver-pc-portal").then((module) => ({ default: module.WebserverPortal })));
+const supportedAgents = portalAgentCatalog.map(({ label }) => label);
 
 export function App({ runtime }: { runtime: BootstrappedWebserverPcRuntime }) {
   const [themeSelection, setThemeSelection] = useState(resolveInitialWebserverTheme);
@@ -54,6 +57,10 @@ export function App({ runtime }: { runtime: BootstrappedWebserverPcRuntime }) {
             path="/"
             element={<PublicPortalApplication runtime={runtime} />}
           />
+          <Route
+            path="/docs/*"
+            element={<PublicDocumentationApplication runtime={runtime} />}
+          />
           <Route path="/*" element={<AuthenticatedApplication runtime={runtime} />} />
         </Routes>
       </BrowserRouter>
@@ -62,12 +69,11 @@ export function App({ runtime }: { runtime: BootstrappedWebserverPcRuntime }) {
 }
 
 function PublicPortalApplication({ runtime }: { runtime: BootstrappedWebserverPcRuntime }) {
-  const authState = useSdkworkAuthControllerState(runtime.authController);
-
-  useEffect(() => {
-    if (authState.isBootstrapped) return;
-    void runtime.authController.bootstrap().catch(() => undefined);
-  }, [authState.isBootstrapped, runtime.authController]);
+  const authState = usePublicAuthState(runtime);
+  const statistics = useMemo(
+    () => createBrowserPortalStatistics(runtime.consoleClients.web),
+    [runtime.consoleClients.web],
+  );
 
   const viewer = authState.isAuthenticated
     ? { label: authState.user?.displayName || authState.user?.email }
@@ -82,12 +88,47 @@ function PublicPortalApplication({ runtime }: { runtime: BootstrappedWebserverPc
           consoleHref: "/console",
           createApplicationHref: "/console/sites",
           deploymentsHref: "/console/deployments",
+          documentationHref: "/docs",
           notificationsHref: runtime.config.messagingPcUrl,
         }}
+        statistics={authState.isAuthenticated ? statistics : undefined}
         viewer={viewer}
       />
     </Suspense>
   );
+}
+
+function PublicDocumentationApplication({ runtime }: { runtime: BootstrappedWebserverPcRuntime }) {
+  const authState = usePublicAuthState(runtime);
+  const viewer = authState.isAuthenticated
+    ? { label: authState.user?.displayName || authState.user?.email }
+    : undefined;
+
+  return (
+    <Suspense fallback={<div className="bootstrap-state">SDKWork Web Server</div>}>
+      <LazyWebserverDocumentation
+        locale={runtime.locale}
+        navigation={{
+          consoleHref: "/console",
+          notificationsHref: runtime.config.messagingPcUrl,
+          portalHref: "/",
+        }}
+        supportedAgents={supportedAgents}
+        viewer={viewer}
+      />
+    </Suspense>
+  );
+}
+
+function usePublicAuthState(runtime: BootstrappedWebserverPcRuntime) {
+  const authState = useSdkworkAuthControllerState(runtime.authController);
+
+  useEffect(() => {
+    if (authState.isBootstrapped) return;
+    void runtime.authController.bootstrap().catch(() => undefined);
+  }, [authState.isBootstrapped, runtime.authController]);
+
+  return authState;
 }
 
 function AuthenticatedApplication({ runtime }: { runtime: BootstrappedWebserverPcRuntime }) {

@@ -33,8 +33,4 @@ pub struct CreateDeploymentRequest {
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub environment: Option<String>,
-
-    #[serde(rename = "idempotencyKey")]
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub idempotency_key: Option<String>,
 }

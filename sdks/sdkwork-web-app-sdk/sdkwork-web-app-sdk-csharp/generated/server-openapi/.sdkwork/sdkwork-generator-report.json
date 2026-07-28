@@ -12,22 +12,34 @@
   "mode": "apply",
   "hasChanges": true,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "beaea2b38f1cf4e65776140c492102abf49a12062f57f4f41d862df5e850126e",
+  "changeFingerprint": "5ed9e0204ab350ae75c3df4606a6ed071d397f4c8f1f4b40c0e8bb087ad8fcf8",
   "changeImpact": {
     "schemaVersion": 1,
     "areas": [
+      "api-surface",
       "models"
     ],
     "details": [
       {
+        "area": "api-surface",
+        "paths": [
+          "Api/CertificateApi.cs",
+          "Api/DeploymentApi.cs",
+          "Api/DomainApi.cs",
+          "Api/EnvVariableApi.cs",
+          "Api/MonitorApi.cs",
+          "Api/SiteApi.cs"
+        ]
+      },
+      {
         "area": "models",
         "paths": [
-          "Models/CertificateResponse.cs"
+          "Models/CreateDeploymentRequest.cs"
         ]
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: models. Verification is required."
+    "summary": "Detected impact areas: api-surface, models. Verification is required."
   },
   "executionDecision": {
     "schemaVersion": 1,
@@ -48,7 +60,7 @@
         "id": "verify-check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-csharp\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -67,13 +79,13 @@
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-csharp\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -112,26 +124,26 @@
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 1,
+    "writtenFiles": 7,
     "skippedScaffoldFiles": 1,
-    "skippedUnchangedGeneratedFiles": 67,
+    "skippedUnchangedGeneratedFiles": 61,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "beaea2b38f1cf4e65776140c492102abf49a12062f57f4f41d862df5e850126e",
+    "changeFingerprint": "5ed9e0204ab350ae75c3df4606a6ed071d397f4c8f1f4b40c0e8bb087ad8fcf8",
     "changes": {
       "createdGeneratedFiles": [],
       "updatedGeneratedFiles": [
-        "Models/CertificateResponse.cs"
-      ],
-      "unchangedGeneratedFiles": [
-        "Api/Api.cs",
-        "Api/ApiPaths.cs",
         "Api/CertificateApi.cs",
         "Api/DeploymentApi.cs",
         "Api/DomainApi.cs",
         "Api/EnvVariableApi.cs",
         "Api/MonitorApi.cs",
         "Api/SiteApi.cs",
+        "Models/CreateDeploymentRequest.cs"
+      ],
+      "unchangedGeneratedFiles": [
+        "Api/Api.cs",
+        "Api/ApiPaths.cs",
         "bin/publish-core.mjs",
         "bin/publish.ps1",
         "bin/publish.sh",
@@ -139,10 +151,10 @@
         "Http/HttpClient.cs",
         "LICENSE",
         "Models/CertificatePage.cs",
+        "Models/CertificateResponse.cs",
         "Models/CertificatesCreateResponse201.cs",
         "Models/CertificatesListResponse.cs",
         "Models/CreateCertificateRequest.cs",
-        "Models/CreateDeploymentRequest.cs",
         "Models/CreateDomainRequest.cs",
         "Models/CreateEnvVariableRequest.cs",
         "Models/CreateHealthCheckRequest.cs",
@@ -202,29 +214,41 @@
     "impact": {
       "schemaVersion": 1,
       "areas": [
+        "api-surface",
         "models"
       ],
       "details": [
         {
+          "area": "api-surface",
+          "paths": [
+            "Api/CertificateApi.cs",
+            "Api/DeploymentApi.cs",
+            "Api/DomainApi.cs",
+            "Api/EnvVariableApi.cs",
+            "Api/MonitorApi.cs",
+            "Api/SiteApi.cs"
+          ]
+        },
+        {
           "area": "models",
           "paths": [
-            "Models/CertificateResponse.cs"
+            "Models/CreateDeploymentRequest.cs"
           ]
         }
       ],
       "requiresVerification": true,
-      "summary": "Detected impact areas: models. Verification is required."
+      "summary": "Detected impact areas: api-surface, models. Verification is required."
     },
     "verificationPlan": {
       "shouldRun": true,
       "runPhase": "now",
-      "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
+      "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
       "steps": [
         {
           "id": "check",
           "title": "Unified package check",
           "required": true,
-          "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
+          "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
           "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-csharp\\generated\\server-openapi",
           "command": "node",
           "args": [

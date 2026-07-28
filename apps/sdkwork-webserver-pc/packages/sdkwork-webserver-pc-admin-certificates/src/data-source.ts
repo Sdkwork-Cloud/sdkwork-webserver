@@ -16,21 +16,21 @@ export function createWebserverAdminCertificateRegistry(client: WebserverAdminSd
           "create",
           "Issue certificate",
           { domainId: "", certType: 1, autoRenew: true },
-          (context) => client.certificate.create(context.body as unknown as Parameters<typeof client.certificate.create>[0]),
+          (context) => client.certificate.create(context.body as unknown as Parameters<typeof client.certificate.create>[0], idempotencyParams(context)),
           { fieldOptions: { certType: [1, 3] }, permission: "web.certificates.write" },
         ),
         action(
           "update-renewal",
           "Update automatic renewal",
           { autoRenew: true },
-          (context) => client.certificate.update(selectedId(context), context.body as unknown as Parameters<typeof client.certificate.update>[1]),
+          (context) => client.certificate.update(selectedId(context), context.body as unknown as Parameters<typeof client.certificate.update>[1], idempotencyParams(context)),
           { requiresSelection: true, permission: "web.certificates.write" },
         ),
         action(
           "renew",
           "Renew now",
           {},
-          (context) => client.certificate.renew(selectedId(context)),
+          (context) => client.certificate.renew(selectedId(context), idempotencyParams(context)),
           { dangerous: true, requiresSelection: true, permission: "web.certificates.write" },
         ),
       ],
@@ -63,4 +63,10 @@ function selectedId(context: WebserverResourceActionContext): string {
   const value = context.selectedItem?.id;
   if (typeof value !== "string" && typeof value !== "number") throw new Error("Selected certificate ID is unavailable");
   return String(value);
+}
+
+function idempotencyParams(context: WebserverResourceActionContext): { idempotencyKey: string } {
+  const idempotencyKey = context.idempotencyKey?.trim();
+  if (!idempotencyKey) throw new Error("Idempotency key is required");
+  return { idempotencyKey };
 }

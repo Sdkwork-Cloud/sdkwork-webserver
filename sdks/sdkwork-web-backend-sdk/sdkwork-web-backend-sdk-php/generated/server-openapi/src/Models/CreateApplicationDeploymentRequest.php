@@ -24,8 +24,6 @@ final class CreateApplicationDeploymentRequest
     /** SHA-256 hexadecimal digest of the uploaded package. */
     public ?string $artifactHash = null;
 
-    public ?string $idempotencyKey = null;
-
     public function __construct(array $data = [])
     {
         $this->deployType = array_key_exists('deployType', $data)
@@ -52,9 +50,6 @@ final class CreateApplicationDeploymentRequest
         $this->artifactHash = array_key_exists('artifactHash', $data)
             ? $data['artifactHash']
             : null;
-        $this->idempotencyKey = array_key_exists('idempotencyKey', $data)
-            ? $data['idempotencyKey']
-            : null;
     }
 
     public static function fromArray(?array $data): ?self
@@ -73,7 +68,6 @@ final class CreateApplicationDeploymentRequest
             'artifactDriveUri' => $this->artifactDriveUri,
             'artifactSize' => $this->artifactSize,
             'artifactHash' => $this->artifactHash,
-            'idempotencyKey' => $this->idempotencyKey,
         ];
     }
 }

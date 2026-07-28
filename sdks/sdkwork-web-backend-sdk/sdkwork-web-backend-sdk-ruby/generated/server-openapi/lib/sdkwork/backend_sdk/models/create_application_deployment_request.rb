@@ -2,7 +2,7 @@ module Sdkwork
   module BackendSdk
     module Models
       class CreateApplicationDeploymentRequest
-              attr_accessor :deploy_type, :environment, :version_tag, :commit_hash, :source_ref, :artifact_drive_uri, :artifact_size, :artifact_hash, :idempotency_key
+              attr_accessor :deploy_type, :environment, :version_tag, :commit_hash, :source_ref, :artifact_drive_uri, :artifact_size, :artifact_hash
 
               def initialize(attributes = {})
                 attributes = (attributes || {}).transform_keys(&:to_s)
@@ -14,7 +14,6 @@ module Sdkwork
                 @artifact_drive_uri = attributes['artifactDriveUri']
                 @artifact_size = attributes['artifactSize']
                 @artifact_hash = attributes['artifactHash']
-                @idempotency_key = attributes['idempotencyKey']
               end
 
               def self.from_hash(data)
@@ -33,7 +32,6 @@ module Sdkwork
                   'artifactDriveUri' => @artifact_drive_uri,
                   'artifactSize' => @artifact_size,
                   'artifactHash' => @artifact_hash,
-                  'idempotencyKey' => @idempotency_key,
                 }
               end
             end

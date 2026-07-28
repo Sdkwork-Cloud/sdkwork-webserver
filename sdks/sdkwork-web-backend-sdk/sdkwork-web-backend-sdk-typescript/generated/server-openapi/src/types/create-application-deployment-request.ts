@@ -9,5 +9,4 @@ export interface CreateApplicationDeploymentRequest {
   artifactSize?: string;
   /** SHA-256 hexadecimal digest of the uploaded package. */
   artifactHash?: string;
-  idempotencyKey?: string;
 }

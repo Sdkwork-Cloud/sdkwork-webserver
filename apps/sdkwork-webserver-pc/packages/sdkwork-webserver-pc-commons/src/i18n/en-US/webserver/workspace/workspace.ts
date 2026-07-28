@@ -35,6 +35,7 @@ export const webserverWorkspaceEnUs = {
   "scope.none.description": "There are no manageable applications for this account.",
   "table.select": "Select",
   "table.selectRow": "Select row {row}",
+  "table.loading": "Loading resources...",
   "table.empty": "No resources found.",
   "pagination.page": "Page {page}",
   "pagination.total": "{total} total",

@@ -32,8 +32,12 @@ func (a *CertificateApi) CertificatesList(page *int, pageSize *int) (sdktypes.Ce
 }
 
 // Issue a canonical certificate
-func (a *CertificateApi) CertificatesCreate(body sdktypes.CreateCertificateRequest) (sdktypes.CertificatesCreateResponse201, error) {
-    raw, err := a.client.Post(BackendApiPath("/certificates"), body, nil, nil, "application/json")
+func (a *CertificateApi) CertificatesCreate(body sdktypes.CreateCertificateRequest, idempotencyKey string) (sdktypes.CertificatesCreateResponse201, error) {
+    headers := BuildRequestHeaders(
+        map[string]ParameterSpec{"Idempotency-Key": ParameterSpec{Value: idempotencyKey, Style: "simple", Explode: false},},
+        map[string]ParameterSpec{},
+    )
+    raw, err := a.client.Post(BackendApiPath("/certificates"), body, nil, headers, "application/json")
     if err != nil {
         var zero sdktypes.CertificatesCreateResponse201
         return zero, err
@@ -42,8 +46,12 @@ func (a *CertificateApi) CertificatesCreate(body sdktypes.CreateCertificateReque
 }
 
 // Update certificate automatic renewal policy
-func (a *CertificateApi) CertificatesUpdate(certificateId string, body sdktypes.UpdateCertificateRequest) (sdktypes.CertificatesUpdateResponse, error) {
-    raw, err := a.client.Put(BackendApiPath(fmt.Sprintf("/certificates/%s", SerializePathParameter(certificateId, PathParameterSpec{Name: "certificateId", Style: "simple", Explode: false}))), body, nil, nil, "application/json")
+func (a *CertificateApi) CertificatesUpdate(certificateId string, body sdktypes.UpdateCertificateRequest, idempotencyKey string) (sdktypes.CertificatesUpdateResponse, error) {
+    headers := BuildRequestHeaders(
+        map[string]ParameterSpec{"Idempotency-Key": ParameterSpec{Value: idempotencyKey, Style: "simple", Explode: false},},
+        map[string]ParameterSpec{},
+    )
+    raw, err := a.client.Put(BackendApiPath(fmt.Sprintf("/certificates/%s", SerializePathParameter(certificateId, PathParameterSpec{Name: "certificateId", Style: "simple", Explode: false}))), body, nil, headers, "application/json")
     if err != nil {
         var zero sdktypes.CertificatesUpdateResponse
         return zero, err
@@ -52,8 +60,12 @@ func (a *CertificateApi) CertificatesUpdate(certificateId string, body sdktypes.
 }
 
 // Renew a canonical certificate now
-func (a *CertificateApi) CertificatesRenew(certificateId string) (sdktypes.CertificatesRenewResponse, error) {
-    raw, err := a.client.Post(BackendApiPath(fmt.Sprintf("/certificates/%s/renew", SerializePathParameter(certificateId, PathParameterSpec{Name: "certificateId", Style: "simple", Explode: false}))), nil, nil, nil, "")
+func (a *CertificateApi) CertificatesRenew(certificateId string, idempotencyKey string) (sdktypes.CertificatesRenewResponse, error) {
+    headers := BuildRequestHeaders(
+        map[string]ParameterSpec{"Idempotency-Key": ParameterSpec{Value: idempotencyKey, Style: "simple", Explode: false},},
+        map[string]ParameterSpec{},
+    )
+    raw, err := a.client.Post(BackendApiPath(fmt.Sprintf("/certificates/%s/renew", SerializePathParameter(certificateId, PathParameterSpec{Name: "certificateId", Style: "simple", Explode: false}))), nil, nil, headers, "")
     if err != nil {
         var zero sdktypes.CertificatesRenewResponse
         return zero, err
@@ -287,7 +299,92 @@ func EncodeQueryValue(value string, allowReserved bool) string {
 }
 
 
+type ParameterSpec struct {
+    Value       interface{}
+    Style       string
+    Explode     bool
+    ContentType string
+}
 
+func BuildRequestHeaders(headers map[string]ParameterSpec, cookies map[string]ParameterSpec) map[string]string {
+    requestHeaders := map[string]string{}
+    for name, parameter := range headers {
+        if serialized, ok := SerializeParameterValue(parameter); ok {
+            requestHeaders[name] = serialized
+        }
+    }
+
+    if cookieHeader := BuildCookieHeader(cookies); cookieHeader != "" {
+        if existing, ok := requestHeaders["Cookie"]; ok && existing != "" {
+            requestHeaders["Cookie"] = existing + "; " + cookieHeader
+        } else {
+            requestHeaders["Cookie"] = cookieHeader
+        }
+    }
+
+    if len(requestHeaders) == 0 {
+        return nil
+    }
+    return requestHeaders
+}
+
+func BuildCookieHeader(cookies map[string]ParameterSpec) string {
+    pairs := make([]string, 0, len(cookies))
+    for name, parameter := range cookies {
+        if serialized, ok := SerializeParameterValue(parameter); ok {
+            pairs = append(pairs, url.QueryEscape(name)+"="+url.QueryEscape(serialized))
+        }
+    }
+    return strings.Join(pairs, "; ")
+}
+
+func SerializeParameterValue(parameter ParameterSpec) (string, bool) {
+    value := parameter.Value
+    if value == nil {
+        return "", false
+    }
+    if parameter.ContentType != "" {
+        encoded, _ := json.Marshal(value)
+        return string(encoded), true
+    }
+    switch typed := value.(type) {
+    case string:
+        return typed, true
+    case fmt.Stringer:
+        return typed.String(), true
+    case []string:
+        return strings.Join(typed, ","), true
+    case []int:
+        values := make([]string, 0, len(typed))
+        for _, item := range typed {
+            values = append(values, fmt.Sprint(item))
+        }
+        return strings.Join(values, ","), true
+    case map[string]string:
+        return SerializeHeaderObject(stringMapToInterface(typed), parameter.Explode), true
+    case map[string]int:
+        return SerializeHeaderObject(intMapToInterface(typed), parameter.Explode), true
+    case map[string]interface{}:
+        return SerializeHeaderObject(typed, parameter.Explode), true
+    default:
+        return fmt.Sprint(value), true
+    }
+}
+
+func SerializeHeaderObject(values map[string]interface{}, explode bool) string {
+    serialized := make([]string, 0, len(values)*2)
+    for key, value := range values {
+        if value == nil {
+            continue
+        }
+        if explode {
+            serialized = append(serialized, key+"="+fmt.Sprint(value))
+        } else {
+            serialized = append(serialized, key, fmt.Sprint(value))
+        }
+    }
+    return strings.Join(serialized, ",")
+}
 func stringSliceToInterface(values []string) []interface{} {
     result := make([]interface{}, 0, len(values))
     for _, value := range values {

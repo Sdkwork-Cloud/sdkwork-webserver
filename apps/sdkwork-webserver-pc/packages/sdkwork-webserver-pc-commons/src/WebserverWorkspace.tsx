@@ -1,14 +1,26 @@
 import {
+  Activity,
   AppWindow,
+  BadgeCheck,
   Check,
   ChevronLeft,
   ChevronRight,
   Clipboard,
   Filter,
+  Inbox,
+  LoaderCircle,
   LockKeyhole,
+  Pause,
+  Pencil,
+  Play,
+  Plus,
   RefreshCw,
+  Rocket,
+  RotateCcw,
   Search,
+  Settings2,
   Shield,
+  Trash2,
   Upload,
   X,
 } from "lucide-react";
@@ -245,26 +257,100 @@ function ResourcePage({
     [entry.resource, items],
   );
   const scopeLabel = t(scopeKind === "application" ? "toolbar.application" : "toolbar.site");
+  const resourceLabel = resourceText(t, entry.resource, "label");
 
   return (
-    <section className="resource-page">
-      <header className="page-header">
-        <div>
-          <span className="eyebrow">{entry.resource}</span>
-          <h1>{resourceText(t, entry.resource, "label")}</h1>
-          <p>{resourceText(t, entry.resource, "description")}</p>
+    <section aria-label={resourceLabel} className="resource-page">
+      <div className="resource-commandbar">
+        <div className="resource-identity">
+          <h1>{resourceLabel}</h1>
         </div>
-        <button
-          aria-label={t("toolbar.refresh")}
-          className="icon-button"
-          disabled={busy || !authorized}
-          onClick={() => void load()}
-          title={t("toolbar.refresh")}
-          type="button"
-        >
-          <RefreshCw aria-hidden="true" size={18} />
-        </button>
-      </header>
+        {authorized ? (
+          <>
+            <div className="resource-query">
+              {source?.requiresScope ? (
+                <label className="scope-selector">
+                  <AppWindow aria-hidden="true" size={16} />
+                  <span>{scopeLabel}</span>
+                  <select
+                    aria-label={scopeLabel}
+                    disabled={scopeBusy || scopeOptions.length === 0}
+                    onChange={(event) => persistScope(event.target.value)}
+                    value={scopeId}
+                  >
+                    {scopeOptions.length === 0 ? (
+                      <option value="">{scopeBusy ? t("scope.loading") : t("scope.none")}</option>
+                    ) : null}
+                    {scopeOptions.map((option) => (
+                      <option key={option.id} value={option.id}>{option.label}</option>
+                    ))}
+                  </select>
+                </label>
+              ) : null}
+              <form
+                className="search-box"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  setPage(1);
+                  void load();
+                }}
+                role="search"
+              >
+                <Search aria-hidden="true" size={16} />
+                <input
+                  aria-label={t("toolbar.search")}
+                  onChange={(event) => setSearch(event.target.value)}
+                  placeholder={t("toolbar.search")}
+                  value={search}
+                />
+              </form>
+              {source?.filters?.length ? (
+                <button
+                  aria-expanded={filtersOpen}
+                  className="secondary-button"
+                  onClick={() => setFiltersOpen((value) => !value)}
+                  type="button"
+                >
+                  <Filter aria-hidden="true" size={16} />
+                  {t("toolbar.filters")}
+                  {activeFilterCount(filters) > 0 ? <span className="filter-count">{activeFilterCount(filters)}</span> : null}
+                </button>
+              ) : null}
+            </div>
+            <div className="actions">
+              {visibleActions.map((candidate) => (
+                <button
+                  className={candidate.dangerous
+                    ? "danger-button"
+                    : candidate.requiresSelection
+                      ? "secondary-button"
+                      : "command-button"}
+                  disabled={busy
+                    || (candidate.requiresSelection && !selected)
+                    || (candidate.requiresScope && !scopeId)
+                    || !actionAvailable(candidate, selected, scopeId)}
+                  key={candidate.id}
+                  onClick={() => setAction(candidate)}
+                  type="button"
+                >
+                  <ActionIcon action={candidate} />
+                  {actionText(t, entry.resource, candidate)}
+                </button>
+              ))}
+              <button
+                aria-label={t("toolbar.refresh")}
+                className="icon-button refresh-button"
+                disabled={busy}
+                onClick={() => void load()}
+                title={t("toolbar.refresh")}
+                type="button"
+              >
+                <RefreshCw aria-hidden="true" className={busy ? "is-spinning" : undefined} size={17} />
+              </button>
+            </div>
+          </>
+        ) : null}
+      </div>
 
       {!authorized ? (
         <div className="resource-access-state" role="status">
@@ -276,71 +362,6 @@ function ResourcePage({
         </div>
       ) : (
         <>
-          <div className="toolbar">
-            <form
-              className="search-box"
-              onSubmit={(event) => {
-                event.preventDefault();
-                setPage(1);
-                void load();
-              }}
-            >
-              <Search aria-hidden="true" size={16} />
-              <input
-                aria-label={t("toolbar.search")}
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder={t("toolbar.search")}
-                value={search}
-              />
-            </form>
-            {source?.filters?.length ? (
-              <button
-                aria-expanded={filtersOpen}
-                className="secondary-button"
-                onClick={() => setFiltersOpen((value) => !value)}
-                type="button"
-              >
-                <Filter aria-hidden="true" size={16} />
-                {t("toolbar.filters")}
-                {activeFilterCount(filters) > 0 ? <span className="filter-count">{activeFilterCount(filters)}</span> : null}
-              </button>
-            ) : null}
-            {source?.requiresScope ? (
-              <label className="scope-selector">
-                <AppWindow aria-hidden="true" size={16} />
-                <span>{scopeLabel}</span>
-                <select
-                  aria-label={scopeLabel}
-                  disabled={scopeBusy || scopeOptions.length === 0}
-                  onChange={(event) => persistScope(event.target.value)}
-                  value={scopeId}
-                >
-                  {scopeOptions.length === 0 ? (
-                    <option value="">{scopeBusy ? t("scope.loading") : t("scope.none")}</option>
-                  ) : null}
-                  {scopeOptions.map((option) => (
-                    <option key={option.id} value={option.id}>{option.label}</option>
-                  ))}
-                </select>
-              </label>
-            ) : null}
-            <div className="actions">
-              {visibleActions.map((candidate) => (
-                <button
-                  className={candidate.dangerous ? "danger-button" : "command-button"}
-                  disabled={busy
-                    || (candidate.requiresSelection && !selected)
-                    || (candidate.requiresScope && !scopeId)
-                    || !actionAvailable(candidate, selected, scopeId)}
-                  key={candidate.id}
-                  onClick={() => setAction(candidate)}
-                  type="button"
-                >
-                  {actionText(t, entry.resource, candidate)}
-                </button>
-              ))}
-            </div>
-          </div>
           {filtersOpen && source?.filters?.length ? (
             <form
               className="filter-bar"
@@ -406,68 +427,87 @@ function ResourcePage({
             </div>
           ) : null}
           {source?.requiresScope && !scopeId ? (
-            <div className="empty-state">{t("scope.none.description")}</div>
+            <div className="empty-state empty-state-standalone">
+              <AppWindow aria-hidden="true" size={20} />
+              <span>{t("scope.none.description")}</span>
+            </div>
           ) : (
-            <div aria-busy={busy} className="table-frame">
-              <table>
-                <thead>
-                  <tr>
-                    <th aria-label={t("table.select")} />
-                    {columns.map((column) => <th key={column}>{fieldLabel(column, locale)}</th>)}
-                  </tr>
-                </thead>
-                <tbody>
-                  {items.map((item, index) => (
-                    <tr
-                      className={selected === item ? "selected" : ""}
-                      key={recordKey(item, index)}
-                      onClick={() => setSelected(item)}
-                    >
-                      <td>
-                        <input
-                          aria-label={t("table.selectRow", { row: index + 1 })}
-                          checked={selected === item}
-                          readOnly
-                          type="radio"
-                        />
-                      </td>
-                      {columns.map((column) => (
-                        <td key={column}>{displayValue(item[column], column, entry.resource, locale)}</td>
+            <div className="data-surface">
+              <div aria-busy={busy} className="table-frame">
+                {busy && items.length > 0 ? <span aria-hidden="true" className="table-loading-bar" /> : null}
+                {busy && items.length === 0 ? (
+                  <div className="empty-state" role="status">
+                    <LoaderCircle aria-hidden="true" className="is-spinning" size={20} />
+                    <span>{t("table.loading")}</span>
+                  </div>
+                ) : items.length === 0 ? (
+                  <div className="empty-state">
+                    <Inbox aria-hidden="true" size={20} />
+                    <span>{t("table.empty")}</span>
+                  </div>
+                ) : (
+                  <table>
+                    <thead>
+                      <tr>
+                        <th aria-label={t("table.select")} />
+                        {columns.map((column) => <th key={column}>{fieldLabel(column, locale)}</th>)}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {items.map((item, index) => (
+                        <tr
+                          className={selected === item ? "selected" : ""}
+                          key={recordKey(item, index)}
+                          onClick={() => setSelected(item)}
+                        >
+                          <td>
+                            <input
+                              aria-label={t("table.selectRow", { row: index + 1 })}
+                              checked={selected === item}
+                              readOnly
+                              type="radio"
+                            />
+                          </td>
+                          {columns.map((column) => (
+                            <td key={column}>{displayValue(item[column], column, entry.resource, locale)}</td>
+                          ))}
+                        </tr>
                       ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {!busy && items.length === 0 ? <div className="empty-state">{t("table.empty")}</div> : null}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+              {(items.length > 0 || busy || page > 1) ? (
+                <footer className="pagination">
+                  <span>
+                    {pageInfo.total === undefined
+                      ? t("pagination.page", { page: pageInfo.page })
+                      : t("pagination.total", { total: pageInfo.total })}
+                  </span>
+                  <button
+                    aria-label={t("pagination.previous")}
+                    className="icon-button"
+                    disabled={page <= 1 || busy}
+                    onClick={() => setPage((value) => Math.max(1, value - 1))}
+                    title={t("pagination.previous")}
+                    type="button"
+                  >
+                    <ChevronLeft aria-hidden="true" size={18} />
+                  </button>
+                  <button
+                    aria-label={t("pagination.next")}
+                    className="icon-button"
+                    disabled={!pageInfo.hasMore || busy}
+                    onClick={() => setPage((value) => value + 1)}
+                    title={t("pagination.next")}
+                    type="button"
+                  >
+                    <ChevronRight aria-hidden="true" size={18} />
+                  </button>
+                </footer>
+              ) : null}
             </div>
           )}
-          <footer className="pagination">
-            <span>
-              {pageInfo.total === undefined
-                ? t("pagination.page", { page: pageInfo.page })
-                : t("pagination.total", { total: pageInfo.total })}
-            </span>
-            <button
-              aria-label={t("pagination.previous")}
-              className="icon-button"
-              disabled={page <= 1 || busy}
-              onClick={() => setPage((value) => Math.max(1, value - 1))}
-              title={t("pagination.previous")}
-              type="button"
-            >
-              <ChevronLeft aria-hidden="true" size={18} />
-            </button>
-            <button
-              aria-label={t("pagination.next")}
-              className="icon-button"
-              disabled={!pageInfo.hasMore || busy}
-              onClick={() => setPage((value) => value + 1)}
-              title={t("pagination.next")}
-              type="button"
-            >
-              <ChevronRight aria-hidden="true" size={18} />
-            </button>
-          </footer>
           {action ? (
             <ActionDialog
               action={action}
@@ -487,6 +527,21 @@ function ResourcePage({
       )}
     </section>
   );
+}
+
+function ActionIcon({ action }: { action: WebserverResourceAction }) {
+  const iconProps = { "aria-hidden": true, size: 15 } as const;
+  if (action.id.includes("rollback")) return <RotateCcw {...iconProps} />;
+  if (action.id.includes("delete")) return <Trash2 {...iconProps} />;
+  if (action.id.includes("pause")) return <Pause {...iconProps} />;
+  if (action.id.includes("activate")) return <Play {...iconProps} />;
+  if (action.id.includes("verify")) return <BadgeCheck {...iconProps} />;
+  if (action.id.includes("deploy")) return <Rocket {...iconProps} />;
+  if (action.id.includes("reload") || action.id.includes("renew")) return <RefreshCw {...iconProps} />;
+  if (action.id.includes("update")) return <Pencil {...iconProps} />;
+  if (action.id.includes("create")) return <Plus {...iconProps} />;
+  if (action.id.includes("diagnostic")) return <Activity {...iconProps} />;
+  return <Settings2 {...iconProps} />;
 }
 
 function ActionDialog({

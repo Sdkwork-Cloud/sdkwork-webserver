@@ -17,18 +17,36 @@ public class CertificateApi {
     }
 
     /// Issue a canonical certificate
-    public func certificatesCreate(body: CreateCertificateRequest) async throws -> CertificatesCreateResponse201? {
-        return try await client.post(ApiPaths.backendPath("/certificates"), body: body, params: nil, headers: nil, contentType: "application/json", responseType: CertificatesCreateResponse201.self)
+    public func certificatesCreate(body: CreateCertificateRequest, idempotencyKey: String) async throws -> CertificatesCreateResponse201? {
+        let requestHeaders = buildRequestHeaders(
+            [
+                "Idempotency-Key": HeaderParameterSpec(value: idempotencyKey, style: "simple", explode: false, contentType: nil),
+            ],
+            [:]
+        )
+        return try await client.post(ApiPaths.backendPath("/certificates"), body: body, params: nil, headers: requestHeaders, contentType: "application/json", responseType: CertificatesCreateResponse201.self)
     }
 
     /// Update certificate automatic renewal policy
-    public func certificatesUpdate(certificateId: String, body: UpdateCertificateRequest) async throws -> CertificatesUpdateResponse? {
-        return try await client.put(ApiPaths.backendPath("/certificates/\(serializePathParameter(certificateId, PathParameterSpec(name: "certificateId", style: "simple", explode: false)))"), body: body, params: nil, headers: nil, contentType: "application/json", responseType: CertificatesUpdateResponse.self)
+    public func certificatesUpdate(certificateId: String, body: UpdateCertificateRequest, idempotencyKey: String) async throws -> CertificatesUpdateResponse? {
+        let requestHeaders = buildRequestHeaders(
+            [
+                "Idempotency-Key": HeaderParameterSpec(value: idempotencyKey, style: "simple", explode: false, contentType: nil),
+            ],
+            [:]
+        )
+        return try await client.put(ApiPaths.backendPath("/certificates/\(serializePathParameter(certificateId, PathParameterSpec(name: "certificateId", style: "simple", explode: false)))"), body: body, params: nil, headers: requestHeaders, contentType: "application/json", responseType: CertificatesUpdateResponse.self)
     }
 
     /// Renew a canonical certificate now
-    public func certificatesRenew(certificateId: String) async throws -> CertificatesRenewResponse? {
-        return try await client.post(ApiPaths.backendPath("/certificates/\(serializePathParameter(certificateId, PathParameterSpec(name: "certificateId", style: "simple", explode: false)))/renew"), body: nil, responseType: CertificatesRenewResponse.self)
+    public func certificatesRenew(certificateId: String, idempotencyKey: String) async throws -> CertificatesRenewResponse? {
+        let requestHeaders = buildRequestHeaders(
+            [
+                "Idempotency-Key": HeaderParameterSpec(value: idempotencyKey, style: "simple", explode: false, contentType: nil),
+            ],
+            [:]
+        )
+        return try await client.post(ApiPaths.backendPath("/certificates/\(serializePathParameter(certificateId, PathParameterSpec(name: "certificateId", style: "simple", explode: false)))/renew"), body: nil, params: nil, headers: requestHeaders, responseType: CertificatesRenewResponse.self)
     }
 
     private struct PathParameterSpec {
@@ -208,4 +226,68 @@ public class CertificateApi {
         value.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? value
     }
 
+    private struct HeaderParameterSpec {
+        let value: Any?
+        let style: String
+        let explode: Bool
+        let contentType: String?
+    }
+
+    private func buildRequestHeaders(_ headers: [String: HeaderParameterSpec], _ cookies: [String: HeaderParameterSpec]) -> [String: String]? {
+        var requestHeaders: [String: String] = [:]
+        for (name, parameter) in headers {
+            if let serialized = serializeParameterValue(parameter) {
+                requestHeaders[name] = serialized
+            }
+        }
+
+        if let cookieHeader = buildCookieHeader(cookies), !cookieHeader.isEmpty {
+            requestHeaders["Cookie"] = requestHeaders["Cookie"].map { "\($0); \(cookieHeader)" } ?? cookieHeader
+        }
+
+        return requestHeaders.isEmpty ? nil : requestHeaders
+    }
+
+    private func buildCookieHeader(_ cookies: [String: HeaderParameterSpec]) -> String? {
+        let pairs = cookies.compactMap { name, parameter -> String? in
+            guard let serialized = serializeParameterValue(parameter) else { return nil }
+            return "\(urlEncode(name))=\(urlEncode(serialized))"
+        }
+        return pairs.isEmpty ? nil : pairs.joined(separator: "; ")
+    }
+
+    private func serializeParameterValue(_ parameter: HeaderParameterSpec?) -> String? {
+        guard let parameter, let value = parameter.value else { return nil }
+        if let contentType = parameter.contentType, !contentType.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            if JSONSerialization.isValidJSONObject(value),
+               let data = try? JSONSerialization.data(withJSONObject: value, options: []),
+               let json = String(data: data, encoding: .utf8) {
+                return json
+            }
+            return String(describing: value)
+        }
+        if let array = value as? [Any?] {
+            return array.compactMap { $0.map { String(describing: $0) } }.joined(separator: ",")
+        }
+        if let object = value as? [String: Any] {
+            var values: [String] = []
+            for (key, item) in object {
+                if parameter.explode {
+                    values.append("\(key)=\(item)")
+                } else {
+                    values.append(key)
+                    values.append(String(describing: item))
+                }
+            }
+            return values.joined(separator: ",")
+        }
+        if let date = value as? Date {
+            return ISO8601DateFormatter().string(from: date)
+        }
+        return String(describing: value)
+    }
+
+    private func urlEncode(_ value: String) -> String {
+        value.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? value
+    }
 }

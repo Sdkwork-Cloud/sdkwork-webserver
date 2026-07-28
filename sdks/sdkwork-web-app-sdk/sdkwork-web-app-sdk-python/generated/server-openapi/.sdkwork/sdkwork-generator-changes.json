@@ -9,11 +9,17 @@
     "protocol": "http",
     "packageName": "sdkwork-web-app-sdk"
   },
-  "changeFingerprint": "2dfb50ce6f51e59e809851c15c04daed5258d762589bf0be386bc3e6f83f7d64",
+  "changeFingerprint": "0c25e68c3b6b38585ce05562094886a15f0ccfc46183fb981bca315721facdb2",
   "changes": {
     "createdGeneratedFiles": [],
     "updatedGeneratedFiles": [
-      "sdkwork_web_app_sdk/models/certificate_response.py"
+      "sdkwork_web_app_sdk/api/certificate.py",
+      "sdkwork_web_app_sdk/api/deployment.py",
+      "sdkwork_web_app_sdk/api/domain.py",
+      "sdkwork_web_app_sdk/api/env_variable.py",
+      "sdkwork_web_app_sdk/api/monitor.py",
+      "sdkwork_web_app_sdk/api/site.py",
+      "sdkwork_web_app_sdk/models/create_deployment_request.py"
     ],
     "unchangedGeneratedFiles": [
       "bin/publish-core.mjs",
@@ -27,20 +33,14 @@
       "requirements.txt",
       "sdkwork_web_app_sdk/__init__.py",
       "sdkwork_web_app_sdk/api/__init__.py",
-      "sdkwork_web_app_sdk/api/certificate.py",
-      "sdkwork_web_app_sdk/api/deployment.py",
-      "sdkwork_web_app_sdk/api/domain.py",
-      "sdkwork_web_app_sdk/api/env_variable.py",
-      "sdkwork_web_app_sdk/api/monitor.py",
-      "sdkwork_web_app_sdk/api/site.py",
       "sdkwork_web_app_sdk/client.py",
       "sdkwork_web_app_sdk/http_client.py",
       "sdkwork_web_app_sdk/models/__init__.py",
       "sdkwork_web_app_sdk/models/certificate_page.py",
+      "sdkwork_web_app_sdk/models/certificate_response.py",
       "sdkwork_web_app_sdk/models/certificates_create_response201.py",
       "sdkwork_web_app_sdk/models/certificates_list_response.py",
       "sdkwork_web_app_sdk/models/create_certificate_request.py",
-      "sdkwork_web_app_sdk/models/create_deployment_request.py",
       "sdkwork_web_app_sdk/models/create_domain_request.py",
       "sdkwork_web_app_sdk/models/create_env_variable_request.py",
       "sdkwork_web_app_sdk/models/create_health_check_request.py",
@@ -98,29 +98,41 @@
   "impact": {
     "schemaVersion": 1,
     "areas": [
+      "api-surface",
       "models"
     ],
     "details": [
       {
+        "area": "api-surface",
+        "paths": [
+          "sdkwork_web_app_sdk/api/certificate.py",
+          "sdkwork_web_app_sdk/api/deployment.py",
+          "sdkwork_web_app_sdk/api/domain.py",
+          "sdkwork_web_app_sdk/api/env_variable.py",
+          "sdkwork_web_app_sdk/api/monitor.py",
+          "sdkwork_web_app_sdk/api/site.py"
+        ]
+      },
+      {
         "area": "models",
         "paths": [
-          "sdkwork_web_app_sdk/models/certificate_response.py"
+          "sdkwork_web_app_sdk/models/create_deployment_request.py"
         ]
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: models. Verification is required."
+    "summary": "Detected impact areas: api-surface, models. Verification is required."
   },
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-python\\generated\\server-openapi",
         "command": "node",
         "args": [

@@ -10,5 +10,4 @@ type CreateApplicationDeploymentRequest struct {
 	ArtifactDriveUri string `json:"artifactDriveUri"`
 	ArtifactSize string `json:"artifactSize"`
 	ArtifactHash string `json:"artifactHash"`
-	IdempotencyKey string `json:"idempotencyKey"`
 }

@@ -12,13 +12,26 @@
   "mode": "apply",
   "hasChanges": true,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "b86ca6dbbbf9f03ef1323f4719b7f3525a8defafbb4cbcc1ce2657aeb6979085",
+  "changeFingerprint": "4655b7398aa2f638b0111c5af1b614f7b7ffb6d52d289c661a8ba77ad138581b",
   "changeImpact": {
     "schemaVersion": 1,
     "areas": [
+      "api-surface",
       "models"
     ],
     "details": [
+      {
+        "area": "api-surface",
+        "paths": [
+          "lib/src/api/api.dart",
+          "lib/src/api/certificate.dart",
+          "lib/src/api/deployment.dart",
+          "lib/src/api/domain.dart",
+          "lib/src/api/env_variable.dart",
+          "lib/src/api/monitor.dart",
+          "lib/src/api/site.dart"
+        ]
+      },
       {
         "area": "models",
         "paths": [
@@ -27,7 +40,7 @@
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: models. Verification is required."
+    "summary": "Detected impact areas: api-surface, models. Verification is required."
   },
   "executionDecision": {
     "schemaVersion": 1,
@@ -48,7 +61,7 @@
         "id": "verify-check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-flutter\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -67,13 +80,13 @@
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-flutter\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -112,15 +125,22 @@
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 1,
+    "writtenFiles": 8,
     "skippedScaffoldFiles": 1,
-    "skippedUnchangedGeneratedFiles": 21,
+    "skippedUnchangedGeneratedFiles": 14,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "b86ca6dbbbf9f03ef1323f4719b7f3525a8defafbb4cbcc1ce2657aeb6979085",
+    "changeFingerprint": "4655b7398aa2f638b0111c5af1b614f7b7ffb6d52d289c661a8ba77ad138581b",
     "changes": {
       "createdGeneratedFiles": [],
       "updatedGeneratedFiles": [
+        "lib/src/api/api.dart",
+        "lib/src/api/certificate.dart",
+        "lib/src/api/deployment.dart",
+        "lib/src/api/domain.dart",
+        "lib/src/api/env_variable.dart",
+        "lib/src/api/monitor.dart",
+        "lib/src/api/site.dart",
         "lib/src/models.dart"
       ],
       "unchangedGeneratedFiles": [
@@ -130,15 +150,8 @@
         "CHANGELOG.md",
         "lib/app_client.dart",
         "lib/sdkwork_web_app_sdk.dart",
-        "lib/src/api/api.dart",
-        "lib/src/api/certificate.dart",
-        "lib/src/api/deployment.dart",
-        "lib/src/api/domain.dart",
-        "lib/src/api/env_variable.dart",
-        "lib/src/api/monitor.dart",
         "lib/src/api/paths.dart",
         "lib/src/api/response_helpers.dart",
-        "lib/src/api/site.dart",
         "lib/src/http/client.dart",
         "LICENSE",
         "pubspec_overrides.yaml",
@@ -156,9 +169,22 @@
     "impact": {
       "schemaVersion": 1,
       "areas": [
+        "api-surface",
         "models"
       ],
       "details": [
+        {
+          "area": "api-surface",
+          "paths": [
+            "lib/src/api/api.dart",
+            "lib/src/api/certificate.dart",
+            "lib/src/api/deployment.dart",
+            "lib/src/api/domain.dart",
+            "lib/src/api/env_variable.dart",
+            "lib/src/api/monitor.dart",
+            "lib/src/api/site.dart"
+          ]
+        },
         {
           "area": "models",
           "paths": [
@@ -167,18 +193,18 @@
         }
       ],
       "requiresVerification": true,
-      "summary": "Detected impact areas: models. Verification is required."
+      "summary": "Detected impact areas: api-surface, models. Verification is required."
     },
     "verificationPlan": {
       "shouldRun": true,
       "runPhase": "now",
-      "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
+      "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
       "steps": [
         {
           "id": "check",
           "title": "Unified package check",
           "required": true,
-          "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
+          "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
           "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-flutter\\generated\\server-openapi",
           "command": "node",
           "args": [

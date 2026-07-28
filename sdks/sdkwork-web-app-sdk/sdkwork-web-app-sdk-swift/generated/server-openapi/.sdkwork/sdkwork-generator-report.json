@@ -12,13 +12,25 @@
   "mode": "apply",
   "hasChanges": true,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "af8dc8ad33c14a533fbfc37c4c126855796179d3e83d361804bcce0f7a172c33",
+  "changeFingerprint": "b88a952934d56649dd14a6e98a47b29a1a19e26a6c8c9d764fe2849840baf3d3",
   "changeImpact": {
     "schemaVersion": 1,
     "areas": [
+      "api-surface",
       "models"
     ],
     "details": [
+      {
+        "area": "api-surface",
+        "paths": [
+          "Sources/API/CertificateApi.swift",
+          "Sources/API/DeploymentApi.swift",
+          "Sources/API/DomainApi.swift",
+          "Sources/API/EnvVariableApi.swift",
+          "Sources/API/MonitorApi.swift",
+          "Sources/API/SiteApi.swift"
+        ]
+      },
       {
         "area": "models",
         "paths": [
@@ -27,7 +39,7 @@
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: models. Verification is required."
+    "summary": "Detected impact areas: api-surface, models. Verification is required."
   },
   "executionDecision": {
     "schemaVersion": 1,
@@ -48,7 +60,7 @@
         "id": "verify-check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-swift\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -67,13 +79,13 @@
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-swift\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -112,15 +124,21 @@
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 1,
+    "writtenFiles": 7,
     "skippedScaffoldFiles": 1,
-    "skippedUnchangedGeneratedFiles": 18,
+    "skippedUnchangedGeneratedFiles": 12,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "af8dc8ad33c14a533fbfc37c4c126855796179d3e83d361804bcce0f7a172c33",
+    "changeFingerprint": "b88a952934d56649dd14a6e98a47b29a1a19e26a6c8c9d764fe2849840baf3d3",
     "changes": {
       "createdGeneratedFiles": [],
       "updatedGeneratedFiles": [
+        "Sources/API/CertificateApi.swift",
+        "Sources/API/DeploymentApi.swift",
+        "Sources/API/DomainApi.swift",
+        "Sources/API/EnvVariableApi.swift",
+        "Sources/API/MonitorApi.swift",
+        "Sources/API/SiteApi.swift",
         "Sources/Models.swift"
       ],
       "unchangedGeneratedFiles": [
@@ -134,12 +152,6 @@
         "sdkwork-sdk.json",
         "Sources/API/API.swift",
         "Sources/API/ApiPaths.swift",
-        "Sources/API/CertificateApi.swift",
-        "Sources/API/DeploymentApi.swift",
-        "Sources/API/DomainApi.swift",
-        "Sources/API/EnvVariableApi.swift",
-        "Sources/API/MonitorApi.swift",
-        "Sources/API/SiteApi.swift",
         "Sources/HTTP/HttpClient.swift",
         "Sources/SdkworkAppClient.swift"
       ],
@@ -153,9 +165,21 @@
     "impact": {
       "schemaVersion": 1,
       "areas": [
+        "api-surface",
         "models"
       ],
       "details": [
+        {
+          "area": "api-surface",
+          "paths": [
+            "Sources/API/CertificateApi.swift",
+            "Sources/API/DeploymentApi.swift",
+            "Sources/API/DomainApi.swift",
+            "Sources/API/EnvVariableApi.swift",
+            "Sources/API/MonitorApi.swift",
+            "Sources/API/SiteApi.swift"
+          ]
+        },
         {
           "area": "models",
           "paths": [
@@ -164,18 +188,18 @@
         }
       ],
       "requiresVerification": true,
-      "summary": "Detected impact areas: models. Verification is required."
+      "summary": "Detected impact areas: api-surface, models. Verification is required."
     },
     "verificationPlan": {
       "shouldRun": true,
       "runPhase": "now",
-      "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
+      "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
       "steps": [
         {
           "id": "check",
           "title": "Unified package check",
           "required": true,
-          "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
+          "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
           "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-swift\\generated\\server-openapi",
           "command": "node",
           "args": [

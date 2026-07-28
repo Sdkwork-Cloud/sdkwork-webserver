@@ -8,6 +8,5 @@ data class CreateDeploymentRequest(
     val artifactDriveUri: String? = null,
     val artifactSize: String? = null,
     val artifactHash: String? = null,
-    val environment: String? = null,
-    val idempotencyKey: String? = null
+    val environment: String? = null
 )

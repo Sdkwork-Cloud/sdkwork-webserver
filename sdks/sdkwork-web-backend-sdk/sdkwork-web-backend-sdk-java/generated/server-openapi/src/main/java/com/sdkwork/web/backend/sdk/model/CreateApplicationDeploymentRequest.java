@@ -10,7 +10,6 @@ public class CreateApplicationDeploymentRequest {
     private String artifactDriveUri;
     private String artifactSize;
     private String artifactHash;
-    private String idempotencyKey;
 
     public Integer getDeployType() {
         return this.deployType;
@@ -74,13 +73,5 @@ public class CreateApplicationDeploymentRequest {
 
     public void setArtifactHash(String artifactHash) {
         this.artifactHash = artifactHash;
-    }
-
-    public String getIdempotencyKey() {
-        return this.idempotencyKey;
-    }
-
-    public void setIdempotencyKey(String idempotencyKey) {
-        this.idempotencyKey = idempotencyKey;
     }
 }

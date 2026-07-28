@@ -26,9 +26,15 @@ class DeploymentApi {
   }
 
   /// 发起部署
-  Future<SitesDeploymentsCreateResponse201?> sitesDeploymentsCreate(String siteId, CreateDeploymentRequest body) async {
+  Future<SitesDeploymentsCreateResponse201?> sitesDeploymentsCreate(String siteId, CreateDeploymentRequest body, String idempotencyKey) async {
+    final requestHeaders = buildRequestHeaders(
+      <String, HeaderParameterSpec>{
+        'Idempotency-Key': HeaderParameterSpec(idempotencyKey, 'simple', false, null),
+      },
+      <String, HeaderParameterSpec>{},
+    );
     final payload = body.toJson();
-    final response = await _client.post(ApiPaths.appPath('/sites/${serializePathParameter(siteId, const PathParameterSpec('siteId', 'simple', false))}/deployments'), body: payload, contentType: 'application/json');
+    final response = await _client.post(ApiPaths.appPath('/sites/${serializePathParameter(siteId, const PathParameterSpec('siteId', 'simple', false))}/deployments'), body: payload, headers: requestHeaders, contentType: 'application/json');
     return (() {
       final map = sdkworkResponseAsMap(response);
       return map == null ? null : SitesDeploymentsCreateResponse201.fromJson(map);
@@ -45,8 +51,14 @@ class DeploymentApi {
   }
 
   /// 回滚部署
-  Future<SitesDeploymentsRollbackResponse?> sitesDeploymentsRollback(String siteId, String deploymentId) async {
-    final response = await _client.post(ApiPaths.appPath('/sites/${serializePathParameter(siteId, const PathParameterSpec('siteId', 'simple', false))}/deployments/${serializePathParameter(deploymentId, const PathParameterSpec('deploymentId', 'simple', false))}/rollback'));
+  Future<SitesDeploymentsRollbackResponse?> sitesDeploymentsRollback(String siteId, String deploymentId, String idempotencyKey) async {
+    final requestHeaders = buildRequestHeaders(
+      <String, HeaderParameterSpec>{
+        'Idempotency-Key': HeaderParameterSpec(idempotencyKey, 'simple', false, null),
+      },
+      <String, HeaderParameterSpec>{},
+    );
+    final response = await _client.post(ApiPaths.appPath('/sites/${serializePathParameter(siteId, const PathParameterSpec('siteId', 'simple', false))}/deployments/${serializePathParameter(deploymentId, const PathParameterSpec('deploymentId', 'simple', false))}/rollback'), headers: requestHeaders);
     return (() {
       final map = sdkworkResponseAsMap(response);
       return map == null ? null : SitesDeploymentsRollbackResponse.fromJson(map);
@@ -257,3 +269,75 @@ String encodeQueryValue(String value, bool allowReserved) {
 }
 
 String urlEncode(String value) => Uri.encodeQueryComponent(value);
+class HeaderParameterSpec {
+  final dynamic value;
+  final String style;
+  final bool explode;
+  final String? contentType;
+
+  HeaderParameterSpec(this.value, this.style, this.explode, this.contentType);
+}
+
+Map<String, String>? buildRequestHeaders(
+  Map<String, HeaderParameterSpec> headers, [
+  Map<String, HeaderParameterSpec> cookies = const {},
+]) {
+  final requestHeaders = <String, String>{};
+
+  headers.forEach((name, parameter) {
+    final serialized = serializeParameterValue(parameter);
+    if (serialized != null) {
+      requestHeaders[name] = serialized;
+    }
+  });
+
+  final cookieHeader = buildCookieHeader(cookies);
+  if (cookieHeader != null && cookieHeader.isNotEmpty) {
+    requestHeaders['Cookie'] = requestHeaders.containsKey('Cookie')
+        ? '${requestHeaders['Cookie']}; $cookieHeader'
+        : cookieHeader;
+  }
+
+  return requestHeaders.isEmpty ? null : requestHeaders;
+}
+
+String? buildCookieHeader(Map<String, HeaderParameterSpec> cookies) {
+  final pairs = <String>[];
+  cookies.forEach((name, parameter) {
+    final serialized = serializeParameterValue(parameter);
+    if (serialized != null) {
+      pairs.add('${Uri.encodeComponent(name)}=${Uri.encodeComponent(serialized)}');
+    }
+  });
+  return pairs.isEmpty ? null : pairs.join('; ');
+}
+
+String? serializeParameterValue(HeaderParameterSpec? parameter) {
+  final value = parameter?.value;
+  if (value == null) return null;
+  if (parameter!.contentType != null && parameter.contentType!.trim().isNotEmpty) {
+    return jsonEncode(value);
+  }
+  if (value is DateTime) return value.toIso8601String();
+  if (value is Iterable) {
+    return value
+        .where((item) => item != null)
+        .map((item) => item.toString())
+        .whereType<String>()
+        .join(',');
+  }
+  if (value is Map) {
+    final serialized = <String>[];
+    value.forEach((key, item) {
+      if (item == null) return;
+      if (parameter.explode) {
+        serialized.add('$key=$item');
+      } else {
+        serialized.add(key.toString());
+        serialized.add(item.toString());
+      }
+    });
+    return serialized.join(',');
+  }
+  return value.toString();
+}

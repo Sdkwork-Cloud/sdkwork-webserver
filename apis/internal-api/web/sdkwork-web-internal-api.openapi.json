@@ -48,6 +48,11 @@
         "x-sdkwork-route-auth": "ingress-token",
         "x-sdkwork-permission": "web.runtimeAssignments.write",
         "x-sdkwork-idempotent": true,
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
         "x-sdkwork-rate-limit-tier": "auth-critical",
         "x-sdkwork-owner": "sdkwork-web",
         "requestBody": {
@@ -269,6 +274,11 @@
         "x-sdkwork-route-auth": "ingress-token",
         "x-sdkwork-permission": "web.agent.write",
         "x-sdkwork-idempotent": true,
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
         "x-sdkwork-rate-limit-tier": "auth-critical",
         "x-sdkwork-owner": "sdkwork-web",
         "requestBody": {
@@ -450,6 +460,16 @@
       }
     },
     "parameters": {
+      "IdempotencyKey": {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      },
       "NodeUuid": {
         "name": "nodeUuid",
         "in": "path",

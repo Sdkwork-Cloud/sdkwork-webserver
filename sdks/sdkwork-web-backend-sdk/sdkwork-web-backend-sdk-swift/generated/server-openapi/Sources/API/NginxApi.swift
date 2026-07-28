@@ -20,8 +20,14 @@ public class NginxApi {
     }
 
     /// Create an Nginx configuration
-    public func configsCreate(body: CreateNginxConfigRequest) async throws -> ConfigsCreateResponse201? {
-        return try await client.post(ApiPaths.backendPath("/nginx/configs"), body: body, params: nil, headers: nil, contentType: "application/json", responseType: ConfigsCreateResponse201.self)
+    public func configsCreate(body: CreateNginxConfigRequest, idempotencyKey: String) async throws -> ConfigsCreateResponse201? {
+        let requestHeaders = buildRequestHeaders(
+            [
+                "Idempotency-Key": HeaderParameterSpec(value: idempotencyKey, style: "simple", explode: false, contentType: nil),
+            ],
+            [:]
+        )
+        return try await client.post(ApiPaths.backendPath("/nginx/configs"), body: body, params: nil, headers: requestHeaders, contentType: "application/json", responseType: ConfigsCreateResponse201.self)
     }
 
     /// Retrieve an Nginx configuration
@@ -30,8 +36,14 @@ public class NginxApi {
     }
 
     /// Update an Nginx configuration
-    public func configsUpdate(configId: String, body: UpdateNginxConfigRequest) async throws -> ConfigsUpdateResponse? {
-        return try await client.put(ApiPaths.backendPath("/nginx/etc/\(serializePathParameter(configId, PathParameterSpec(name: "configId", style: "simple", explode: false)))"), body: body, params: nil, headers: nil, contentType: "application/json", responseType: ConfigsUpdateResponse.self)
+    public func configsUpdate(configId: String, body: UpdateNginxConfigRequest, idempotencyKey: String) async throws -> ConfigsUpdateResponse? {
+        let requestHeaders = buildRequestHeaders(
+            [
+                "Idempotency-Key": HeaderParameterSpec(value: idempotencyKey, style: "simple", explode: false, contentType: nil),
+            ],
+            [:]
+        )
+        return try await client.put(ApiPaths.backendPath("/nginx/etc/\(serializePathParameter(configId, PathParameterSpec(name: "configId", style: "simple", explode: false)))"), body: body, params: nil, headers: requestHeaders, contentType: "application/json", responseType: ConfigsUpdateResponse.self)
     }
 
     /// Validate an Nginx configuration
@@ -40,13 +52,25 @@ public class NginxApi {
     }
 
     /// Deploy an Nginx configuration
-    public func configsDeploy(configId: String) async throws -> ConfigsDeployResponse? {
-        return try await client.post(ApiPaths.backendPath("/nginx/etc/\(serializePathParameter(configId, PathParameterSpec(name: "configId", style: "simple", explode: false)))/deploy"), body: nil, responseType: ConfigsDeployResponse.self)
+    public func configsDeploy(configId: String, idempotencyKey: String) async throws -> ConfigsDeployResponse? {
+        let requestHeaders = buildRequestHeaders(
+            [
+                "Idempotency-Key": HeaderParameterSpec(value: idempotencyKey, style: "simple", explode: false, contentType: nil),
+            ],
+            [:]
+        )
+        return try await client.post(ApiPaths.backendPath("/nginx/etc/\(serializePathParameter(configId, PathParameterSpec(name: "configId", style: "simple", explode: false)))/deploy"), body: nil, params: nil, headers: requestHeaders, responseType: ConfigsDeployResponse.self)
     }
 
     /// Reload Nginx
-    public func reload() async throws -> ReloadResponse? {
-        return try await client.post(ApiPaths.backendPath("/nginx/reload"), body: nil, responseType: ReloadResponse.self)
+    public func reload(idempotencyKey: String) async throws -> ReloadResponse? {
+        let requestHeaders = buildRequestHeaders(
+            [
+                "Idempotency-Key": HeaderParameterSpec(value: idempotencyKey, style: "simple", explode: false, contentType: nil),
+            ],
+            [:]
+        )
+        return try await client.post(ApiPaths.backendPath("/nginx/reload"), body: nil, params: nil, headers: requestHeaders, responseType: ReloadResponse.self)
     }
 
     /// Retrieve Nginx status
@@ -231,4 +255,68 @@ public class NginxApi {
         value.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? value
     }
 
+    private struct HeaderParameterSpec {
+        let value: Any?
+        let style: String
+        let explode: Bool
+        let contentType: String?
+    }
+
+    private func buildRequestHeaders(_ headers: [String: HeaderParameterSpec], _ cookies: [String: HeaderParameterSpec]) -> [String: String]? {
+        var requestHeaders: [String: String] = [:]
+        for (name, parameter) in headers {
+            if let serialized = serializeParameterValue(parameter) {
+                requestHeaders[name] = serialized
+            }
+        }
+
+        if let cookieHeader = buildCookieHeader(cookies), !cookieHeader.isEmpty {
+            requestHeaders["Cookie"] = requestHeaders["Cookie"].map { "\($0); \(cookieHeader)" } ?? cookieHeader
+        }
+
+        return requestHeaders.isEmpty ? nil : requestHeaders
+    }
+
+    private func buildCookieHeader(_ cookies: [String: HeaderParameterSpec]) -> String? {
+        let pairs = cookies.compactMap { name, parameter -> String? in
+            guard let serialized = serializeParameterValue(parameter) else { return nil }
+            return "\(urlEncode(name))=\(urlEncode(serialized))"
+        }
+        return pairs.isEmpty ? nil : pairs.joined(separator: "; ")
+    }
+
+    private func serializeParameterValue(_ parameter: HeaderParameterSpec?) -> String? {
+        guard let parameter, let value = parameter.value else { return nil }
+        if let contentType = parameter.contentType, !contentType.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            if JSONSerialization.isValidJSONObject(value),
+               let data = try? JSONSerialization.data(withJSONObject: value, options: []),
+               let json = String(data: data, encoding: .utf8) {
+                return json
+            }
+            return String(describing: value)
+        }
+        if let array = value as? [Any?] {
+            return array.compactMap { $0.map { String(describing: $0) } }.joined(separator: ",")
+        }
+        if let object = value as? [String: Any] {
+            var values: [String] = []
+            for (key, item) in object {
+                if parameter.explode {
+                    values.append("\(key)=\(item)")
+                } else {
+                    values.append(key)
+                    values.append(String(describing: item))
+                }
+            }
+            return values.joined(separator: ",")
+        }
+        if let date = value as? Date {
+            return ISO8601DateFormatter().string(from: date)
+        }
+        return String(describing: value)
+    }
+
+    private func urlEncode(_ value: String) -> String {
+        value.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? value
+    }
 }

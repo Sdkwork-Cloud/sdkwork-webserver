@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "kind": "sdkwork.component.spec",
+  "component": {
+    "name": "@sdkwork/webserver-pc-documentation",
+    "displayName": "SDKWork Webserver PC Documentation",
+    "version": "0.1.0",
+    "type": "react-package",
+    "root": "sdkwork-web-server/apps/sdkwork-webserver-pc/packages/sdkwork-webserver-pc-documentation",
+    "domain": "infrastructure",
+    "capability": "documentation",
+    "surface": "app",
+    "languages": ["typescript"],
+    "generated": false,
+    "private": true,
+    "status": "active",
+    "manifests": ["package.json", "specs/component.spec.json"]
+  },
+  "canonicalSpecs": [
+    { "file": "CODE_STYLE_SPEC.md", "path": "../../../../../sdkwork-specs/CODE_STYLE_SPEC.md", "purpose": "Authored code and public export boundaries." },
+    { "file": "NAMING_SPEC.md", "path": "../../../../../sdkwork-specs/NAMING_SPEC.md", "purpose": "PC package identity." },
+    { "file": "TYPESCRIPT_CODE_SPEC.md", "path": "../../../../../sdkwork-specs/TYPESCRIPT_CODE_SPEC.md", "purpose": "TypeScript package structure." },
+    { "file": "FRONTEND_CODE_SPEC.md", "path": "../../../../../sdkwork-specs/FRONTEND_CODE_SPEC.md", "purpose": "Frontend implementation and verification." },
+    { "file": "COMPONENT_SPEC.md", "path": "../../../../../sdkwork-specs/COMPONENT_SPEC.md", "purpose": "Component manifest contract." },
+    { "file": "DOCUMENTATION_SPEC.md", "path": "../../../../../sdkwork-specs/DOCUMENTATION_SPEC.md", "purpose": "Documentation authority and narrative boundaries." },
+    { "file": "UI_ARCHITECTURE_SPEC.md", "path": "../../../../../sdkwork-specs/UI_ARCHITECTURE_SPEC.md", "purpose": "App PC React package selection." },
+    { "file": "APP_PC_ARCHITECTURE_SPEC.md", "path": "../../../../../sdkwork-specs/APP_PC_ARCHITECTURE_SPEC.md", "purpose": "PC package taxonomy and route ownership." },
+    { "file": "APP_PC_REACT_UI_SPEC.md", "path": "../../../../../sdkwork-specs/APP_PC_REACT_UI_SPEC.md", "purpose": "App-side React UI rules." },
+    { "file": "I18N_SPEC.md", "path": "../../../../../sdkwork-specs/I18N_SPEC.md", "purpose": "Package-local locale fragments." },
+    { "file": "TEST_SPEC.md", "path": "../../../../../sdkwork-specs/TEST_SPEC.md", "purpose": "Focused UI and architecture verification." }
+  ],
+  "contracts": {
+    "layerRole": "frontend-feature",
+    "publicExports": ["."],
+    "providedPorts": [
+      { "name": "webserverDocumentation", "export": "." },
+      { "name": "webserverDocumentationRoute", "export": "." },
+      { "name": "webserverDocumentationI18n", "export": "." }
+    ],
+    "requiredPorts": [
+      { "name": "documentationPortalNavigation", "export": "." },
+      { "name": "documentationConsoleNavigation", "export": "." },
+      { "name": "notificationCenterNavigation", "export": "." },
+      { "name": "documentationAgentCatalog", "export": "." },
+      { "name": "documentationViewer", "export": "." }
+    ],
+    "runtimeEntrypoints": [],
+    "routeManifest": null,
+    "sdkClients": [],
+    "sdkDependencies": [],
+    "dependencyApiExports": [],
+    "dependencyApiSurfaces": [],
+    "events": [],
+    "configKeys": []
+  },
+  "integration": {
+    "authority": "Root SDKWork specs remain authoritative.",
+    "dependencyPolicy": "The application root injects navigation, optional viewer data, and the supported agent display catalog through the package root export.",
+    "sdkPolicy": "The documentation package has no SDK dependency and owns no remote data access."
+  },
+  "verification": {
+    "commands": [
+      "pnpm --dir apps/sdkwork-webserver-pc typecheck",
+      "pnpm --dir apps/sdkwork-webserver-pc test",
+      "pnpm --dir apps/sdkwork-webserver-pc build"
+    ]
+  },
+  "metadata": { "standardVersion": "2026-07-28" }
+}

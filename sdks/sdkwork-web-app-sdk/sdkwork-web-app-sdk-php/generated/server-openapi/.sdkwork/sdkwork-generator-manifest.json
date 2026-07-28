@@ -48,27 +48,27 @@
     },
     {
       "path": "src/Api/Certificate.php",
-      "sha256": "0d139e2a379d624cfae2271ee563f10d6e705a166963491c857603f6ca729877"
+      "sha256": "e8cc3d9e9b816d890c7cdf54aa1fb455a432e736c45d700babcffa451afd5c6b"
     },
     {
       "path": "src/Api/Deployment.php",
-      "sha256": "1b6c905719a6427bc0d7bf47b46cdba0603a1bf3b646cdec8c04561b5ff0f3f8"
+      "sha256": "5c6753dff22a379958f645d97d32d91c767d6be28d3d76ca25002879601e069e"
     },
     {
       "path": "src/Api/Domain.php",
-      "sha256": "afaf67a1868470b47d9fac17fcc701ced6d133cee7078511b2a82d2fe846b4bc"
+      "sha256": "24c20c5643f16ab4e72d2ecfdc86ae10a04b68712c804ccf486896aa6134da4d"
     },
     {
       "path": "src/Api/EnvVariable.php",
-      "sha256": "9165e82850fb3b962329414335306bc1e6bc223f241ef04e7375aa69d2eea851"
+      "sha256": "1792c48756a8870982e30fa0c79ce6c107b61051a0475960606eaf7190400c2b"
     },
     {
       "path": "src/Api/Monitor.php",
-      "sha256": "35c802146228bff3f32693394896f78cf31810fc7459d7bffd2f65634b00746b"
+      "sha256": "aa8861f248017125cb463e5db31cbac8388b18525b02d6fcb488d365b8b439a2"
     },
     {
       "path": "src/Api/Site.php",
-      "sha256": "efe1157a6c9a97900236f4a1bf70ce1291d508600bf2ac7bbbb453614d54e8b3"
+      "sha256": "03810a60439dde91b68eaf5e660c976b0cf20b219334099b4ebb43994bdecdb4"
     },
     {
       "path": "src/Http/HttpClient.php",
@@ -96,7 +96,7 @@
     },
     {
       "path": "src/Models/CreateDeploymentRequest.php",
-      "sha256": "cc696bcecc174b12f7fdd9a203573174ebe12ae608f45dfb32e20ccf798b16e4"
+      "sha256": "4980d68516aa3385df501c56460994eb34bf6690c4e166597acdfd57961e52f6"
     },
     {
       "path": "src/Models/CreateDomainRequest.php",

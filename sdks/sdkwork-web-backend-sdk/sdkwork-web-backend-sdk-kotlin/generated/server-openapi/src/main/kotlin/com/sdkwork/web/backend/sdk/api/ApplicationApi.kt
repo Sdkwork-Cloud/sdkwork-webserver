@@ -23,8 +23,14 @@ class ApplicationApi(private val client: HttpClient) {
     }
 
     /** Create a managed application */
-    suspend fun applicationsCreate(body: CreateApplicationRequest): ApplicationsCreateResponse201? {
-        val raw = client.post(ApiPaths.backendPath("/applications"), body, null, null, "application/json")
+    suspend fun applicationsCreate(body: CreateApplicationRequest, idempotencyKey: String): ApplicationsCreateResponse201? {
+        val requestHeaders = buildRequestHeaders(
+            mapOf(
+                "Idempotency-Key" to HeaderParameterSpec(idempotencyKey, "simple", false, null),
+            ),
+            emptyMap()
+        )
+        val raw = client.post(ApiPaths.backendPath("/applications"), body, null, requestHeaders, "application/json")
         return client.convertValue(raw, object : TypeReference<ApplicationsCreateResponse201>() {})
     }
 
@@ -35,25 +41,49 @@ class ApplicationApi(private val client: HttpClient) {
     }
 
     /** Update a managed application */
-    suspend fun applicationsUpdate(applicationId: String, body: UpdateApplicationRequest): ApplicationsUpdateResponse? {
-        val raw = client.patch(ApiPaths.backendPath("/applications/${serializePathParameter(applicationId, PathParameterSpec("applicationId", "simple", false))}"), body, null, null, "application/json")
+    suspend fun applicationsUpdate(applicationId: String, body: UpdateApplicationRequest, idempotencyKey: String): ApplicationsUpdateResponse? {
+        val requestHeaders = buildRequestHeaders(
+            mapOf(
+                "Idempotency-Key" to HeaderParameterSpec(idempotencyKey, "simple", false, null),
+            ),
+            emptyMap()
+        )
+        val raw = client.patch(ApiPaths.backendPath("/applications/${serializePathParameter(applicationId, PathParameterSpec("applicationId", "simple", false))}"), body, null, requestHeaders, "application/json")
         return client.convertValue(raw, object : TypeReference<ApplicationsUpdateResponse>() {})
     }
 
     /** Delete a managed application */
-    suspend fun applicationsDelete(applicationId: String): Unit {
-        client.delete(ApiPaths.backendPath("/applications/${serializePathParameter(applicationId, PathParameterSpec("applicationId", "simple", false))}"))
+    suspend fun applicationsDelete(applicationId: String, idempotencyKey: String): Unit {
+        val requestHeaders = buildRequestHeaders(
+            mapOf(
+                "Idempotency-Key" to HeaderParameterSpec(idempotencyKey, "simple", false, null),
+            ),
+            emptyMap()
+        )
+        client.delete(ApiPaths.backendPath("/applications/${serializePathParameter(applicationId, PathParameterSpec("applicationId", "simple", false))}"), null, requestHeaders)
     }
 
     /** Activate a managed application */
-    suspend fun applicationsActivate(applicationId: String): ApplicationsActivateResponse? {
-        val raw = client.post(ApiPaths.backendPath("/applications/${serializePathParameter(applicationId, PathParameterSpec("applicationId", "simple", false))}/activate"), null)
+    suspend fun applicationsActivate(applicationId: String, idempotencyKey: String): ApplicationsActivateResponse? {
+        val requestHeaders = buildRequestHeaders(
+            mapOf(
+                "Idempotency-Key" to HeaderParameterSpec(idempotencyKey, "simple", false, null),
+            ),
+            emptyMap()
+        )
+        val raw = client.post(ApiPaths.backendPath("/applications/${serializePathParameter(applicationId, PathParameterSpec("applicationId", "simple", false))}/activate"), null, null, requestHeaders)
         return client.convertValue(raw, object : TypeReference<ApplicationsActivateResponse>() {})
     }
 
     /** Pause a managed application */
-    suspend fun applicationsPause(applicationId: String): ApplicationsPauseResponse? {
-        val raw = client.post(ApiPaths.backendPath("/applications/${serializePathParameter(applicationId, PathParameterSpec("applicationId", "simple", false))}/pause"), null)
+    suspend fun applicationsPause(applicationId: String, idempotencyKey: String): ApplicationsPauseResponse? {
+        val requestHeaders = buildRequestHeaders(
+            mapOf(
+                "Idempotency-Key" to HeaderParameterSpec(idempotencyKey, "simple", false, null),
+            ),
+            emptyMap()
+        )
+        val raw = client.post(ApiPaths.backendPath("/applications/${serializePathParameter(applicationId, PathParameterSpec("applicationId", "simple", false))}/pause"), null, null, requestHeaders)
         return client.convertValue(raw, object : TypeReference<ApplicationsPauseResponse>() {})
     }
 
@@ -229,4 +259,50 @@ class ApplicationApi(private val client: HttpClient) {
         return java.net.URLEncoder.encode(value, java.nio.charset.StandardCharsets.UTF_8)
     }
 
+    private data class HeaderParameterSpec(val value: Any?, val style: String, val explode: Boolean, val contentType: String?)
+
+    private val headerObjectMapper = ObjectMapper().registerKotlinModule()
+
+    private fun buildRequestHeaders(headers: Map<String, HeaderParameterSpec>, cookies: Map<String, HeaderParameterSpec>): Map<String, String>? {
+        val requestHeaders = linkedMapOf<String, String>()
+        headers.forEach { (name, parameter) ->
+            serializeParameterValue(parameter)?.let { requestHeaders[name] = it }
+        }
+
+        val cookieHeader = buildCookieHeader(cookies)
+        if (cookieHeader.isNotEmpty()) {
+            requestHeaders["Cookie"] = requestHeaders["Cookie"]?.let { "$it; $cookieHeader" } ?: cookieHeader
+        }
+
+        return requestHeaders.takeIf { it.isNotEmpty() }
+    }
+
+    private fun buildCookieHeader(cookies: Map<String, HeaderParameterSpec>): String {
+        return cookies.mapNotNull { (name, parameter) ->
+            serializeParameterValue(parameter)?.let {
+                java.net.URLEncoder.encode(name, java.nio.charset.StandardCharsets.UTF_8) + "=" +
+                    java.net.URLEncoder.encode(it, java.nio.charset.StandardCharsets.UTF_8)
+            }
+        }.joinToString("; ")
+    }
+
+    private fun serializeParameterValue(parameter: HeaderParameterSpec?): String? {
+        val value = parameter?.value ?: return null
+        if (!parameter.contentType.isNullOrBlank()) {
+            return headerObjectMapper.writeValueAsString(value)
+        }
+        return when (value) {
+            is Iterable<*> -> value.mapNotNull { it?.toString() }.joinToString(",")
+            is Map<*, *> -> value.mapNotNull { (key, item) ->
+                if (item == null) {
+                    null
+                } else if (parameter.explode) {
+                    "$key=$item"
+                } else {
+                    listOf(key.toString(), item.toString()).joinToString(",")
+                }
+            }.joinToString(",")
+            else -> value.toString()
+        }
+    }
 }

@@ -25,30 +25,118 @@ final class ApplicationDomainApi extends BaseApi
     }
 
     /** Bind a public domain to an application */
-    public function applicationsDomainsCreate(string $applicationId, array|CreateApplicationDomainRequest $body): ?ApplicationsDomainsCreateResponse201
+    public function applicationsDomainsCreate(string $applicationId, array|CreateApplicationDomainRequest $body, string $idempotencyKey): ?ApplicationsDomainsCreateResponse201
     {
         $path = $this->interpolatePath('/backend/v3/api/applications/{applicationId}/domains', ['applicationId' => $this->serializePathParameter($applicationId, new PathParameterSpec('applicationId', 'simple', false))]);
         $payload = $body instanceof CreateApplicationDomainRequest ? $body->toArray() : $body;
+        $requestHeaders = $this->buildRequestHeaders(
+            [
+                'Idempotency-Key' => new HeaderParameterSpec($idempotencyKey, 'simple', false, null),
+            ],
+            []
+        );
         $result = $this->client->request('POST', $path, [
+            'headers' => $requestHeaders,
             'json' => $payload,
         ]);
         return is_array($result) ? ApplicationsDomainsCreateResponse201::fromArray($result) : null;
     }
 
     /** Unbind an application public domain */
-    public function applicationsDomainsDelete(string $applicationId, string $domainId): mixed
+    public function applicationsDomainsDelete(string $applicationId, string $domainId, string $idempotencyKey): mixed
     {
         $path = $this->interpolatePath('/backend/v3/api/applications/{applicationId}/domains/{domainId}', ['applicationId' => $this->serializePathParameter($applicationId, new PathParameterSpec('applicationId', 'simple', false)), 'domainId' => $this->serializePathParameter($domainId, new PathParameterSpec('domainId', 'simple', false))]);
-        $result = $this->client->request('DELETE', $path, []);
+        $requestHeaders = $this->buildRequestHeaders(
+            [
+                'Idempotency-Key' => new HeaderParameterSpec($idempotencyKey, 'simple', false, null),
+            ],
+            []
+        );
+        $result = $this->client->request('DELETE', $path, [
+            'headers' => $requestHeaders,
+        ]);
         return $result;
     }
 
     /** Verify an application public domain */
-    public function applicationsDomainsVerify(string $applicationId, string $domainId): ?ApplicationsDomainsVerifyResponse
+    public function applicationsDomainsVerify(string $applicationId, string $domainId, string $idempotencyKey): ?ApplicationsDomainsVerifyResponse
     {
         $path = $this->interpolatePath('/backend/v3/api/applications/{applicationId}/domains/{domainId}/verify', ['applicationId' => $this->serializePathParameter($applicationId, new PathParameterSpec('applicationId', 'simple', false)), 'domainId' => $this->serializePathParameter($domainId, new PathParameterSpec('domainId', 'simple', false))]);
-        $result = $this->client->request('POST', $path, []);
+        $requestHeaders = $this->buildRequestHeaders(
+            [
+                'Idempotency-Key' => new HeaderParameterSpec($idempotencyKey, 'simple', false, null),
+            ],
+            []
+        );
+        $result = $this->client->request('POST', $path, [
+            'headers' => $requestHeaders,
+        ]);
         return is_array($result) ? ApplicationsDomainsVerifyResponse::fromArray($result) : null;
     }
 
+    private function buildRequestHeaders(array $headers, array $cookies): array
+    {
+        $requestHeaders = [];
+        foreach ($headers as $name => $parameter) {
+            $serialized = $this->serializeParameterValue($parameter);
+            if ($serialized !== null) {
+                $requestHeaders[(string) $name] = $serialized;
+            }
+        }
+
+        $cookieHeader = $this->buildCookieHeader($cookies);
+        if ($cookieHeader !== '') {
+            $requestHeaders['Cookie'] = isset($requestHeaders['Cookie']) && $requestHeaders['Cookie'] !== ''
+                ? $requestHeaders['Cookie'] . '; ' . $cookieHeader
+                : $cookieHeader;
+        }
+
+        return $requestHeaders;
+    }
+
+    private function buildCookieHeader(array $cookies): string
+    {
+        $pairs = [];
+        foreach ($cookies as $name => $parameter) {
+            $serialized = $this->serializeParameterValue($parameter);
+            if ($serialized !== null) {
+                $pairs[] = rawurlencode((string) $name) . '=' . rawurlencode($serialized);
+            }
+        }
+
+        return implode('; ', $pairs);
+    }
+
+    private function serializeParameterValue(?HeaderParameterSpec $parameter): ?string
+    {
+        $value = $parameter?->value;
+        if ($value === null) {
+            return null;
+        }
+        if ($parameter->contentType !== null && trim($parameter->contentType) !== '') {
+            return (string) json_encode($value, JSON_UNESCAPED_SLASHES);
+        }
+        if (is_array($value)) {
+            $serialized = [];
+            foreach ($value as $key => $item) {
+                if ($item === null) {
+                    continue;
+                }
+                if (!array_is_list($value) && $parameter->explode) {
+                    $serialized[] = (string) $key . '=' . (string) $item;
+                } elseif (!array_is_list($value)) {
+                    $serialized[] = (string) $key;
+                    $serialized[] = (string) $item;
+                } else {
+                    $serialized[] = (string) $item;
+                }
+            }
+            return implode(',', $serialized);
+        }
+        if ($value instanceof \Stringable) {
+            return (string) $value;
+        }
+
+        return (string) $value;
+    }
 }

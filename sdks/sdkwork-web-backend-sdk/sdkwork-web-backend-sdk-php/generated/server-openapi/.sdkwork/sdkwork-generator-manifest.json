@@ -48,15 +48,15 @@
     },
     {
       "path": "src/Api/Application.php",
-      "sha256": "66d17e7ffbb4132c1b5abbf65ba4541d348f6f3b022cf04796c549784bcc2183"
+      "sha256": "67cd38cb5f92ccb061beb0ad3bba0202721586f59994876e87f66a1ef00067a1"
     },
     {
       "path": "src/Api/ApplicationDeployment.php",
-      "sha256": "587c20dc52a0ed3941444ade75017d6ca8232f9d6192ca36876d4f590722ac5e"
+      "sha256": "ef75f1e174a4c114b427380ae315617f2193e53bd663982c5bd5167235d32a86"
     },
     {
       "path": "src/Api/ApplicationDomain.php",
-      "sha256": "2e15816d4f74345865bfabf88bb7db966355d5654c6b1b097d7acc3cb21c61bc"
+      "sha256": "f2a7de947600c0898cd4fb093be3141b1df80cee60a0b1c7cadd73c369a5d131"
     },
     {
       "path": "src/Api/Audit.php",
@@ -68,7 +68,7 @@
     },
     {
       "path": "src/Api/Certificate.php",
-      "sha256": "616d265fa7d7d349e5bd3d147b306607acbe7086d0bdebc6a33c29b152d66ee9"
+      "sha256": "c29eaaf96922523f3efec2fa7bb8037f66f0744957e14a2dec3e0c50161c8ef3"
     },
     {
       "path": "src/Api/CertificateDistribution.php",
@@ -76,11 +76,11 @@
     },
     {
       "path": "src/Api/Nginx.php",
-      "sha256": "79b76b7ef00bcd9e84a4e7b35413390fd8dc9d4da82de7e328fdc6c94608a326"
+      "sha256": "4c6ef5b322bf05a65565afe64a158aa6cf69b5efa9acba48241460eef6ec1c4b"
     },
     {
       "path": "src/Api/Server.php",
-      "sha256": "082a66ab3d106a14bb0a9acc5665d00a12849a20b5fd327b92a3beeb74a4c7c8"
+      "sha256": "7a8e2041bb9e0bd119ed89af12098b8ec460e815ff562d206b9d7978c51ddc10"
     },
     {
       "path": "src/Http/HttpClient.php",
@@ -236,7 +236,7 @@
     },
     {
       "path": "src/Models/CreateApplicationDeploymentRequest.php",
-      "sha256": "5cf5b6080b292bf9538db3d2cc8e9333233b49f25a72e71003893af415667250"
+      "sha256": "72d0a368823dc4a5b9871a566944bd0002088ec3a797952a1f220816ef6e1c3f"
     },
     {
       "path": "src/Models/CreateApplicationDomainRequest.php",

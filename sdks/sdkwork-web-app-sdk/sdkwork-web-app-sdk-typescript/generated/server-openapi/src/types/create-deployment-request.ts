@@ -9,5 +9,4 @@ export interface CreateDeploymentRequest {
   /** SHA-256 hexadecimal digest of the uploaded package. */
   artifactHash?: string;
   environment?: string;
-  idempotencyKey?: string;
 }

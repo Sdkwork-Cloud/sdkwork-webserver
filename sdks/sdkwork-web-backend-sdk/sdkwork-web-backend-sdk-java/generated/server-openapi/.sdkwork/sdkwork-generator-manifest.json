@@ -52,15 +52,15 @@
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/api/ApplicationApi.java",
-      "sha256": "c33a1a7dea8968d4ccd0a303275d88d59cf97746ea47592fc4b6ede09852d05f"
+      "sha256": "d367696de04f62abac911f12170dc9dbb30e5c1abf40a6d2678e3b05f28f6da1"
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/api/ApplicationDeploymentApi.java",
-      "sha256": "0616f8b57e67c03c9d6d4c91e2fb190678dd15d005b1d9088df86934941e4439"
+      "sha256": "cf887b5044d6364e138fc5c5d1bd65aa3d9ddc131ac9507731030fc0e3dfc373"
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/api/ApplicationDomainApi.java",
-      "sha256": "6ac2de9f7fcee52139e48ac3eeb3dad0c439fdb055b4365f0ec29e9a1898a1eb"
+      "sha256": "d17cac766757b762b45c955d5b1a34387c5f91724c0bb4560ac528ddff97de80"
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/api/AuditApi.java",
@@ -68,7 +68,7 @@
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/api/CertificateApi.java",
-      "sha256": "3f0b51e8ceff3ed9023851a137dd4c63213b7e55ef5c5afb5586b60731e142b6"
+      "sha256": "62a1cdd4ea5060d88275cd2645effdde4356452b539e5a2e64272013d5734c6b"
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/api/CertificateDistributionApi.java",
@@ -76,7 +76,7 @@
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/api/NginxApi.java",
-      "sha256": "e387d3643331a17aef47a4ad773746829204d40e8e018c356d4049eaa7c6943e"
+      "sha256": "417f03d3f04fbeda7281213d8372894ddcffb2d5ff4bb18a21f3333cc8b6e0c4"
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/api/package-info.java",
@@ -84,7 +84,7 @@
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/api/ServerApi.java",
-      "sha256": "68fbeecbd79f2e7e407e99ec87fd7c1fd245a0bda1d3a16633dcc66db5ab7188"
+      "sha256": "494e6864dbae3df2f1a616c547732fb0fa701d6c6a899291ab8df8d2770e339f"
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/http/HttpClient.java",
@@ -240,7 +240,7 @@
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/model/CreateApplicationDeploymentRequest.java",
-      "sha256": "a76d9cd698b8a692c972c34f7af902e983cc1d672d420b8dfdae796df80ab667"
+      "sha256": "7d80df32779e270e3c9bfd309fa83636b9baf9dec41990bfd4516747c3f3fddb"
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/model/CreateApplicationDomainRequest.java",
