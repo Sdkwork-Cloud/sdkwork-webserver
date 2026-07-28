@@ -186,9 +186,8 @@ describe("console release controls", () => {
       artifactSize: "5",
       deployType: 1,
       environment: "production",
-      idempotencyKey: "release-attempt-1",
       versionTag: "v1.2.3",
-    }));
+    }), { idempotencyKey: "release-attempt-1" });
   });
 
   it("scopes certificate listing and domain choices to the selected application", async () => {

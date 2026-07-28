@@ -33,32 +33,32 @@ describe("admin application capability", () => {
 
     const registry = createWebserverAdminApplicationRegistry(client);
     await registry.applications?.load({ page: 1, pageSize: 20, search: "api" });
-    await registry.applications?.actions[0]?.execute({ body: { name: "API", applicationType: "API", siteType: 6 } });
+    await registry.applications?.actions[0]?.execute({ body: { name: "API", applicationType: "API", siteType: 6 }, idempotencyKey: "application-create-1" });
     expect(listApplications).toHaveBeenCalledWith({ page: 1, pageSize: 20, keyword: "api" });
-    expect(createApplication).toHaveBeenCalledWith({ name: "API", applicationType: "API", siteType: 6 });
+    expect(createApplication).toHaveBeenCalledWith({ name: "API", applicationType: "API", siteType: 6 }, { idempotencyKey: "application-create-1" });
 
     const applicationActions = registry.applications?.actions ?? [];
-    await applicationActions.find((candidate) => candidate.id === "update")?.execute({ body: { name: "Renamed", description: "API" }, selectedItem: { id: "app-1" } });
-    await applicationActions.find((candidate) => candidate.id === "activate")?.execute({ body: {}, selectedItem: { id: "app-1", status: 0 } });
-    await applicationActions.find((candidate) => candidate.id === "pause")?.execute({ body: {}, selectedItem: { id: "app-1", status: 1 } });
-    await applicationActions.find((candidate) => candidate.id === "delete")?.execute({ body: {}, selectedItem: { id: "app-1", status: 2 } });
-    expect(updateApplication).toHaveBeenCalledWith("app-1", { name: "Renamed", description: "API" });
-    expect(activateApplication).toHaveBeenCalledWith("app-1");
-    expect(pauseApplication).toHaveBeenCalledWith("app-1");
-    expect(deleteApplication).toHaveBeenCalledWith("app-1");
+    await applicationActions.find((candidate) => candidate.id === "update")?.execute({ body: { name: "Renamed", description: "API" }, idempotencyKey: "application-update-1", selectedItem: { id: "app-1" } });
+    await applicationActions.find((candidate) => candidate.id === "activate")?.execute({ body: {}, idempotencyKey: "application-activate-1", selectedItem: { id: "app-1", status: 0 } });
+    await applicationActions.find((candidate) => candidate.id === "pause")?.execute({ body: {}, idempotencyKey: "application-pause-1", selectedItem: { id: "app-1", status: 1 } });
+    await applicationActions.find((candidate) => candidate.id === "delete")?.execute({ body: {}, idempotencyKey: "application-delete-1", selectedItem: { id: "app-1", status: 2 } });
+    expect(updateApplication).toHaveBeenCalledWith("app-1", { name: "Renamed", description: "API" }, { idempotencyKey: "application-update-1" });
+    expect(activateApplication).toHaveBeenCalledWith("app-1", { idempotencyKey: "application-activate-1" });
+    expect(pauseApplication).toHaveBeenCalledWith("app-1", { idempotencyKey: "application-pause-1" });
+    expect(deleteApplication).toHaveBeenCalledWith("app-1", { idempotencyKey: "application-delete-1" });
     expect(applicationActions.find((candidate) => candidate.id === "activate")?.availableWhen?.({ body: {}, selectedItem: { status: 1 } })).toBe(false);
     expect(applicationActions.find((candidate) => candidate.id === "pause")?.availableWhen?.({ body: {}, selectedItem: { status: 1 } })).toBe(true);
     expect(applicationActions.find((candidate) => candidate.id === "delete")?.dangerous).toBe(true);
 
     expect(registry["application-domains"]?.scopeKind).toBe("application");
     await registry["application-domains"]?.load({ page: 1, pageSize: 20, scopeId: "app-1" });
-    await registry["application-domains"]?.actions[0]?.execute({ scopeId: "app-1", body: { hostname: "api.example.test" } });
-    await registry["application-domains"]?.actions[1]?.execute({ scopeId: "app-1", body: {}, selectedItem: { id: "domain-1" } });
-    await registry["application-domains"]?.actions.find((candidate) => candidate.id === "delete")?.execute({ scopeId: "app-1", body: {}, selectedItem: { id: "domain-1" } });
+    await registry["application-domains"]?.actions[0]?.execute({ scopeId: "app-1", body: { hostname: "api.example.test" }, idempotencyKey: "domain-create-1" });
+    await registry["application-domains"]?.actions[1]?.execute({ scopeId: "app-1", body: {}, idempotencyKey: "domain-verify-1", selectedItem: { id: "domain-1" } });
+    await registry["application-domains"]?.actions.find((candidate) => candidate.id === "delete")?.execute({ scopeId: "app-1", body: {}, idempotencyKey: "domain-delete-1", selectedItem: { id: "domain-1" } });
     expect(listDomains).toHaveBeenCalledWith("app-1", { page: 1, pageSize: 20 });
-    expect(createDomain).toHaveBeenCalledWith("app-1", { hostname: "api.example.test" });
-    expect(verifyDomain).toHaveBeenCalledWith("app-1", "domain-1");
-    expect(deleteDomain).toHaveBeenCalledWith("app-1", "domain-1");
+    expect(createDomain).toHaveBeenCalledWith("app-1", { hostname: "api.example.test" }, { idempotencyKey: "domain-create-1" });
+    expect(verifyDomain).toHaveBeenCalledWith("app-1", "domain-1", { idempotencyKey: "domain-verify-1" });
+    expect(deleteDomain).toHaveBeenCalledWith("app-1", "domain-1", { idempotencyKey: "domain-delete-1" });
     expect(registry["application-domains"]?.actions.find((candidate) => candidate.id === "verify")?.availableWhen?.({ body: {}, selectedItem: { isVerified: true } })).toBe(false);
 
     const deploymentBody = {
@@ -68,10 +68,10 @@ describe("admin application capability", () => {
       artifactSize: "1024",
       artifactHash: "a".repeat(64),
     };
-    await registry["application-deployments"]?.actions[0]?.execute({ scopeId: "app-1", body: deploymentBody });
-    await registry["application-deployments"]?.actions.find((candidate) => candidate.id === "rollback")?.execute({ scopeId: "app-1", body: {}, selectedItem: { id: "deployment-1", status: 2 } });
-    expect(createDeployment).toHaveBeenCalledWith("app-1", deploymentBody);
-    expect(rollbackDeployment).toHaveBeenCalledWith("app-1", "deployment-1");
+    await registry["application-deployments"]?.actions[0]?.execute({ scopeId: "app-1", body: deploymentBody, idempotencyKey: "deployment-create-1" });
+    await registry["application-deployments"]?.actions.find((candidate) => candidate.id === "rollback")?.execute({ scopeId: "app-1", body: {}, idempotencyKey: "deployment-rollback-1", selectedItem: { id: "deployment-1", status: 2 } });
+    expect(createDeployment).toHaveBeenCalledWith("app-1", deploymentBody, { idempotencyKey: "deployment-create-1" });
+    expect(rollbackDeployment).toHaveBeenCalledWith("app-1", "deployment-1", { idempotencyKey: "deployment-rollback-1" });
     expect(registry["application-deployments"]?.actions.find((candidate) => candidate.id === "rollback")?.availableWhen?.({ body: {}, selectedItem: { status: 3 } })).toBe(false);
   });
 });
@@ -90,15 +90,15 @@ describe("admin certificate capability", () => {
 
     const registry = createWebserverAdminCertificateRegistry(client);
     await registry["managed-certificates"]?.load({ page: 2, pageSize: 20 });
-    await registry["managed-certificates"]?.actions[0]?.execute({ body: { domainId: "domain-1", certType: 1, autoRenew: true } });
-    await registry["managed-certificates"]?.actions[1]?.execute({ body: { autoRenew: false }, selectedItem: { id: "certificate-1" } });
-    await registry["managed-certificates"]?.actions[2]?.execute({ body: {}, selectedItem: { id: "certificate-1" } });
+    await registry["managed-certificates"]?.actions[0]?.execute({ body: { domainId: "domain-1", certType: 1, autoRenew: true }, idempotencyKey: "certificate-create-1" });
+    await registry["managed-certificates"]?.actions[1]?.execute({ body: { autoRenew: false }, idempotencyKey: "certificate-update-1", selectedItem: { id: "certificate-1" } });
+    await registry["managed-certificates"]?.actions[2]?.execute({ body: {}, idempotencyKey: "certificate-renew-1", selectedItem: { id: "certificate-1" } });
     await registry["certificate-distribution"]?.load({ page: 1, pageSize: 20 });
 
     expect(list).toHaveBeenCalledWith({ page: 2, pageSize: 20 });
-    expect(create).toHaveBeenCalledWith({ domainId: "domain-1", certType: 1, autoRenew: true });
-    expect(update).toHaveBeenCalledWith("certificate-1", { autoRenew: false });
-    expect(renew).toHaveBeenCalledWith("certificate-1");
+    expect(create).toHaveBeenCalledWith({ domainId: "domain-1", certType: 1, autoRenew: true }, { idempotencyKey: "certificate-create-1" });
+    expect(update).toHaveBeenCalledWith("certificate-1", { autoRenew: false }, { idempotencyKey: "certificate-update-1" });
+    expect(renew).toHaveBeenCalledWith("certificate-1", { idempotencyKey: "certificate-renew-1" });
     expect(listDistribution).toHaveBeenCalledWith({ page: 1, pageSize: 20 });
   });
 });
@@ -129,15 +129,15 @@ describe("admin control-plane capability", () => {
     } as unknown as WebserverAdminSdkClient;
     const registry = createWebserverAdminRegistry(client);
 
-    await registry.nginx?.actions.find((candidate) => candidate.id === "create")?.execute({ body: { configType: 1, configName: "edge", configContent: "events {}" } });
-    await registry.nginx?.actions.find((candidate) => candidate.id === "update")?.execute({ body: { configName: "edge-v2", configContent: "events {}" }, selectedItem: { id: "config-1" } });
-    expect(createConfig).toHaveBeenCalledWith({ configType: 1, configName: "edge", configContent: "events {}" });
-    expect(updateConfig).toHaveBeenCalledWith("config-1", { configName: "edge-v2", configContent: "events {}" });
+    await registry.nginx?.actions.find((candidate) => candidate.id === "create")?.execute({ body: { configType: 1, configName: "edge", configContent: "events {}" }, idempotencyKey: "config-create-1" });
+    await registry.nginx?.actions.find((candidate) => candidate.id === "update")?.execute({ body: { configName: "edge-v2", configContent: "events {}" }, idempotencyKey: "config-update-1", selectedItem: { id: "config-1" } });
+    expect(createConfig).toHaveBeenCalledWith({ configType: 1, configName: "edge", configContent: "events {}" }, { idempotencyKey: "config-create-1" });
+    expect(updateConfig).toHaveBeenCalledWith("config-1", { configName: "edge-v2", configContent: "events {}" }, { idempotencyKey: "config-update-1" });
 
     const register = registry.servers?.actions.find((candidate) => candidate.id === "create");
-    await register?.execute({ body: { name: "edge-1", host: "10.0.0.8", sshPort: 22, tenantScopeHash: "tenant-hash" } });
+    await register?.execute({ body: { name: "edge-1", host: "10.0.0.8", sshPort: 22, tenantScopeHash: "tenant-hash" }, idempotencyKey: "server-create-1" });
     expect(register?.resultFields).toContain("agentToken");
-    expect(createServer).toHaveBeenCalledWith({ name: "edge-1", host: "10.0.0.8", sshPort: 22, tenantScopeHash: "tenant-hash" });
+    expect(createServer).toHaveBeenCalledWith({ name: "edge-1", host: "10.0.0.8", sshPort: 22, tenantScopeHash: "tenant-hash" }, { idempotencyKey: "server-create-1" });
 
     await registry.audit?.load({
       filters: { targetType: "deployment", action: "sites.rollback", operatorId: "42", startDate: "2026-07-01", endDate: "2026-07-28" },
