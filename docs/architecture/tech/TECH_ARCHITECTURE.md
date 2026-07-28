@@ -143,6 +143,7 @@ The request path does not call management services or repositories. Management r
 ## 5. API, SDK, And Data Ownership
 
 - Management success/error responses follow SDKWork envelopes and Problem Details.
+- Retriable management operations preserve one explicit idempotency contract from authority OpenAPI through route metadata and generated SDK inputs. The framework validates and scopes the Header; deployment repository deduplication receives only that framework-owned context value.
 - SDK families are `sdkwork-web-app-sdk`, `sdkwork-web-backend-sdk`, and the machine-to-machine
   `sdkwork-web-internal-sdk` used for runtime assignment publication, retrieval, and observations.
 - Request data-plane traffic preserves the configured upstream or static Web protocol; it does not wrap arbitrary application responses in SDKWork management envelopes.
@@ -188,12 +189,14 @@ The request path does not call management services or repositories. Management r
 
 ## 8. Architecture Decision Index
 
+- [ADR-20260728 Idempotency Contract Closure](../decisions/ADR-20260728-idempotency-contract-closure.md) - accepted strict marker/Header/route/SDK parity, stable action keys, bounded runtime validation, and Header-owned durable deduplication.
 - [ADR-20260728 Standalone Browser Same-Origin Delivery](../decisions/ADR-20260728-standalone-browser-same-origin-delivery.md) - accepted topology-derived development proxy and production gateway-static delivery for one browser-visible origin.
 - [ADR-20260728 Embedded Standalone Dependency Assemblies](../decisions/ADR-20260728-embedded-standalone-dependency-assemblies.md) - accepted one-process IAM/Drive owner assembly composition and one standalone browser API ingress.
 - [ADR-20260721 Compiled Website Runtime Descriptor](../decisions/ADR-20260721-compiled-website-runtime-descriptor.md) - accepted cloud data-plane input and authority boundary.
 
 | ADR | Topic | Status |
 | --- | --- | --- |
+| ADR-20260728-idempotency-contract-closure | Generated replay-safe API/SDK idempotency contract | accepted |
 | ADR-20260716-canonical-uri-dual-representation | Raw request URI preservation and bounded canonical routing Path | proposed; human review required |
 | ADR-20260715-rust-webserver-data-plane | Config authority, crate boundaries, HTTP/TLS/static/proxy stack | accepted |
 | ADR-20260720-process-database-pool | One typed SDKWork lifecycle pool per process | accepted |

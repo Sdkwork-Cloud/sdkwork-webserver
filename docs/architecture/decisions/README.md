@@ -6,6 +6,10 @@ Retired layout: `docs/adr/` must not be used for new ADRs.
 
 See `ARCHITECTURE_DECISION_SPEC.md`.
 
+## Accepted
+
+- [ADR-20260728 Idempotency Contract Closure](ADR-20260728-idempotency-contract-closure.md)
+
 ## Proposed
 
 - [ADR-20260721 Compiled Website Runtime Descriptor](ADR-20260721-compiled-website-runtime-descriptor.md)
