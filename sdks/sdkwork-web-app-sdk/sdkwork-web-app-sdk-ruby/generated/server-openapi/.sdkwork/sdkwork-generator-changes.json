@@ -9,17 +9,12 @@
     "protocol": "http",
     "packageName": "sdkwork-web-app-sdk"
   },
-  "changeFingerprint": "b9d7970e528d23061793c585bdaa6a51a860b68b022c5227a7c09ee8329ed47f",
+  "changeFingerprint": "1b6cc6ddd9ee7b4e7778abee231ec4410659445bfb342dd81b4e25b6d361223e",
   "changes": {
     "createdGeneratedFiles": [],
     "updatedGeneratedFiles": [
-      "lib/sdkwork/app_sdk/api/certificate.rb",
       "lib/sdkwork/app_sdk/api/deployment.rb",
-      "lib/sdkwork/app_sdk/api/domain.rb",
-      "lib/sdkwork/app_sdk/api/env_variable.rb",
-      "lib/sdkwork/app_sdk/api/monitor.rb",
-      "lib/sdkwork/app_sdk/api/site.rb",
-      "lib/sdkwork/app_sdk/models/create_deployment_request.rb"
+      "lib/sdkwork/app_sdk/models/deployment_response.rb"
     ],
     "unchangedGeneratedFiles": [
       "bin/publish-core.mjs",
@@ -29,6 +24,11 @@
       "Gemfile",
       "lib/sdkwork/app_sdk.rb",
       "lib/sdkwork/app_sdk/api/base_api.rb",
+      "lib/sdkwork/app_sdk/api/certificate.rb",
+      "lib/sdkwork/app_sdk/api/domain.rb",
+      "lib/sdkwork/app_sdk/api/env_variable.rb",
+      "lib/sdkwork/app_sdk/api/monitor.rb",
+      "lib/sdkwork/app_sdk/api/site.rb",
       "lib/sdkwork/app_sdk/client.rb",
       "lib/sdkwork/app_sdk/http/client.rb",
       "lib/sdkwork/app_sdk/models/certificate_page.rb",
@@ -36,12 +36,12 @@
       "lib/sdkwork/app_sdk/models/certificates_create_response201.rb",
       "lib/sdkwork/app_sdk/models/certificates_list_response.rb",
       "lib/sdkwork/app_sdk/models/create_certificate_request.rb",
+      "lib/sdkwork/app_sdk/models/create_deployment_request.rb",
       "lib/sdkwork/app_sdk/models/create_domain_request.rb",
       "lib/sdkwork/app_sdk/models/create_env_variable_request.rb",
       "lib/sdkwork/app_sdk/models/create_health_check_request.rb",
       "lib/sdkwork/app_sdk/models/create_site_request.rb",
       "lib/sdkwork/app_sdk/models/deployment_page.rb",
-      "lib/sdkwork/app_sdk/models/deployment_response.rb",
       "lib/sdkwork/app_sdk/models/domain_page.rb",
       "lib/sdkwork/app_sdk/models/domain_response.rb",
       "lib/sdkwork/app_sdk/models/domain_verify_response.rb",
@@ -104,18 +104,13 @@
       {
         "area": "api-surface",
         "paths": [
-          "lib/sdkwork/app_sdk/api/certificate.rb",
-          "lib/sdkwork/app_sdk/api/deployment.rb",
-          "lib/sdkwork/app_sdk/api/domain.rb",
-          "lib/sdkwork/app_sdk/api/env_variable.rb",
-          "lib/sdkwork/app_sdk/api/monitor.rb",
-          "lib/sdkwork/app_sdk/api/site.rb"
+          "lib/sdkwork/app_sdk/api/deployment.rb"
         ]
       },
       {
         "area": "models",
         "paths": [
-          "lib/sdkwork/app_sdk/models/create_deployment_request.rb"
+          "lib/sdkwork/app_sdk/models/deployment_response.rb"
         ]
       }
     ],

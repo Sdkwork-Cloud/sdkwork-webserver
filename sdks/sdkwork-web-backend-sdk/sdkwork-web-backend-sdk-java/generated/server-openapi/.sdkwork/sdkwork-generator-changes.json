@@ -9,17 +9,12 @@
     "protocol": "http",
     "packageName": "com.sdkwork:sdkwork-web-backend-sdk"
   },
-  "changeFingerprint": "614ea2a08c5a47b0d2810020e8cbe1cb74956a47c2346cfcd3d1f42ee1194374",
+  "changeFingerprint": "88ba5e255d08d7eb97da8b53cb1df995b5bea9fe9cd899fec8a9353fb3ae5ca2",
   "changes": {
     "createdGeneratedFiles": [],
     "updatedGeneratedFiles": [
-      "src/main/java/com/sdkwork/web/backend/sdk/api/ApplicationApi.java",
       "src/main/java/com/sdkwork/web/backend/sdk/api/ApplicationDeploymentApi.java",
-      "src/main/java/com/sdkwork/web/backend/sdk/api/ApplicationDomainApi.java",
-      "src/main/java/com/sdkwork/web/backend/sdk/api/CertificateApi.java",
-      "src/main/java/com/sdkwork/web/backend/sdk/api/NginxApi.java",
-      "src/main/java/com/sdkwork/web/backend/sdk/api/ServerApi.java",
-      "src/main/java/com/sdkwork/web/backend/sdk/model/CreateApplicationDeploymentRequest.java"
+      "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationDeploymentResponse.java"
     ],
     "unchangedGeneratedFiles": [
       "bin/publish-core.mjs",
@@ -32,16 +27,20 @@
       "sdkwork-sdk.json",
       "src/main/java/com/sdkwork/web/backend/sdk/api/AgentApi.java",
       "src/main/java/com/sdkwork/web/backend/sdk/api/ApiPaths.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/api/ApplicationApi.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/api/ApplicationDomainApi.java",
       "src/main/java/com/sdkwork/web/backend/sdk/api/AuditApi.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/api/CertificateApi.java",
       "src/main/java/com/sdkwork/web/backend/sdk/api/CertificateDistributionApi.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/api/NginxApi.java",
       "src/main/java/com/sdkwork/web/backend/sdk/api/package-info.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/api/ServerApi.java",
       "src/main/java/com/sdkwork/web/backend/sdk/http/HttpClient.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/AgentCertificateBundle.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/AgentHeartbeatRequest.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/AgentHeartbeatResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/AgentNginxConfigBundle.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/AgentSyncResponse.java",
-      "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationDeploymentResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationDomainResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationDomainVerifyResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationResponse.java",
@@ -73,6 +72,7 @@
       "src/main/java/com/sdkwork/web/backend/sdk/model/ConfigsRetrieveResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/ConfigsUpdateResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/ConfigsValidateResponse.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/model/CreateApplicationDeploymentRequest.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/CreateApplicationDomainRequest.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/CreateApplicationRequest.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/CreateCertificateRequest.java",
@@ -125,18 +125,13 @@
       {
         "area": "api-surface",
         "paths": [
-          "src/main/java/com/sdkwork/web/backend/sdk/api/ApplicationApi.java",
-          "src/main/java/com/sdkwork/web/backend/sdk/api/ApplicationDeploymentApi.java",
-          "src/main/java/com/sdkwork/web/backend/sdk/api/ApplicationDomainApi.java",
-          "src/main/java/com/sdkwork/web/backend/sdk/api/CertificateApi.java",
-          "src/main/java/com/sdkwork/web/backend/sdk/api/NginxApi.java",
-          "src/main/java/com/sdkwork/web/backend/sdk/api/ServerApi.java"
+          "src/main/java/com/sdkwork/web/backend/sdk/api/ApplicationDeploymentApi.java"
         ]
       },
       {
         "area": "models",
         "paths": [
-          "src/main/java/com/sdkwork/web/backend/sdk/model/CreateApplicationDeploymentRequest.java"
+          "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationDeploymentResponse.java"
         ]
       }
     ],

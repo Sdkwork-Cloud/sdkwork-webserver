@@ -14,6 +14,7 @@ namespace SDKWork.Web.BackendSdk.Models
         public string? VersionTag { get; set; }
         public string? CommitHash { get; set; }
         public string? SourceRef { get; set; }
+        public string? RollbackFromDeploymentId { get; set; }
         public string? ArtifactDriveUri { get; set; }
         public string? ArtifactSize { get; set; }
         public string? ArtifactHash { get; set; }

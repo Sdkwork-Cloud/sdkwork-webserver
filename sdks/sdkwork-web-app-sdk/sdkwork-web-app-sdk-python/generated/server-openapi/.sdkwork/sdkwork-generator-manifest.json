@@ -60,7 +60,7 @@
     },
     {
       "path": "sdkwork_web_app_sdk/api/deployment.py",
-      "sha256": "b9cb16cbdab99b933fd3cdde6300738d9ac375d94639b4de4d66d783747d1b20"
+      "sha256": "53431cabf6a541916909f849d75d184af596231c02c72a9155d69d601123f2da"
     },
     {
       "path": "sdkwork_web_app_sdk/api/domain.py",
@@ -136,7 +136,7 @@
     },
     {
       "path": "sdkwork_web_app_sdk/models/deployment_response.py",
-      "sha256": "c810710a0ee3e0e70eb8d2e75a919e85d2115c2e1dfa130fd2e5a85022dc9071"
+      "sha256": "e5f45eb96465368b3ffc3a16595786d78156481f36f70c77aa2bc188249a895c"
     },
     {
       "path": "sdkwork_web_app_sdk/models/domain_page.py",

@@ -28,7 +28,7 @@ public class ApplicationDeploymentApi {
         return try await client.post(ApiPaths.backendPath("/applications/\(serializePathParameter(applicationId, PathParameterSpec(name: "applicationId", style: "simple", explode: false)))/deployments"), body: body, params: nil, headers: requestHeaders, contentType: "application/json", responseType: ApplicationsDeploymentsCreateResponse201.self)
     }
 
-    /// Roll back a managed application deployment
+    /// Restore a managed application from an immutable successful version
     public func applicationsDeploymentsRollback(applicationId: String, deploymentId: String, idempotencyKey: String) async throws -> ApplicationsDeploymentsRollbackResponse? {
         let requestHeaders = buildRequestHeaders(
             [

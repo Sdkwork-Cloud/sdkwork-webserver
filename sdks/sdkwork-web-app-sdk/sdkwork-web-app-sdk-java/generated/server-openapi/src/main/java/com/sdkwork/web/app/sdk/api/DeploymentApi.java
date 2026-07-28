@@ -40,7 +40,7 @@ public class DeploymentApi {
         return client.convertValue(raw, new TypeReference<SitesDeploymentsRetrieveResponse>() {});
     }
 
-    /** 回滚部署 */
+    /** 基于历史成功版本创建快速还原命令 */
     public SitesDeploymentsRollbackResponse sitesDeploymentsRollback(String siteId, String deploymentId, String idempotencyKey) throws Exception {
         Map<String, String> requestHeaders = buildRequestHeaders(
                 Map.of("Idempotency-Key", new HeaderParameterSpec(idempotencyKey, "simple", false, null)),

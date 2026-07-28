@@ -12,7 +12,7 @@
   "mode": "apply",
   "hasChanges": true,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "e671ce0136b3c6c9f5c39fe046e08f64652533ae3365ca190cf64e486cd68075",
+  "changeFingerprint": "c155c130150f9950450b936b9636df10d0b4146a38f8e5180c78fd541548d8ac",
   "changeImpact": {
     "schemaVersion": 1,
     "areas": [
@@ -23,18 +23,13 @@
       {
         "area": "api-surface",
         "paths": [
-          "src/main/kotlin/com/sdkwork/web/backend/sdk/api/ApplicationApi.kt",
-          "src/main/kotlin/com/sdkwork/web/backend/sdk/api/ApplicationDeploymentApi.kt",
-          "src/main/kotlin/com/sdkwork/web/backend/sdk/api/ApplicationDomainApi.kt",
-          "src/main/kotlin/com/sdkwork/web/backend/sdk/api/CertificateApi.kt",
-          "src/main/kotlin/com/sdkwork/web/backend/sdk/api/NginxApi.kt",
-          "src/main/kotlin/com/sdkwork/web/backend/sdk/api/ServerApi.kt"
+          "src/main/kotlin/com/sdkwork/web/backend/sdk/api/ApplicationDeploymentApi.kt"
         ]
       },
       {
         "area": "unknown",
         "paths": [
-          "src/main/kotlin/com/sdkwork/web/backend/sdk/CreateApplicationDeploymentRequest.kt"
+          "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationDeploymentResponse.kt"
         ]
       }
     ],
@@ -126,22 +121,17 @@
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 7,
+    "writtenFiles": 2,
     "skippedScaffoldFiles": 1,
-    "skippedUnchangedGeneratedFiles": 86,
+    "skippedUnchangedGeneratedFiles": 91,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "e671ce0136b3c6c9f5c39fe046e08f64652533ae3365ca190cf64e486cd68075",
+    "changeFingerprint": "c155c130150f9950450b936b9636df10d0b4146a38f8e5180c78fd541548d8ac",
     "changes": {
       "createdGeneratedFiles": [],
       "updatedGeneratedFiles": [
-        "src/main/kotlin/com/sdkwork/web/backend/sdk/api/ApplicationApi.kt",
         "src/main/kotlin/com/sdkwork/web/backend/sdk/api/ApplicationDeploymentApi.kt",
-        "src/main/kotlin/com/sdkwork/web/backend/sdk/api/ApplicationDomainApi.kt",
-        "src/main/kotlin/com/sdkwork/web/backend/sdk/api/CertificateApi.kt",
-        "src/main/kotlin/com/sdkwork/web/backend/sdk/api/NginxApi.kt",
-        "src/main/kotlin/com/sdkwork/web/backend/sdk/api/ServerApi.kt",
-        "src/main/kotlin/com/sdkwork/web/backend/sdk/CreateApplicationDeploymentRequest.kt"
+        "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationDeploymentResponse.kt"
       ],
       "unchangedGeneratedFiles": [
         "bin/publish-core.mjs",
@@ -161,9 +151,13 @@
         "src/main/kotlin/com/sdkwork/web/backend/sdk/api/AgentApi.kt",
         "src/main/kotlin/com/sdkwork/web/backend/sdk/api/Api.kt",
         "src/main/kotlin/com/sdkwork/web/backend/sdk/api/ApiPaths.kt",
+        "src/main/kotlin/com/sdkwork/web/backend/sdk/api/ApplicationApi.kt",
+        "src/main/kotlin/com/sdkwork/web/backend/sdk/api/ApplicationDomainApi.kt",
         "src/main/kotlin/com/sdkwork/web/backend/sdk/api/AuditApi.kt",
+        "src/main/kotlin/com/sdkwork/web/backend/sdk/api/CertificateApi.kt",
         "src/main/kotlin/com/sdkwork/web/backend/sdk/api/CertificateDistributionApi.kt",
-        "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationDeploymentResponse.kt",
+        "src/main/kotlin/com/sdkwork/web/backend/sdk/api/NginxApi.kt",
+        "src/main/kotlin/com/sdkwork/web/backend/sdk/api/ServerApi.kt",
         "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationDomainResponse.kt",
         "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationDomainVerifyResponse.kt",
         "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationResponse.kt",
@@ -195,6 +189,7 @@
         "src/main/kotlin/com/sdkwork/web/backend/sdk/ConfigsRetrieveResponse.kt",
         "src/main/kotlin/com/sdkwork/web/backend/sdk/ConfigsUpdateResponse.kt",
         "src/main/kotlin/com/sdkwork/web/backend/sdk/ConfigsValidateResponse.kt",
+        "src/main/kotlin/com/sdkwork/web/backend/sdk/CreateApplicationDeploymentRequest.kt",
         "src/main/kotlin/com/sdkwork/web/backend/sdk/CreateApplicationDomainRequest.kt",
         "src/main/kotlin/com/sdkwork/web/backend/sdk/CreateApplicationRequest.kt",
         "src/main/kotlin/com/sdkwork/web/backend/sdk/CreateCertificateRequest.kt",
@@ -248,18 +243,13 @@
         {
           "area": "api-surface",
           "paths": [
-            "src/main/kotlin/com/sdkwork/web/backend/sdk/api/ApplicationApi.kt",
-            "src/main/kotlin/com/sdkwork/web/backend/sdk/api/ApplicationDeploymentApi.kt",
-            "src/main/kotlin/com/sdkwork/web/backend/sdk/api/ApplicationDomainApi.kt",
-            "src/main/kotlin/com/sdkwork/web/backend/sdk/api/CertificateApi.kt",
-            "src/main/kotlin/com/sdkwork/web/backend/sdk/api/NginxApi.kt",
-            "src/main/kotlin/com/sdkwork/web/backend/sdk/api/ServerApi.kt"
+            "src/main/kotlin/com/sdkwork/web/backend/sdk/api/ApplicationDeploymentApi.kt"
           ]
         },
         {
           "area": "unknown",
           "paths": [
-            "src/main/kotlin/com/sdkwork/web/backend/sdk/CreateApplicationDeploymentRequest.kt"
+            "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationDeploymentResponse.kt"
           ]
         }
       ],

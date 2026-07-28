@@ -50,7 +50,7 @@ module Sdkwork
             result.is_a?(Hash) ? Models::SitesDeploymentsRetrieveResponse.from_hash(result) : nil
           end
 
-          # 回滚部署
+          # 基于历史成功版本创建快速还原命令
           def sites_deployments_rollback(site_id, deployment_id, idempotency_key)
             path = interpolate_path('/app/v3/api/sites/{siteId}/deployments/{deploymentId}/rollback', siteId: serialize_path_parameter(site_id, PathParameterSpec.new('siteId', 'simple', false)), deploymentId: serialize_path_parameter(deployment_id, PathParameterSpec.new('deploymentId', 'simple', false)))
             request_headers = build_request_headers(

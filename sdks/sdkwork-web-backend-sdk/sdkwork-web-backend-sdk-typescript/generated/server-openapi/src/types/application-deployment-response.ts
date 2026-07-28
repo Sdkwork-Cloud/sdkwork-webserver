@@ -7,6 +7,8 @@ export interface ApplicationDeploymentResponse {
   versionTag?: string;
   commitHash?: string;
   sourceRef?: string;
+  /** Immutable successful deployment selected as this restore command's source. */
+  rollbackFromDeploymentId?: string;
   artifactDriveUri?: string;
   artifactSize?: string;
   artifactHash?: string;

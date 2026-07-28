@@ -52,7 +52,7 @@ export class DeploymentSitesDeploymentsApi {
     return this.client.request<DeploymentResponse>(appApiPath(`/sites/${serializePathParameter(siteId, { name: 'siteId', style: 'simple', explode: false })}/deployments/${serializePathParameter(deploymentId, { name: 'deploymentId', style: 'simple', explode: false })}`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any });
   }
 
-/** 回滚部署 */
+/** 基于历史成功版本创建快速还原命令 */
   async rollback(siteId: string, deploymentId: string, params: DeploymentSitesDeploymentsRollbackParams, requestOptions?: ApiRequestOptions): Promise<DeploymentResponse> {
     const requestHeaders = buildRequestHeaders(
       {

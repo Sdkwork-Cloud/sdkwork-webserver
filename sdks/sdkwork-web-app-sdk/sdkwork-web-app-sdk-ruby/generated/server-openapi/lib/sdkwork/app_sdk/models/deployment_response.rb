@@ -2,7 +2,7 @@ module Sdkwork
   module AppSdk
     module Models
       class DeploymentResponse
-              attr_accessor :id, :site_id, :deploy_type, :version_tag, :commit_hash, :source_ref, :environment, :artifact_drive_uri, :artifact_size, :artifact_hash, :status, :started_at, :completed_at, :duration_ms, :created_at
+              attr_accessor :id, :site_id, :deploy_type, :version_tag, :commit_hash, :source_ref, :rollback_from_deployment_id, :environment, :artifact_drive_uri, :artifact_size, :artifact_hash, :status, :started_at, :completed_at, :duration_ms, :created_at
 
               def initialize(attributes = {})
                 attributes = (attributes || {}).transform_keys(&:to_s)
@@ -12,6 +12,7 @@ module Sdkwork
                 @version_tag = attributes['versionTag']
                 @commit_hash = attributes['commitHash']
                 @source_ref = attributes['sourceRef']
+                @rollback_from_deployment_id = attributes['rollbackFromDeploymentId']
                 @environment = attributes['environment']
                 @artifact_drive_uri = attributes['artifactDriveUri']
                 @artifact_size = attributes['artifactSize']
@@ -37,6 +38,7 @@ module Sdkwork
                   'versionTag' => @version_tag,
                   'commitHash' => @commit_hash,
                   'sourceRef' => @source_ref,
+                  'rollbackFromDeploymentId' => @rollback_from_deployment_id,
                   'environment' => @environment,
                   'artifactDriveUri' => @artifact_drive_uri,
                   'artifactSize' => @artifact_size,

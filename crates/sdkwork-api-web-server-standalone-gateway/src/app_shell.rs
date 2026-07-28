@@ -214,7 +214,7 @@ fn resolve_packaged_static_root(configured: &Path, executable: &Path) -> Result<
 }
 
 fn collect_static_files(root: &Path) -> Result<Vec<PathBuf>, String> {
-    let root_metadata = fs::symlink_metadata(&root).map_err(|error| {
+    let root_metadata = fs::symlink_metadata(root).map_err(|error| {
         format!(
             "{PC_STATIC_ROOT_ENV} {} is not available: {error}",
             root.display()

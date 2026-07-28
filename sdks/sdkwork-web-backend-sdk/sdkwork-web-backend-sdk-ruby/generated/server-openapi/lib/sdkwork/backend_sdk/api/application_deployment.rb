@@ -40,7 +40,7 @@ module Sdkwork
             result.is_a?(Hash) ? Models::ApplicationsDeploymentsCreateResponse201.from_hash(result) : nil
           end
 
-          # Roll back a managed application deployment
+          # Restore a managed application from an immutable successful version
           def applications_deployments_rollback(application_id, deployment_id, idempotency_key)
             path = interpolate_path('/backend/v3/api/applications/{applicationId}/deployments/{deploymentId}/rollback', applicationId: serialize_path_parameter(application_id, PathParameterSpec.new('applicationId', 'simple', false)), deploymentId: serialize_path_parameter(deployment_id, PathParameterSpec.new('deploymentId', 'simple', false)))
             request_headers = build_request_headers(

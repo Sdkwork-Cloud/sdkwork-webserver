@@ -48,7 +48,7 @@
     },
     {
       "path": "src/api/application_deployment.rs",
-      "sha256": "ee5f66d7d90ede25e3fdc929536daf0804f27a33a21b102cc761d92488d1a84e"
+      "sha256": "9ef014929c75308efb3777acc852cc0164b111b88fa9a616f060a5788e1670cc"
     },
     {
       "path": "src/api/application_domain.rs",
@@ -128,7 +128,7 @@
     },
     {
       "path": "src/models/application_deployment_response.rs",
-      "sha256": "375155b323eb29182050369a56380ab06aa5143df6a40f89a2dd4249cbbac815"
+      "sha256": "f72c97ef389958d0bcc0164264b34b68a9f8c168261468f0cc311826963fa5d3"
     },
     {
       "path": "src/models/application_domain_response.rs",

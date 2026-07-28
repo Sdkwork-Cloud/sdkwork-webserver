@@ -12,7 +12,7 @@
   "mode": "apply",
   "hasChanges": true,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "a5a82bf5c511a1668cb415bb53466ad79f2db253e7fe00eec126fe7b2cfa6698",
+  "changeFingerprint": "566935a987ebb7e7b71f4ec2e0670f2072e112a13526824f488de4ec5bf32235",
   "changeImpact": {
     "schemaVersion": 1,
     "areas": [
@@ -23,18 +23,13 @@
       {
         "area": "api-surface",
         "paths": [
-          "src/api/application_deployment.rs",
-          "src/api/application_domain.rs",
-          "src/api/application.rs",
-          "src/api/certificate.rs",
-          "src/api/nginx.rs",
-          "src/api/server.rs"
+          "src/api/application_deployment.rs"
         ]
       },
       {
         "area": "models",
         "paths": [
-          "src/models/create_application_deployment_request.rs"
+          "src/models/application_deployment_response.rs"
         ]
       }
     ],
@@ -160,22 +155,17 @@
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 7,
+    "writtenFiles": 2,
     "skippedScaffoldFiles": 1,
-    "skippedUnchangedGeneratedFiles": 90,
+    "skippedUnchangedGeneratedFiles": 95,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "a5a82bf5c511a1668cb415bb53466ad79f2db253e7fe00eec126fe7b2cfa6698",
+    "changeFingerprint": "566935a987ebb7e7b71f4ec2e0670f2072e112a13526824f488de4ec5bf32235",
     "changes": {
       "createdGeneratedFiles": [],
       "updatedGeneratedFiles": [
         "src/api/application_deployment.rs",
-        "src/api/application_domain.rs",
-        "src/api/application.rs",
-        "src/api/certificate.rs",
-        "src/api/nginx.rs",
-        "src/api/server.rs",
-        "src/models/create_application_deployment_request.rs"
+        "src/models/application_deployment_response.rs"
       ],
       "unchangedGeneratedFiles": [
         "bin/publish-core.mjs",
@@ -187,11 +177,16 @@
         "README.md",
         "sdkwork-sdk.json",
         "src/api/agent.rs",
+        "src/api/application_domain.rs",
+        "src/api/application.rs",
         "src/api/audit.rs",
         "src/api/base.rs",
         "src/api/certificate_distribution.rs",
+        "src/api/certificate.rs",
         "src/api/mod.rs",
+        "src/api/nginx.rs",
         "src/api/paths.rs",
+        "src/api/server.rs",
         "src/client.rs",
         "src/http/client.rs",
         "src/http/mod.rs",
@@ -201,7 +196,6 @@
         "src/models/agent_heartbeat_response.rs",
         "src/models/agent_nginx_config_bundle.rs",
         "src/models/agent_sync_response.rs",
-        "src/models/application_deployment_response.rs",
         "src/models/application_domain_response.rs",
         "src/models/application_domain_verify_response.rs",
         "src/models/application_response.rs",
@@ -234,6 +228,7 @@
         "src/models/configs_retrieve_response.rs",
         "src/models/configs_update_response.rs",
         "src/models/configs_validate_response.rs",
+        "src/models/create_application_deployment_request.rs",
         "src/models/create_application_domain_request.rs",
         "src/models/create_application_request.rs",
         "src/models/create_certificate_request.rs",
@@ -286,18 +281,13 @@
         {
           "area": "api-surface",
           "paths": [
-            "src/api/application_deployment.rs",
-            "src/api/application_domain.rs",
-            "src/api/application.rs",
-            "src/api/certificate.rs",
-            "src/api/nginx.rs",
-            "src/api/server.rs"
+            "src/api/application_deployment.rs"
           ]
         },
         {
           "area": "models",
           "paths": [
-            "src/models/create_application_deployment_request.rs"
+            "src/models/application_deployment_response.rs"
           ]
         }
       ],

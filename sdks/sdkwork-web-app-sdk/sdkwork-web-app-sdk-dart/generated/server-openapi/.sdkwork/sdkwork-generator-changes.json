@@ -9,17 +9,11 @@
     "protocol": "http",
     "packageName": "sdkwork_web_app_sdk"
   },
-  "changeFingerprint": "0a2c41f1549904fbedc01f10672701141178468fede343531271d9a65ef3da0c",
+  "changeFingerprint": "0d51fbbe3435e96081299b90be80d541d56331945a6f9348bb5589ba9062eeee",
   "changes": {
     "createdGeneratedFiles": [],
     "updatedGeneratedFiles": [
-      "lib/src/api/api.dart",
-      "lib/src/api/certificate.dart",
       "lib/src/api/deployment.dart",
-      "lib/src/api/domain.dart",
-      "lib/src/api/env_variable.dart",
-      "lib/src/api/monitor.dart",
-      "lib/src/api/site.dart",
       "lib/src/models.dart"
     ],
     "unchangedGeneratedFiles": [
@@ -30,8 +24,14 @@
       "CHANGELOG.md",
       "lib/app_client.dart",
       "lib/sdkwork_web_app_sdk.dart",
+      "lib/src/api/api.dart",
+      "lib/src/api/certificate.dart",
+      "lib/src/api/domain.dart",
+      "lib/src/api/env_variable.dart",
+      "lib/src/api/monitor.dart",
       "lib/src/api/paths.dart",
       "lib/src/api/response_helpers.dart",
+      "lib/src/api/site.dart",
       "lib/src/http/client.dart",
       "lib/src/http/sdk_config.dart",
       "LICENSE",
@@ -56,13 +56,7 @@
       {
         "area": "api-surface",
         "paths": [
-          "lib/src/api/api.dart",
-          "lib/src/api/certificate.dart",
-          "lib/src/api/deployment.dart",
-          "lib/src/api/domain.dart",
-          "lib/src/api/env_variable.dart",
-          "lib/src/api/monitor.dart",
-          "lib/src/api/site.dart"
+          "lib/src/api/deployment.dart"
         ]
       },
       {

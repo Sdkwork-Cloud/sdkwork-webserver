@@ -280,7 +280,7 @@ class ApplicationDeploymentApplicationsDeploymentsApi:
         return self._client.post(f"/backend/v3/api/applications/{serialize_path_parameter(application_id, {'name': 'applicationId', 'style': 'simple', 'explode': False})}/deployments", json=body, headers=request_headers)
 
     def rollback(self, application_id: str, deployment_id: str, idempotency_key: str) -> ApplicationsDeploymentsRollbackResponse:
-        """Roll back a managed application deployment"""
+        """Restore a managed application from an immutable successful version"""
         request_headers = build_request_headers(
             {
                 'Idempotency-Key': {'value': idempotency_key, 'style': 'simple', 'explode': False},

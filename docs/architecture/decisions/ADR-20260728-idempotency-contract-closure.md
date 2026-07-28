@@ -64,4 +64,8 @@ framework Header.
 - SDK generator regression proves shared Header refs become required method inputs.
 - Application contract tests prove 8 app, 18 backend, and 2 internal operations remain aligned.
 - PC type checking and tests prove stable key forwarding through generated calls.
+- The standalone gateway loopback test proves its generated internal SDK call sends a UUID
+  `Idempotency-Key` instead of bypassing the generated transport contract.
+- Repository parity tests prove same-key replay, conflicting input rejection, tenant isolation, and
+  concurrent unique admission for durable deployment deduplication.
 - Framework pipeline tests prove 128-byte acceptance and 129-byte rejection before store access.

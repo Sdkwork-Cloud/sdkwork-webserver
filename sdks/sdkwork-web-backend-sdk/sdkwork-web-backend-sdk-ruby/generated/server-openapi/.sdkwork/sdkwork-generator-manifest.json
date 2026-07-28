@@ -40,7 +40,7 @@
     },
     {
       "path": "lib/sdkwork/backend_sdk/api/application_deployment.rb",
-      "sha256": "68e5397401d76a0298ae1076efc37ab9aa9d0f6831c6f8d93dcf755b7ed4b02b"
+      "sha256": "9e48f8c88e499efd5abd26a26677fdabe9a020a816233a18f6f1294c3c01128b"
     },
     {
       "path": "lib/sdkwork/backend_sdk/api/application_domain.rb",
@@ -104,7 +104,7 @@
     },
     {
       "path": "lib/sdkwork/backend_sdk/models/application_deployment_response.rb",
-      "sha256": "226d6ffac6ce8a916693e2dc6146b8ec0f4955e0ca5229aa2c2b0d4374006856"
+      "sha256": "838acfc9de7c15e8ce26fccadb13d0c6454095cf4d8c29924a048bf5100b1817"
     },
     {
       "path": "lib/sdkwork/backend_sdk/models/application_domain_response.rb",

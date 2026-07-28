@@ -56,8 +56,10 @@ trace:
     - sdks/sdkwork-web-backend-sdk
     - sdks/sdkwork-web-internal-sdk
     - apps/sdkwork-webserver-pc
+    - crates/sdkwork-api-web-server-standalone-gateway
     - crates/sdkwork-webserver-contract
     - crates/sdkwork-intelligence-webserver-service
+    - crates/sdkwork-intelligence-webserver-repository-sqlx
     - ../sdkwork-web-framework/crates/sdkwork-web-core
 verification:
   - node ../sdkwork-specs/tools/check-api-operation-patterns.mjs --root .
@@ -66,6 +68,8 @@ verification:
   - pnpm test:contracts
   - pnpm --dir apps/sdkwork-webserver-pc typecheck
   - pnpm --dir apps/sdkwork-webserver-pc test
+  - cargo test -p sdkwork-api-web-server-standalone-gateway generated_internal_sdk_preserves_runtime_assignment_wire_contract
+  - cargo test -p sdkwork-intelligence-webserver-repository-sqlx --test repository_parity sqlite_repository_transactions_tenants_idempotency_and_pagination_are_bounded -- --exact
   - cargo test -p sdkwork-web-core
 ```
 

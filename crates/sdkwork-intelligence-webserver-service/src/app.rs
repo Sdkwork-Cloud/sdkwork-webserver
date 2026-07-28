@@ -363,7 +363,13 @@ impl WebAppApi for WebService {
     ) -> WebServiceResult<sdkwork_webserver_contract::DeploymentResponse> {
         let tenant_id = self.require_site_access(context, site_id).await?;
         self.repository
-            .rollback_deployment(tenant_id, site_id, deployment_id, context.actor_id)
+            .rollback_deployment(
+                tenant_id,
+                site_id,
+                deployment_id,
+                context.actor_id,
+                context.idempotency_key.as_deref(),
+            )
             .await
     }
 

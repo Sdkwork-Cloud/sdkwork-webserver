@@ -284,7 +284,7 @@ class DeploymentSitesDeploymentsApi:
         return self._client.get(f"/app/v3/api/sites/{serialize_path_parameter(site_id, {'name': 'siteId', 'style': 'simple', 'explode': False})}/deployments/{serialize_path_parameter(deployment_id, {'name': 'deploymentId', 'style': 'simple', 'explode': False})}")
 
     def rollback(self, site_id: str, deployment_id: str, idempotency_key: str) -> SitesDeploymentsRollbackResponse:
-        """回滚部署"""
+        """基于历史成功版本创建快速还原命令"""
         request_headers = build_request_headers(
             {
                 'Idempotency-Key': {'value': idempotency_key, 'style': 'simple', 'explode': False},

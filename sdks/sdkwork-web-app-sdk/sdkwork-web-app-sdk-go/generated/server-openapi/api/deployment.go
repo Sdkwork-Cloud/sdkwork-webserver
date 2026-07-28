@@ -56,7 +56,7 @@ func (a *DeploymentApi) SitesDeploymentsRetrieve(siteId string, deploymentId str
     return decodeResult[sdktypes.SitesDeploymentsRetrieveResponse](raw)
 }
 
-// 回滚部署
+// 基于历史成功版本创建快速还原命令
 func (a *DeploymentApi) SitesDeploymentsRollback(siteId string, deploymentId string, idempotencyKey string) (sdktypes.SitesDeploymentsRollbackResponse, error) {
     headers := BuildRequestHeaders(
         map[string]ParameterSpec{"Idempotency-Key": ParameterSpec{Value: idempotencyKey, Style: "simple", Explode: false},},

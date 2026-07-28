@@ -189,6 +189,7 @@ public struct DeploymentResponse: Codable {
     public let versionTag: String?
     public let commitHash: String?
     public let sourceRef: String?
+    public let rollbackFromDeploymentId: String?
     public let environment: String?
     public let artifactDriveUri: String?
     public let artifactSize: String?
@@ -200,13 +201,14 @@ public struct DeploymentResponse: Codable {
     public let createdAt: String?
 
 
-    public init(id: String? = nil, siteId: String? = nil, deployType: Int? = nil, versionTag: String? = nil, commitHash: String? = nil, sourceRef: String? = nil, environment: String? = nil, artifactDriveUri: String? = nil, artifactSize: String? = nil, artifactHash: String? = nil, status: Int? = nil, startedAt: String? = nil, completedAt: String? = nil, durationMs: String? = nil, createdAt: String? = nil) {
+    public init(id: String? = nil, siteId: String? = nil, deployType: Int? = nil, versionTag: String? = nil, commitHash: String? = nil, sourceRef: String? = nil, rollbackFromDeploymentId: String? = nil, environment: String? = nil, artifactDriveUri: String? = nil, artifactSize: String? = nil, artifactHash: String? = nil, status: Int? = nil, startedAt: String? = nil, completedAt: String? = nil, durationMs: String? = nil, createdAt: String? = nil) {
         self.id = id
         self.siteId = siteId
         self.deployType = deployType
         self.versionTag = versionTag
         self.commitHash = commitHash
         self.sourceRef = sourceRef
+        self.rollbackFromDeploymentId = rollbackFromDeploymentId
         self.environment = environment
         self.artifactDriveUri = artifactDriveUri
         self.artifactSize = artifactSize

@@ -5,6 +5,8 @@ export interface DeploymentResponse {
   versionTag?: string;
   commitHash?: string;
   sourceRef?: string;
+  /** 此还原命令所引用的不可变历史成功版本 ID。 */
+  rollbackFromDeploymentId?: string;
   environment: string;
   artifactDriveUri?: string;
   artifactSize?: string;

@@ -50,7 +50,7 @@ class DeploymentApi {
     })();
   }
 
-  /// 回滚部署
+  /// 基于历史成功版本创建快速还原命令
   Future<SitesDeploymentsRollbackResponse?> sitesDeploymentsRollback(String siteId, String deploymentId, String idempotencyKey) async {
     final requestHeaders = buildRequestHeaders(
       <String, HeaderParameterSpec>{

@@ -46,7 +46,7 @@ func (a *ApplicationDeploymentApi) ApplicationsDeploymentsCreate(applicationId s
     return decodeResult[sdktypes.ApplicationsDeploymentsCreateResponse201](raw)
 }
 
-// Roll back a managed application deployment
+// Restore a managed application from an immutable successful version
 func (a *ApplicationDeploymentApi) ApplicationsDeploymentsRollback(applicationId string, deploymentId string, idempotencyKey string) (sdktypes.ApplicationsDeploymentsRollbackResponse, error) {
     headers := BuildRequestHeaders(
         map[string]ParameterSpec{"Idempotency-Key": ParameterSpec{Value: idempotencyKey, Style: "simple", Explode: false},},

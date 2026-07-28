@@ -510,7 +510,7 @@ paths:
     - $ref: '#/components/parameters/DeploymentIdParam'
     post:
       operationId: applications.deployments.rollback
-      summary: Roll back a managed application deployment
+      summary: Restore a managed application from an immutable successful version
       tags: [applicationDeployment]
       security:
       - AuthToken: []
@@ -527,7 +527,7 @@ paths:
       x-sdkwork-owner: sdkwork-web-server
       responses:
         '200':
-          description: Application rollback command created successfully.
+          description: Application restore command created; deployment proceeds asynchronously.
           content:
             application/json:
               schema:
@@ -1642,6 +1642,10 @@ components:
           type: string
         sourceRef:
           type: string
+        rollbackFromDeploymentId:
+          type: string
+          format: uuid
+          description: Immutable successful deployment selected as this restore command's source.
         artifactDriveUri:
           type: string
           pattern: '^drive://spaces/[^/?#]+/nodes/[^/?#]+$'

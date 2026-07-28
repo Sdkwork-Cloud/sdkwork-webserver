@@ -18,6 +18,9 @@ final class DeploymentResponse
 
     public ?string $sourceRef = null;
 
+    /** 此还原命令所引用的不可变历史成功版本 ID。 */
+    public ?string $rollbackFromDeploymentId = null;
+
     public ?string $environment = null;
 
     public ?string $artifactDriveUri = null;
@@ -56,6 +59,9 @@ final class DeploymentResponse
             : null;
         $this->sourceRef = array_key_exists('sourceRef', $data)
             ? $data['sourceRef']
+            : null;
+        $this->rollbackFromDeploymentId = array_key_exists('rollbackFromDeploymentId', $data)
+            ? $data['rollbackFromDeploymentId']
             : null;
         $this->environment = array_key_exists('environment', $data)
             ? $data['environment']
@@ -100,6 +106,7 @@ final class DeploymentResponse
             'versionTag' => $this->versionTag,
             'commitHash' => $this->commitHash,
             'sourceRef' => $this->sourceRef,
+            'rollbackFromDeploymentId' => $this->rollbackFromDeploymentId,
             'environment' => $this->environment,
             'artifactDriveUri' => $this->artifactDriveUri,
             'artifactSize' => $this->artifactSize,

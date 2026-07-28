@@ -1404,7 +1404,7 @@ async fn verify_rollback_atomicity(context: &TestContext, site_id: &str) {
         .expect("create rollback source");
     let pending_rollback = context
         .repository
-        .rollback_deployment(TENANT_A, site_id, &source.id, Some(91))
+        .rollback_deployment(TENANT_A, site_id, &source.id, Some(91), None)
         .await
         .expect_err("pending deployment rollback must be rejected");
     assert_eq!(pending_rollback.kind(), WebServiceErrorKind::Conflict);
@@ -1419,7 +1419,13 @@ async fn verify_rollback_atomicity(context: &TestContext, site_id: &str) {
     install_rollback_failure_trigger(&context.pool, context.engine).await;
     context
         .repository
-        .rollback_deployment(TENANT_A, site_id, &source.id, Some(91))
+        .rollback_deployment(
+            TENANT_A,
+            site_id,
+            &source.id,
+            Some(91),
+            Some("restore-failure"),
+        )
         .await
         .expect_err("forced rollback-record failure must abort transaction");
 
@@ -1443,7 +1449,13 @@ async fn verify_rollback_atomicity(context: &TestContext, site_id: &str) {
     remove_rollback_failure_trigger(&context.pool, context.engine).await;
     let rollback = context
         .repository
-        .rollback_deployment(TENANT_A, site_id, &source.id, Some(91))
+        .rollback_deployment(
+            TENANT_A,
+            site_id,
+            &source.id,
+            Some(91),
+            Some("restore-source-v1"),
+        )
         .await
         .expect("rollback succeeds after removing failure trigger");
     assert_eq!(rollback.site_id, site_id);
@@ -1457,6 +1469,49 @@ async fn verify_rollback_atomicity(context: &TestContext, site_id: &str) {
         .artifact_hash
         .as_deref()
         .is_some_and(|hash| hash == "b".repeat(64)));
+    assert_eq!(
+        rollback.rollback_from_deployment_id.as_deref(),
+        Some(source.id.as_str())
+    );
+
+    let repeated = context
+        .repository
+        .rollback_deployment(
+            TENANT_A,
+            site_id,
+            &source.id,
+            Some(91),
+            Some("restore-source-v1"),
+        )
+        .await
+        .expect("repeating the same restore command is idempotent");
+    assert_eq!(repeated.id, rollback.id);
+
+    let second_restore = context
+        .repository
+        .rollback_deployment(
+            TENANT_A,
+            site_id,
+            &source.id,
+            Some(91),
+            Some("restore-source-v1-again"),
+        )
+        .await
+        .expect("a successful version can be restored more than once");
+    assert_ne!(second_restore.id, rollback.id);
+    assert_eq!(
+        second_restore.rollback_from_deployment_id.as_deref(),
+        Some(source.id.as_str())
+    );
+
+    let rollback_records: i64 = sqlx::query_scalar(
+        "SELECT COUNT(*) FROM web_deployment WHERE tenant_id = $1 AND rollback_from IS NOT NULL",
+    )
+    .bind(TENANT_A)
+    .fetch_one(&context.pool)
+    .await
+    .expect("count immutable restore records");
+    assert_eq!(rollback_records, 2);
     let source_status: i32 =
         sqlx::query_scalar("SELECT status FROM web_deployment WHERE tenant_id = $1 AND uuid = $2")
             .bind(TENANT_A)
@@ -1464,7 +1519,7 @@ async fn verify_rollback_atomicity(context: &TestContext, site_id: &str) {
             .fetch_one(&context.pool)
             .await
             .expect("read committed rollback source status");
-    assert_eq!(source_status, 5);
+    assert_eq!(source_status, 2);
 }
 
 async fn install_rollback_failure_trigger(pool: &AnyPool, engine: TestEngine) {

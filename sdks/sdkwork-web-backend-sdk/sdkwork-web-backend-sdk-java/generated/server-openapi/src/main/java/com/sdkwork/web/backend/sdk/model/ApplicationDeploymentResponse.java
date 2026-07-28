@@ -10,6 +10,7 @@ public class ApplicationDeploymentResponse {
     private String versionTag;
     private String commitHash;
     private String sourceRef;
+    private String rollbackFromDeploymentId;
     private String artifactDriveUri;
     private String artifactSize;
     private String artifactHash;
@@ -80,6 +81,14 @@ public class ApplicationDeploymentResponse {
 
     public void setSourceRef(String sourceRef) {
         this.sourceRef = sourceRef;
+    }
+
+    public String getRollbackFromDeploymentId() {
+        return this.rollbackFromDeploymentId;
+    }
+
+    public void setRollbackFromDeploymentId(String rollbackFromDeploymentId) {
+        this.rollbackFromDeploymentId = rollbackFromDeploymentId;
     }
 
     public String getArtifactDriveUri() {

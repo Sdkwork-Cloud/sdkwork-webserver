@@ -12,7 +12,7 @@
   "mode": "apply",
   "hasChanges": true,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "4655b7398aa2f638b0111c5af1b614f7b7ffb6d52d289c661a8ba77ad138581b",
+  "changeFingerprint": "5a34ffba7fb485273c27bc3636f7f352ed6c78a801678ce888d1a1a044894d0b",
   "changeImpact": {
     "schemaVersion": 1,
     "areas": [
@@ -23,13 +23,7 @@
       {
         "area": "api-surface",
         "paths": [
-          "lib/src/api/api.dart",
-          "lib/src/api/certificate.dart",
-          "lib/src/api/deployment.dart",
-          "lib/src/api/domain.dart",
-          "lib/src/api/env_variable.dart",
-          "lib/src/api/monitor.dart",
-          "lib/src/api/site.dart"
+          "lib/src/api/deployment.dart"
         ]
       },
       {
@@ -125,22 +119,16 @@
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 8,
+    "writtenFiles": 2,
     "skippedScaffoldFiles": 1,
-    "skippedUnchangedGeneratedFiles": 14,
+    "skippedUnchangedGeneratedFiles": 20,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "4655b7398aa2f638b0111c5af1b614f7b7ffb6d52d289c661a8ba77ad138581b",
+    "changeFingerprint": "5a34ffba7fb485273c27bc3636f7f352ed6c78a801678ce888d1a1a044894d0b",
     "changes": {
       "createdGeneratedFiles": [],
       "updatedGeneratedFiles": [
-        "lib/src/api/api.dart",
-        "lib/src/api/certificate.dart",
         "lib/src/api/deployment.dart",
-        "lib/src/api/domain.dart",
-        "lib/src/api/env_variable.dart",
-        "lib/src/api/monitor.dart",
-        "lib/src/api/site.dart",
         "lib/src/models.dart"
       ],
       "unchangedGeneratedFiles": [
@@ -150,8 +138,14 @@
         "CHANGELOG.md",
         "lib/app_client.dart",
         "lib/sdkwork_web_app_sdk.dart",
+        "lib/src/api/api.dart",
+        "lib/src/api/certificate.dart",
+        "lib/src/api/domain.dart",
+        "lib/src/api/env_variable.dart",
+        "lib/src/api/monitor.dart",
         "lib/src/api/paths.dart",
         "lib/src/api/response_helpers.dart",
+        "lib/src/api/site.dart",
         "lib/src/http/client.dart",
         "LICENSE",
         "pubspec_overrides.yaml",
@@ -176,13 +170,7 @@
         {
           "area": "api-surface",
           "paths": [
-            "lib/src/api/api.dart",
-            "lib/src/api/certificate.dart",
-            "lib/src/api/deployment.dart",
-            "lib/src/api/domain.dart",
-            "lib/src/api/env_variable.dart",
-            "lib/src/api/monitor.dart",
-            "lib/src/api/site.dart"
+            "lib/src/api/deployment.dart"
           ]
         },
         {

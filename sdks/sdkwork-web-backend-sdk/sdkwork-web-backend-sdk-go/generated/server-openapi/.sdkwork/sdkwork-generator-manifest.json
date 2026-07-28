@@ -16,7 +16,7 @@
     },
     {
       "path": "api/application_deployment.go",
-      "sha256": "f61c908bd049e9e011e2ee52ddabb57e8aadc7a5e005805d15d77ad4d4068d2c"
+      "sha256": "5d71fa1be0fe34386d2e4ced732f0c26610a193386980106b5a8d9a3e1fa68cc"
     },
     {
       "path": "api/application_domain.go",
@@ -128,7 +128,7 @@
     },
     {
       "path": "types/application_deployment_response.go",
-      "sha256": "c40727a19379a0fc84846bc149249a69a072705148a96a8caea6e9bb2f02286e"
+      "sha256": "1fea960b95a909e463fac74d2da0784c3dda6d1b6763b8a92058fd095ef5d669"
     },
     {
       "path": "types/application_domain_response.go",

@@ -9,17 +9,12 @@
     "protocol": "http",
     "packageName": "sdkwork-web-app-sdk"
   },
-  "changeFingerprint": "0c25e68c3b6b38585ce05562094886a15f0ccfc46183fb981bca315721facdb2",
+  "changeFingerprint": "3872c185d39ce965f2f124e31488b3443266b1750a8d454465cf61ae68cbb7e0",
   "changes": {
     "createdGeneratedFiles": [],
     "updatedGeneratedFiles": [
-      "sdkwork_web_app_sdk/api/certificate.py",
       "sdkwork_web_app_sdk/api/deployment.py",
-      "sdkwork_web_app_sdk/api/domain.py",
-      "sdkwork_web_app_sdk/api/env_variable.py",
-      "sdkwork_web_app_sdk/api/monitor.py",
-      "sdkwork_web_app_sdk/api/site.py",
-      "sdkwork_web_app_sdk/models/create_deployment_request.py"
+      "sdkwork_web_app_sdk/models/deployment_response.py"
     ],
     "unchangedGeneratedFiles": [
       "bin/publish-core.mjs",
@@ -33,6 +28,11 @@
       "requirements.txt",
       "sdkwork_web_app_sdk/__init__.py",
       "sdkwork_web_app_sdk/api/__init__.py",
+      "sdkwork_web_app_sdk/api/certificate.py",
+      "sdkwork_web_app_sdk/api/domain.py",
+      "sdkwork_web_app_sdk/api/env_variable.py",
+      "sdkwork_web_app_sdk/api/monitor.py",
+      "sdkwork_web_app_sdk/api/site.py",
       "sdkwork_web_app_sdk/client.py",
       "sdkwork_web_app_sdk/http_client.py",
       "sdkwork_web_app_sdk/models/__init__.py",
@@ -41,12 +41,12 @@
       "sdkwork_web_app_sdk/models/certificates_create_response201.py",
       "sdkwork_web_app_sdk/models/certificates_list_response.py",
       "sdkwork_web_app_sdk/models/create_certificate_request.py",
+      "sdkwork_web_app_sdk/models/create_deployment_request.py",
       "sdkwork_web_app_sdk/models/create_domain_request.py",
       "sdkwork_web_app_sdk/models/create_env_variable_request.py",
       "sdkwork_web_app_sdk/models/create_health_check_request.py",
       "sdkwork_web_app_sdk/models/create_site_request.py",
       "sdkwork_web_app_sdk/models/deployment_page.py",
-      "sdkwork_web_app_sdk/models/deployment_response.py",
       "sdkwork_web_app_sdk/models/domain_page.py",
       "sdkwork_web_app_sdk/models/domain_response.py",
       "sdkwork_web_app_sdk/models/domain_verify_response.py",
@@ -105,18 +105,13 @@
       {
         "area": "api-surface",
         "paths": [
-          "sdkwork_web_app_sdk/api/certificate.py",
-          "sdkwork_web_app_sdk/api/deployment.py",
-          "sdkwork_web_app_sdk/api/domain.py",
-          "sdkwork_web_app_sdk/api/env_variable.py",
-          "sdkwork_web_app_sdk/api/monitor.py",
-          "sdkwork_web_app_sdk/api/site.py"
+          "sdkwork_web_app_sdk/api/deployment.py"
         ]
       },
       {
         "area": "models",
         "paths": [
-          "sdkwork_web_app_sdk/models/create_deployment_request.py"
+          "sdkwork_web_app_sdk/models/deployment_response.py"
         ]
       }
     ],

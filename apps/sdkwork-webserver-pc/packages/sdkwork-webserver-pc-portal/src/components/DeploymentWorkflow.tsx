@@ -18,7 +18,7 @@ const deploymentFacts = [
 
 export function DeploymentWorkflow({ t }: { t: PortalTranslator }) {
   return (
-    <section className="scroll-mt-16 border-b border-zinc-200 bg-[#f4f7f5] py-20 text-zinc-950 dark:border-white/10 dark:bg-[#111a16] dark:text-white" id="workflow">
+    <section className="scroll-mt-[52px] border-b border-zinc-200 bg-[#f4f7f5] py-20 text-zinc-950 dark:border-white/10 dark:bg-[#111a16] dark:text-white" id="workflow">
       <div className="mx-auto grid max-w-[1280px] gap-14 px-5 sm:px-7 lg:grid-cols-[minmax(0,1fr)_minmax(420px,0.88fr)] lg:px-10">
         <div>
           <span className="text-xs font-bold uppercase text-emerald-700 dark:text-emerald-300">{t("workflow.eyebrow")}</span>
@@ -37,12 +37,12 @@ export function DeploymentWorkflow({ t }: { t: PortalTranslator }) {
           </ol>
         </div>
         <div className="self-center overflow-hidden rounded-md border border-zinc-300 bg-white shadow-xl shadow-zinc-900/10 dark:border-white/15 dark:bg-[#0b120f]" aria-label={t("workflow.panel.title")}>
-          <header className="flex min-h-14 items-center justify-between border-b border-zinc-200 px-5 dark:border-white/10">
-            <div className="flex items-center gap-3">
+          <header className="flex min-h-11 items-center justify-between gap-3 bg-zinc-50 px-5 dark:bg-white/5">
+            <div className="flex min-w-0 items-center gap-3 whitespace-nowrap">
               <span className="size-2 rounded-full bg-emerald-500 motion-safe:animate-pulse" />
-              <strong className="font-mono text-sm">{t("workflow.panel.title")}</strong>
+              <strong className="truncate font-mono text-sm">{t("workflow.panel.title")}</strong>
             </div>
-            <span className="rounded-md bg-emerald-100 px-2 py-1 text-xs font-bold text-emerald-800 dark:bg-emerald-400/15 dark:text-emerald-200">
+            <span className="shrink-0 whitespace-nowrap rounded bg-emerald-100 px-2 py-1 text-xs font-bold text-emerald-800 dark:bg-emerald-400/15 dark:text-emerald-200">
               {t("workflow.panel.status")}
             </span>
           </header>

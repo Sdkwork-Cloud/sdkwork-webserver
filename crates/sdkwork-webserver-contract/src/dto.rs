@@ -128,6 +128,11 @@ pub struct DeploymentResponse {
     pub commit_hash: Option<String>,
     #[serde(rename = "sourceRef", skip_serializing_if = "Option::is_none")]
     pub source_ref: Option<String>,
+    #[serde(
+        rename = "rollbackFromDeploymentId",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub rollback_from_deployment_id: Option<String>,
     #[serde(rename = "artifactDriveUri", skip_serializing_if = "Option::is_none")]
     pub artifact_drive_uri: Option<String>,
     #[serde(

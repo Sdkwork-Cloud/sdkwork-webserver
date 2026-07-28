@@ -585,6 +585,7 @@ class ApplicationDeploymentResponse {
   final String? versionTag;
   final String? commitHash;
   final String? sourceRef;
+  final String? rollbackFromDeploymentId;
   final String? artifactDriveUri;
   final String? artifactSize;
   final String? artifactHash;
@@ -602,6 +603,7 @@ class ApplicationDeploymentResponse {
     this.versionTag,
     this.commitHash,
     this.sourceRef,
+    this.rollbackFromDeploymentId,
     this.artifactDriveUri,
     this.artifactSize,
     this.artifactHash,
@@ -651,6 +653,7 @@ class ApplicationDeploymentResponse {
       versionTag: json['versionTag']?.toString(),
       commitHash: json['commitHash']?.toString(),
       sourceRef: json['sourceRef']?.toString(),
+      rollbackFromDeploymentId: json['rollbackFromDeploymentId']?.toString(),
       artifactDriveUri: json['artifactDriveUri']?.toString(),
       artifactSize: json['artifactSize']?.toString(),
       artifactHash: json['artifactHash']?.toString(),
@@ -677,6 +680,7 @@ class ApplicationDeploymentResponse {
       'versionTag': versionTag,
       'commitHash': commitHash,
       'sourceRef': sourceRef,
+      'rollbackFromDeploymentId': rollbackFromDeploymentId,
       'artifactDriveUri': artifactDriveUri,
       'artifactSize': artifactSize,
       'artifactHash': artifactHash,

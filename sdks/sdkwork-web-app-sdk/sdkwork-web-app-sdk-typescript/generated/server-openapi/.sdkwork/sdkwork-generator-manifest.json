@@ -60,7 +60,7 @@
     },
     {
       "path": "src/api/deployment.ts",
-      "sha256": "f82ec6708bb6c3b6344da20863d4e9bb34ed76aaed112ca560dde1f002e47cb4"
+      "sha256": "abcb0d7360dd52c8578842ae40537636ae91ec7f0602de4a2c2b1e9fe119bb0a"
     },
     {
       "path": "src/api/domain.ts",
@@ -156,7 +156,7 @@
     },
     {
       "path": "src/types/deployment-response.ts",
-      "sha256": "8a54fbd761b373486b5e918c3ffa59890f384a2b5bf4d6be3736aee72c6872ba"
+      "sha256": "0cd9d665284ad367e284d5694676c2581b5d4f381e009789a7306515564fe624"
     },
     {
       "path": "src/types/domain-page.ts",

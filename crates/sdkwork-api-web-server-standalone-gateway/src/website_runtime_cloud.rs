@@ -1,3 +1,4 @@
+use sdkwork_utils_rust::uuid;
 use sdkwork_web_internal_sdk::{
     api::RuntimeApi, CreateRuntimeObservationRequest, RuntimeAssignment as SdkRuntimeAssignment,
     RuntimeAssignmentDelivery as SdkRuntimeAssignmentDelivery, SdkworkConfig, SdkworkCustomClient,
@@ -92,6 +93,7 @@ impl CloudRuntimeAssignmentSource {
         reason_code: Option<&str>,
         detail: Option<&str>,
     ) -> Result<(), CloudRuntimeAssignmentError> {
+        let idempotency_key = uuid();
         let observation = self
             .api
             .assignments_observations_create(
@@ -104,6 +106,7 @@ impl CloudRuntimeAssignmentSource {
                     reason_code: reason_code.map(str::to_owned),
                     detail: detail.map(str::to_owned),
                 },
+                &idempotency_key,
             )
             .await
             .map_err(|_| CloudRuntimeAssignmentError::Request)?;
@@ -204,6 +207,7 @@ mod tests {
         Json, Router,
     };
     use http_body_util::BodyExt;
+    use sdkwork_utils_rust::is_uuid;
     use sdkwork_webserver_contract::RuntimeObservationState;
     use serde_json::{json, Value};
 
@@ -228,6 +232,7 @@ mod tests {
         path: String,
         query: Option<String>,
         api_key: Option<String>,
+        idempotency_key: Option<String>,
         content_type: Option<String>,
         body: Value,
     }
@@ -298,6 +303,7 @@ mod tests {
             "/internal/v3/api/web/runtime_assignments/snapshot-7/observations"
         );
         assert_eq!(observation.api_key.as_deref(), Some("node-token-7"));
+        assert!(observation.idempotency_key.as_deref().is_some_and(is_uuid));
         assert_eq!(
             observation.content_type.as_deref(),
             Some("application/json")
@@ -361,6 +367,7 @@ mod tests {
         let path = request.uri().path().to_owned();
         let query = request.uri().query().map(str::to_owned);
         let api_key = header_value(&request, "x-api-key");
+        let idempotency_key = header_value(&request, "idempotency-key");
         let content_type = header_value(&request, "content-type");
         let body_bytes = request.into_body().collect().await.unwrap().to_bytes();
         let body = if body_bytes.is_empty() {
@@ -373,6 +380,7 @@ mod tests {
             path,
             query,
             api_key,
+            idempotency_key,
             content_type,
             body,
         });

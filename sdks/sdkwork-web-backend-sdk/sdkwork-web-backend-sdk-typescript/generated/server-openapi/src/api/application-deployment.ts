@@ -47,7 +47,7 @@ export class ApplicationDeploymentApplicationsDeploymentsApi {
     return this.client.request<ApplicationDeploymentResponse>(backendApiPath(`/applications/${serializePathParameter(applicationId, { name: 'applicationId', style: 'simple', explode: false })}/deployments`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, body, headers: requestHeaders, contentType: 'application/json' });
   }
 
-/** Roll back a managed application deployment */
+/** Restore a managed application from an immutable successful version */
   async rollback(applicationId: string, deploymentId: string, params: ApplicationDeploymentApplicationsDeploymentsRollbackParams, requestOptions?: ApiRequestOptions): Promise<ApplicationDeploymentResponse> {
     const requestHeaders = buildRequestHeaders(
       {

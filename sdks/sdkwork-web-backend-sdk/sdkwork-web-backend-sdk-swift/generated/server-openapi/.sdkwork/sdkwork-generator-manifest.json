@@ -60,7 +60,7 @@
     },
     {
       "path": "Sources/API/ApplicationDeploymentApi.swift",
-      "sha256": "fea5890863bfa1eb7656b538f581d5fb3995fd7a0394903644fe665b21766bc7"
+      "sha256": "6f026e4d9a80fb5130df9bd3f0645873cf7ca8f17142f772451e20705e76bf84"
     },
     {
       "path": "Sources/API/ApplicationDomainApi.swift",
@@ -92,7 +92,7 @@
     },
     {
       "path": "Sources/Models.swift",
-      "sha256": "b341965fc5ddb95ec9b12183e33dd58deb0aa4cde3437eb3709f70a2092780c9"
+      "sha256": "c1a396c2ed4db83548527fa4eb3e49b28cc66b21b9e57f702db9046c652b6409"
     },
     {
       "path": "Sources/SdkworkBackendClient.swift",

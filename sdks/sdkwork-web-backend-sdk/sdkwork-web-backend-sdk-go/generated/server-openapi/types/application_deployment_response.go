@@ -10,6 +10,7 @@ type ApplicationDeploymentResponse struct {
 	VersionTag string `json:"versionTag"`
 	CommitHash string `json:"commitHash"`
 	SourceRef string `json:"sourceRef"`
+	RollbackFromDeploymentId string `json:"rollbackFromDeploymentId"`
 	ArtifactDriveUri string `json:"artifactDriveUri"`
 	ArtifactSize string `json:"artifactSize"`
 	ArtifactHash string `json:"artifactHash"`

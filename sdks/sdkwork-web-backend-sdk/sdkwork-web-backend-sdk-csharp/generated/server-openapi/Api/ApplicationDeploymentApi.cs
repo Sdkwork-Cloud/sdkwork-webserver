@@ -45,7 +45,7 @@ namespace SDKWork.Web.BackendSdk.Api
         }
 
         /// <summary>
-        /// Roll back a managed application deployment
+        /// Restore a managed application from an immutable successful version
         /// </summary>
         public async Task<SDKWork.Web.BackendSdk.Models.ApplicationsDeploymentsRollbackResponse?> ApplicationsDeploymentsRollbackAsync(string applicationId, string deploymentId, string idempotencyKey)
         {

@@ -52,7 +52,7 @@
     },
     {
       "path": "src/Api/ApplicationDeployment.php",
-      "sha256": "ef75f1e174a4c114b427380ae315617f2193e53bd663982c5bd5167235d32a86"
+      "sha256": "019612ab673bf2f796b641fa21daee6c0b62188383fbd0963f88f9e5fe5a0e18"
     },
     {
       "path": "src/Api/ApplicationDomain.php",
@@ -108,7 +108,7 @@
     },
     {
       "path": "src/Models/ApplicationDeploymentResponse.php",
-      "sha256": "6e65887bf353ed4eb705b75caaf4b61cb83504b868c97410f4d274d68f88fcfa"
+      "sha256": "4be244241ddfca954a43daace39fb2ce17c5b767d1ad86bac715c1a649077273"
     },
     {
       "path": "src/Models/ApplicationDomainResponse.php",

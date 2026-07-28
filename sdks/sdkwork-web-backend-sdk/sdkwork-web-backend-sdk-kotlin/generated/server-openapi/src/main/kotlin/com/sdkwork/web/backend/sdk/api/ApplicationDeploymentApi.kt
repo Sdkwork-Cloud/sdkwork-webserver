@@ -31,7 +31,7 @@ class ApplicationDeploymentApi(private val client: HttpClient) {
         return client.convertValue(raw, object : TypeReference<ApplicationsDeploymentsCreateResponse201>() {})
     }
 
-    /** Roll back a managed application deployment */
+    /** Restore a managed application from an immutable successful version */
     suspend fun applicationsDeploymentsRollback(applicationId: String, deploymentId: String, idempotencyKey: String): ApplicationsDeploymentsRollbackResponse? {
         val requestHeaders = buildRequestHeaders(
             mapOf(

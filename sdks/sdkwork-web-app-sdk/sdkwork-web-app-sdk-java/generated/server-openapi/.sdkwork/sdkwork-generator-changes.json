@@ -9,17 +9,12 @@
     "protocol": "http",
     "packageName": "com.sdkwork:sdkwork-web-app-sdk"
   },
-  "changeFingerprint": "d922dab4b38a8a6aeb05b546a85368a3ed226a4827bba5c11ec39b74ccbd6e8e",
+  "changeFingerprint": "773b91125afea1b7c1db5fe34fe732cff9e5786a4dbc14054407eefd246a8823",
   "changes": {
     "createdGeneratedFiles": [],
     "updatedGeneratedFiles": [
-      "src/main/java/com/sdkwork/web/app/sdk/api/CertificateApi.java",
       "src/main/java/com/sdkwork/web/app/sdk/api/DeploymentApi.java",
-      "src/main/java/com/sdkwork/web/app/sdk/api/DomainApi.java",
-      "src/main/java/com/sdkwork/web/app/sdk/api/EnvVariableApi.java",
-      "src/main/java/com/sdkwork/web/app/sdk/api/MonitorApi.java",
-      "src/main/java/com/sdkwork/web/app/sdk/api/SiteApi.java",
-      "src/main/java/com/sdkwork/web/app/sdk/model/CreateDeploymentRequest.java"
+      "src/main/java/com/sdkwork/web/app/sdk/model/DeploymentResponse.java"
     ],
     "unchangedGeneratedFiles": [
       "bin/publish-core.mjs",
@@ -31,19 +26,24 @@
       "README.md",
       "sdkwork-sdk.json",
       "src/main/java/com/sdkwork/web/app/sdk/api/ApiPaths.java",
+      "src/main/java/com/sdkwork/web/app/sdk/api/CertificateApi.java",
+      "src/main/java/com/sdkwork/web/app/sdk/api/DomainApi.java",
+      "src/main/java/com/sdkwork/web/app/sdk/api/EnvVariableApi.java",
+      "src/main/java/com/sdkwork/web/app/sdk/api/MonitorApi.java",
       "src/main/java/com/sdkwork/web/app/sdk/api/package-info.java",
+      "src/main/java/com/sdkwork/web/app/sdk/api/SiteApi.java",
       "src/main/java/com/sdkwork/web/app/sdk/http/HttpClient.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/CertificatePage.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/CertificateResponse.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/CertificatesCreateResponse201.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/CertificatesListResponse.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/CreateCertificateRequest.java",
+      "src/main/java/com/sdkwork/web/app/sdk/model/CreateDeploymentRequest.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/CreateDomainRequest.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/CreateEnvVariableRequest.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/CreateHealthCheckRequest.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/CreateSiteRequest.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/DeploymentPage.java",
-      "src/main/java/com/sdkwork/web/app/sdk/model/DeploymentResponse.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/DomainPage.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/DomainResponse.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/DomainVerifyResponse.java",
@@ -101,18 +101,13 @@
       {
         "area": "api-surface",
         "paths": [
-          "src/main/java/com/sdkwork/web/app/sdk/api/CertificateApi.java",
-          "src/main/java/com/sdkwork/web/app/sdk/api/DeploymentApi.java",
-          "src/main/java/com/sdkwork/web/app/sdk/api/DomainApi.java",
-          "src/main/java/com/sdkwork/web/app/sdk/api/EnvVariableApi.java",
-          "src/main/java/com/sdkwork/web/app/sdk/api/MonitorApi.java",
-          "src/main/java/com/sdkwork/web/app/sdk/api/SiteApi.java"
+          "src/main/java/com/sdkwork/web/app/sdk/api/DeploymentApi.java"
         ]
       },
       {
         "area": "models",
         "paths": [
-          "src/main/java/com/sdkwork/web/app/sdk/model/CreateDeploymentRequest.java"
+          "src/main/java/com/sdkwork/web/app/sdk/model/DeploymentResponse.java"
         ]
       }
     ],

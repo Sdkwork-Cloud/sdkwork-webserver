@@ -175,6 +175,7 @@ pub trait WebRepositoryPort: Send + Sync {
         site_id: &str,
         deployment_id: &str,
         actor_id: Option<i64>,
+        idempotency_key: Option<&str>,
     ) -> WebServiceResult<DeploymentResponse>;
 
     async fn list_env_variables(

@@ -7,6 +7,7 @@ data class DeploymentResponse(
     val versionTag: String? = null,
     val commitHash: String? = null,
     val sourceRef: String? = null,
+    val rollbackFromDeploymentId: String? = null,
     val environment: String? = null,
     val artifactDriveUri: String? = null,
     val artifactSize: String? = null,

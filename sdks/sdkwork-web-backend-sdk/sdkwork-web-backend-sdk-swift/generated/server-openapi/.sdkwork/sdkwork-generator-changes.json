@@ -9,16 +9,11 @@
     "protocol": "http",
     "packageName": "sdkwork-web-backend-sdk"
   },
-  "changeFingerprint": "c2e6b7cebad4e80fdf219091a25f302f7a320a586c98b8f6707a66c6889e9bf0",
+  "changeFingerprint": "e2bf10b47201a3d2bc16316b430bbef30f48009aeb2a9d41a0c0dd24cec8a021",
   "changes": {
     "createdGeneratedFiles": [],
     "updatedGeneratedFiles": [
-      "Sources/API/ApplicationApi.swift",
       "Sources/API/ApplicationDeploymentApi.swift",
-      "Sources/API/ApplicationDomainApi.swift",
-      "Sources/API/CertificateApi.swift",
-      "Sources/API/NginxApi.swift",
-      "Sources/API/ServerApi.swift",
       "Sources/Models.swift"
     ],
     "unchangedGeneratedFiles": [
@@ -33,8 +28,13 @@
       "Sources/API/AgentApi.swift",
       "Sources/API/API.swift",
       "Sources/API/ApiPaths.swift",
+      "Sources/API/ApplicationApi.swift",
+      "Sources/API/ApplicationDomainApi.swift",
       "Sources/API/AuditApi.swift",
+      "Sources/API/CertificateApi.swift",
       "Sources/API/CertificateDistributionApi.swift",
+      "Sources/API/NginxApi.swift",
+      "Sources/API/ServerApi.swift",
       "Sources/HTTP/HttpClient.swift",
       "Sources/SdkworkBackendClient.swift"
     ],
@@ -55,12 +55,7 @@
       {
         "area": "api-surface",
         "paths": [
-          "Sources/API/ApplicationApi.swift",
-          "Sources/API/ApplicationDeploymentApi.swift",
-          "Sources/API/ApplicationDomainApi.swift",
-          "Sources/API/CertificateApi.swift",
-          "Sources/API/NginxApi.swift",
-          "Sources/API/ServerApi.swift"
+          "Sources/API/ApplicationDeploymentApi.swift"
         ]
       },
       {

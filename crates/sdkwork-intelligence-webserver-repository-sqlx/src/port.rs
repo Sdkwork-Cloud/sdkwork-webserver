@@ -176,8 +176,9 @@ impl WebRepositoryPort for WebRepository {
         site_id: &str,
         deployment_id: &str,
         actor_id: Option<i64>,
+        idempotency_key: Option<&str>,
     ) -> WebServiceResult<DeploymentResponse> {
-        self.rollback_deployment_repo(tenant_id, site_id, deployment_id, actor_id)
+        self.rollback_deployment_repo(tenant_id, site_id, deployment_id, actor_id, idempotency_key)
             .await
     }
 
@@ -219,7 +220,8 @@ impl WebRepositoryPort for WebRepository {
         owner_id: Option<i64>,
         request: &CreateCertificateRequest,
     ) -> WebServiceResult<CertificateResponse> {
-        self.create_certificate_repo(tenant_id, owner_id, request).await
+        self.create_certificate_repo(tenant_id, owner_id, request)
+            .await
     }
 
     async fn insert_certificate_pending(
@@ -230,13 +232,7 @@ impl WebRepositoryPort for WebRepository {
         cert_type: i32,
         auto_renew: bool,
     ) -> WebServiceResult<(String, String)> {
-        self.insert_certificate_pending_repo(
-            tenant_id,
-            owner_id,
-            domain_id,
-            cert_type,
-            auto_renew,
-        )
+        self.insert_certificate_pending_repo(tenant_id, owner_id, domain_id, cert_type, auto_renew)
             .await
     }
 

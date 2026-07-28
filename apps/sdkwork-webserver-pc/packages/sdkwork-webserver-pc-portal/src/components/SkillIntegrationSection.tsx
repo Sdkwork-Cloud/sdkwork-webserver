@@ -27,7 +27,7 @@ export function SkillIntegrationSection({
       : t("skill.copy");
 
   return (
-    <section className="scroll-mt-16 border-b border-emerald-300/15 bg-[#122a22] py-14 text-white sm:py-16" id="skill">
+    <section className="scroll-mt-[52px] border-b border-emerald-300/15 bg-[#122a22] py-14 text-white sm:py-16" id="skill">
       <div className="mx-auto max-w-[1280px] px-5 sm:px-7 lg:px-10">
         <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
           <div className="max-w-[790px]">
@@ -60,12 +60,12 @@ export function SkillIntegrationSection({
             ))}
           </div>
           <div className="mt-4 overflow-hidden rounded-md border border-white/15 bg-[#08150f] shadow-2xl">
-            <header className="flex min-h-12 items-center justify-between gap-4 border-b border-white/10 px-4">
-              <span className="flex items-center gap-2 text-xs font-semibold text-emerald-100/70">
+            <header className="flex min-h-10 items-center justify-between gap-4 bg-white/[0.04] px-4">
+              <span className="flex min-w-0 items-center gap-2 whitespace-nowrap text-xs font-semibold text-emerald-100/70">
                 <Terminal aria-hidden="true" size={15} />
-                {t("skill.commandLabel")}
+                <span className="truncate">{t("skill.commandLabel")}</span>
               </span>
-              <span className="flex items-center gap-2 text-xs text-emerald-300">
+              <span className="flex shrink-0 items-center gap-2 whitespace-nowrap text-xs text-emerald-300">
                 <ShieldCheck aria-hidden="true" size={14} />
                 {t("skill.governed")}
               </span>

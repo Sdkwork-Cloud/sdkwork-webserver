@@ -43,7 +43,7 @@ final class ApplicationDeploymentApi extends BaseApi
         return is_array($result) ? ApplicationsDeploymentsCreateResponse201::fromArray($result) : null;
     }
 
-    /** Roll back a managed application deployment */
+    /** Restore a managed application from an immutable successful version */
     public function applicationsDeploymentsRollback(string $applicationId, string $deploymentId, string $idempotencyKey): ?ApplicationsDeploymentsRollbackResponse
     {
         $path = $this->interpolatePath('/backend/v3/api/applications/{applicationId}/deployments/{deploymentId}/rollback', ['applicationId' => $this->serializePathParameter($applicationId, new PathParameterSpec('applicationId', 'simple', false)), 'deploymentId' => $this->serializePathParameter($deploymentId, new PathParameterSpec('deploymentId', 'simple', false))]);

@@ -39,7 +39,7 @@ impl ApplicationDeploymentApi {
         self.client.post(&path, Some(body), None, headers.as_ref(), Some("application/json")).await
     }
 
-    /// Roll back a managed application deployment
+    /// Restore a managed application from an immutable successful version
     pub async fn applications_deployments_rollback(&self, application_id: &str, deployment_id: &str, idempotency_key: &str) -> Result<ApplicationDeploymentResponse, SdkworkError> {
         let path = backend_path(&format!("/applications/{}/deployments/{}/rollback", serialize_path_parameter(application_id, PathParameterSpec::new("applicationId", "simple", false)), serialize_path_parameter(deployment_id, PathParameterSpec::new("deploymentId", "simple", false))));
         let headers = build_request_headers(

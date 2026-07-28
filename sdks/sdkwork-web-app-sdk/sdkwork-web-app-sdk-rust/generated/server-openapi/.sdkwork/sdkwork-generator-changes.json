@@ -9,17 +9,12 @@
     "protocol": "http",
     "packageName": "sdkwork-web-app-sdk"
   },
-  "changeFingerprint": "9633e8561fb1971db6b92da046fabd194409446efc798ec08b983923461ef601",
+  "changeFingerprint": "82c24507b8516f0b2cc59bb448567cdaa21f8daa6528d71f5d36fb802bb62ba7",
   "changes": {
     "createdGeneratedFiles": [],
     "updatedGeneratedFiles": [
-      "src/api/certificate.rs",
       "src/api/deployment.rs",
-      "src/api/domain.rs",
-      "src/api/env_variable.rs",
-      "src/api/monitor.rs",
-      "src/api/site.rs",
-      "src/models/create_deployment_request.rs"
+      "src/models/deployment_response.rs"
     ],
     "unchangedGeneratedFiles": [
       "bin/publish-core.mjs",
@@ -31,8 +26,13 @@
       "README.md",
       "sdkwork-sdk.json",
       "src/api/base.rs",
+      "src/api/certificate.rs",
+      "src/api/domain.rs",
+      "src/api/env_variable.rs",
       "src/api/mod.rs",
+      "src/api/monitor.rs",
       "src/api/paths.rs",
+      "src/api/site.rs",
       "src/client.rs",
       "src/http/client.rs",
       "src/http/mod.rs",
@@ -43,12 +43,12 @@
       "src/models/certificates_list_response.rs",
       "src/models/common.rs",
       "src/models/create_certificate_request.rs",
+      "src/models/create_deployment_request.rs",
       "src/models/create_domain_request.rs",
       "src/models/create_env_variable_request.rs",
       "src/models/create_health_check_request.rs",
       "src/models/create_site_request.rs",
       "src/models/deployment_page.rs",
-      "src/models/deployment_response.rs",
       "src/models/domain_page.rs",
       "src/models/domain_response.rs",
       "src/models/domain_verify_response.rs",
@@ -106,18 +106,13 @@
       {
         "area": "api-surface",
         "paths": [
-          "src/api/certificate.rs",
-          "src/api/deployment.rs",
-          "src/api/domain.rs",
-          "src/api/env_variable.rs",
-          "src/api/monitor.rs",
-          "src/api/site.rs"
+          "src/api/deployment.rs"
         ]
       },
       {
         "area": "models",
         "paths": [
-          "src/models/create_deployment_request.rs"
+          "src/models/deployment_response.rs"
         ]
       }
     ],

@@ -45,7 +45,7 @@ impl DeploymentApi {
         self.client.get(&path, None, None).await
     }
 
-    /// 回滚部署
+    /// 基于历史成功版本创建快速还原命令
     pub async fn sites_deployments_rollback(&self, site_id: &str, deployment_id: &str, idempotency_key: &str) -> Result<DeploymentResponse, SdkworkError> {
         let path = app_path(&format!("/sites/{}/deployments/{}/rollback", serialize_path_parameter(site_id, PathParameterSpec::new("siteId", "simple", false)), serialize_path_parameter(deployment_id, PathParameterSpec::new("deploymentId", "simple", false))));
         let headers = build_request_headers(

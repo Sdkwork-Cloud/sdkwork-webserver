@@ -12,7 +12,7 @@
   "mode": "apply",
   "hasChanges": true,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "269b07cb8f0f688d85ac37135ea7fd8fe5785ed22df17f64abb5a240ab489fa8",
+  "changeFingerprint": "59c162b5f779749e02506e79e90a83ce58745215ca1bca79df242e02fa72da17",
   "changeImpact": {
     "schemaVersion": 1,
     "areas": [
@@ -23,18 +23,13 @@
       {
         "area": "api-surface",
         "paths": [
-          "api/certificate.go",
-          "api/deployment.go",
-          "api/domain.go",
-          "api/env_variable.go",
-          "api/monitor.go",
-          "api/site.go"
+          "api/deployment.go"
         ]
       },
       {
         "area": "models",
         "paths": [
-          "types/create_deployment_request.go"
+          "types/deployment_response.go"
         ]
       }
     ],
@@ -124,27 +119,27 @@
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 7,
+    "writtenFiles": 2,
     "skippedScaffoldFiles": 1,
-    "skippedUnchangedGeneratedFiles": 67,
+    "skippedUnchangedGeneratedFiles": 72,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "269b07cb8f0f688d85ac37135ea7fd8fe5785ed22df17f64abb5a240ab489fa8",
+    "changeFingerprint": "59c162b5f779749e02506e79e90a83ce58745215ca1bca79df242e02fa72da17",
     "changes": {
       "createdGeneratedFiles": [],
       "updatedGeneratedFiles": [
-        "api/certificate.go",
         "api/deployment.go",
-        "api/domain.go",
-        "api/env_variable.go",
-        "api/monitor.go",
-        "api/site.go",
-        "types/create_deployment_request.go"
+        "types/deployment_response.go"
       ],
       "unchangedGeneratedFiles": [
         "api/base.go",
+        "api/certificate.go",
         "api/doc.go",
+        "api/domain.go",
+        "api/env_variable.go",
+        "api/monitor.go",
         "api/paths.go",
+        "api/site.go",
         "bin/publish-core.mjs",
         "bin/publish.ps1",
         "bin/publish.sh",
@@ -163,12 +158,12 @@
         "types/certificates_list_response.go",
         "types/common.go",
         "types/create_certificate_request.go",
+        "types/create_deployment_request.go",
         "types/create_domain_request.go",
         "types/create_env_variable_request.go",
         "types/create_health_check_request.go",
         "types/create_site_request.go",
         "types/deployment_page.go",
-        "types/deployment_response.go",
         "types/doc.go",
         "types/domain_page.go",
         "types/domain_response.go",
@@ -227,18 +222,13 @@
         {
           "area": "api-surface",
           "paths": [
-            "api/certificate.go",
-            "api/deployment.go",
-            "api/domain.go",
-            "api/env_variable.go",
-            "api/monitor.go",
-            "api/site.go"
+            "api/deployment.go"
           ]
         },
         {
           "area": "models",
           "paths": [
-            "types/create_deployment_request.go"
+            "types/deployment_response.go"
           ]
         }
       ],

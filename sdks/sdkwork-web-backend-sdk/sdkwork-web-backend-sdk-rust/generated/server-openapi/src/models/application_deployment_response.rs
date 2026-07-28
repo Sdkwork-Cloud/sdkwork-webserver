@@ -26,6 +26,11 @@ pub struct ApplicationDeploymentResponse {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub source_ref: Option<String>,
 
+    /// Immutable successful deployment selected as this restore command's source.
+    #[serde(rename = "rollbackFromDeploymentId")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub rollback_from_deployment_id: Option<String>,
+
     #[serde(rename = "artifactDriveUri")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub artifact_drive_uri: Option<String>,

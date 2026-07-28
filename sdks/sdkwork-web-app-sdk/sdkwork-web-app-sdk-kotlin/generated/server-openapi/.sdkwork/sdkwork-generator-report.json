@@ -12,7 +12,7 @@
   "mode": "apply",
   "hasChanges": true,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "c33f3a72796bcaa56cf2caeff72b65aa23fe6200047d3c293187b2cf3651adeb",
+  "changeFingerprint": "e8319a74fcc7bc8deab37f236cd107b9be8192066e91b03199ade74b70842384",
   "changeImpact": {
     "schemaVersion": 1,
     "areas": [
@@ -23,18 +23,13 @@
       {
         "area": "api-surface",
         "paths": [
-          "src/main/kotlin/com/sdkwork/web/app/sdk/api/CertificateApi.kt",
-          "src/main/kotlin/com/sdkwork/web/app/sdk/api/DeploymentApi.kt",
-          "src/main/kotlin/com/sdkwork/web/app/sdk/api/DomainApi.kt",
-          "src/main/kotlin/com/sdkwork/web/app/sdk/api/EnvVariableApi.kt",
-          "src/main/kotlin/com/sdkwork/web/app/sdk/api/MonitorApi.kt",
-          "src/main/kotlin/com/sdkwork/web/app/sdk/api/SiteApi.kt"
+          "src/main/kotlin/com/sdkwork/web/app/sdk/api/DeploymentApi.kt"
         ]
       },
       {
         "area": "unknown",
         "paths": [
-          "src/main/kotlin/com/sdkwork/web/app/sdk/CreateDeploymentRequest.kt"
+          "src/main/kotlin/com/sdkwork/web/app/sdk/DeploymentResponse.kt"
         ]
       }
     ],
@@ -126,22 +121,17 @@
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 7,
+    "writtenFiles": 2,
     "skippedScaffoldFiles": 1,
-    "skippedUnchangedGeneratedFiles": 62,
+    "skippedUnchangedGeneratedFiles": 67,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "c33f3a72796bcaa56cf2caeff72b65aa23fe6200047d3c293187b2cf3651adeb",
+    "changeFingerprint": "e8319a74fcc7bc8deab37f236cd107b9be8192066e91b03199ade74b70842384",
     "changes": {
       "createdGeneratedFiles": [],
       "updatedGeneratedFiles": [
-        "src/main/kotlin/com/sdkwork/web/app/sdk/api/CertificateApi.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/api/DeploymentApi.kt",
-        "src/main/kotlin/com/sdkwork/web/app/sdk/api/DomainApi.kt",
-        "src/main/kotlin/com/sdkwork/web/app/sdk/api/EnvVariableApi.kt",
-        "src/main/kotlin/com/sdkwork/web/app/sdk/api/MonitorApi.kt",
-        "src/main/kotlin/com/sdkwork/web/app/sdk/api/SiteApi.kt",
-        "src/main/kotlin/com/sdkwork/web/app/sdk/CreateDeploymentRequest.kt"
+        "src/main/kotlin/com/sdkwork/web/app/sdk/DeploymentResponse.kt"
       ],
       "unchangedGeneratedFiles": [
         "bin/publish-core.mjs",
@@ -155,17 +145,22 @@
         "settings.gradle.kts",
         "src/main/kotlin/com/sdkwork/web/app/sdk/api/Api.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/api/ApiPaths.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/api/CertificateApi.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/api/DomainApi.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/api/EnvVariableApi.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/api/MonitorApi.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/api/SiteApi.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatePage.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/CertificateResponse.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatesCreateResponse201.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatesListResponse.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/CreateCertificateRequest.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/CreateDeploymentRequest.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/CreateDomainRequest.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/CreateEnvVariableRequest.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/CreateHealthCheckRequest.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/CreateSiteRequest.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/DeploymentPage.kt",
-        "src/main/kotlin/com/sdkwork/web/app/sdk/DeploymentResponse.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/DomainPage.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/DomainResponse.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/DomainVerifyResponse.kt",
@@ -224,18 +219,13 @@
         {
           "area": "api-surface",
           "paths": [
-            "src/main/kotlin/com/sdkwork/web/app/sdk/api/CertificateApi.kt",
-            "src/main/kotlin/com/sdkwork/web/app/sdk/api/DeploymentApi.kt",
-            "src/main/kotlin/com/sdkwork/web/app/sdk/api/DomainApi.kt",
-            "src/main/kotlin/com/sdkwork/web/app/sdk/api/EnvVariableApi.kt",
-            "src/main/kotlin/com/sdkwork/web/app/sdk/api/MonitorApi.kt",
-            "src/main/kotlin/com/sdkwork/web/app/sdk/api/SiteApi.kt"
+            "src/main/kotlin/com/sdkwork/web/app/sdk/api/DeploymentApi.kt"
           ]
         },
         {
           "area": "unknown",
           "paths": [
-            "src/main/kotlin/com/sdkwork/web/app/sdk/CreateDeploymentRequest.kt"
+            "src/main/kotlin/com/sdkwork/web/app/sdk/DeploymentResponse.kt"
           ]
         }
       ],

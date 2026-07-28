@@ -12,7 +12,7 @@
   "mode": "apply",
   "hasChanges": true,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "ce47801330edcf64a39b6fd6543a6a30c0c3ff08d9988b8398e639875792529d",
+  "changeFingerprint": "24900fa8242131f82ba264374f510e0b33bf3dfee95e990e48deecb059fe8318",
   "changeImpact": {
     "schemaVersion": 1,
     "areas": [
@@ -23,18 +23,13 @@
       {
         "area": "api-surface",
         "paths": [
-          "lib/sdkwork/backend_sdk/api/application_deployment.rb",
-          "lib/sdkwork/backend_sdk/api/application_domain.rb",
-          "lib/sdkwork/backend_sdk/api/application.rb",
-          "lib/sdkwork/backend_sdk/api/certificate.rb",
-          "lib/sdkwork/backend_sdk/api/nginx.rb",
-          "lib/sdkwork/backend_sdk/api/server.rb"
+          "lib/sdkwork/backend_sdk/api/application_deployment.rb"
         ]
       },
       {
         "area": "models",
         "paths": [
-          "lib/sdkwork/backend_sdk/models/create_application_deployment_request.rb"
+          "lib/sdkwork/backend_sdk/models/application_deployment_response.rb"
         ]
       }
     ],
@@ -124,22 +119,17 @@
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 7,
+    "writtenFiles": 2,
     "skippedScaffoldFiles": 1,
-    "skippedUnchangedGeneratedFiles": 88,
+    "skippedUnchangedGeneratedFiles": 93,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "ce47801330edcf64a39b6fd6543a6a30c0c3ff08d9988b8398e639875792529d",
+    "changeFingerprint": "24900fa8242131f82ba264374f510e0b33bf3dfee95e990e48deecb059fe8318",
     "changes": {
       "createdGeneratedFiles": [],
       "updatedGeneratedFiles": [
         "lib/sdkwork/backend_sdk/api/application_deployment.rb",
-        "lib/sdkwork/backend_sdk/api/application_domain.rb",
-        "lib/sdkwork/backend_sdk/api/application.rb",
-        "lib/sdkwork/backend_sdk/api/certificate.rb",
-        "lib/sdkwork/backend_sdk/api/nginx.rb",
-        "lib/sdkwork/backend_sdk/api/server.rb",
-        "lib/sdkwork/backend_sdk/models/create_application_deployment_request.rb"
+        "lib/sdkwork/backend_sdk/models/application_deployment_response.rb"
       ],
       "unchangedGeneratedFiles": [
         "bin/publish-core.mjs",
@@ -149,9 +139,14 @@
         "Gemfile",
         "lib/sdkwork/backend_sdk.rb",
         "lib/sdkwork/backend_sdk/api/agent.rb",
+        "lib/sdkwork/backend_sdk/api/application_domain.rb",
+        "lib/sdkwork/backend_sdk/api/application.rb",
         "lib/sdkwork/backend_sdk/api/audit.rb",
         "lib/sdkwork/backend_sdk/api/base_api.rb",
         "lib/sdkwork/backend_sdk/api/certificate_distribution.rb",
+        "lib/sdkwork/backend_sdk/api/certificate.rb",
+        "lib/sdkwork/backend_sdk/api/nginx.rb",
+        "lib/sdkwork/backend_sdk/api/server.rb",
         "lib/sdkwork/backend_sdk/client.rb",
         "lib/sdkwork/backend_sdk/http/client.rb",
         "lib/sdkwork/backend_sdk/models/agent_certificate_bundle.rb",
@@ -159,7 +154,6 @@
         "lib/sdkwork/backend_sdk/models/agent_heartbeat_response.rb",
         "lib/sdkwork/backend_sdk/models/agent_nginx_config_bundle.rb",
         "lib/sdkwork/backend_sdk/models/agent_sync_response.rb",
-        "lib/sdkwork/backend_sdk/models/application_deployment_response.rb",
         "lib/sdkwork/backend_sdk/models/application_domain_response.rb",
         "lib/sdkwork/backend_sdk/models/application_domain_verify_response.rb",
         "lib/sdkwork/backend_sdk/models/application_response.rb",
@@ -191,6 +185,7 @@
         "lib/sdkwork/backend_sdk/models/configs_retrieve_response.rb",
         "lib/sdkwork/backend_sdk/models/configs_update_response.rb",
         "lib/sdkwork/backend_sdk/models/configs_validate_response.rb",
+        "lib/sdkwork/backend_sdk/models/create_application_deployment_request.rb",
         "lib/sdkwork/backend_sdk/models/create_application_domain_request.rb",
         "lib/sdkwork/backend_sdk/models/create_application_request.rb",
         "lib/sdkwork/backend_sdk/models/create_certificate_request.rb",
@@ -248,18 +243,13 @@
         {
           "area": "api-surface",
           "paths": [
-            "lib/sdkwork/backend_sdk/api/application_deployment.rb",
-            "lib/sdkwork/backend_sdk/api/application_domain.rb",
-            "lib/sdkwork/backend_sdk/api/application.rb",
-            "lib/sdkwork/backend_sdk/api/certificate.rb",
-            "lib/sdkwork/backend_sdk/api/nginx.rb",
-            "lib/sdkwork/backend_sdk/api/server.rb"
+            "lib/sdkwork/backend_sdk/api/application_deployment.rb"
           ]
         },
         {
           "area": "models",
           "paths": [
-            "lib/sdkwork/backend_sdk/models/create_application_deployment_request.rb"
+            "lib/sdkwork/backend_sdk/models/application_deployment_response.rb"
           ]
         }
       ],

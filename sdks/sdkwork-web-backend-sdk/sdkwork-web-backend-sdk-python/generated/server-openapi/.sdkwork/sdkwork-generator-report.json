@@ -12,7 +12,7 @@
   "mode": "apply",
   "hasChanges": true,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "95c2165388f77240bb829e5675de4722230ff95210e21ddc8b7296d4ee24ca83",
+  "changeFingerprint": "a53bb488f77408bc700e9d0c7d3298d2c184ed427c279e6693a972d2b02211a9",
   "changeImpact": {
     "schemaVersion": 1,
     "areas": [
@@ -23,18 +23,13 @@
       {
         "area": "api-surface",
         "paths": [
-          "sdkwork_web_backend_sdk/api/application_deployment.py",
-          "sdkwork_web_backend_sdk/api/application_domain.py",
-          "sdkwork_web_backend_sdk/api/application.py",
-          "sdkwork_web_backend_sdk/api/certificate.py",
-          "sdkwork_web_backend_sdk/api/nginx.py",
-          "sdkwork_web_backend_sdk/api/server.py"
+          "sdkwork_web_backend_sdk/api/application_deployment.py"
         ]
       },
       {
         "area": "models",
         "paths": [
-          "sdkwork_web_backend_sdk/models/create_application_deployment_request.py"
+          "sdkwork_web_backend_sdk/models/application_deployment_response.py"
         ]
       }
     ],
@@ -124,22 +119,17 @@
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 7,
+    "writtenFiles": 2,
     "skippedScaffoldFiles": 1,
-    "skippedUnchangedGeneratedFiles": 89,
+    "skippedUnchangedGeneratedFiles": 94,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "95c2165388f77240bb829e5675de4722230ff95210e21ddc8b7296d4ee24ca83",
+    "changeFingerprint": "a53bb488f77408bc700e9d0c7d3298d2c184ed427c279e6693a972d2b02211a9",
     "changes": {
       "createdGeneratedFiles": [],
       "updatedGeneratedFiles": [
         "sdkwork_web_backend_sdk/api/application_deployment.py",
-        "sdkwork_web_backend_sdk/api/application_domain.py",
-        "sdkwork_web_backend_sdk/api/application.py",
-        "sdkwork_web_backend_sdk/api/certificate.py",
-        "sdkwork_web_backend_sdk/api/nginx.py",
-        "sdkwork_web_backend_sdk/api/server.py",
-        "sdkwork_web_backend_sdk/models/create_application_deployment_request.py"
+        "sdkwork_web_backend_sdk/models/application_deployment_response.py"
       ],
       "unchangedGeneratedFiles": [
         "bin/publish-core.mjs",
@@ -154,8 +144,13 @@
         "sdkwork_web_backend_sdk/__init__.py",
         "sdkwork_web_backend_sdk/api/__init__.py",
         "sdkwork_web_backend_sdk/api/agent.py",
+        "sdkwork_web_backend_sdk/api/application_domain.py",
+        "sdkwork_web_backend_sdk/api/application.py",
         "sdkwork_web_backend_sdk/api/audit.py",
         "sdkwork_web_backend_sdk/api/certificate_distribution.py",
+        "sdkwork_web_backend_sdk/api/certificate.py",
+        "sdkwork_web_backend_sdk/api/nginx.py",
+        "sdkwork_web_backend_sdk/api/server.py",
         "sdkwork_web_backend_sdk/client.py",
         "sdkwork_web_backend_sdk/http_client.py",
         "sdkwork_web_backend_sdk/models/__init__.py",
@@ -164,7 +159,6 @@
         "sdkwork_web_backend_sdk/models/agent_heartbeat_response.py",
         "sdkwork_web_backend_sdk/models/agent_nginx_config_bundle.py",
         "sdkwork_web_backend_sdk/models/agent_sync_response.py",
-        "sdkwork_web_backend_sdk/models/application_deployment_response.py",
         "sdkwork_web_backend_sdk/models/application_domain_response.py",
         "sdkwork_web_backend_sdk/models/application_domain_verify_response.py",
         "sdkwork_web_backend_sdk/models/application_response.py",
@@ -196,6 +190,7 @@
         "sdkwork_web_backend_sdk/models/configs_retrieve_response.py",
         "sdkwork_web_backend_sdk/models/configs_update_response.py",
         "sdkwork_web_backend_sdk/models/configs_validate_response.py",
+        "sdkwork_web_backend_sdk/models/create_application_deployment_request.py",
         "sdkwork_web_backend_sdk/models/create_application_domain_request.py",
         "sdkwork_web_backend_sdk/models/create_application_request.py",
         "sdkwork_web_backend_sdk/models/create_certificate_request.py",
@@ -249,18 +244,13 @@
         {
           "area": "api-surface",
           "paths": [
-            "sdkwork_web_backend_sdk/api/application_deployment.py",
-            "sdkwork_web_backend_sdk/api/application_domain.py",
-            "sdkwork_web_backend_sdk/api/application.py",
-            "sdkwork_web_backend_sdk/api/certificate.py",
-            "sdkwork_web_backend_sdk/api/nginx.py",
-            "sdkwork_web_backend_sdk/api/server.py"
+            "sdkwork_web_backend_sdk/api/application_deployment.py"
           ]
         },
         {
           "area": "models",
           "paths": [
-            "sdkwork_web_backend_sdk/models/create_application_deployment_request.py"
+            "sdkwork_web_backend_sdk/models/application_deployment_response.py"
           ]
         }
       ],

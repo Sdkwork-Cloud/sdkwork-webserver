@@ -9,24 +9,24 @@
     "protocol": "http",
     "packageName": "SDKWork.Web.BackendSdk"
   },
-  "changeFingerprint": "8287d0c7327e4beda6a4a55c35b904bfbd2afe6d40292967be07d60b3bf2e7e3",
+  "changeFingerprint": "087b11ec8b42d2d49c8838eef852aba3be633945a7f0a9049340ca128eb21cff",
   "changes": {
     "createdGeneratedFiles": [],
     "updatedGeneratedFiles": [
-      "Api/ApplicationApi.cs",
       "Api/ApplicationDeploymentApi.cs",
-      "Api/ApplicationDomainApi.cs",
-      "Api/CertificateApi.cs",
-      "Api/NginxApi.cs",
-      "Api/ServerApi.cs",
-      "Models/CreateApplicationDeploymentRequest.cs"
+      "Models/ApplicationDeploymentResponse.cs"
     ],
     "unchangedGeneratedFiles": [
       "Api/AgentApi.cs",
       "Api/Api.cs",
       "Api/ApiPaths.cs",
+      "Api/ApplicationApi.cs",
+      "Api/ApplicationDomainApi.cs",
       "Api/AuditApi.cs",
+      "Api/CertificateApi.cs",
       "Api/CertificateDistributionApi.cs",
+      "Api/NginxApi.cs",
+      "Api/ServerApi.cs",
       "bin/publish-core.mjs",
       "bin/publish.ps1",
       "bin/publish.sh",
@@ -38,7 +38,6 @@
       "Models/AgentHeartbeatResponse.cs",
       "Models/AgentNginxConfigBundle.cs",
       "Models/AgentSyncResponse.cs",
-      "Models/ApplicationDeploymentResponse.cs",
       "Models/ApplicationDomainResponse.cs",
       "Models/ApplicationDomainVerifyResponse.cs",
       "Models/ApplicationResponse.cs",
@@ -70,6 +69,7 @@
       "Models/ConfigsRetrieveResponse.cs",
       "Models/ConfigsUpdateResponse.cs",
       "Models/ConfigsValidateResponse.cs",
+      "Models/CreateApplicationDeploymentRequest.cs",
       "Models/CreateApplicationDomainRequest.cs",
       "Models/CreateApplicationRequest.cs",
       "Models/CreateCertificateRequest.cs",
@@ -125,18 +125,13 @@
       {
         "area": "api-surface",
         "paths": [
-          "Api/ApplicationApi.cs",
-          "Api/ApplicationDeploymentApi.cs",
-          "Api/ApplicationDomainApi.cs",
-          "Api/CertificateApi.cs",
-          "Api/NginxApi.cs",
-          "Api/ServerApi.cs"
+          "Api/ApplicationDeploymentApi.cs"
         ]
       },
       {
         "area": "models",
         "paths": [
-          "Models/CreateApplicationDeploymentRequest.cs"
+          "Models/ApplicationDeploymentResponse.cs"
         ]
       }
     ],

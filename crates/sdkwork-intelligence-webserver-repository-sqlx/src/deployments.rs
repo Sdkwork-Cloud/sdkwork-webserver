@@ -9,6 +9,22 @@ use super::support::{
     now_rfc3339, optional_instant_from_row, pagination, resolve_site_internal_id, store_error,
 };
 
+struct DeploymentIdempotencyLookup<'a> {
+    tenant_id: i64,
+    site_internal_id: i64,
+    site_id: &'a str,
+    deploy_type: i32,
+    environment: &'a str,
+    version_tag: Option<&'a str>,
+    commit_hash: Option<&'a str>,
+    source_ref: Option<&'a str>,
+    artifact_drive_uri: Option<&'a str>,
+    artifact_size: Option<i64>,
+    artifact_hash: Option<&'a str>,
+    rollback_from_internal_id: Option<i64>,
+    idempotency_key: &'a str,
+}
+
 impl WebRepository {
     pub(super) async fn list_deployments_repo(
         &self,
@@ -34,14 +50,24 @@ impl WebRepository {
             .map_err(|error| store_error("count web_deployment", error))?;
 
             let rows = sqlx::query(
-                "SELECT uuid, site_id, status, deploy_type, environment, version_tag,
-                        commit_hash, source_ref, artifact_path, artifact_size, artifact_hash,
-                        CAST(started_at AS TEXT) AS started_at,
-                        CAST(completed_at AS TEXT) AS completed_at, duration_ms,
-                        CAST(created_at AS TEXT) AS created_at
-                 FROM web_deployment
-                 WHERE tenant_id = $1 AND site_id = $2 AND status = $3
-                 ORDER BY created_at DESC, id DESC LIMIT $4 OFFSET $5",
+                "SELECT deployment.uuid, deployment.site_id, deployment.status,
+                        deployment.deploy_type, deployment.environment, deployment.version_tag,
+                        deployment.commit_hash, deployment.source_ref, deployment.artifact_path,
+                        deployment.artifact_size, deployment.artifact_hash,
+                        source.uuid AS rollback_from_deployment_id,
+                        CAST(deployment.started_at AS TEXT) AS started_at,
+                        CAST(deployment.completed_at AS TEXT) AS completed_at,
+                        deployment.duration_ms,
+                        CAST(deployment.created_at AS TEXT) AS created_at
+                 FROM web_deployment deployment
+                 LEFT JOIN web_deployment source
+                   ON source.id = deployment.rollback_from
+                  AND source.tenant_id = deployment.tenant_id
+                  AND source.site_id = deployment.site_id
+                 WHERE deployment.tenant_id = $1
+                   AND deployment.site_id = $2
+                   AND deployment.status = $3
+                 ORDER BY deployment.created_at DESC, deployment.id DESC LIMIT $4 OFFSET $5",
             )
             .bind(tenant_id)
             .bind(site_internal_id)
@@ -65,14 +91,22 @@ impl WebRepository {
             .map_err(|error| store_error("count web_deployment", error))?;
 
             let rows = sqlx::query(
-                "SELECT uuid, site_id, status, deploy_type, environment, version_tag,
-                        commit_hash, source_ref, artifact_path, artifact_size, artifact_hash,
-                        CAST(started_at AS TEXT) AS started_at,
-                        CAST(completed_at AS TEXT) AS completed_at, duration_ms,
-                        CAST(created_at AS TEXT) AS created_at
-                 FROM web_deployment
-                 WHERE tenant_id = $1 AND site_id = $2
-                 ORDER BY created_at DESC, id DESC LIMIT $3 OFFSET $4",
+                "SELECT deployment.uuid, deployment.site_id, deployment.status,
+                        deployment.deploy_type, deployment.environment, deployment.version_tag,
+                        deployment.commit_hash, deployment.source_ref, deployment.artifact_path,
+                        deployment.artifact_size, deployment.artifact_hash,
+                        source.uuid AS rollback_from_deployment_id,
+                        CAST(deployment.started_at AS TEXT) AS started_at,
+                        CAST(deployment.completed_at AS TEXT) AS completed_at,
+                        deployment.duration_ms,
+                        CAST(deployment.created_at AS TEXT) AS created_at
+                 FROM web_deployment deployment
+                 LEFT JOIN web_deployment source
+                   ON source.id = deployment.rollback_from
+                  AND source.tenant_id = deployment.tenant_id
+                  AND source.site_id = deployment.site_id
+                 WHERE deployment.tenant_id = $1 AND deployment.site_id = $2
+                 ORDER BY deployment.created_at DESC, deployment.id DESC LIMIT $3 OFFSET $4",
             )
             .bind(tenant_id)
             .bind(site_internal_id)
@@ -129,24 +163,23 @@ impl WebRepository {
             .as_deref()
             .map(str::trim)
             .filter(|value| !value.is_empty());
-        if let Some(key) = idempotency_key {
-            if let Some(existing) = self
-                .find_deployment_by_idempotency_repo(
-                    tenant_id,
-                    site_internal_id,
-                    site_id,
-                    request.deploy_type,
-                    environment,
-                    version_tag,
-                    commit_hash,
-                    source_ref,
-                    artifact_drive_uri,
-                    request.artifact_size,
-                    artifact_hash,
-                    key,
-                )
-                .await?
-            {
+        let idempotency_lookup = idempotency_key.map(|key| DeploymentIdempotencyLookup {
+            tenant_id,
+            site_internal_id,
+            site_id,
+            deploy_type: request.deploy_type,
+            environment,
+            version_tag,
+            commit_hash,
+            source_ref,
+            artifact_drive_uri,
+            artifact_size: request.artifact_size,
+            artifact_hash,
+            rollback_from_internal_id: None,
+            idempotency_key: key,
+        });
+        if let Some(lookup) = idempotency_lookup.as_ref() {
+            if let Some(existing) = self.find_deployment_by_idempotency_repo(lookup).await? {
                 return Ok(existing);
             }
         }
@@ -187,24 +220,11 @@ impl WebRepository {
             .await;
 
         if let Err(error) = insert_result {
-            if let Some(key) = idempotency_key.filter(|_| is_unique_violation(&error)) {
-                if let Some(existing) = self
-                    .find_deployment_by_idempotency_repo(
-                        tenant_id,
-                        site_internal_id,
-                        site_id,
-                        request.deploy_type,
-                        environment,
-                        version_tag,
-                        commit_hash,
-                        source_ref,
-                        artifact_drive_uri,
-                        request.artifact_size,
-                        artifact_hash,
-                        key,
-                    )
-                    .await?
-                {
+            if is_unique_violation(&error) {
+                let Some(lookup) = idempotency_lookup.as_ref() else {
+                    return Err(store_error("insert web_deployment", error));
+                };
+                if let Some(existing) = self.find_deployment_by_idempotency_repo(lookup).await? {
                     return Ok(existing);
                 }
             }
@@ -219,30 +239,28 @@ impl WebRepository {
     /// 用于 create_deployment 的幂等性检查。
     async fn find_deployment_by_idempotency_repo(
         &self,
-        tenant_id: i64,
-        requested_site_internal_id: i64,
-        requested_site_id: &str,
-        requested_deploy_type: i32,
-        requested_environment: &str,
-        requested_version_tag: Option<&str>,
-        requested_commit_hash: Option<&str>,
-        requested_source_ref: Option<&str>,
-        requested_artifact_drive_uri: Option<&str>,
-        requested_artifact_size: Option<i64>,
-        requested_artifact_hash: Option<&str>,
-        idempotency_key: &str,
+        lookup: &DeploymentIdempotencyLookup<'_>,
     ) -> WebServiceResult<Option<DeploymentResponse>> {
         let row = sqlx::query(
-            "SELECT uuid, site_id, status, deploy_type, environment, version_tag,
-                    commit_hash, source_ref, artifact_path, artifact_size, artifact_hash,
-                    CAST(started_at AS TEXT) AS started_at,
-                    CAST(completed_at AS TEXT) AS completed_at, duration_ms,
-                    CAST(created_at AS TEXT) AS created_at
-             FROM web_deployment
-             WHERE tenant_id = $1 AND idempotency_key = $2",
+            "SELECT deployment.uuid, deployment.site_id, deployment.status,
+                    deployment.deploy_type, deployment.environment, deployment.version_tag,
+                    deployment.commit_hash, deployment.source_ref, deployment.artifact_path,
+                    deployment.artifact_size, deployment.artifact_hash,
+                    deployment.rollback_from,
+                    source.uuid AS rollback_from_deployment_id,
+                    CAST(deployment.started_at AS TEXT) AS started_at,
+                    CAST(deployment.completed_at AS TEXT) AS completed_at,
+                    deployment.duration_ms,
+                    CAST(deployment.created_at AS TEXT) AS created_at
+             FROM web_deployment deployment
+             LEFT JOIN web_deployment source
+               ON source.id = deployment.rollback_from
+              AND source.tenant_id = deployment.tenant_id
+              AND source.site_id = deployment.site_id
+             WHERE deployment.tenant_id = $1 AND deployment.idempotency_key = $2",
         )
-        .bind(tenant_id)
-        .bind(idempotency_key)
+        .bind(lookup.tenant_id)
+        .bind(lookup.idempotency_key)
         .fetch_optional(&self.pool)
         .await
         .map_err(|error| store_error("find web_deployment by idempotency_key", error))?;
@@ -265,22 +283,27 @@ impl WebRepository {
         let existing_artifact_drive_uri: Option<String> = row.try_get("artifact_path").ok();
         let existing_artifact_size: Option<i64> = row.try_get("artifact_size").ok();
         let existing_artifact_hash: Option<String> = row.try_get("artifact_hash").ok();
-        if existing_site_internal_id != requested_site_internal_id
-            || existing_deploy_type != requested_deploy_type
-            || existing_environment != requested_environment
-            || existing_version_tag.as_deref() != requested_version_tag
-            || existing_commit_hash.as_deref() != requested_commit_hash
-            || existing_source_ref.as_deref() != requested_source_ref
-            || existing_artifact_drive_uri.as_deref() != requested_artifact_drive_uri
-            || existing_artifact_size != requested_artifact_size
-            || existing_artifact_hash.as_deref() != requested_artifact_hash
+        let existing_rollback_from_internal_id = row
+            .try_get::<i64, _>("rollback_from")
+            .ok()
+            .filter(|value| *value > 0);
+        if existing_site_internal_id != lookup.site_internal_id
+            || existing_deploy_type != lookup.deploy_type
+            || existing_environment != lookup.environment
+            || existing_version_tag.as_deref() != lookup.version_tag
+            || existing_commit_hash.as_deref() != lookup.commit_hash
+            || existing_source_ref.as_deref() != lookup.source_ref
+            || existing_artifact_drive_uri.as_deref() != lookup.artifact_drive_uri
+            || existing_artifact_size != lookup.artifact_size
+            || existing_artifact_hash.as_deref() != lookup.artifact_hash
+            || existing_rollback_from_internal_id != lookup.rollback_from_internal_id
         {
             return Err(WebServiceError::conflict(
                 "idempotency key was already used with different deployment input",
             ));
         }
 
-        map_deployment_row(&row, requested_site_id)
+        map_deployment_row(&row, lookup.site_id)
             .map(Some)
             .map_err(|error| WebServiceError::Internal(format!("map web_deployment row: {error}")))
     }
@@ -293,13 +316,23 @@ impl WebRepository {
     ) -> WebServiceResult<DeploymentResponse> {
         let site_internal_id = resolve_site_internal_id(&self.pool, tenant_id, site_id).await?;
         let row = sqlx::query(
-            "SELECT uuid, site_id, status, deploy_type, environment, version_tag,
-                    commit_hash, source_ref, artifact_path, artifact_size, artifact_hash,
-                    CAST(started_at AS TEXT) AS started_at,
-                    CAST(completed_at AS TEXT) AS completed_at, duration_ms,
-                    CAST(created_at AS TEXT) AS created_at
-             FROM web_deployment
-             WHERE tenant_id = $1 AND site_id = $2 AND uuid = $3",
+            "SELECT deployment.uuid, deployment.site_id, deployment.status,
+                    deployment.deploy_type, deployment.environment, deployment.version_tag,
+                    deployment.commit_hash, deployment.source_ref, deployment.artifact_path,
+                    deployment.artifact_size, deployment.artifact_hash,
+                    source.uuid AS rollback_from_deployment_id,
+                    CAST(deployment.started_at AS TEXT) AS started_at,
+                    CAST(deployment.completed_at AS TEXT) AS completed_at,
+                    deployment.duration_ms,
+                    CAST(deployment.created_at AS TEXT) AS created_at
+             FROM web_deployment deployment
+             LEFT JOIN web_deployment source
+               ON source.id = deployment.rollback_from
+              AND source.tenant_id = deployment.tenant_id
+              AND source.site_id = deployment.site_id
+             WHERE deployment.tenant_id = $1
+               AND deployment.site_id = $2
+               AND deployment.uuid = $3",
         )
         .bind(tenant_id)
         .bind(site_internal_id)
@@ -319,6 +352,7 @@ impl WebRepository {
         site_id: &str,
         deployment_id: &str,
         actor_id: Option<i64>,
+        idempotency_key: Option<&str>,
     ) -> WebServiceResult<DeploymentResponse> {
         let site_internal_id = resolve_site_internal_id(&self.pool, tenant_id, site_id).await?;
         let source = sqlx::query(
@@ -358,53 +392,55 @@ impl WebRepository {
         let artifact_drive_uri: Option<String> = source.try_get("artifact_path").ok();
         let artifact_size: Option<i64> = source.try_get("artifact_size").ok();
         let artifact_hash: Option<String> = source.try_get("artifact_hash").ok();
+        let idempotency_key = idempotency_key
+            .map(str::trim)
+            .filter(|value| !value.is_empty());
+        let idempotency_lookup = idempotency_key.map(|key| DeploymentIdempotencyLookup {
+            tenant_id,
+            site_internal_id,
+            site_id,
+            deploy_type,
+            environment: &environment,
+            version_tag: version_tag.as_deref(),
+            commit_hash: commit_hash.as_deref(),
+            source_ref: source_ref.as_deref(),
+            artifact_drive_uri: artifact_drive_uri.as_deref(),
+            artifact_size,
+            artifact_hash: artifact_hash.as_deref(),
+            rollback_from_internal_id: Some(source_id),
+            idempotency_key: key,
+        });
+        if let Some(lookup) = idempotency_lookup.as_ref() {
+            if let Some(existing) = self.find_deployment_by_idempotency_repo(lookup).await? {
+                return Ok(existing);
+            }
+        }
+
         let now = now_rfc3339();
         let id = next_id(self.id_generator())?;
         let uuid = new_uuid();
         let engine = self.database_engine().await?;
-        let rollback_update_time = instant_write_expression(engine, "$4");
-        let rollback_insert_time = instant_write_expression(engine, "$15");
-        let update_sql = format!(
-            "UPDATE web_deployment
-             SET status = 5, updated_at = {rollback_update_time}, version = version + 1
-             WHERE tenant_id = $1 AND site_id = $2 AND uuid = $3 AND status = 2"
-        );
+        let rollback_insert_time = instant_write_expression(engine, "$16");
         let insert_sql = format!(
             "INSERT INTO web_deployment (
                 id, uuid, tenant_id, user_id, site_id, deploy_type, environment, version_tag,
                 commit_hash, source_ref, artifact_path, artifact_size, artifact_hash, status,
-                rollback_from, metadata,
+                rollback_from, idempotency_key, metadata,
                 created_at, updated_at, version
              ) VALUES (
-                $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, 0, $14, '{{}}',
+                $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, 0, $14, $15, '{{}}',
                 {rollback_insert_time}, {rollback_insert_time}, 0
              )"
         );
 
-        // 事务边界：标记源 deployment 为已回滚 + 创建 rollback 记录必须原子完成，
-        // 避免标记成功但记录创建失败导致状态不一致。
+        // Keep the immutable source untouched; this transaction only creates a restore command.
         let mut tx = self
             .pool
             .begin()
             .await
             .map_err(|error| store_error("begin rollback web_deployment transaction", error))?;
 
-        let updated = sqlx::query(&update_sql)
-            .bind(tenant_id)
-            .bind(site_internal_id)
-            .bind(deployment_id)
-            .bind(&now)
-            .execute(&mut *tx)
-            .await
-            .map_err(|error| store_error("mark web_deployment rolled back", error))?;
-
-        if updated.rows_affected() == 0 {
-            return Err(WebServiceError::conflict(
-                "deployment state changed; only a successful deployment can be rolled back",
-            ));
-        }
-
-        sqlx::query(&insert_sql)
+        let insert_result = sqlx::query(&insert_sql)
             .bind(id)
             .bind(&uuid)
             .bind(tenant_id)
@@ -419,14 +455,29 @@ impl WebRepository {
             .bind(artifact_size)
             .bind(&artifact_hash)
             .bind(source_id)
+            .bind(idempotency_key)
             .bind(&now)
             .execute(&mut *tx)
-            .await
-            .map_err(|error| store_error("insert rollback web_deployment", error))?;
+            .await;
+
+        if let Err(error) = insert_result {
+            tx.rollback().await.map_err(|rollback_error| {
+                store_error("abort restore web_deployment transaction", rollback_error)
+            })?;
+            if is_unique_violation(&error) {
+                let Some(lookup) = idempotency_lookup.as_ref() else {
+                    return Err(store_error("insert restore web_deployment", error));
+                };
+                if let Some(existing) = self.find_deployment_by_idempotency_repo(lookup).await? {
+                    return Ok(existing);
+                }
+            }
+            return Err(store_error("insert restore web_deployment", error));
+        }
 
         tx.commit()
             .await
-            .map_err(|error| store_error("commit rollback web_deployment transaction", error))?;
+            .map_err(|error| store_error("commit restore web_deployment transaction", error))?;
 
         self.retrieve_deployment_repo(tenant_id, site_id, &uuid)
             .await
@@ -443,6 +494,7 @@ fn map_deployment_row(row: &EngineRow, site_id: &str) -> Result<DeploymentRespon
         version_tag: row.try_get("version_tag").ok(),
         commit_hash: row.try_get("commit_hash").ok(),
         source_ref: row.try_get("source_ref").ok(),
+        rollback_from_deployment_id: row.try_get("rollback_from_deployment_id").ok(),
         artifact_drive_uri: row.try_get("artifact_path").ok(),
         artifact_size: row.try_get("artifact_size").ok(),
         artifact_hash: row.try_get("artifact_hash").ok(),

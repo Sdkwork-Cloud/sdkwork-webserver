@@ -56,7 +56,7 @@
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/api/ApplicationDeploymentApi.java",
-      "sha256": "cf887b5044d6364e138fc5c5d1bd65aa3d9ddc131ac9507731030fc0e3dfc373"
+      "sha256": "a45566b2e9c8bbe2fbfba3883d6fa3e21100154303f95e6c9957f8330a943727"
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/api/ApplicationDomainApi.java",
@@ -112,7 +112,7 @@
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationDeploymentResponse.java",
-      "sha256": "65878df53318c134916b29db4408afc93530c0d5b837803e11c4c95abcd00373"
+      "sha256": "6459b14e169389d40f21a4cfeb99baa9801317e75543476ae2a7aafd279d8b83"
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationDomainResponse.java",

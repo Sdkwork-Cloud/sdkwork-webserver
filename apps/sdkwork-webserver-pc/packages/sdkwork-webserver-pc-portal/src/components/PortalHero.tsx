@@ -18,7 +18,7 @@ export function PortalHero({
     <section className="relative isolate overflow-hidden bg-[#10231b] text-white">
       <CloudTopologyScene t={t} />
       <div className="absolute inset-y-0 left-0 w-full bg-[#10231b] lg:w-[57%]" aria-hidden="true" />
-      <div className="relative z-10 mx-auto flex min-h-[480px] max-w-[1280px] items-center px-5 py-12 sm:px-7 sm:py-14 lg:px-10">
+      <div className="relative z-10 mx-auto flex min-h-[480px] max-w-[1280px] items-center px-5 pt-8 pb-4 sm:px-7 sm:py-14 lg:px-10">
         <div className="w-full max-w-[840px]">
           <div className="mb-5 inline-flex items-center gap-2 rounded-md border border-emerald-300/25 bg-emerald-950/70 px-3 py-2 text-xs font-semibold text-emerald-100">
             <CloudCog aria-hidden="true" size={16} />

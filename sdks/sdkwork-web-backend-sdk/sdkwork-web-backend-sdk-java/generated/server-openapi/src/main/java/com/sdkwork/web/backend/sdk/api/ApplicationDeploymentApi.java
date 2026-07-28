@@ -34,7 +34,7 @@ public class ApplicationDeploymentApi {
         return client.convertValue(raw, new TypeReference<ApplicationsDeploymentsCreateResponse201>() {});
     }
 
-    /** Roll back a managed application deployment */
+    /** Restore a managed application from an immutable successful version */
     public ApplicationsDeploymentsRollbackResponse applicationsDeploymentsRollback(String applicationId, String deploymentId, String idempotencyKey) throws Exception {
         Map<String, String> requestHeaders = buildRequestHeaders(
                 Map.of("Idempotency-Key", new HeaderParameterSpec(idempotencyKey, "simple", false, null)),

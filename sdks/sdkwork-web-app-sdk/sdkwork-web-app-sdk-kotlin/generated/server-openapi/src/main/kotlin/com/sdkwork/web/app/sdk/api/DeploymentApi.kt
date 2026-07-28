@@ -37,7 +37,7 @@ class DeploymentApi(private val client: HttpClient) {
         return client.convertValue(raw, object : TypeReference<SitesDeploymentsRetrieveResponse>() {})
     }
 
-    /** 回滚部署 */
+    /** 基于历史成功版本创建快速还原命令 */
     suspend fun sitesDeploymentsRollback(siteId: String, deploymentId: String, idempotencyKey: String): SitesDeploymentsRollbackResponse? {
         val requestHeaders = buildRequestHeaders(
             mapOf(

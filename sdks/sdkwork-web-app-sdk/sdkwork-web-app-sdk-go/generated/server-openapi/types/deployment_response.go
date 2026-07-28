@@ -8,6 +8,7 @@ type DeploymentResponse struct {
 	VersionTag string `json:"versionTag"`
 	CommitHash string `json:"commitHash"`
 	SourceRef string `json:"sourceRef"`
+	RollbackFromDeploymentId string `json:"rollbackFromDeploymentId"`
 	Environment string `json:"environment"`
 	ArtifactDriveUri string `json:"artifactDriveUri"`
 	ArtifactSize string `json:"artifactSize"`

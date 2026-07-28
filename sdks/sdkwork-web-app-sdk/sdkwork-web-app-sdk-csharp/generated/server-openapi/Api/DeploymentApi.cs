@@ -53,7 +53,7 @@ namespace SDKWork.Web.AppSdk.Api
         }
 
         /// <summary>
-        /// 回滚部署
+        /// 基于历史成功版本创建快速还原命令
         /// </summary>
         public async Task<SDKWork.Web.AppSdk.Models.SitesDeploymentsRollbackResponse?> SitesDeploymentsRollbackAsync(string siteId, string deploymentId, string idempotencyKey)
         {

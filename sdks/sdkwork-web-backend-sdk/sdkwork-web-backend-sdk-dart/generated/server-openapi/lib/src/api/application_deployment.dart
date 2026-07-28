@@ -41,7 +41,7 @@ class ApplicationDeploymentApi {
     })();
   }
 
-  /// Roll back a managed application deployment
+  /// Restore a managed application from an immutable successful version
   Future<ApplicationsDeploymentsRollbackResponse?> applicationsDeploymentsRollback(String applicationId, String deploymentId, String idempotencyKey) async {
     final requestHeaders = buildRequestHeaders(
       <String, HeaderParameterSpec>{

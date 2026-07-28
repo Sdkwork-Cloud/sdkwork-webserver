@@ -12,7 +12,7 @@
   "mode": "apply",
   "hasChanges": true,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "5ed9e0204ab350ae75c3df4606a6ed071d397f4c8f1f4b40c0e8bb087ad8fcf8",
+  "changeFingerprint": "f31050f44a5422bedc44e569ed9d9c619ea874be3f772de33da747f364c52d6c",
   "changeImpact": {
     "schemaVersion": 1,
     "areas": [
@@ -23,18 +23,13 @@
       {
         "area": "api-surface",
         "paths": [
-          "Api/CertificateApi.cs",
-          "Api/DeploymentApi.cs",
-          "Api/DomainApi.cs",
-          "Api/EnvVariableApi.cs",
-          "Api/MonitorApi.cs",
-          "Api/SiteApi.cs"
+          "Api/DeploymentApi.cs"
         ]
       },
       {
         "area": "models",
         "paths": [
-          "Models/CreateDeploymentRequest.cs"
+          "Models/DeploymentResponse.cs"
         ]
       }
     ],
@@ -124,26 +119,26 @@
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 7,
+    "writtenFiles": 2,
     "skippedScaffoldFiles": 1,
-    "skippedUnchangedGeneratedFiles": 61,
+    "skippedUnchangedGeneratedFiles": 66,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "5ed9e0204ab350ae75c3df4606a6ed071d397f4c8f1f4b40c0e8bb087ad8fcf8",
+    "changeFingerprint": "f31050f44a5422bedc44e569ed9d9c619ea874be3f772de33da747f364c52d6c",
     "changes": {
       "createdGeneratedFiles": [],
       "updatedGeneratedFiles": [
-        "Api/CertificateApi.cs",
         "Api/DeploymentApi.cs",
-        "Api/DomainApi.cs",
-        "Api/EnvVariableApi.cs",
-        "Api/MonitorApi.cs",
-        "Api/SiteApi.cs",
-        "Models/CreateDeploymentRequest.cs"
+        "Models/DeploymentResponse.cs"
       ],
       "unchangedGeneratedFiles": [
         "Api/Api.cs",
         "Api/ApiPaths.cs",
+        "Api/CertificateApi.cs",
+        "Api/DomainApi.cs",
+        "Api/EnvVariableApi.cs",
+        "Api/MonitorApi.cs",
+        "Api/SiteApi.cs",
         "bin/publish-core.mjs",
         "bin/publish.ps1",
         "bin/publish.sh",
@@ -155,12 +150,12 @@
         "Models/CertificatesCreateResponse201.cs",
         "Models/CertificatesListResponse.cs",
         "Models/CreateCertificateRequest.cs",
+        "Models/CreateDeploymentRequest.cs",
         "Models/CreateDomainRequest.cs",
         "Models/CreateEnvVariableRequest.cs",
         "Models/CreateHealthCheckRequest.cs",
         "Models/CreateSiteRequest.cs",
         "Models/DeploymentPage.cs",
-        "Models/DeploymentResponse.cs",
         "Models/DomainPage.cs",
         "Models/DomainResponse.cs",
         "Models/DomainVerifyResponse.cs",
@@ -221,18 +216,13 @@
         {
           "area": "api-surface",
           "paths": [
-            "Api/CertificateApi.cs",
-            "Api/DeploymentApi.cs",
-            "Api/DomainApi.cs",
-            "Api/EnvVariableApi.cs",
-            "Api/MonitorApi.cs",
-            "Api/SiteApi.cs"
+            "Api/DeploymentApi.cs"
           ]
         },
         {
           "area": "models",
           "paths": [
-            "Models/CreateDeploymentRequest.cs"
+            "Models/DeploymentResponse.cs"
           ]
         }
       ],

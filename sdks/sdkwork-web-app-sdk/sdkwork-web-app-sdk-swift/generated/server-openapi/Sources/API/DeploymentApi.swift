@@ -33,7 +33,7 @@ public class DeploymentApi {
         return try await client.get(ApiPaths.appPath("/sites/\(serializePathParameter(siteId, PathParameterSpec(name: "siteId", style: "simple", explode: false)))/deployments/\(serializePathParameter(deploymentId, PathParameterSpec(name: "deploymentId", style: "simple", explode: false)))"), responseType: SitesDeploymentsRetrieveResponse.self)
     }
 
-    /// 回滚部署
+    /// 基于历史成功版本创建快速还原命令
     public func sitesDeploymentsRollback(siteId: String, deploymentId: String, idempotencyKey: String) async throws -> SitesDeploymentsRollbackResponse? {
         let requestHeaders = buildRequestHeaders(
             [

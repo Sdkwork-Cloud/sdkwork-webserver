@@ -22,6 +22,9 @@ final class ApplicationDeploymentResponse
 
     public ?string $sourceRef = null;
 
+    /** Immutable successful deployment selected as this restore command's source. */
+    public ?string $rollbackFromDeploymentId = null;
+
     public ?string $artifactDriveUri = null;
 
     public ?string $artifactSize = null;
@@ -62,6 +65,9 @@ final class ApplicationDeploymentResponse
         $this->sourceRef = array_key_exists('sourceRef', $data)
             ? $data['sourceRef']
             : null;
+        $this->rollbackFromDeploymentId = array_key_exists('rollbackFromDeploymentId', $data)
+            ? $data['rollbackFromDeploymentId']
+            : null;
         $this->artifactDriveUri = array_key_exists('artifactDriveUri', $data)
             ? $data['artifactDriveUri']
             : null;
@@ -101,6 +107,7 @@ final class ApplicationDeploymentResponse
             'versionTag' => $this->versionTag,
             'commitHash' => $this->commitHash,
             'sourceRef' => $this->sourceRef,
+            'rollbackFromDeploymentId' => $this->rollbackFromDeploymentId,
             'artifactDriveUri' => $this->artifactDriveUri,
             'artifactSize' => $this->artifactSize,
             'artifactHash' => $this->artifactHash,

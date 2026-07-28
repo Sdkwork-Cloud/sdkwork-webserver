@@ -9,16 +9,11 @@
     "protocol": "http",
     "packageName": "sdkwork-web-app-sdk"
   },
-  "changeFingerprint": "b88a952934d56649dd14a6e98a47b29a1a19e26a6c8c9d764fe2849840baf3d3",
+  "changeFingerprint": "3bc449d3d466e8a73fd5888b7a20d028b246ce7e9b10c52a7dfb40abefcf94da",
   "changes": {
     "createdGeneratedFiles": [],
     "updatedGeneratedFiles": [
-      "Sources/API/CertificateApi.swift",
       "Sources/API/DeploymentApi.swift",
-      "Sources/API/DomainApi.swift",
-      "Sources/API/EnvVariableApi.swift",
-      "Sources/API/MonitorApi.swift",
-      "Sources/API/SiteApi.swift",
       "Sources/Models.swift"
     ],
     "unchangedGeneratedFiles": [
@@ -32,6 +27,11 @@
       "sdkwork-sdk.json",
       "Sources/API/API.swift",
       "Sources/API/ApiPaths.swift",
+      "Sources/API/CertificateApi.swift",
+      "Sources/API/DomainApi.swift",
+      "Sources/API/EnvVariableApi.swift",
+      "Sources/API/MonitorApi.swift",
+      "Sources/API/SiteApi.swift",
       "Sources/HTTP/HttpClient.swift",
       "Sources/SdkworkAppClient.swift"
     ],
@@ -52,12 +52,7 @@
       {
         "area": "api-surface",
         "paths": [
-          "Sources/API/CertificateApi.swift",
-          "Sources/API/DeploymentApi.swift",
-          "Sources/API/DomainApi.swift",
-          "Sources/API/EnvVariableApi.swift",
-          "Sources/API/MonitorApi.swift",
-          "Sources/API/SiteApi.swift"
+          "Sources/API/DeploymentApi.swift"
         ]
       },
       {

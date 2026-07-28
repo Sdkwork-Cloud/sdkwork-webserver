@@ -52,7 +52,7 @@ final class DeploymentApi extends BaseApi
         return is_array($result) ? SitesDeploymentsRetrieveResponse::fromArray($result) : null;
     }
 
-    /** 回滚部署 */
+    /** 基于历史成功版本创建快速还原命令 */
     public function sitesDeploymentsRollback(string $siteId, string $deploymentId, string $idempotencyKey): ?SitesDeploymentsRollbackResponse
     {
         $path = $this->interpolatePath('/app/v3/api/sites/{siteId}/deployments/{deploymentId}/rollback', ['siteId' => $this->serializePathParameter($siteId, new PathParameterSpec('siteId', 'simple', false)), 'deploymentId' => $this->serializePathParameter($deploymentId, new PathParameterSpec('deploymentId', 'simple', false))]);

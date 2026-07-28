@@ -22,6 +22,11 @@ pub struct DeploymentResponse {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub source_ref: Option<String>,
 
+    /// 此还原命令所引用的不可变历史成功版本 ID。
+    #[serde(rename = "rollbackFromDeploymentId")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub rollback_from_deployment_id: Option<String>,
+
     pub environment: String,
 
     #[serde(rename = "artifactDriveUri")]

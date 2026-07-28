@@ -12,7 +12,7 @@
   "mode": "apply",
   "hasChanges": true,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "b3d9364bfc9204a1cdf0fce2e0f72cf21f4b45869d98ed72472ee77c6ff57012",
+  "changeFingerprint": "5baa7977782809d1eabc326243847ccde721574b4254e101f56b50b7e50ad217",
   "changeImpact": {
     "schemaVersion": 1,
     "areas": [
@@ -23,18 +23,13 @@
       {
         "area": "api-surface",
         "paths": [
-          "src/Api/Application.php",
-          "src/Api/ApplicationDeployment.php",
-          "src/Api/ApplicationDomain.php",
-          "src/Api/Certificate.php",
-          "src/Api/Nginx.php",
-          "src/Api/Server.php"
+          "src/Api/ApplicationDeployment.php"
         ]
       },
       {
         "area": "models",
         "paths": [
-          "src/Models/CreateApplicationDeploymentRequest.php"
+          "src/Models/ApplicationDeploymentResponse.php"
         ]
       }
     ],
@@ -124,22 +119,17 @@
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 7,
+    "writtenFiles": 2,
     "skippedScaffoldFiles": 1,
-    "skippedUnchangedGeneratedFiles": 85,
+    "skippedUnchangedGeneratedFiles": 90,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "b3d9364bfc9204a1cdf0fce2e0f72cf21f4b45869d98ed72472ee77c6ff57012",
+    "changeFingerprint": "5baa7977782809d1eabc326243847ccde721574b4254e101f56b50b7e50ad217",
     "changes": {
       "createdGeneratedFiles": [],
       "updatedGeneratedFiles": [
-        "src/Api/Application.php",
         "src/Api/ApplicationDeployment.php",
-        "src/Api/ApplicationDomain.php",
-        "src/Api/Certificate.php",
-        "src/Api/Nginx.php",
-        "src/Api/Server.php",
-        "src/Models/CreateApplicationDeploymentRequest.php"
+        "src/Models/ApplicationDeploymentResponse.php"
       ],
       "unchangedGeneratedFiles": [
         "bin/publish-core.mjs",
@@ -151,16 +141,20 @@
         "README.md",
         "sdkwork-sdk.json",
         "src/Api/Agent.php",
+        "src/Api/Application.php",
+        "src/Api/ApplicationDomain.php",
         "src/Api/Audit.php",
         "src/Api/BaseApi.php",
+        "src/Api/Certificate.php",
         "src/Api/CertificateDistribution.php",
+        "src/Api/Nginx.php",
+        "src/Api/Server.php",
         "src/Http/HttpClient.php",
         "src/Models/AgentCertificateBundle.php",
         "src/Models/AgentHeartbeatRequest.php",
         "src/Models/AgentHeartbeatResponse.php",
         "src/Models/AgentNginxConfigBundle.php",
         "src/Models/AgentSyncResponse.php",
-        "src/Models/ApplicationDeploymentResponse.php",
         "src/Models/ApplicationDomainResponse.php",
         "src/Models/ApplicationDomainVerifyResponse.php",
         "src/Models/ApplicationResponse.php",
@@ -192,6 +186,7 @@
         "src/Models/ConfigsRetrieveResponse.php",
         "src/Models/ConfigsUpdateResponse.php",
         "src/Models/ConfigsValidateResponse.php",
+        "src/Models/CreateApplicationDeploymentRequest.php",
         "src/Models/CreateApplicationDomainRequest.php",
         "src/Models/CreateApplicationRequest.php",
         "src/Models/CreateCertificateRequest.php",
@@ -245,18 +240,13 @@
         {
           "area": "api-surface",
           "paths": [
-            "src/Api/Application.php",
-            "src/Api/ApplicationDeployment.php",
-            "src/Api/ApplicationDomain.php",
-            "src/Api/Certificate.php",
-            "src/Api/Nginx.php",
-            "src/Api/Server.php"
+            "src/Api/ApplicationDeployment.php"
           ]
         },
         {
           "area": "models",
           "paths": [
-            "src/Models/CreateApplicationDeploymentRequest.php"
+            "src/Models/ApplicationDeploymentResponse.php"
           ]
         }
       ],

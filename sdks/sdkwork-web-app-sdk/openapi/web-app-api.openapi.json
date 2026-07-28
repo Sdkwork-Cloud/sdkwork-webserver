@@ -1323,7 +1323,7 @@
       ],
       "post": {
         "operationId": "sites.deployments.rollback",
-        "summary": "回滚部署",
+        "summary": "基于历史成功版本创建快速还原命令",
         "tags": [
           "deployment"
         ],
@@ -1348,7 +1348,7 @@
         "x-sdkwork-rate-limit-tier": "auth-critical",
         "responses": {
           "200": {
-            "description": "回滚成功",
+            "description": "快速还原命令已创建，部署状态仍需异步推进。",
             "content": {
               "application/json": {
                 "schema": {
@@ -2285,6 +2285,11 @@
           },
           "sourceRef": {
             "type": "string"
+          },
+          "rollbackFromDeploymentId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "此还原命令所引用的不可变历史成功版本 ID。"
           },
           "environment": {
             "type": "string"
