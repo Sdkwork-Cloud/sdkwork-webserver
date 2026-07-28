@@ -1,7 +1,7 @@
 {
-  "environment": "development",
+  "environment": "production",
   "deploymentProfile": "standalone",
-  "profileId": "standalone.development",
+  "profileId": "standalone.production",
   "runtimeTarget": "browser",
   "browserOriginMode": "same-origin",
   "defaultLocale": "zh-CN",
@@ -18,5 +18,5 @@
   "backendApiBaseUrl": "/",
   "driveAppApiBaseUrl": "/",
   "appbaseAppApiBaseUrl": "/",
-  "messagingPcUrl": "http://127.0.0.1:5184/notifications"
+  "messagingPcUrl": "https://messaging.sdkwork.com/notifications"
 }
