@@ -882,14 +882,25 @@ html[data-sdk-color-mode="dark"] .webserver-auth-page {
 .application-identity-fields {
   grid-template-columns: 1fr;
 }
-.application-identity-fields textarea {
-  min-height: 34px;
-  max-height: 34px;
-  overflow-x: auto;
-  overflow-y: hidden;
+.application-creation-dialog .application-identity-fields textarea {
+  min-height: 56px;
+  height: 56px;
+  max-height: 56px;
+  overflow-y: auto;
+  padding: 8px 10px;
+  background: var(--sdk-color-surface-panel-muted);
   resize: none;
-  white-space: nowrap;
+  white-space: pre-wrap;
 }
+.application-identity-fields [data-field="description"],
+.application-listing-fields [data-field="fullDescription"],
+.application-listing-fields [data-field="releaseNotes"] {
+  align-items: start;
+  padding-block: 6px;
+}
+.application-identity-fields [data-field="description"] .field-label-row,
+.application-listing-fields [data-field="fullDescription"] .field-label-row,
+.application-listing-fields [data-field="releaseNotes"] .field-label-row { margin-top: 8px; }
 .application-creation-dialog .application-store-assets-compact {
   gap: 0;
   margin: 10px 0 0;
@@ -911,12 +922,12 @@ html[data-sdk-color-mode="dark"] .webserver-auth-page {
 }
 .application-media-flat-field {
   min-width: 0;
-  min-height: 82px;
+  min-height: 92px;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 118px;
-  grid-template-rows: auto auto;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto;
   align-items: center;
-  gap: 7px 12px;
+  gap: 12px;
   padding: 7px 0;
 }
 .application-media-flat-heading {
@@ -939,38 +950,90 @@ html[data-sdk-color-mode="dark"] .webserver-auth-page {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.application-media-flat-preview {
+.application-media-placeholder-wrap {
+  position: relative;
   grid-column: 2;
-  grid-row: 1 / 3;
+  grid-row: 1;
+  align-self: center;
+}
+.application-media-placeholder-wrap-icon,
+.application-media-flat-preview-icon { width: 72px; }
+.application-media-placeholder-wrap-cover,
+.application-media-flat-preview-cover { width: 148px; }
+.application-media-flat-preview {
   min-width: 0;
-  height: 62px;
+  height: 72px;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 5px;
+  padding: 6px;
   overflow: hidden;
   color: var(--sdk-color-text-muted);
   background: var(--sdk-color-surface-panel-muted);
+  border: 1px dashed var(--sdk-color-border-default);
   border-radius: 5px;
+  cursor: pointer;
+  transition: color .14s ease, background .14s ease, border-color .14s ease;
 }
 .application-media-flat-preview > span {
-  display: none;
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 10px;
+  font-weight: 650;
+  line-height: 1.2;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .application-media-flat-preview > img {
-  width: 48px;
-  height: 48px;
+  width: 100%;
+  height: 100%;
+  display: block;
   object-fit: cover;
   border-radius: 4px;
 }
-.application-media-flat-preview-cover > img { width: 104px; height: 51px; }
-.application-media-flat-field .media-mode-toggle {
-  width: fit-content;
-  max-width: 100%;
-  align-self: end;
-  padding: 2px;
-  border: 0;
+.application-media-flat-preview:hover,
+.application-media-flat-preview:focus-visible {
+  color: var(--sdk-color-brand-primary);
+  background: var(--sdk-color-brand-primary-soft);
+  border-color: var(--sdk-color-border-focus);
 }
-.application-media-flat-field .media-mode-toggle button { min-height: 27px; padding-inline: 8px; font-size: 11px; }
+.application-media-flat-preview:focus-visible {
+  outline: 2px solid var(--sdk-color-border-focus);
+  outline-offset: 2px;
+}
+.application-media-flat-preview.has-image {
+  padding: 0;
+  border-style: solid;
+}
+.application-media-remove {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-content: center;
+  padding: 0;
+  color: #fff;
+  background: rgba(15, 23, 42, .82);
+  border: 0;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background .14s ease;
+}
+.application-media-remove:hover { background: var(--sdk-color-danger, #b42318); }
+.application-media-remove:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: -3px;
+}
+.application-media-flat-preview:disabled,
+.application-media-remove:disabled {
+  cursor: not-allowed;
+  opacity: .56;
+}
 .application-preview-manager {
   min-width: 0;
   padding: 8px 0 0;
@@ -1129,11 +1192,18 @@ html[data-sdk-color-mode="dark"] .webserver-auth-page {
 }
 .application-listing-fields { grid-template-columns: 1fr; }
 .application-listing-fields [data-field] { grid-column: auto; grid-row: auto; }
-.application-listing-fields textarea {
-  min-height: 54px;
-  height: 54px;
-  max-height: 54px;
+.application-creation-dialog .application-listing-fields textarea {
+  min-height: 84px;
+  height: 84px;
+  max-height: 84px;
+  padding: 8px 10px;
+  background: var(--sdk-color-surface-panel-muted);
   resize: none;
+}
+.application-listing-fields [data-field="fullDescription"] .field-character-limit,
+.application-listing-fields [data-field="releaseNotes"] .field-character-limit {
+  align-self: end;
+  margin-bottom: 8px;
 }
 .application-release-layout {
   display: grid;
@@ -1290,15 +1360,36 @@ html[data-sdk-color-mode="dark"] .webserver-auth-page {
   .application-listing-fields,
   .application-release-layout { grid-template-columns: 1fr; }
   .application-identity-fields [data-field="description"],
+  .application-listing-fields [data-field="fullDescription"],
+  .application-listing-fields [data-field="releaseNotes"] {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto auto;
+    gap: 5px 10px;
+  }
+  .application-identity-fields [data-field="description"] .field-label-row,
+  .application-listing-fields [data-field="fullDescription"] .field-label-row,
+  .application-listing-fields [data-field="releaseNotes"] .field-label-row {
+    grid-column: 1;
+    grid-row: 1;
+    margin-top: 0;
+  }
+  .application-identity-fields [data-field="description"] textarea,
+  .application-listing-fields [data-field="fullDescription"] textarea,
+  .application-listing-fields [data-field="releaseNotes"] textarea {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+  .application-listing-fields [data-field="fullDescription"] .field-character-limit,
+  .application-listing-fields [data-field="releaseNotes"] .field-character-limit {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: center;
+    margin-bottom: 0;
+  }
+  .application-identity-fields [data-field="description"],
   .application-listing-fields [data-field] { grid-column: 1; grid-row: auto; }
   .application-media-primary-grid { grid-template-columns: 1fr; }
-  .application-media-flat-field { min-height: 76px; }
-  .application-media-flat-field .media-mode-toggle {
-    width: fit-content;
-    grid-auto-flow: column;
-    grid-auto-columns: 34px;
-    grid-auto-rows: auto;
-  }
+  .application-media-flat-field { min-height: 86px; }
   .application-media-flat-field .media-mode-toggle button { width: 34px; padding: 0; }
   .application-media-flat-field .media-mode-toggle button > span { display: none; }
   .application-preview-manager-heading { align-items: flex-start; }

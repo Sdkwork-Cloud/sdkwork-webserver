@@ -9,6 +9,7 @@ source: operator
 problem: The tenant console exposes site, domain, deployment, and certificate workflows, but the backend-admin surface has no application deployment or certificate modules. The existing siteType field describes the runtime technology and cannot represent the operator-facing WEB/API application category. Certificate renewal and Web Node synchronization exist, but operators cannot manage the canonical certificate lifecycle or observe fleet convergence from the admin surface.
 goals:
   - Add backend-admin application workflows for creating WEB/API applications, binding and verifying public domains, and creating deployments.
+  - Make application media selection direct and recoverable during creation with image placeholders, in-place previews, and removal controls.
   - Keep applicationType independent from the existing siteType runtime technology classification.
   - Add an independent backend-admin certificate module for issuance, automatic-renewal policy, manual renewal, and distribution status.
   - Preserve exactly one canonical certificate record and encrypted private-key authority per certificate while distributing replaceable runtime copies to every Web Node in the tenant fleet.
@@ -28,6 +29,7 @@ acceptance_criteria:
   - Automatic renewal updates the existing canonical certificate record and changes the tenant Node Sync Manifest version when the leaf fingerprint changes.
   - Every registered server reports its last applied manifest version, and admin distribution status compares that observation with one current desired manifest version.
   - The PC backend-admin surface contains independent Applications and Certificates capability packages and calls only the generated Backend SDK through admin-core injection.
+  - The application creation flow presents the icon and cover as keyboard-accessible image placeholders, previews selected local images in place, and lets operators remove either selection before submission.
   - Private keys never appear in admin API responses, UI state, logs, or generated frontend models.
 non_functional_requirements:
   security: Tenant context and backend permissions are mandatory; private keys remain encrypted at rest and are decrypted only while producing the authenticated bounded Node Sync Manifest.
@@ -58,6 +60,7 @@ trace:
     - crates/sdkwork-webserver-certificate-worker
     - crates/sdkwork-web-agent
     - apps/sdkwork-webserver-pc/packages/sdkwork-webserver-pc-admin-applications
+    - apps/sdkwork-webserver-pc/packages/sdkwork-webserver-pc-commons
     - apps/sdkwork-webserver-pc/packages/sdkwork-webserver-pc-admin-certificates
 verification:
   - cargo test -p sdkwork-routes-webserver-backend-api

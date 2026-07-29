@@ -11,6 +11,7 @@ import {
   FolderOpen,
   Inbox,
   Image,
+  ImagePlus,
   Images,
   LoaderCircle,
   LockKeyhole,
@@ -658,17 +659,24 @@ function ActionDialog({
     );
   };
 
-  const applicationStepReady = (step: ApplicationWizardStep): boolean => {
+  const applicationStepError = (step: ApplicationWizardStep): WebserverMessageKey | undefined => {
     if (step === 0) {
-      return !hasMissingRequiredFields(body, ["name"])
-        && applicationSubmissionReady(applicationSubmission, mediaError);
+      return hasMissingRequiredFields(body, ["name"])
+        || !applicationSubmissionReady(applicationSubmission, mediaError)
+        ? "dialog.applicationBasicRequired"
+        : undefined;
     }
     if (step === 2) {
-      return !hasMissingRequiredFields(body, ["versionTag"])
-        && (!sourceInputRequired || files.length > 0);
+      const versionMissing = hasMissingRequiredFields(body, ["versionTag"]);
+      const sourceMissing = sourceInputRequired && files.length === 0;
+      if (versionMissing && sourceMissing) return "dialog.applicationReleaseRequired";
+      if (versionMissing) return "dialog.applicationVersionRequired";
+      if (sourceMissing) return "dialog.applicationSourceRequired";
     }
-    return true;
+    return undefined;
   };
+
+  const applicationStepReady = (step: ApplicationWizardStep): boolean => !applicationStepError(step);
 
   const focusApplicationStep = (step: ApplicationWizardStep, invalid = false): void => {
     queueMicrotask(() => {
@@ -687,9 +695,10 @@ function ActionDialog({
     if (nextStep > applicationStep) {
       for (let step = 0; step < nextStep; step += 1) {
         const checkedStep = step as ApplicationWizardStep;
-        if (applicationStepReady(checkedStep)) continue;
+        const errorKey = applicationStepError(checkedStep);
+        if (!errorKey) continue;
         setApplicationStep(checkedStep);
-        setError(t(checkedStep === 0 ? "dialog.applicationBasicRequired" : "dialog.applicationReleaseRequired"));
+        setError(t(errorKey));
         focusApplicationStep(checkedStep, true);
         return;
       }
@@ -1438,6 +1447,17 @@ function ApplicationSubmissionFields({
     onChange({ ...submission, previewFiles, previewsMode: "replace" });
   }
 
+  function removePrimaryMedia(role: "icon" | "cover"): void {
+    validationVersion.current += 1;
+    onError(undefined);
+    onChange({
+      ...submission,
+      ...(role === "icon"
+        ? { iconFile: undefined, iconMode: "default" as const }
+        : { coverFile: undefined, coverMode: "remove" as const }),
+    });
+  }
+
   if (compact) {
     const chooseMedia = (role: "icon" | "cover" | "previews"): void => {
       if (role === "icon") {
@@ -1469,16 +1489,45 @@ function ApplicationSubmissionFields({
               </div>
               <span className="required-mark">{t("dialog.mediaRequired")}</span>
             </div>
-            <div className="application-media-flat-preview application-media-flat-preview-icon">
-              {iconPreview ? <img alt="" src={iconPreview} /> : <WandSparkles aria-hidden="true" size={24} />}
-              <span>{submission.iconMode === "default" ? t("dialog.mediaDefault") : t("dialog.mediaUpload")}</span>
+            <div className="application-media-placeholder-wrap application-media-placeholder-wrap-icon">
+              <button
+                aria-label={t("dialog.mediaIconUpload")}
+                className={`application-media-flat-preview application-media-flat-preview-icon${iconPreview ? " has-image" : ""}`}
+                disabled={disabled}
+                onClick={() => chooseMedia("icon")}
+                title={t("dialog.mediaIconUpload")}
+                type="button"
+              >
+                {iconPreview ? <img alt={t("dialog.mediaIcon")} src={iconPreview} /> : submission.iconMode === "keep" ? <BadgeCheck aria-hidden="true" size={22} /> : <ImagePlus aria-hidden="true" size={22} />}
+                {iconPreview ? null : <span>{submission.iconMode === "keep" ? t("dialog.mediaKeep") : t("dialog.mediaUpload")}</span>}
+              </button>
+              {submission.iconFile ? (
+                <button
+                  aria-label={t("dialog.mediaIconRemove")}
+                  className="application-media-remove"
+                  disabled={disabled}
+                  onClick={() => removePrimaryMedia("icon")}
+                  title={t("dialog.mediaIconRemove")}
+                  type="button"
+                >
+                  <Trash2 aria-hidden="true" size={14} />
+                </button>
+              ) : null}
             </div>
-            <div aria-label={t("dialog.mediaIconMode")} className="media-mode-toggle" role="group">
-              {existing?.icon ? <MediaModeButton active={submission.iconMode === "keep"} disabled={disabled} icon={<BadgeCheck aria-hidden="true" size={15} />} label={t("dialog.mediaKeep")} onClick={() => { validationVersion.current += 1; onError(undefined); onChange({ ...submission, iconFile: undefined, iconMode: "keep" }); }} /> : null}
-              <MediaModeButton active={submission.iconMode === "default"} disabled={disabled} icon={<WandSparkles aria-hidden="true" size={15} />} label={t("dialog.mediaDefault")} onClick={() => { validationVersion.current += 1; onError(undefined); onChange({ ...submission, iconFile: undefined, iconMode: "default" }); }} />
-              <MediaModeButton active={submission.iconMode === "upload"} disabled={disabled} icon={<Upload aria-hidden="true" size={15} />} label={t("dialog.mediaUpload")} onClick={() => chooseMedia("icon")} />
-            </div>
-            <input accept="image/png" aria-label={t("dialog.mediaIcon")} disabled={disabled} hidden onChange={(event) => void selectFile("icon", event.target.files?.[0])} ref={iconInputRef} type="file" />
+            <input
+              accept="image/png"
+              aria-label={t("dialog.mediaIcon")}
+              data-testid="application-icon-input"
+              disabled={disabled}
+              hidden
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                event.target.value = "";
+                void selectFile("icon", file);
+              }}
+              ref={iconInputRef}
+              type="file"
+            />
           </section>
           <section className="application-media-flat-field">
             <div className="application-media-flat-heading">
@@ -1488,16 +1537,45 @@ function ApplicationSubmissionFields({
                 <small>1024 x 500 PNG, JPEG, WebP</small>
               </div>
             </div>
-            <div className="application-media-flat-preview application-media-flat-preview-cover">
-              {coverPreview ? <img alt="" src={coverPreview} /> : <Image aria-hidden="true" size={24} />}
-              <span>{submission.coverMode === "remove" ? t("dialog.mediaNone") : submission.coverMode === "keep" ? t("dialog.mediaKeep") : t("dialog.mediaUpload")}</span>
+            <div className="application-media-placeholder-wrap application-media-placeholder-wrap-cover">
+              <button
+                aria-label={t("dialog.mediaCoverUpload")}
+                className={`application-media-flat-preview application-media-flat-preview-cover${coverPreview ? " has-image" : ""}`}
+                disabled={disabled}
+                onClick={() => chooseMedia("cover")}
+                title={t("dialog.mediaCoverUpload")}
+                type="button"
+              >
+                {coverPreview ? <img alt={t("dialog.mediaCover")} src={coverPreview} /> : submission.coverMode === "keep" ? <BadgeCheck aria-hidden="true" size={22} /> : <ImagePlus aria-hidden="true" size={22} />}
+                {coverPreview ? null : <span>{submission.coverMode === "keep" ? t("dialog.mediaKeep") : t("dialog.mediaUpload")}</span>}
+              </button>
+              {submission.coverFile ? (
+                <button
+                  aria-label={t("dialog.mediaCoverRemove")}
+                  className="application-media-remove"
+                  disabled={disabled}
+                  onClick={() => removePrimaryMedia("cover")}
+                  title={t("dialog.mediaCoverRemove")}
+                  type="button"
+                >
+                  <Trash2 aria-hidden="true" size={14} />
+                </button>
+              ) : null}
             </div>
-            <div aria-label={t("dialog.mediaCoverMode")} className="media-mode-toggle" role="group">
-              {existing?.cover ? <MediaModeButton active={submission.coverMode === "keep"} disabled={disabled} icon={<BadgeCheck aria-hidden="true" size={15} />} label={t("dialog.mediaKeep")} onClick={() => { validationVersion.current += 1; onError(undefined); onChange({ ...submission, coverFile: undefined, coverMode: "keep" }); }} /> : null}
-              <MediaModeButton active={submission.coverMode === "remove"} disabled={disabled} icon={<X aria-hidden="true" size={15} />} label={t("dialog.mediaNone")} onClick={() => { validationVersion.current += 1; onError(undefined); onChange({ ...submission, coverFile: undefined, coverMode: "remove" }); }} />
-              <MediaModeButton active={submission.coverMode === "upload"} disabled={disabled} icon={<Upload aria-hidden="true" size={15} />} label={t("dialog.mediaUpload")} onClick={() => chooseMedia("cover")} />
-            </div>
-            <input accept="image/png,image/jpeg,image/webp" aria-label={t("dialog.mediaCover")} disabled={disabled} hidden onChange={(event) => void selectFile("cover", event.target.files?.[0])} ref={coverInputRef} type="file" />
+            <input
+              accept="image/png,image/jpeg,image/webp"
+              aria-label={t("dialog.mediaCover")}
+              data-testid="application-cover-input"
+              disabled={disabled}
+              hidden
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                event.target.value = "";
+                void selectFile("cover", file);
+              }}
+              ref={coverInputRef}
+              type="file"
+            />
           </section>
         </div>
         <section className="application-preview-manager">
@@ -1516,7 +1594,6 @@ function ApplicationSubmissionFields({
               <div aria-label={t("dialog.mediaPreviewsMode")} className="media-mode-toggle" role="group">
                 {existing?.previews?.length ? <MediaModeButton active={submission.previewsMode === "keep"} disabled={disabled} icon={<BadgeCheck aria-hidden="true" size={15} />} label={t("dialog.mediaKeep")} onClick={() => { validationVersion.current += 1; onError(undefined); onChange({ ...submission, previewFiles: [], previewsMode: "keep" }); }} /> : null}
                 <MediaModeButton active={submission.previewsMode === "remove"} disabled={disabled} icon={<X aria-hidden="true" size={15} />} label={t("dialog.mediaNone")} onClick={() => { validationVersion.current += 1; onError(undefined); onChange({ ...submission, previewFiles: [], previewsMode: "remove" }); }} />
-                <MediaModeButton active={submission.previewsMode === "replace"} disabled={disabled} icon={<Upload aria-hidden="true" size={15} />} label={t("dialog.mediaUpload")} onClick={() => chooseMedia("previews")} />
               </div>
             </div>
           </div>
@@ -1903,7 +1980,13 @@ function Field({
         {required ? <small aria-hidden="true" className="field-required" data-label={locale === "zh-CN" ? "必填" : "Required"} /> : null}
       </span>
       {multiline ? (
-        <textarea aria-label={fieldLabel(name, locale)} aria-required={required} onChange={(event) => updateText(event.target.value)} value={text} />
+        <textarea
+          aria-label={fieldLabel(name, locale)}
+          aria-required={required}
+          onChange={(event) => updateText(event.target.value)}
+          rows={name === "description" ? 2 : 4}
+          value={text}
+        />
       ) : (
         <input
           aria-label={fieldLabel(name, locale)}

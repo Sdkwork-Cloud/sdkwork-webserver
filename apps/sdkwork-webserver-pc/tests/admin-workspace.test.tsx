@@ -46,7 +46,11 @@ describe("admin workspace application controls", () => {
     expect(screen.getByText("Application media")).toBeTruthy();
     expect(screen.getByText("Step 1 of 4")).toBeTruthy();
     expect((screen.getByRole("button", { name: "2. Store listing" }) as HTMLButtonElement).disabled).toBe(true);
-    expect(screen.getByRole("button", { name: "Generate default" }).getAttribute("aria-pressed")).toBe("true");
+    expect(screen.getByRole("button", { name: "Upload application icon" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Upload cover image" })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Generate default" })).toBeNull();
+    expect(within(screen.getByRole("group", { name: "Preview image source" })).queryByRole("button", { name: "Upload" })).toBeNull();
+    expect(within(screen.getByRole("list", { name: "Preview images" })).getByRole("button", { name: "Add preview" })).toBeTruthy();
     fireEvent.change(screen.getByLabelText("Application name"), { target: { value: "Public API" } });
     fireEvent.change(applicationType, { target: { value: "API" } });
     fireEvent.change(siteType, { target: { value: "6" } });
@@ -111,17 +115,76 @@ describe("admin workspace application controls", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
     expect(screen.getByRole("heading", { name: "Release setup" })).toBeTruthy();
+    expect((screen.getByLabelText("Version") as HTMLInputElement).value).toBe("v1.0.0");
 
     const sourceTrigger = screen.getByRole("button", { name: "Choose ZIP package" });
     fireEvent.click(screen.getByRole("button", { name: "Review" }));
-    expect(screen.getByRole("alert").textContent).toContain("select the initial application source");
+    const releaseAlert = screen.getByRole("alert");
+    expect(releaseAlert.textContent).toContain("Select the initial application source");
+    expect(releaseAlert.textContent).not.toContain("version");
     await waitFor(() => expect(document.activeElement).toBe(sourceTrigger));
 
+    fireEvent.change(screen.getByTestId("application-source-input"), {
+      target: { files: [new File(["source"], "source.zip", { type: "application/zip" })] },
+    });
+    const versionInput = screen.getByLabelText("Version") as HTMLInputElement;
+    fireEvent.change(versionInput, { target: { value: "" } });
+    fireEvent.click(screen.getByRole("button", { name: "Review" }));
+    expect(screen.getByRole("alert").textContent).toContain("Enter a version");
+    expect(screen.getByRole("alert").textContent).not.toContain("source");
+    await waitFor(() => expect(document.activeElement).toBe(versionInput));
+
+    fireEvent.change(versionInput, { target: { value: "v1.0.1" } });
+    fireEvent.click(screen.getByRole("button", { name: "Review" }));
+    expect(screen.getByRole("heading", { name: "Review and create" })).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "Back" }));
+    expect(screen.getByRole("heading", { name: "Release setup" })).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Back" }));
     expect(screen.getByRole("heading", { name: "Store listing details" })).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Back" }));
     expect(screen.getByRole("heading", { name: "Application basics" })).toBeTruthy();
     expect((screen.getByLabelText("Application name") as HTMLInputElement).value).toBe("Portal");
+  });
+
+  it("previews and removes icon and cover selections from image placeholders", async () => {
+    class PreviewUrl extends URL {
+      static createObjectURL(file: Blob): string {
+        return `blob:${(file as File).name}`;
+      }
+
+      static revokeObjectURL(): void {}
+    }
+    vi.stubGlobal("URL", PreviewUrl);
+    vi.stubGlobal("createImageBitmap", vi.fn(async (file: Blob) => ({
+      close: vi.fn(),
+      height: (file as File).name.includes("cover") ? 500 : 1024,
+      width: 1024,
+    })));
+    const registry = createWebserverAdminApplicationRegistry(client({}), testSourceStorage(), testMediaStorage());
+    renderWorkspace("/admin/applications", registry);
+
+    fireEvent.click(await screen.findByRole("button", { name: "Create application" }));
+    const icon = new File(["icon"], "icon.png", { type: "image/png" });
+    const cover = new File(["cover"], "cover.webp", { type: "image/webp" });
+
+    fireEvent.change(screen.getByTestId("application-icon-input"), { target: { files: [icon] } });
+    expect(await screen.findByRole("img", { name: "Application icon" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Remove application icon" }));
+    expect(screen.queryByRole("img", { name: "Application icon" })).toBeNull();
+
+    fireEvent.change(screen.getByTestId("application-icon-input"), { target: { files: [icon] } });
+    expect(await screen.findByRole("img", { name: "Application icon" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Remove application icon" }));
+
+    fireEvent.change(screen.getByTestId("application-cover-input"), { target: { files: [cover] } });
+    expect(await screen.findByRole("img", { name: "Cover image" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Remove cover image" }));
+    expect(screen.queryByRole("img", { name: "Cover image" })).toBeNull();
+
+    fireEvent.change(screen.getByLabelText("Application name"), { target: { value: "Media portal" } });
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+    expect(screen.getByRole("heading", { name: "Store listing details" })).toBeTruthy();
   });
 
   it("manages preview images as an ordered ten-slot strip", async () => {

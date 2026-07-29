@@ -124,8 +124,8 @@ describe("console release controls", () => {
     const releaseNotesField = screen.getByText("Release notes").closest("label");
     const shortDescriptionInput = shortDescriptionField?.querySelector("input");
     expect(shortDescriptionInput).toBeTruthy();
-    expect(fullDescriptionField?.querySelector("textarea")).toBeTruthy();
-    expect(releaseNotesField?.querySelector("textarea")).toBeTruthy();
+    expect(fullDescriptionField?.querySelector("textarea")?.rows).toBe(4);
+    expect(releaseNotesField?.querySelector("textarea")?.rows).toBe(4);
 
     fireEvent.change(shortDescriptionInput!, { target: { value: "a".repeat(81) } });
     expect(shortDescriptionInput?.value).toHaveLength(80);
