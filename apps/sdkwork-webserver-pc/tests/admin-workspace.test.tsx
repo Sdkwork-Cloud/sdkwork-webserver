@@ -3,11 +3,14 @@
 import { createWebserverAdminApplicationRegistry, webserverModule as applicationsModule } from "@sdkwork/webserver-pc-admin-applications";
 import type { WebserverAdminSdkClient } from "@sdkwork/webserver-pc-admin-core";
 import { WebserverWorkspace, type ApplicationMediaStorage, type ApplicationSourceStorage } from "@sdkwork/webserver-pc-commons";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-afterEach(() => cleanup());
+afterEach(() => {
+  cleanup();
+  vi.unstubAllGlobals();
+});
 
 describe("admin workspace application controls", () => {
   it("renders constrained application fields as selects", async () => {
@@ -119,6 +122,59 @@ describe("admin workspace application controls", () => {
     fireEvent.click(screen.getByRole("button", { name: "Back" }));
     expect(screen.getByRole("heading", { name: "Application basics" })).toBeTruthy();
     expect((screen.getByLabelText("Application name") as HTMLInputElement).value).toBe("Portal");
+  });
+
+  it("manages preview images as an ordered ten-slot strip", async () => {
+    class PreviewUrl extends URL {
+      static createObjectURL(file: Blob): string {
+        return `blob:${(file as File).name}`;
+      }
+
+      static revokeObjectURL(): void {}
+    }
+    vi.stubGlobal("URL", PreviewUrl);
+    vi.stubGlobal("createImageBitmap", vi.fn().mockResolvedValue({
+      close: vi.fn(),
+      height: 800,
+      width: 1200,
+    }));
+    const registry = createWebserverAdminApplicationRegistry(client({}), testSourceStorage(), testMediaStorage());
+    renderWorkspace("/admin/applications", registry);
+
+    fireEvent.click(await screen.findByRole("button", { name: "Create application" }));
+    const previewInput = screen.getByLabelText("Preview images") as HTMLInputElement;
+    const first = new File(["first"], "first.png", { lastModified: 1, type: "image/png" });
+    const second = new File(["second"], "second.png", { lastModified: 2, type: "image/png" });
+    const third = new File(["third"], "third.png", { lastModified: 3, type: "image/png" });
+
+    fireEvent.change(previewInput, { target: { files: [first, second] } });
+    await screen.findByText("2 / 10");
+    fireEvent.change(previewInput, { target: { files: [third, first] } });
+    await screen.findByText("3 / 10");
+
+    const previewList = screen.getByRole("list", { name: "Preview images" });
+    expect(within(previewList).getAllByRole("listitem").map((item) => item.getAttribute("aria-label"))).toEqual([
+      "first.png",
+      "second.png",
+      "third.png",
+    ]);
+    fireEvent.click(screen.getByRole("button", { name: "Move preview 3 left" }));
+    expect(within(previewList).getAllByRole("listitem").map((item) => item.getAttribute("aria-label"))).toEqual([
+      "first.png",
+      "third.png",
+      "second.png",
+    ]);
+    fireEvent.click(screen.getByRole("button", { name: "Remove preview 1" }));
+    expect(screen.getByText("2 / 10")).toBeTruthy();
+
+    const overflow = Array.from({ length: 9 }, (_, index) => new File(
+      [`overflow-${index}`],
+      `overflow-${index}.png`,
+      { lastModified: index + 10, type: "image/png" },
+    ));
+    fireEvent.change(previewInput, { target: { files: overflow } });
+    expect((await screen.findByRole("alert")).textContent).toContain("no more than 10 preview images");
+    expect(screen.getByText("2 / 10")).toBeTruthy();
   });
 
   it("uses an application-specific scope for domain management", async () => {
