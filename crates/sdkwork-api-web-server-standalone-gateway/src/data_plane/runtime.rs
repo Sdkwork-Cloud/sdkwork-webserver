@@ -134,8 +134,9 @@ fn add_capacity(total: &mut [u64; 3], value: [u64; 3]) {
 pub(crate) struct DataPlaneRuntime {
     current: ArcSwap<RuntimeGeneration>,
     topology: ReloadTopology,
-    reload_lock: Mutex<()>,
+    reload_lifecycle: Semaphore,
     active_health: Mutex<ActiveHealthRuntime>,
+    resource_pressure_lifecycle: Semaphore,
     resource_pressure_runtime: Mutex<ResourcePressureRuntime>,
     pub connection_permits: Arc<Semaphore>,
     pub request_gate: RequestAdmissionGate,
@@ -202,8 +203,9 @@ impl DataPlaneRuntime {
         Ok(Arc::new(Self {
             current: ArcSwap::from(initial),
             topology,
-            reload_lock: Mutex::new(()),
+            reload_lifecycle: Semaphore::new(1),
             active_health: Mutex::new(ActiveHealthRuntime::default()),
+            resource_pressure_lifecycle: Semaphore::new(1),
             resource_pressure_runtime: Mutex::new(ResourcePressureRuntime::default()),
             connection_permits: Arc::new(Semaphore::new(maximum_connections)),
             request_gate: RequestAdmissionGate::new(
@@ -221,20 +223,34 @@ impl DataPlaneRuntime {
         self.current.load_full()
     }
 
-    pub(crate) async fn start_active_health(&self) {
-        let _reload_guard = self.reload_lock.lock().await;
+    pub(crate) async fn start_active_health(&self) -> Result<(), DataPlaneError> {
+        let _reload_lifecycle = self.reload_lifecycle.acquire().await.map_err(|_| {
+            DataPlaneError::LifecycleCoordinatorUnavailable {
+                subsystem: "data-plane reload",
+            }
+        })?;
         let mut active_health = self.active_health.lock().await;
         if active_health.started {
-            return;
+            return Ok(());
         }
         active_health.supervisor = ActiveHealthSupervisor::start(self.current());
         active_health.started = true;
+        Ok(())
     }
 
     pub(crate) async fn start_resource_pressure(&self) -> Result<(), DataPlaneError> {
-        let mut runtime = self.resource_pressure_runtime.lock().await;
-        if runtime.started {
-            return Ok(());
+        let _lifecycle = self
+            .resource_pressure_lifecycle
+            .acquire()
+            .await
+            .map_err(|_| DataPlaneError::LifecycleCoordinatorUnavailable {
+                subsystem: "resource pressure",
+            })?;
+        {
+            let runtime = self.resource_pressure_runtime.lock().await;
+            if runtime.started {
+                return Ok(());
+            }
         }
         let policy = self
             .current()
@@ -243,17 +259,26 @@ impl DataPlaneRuntime {
             .deployment
             .resource_pressure
             .clone();
-        runtime.supervisor = match policy {
+        let supervisor = match policy {
             Some(policy) => Some(
                 ResourcePressureSupervisor::start(self.resource_pressure.clone(), policy).await?,
             ),
             None => None,
         };
+        let mut runtime = self.resource_pressure_runtime.lock().await;
+        runtime.supervisor = supervisor;
         runtime.started = true;
         Ok(())
     }
 
     pub(crate) async fn stop_resource_pressure(&self) -> Result<(), DataPlaneError> {
+        let _lifecycle = self
+            .resource_pressure_lifecycle
+            .acquire()
+            .await
+            .map_err(|_| DataPlaneError::LifecycleCoordinatorUnavailable {
+                subsystem: "resource pressure",
+            })?;
         let supervisor = {
             let mut runtime = self.resource_pressure_runtime.lock().await;
             runtime.started = false;
@@ -269,7 +294,11 @@ impl DataPlaneRuntime {
     }
 
     pub(crate) async fn stop_active_health(&self) -> Result<(), DataPlaneError> {
-        let _reload_guard = self.reload_lock.lock().await;
+        let _reload_lifecycle = self.reload_lifecycle.acquire().await.map_err(|_| {
+            DataPlaneError::LifecycleCoordinatorUnavailable {
+                subsystem: "data-plane reload",
+            }
+        })?;
         let supervisor = {
             let mut active_health = self.active_health.lock().await;
             active_health.started = false;
@@ -288,7 +317,11 @@ impl DataPlaneRuntime {
         &self,
         revision: CompiledWebServerRevision,
     ) -> Result<DataPlaneReloadReport, DataPlaneError> {
-        let _guard = self.reload_lock.lock().await;
+        let _reload_lifecycle = self.reload_lifecycle.acquire().await.map_err(|_| {
+            DataPlaneError::LifecycleCoordinatorUnavailable {
+                subsystem: "data-plane reload",
+            }
+        })?;
         let candidate_topology = match ReloadTopology::from_app(revision.app()) {
             Ok(topology) => topology,
             Err(error) => {

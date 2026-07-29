@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace SDKWork\Web\BackendSdk\Models;
 
+use SDKWork\Web\BackendSdk\Models\ApplicationStoreListing;
+
 final class ApplicationResponse
 {
     public ?string $id = null;
@@ -21,6 +23,8 @@ final class ApplicationResponse
     public ?int $status = null;
 
     public array $runtimeConfig = [];
+
+    public ?ApplicationStoreListing $storeListing = null;
 
     public ?string $createdAt = null;
 
@@ -52,6 +56,9 @@ final class ApplicationResponse
         $this->runtimeConfig = array_key_exists('runtimeConfig', $data)
             ? is_array($data['runtimeConfig']) ? $data['runtimeConfig'] : []
             : [];
+        $this->storeListing = array_key_exists('storeListing', $data)
+            ? is_array($data['storeListing']) ? ApplicationStoreListing::fromArray($data['storeListing']) : null
+            : null;
         $this->createdAt = array_key_exists('createdAt', $data)
             ? $data['createdAt']
             : null;
@@ -76,6 +83,7 @@ final class ApplicationResponse
             'siteType' => $this->siteType,
             'status' => $this->status,
             'runtimeConfig' => $this->runtimeConfig,
+            'storeListing' => $this->storeListing instanceof ApplicationStoreListing ? $this->storeListing->toArray() : $this->storeListing,
             'createdAt' => $this->createdAt,
             'updatedAt' => $this->updatedAt,
         ];

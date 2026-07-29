@@ -11,12 +11,12 @@ use sdkwork_intelligence_webserver_service::{
 };
 use sdkwork_webserver_acme_service::{AcmeConfig, CertificateIssuer};
 use sdkwork_webserver_contract::{
-    AgentHeartbeatRequest, CertificateIssueUpdate, CreateCertificateRequest,
-    CreateDeploymentRequest, CreateDomainRequest, CreateEnvVariableRequest,
-    CreateHealthCheckRequest, CreateNginxConfigRequest, CreateServerRequest, CreateSiteRequest,
-    ListNginxConfigsQuery, ListSitesQuery, RuntimeObservationState, UpdateNginxConfigRequest,
-    UpdateSiteRequest, WebAppRequestContext, WebAppResourceScope, WebServiceErrorKind,
-    WebsiteRuntimeSetSnapshot,
+    AgentHeartbeatRequest, ApplicationStoreListing, CertificateIssueUpdate,
+    CreateCertificateRequest, CreateDeploymentRequest, CreateDomainRequest,
+    CreateEnvVariableRequest, CreateHealthCheckRequest, CreateNginxConfigRequest,
+    CreateServerRequest, CreateSiteRequest, ListNginxConfigsQuery, ListSitesQuery, MediaResource,
+    RuntimeObservationState, UpdateNginxConfigRequest, UpdateSiteRequest, WebAppRequestContext,
+    WebAppResourceScope, WebServiceErrorKind, WebsiteRuntimeSetSnapshot,
 };
 use sdkwork_webserver_core::website_runtime::website_runtime_set_snapshot_sha256;
 use sdkwork_webserver_database_host::bootstrap_web_database;
@@ -132,6 +132,7 @@ async fn verify_certificate_activation_compensation(context: &TestContext) {
                 application_type: "WEB".to_string(),
                 site_type: 1,
                 runtime_config: None,
+                store_listing: None,
             },
         )
         .await
@@ -194,7 +195,7 @@ async fn verify_certificate_activation_compensation(context: &TestContext) {
             &CreateCertificateRequest {
                 domain_id: domain.id,
                 cert_type: 3,
-                auto_renew: true,
+                auto_renew: false,
             },
         )
         .await;
@@ -316,6 +317,7 @@ async fn verify_repository_contract(context: &TestContext) {
                         application_type: "WEB".to_owned(),
                         site_type: 1,
                         runtime_config: None,
+                        store_listing: None,
                     },
                 )
                 .await
@@ -334,6 +336,7 @@ async fn verify_repository_contract(context: &TestContext) {
                 application_type: "API".to_owned(),
                 site_type: 6,
                 runtime_config: None,
+                store_listing: None,
             },
         )
         .await
@@ -409,6 +412,7 @@ async fn verify_repository_contract(context: &TestContext) {
                 application_type: "WEB".to_owned(),
                 site_type: 1,
                 runtime_config: None,
+                store_listing: None,
             },
         )
         .await
@@ -427,6 +431,7 @@ async fn verify_repository_contract(context: &TestContext) {
                 application_type: "WEB".to_owned(),
                 site_type: 1,
                 runtime_config: None,
+                store_listing: None,
             },
         )
         .await
@@ -638,6 +643,19 @@ async fn verify_bounded_config_collections(
 
 async fn verify_public_repository_surface(context: &TestContext, site_id: &str) {
     let repository = &context.repository;
+    let metadata_expression = match context.engine {
+        TestEngine::Sqlite => "$3",
+        TestEngine::Postgres => "CAST($3 AS JSONB)",
+    };
+    sqlx::query(&format!(
+        "UPDATE web_site SET metadata = {metadata_expression} WHERE tenant_id = $1 AND uuid = $2"
+    ))
+    .bind(TENANT_A)
+    .bind(site_id)
+    .bind(r#"{"system":{"retention":"managed"}}"#)
+    .execute(&context.pool)
+    .await
+    .expect("seed unrelated site metadata");
     let updated_site = repository
         .update_site(
             TENANT_A,
@@ -649,11 +667,46 @@ async fn verify_public_repository_surface(context: &TestContext, site_id: &str) 
                     "workers": 4,
                     "features": {"http2": true, "https": true}
                 })),
+                store_listing: Some(ApplicationStoreListing {
+                    icon: Some(test_media_resource("icon-node", 1024, 1024)),
+                    short_description: Some("Production-ready application".to_string()),
+                    ..ApplicationStoreListing::default()
+                }),
             },
         )
         .await
         .expect("update site JSON and timestamp fields");
     assert_eq!(updated_site.name, "Alpha Site Updated");
+    assert_eq!(
+        updated_site
+            .store_listing
+            .as_ref()
+            .and_then(|listing| listing.icon.as_ref())
+            .and_then(|icon| icon.id.as_deref()),
+        Some("icon-node")
+    );
+    let metadata: String = sqlx::query_scalar(
+        "SELECT CAST(metadata AS TEXT) FROM web_site WHERE tenant_id = $1 AND uuid = $2",
+    )
+    .bind(TENANT_A)
+    .bind(site_id)
+    .fetch_one(&context.pool)
+    .await
+    .expect("read merged site metadata");
+    let metadata: serde_json::Value =
+        serde_json::from_str(&metadata).expect("parse merged metadata");
+    assert_eq!(
+        metadata
+            .pointer("/system/retention")
+            .and_then(serde_json::Value::as_str),
+        Some("managed")
+    );
+    assert_eq!(
+        metadata
+            .pointer("/storeListing/icon/id")
+            .and_then(serde_json::Value::as_str),
+        Some("icon-node")
+    );
     assert_eq!(
         updated_site
             .runtime_config
@@ -835,37 +888,52 @@ async fn verify_public_repository_surface(context: &TestContext, site_id: &str) 
             .total,
         1
     );
+    assert_eq!(
+        repository
+            .list_nginx_configs(
+                None,
+                &ListNginxConfigsQuery {
+                    page: 1,
+                    page_size: 20,
+                    site_id: Some("missing-site".to_string()),
+                    config_type: Some(1),
+                    is_active: None,
+                },
+            )
+            .await
+            .expect("global nginx config list applies the site filter")
+            .total,
+        0
+    );
     repository
         .web_nginx_config(None, &nginx.id)
         .await
         .expect("atomically activate nginx config through global backend scope");
+    verify_nginx_activation_rollback(context, site_id, &nginx.id).await;
 
     let (certificate_id, _) = repository
         .insert_certificate_pending(TENANT_A, None, &domain.id, 1, true)
         .await
         .expect("insert pending certificate timestamps");
+    let certificate_update = CertificateIssueUpdate {
+        cert_name: "parity.example.test".to_string(),
+        cert_type: 1,
+        issuer: "SDKWork Test CA".to_string(),
+        subject: "CN=parity.example.test".to_string(),
+        san_list: "parity.example.test".to_string(),
+        fingerprint: "sha256:repository-parity".to_string(),
+        cert_path: "/test/fullchain.pem".to_string(),
+        key_path: "/test/privkey.pem".to_string(),
+        chain_path: Some("/test/chain.pem".to_string()),
+        not_before: "2026-01-01T00:00:00Z".to_string(),
+        not_after: "2027-01-01T00:00:00Z".to_string(),
+        auto_renew: true,
+        cert_pem: "test-fullchain-pem".to_string(),
+        chain_pem: Some("test-chain-pem".to_string()),
+        encrypted_private_key: "test-encrypted-private-key".to_string(),
+    };
     let certificate = repository
-        .finalize_certificate(
-            TENANT_A,
-            &certificate_id,
-            &CertificateIssueUpdate {
-                cert_name: "parity.example.test".to_string(),
-                cert_type: 1,
-                issuer: "SDKWork Test CA".to_string(),
-                subject: "CN=parity.example.test".to_string(),
-                san_list: "parity.example.test".to_string(),
-                fingerprint: "sha256:repository-parity".to_string(),
-                cert_path: "/test/fullchain.pem".to_string(),
-                key_path: "/test/privkey.pem".to_string(),
-                chain_path: Some("/test/chain.pem".to_string()),
-                not_before: "2026-01-01T00:00:00Z".to_string(),
-                not_after: "2027-01-01T00:00:00Z".to_string(),
-                auto_renew: true,
-                cert_pem: "test-fullchain-pem".to_string(),
-                chain_pem: Some("test-chain-pem".to_string()),
-                encrypted_private_key: "test-encrypted-private-key".to_string(),
-            },
-        )
+        .finalize_certificate(TENANT_A, &certificate_id, &certificate_update, None)
         .await
         .expect("finalize certificate JSON and timestamps");
     assert_eq!(certificate.status, 1);
@@ -902,7 +970,7 @@ async fn verify_public_repository_surface(context: &TestContext, site_id: &str) 
     assert_eq!(disabled_certificate.id, certificate_id);
     assert_eq!(disabled_certificate.auto_renew, Some(false));
     assert!(!repository
-        .list_certificates_due_for_renewal(3650, 20)
+        .list_certificates_due_for_renewal(3650, "2020-01-01T00:00:00Z", 20)
         .await
         .expect("exclude disabled certificate from renewal scan")
         .iter()
@@ -930,17 +998,102 @@ async fn verify_public_repository_surface(context: &TestContext, site_id: &str) 
         1
     );
     assert!(repository
-        .list_certificates_due_for_renewal(3650, 20)
+        .list_certificates_due_for_renewal(3650, "2020-01-01T00:00:00Z", 20)
         .await
         .expect("list renewal timestamp projections")
         .iter()
         .any(|candidate| candidate.certificate_id == certificate_id));
-    assert!(repository
-        .mark_certificate_renewing(TENANT_A, &certificate_id)
+    let first_claim_version = repository
+        .claim_certificate_renewal(TENANT_A, &certificate_id, "2020-01-01T00:00:00Z")
         .await
-        .expect("mark certificate renewing timestamp"));
+        .expect("claim certificate renewal")
+        .expect("idle certificate must be claimable");
+    assert!(repository
+        .list_certificates_due_for_renewal(3650, "2020-01-01T00:00:00Z", 20)
+        .await
+        .expect("active renewal claim must not be scanned")
+        .iter()
+        .all(|candidate| candidate.certificate_id != certificate_id));
+    assert!(repository
+        .claim_certificate_renewal(TENANT_A, &certificate_id, "2020-01-01T00:00:00Z",)
+        .await
+        .expect("reject active certificate renewal claim")
+        .is_none());
     repository
-        .fail_certificate_renewal(TENANT_A, &certificate_id, "synthetic parity failure")
+        .update_certificate_auto_renew(TENANT_A, &certificate_id, false)
+        .await
+        .expect_err("automatic renewal policy cannot invalidate an active claim");
+
+    let stale_timestamp_update = match context.engine {
+        TestEngine::Sqlite => {
+            "UPDATE web_certificate SET updated_at = $1 WHERE tenant_id = $2 AND uuid = $3"
+        }
+        TestEngine::Postgres => {
+            "UPDATE web_certificate SET updated_at = CAST($1 AS TIMESTAMPTZ) WHERE tenant_id = $2 AND uuid = $3"
+        }
+    };
+    sqlx::query(stale_timestamp_update)
+        .bind("2019-12-31T23:59:59Z")
+        .bind(TENANT_A)
+        .bind(&certificate_id)
+        .execute(&context.pool)
+        .await
+        .expect("age certificate renewal claim");
+    assert!(repository
+        .list_certificates_due_for_renewal(3650, "2020-01-01T00:00:00Z", 20)
+        .await
+        .expect("stale renewal claim must return to the bounded scan")
+        .iter()
+        .any(|candidate| candidate.certificate_id == certificate_id));
+    let replacement_claim_version = repository
+        .claim_certificate_renewal(TENANT_A, &certificate_id, "2020-01-01T00:00:00Z")
+        .await
+        .expect("reclaim stale certificate renewal")
+        .expect("stale certificate renewal must be claimable");
+    assert!(replacement_claim_version > first_claim_version);
+
+    let stale_finalize = repository
+        .finalize_certificate(
+            TENANT_A,
+            &certificate_id,
+            &certificate_update,
+            Some(first_claim_version),
+        )
+        .await
+        .expect_err("stale renewal worker must not finalize over a replacement claim");
+    assert_eq!(stale_finalize.kind(), WebServiceErrorKind::Conflict);
+    let stale_failure = repository
+        .fail_certificate_renewal(
+            TENANT_A,
+            &certificate_id,
+            first_claim_version,
+            "stale worker failure",
+        )
+        .await
+        .expect_err("stale renewal worker must not fail a replacement claim");
+    assert_eq!(stale_failure.kind(), WebServiceErrorKind::Conflict);
+
+    repository
+        .finalize_certificate(
+            TENANT_A,
+            &certificate_id,
+            &certificate_update,
+            Some(replacement_claim_version),
+        )
+        .await
+        .expect("current renewal claim finalizes successfully");
+    let failure_claim_version = repository
+        .claim_certificate_renewal(TENANT_A, &certificate_id, "2020-01-01T00:00:00Z")
+        .await
+        .expect("claim certificate renewal failure path")
+        .expect("finalized certificate returns to idle renewal state");
+    repository
+        .fail_certificate_renewal(
+            TENANT_A,
+            &certificate_id,
+            failure_claim_version,
+            "synthetic parity failure",
+        )
         .await
         .expect("merge certificate JSON metadata");
     let failed_certificate = repository
@@ -1105,6 +1258,25 @@ async fn verify_public_repository_surface(context: &TestContext, site_id: &str) 
         .retrieve_site(TENANT_A, None, site_id)
         .await
         .expect_err("soft-deleted site must not be retrievable");
+}
+
+fn test_media_resource(node_id: &str, width: i32, height: i32) -> MediaResource {
+    MediaResource {
+        id: Some(node_id.to_string()),
+        kind: "image".to_string(),
+        source: "drive".to_string(),
+        uri: Some(format!("drive://spaces/store-assets/nodes/{node_id}")),
+        file_name: Some("application-icon.png".to_string()),
+        mime_type: Some("image/png".to_string()),
+        size_bytes: Some("4096".to_string()),
+        width: Some(width),
+        height: Some(height),
+        alt_text: Some("Application icon".to_string()),
+        metadata: Some(serde_json::json!({
+            "drive": { "spaceId": "store-assets", "nodeId": node_id }
+        })),
+        ..MediaResource::default()
+    }
 }
 
 async fn verify_runtime_assignment_contract(context: &TestContext, node_uuid: &str) {
@@ -1610,11 +1782,16 @@ async fn verify_deployment_idempotency(
         .await
         .expect_err("same idempotency key with different input must conflict");
     assert_eq!(conflicting_input.kind(), WebServiceErrorKind::Conflict);
-    let conflicting_site = repository
+    let second_site = repository
         .create_deployment(TENANT_A, second_site_id, Some(91), &request)
         .await
-        .expect_err("tenant-wide idempotency key cannot move to another site");
-    assert_eq!(conflicting_site.kind(), WebServiceErrorKind::Conflict);
+        .expect("the same client key is independent on another resource path");
+    assert_ne!(second_site.id, first.id);
+    let second_actor = repository
+        .create_deployment(TENANT_A, first_site_id, Some(92), &request)
+        .await
+        .expect("the same client key is independent for another principal");
+    assert_ne!(second_actor.id, first.id);
 
     let concurrent_request = CreateDeploymentRequest {
         idempotency_key: Some("deploy-idempotency-race".to_owned()),
@@ -1771,6 +1948,112 @@ async fn verify_rollback_atomicity(context: &TestContext, site_id: &str) {
             .await
             .expect("read committed rollback source status");
     assert_eq!(source_status, 2);
+}
+
+async fn verify_nginx_activation_rollback(
+    context: &TestContext,
+    site_id: &str,
+    active_config_id: &str,
+) {
+    let blocked = context
+        .repository
+        .create_nginx_config(
+            TENANT_A,
+            &CreateNginxConfigRequest {
+                site_id: site_id.to_string(),
+                config_name: "blocked-activation.conf".to_string(),
+                config_type: 1,
+                config_content: "server { listen 8443 ssl; }".to_string(),
+            },
+        )
+        .await
+        .expect("create nginx config for activation rollback");
+    install_nginx_activation_ignore_trigger(&context.pool, context.engine).await;
+
+    let error = context
+        .repository
+        .web_nginx_config(Some(TENANT_A), &blocked.id)
+        .await
+        .expect_err("a skipped target activation must abort the transaction");
+    assert_eq!(error.kind(), WebServiceErrorKind::NotFound);
+
+    let active: String = sqlx::query_scalar(
+        "SELECT config.uuid
+         FROM web_nginx_config config
+         INNER JOIN web_site site
+           ON site.id = config.site_id AND site.tenant_id = config.tenant_id
+         WHERE config.tenant_id = $1 AND site.uuid = $2 AND config.is_active = TRUE",
+    )
+    .bind(TENANT_A)
+    .bind(site_id)
+    .fetch_one(&context.pool)
+    .await
+    .expect("failed target activation preserves the previous active config");
+    assert_eq!(active, active_config_id);
+
+    remove_nginx_activation_ignore_trigger(&context.pool, context.engine).await;
+}
+
+async fn install_nginx_activation_ignore_trigger(pool: &AnyPool, engine: TestEngine) {
+    match engine {
+        TestEngine::Sqlite => {
+            sqlx::query(
+                "CREATE TRIGGER sdkwork_test_ignore_nginx_activation
+                 BEFORE UPDATE OF is_active ON web_nginx_config
+                 WHEN NEW.config_name = 'blocked-activation.conf' AND NEW.is_active = TRUE
+                 BEGIN
+                   SELECT RAISE(IGNORE);
+                 END",
+            )
+            .execute(pool)
+            .await
+            .expect("install SQLite nginx activation trigger");
+        }
+        TestEngine::Postgres => {
+            sqlx::query(
+                "CREATE FUNCTION sdkwork_test_ignore_nginx_activation() RETURNS trigger AS $$
+                 BEGIN
+                   IF NEW.config_name = 'blocked-activation.conf' AND NEW.is_active = TRUE THEN
+                     RETURN NULL;
+                   END IF;
+                   RETURN NEW;
+                 END;
+                 $$ LANGUAGE plpgsql",
+            )
+            .execute(pool)
+            .await
+            .expect("install PostgreSQL nginx activation trigger function");
+            sqlx::query(
+                "CREATE TRIGGER sdkwork_test_ignore_nginx_activation
+                 BEFORE UPDATE OF is_active ON web_nginx_config
+                 FOR EACH ROW EXECUTE FUNCTION sdkwork_test_ignore_nginx_activation()",
+            )
+            .execute(pool)
+            .await
+            .expect("install PostgreSQL nginx activation trigger");
+        }
+    }
+}
+
+async fn remove_nginx_activation_ignore_trigger(pool: &AnyPool, engine: TestEngine) {
+    match engine {
+        TestEngine::Sqlite => {
+            sqlx::query("DROP TRIGGER sdkwork_test_ignore_nginx_activation")
+                .execute(pool)
+                .await
+                .expect("remove SQLite nginx activation trigger");
+        }
+        TestEngine::Postgres => {
+            sqlx::query("DROP TRIGGER sdkwork_test_ignore_nginx_activation ON web_nginx_config")
+                .execute(pool)
+                .await
+                .expect("remove PostgreSQL nginx activation trigger");
+            sqlx::query("DROP FUNCTION sdkwork_test_ignore_nginx_activation()")
+                .execute(pool)
+                .await
+                .expect("remove PostgreSQL nginx activation trigger function");
+        }
+    }
 }
 
 async fn install_rollback_failure_trigger(pool: &AnyPool, engine: TestEngine) {

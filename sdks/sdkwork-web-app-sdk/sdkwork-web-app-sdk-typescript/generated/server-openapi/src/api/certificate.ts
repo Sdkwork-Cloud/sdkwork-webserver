@@ -29,7 +29,7 @@ export class CertificateApi {
       { name: 'page_size', value: params?.pageSize, style: 'form', explode: true, allowReserved: false },
       { name: 'siteId', value: params?.siteId, style: 'form', explode: true, allowReserved: false },
     ]);
-    return this.client.request<{ items: CertificateResponse[]; pageInfo: PageInfo; }>(appendQueryString(appApiPath(`/certificates`), query), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any });
+    return this.client.request<{ items: CertificateResponse[]; pageInfo: PageInfo; }>(appendQueryString(appApiPath(`/certificates`), query), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any, sdkworkUnwrapKind: 'page' });
   }
 
 /** 申请证书 */
@@ -40,7 +40,7 @@ export class CertificateApi {
       },
       {}
     );
-    return this.client.request<CertificateResponse>(appApiPath(`/certificates`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, body, headers: requestHeaders, contentType: 'application/json' });
+    return this.client.request<CertificateResponse>(appApiPath(`/certificates`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, body, headers: requestHeaders, contentType: 'application/json', sdkworkUnwrapKind: 'item' });
   }
 }
 

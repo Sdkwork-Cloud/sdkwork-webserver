@@ -52,23 +52,23 @@
     },
     {
       "path": "src/api/agent.ts",
-      "sha256": "c89bd3aae42b58d1189ea4312ba8021c20767e7b07bb83016484f7a357610817"
+      "sha256": "6ef64233b08ef13e24322294da9cfe3ef0d7e2de6f04b4419009c620d79dd0ab"
     },
     {
       "path": "src/api/application-deployment.ts",
-      "sha256": "5f6ddcedd101ac8d853be2622003b3cfb48f0b39ab61185062b040b8eba07198"
+      "sha256": "ddd321710925df52dd0f033399ed4177b8ad30df2a7e45a3edf54097c02f1b3f"
     },
     {
       "path": "src/api/application-domain.ts",
-      "sha256": "d4bda35cf167b9cc432fabc2996c7426c044536082a31f8e10942d773a42347a"
+      "sha256": "159ebe2b7e4586e3f0e8482e1de02fbf3448e9c4af8f9d3ba69d679053266c71"
     },
     {
       "path": "src/api/application.ts",
-      "sha256": "724569d98c58c5aa3d02096112939feaffaef2a6738bc5bd9920c70b7ef26534"
+      "sha256": "23f599663a0d9a39e47e85f1564f35305cfdf1531d1c490af619d809d0ad70b6"
     },
     {
       "path": "src/api/audit.ts",
-      "sha256": "200daf2878bce7de7f22e77921962b9b2400390e4e2a84541c029fe8c9b3a8d5"
+      "sha256": "e8500724eb04dff3a518977444a50cf85a40d419269a5ffecf8f78ae32bfc1b5"
     },
     {
       "path": "src/api/base.ts",
@@ -76,11 +76,11 @@
     },
     {
       "path": "src/api/certificate-distribution.ts",
-      "sha256": "929d9963563cc2f9ab1671a0f933aecc54098247d29de1103ac62237c558c5e8"
+      "sha256": "9267e13e6e28945f5b2a85b70b61d3120a622baec18d2a57b82560be3d0e98c7"
     },
     {
       "path": "src/api/certificate.ts",
-      "sha256": "3838a42677d6df663b172edf8480311ddd77902bfac4a76bcd95ae25e6dcc02e"
+      "sha256": "aeb02dfdcd47d3bc5de9a07dd8e4cfc0b428417d20c38837ea068e959b49a751"
     },
     {
       "path": "src/api/index.ts",
@@ -88,7 +88,7 @@
     },
     {
       "path": "src/api/nginx.ts",
-      "sha256": "a59026d5f21d7b6359bbe9460a42ce99915a4baac3e339781a36112ffdd50c29"
+      "sha256": "49486e67169924fee65ab96d77c4115e3a20f1ce2950d12d8dc1e3b56e27c067"
     },
     {
       "path": "src/api/paths.ts",
@@ -96,7 +96,7 @@
     },
     {
       "path": "src/api/server.ts",
-      "sha256": "ed56dba9529193a7a27baaeeb797dd966cbc6aa47d10d881f6b8d432d53eac79"
+      "sha256": "6e62694c0e52a3d291175d6f4db083d31d07c332869cdaa672d41ec8c6ea3975"
     },
     {
       "path": "src/auth/index.ts",
@@ -104,7 +104,7 @@
     },
     {
       "path": "src/http/client.ts",
-      "sha256": "cf21d09fa2b2a4297058b36507d58ed49644057186ef562dfb45e201bd0415e3"
+      "sha256": "8a0a4cb9cc3cb855091ccd790e99feb9b9beff7637db48869173393ab544b9af"
     },
     {
       "path": "src/http/index.ts",
@@ -152,7 +152,11 @@
     },
     {
       "path": "src/types/application-response.ts",
-      "sha256": "fef95f716f64aacd98ee13726152e03e37d865f90485d3df4273527fa7459c95"
+      "sha256": "eef3972409abcc724e7641e9dec943d8e493f06c3f5e07f3c49a6855c9e80dfa"
+    },
+    {
+      "path": "src/types/application-store-listing.ts",
+      "sha256": "371c6d21e6dc4b5d16f4dcc8d293bcfa8a124d7c409439049f673d905373ac94"
     },
     {
       "path": "src/types/applications-activate-response.ts",
@@ -280,7 +284,7 @@
     },
     {
       "path": "src/types/create-application-request.ts",
-      "sha256": "8cce18c0ef20c8a7f0ac1642dcbdd867bc667feabe6968a4c1a2c5a3895771f3"
+      "sha256": "a526c1edfd82e0c38c81be2546c7b5adb16b6576fa2158021542e361a180cd16"
     },
     {
       "path": "src/types/create-certificate-request.ts",
@@ -308,7 +312,15 @@
     },
     {
       "path": "src/types/index.ts",
-      "sha256": "8381ce7177b620addacc5302f207a330a0ac115921306c24cff9bf90d5fb8836"
+      "sha256": "6e7ec2370adf40e1810e7a3a17d265f6b195b47cf166006446e745f2365f8bda"
+    },
+    {
+      "path": "src/types/media-checksum.ts",
+      "sha256": "7a2e61d45956415a4b9bf91fd9383947acb7bad7061bb68e29ad6ad9ef349f1e"
+    },
+    {
+      "path": "src/types/media-resource.ts",
+      "sha256": "d76f4d253858ec8232db7ba7ccd234cb3381bdd0c7780941df0010ad0b21019b"
     },
     {
       "path": "src/types/nginx-config-page.ts",
@@ -404,7 +416,7 @@
     },
     {
       "path": "src/types/update-application-request.ts",
-      "sha256": "def77139fabfc3d301d7331c6e2d18ee1df7f8430baaa2a64e4ca56188fc4119"
+      "sha256": "ae2982eda65875d382bc59f33af2abb4926e19ed30092075e2dc73182631da80"
     },
     {
       "path": "src/types/update-certificate-request.ts",

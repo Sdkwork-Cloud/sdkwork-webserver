@@ -9,6 +9,7 @@ data class SiteResponse(
     val siteType: Int? = null,
     val status: Int? = null,
     val runtimeConfig: Map<String, Any>? = null,
+    val storeListing: ApplicationStoreListing? = null,
     val createdAt: String? = null,
     val updatedAt: String? = null
 )

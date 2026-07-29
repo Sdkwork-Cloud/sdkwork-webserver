@@ -5,7 +5,6 @@ import { PortalClosing } from "../components/PortalClosing.tsx";
 import { PortalHeader } from "../components/PortalHeader.tsx";
 import { PortalHero } from "../components/PortalHero.tsx";
 import { SecurityBand } from "../components/SecurityBand.tsx";
-import { SkillIntegrationSection } from "../components/SkillIntegrationSection.tsx";
 import { createPortalTranslator } from "../services/portal-translator.ts";
 import type { WebserverPortalProps } from "../types.ts";
 
@@ -16,8 +15,7 @@ export function WebserverPortal({ clipboard, locale, navigation, statistics, vie
     <div className="min-h-screen bg-white text-zinc-950 dark:bg-[#0d1511] dark:text-white">
       <PortalHeader navigation={navigation} t={t} viewer={viewer} />
       <main>
-        <PortalHero navigation={navigation} statistics={statistics} t={t} />
-        <SkillIntegrationSection clipboard={clipboard} t={t} />
+        <PortalHero clipboard={clipboard} navigation={navigation} statistics={statistics} t={t} />
         <CapabilityBand t={t} />
         <DeploymentWorkflow t={t} />
         <SecurityBand t={t} />

@@ -14,7 +14,7 @@ export class NginxStatusApi {
 
 /** Retrieve Nginx status */
   async retrieve(requestOptions?: ApiRequestOptions): Promise<NginxStatusResponse> {
-    return this.client.request<NginxStatusResponse>(backendApiPath(`/nginx/status`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any });
+    return this.client.request<NginxStatusResponse>(backendApiPath(`/nginx/status`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any, sdkworkUnwrapKind: 'item' });
   }
 }
 
@@ -38,7 +38,7 @@ export class NginxReloadApi {
       },
       {}
     );
-    return this.client.request<NginxReloadResponse>(backendApiPath(`/nginx/reload`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, headers: requestHeaders });
+    return this.client.request<NginxReloadResponse>(backendApiPath(`/nginx/reload`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, headers: requestHeaders, sdkworkUnwrapKind: 'item' });
   }
 }
 
@@ -79,7 +79,7 @@ export class NginxConfigsApi {
       { name: 'configType', value: params?.configType, style: 'form', explode: true, allowReserved: false },
       { name: 'isActive', value: params?.isActive, style: 'form', explode: true, allowReserved: false },
     ]);
-    return this.client.request<{ items: NginxConfigResponse[]; pageInfo: PageInfo; }>(appendQueryString(backendApiPath(`/nginx/configs`), query), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any });
+    return this.client.request<{ items: NginxConfigResponse[]; pageInfo: PageInfo; }>(appendQueryString(backendApiPath(`/nginx/configs`), query), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any, sdkworkUnwrapKind: 'page' });
   }
 
 /** Create an Nginx configuration */
@@ -90,12 +90,12 @@ export class NginxConfigsApi {
       },
       {}
     );
-    return this.client.request<NginxConfigResponse>(backendApiPath(`/nginx/configs`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, body, headers: requestHeaders, contentType: 'application/json' });
+    return this.client.request<NginxConfigResponse>(backendApiPath(`/nginx/configs`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, body, headers: requestHeaders, contentType: 'application/json', sdkworkUnwrapKind: 'item' });
   }
 
 /** Retrieve an Nginx configuration */
   async retrieve(configId: string, requestOptions?: ApiRequestOptions): Promise<NginxConfigResponse> {
-    return this.client.request<NginxConfigResponse>(backendApiPath(`/nginx/etc/${serializePathParameter(configId, { name: 'configId', style: 'simple', explode: false })}`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any });
+    return this.client.request<NginxConfigResponse>(backendApiPath(`/nginx/etc/${serializePathParameter(configId, { name: 'configId', style: 'simple', explode: false })}`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any, sdkworkUnwrapKind: 'item' });
   }
 
 /** Update an Nginx configuration */
@@ -106,12 +106,12 @@ export class NginxConfigsApi {
       },
       {}
     );
-    return this.client.request<NginxConfigResponse>(backendApiPath(`/nginx/etc/${serializePathParameter(configId, { name: 'configId', style: 'simple', explode: false })}`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'PUT' as any, body, headers: requestHeaders, contentType: 'application/json' });
+    return this.client.request<NginxConfigResponse>(backendApiPath(`/nginx/etc/${serializePathParameter(configId, { name: 'configId', style: 'simple', explode: false })}`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'PUT' as any, body, headers: requestHeaders, contentType: 'application/json', sdkworkUnwrapKind: 'item' });
   }
 
 /** Validate an Nginx configuration */
   async validate(configId: string, requestOptions?: ApiRequestOptions): Promise<NginxValidateResponse> {
-    return this.client.request<NginxValidateResponse>(backendApiPath(`/nginx/etc/${serializePathParameter(configId, { name: 'configId', style: 'simple', explode: false })}/validate`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any });
+    return this.client.request<NginxValidateResponse>(backendApiPath(`/nginx/etc/${serializePathParameter(configId, { name: 'configId', style: 'simple', explode: false })}/validate`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, sdkworkUnwrapKind: 'item' });
   }
 
 /** Deploy an Nginx configuration */
@@ -122,7 +122,7 @@ export class NginxConfigsApi {
       },
       {}
     );
-    return this.client.request<NginxDeployResponse>(backendApiPath(`/nginx/etc/${serializePathParameter(configId, { name: 'configId', style: 'simple', explode: false })}/deploy`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, headers: requestHeaders });
+    return this.client.request<NginxDeployResponse>(backendApiPath(`/nginx/etc/${serializePathParameter(configId, { name: 'configId', style: 'simple', explode: false })}/deploy`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, headers: requestHeaders, sdkworkUnwrapKind: 'item' });
   }
 }
 

@@ -95,6 +95,10 @@
       "sha256": "6447833851e63bd297dbd46869a9d041657719ee7722249e8daea0b7c48576fa"
     },
     {
+      "path": "types/application_store_listing.go",
+      "sha256": "b4cc0f5f1f0d365c0c49b521c003a373ce88ea2758425114b9a6133f9813a3f3"
+    },
+    {
       "path": "types/certificate_page.go",
       "sha256": "7e48c1f38547c1a8b371b315004abac369848841f06d2573ed5e230be4d9d17d"
     },
@@ -136,7 +140,7 @@
     },
     {
       "path": "types/create_site_request.go",
-      "sha256": "e7a12265ce08cc9c9c8a58217564c0df4f5ca6516988ce997c4532d16fecdb92"
+      "sha256": "32389aa36b3021afe0c1cd94b60138451b59bda32a2b37678fb29d422bd55149"
     },
     {
       "path": "types/deployment_page.go",
@@ -181,6 +185,14 @@
     {
       "path": "types/health_check_response.go",
       "sha256": "99daa0bb6337434d0efeb03cebef62143c518cdd373c8b91181605be5a0376c2"
+    },
+    {
+      "path": "types/media_checksum.go",
+      "sha256": "620cad237010debdc8e92dd9740085356b342273484fff5b440a5f8156ac74a8"
+    },
+    {
+      "path": "types/media_resource.go",
+      "sha256": "a2c2c08cc486534c3c361b787e52bd9d0fc28603f8b201a7beae61c1255df4a7"
     },
     {
       "path": "types/page_info.go",
@@ -228,7 +240,7 @@
     },
     {
       "path": "types/site_response.go",
-      "sha256": "d592e00129b39c7a212139dc6a293bd9edc884476e068217dd89aa99fd790c9c"
+      "sha256": "987a609ab09acfe6faa184b7b488ed8a04bb31f860053f21ba3847f920ef396f"
     },
     {
       "path": "types/sites_activate_response.go",
@@ -304,7 +316,7 @@
     },
     {
       "path": "types/update_site_request.go",
-      "sha256": "99273b84e5d11bd521e25ef3716863de9f93580c9452072210a6e71e26a41b42"
+      "sha256": "e95de479c375db4bbba8d78f7b02f4d938b85853b7f27c68fa4e8feca603828e"
     }
   ],
   "scaffoldFiles": [

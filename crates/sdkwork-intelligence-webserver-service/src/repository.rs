@@ -225,6 +225,7 @@ pub trait WebRepositoryPort: Send + Sync {
         tenant_id: i64,
         certificate_id: &str,
         update: &CertificateIssueUpdate,
+        expected_renewal_version: Option<i64>,
     ) -> WebServiceResult<CertificateResponse>;
 
     async fn fail_certificate(
@@ -237,19 +238,22 @@ pub trait WebRepositoryPort: Send + Sync {
     async fn list_certificates_due_for_renewal(
         &self,
         renew_before_days: u32,
+        claim_expired_before: &str,
         limit: i32,
     ) -> WebServiceResult<Vec<sdkwork_webserver_contract::CertificateRenewalCandidate>>;
 
-    async fn mark_certificate_renewing(
+    async fn claim_certificate_renewal(
         &self,
         tenant_id: i64,
         certificate_id: &str,
-    ) -> WebServiceResult<bool>;
+        claim_expired_before: &str,
+    ) -> WebServiceResult<Option<i64>>;
 
     async fn fail_certificate_renewal(
         &self,
         tenant_id: i64,
         certificate_id: &str,
+        expected_renewal_version: i64,
         reason: &str,
     ) -> WebServiceResult<()>;
 

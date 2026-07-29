@@ -6,7 +6,7 @@ import { webserverModule as diagnosticsModule } from "@sdkwork/webserver-pc-admi
 import { webserverModule as nginxModule } from "@sdkwork/webserver-pc-admin-nginx";
 import { webserverModule as serversModule } from "@sdkwork/webserver-pc-admin-servers";
 import { hasWebserverAdminAccess, type WebserverPcModuleDefinition } from "@sdkwork/webserver-pc-commons";
-import { createApplicationSourceStorage, createWebserverConsoleRegistry, WebserverConsoleSdkProvider } from "@sdkwork/webserver-pc-console-core";
+import { createApplicationMediaStorage, createApplicationSourceStorage, createWebserverConsoleRegistry, WebserverConsoleSdkProvider } from "@sdkwork/webserver-pc-console-core";
 import { webserverModule as deliveryModule } from "@sdkwork/webserver-pc-console-delivery";
 import { webserverModule as deploymentsModule } from "@sdkwork/webserver-pc-console-deployments";
 import { WebserverConsoleShell } from "@sdkwork/webserver-pc-console-shell";
@@ -27,9 +27,13 @@ export function WebserverAuthorizedWorkspace({ runtime }: { runtime: Bootstrappe
     () => createApplicationSourceStorage(consoleClients.drive),
     [consoleClients.drive],
   );
+  const mediaStorage = useMemo(
+    () => createApplicationMediaStorage(consoleClients.drive),
+    [consoleClients.drive],
+  );
   const registry = useMemo(
-    () => createWebserverConsoleRegistry(consoleClients, sourceStorage),
-    [consoleClients, sourceStorage],
+    () => createWebserverConsoleRegistry(consoleClients, sourceStorage, mediaStorage),
+    [consoleClients, mediaStorage, sourceStorage],
   );
   const permissionScope = authState.session?.context?.permissionScope ?? [];
   const adminAccess = hasWebserverAdminAccess(permissionScope);
@@ -62,6 +66,7 @@ export function WebserverAuthorizedWorkspace({ runtime }: { runtime: Bootstrappe
               <LazyAdminSurface
                 backendApiBaseUrl={runtime.config.backendApiBaseUrl}
                 locale={runtime.locale}
+                mediaStorage={mediaStorage}
                 modules={adminModules}
                 onSignOut={signOut}
                 permissionScope={permissionScope}

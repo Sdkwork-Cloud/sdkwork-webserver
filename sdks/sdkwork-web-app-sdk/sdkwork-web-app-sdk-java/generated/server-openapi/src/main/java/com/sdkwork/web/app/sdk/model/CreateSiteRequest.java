@@ -9,6 +9,7 @@ public class CreateSiteRequest {
     private String applicationType;
     private Integer siteType;
     private Map<String, Object> runtimeConfig;
+    private ApplicationStoreListing storeListing;
 
     public String getName() {
         return this.name;
@@ -56,5 +57,13 @@ public class CreateSiteRequest {
 
     public void setRuntimeConfig(Map<String, Object> runtimeConfig) {
         this.runtimeConfig = runtimeConfig;
+    }
+
+    public ApplicationStoreListing getStoreListing() {
+        return this.storeListing;
+    }
+
+    public void setStoreListing(ApplicationStoreListing storeListing) {
+        this.storeListing = storeListing;
     }
 }

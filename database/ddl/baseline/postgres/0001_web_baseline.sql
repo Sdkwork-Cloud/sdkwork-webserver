@@ -190,7 +190,7 @@ COMMENT ON TABLE web_certificate IS 'SSL certificate registry';
 COMMENT ON COLUMN web_certificate.cert_type IS 'Cert type: 1=Lets Encrypt, 2=custom, 3=self-signed';
 COMMENT ON COLUMN web_certificate.san_list IS 'Subject Alternative Names list';
 COMMENT ON COLUMN web_certificate.auto_renew IS 'Whether auto-renewal is enabled';
-COMMENT ON COLUMN web_certificate.renewal_status IS 'Renewal status: 0=idle, 1=pending, 2=renewing, 3=failed';
+COMMENT ON COLUMN web_certificate.renewal_status IS 'Renewal status: 0=idle, 1=renewing, 2=pending, 3=failed';
 COMMENT ON COLUMN web_certificate.status IS 'Status: 0=pending, 1=active, 2=expired, 3=revoked, 4=archived';
 
 CREATE INDEX idx_web_certificate_domain

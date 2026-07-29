@@ -8,4 +8,5 @@ type CreateApplicationRequest struct {
 	ApplicationType string `json:"applicationType"`
 	SiteType int `json:"siteType"`
 	RuntimeConfig map[string]interface{} `json:"runtimeConfig"`
+	StoreListing ApplicationStoreListing `json:"storeListing"`
 }

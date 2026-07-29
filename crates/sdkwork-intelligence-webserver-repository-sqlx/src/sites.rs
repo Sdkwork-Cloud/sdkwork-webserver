@@ -1,8 +1,8 @@
 use super::{EngineRow, WebRepository};
 use sdkwork_utils_rust::slugify;
 use sdkwork_webserver_contract::{
-    CreateSiteRequest, ListSitesQuery, SitePage, SiteResponse, UpdateSiteRequest, WebServiceError,
-    WebServiceResult,
+    ApplicationStoreListing, CreateSiteRequest, ListSitesQuery, SitePage, SiteResponse,
+    UpdateSiteRequest, WebServiceError, WebServiceResult,
 };
 use sqlx::Row;
 
@@ -34,6 +34,7 @@ impl WebRepository {
                AND ($6 IS NULL OR (data_scope = 3 AND user_id = $6))";
         let list_sql = "SELECT uuid, name, slug, description, application_type, site_type, status,
                     CAST(runtime_config AS TEXT) AS runtime_config,
+                    CAST(metadata AS TEXT) AS metadata,
                     CAST(created_at AS TEXT) AS created_at,
                     CAST(updated_at AS TEXT) AS updated_at
              FROM web_site
@@ -114,18 +115,24 @@ impl WebRepository {
             .runtime_config
             .clone()
             .unwrap_or_else(|| serde_json::json!({}));
+        let metadata = request
+            .store_listing
+            .as_ref()
+            .map(|store_listing| serde_json::json!({ "storeListing": store_listing }))
+            .unwrap_or_else(|| serde_json::json!({}));
         let org_id = organization_id.unwrap_or(0);
         let data_scope = if owner_id.is_some() { 3 } else { 1 };
         let engine = self.database_engine().await?;
         let runtime_config_expression = json_write_expression(engine, "$12");
-        let now_expression = instant_write_expression(engine, "$13");
+        let metadata_expression = json_write_expression(engine, "$13");
+        let now_expression = instant_write_expression(engine, "$14");
         let insert_sql = format!(
             "INSERT INTO web_site (
                 id, uuid, tenant_id, organization_id, data_scope, user_id, name, slug, description,
                 application_type, site_type, status, runtime_config, metadata, created_at, updated_at, version
              ) VALUES (
                 $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 0,
-                {runtime_config_expression}, '{{}}', {now_expression}, {now_expression}, 0
+                {runtime_config_expression}, {metadata_expression}, {now_expression}, {now_expression}, 0
              )"
         );
 
@@ -142,6 +149,7 @@ impl WebRepository {
             .bind(&request.application_type)
             .bind(request.site_type)
             .bind(runtime_config.to_string())
+            .bind(metadata.to_string())
             .bind(&now)
             .execute(&self.pool)
             .await
@@ -159,6 +167,7 @@ impl WebRepository {
         let row = sqlx::query(
             "SELECT uuid, name, slug, description, application_type, site_type, status,
                     CAST(runtime_config AS TEXT) AS runtime_config,
+                    CAST(metadata AS TEXT) AS metadata,
                     CAST(created_at AS TEXT) AS created_at,
                     CAST(updated_at AS TEXT) AS updated_at
              FROM web_site
@@ -196,10 +205,27 @@ impl WebRepository {
         let now = now_rfc3339();
         let engine = self.database_engine().await?;
         let runtime_config_expression = json_write_expression(engine, "$5");
-        let now_expression = instant_write_expression(engine, "$6");
+        let store_listing_json = request
+            .store_listing
+            .as_ref()
+            .map(serde_json::to_string)
+            .transpose()
+            .map_err(|error| WebServiceError::Internal(format!("serialize store listing: {error}")))?;
+        let metadata_expression = match engine {
+            sdkwork_database_config::DatabaseEngine::Sqlite => {
+                "CASE WHEN $6 IS NULL THEN metadata ELSE json_set(metadata, '$.storeListing', json($6)) END"
+                    .to_string()
+            }
+            sdkwork_database_config::DatabaseEngine::Postgres => {
+                "CASE WHEN $6 IS NULL THEN metadata ELSE jsonb_set(metadata, '{storeListing}', CAST($6 AS JSONB), true) END"
+                    .to_string()
+            }
+        };
+        let now_expression = instant_write_expression(engine, "$7");
         let update_sql = format!(
             "UPDATE web_site
              SET name = $3, description = $4, runtime_config = {runtime_config_expression},
+                 metadata = {metadata_expression},
                  updated_at = {now_expression}, version = version + 1
              WHERE tenant_id = $1 AND uuid = $2 AND deleted_at IS NULL"
         );
@@ -210,6 +236,7 @@ impl WebRepository {
             .bind(name)
             .bind(description)
             .bind(runtime_config.to_string())
+            .bind(store_listing_json)
             .bind(&now)
             .execute(&self.pool)
             .await
@@ -313,7 +340,20 @@ fn map_site_row(row: &EngineRow) -> Result<SiteResponse, sqlx::Error> {
         site_type: row.try_get("site_type")?,
         status: row.try_get("status")?,
         runtime_config: json_from_row(row, "runtime_config")?,
+        store_listing: store_listing_from_row(row)?,
         created_at: instant_from_row(row, "created_at")?,
         updated_at: instant_from_row(row, "updated_at")?,
     })
+}
+
+fn store_listing_from_row(row: &EngineRow) -> Result<Option<ApplicationStoreListing>, sqlx::Error> {
+    let Some(metadata) = json_from_row(row, "metadata")? else {
+        return Ok(None);
+    };
+    metadata
+        .get("storeListing")
+        .cloned()
+        .map(serde_json::from_value)
+        .transpose()
+        .map_err(|error| sqlx::Error::Decode(Box::new(error)))
 }

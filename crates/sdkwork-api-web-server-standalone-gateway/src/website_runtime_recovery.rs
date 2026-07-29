@@ -1,7 +1,7 @@
 use std::{
     fs,
     path::{Path, PathBuf},
-    sync::Arc,
+    sync::{Arc, Mutex},
 };
 
 use sdkwork_webserver_core::website_runtime::{
@@ -9,7 +9,7 @@ use sdkwork_webserver_core::website_runtime::{
     WebsiteRuntimeSetError, MAX_WEBSITE_RUNTIME_SET_BYTES,
 };
 use thiserror::Error;
-use tokio::{fs as tokio_fs, io::AsyncWriteExt, sync::Mutex};
+use tokio::{fs as tokio_fs, io::AsyncWriteExt, sync::Semaphore};
 
 const SLOT_A_FILE: &str = "website-runtime-set.a.json";
 const SLOT_B_FILE: &str = "website-runtime-set.b.json";
@@ -54,6 +54,7 @@ pub(crate) struct WebsiteRuntimeSetRecoveryOpen {
 
 pub(crate) struct WebsiteRuntimeSetRecoveryStore {
     directory: PathBuf,
+    persistence: Semaphore,
     state: Mutex<RecoveryState>,
 }
 
@@ -137,6 +138,7 @@ impl WebsiteRuntimeSetRecoveryStore {
         Ok(WebsiteRuntimeSetRecoveryOpen {
             store: Arc::new(Self {
                 directory,
+                persistence: Semaphore::new(1),
                 state: Mutex::new(state),
             }),
             recovered,
@@ -151,31 +153,42 @@ impl WebsiteRuntimeSetRecoveryStore {
         if candidate.bytes.is_empty() || candidate.bytes.len() > MAX_WEBSITE_RUNTIME_SET_BYTES {
             return Err(WebsiteRuntimeSetRecoveryError::Io);
         }
-        let mut state = self.state.lock().await;
-        if let (Some(node_uuid), Some(environment)) =
-            (state.node_uuid.as_deref(), state.environment)
-        {
-            if node_uuid != candidate.runtime_set.node_uuid()
-                || environment != candidate.runtime_set.environment()
+        let _persistence = self
+            .persistence
+            .acquire()
+            .await
+            .map_err(|_| WebsiteRuntimeSetRecoveryError::Io)?;
+        let target_slot = {
+            let state = self
+                .state
+                .lock()
+                .map_err(|_| WebsiteRuntimeSetRecoveryError::Io)?;
+            if let (Some(node_uuid), Some(environment)) =
+                (state.node_uuid.as_deref(), state.environment)
             {
-                return Err(WebsiteRuntimeSetRecoveryError::ScopeMismatch);
-            }
-        }
-        if let Some(generation) = state.generation {
-            if candidate.runtime_set.generation() < generation {
-                return Err(WebsiteRuntimeSetRecoveryError::Stale);
-            }
-            if candidate.runtime_set.generation() == generation {
-                if state.snapshot_sha256.as_deref() == Some(candidate.runtime_set.snapshot_sha256())
+                if node_uuid != candidate.runtime_set.node_uuid()
+                    || environment != candidate.runtime_set.environment()
                 {
-                    return Ok(false);
+                    return Err(WebsiteRuntimeSetRecoveryError::ScopeMismatch);
                 }
-                return Err(WebsiteRuntimeSetRecoveryError::Conflict);
             }
-        }
+            if let Some(generation) = state.generation {
+                if candidate.runtime_set.generation() < generation {
+                    return Err(WebsiteRuntimeSetRecoveryError::Stale);
+                }
+                if candidate.runtime_set.generation() == generation {
+                    if state.snapshot_sha256.as_deref()
+                        == Some(candidate.runtime_set.snapshot_sha256())
+                    {
+                        return Ok(false);
+                    }
+                    return Err(WebsiteRuntimeSetRecoveryError::Conflict);
+                }
+            }
+            RecoverySlot::inactive_after(state.active_slot)
+        };
 
         validate_directory_async(&self.directory).await?;
-        let target_slot = RecoverySlot::inactive_after(state.active_slot);
         let target = self.directory.join(target_slot.filename());
         validate_slot_target(&target).await?;
         let mut file = tokio_fs::OpenOptions::new()
@@ -193,6 +206,10 @@ impl WebsiteRuntimeSetRecoveryStore {
             .map_err(|_| WebsiteRuntimeSetRecoveryError::Io)?;
         sync_directory(&self.directory).await?;
 
+        let mut state = self
+            .state
+            .lock()
+            .map_err(|_| WebsiteRuntimeSetRecoveryError::Io)?;
         state.active_slot = Some(target_slot);
         state.generation = Some(candidate.runtime_set.generation());
         state.snapshot_sha256 = Some(candidate.runtime_set.snapshot_sha256().to_owned());

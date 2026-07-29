@@ -33,7 +33,7 @@ export class ApplicationDeploymentApplicationsDeploymentsApi {
       { name: 'page_size', value: params?.pageSize, style: 'form', explode: true, allowReserved: false },
       { name: 'status', value: params?.status, style: 'form', explode: true, allowReserved: false },
     ]);
-    return this.client.request<{ items: ApplicationDeploymentResponse[]; pageInfo: PageInfo; }>(appendQueryString(backendApiPath(`/applications/${serializePathParameter(applicationId, { name: 'applicationId', style: 'simple', explode: false })}/deployments`), query), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any });
+    return this.client.request<{ items: ApplicationDeploymentResponse[]; pageInfo: PageInfo; }>(appendQueryString(backendApiPath(`/applications/${serializePathParameter(applicationId, { name: 'applicationId', style: 'simple', explode: false })}/deployments`), query), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any, sdkworkUnwrapKind: 'page' });
   }
 
 /** Deploy an application */
@@ -44,7 +44,7 @@ export class ApplicationDeploymentApplicationsDeploymentsApi {
       },
       {}
     );
-    return this.client.request<ApplicationDeploymentResponse>(backendApiPath(`/applications/${serializePathParameter(applicationId, { name: 'applicationId', style: 'simple', explode: false })}/deployments`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, body, headers: requestHeaders, contentType: 'application/json' });
+    return this.client.request<ApplicationDeploymentResponse>(backendApiPath(`/applications/${serializePathParameter(applicationId, { name: 'applicationId', style: 'simple', explode: false })}/deployments`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, body, headers: requestHeaders, contentType: 'application/json', sdkworkUnwrapKind: 'item' });
   }
 
 /** Restore a managed application from an immutable successful version */
@@ -55,7 +55,7 @@ export class ApplicationDeploymentApplicationsDeploymentsApi {
       },
       {}
     );
-    return this.client.request<ApplicationDeploymentResponse>(backendApiPath(`/applications/${serializePathParameter(applicationId, { name: 'applicationId', style: 'simple', explode: false })}/deployments/${serializePathParameter(deploymentId, { name: 'deploymentId', style: 'simple', explode: false })}/rollback`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, headers: requestHeaders });
+    return this.client.request<ApplicationDeploymentResponse>(backendApiPath(`/applications/${serializePathParameter(applicationId, { name: 'applicationId', style: 'simple', explode: false })}/deployments/${serializePathParameter(deploymentId, { name: 'deploymentId', style: 'simple', explode: false })}/rollback`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, headers: requestHeaders, sdkworkUnwrapKind: 'item' });
   }
 }
 

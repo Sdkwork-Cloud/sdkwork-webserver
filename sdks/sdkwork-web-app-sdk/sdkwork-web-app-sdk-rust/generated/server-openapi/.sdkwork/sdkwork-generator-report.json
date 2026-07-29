@@ -10,37 +10,126 @@
   },
   "status": "ok",
   "mode": "apply",
-  "hasChanges": false,
+  "hasChanges": true,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "df5e24bc366e040241a062845dd79b908e421c06ebb26602b5d9b26cbcd15f24",
+  "changeFingerprint": "0cf12696961164ad767999adc815319af86efb6a5c8b64a87886724d4420b0ef",
   "changeImpact": {
     "schemaVersion": 1,
-    "areas": [],
-    "details": [],
-    "requiresVerification": false,
-    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
+    "areas": [
+      "models"
+    ],
+    "details": [
+      {
+        "area": "models",
+        "paths": [
+          "src/models/application_store_listing.rs",
+          "src/models/create_site_request.rs",
+          "src/models/media_checksum.rs",
+          "src/models/media_resource.rs",
+          "src/models/mod.rs",
+          "src/models/site_response.rs",
+          "src/models/update_site_request.rs"
+        ]
+      }
+    ],
+    "requiresVerification": true,
+    "summary": "Detected impact areas: models. Verification is required."
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "low",
-    "nextAction": "skip",
+    "riskLevel": "medium",
+    "nextAction": "verify",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
-    "summary": "No actionable changes were detected. No apply or verification step is required.",
+    "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
-      "no-actionable-changes"
+      "verification-required"
     ]
   },
   "executionHandoff": {
     "schemaVersion": 1,
-    "summary": "No further commands are required.",
-    "steps": []
+    "summary": "Run the required verification commands now.",
+    "steps": [
+      {
+        "id": "verify-check",
+        "title": "Unified package check",
+        "required": true,
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
+        "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-rust\\generated\\server-openapi",
+        "command": "node",
+        "args": [
+          "./bin/publish-core.mjs",
+          "--language",
+          "rust",
+          "--project-dir",
+          ".",
+          "--action",
+          "check"
+        ],
+        "displayCommand": "node ./bin/publish-core.mjs --language rust --project-dir . --action check"
+      },
+      {
+        "id": "verify-build",
+        "title": "Unified package build",
+        "required": true,
+        "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: models.",
+        "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-rust\\generated\\server-openapi",
+        "command": "node",
+        "args": [
+          "./bin/publish-core.mjs",
+          "--language",
+          "rust",
+          "--project-dir",
+          ".",
+          "--action",
+          "build"
+        ],
+        "displayCommand": "node ./bin/publish-core.mjs --language rust --project-dir . --action build"
+      }
+    ]
   },
   "verificationPlan": {
-    "shouldRun": false,
-    "runPhase": "skip",
-    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
-    "steps": []
+    "shouldRun": true,
+    "runPhase": "now",
+    "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "steps": [
+      {
+        "id": "check",
+        "title": "Unified package check",
+        "required": true,
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
+        "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-rust\\generated\\server-openapi",
+        "command": "node",
+        "args": [
+          "./bin/publish-core.mjs",
+          "--language",
+          "rust",
+          "--project-dir",
+          ".",
+          "--action",
+          "check"
+        ],
+        "displayCommand": "node ./bin/publish-core.mjs --language rust --project-dir . --action check"
+      },
+      {
+        "id": "build",
+        "title": "Unified package build",
+        "required": true,
+        "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: models.",
+        "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-rust\\generated\\server-openapi",
+        "command": "node",
+        "args": [
+          "./bin/publish-core.mjs",
+          "--language",
+          "rust",
+          "--project-dir",
+          ".",
+          "--action",
+          "build"
+        ],
+        "displayCommand": "node ./bin/publish-core.mjs --language rust --project-dir . --action build"
+      }
+    ]
   },
   "sdk": {
     "name": "sdkwork-web-app-sdk",
@@ -56,24 +145,33 @@
     "localVersions": []
   },
   "stats": {
-    "totalFiles": 74,
-    "models": 50,
+    "totalFiles": 77,
+    "models": 53,
     "apis": 6,
-    "types": 52
+    "types": 55
   },
   "warnings": [],
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 0,
+    "writtenFiles": 7,
     "skippedScaffoldFiles": 1,
-    "skippedUnchangedGeneratedFiles": 73,
+    "skippedUnchangedGeneratedFiles": 69,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "df5e24bc366e040241a062845dd79b908e421c06ebb26602b5d9b26cbcd15f24",
+    "changeFingerprint": "0cf12696961164ad767999adc815319af86efb6a5c8b64a87886724d4420b0ef",
     "changes": {
-      "createdGeneratedFiles": [],
-      "updatedGeneratedFiles": [],
+      "createdGeneratedFiles": [
+        "src/models/application_store_listing.rs",
+        "src/models/media_checksum.rs",
+        "src/models/media_resource.rs"
+      ],
+      "updatedGeneratedFiles": [
+        "src/models/create_site_request.rs",
+        "src/models/mod.rs",
+        "src/models/site_response.rs",
+        "src/models/update_site_request.rs"
+      ],
       "unchangedGeneratedFiles": [
         "bin/publish-core.mjs",
         "bin/publish.ps1",
@@ -106,7 +204,6 @@
         "src/models/create_domain_request.rs",
         "src/models/create_env_variable_request.rs",
         "src/models/create_health_check_request.rs",
-        "src/models/create_site_request.rs",
         "src/models/deployment_page.rs",
         "src/models/deployment_response.rs",
         "src/models/domain_page.rs",
@@ -117,7 +214,6 @@
         "src/models/field_error.rs",
         "src/models/health_check_page.rs",
         "src/models/health_check_response.rs",
-        "src/models/mod.rs",
         "src/models/page_info.rs",
         "src/models/problem_detail.rs",
         "src/models/sdk_work_api_response.rs",
@@ -128,7 +224,6 @@
         "src/models/sdk_work_resource_data.rs",
         "src/models/sdk_work_resource_response.rs",
         "src/models/site_page.rs",
-        "src/models/site_response.rs",
         "src/models/sites_activate_response.rs",
         "src/models/sites_create_response201.rs",
         "src/models/sites_deployments_create_response201.rs",
@@ -146,8 +241,7 @@
         "src/models/sites_list_response.rs",
         "src/models/sites_pause_response.rs",
         "src/models/sites_retrieve_response.rs",
-        "src/models/sites_update_response.rs",
-        "src/models/update_site_request.rs"
+        "src/models/sites_update_response.rs"
       ],
       "deletedGeneratedFiles": [],
       "scaffoldedFiles": [],
@@ -158,26 +252,78 @@
     },
     "impact": {
       "schemaVersion": 1,
-      "areas": [],
-      "details": [],
-      "requiresVerification": false,
-      "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
+      "areas": [
+        "models"
+      ],
+      "details": [
+        {
+          "area": "models",
+          "paths": [
+            "src/models/application_store_listing.rs",
+            "src/models/create_site_request.rs",
+            "src/models/media_checksum.rs",
+            "src/models/media_resource.rs",
+            "src/models/mod.rs",
+            "src/models/site_response.rs",
+            "src/models/update_site_request.rs"
+          ]
+        }
+      ],
+      "requiresVerification": true,
+      "summary": "Detected impact areas: models. Verification is required."
     },
     "verificationPlan": {
-      "shouldRun": false,
-      "runPhase": "skip",
-      "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
-      "steps": []
+      "shouldRun": true,
+      "runPhase": "now",
+      "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
+      "steps": [
+        {
+          "id": "check",
+          "title": "Unified package check",
+          "required": true,
+          "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
+          "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-rust\\generated\\server-openapi",
+          "command": "node",
+          "args": [
+            "./bin/publish-core.mjs",
+            "--language",
+            "rust",
+            "--project-dir",
+            ".",
+            "--action",
+            "check"
+          ],
+          "displayCommand": "node ./bin/publish-core.mjs --language rust --project-dir . --action check"
+        },
+        {
+          "id": "build",
+          "title": "Unified package build",
+          "required": true,
+          "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: models.",
+          "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-rust\\generated\\server-openapi",
+          "command": "node",
+          "args": [
+            "./bin/publish-core.mjs",
+            "--language",
+            "rust",
+            "--project-dir",
+            ".",
+            "--action",
+            "build"
+          ],
+          "displayCommand": "node ./bin/publish-core.mjs --language rust --project-dir . --action build"
+        }
+      ]
     },
     "executionDecision": {
       "schemaVersion": 1,
-      "riskLevel": "low",
-      "nextAction": "skip",
+      "riskLevel": "medium",
+      "nextAction": "verify",
       "requiresManualReview": false,
       "applyRequiresExpectedFingerprint": false,
-      "summary": "No actionable changes were detected. No apply or verification step is required.",
+      "summary": "Changes have been applied. Run the required verification plan now.",
       "reasons": [
-        "no-actionable-changes"
+        "verification-required"
       ]
     },
     "backedUpFiles": [],

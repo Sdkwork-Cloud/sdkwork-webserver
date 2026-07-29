@@ -154,6 +154,14 @@ The request path does not call management services or repositories. Management r
   canonical certificate lifecycle and fleet convergence, Nginx, server inventory, diagnostics,
   and audit.
   UI packages never construct SDK clients or assemble authenticated HTTP requests.
+- Application store-listing media is uploaded by the bootstrap-injected Drive App SDK. The Web
+  service persists the canonical Drive-backed `MediaResource` snapshots under
+  `web_site.metadata.storeListing`, projects only the typed `storeListing` API field, and atomically
+  replaces that metadata member without exposing or overwriting unrelated system metadata.
+- Application creation is a recoverable orchestration: validate source locally, create the draft,
+  upload and attach bounded store media, upload/extract the source archive, then create the initial
+  deployment command. Deployment and activation enforce the icon invariant server-side, and
+  activation also checks durable successful-deployment evidence.
 
 ## 6. Security, Privacy, And Resource Boundaries
 

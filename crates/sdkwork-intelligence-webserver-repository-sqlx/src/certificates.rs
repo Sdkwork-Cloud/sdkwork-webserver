@@ -128,11 +128,15 @@ impl WebRepository {
     pub(super) async fn list_certificates_due_for_renewal_repo(
         &self,
         renew_before_days: u32,
+        claim_expired_before: &str,
         limit: i32,
     ) -> WebServiceResult<Vec<sdkwork_webserver_contract::CertificateRenewalCandidate>> {
         use sdkwork_webserver_contract::CertificateRenewalCandidate;
 
-        let rows = sqlx::query(
+        let limit = limit.clamp(1, 100);
+        let engine = self.database_engine().await?;
+        let claim_expired_before_expression = instant_write_expression(engine, "$3");
+        let select_sql = format!(
             "SELECT c.tenant_id, c.uuid, c.cert_type, c.cert_name, c.auto_renew,
                     CAST(c.not_after AS TEXT) AS not_after,
                     COALESCE(d.hostname, c.subject, c.cert_name) AS hostname
@@ -140,19 +144,24 @@ impl WebRepository {
              LEFT JOIN web_domain d ON d.id = c.domain_id
              WHERE c.auto_renew = $1
                AND c.status = 1
-               AND c.renewal_status IN (0, 3)
+               AND (
+                    c.renewal_status IN (0, 3)
+                    OR (c.renewal_status = 1 AND c.updated_at < {claim_expired_before_expression})
+               )
                AND c.cert_type IN (1, 3)
                AND c.not_after IS NOT NULL
              ORDER BY c.not_after ASC
-             LIMIT $2",
-        )
+             LIMIT $2"
+        );
+        let rows = sqlx::query(&select_sql)
         .bind(true)
         .bind(limit)
+        .bind(claim_expired_before)
         .fetch_all(&self.pool)
         .await
         .map_err(|error| store_error("list web_certificate renewal candidates", error))?;
 
-        let mut items = Vec::new();
+        let mut items = Vec::with_capacity(rows.len());
         for row in &rows {
             let not_after: String = row.try_get("not_after").map_err(|error| {
                 WebServiceError::Internal(format!("renewal candidate not_after: {error}"))
@@ -195,45 +204,62 @@ impl WebRepository {
         Ok(items)
     }
 
-    pub(super) async fn mark_certificate_renewing_repo(
+    pub(super) async fn claim_certificate_renewal_repo(
         &self,
         tenant_id: i64,
         certificate_uuid: &str,
-    ) -> WebServiceResult<bool> {
+        claim_expired_before: &str,
+    ) -> WebServiceResult<Option<i64>> {
         let now = now_rfc3339();
         let engine = self.database_engine().await?;
-        let now_expression = instant_write_expression(engine, "$3");
+        let claim_expired_before_expression = instant_write_expression(engine, "$3");
+        let now_expression = instant_write_expression(engine, "$4");
         let update_sql = format!(
             "UPDATE web_certificate
              SET renewal_status = 1, updated_at = {now_expression}, version = version + 1
-             WHERE tenant_id = $1 AND uuid = $2 AND status = 1 AND renewal_status IN (0, 3)"
+             WHERE tenant_id = $1 AND uuid = $2 AND status = 1
+               AND (
+                    renewal_status IN (0, 3)
+                    OR (renewal_status = 1 AND updated_at < {claim_expired_before_expression})
+               )
+             RETURNING version"
         );
-        let result = sqlx::query(&update_sql)
+        let row = sqlx::query(&update_sql)
             .bind(tenant_id)
             .bind(certificate_uuid)
-            .bind(&now)
-            .execute(&self.pool)
+            .bind(claim_expired_before)
+            .bind(now)
+            .fetch_optional(&self.pool)
             .await
-            .map_err(|error| store_error("mark web_certificate renewing", error))?;
-        Ok(result.rows_affected() > 0)
+            .map_err(|error| store_error("claim web_certificate renewal", error))?;
+        row.map(|row| {
+            row.try_get("version").map_err(|error| {
+                WebServiceError::Internal(format!("certificate renewal claim version: {error}"))
+            })
+        })
+        .transpose()
     }
 
     pub(super) async fn fail_certificate_renewal_repo(
         &self,
         tenant_id: i64,
         certificate_uuid: &str,
+        expected_renewal_version: i64,
         reason: &str,
     ) -> WebServiceResult<()> {
         let row = sqlx::query(
             "SELECT CAST(metadata AS TEXT) AS metadata
-             FROM web_certificate WHERE tenant_id = $1 AND uuid = $2",
+             FROM web_certificate
+             WHERE tenant_id = $1 AND uuid = $2 AND status = 1
+               AND renewal_status = 1 AND version = $3",
         )
         .bind(tenant_id)
         .bind(certificate_uuid)
+        .bind(expected_renewal_version)
         .fetch_optional(&self.pool)
         .await
         .map_err(|error| store_error("load web_certificate metadata for renewal failure", error))?
-        .ok_or_else(|| WebServiceError::not_found("certificate not found"))?;
+        .ok_or_else(|| WebServiceError::conflict("certificate renewal claim is no longer current"))?;
 
         let mut existing = json_from_row(&row, "metadata")
             .map_err(|error| {
@@ -249,22 +275,29 @@ impl WebRepository {
 
         let now = now_rfc3339();
         let engine = self.database_engine().await?;
-        let metadata_expression = json_write_expression(engine, "$3");
-        let now_expression = instant_write_expression(engine, "$4");
+        let metadata_expression = json_write_expression(engine, "$4");
+        let now_expression = instant_write_expression(engine, "$5");
         let update_sql = format!(
             "UPDATE web_certificate
              SET renewal_status = 3, metadata = {metadata_expression},
                  updated_at = {now_expression}, version = version + 1
-             WHERE tenant_id = $1 AND uuid = $2"
+             WHERE tenant_id = $1 AND uuid = $2 AND status = 1
+               AND renewal_status = 1 AND version = $3"
         );
-        sqlx::query(&update_sql)
+        let result = sqlx::query(&update_sql)
             .bind(tenant_id)
             .bind(certificate_uuid)
+            .bind(expected_renewal_version)
             .bind(existing.to_string())
             .bind(now)
             .execute(&self.pool)
             .await
             .map_err(|error| store_error("fail web_certificate renewal", error))?;
+        if result.rows_affected() == 0 {
+            return Err(WebServiceError::conflict(
+                "certificate renewal claim is no longer current",
+            ));
+        }
         Ok(())
     }
 
@@ -327,6 +360,7 @@ impl WebRepository {
             "UPDATE web_certificate
              SET auto_renew = $3, updated_at = {now_expression}, version = version + 1
              WHERE tenant_id = $1 AND uuid = $2 AND status = 1
+               AND renewal_status <> 1
                AND ($3 = FALSE OR cert_type IN (1, 3))"
         );
         let result = sqlx::query(&update_sql)
@@ -338,6 +372,32 @@ impl WebRepository {
             .await
             .map_err(|error| store_error("update web_certificate auto renewal", error))?;
         if result.rows_affected() == 0 {
+            let state = sqlx::query(
+                "SELECT status, renewal_status
+                 FROM web_certificate WHERE tenant_id = $1 AND uuid = $2",
+            )
+            .bind(tenant_id)
+            .bind(certificate_uuid)
+            .fetch_optional(&self.pool)
+            .await
+            .map_err(|error| store_error("load web_certificate auto renewal state", error))?;
+            if let Some(row) = state {
+                let status: i32 = row.try_get("status").map_err(|error| {
+                    WebServiceError::Internal(format!(
+                        "certificate auto renewal status: {error}"
+                    ))
+                })?;
+                let renewal_status: i32 = row.try_get("renewal_status").map_err(|error| {
+                    WebServiceError::Internal(format!(
+                        "certificate auto renewal operation status: {error}"
+                    ))
+                })?;
+                if status == 1 && renewal_status == 1 {
+                    return Err(WebServiceError::conflict(
+                        "certificate renewal is in progress",
+                    ));
+                }
+            }
             return Err(WebServiceError::validation(
                 "active certificate not found or certificate type is not renewable",
             ));
@@ -351,6 +411,7 @@ impl WebRepository {
         tenant_id: i64,
         certificate_uuid: &str,
         update: &CertificateIssueUpdate,
+        expected_renewal_version: Option<i64>,
     ) -> WebServiceResult<CertificateResponse> {
         let metadata = json!({
             "encryptedPrivateKey": update.encrypted_private_key,
@@ -364,6 +425,9 @@ impl WebRepository {
         let not_after_expression = instant_write_expression(engine, "$13");
         let metadata_expression = json_write_expression(engine, "$15");
         let now_expression = instant_write_expression(engine, "$16");
+        let renewal_fence = expected_renewal_version
+            .map(|_| " AND renewal_status = 1 AND version = $17")
+            .unwrap_or_default();
         let update_sql = format!(
             "UPDATE web_certificate SET
                 cert_name = $3,
@@ -383,10 +447,10 @@ impl WebRepository {
                 metadata = {metadata_expression},
                 updated_at = {now_expression},
                 version = version + 1
-             WHERE tenant_id = $1 AND uuid = $2"
+             WHERE tenant_id = $1 AND uuid = $2{renewal_fence}"
         );
 
-        let result = sqlx::query(&update_sql)
+        let mut query = sqlx::query(&update_sql)
             .bind(tenant_id)
             .bind(certificate_uuid)
             .bind(&update.cert_name)
@@ -402,12 +466,21 @@ impl WebRepository {
             .bind(&update.not_after)
             .bind(update.auto_renew)
             .bind(metadata.to_string())
-            .bind(&now)
+            .bind(&now);
+        if let Some(expected_renewal_version) = expected_renewal_version {
+            query = query.bind(expected_renewal_version);
+        }
+        let result = query
             .execute(&self.pool)
             .await
             .map_err(|error| store_error("finalize web_certificate", error))?;
 
         if result.rows_affected() == 0 {
+            if expected_renewal_version.is_some() {
+                return Err(WebServiceError::conflict(
+                    "certificate renewal claim is no longer current",
+                ));
+            }
             return Err(WebServiceError::not_found("certificate not found"));
         }
 

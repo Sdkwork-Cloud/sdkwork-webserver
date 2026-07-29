@@ -6,6 +6,7 @@ public class UpdateApplicationRequest {
     private String name;
     private String description;
     private Map<String, Object> runtimeConfig;
+    private ApplicationStoreListing storeListing;
 
     public String getName() {
         return this.name;
@@ -29,5 +30,13 @@ public class UpdateApplicationRequest {
 
     public void setRuntimeConfig(Map<String, Object> runtimeConfig) {
         this.runtimeConfig = runtimeConfig;
+    }
+
+    public ApplicationStoreListing getStoreListing() {
+        return this.storeListing;
+    }
+
+    public void setStoreListing(ApplicationStoreListing storeListing) {
+        this.storeListing = storeListing;
     }
 }

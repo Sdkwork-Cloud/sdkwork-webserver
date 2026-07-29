@@ -49,6 +49,87 @@ public struct UpdateNginxConfigRequest: Codable {
     }
 }
 
+public struct MediaChecksum: Codable {
+    public let algorithm: String?
+    public let value: String?
+
+
+    public init(algorithm: String? = nil, value: String? = nil) {
+        self.algorithm = algorithm
+        self.value = value
+    }
+}
+
+public struct MediaResource: Codable {
+    public let id: String?
+    public let kind: String?
+    public let source: String?
+    public let url: String?
+    public let publicUrl: String?
+    public let uri: String?
+    public let objectBlobId: String?
+    public let fileName: String?
+    public let mimeType: String?
+    public let sizeBytes: String?
+    public let checksum: MediaChecksum?
+    public let width: Int?
+    public let height: Int?
+    public let durationSeconds: Double?
+    public let altText: String?
+    public let title: String?
+    public let metadata: [String: Any]?
+
+
+    public init(id: String? = nil, kind: String? = nil, source: String? = nil, url: String? = nil, publicUrl: String? = nil, uri: String? = nil, objectBlobId: String? = nil, fileName: String? = nil, mimeType: String? = nil, sizeBytes: String? = nil, checksum: MediaChecksum? = nil, width: Int? = nil, height: Int? = nil, durationSeconds: Double? = nil, altText: String? = nil, title: String? = nil, metadata: [String: Any]? = nil) {
+        self.id = id
+        self.kind = kind
+        self.source = source
+        self.url = url
+        self.publicUrl = publicUrl
+        self.uri = uri
+        self.objectBlobId = objectBlobId
+        self.fileName = fileName
+        self.mimeType = mimeType
+        self.sizeBytes = sizeBytes
+        self.checksum = checksum
+        self.width = width
+        self.height = height
+        self.durationSeconds = durationSeconds
+        self.altText = altText
+        self.title = title
+        self.metadata = metadata
+    }
+}
+
+public struct ApplicationStoreListing: Codable {
+    public let icon: MediaResource?
+    public let cover: MediaResource?
+    public let previews: [MediaResource]?
+    public let shortDescription: String?
+    public let fullDescription: String?
+    public let releaseNotes: String?
+    public let category: String?
+    public let keywords: [String]?
+    public let supportUrl: String?
+    public let privacyPolicyUrl: String?
+    public let officialWebsiteUrl: String?
+
+
+    public init(icon: MediaResource? = nil, cover: MediaResource? = nil, previews: [MediaResource]? = nil, shortDescription: String? = nil, fullDescription: String? = nil, releaseNotes: String? = nil, category: String? = nil, keywords: [String]? = nil, supportUrl: String? = nil, privacyPolicyUrl: String? = nil, officialWebsiteUrl: String? = nil) {
+        self.icon = icon
+        self.cover = cover
+        self.previews = previews
+        self.shortDescription = shortDescription
+        self.fullDescription = fullDescription
+        self.releaseNotes = releaseNotes
+        self.category = category
+        self.keywords = keywords
+        self.supportUrl = supportUrl
+        self.privacyPolicyUrl = privacyPolicyUrl
+        self.officialWebsiteUrl = officialWebsiteUrl
+    }
+}
+
 public struct CreateApplicationRequest: Codable {
     public let name: String?
     public let slug: String?
@@ -56,15 +137,17 @@ public struct CreateApplicationRequest: Codable {
     public let applicationType: String?
     public let siteType: Int?
     public let runtimeConfig: [String: Any]?
+    public let storeListing: ApplicationStoreListing?
 
 
-    public init(name: String? = nil, slug: String? = nil, description: String? = nil, applicationType: String? = nil, siteType: Int? = nil, runtimeConfig: [String: Any]? = nil) {
+    public init(name: String? = nil, slug: String? = nil, description: String? = nil, applicationType: String? = nil, siteType: Int? = nil, runtimeConfig: [String: Any]? = nil, storeListing: ApplicationStoreListing? = nil) {
         self.name = name
         self.slug = slug
         self.description = description
         self.applicationType = applicationType
         self.siteType = siteType
         self.runtimeConfig = runtimeConfig
+        self.storeListing = storeListing
     }
 }
 
@@ -72,12 +155,14 @@ public struct UpdateApplicationRequest: Codable {
     public let name: String?
     public let description: String?
     public let runtimeConfig: [String: Any]?
+    public let storeListing: ApplicationStoreListing?
 
 
-    public init(name: String? = nil, description: String? = nil, runtimeConfig: [String: Any]? = nil) {
+    public init(name: String? = nil, description: String? = nil, runtimeConfig: [String: Any]? = nil, storeListing: ApplicationStoreListing? = nil) {
         self.name = name
         self.description = description
         self.runtimeConfig = runtimeConfig
+        self.storeListing = storeListing
     }
 }
 
@@ -90,11 +175,12 @@ public struct ApplicationResponse: Codable {
     public let siteType: Int?
     public let status: Int?
     public let runtimeConfig: [String: Any]?
+    public let storeListing: ApplicationStoreListing?
     public let createdAt: String?
     public let updatedAt: String?
 
 
-    public init(id: String? = nil, name: String? = nil, slug: String? = nil, description: String? = nil, applicationType: String? = nil, siteType: Int? = nil, status: Int? = nil, runtimeConfig: [String: Any]? = nil, createdAt: String? = nil, updatedAt: String? = nil) {
+    public init(id: String? = nil, name: String? = nil, slug: String? = nil, description: String? = nil, applicationType: String? = nil, siteType: Int? = nil, status: Int? = nil, runtimeConfig: [String: Any]? = nil, storeListing: ApplicationStoreListing? = nil, createdAt: String? = nil, updatedAt: String? = nil) {
         self.id = id
         self.name = name
         self.slug = slug
@@ -103,6 +189,7 @@ public struct ApplicationResponse: Codable {
         self.siteType = siteType
         self.status = status
         self.runtimeConfig = runtimeConfig
+        self.storeListing = storeListing
         self.createdAt = createdAt
         self.updatedAt = updatedAt
     }

@@ -88,7 +88,11 @@
     },
     {
       "path": "sdkwork_web_app_sdk/models/__init__.py",
-      "sha256": "a128853550db2e9649e23f73f65a8c7341cc347eb2ac625373d68da1c2ff9afa"
+      "sha256": "79942f9cc2434b234bc11bb8b75a8bb784cdafacdb1a3dc12c538626379f2acd"
+    },
+    {
+      "path": "sdkwork_web_app_sdk/models/application_store_listing.py",
+      "sha256": "0d87a09cc155c1348867aa4e0977205d3f8e6183f29b9cdc9697579d2fb31ec7"
     },
     {
       "path": "sdkwork_web_app_sdk/models/certificate_page.py",
@@ -128,7 +132,7 @@
     },
     {
       "path": "sdkwork_web_app_sdk/models/create_site_request.py",
-      "sha256": "3720c325400ff7e313908bed1d8a5aa721b922a5a342500e2f48fbd3b661b64c"
+      "sha256": "0b1ec610d1b98adb1bbfa620d7d37a72e0344423543d578c3f2423626a2640b3"
     },
     {
       "path": "sdkwork_web_app_sdk/models/deployment_page.py",
@@ -169,6 +173,14 @@
     {
       "path": "sdkwork_web_app_sdk/models/health_check_response.py",
       "sha256": "95887234abd865239f6be0f4a4b5ff06749731be0e023dacfc07fa1d9dc0d816"
+    },
+    {
+      "path": "sdkwork_web_app_sdk/models/media_checksum.py",
+      "sha256": "10b8bbd44c1cdbb51985fea5cf1f430ff5784fda51b20a69e392a852c300ab98"
+    },
+    {
+      "path": "sdkwork_web_app_sdk/models/media_resource.py",
+      "sha256": "2e2915a117b2455fd9a94e1bcfe95ecf0e08dfb61570dad68e841da0d42d743d"
     },
     {
       "path": "sdkwork_web_app_sdk/models/page_info.py",
@@ -212,7 +224,7 @@
     },
     {
       "path": "sdkwork_web_app_sdk/models/site_response.py",
-      "sha256": "219aecf0ab7ff4a9aa5ac87440df371b9baf3e433bc75ebbdd628331ac033bca"
+      "sha256": "9b9e07b3749ceb80c9619ce737f77c60c5dc2cbfa3f6963d607fab1fc1ad4e9c"
     },
     {
       "path": "sdkwork_web_app_sdk/models/sites_activate_response.py",
@@ -288,7 +300,7 @@
     },
     {
       "path": "sdkwork_web_app_sdk/models/update_site_request.py",
-      "sha256": "b95cc5885993010ecd575efc5df2884d4599f431fa3069d23b7259a4de8399c0"
+      "sha256": "d118ee6af09c3a7db0e565e083714ad2752254b04c5a1994e56eb4a488d05eac"
     },
     {
       "path": "sdkwork-sdk.json",

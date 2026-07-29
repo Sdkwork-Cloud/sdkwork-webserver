@@ -2,6 +2,109 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct MediaChecksum {
+    pub algorithm: String,
+    pub value: String,
+}
+
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct MediaResource {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    pub kind: String,
+    pub source: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub url: Option<String>,
+    #[serde(rename = "publicUrl", default, skip_serializing_if = "Option::is_none")]
+    pub public_url: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub uri: Option<String>,
+    #[serde(
+        rename = "objectBlobId",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub object_blob_id: Option<String>,
+    #[serde(rename = "fileName", default, skip_serializing_if = "Option::is_none")]
+    pub file_name: Option<String>,
+    #[serde(rename = "mimeType", default, skip_serializing_if = "Option::is_none")]
+    pub mime_type: Option<String>,
+    #[serde(rename = "sizeBytes", default, skip_serializing_if = "Option::is_none")]
+    pub size_bytes: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub checksum: Option<MediaChecksum>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub width: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub height: Option<i32>,
+    #[serde(
+        rename = "durationSeconds",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub duration_seconds: Option<f64>,
+    #[serde(rename = "altText", default, skip_serializing_if = "Option::is_none")]
+    pub alt_text: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub title: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub metadata: Option<Value>,
+}
+
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct ApplicationStoreListing {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub icon: Option<MediaResource>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cover: Option<MediaResource>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub previews: Vec<MediaResource>,
+    #[serde(
+        rename = "shortDescription",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub short_description: Option<String>,
+    #[serde(
+        rename = "fullDescription",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub full_description: Option<String>,
+    #[serde(
+        rename = "releaseNotes",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub release_notes: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub category: Option<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub keywords: Vec<String>,
+    #[serde(
+        rename = "supportUrl",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub support_url: Option<String>,
+    #[serde(
+        rename = "privacyPolicyUrl",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub privacy_policy_url: Option<String>,
+    #[serde(
+        rename = "officialWebsiteUrl",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub official_website_url: Option<String>,
+}
+
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct SiteResponse {
     pub id: String,
     pub name: String,
@@ -15,6 +118,8 @@ pub struct SiteResponse {
     pub status: i32,
     #[serde(rename = "runtimeConfig", skip_serializing_if = "Option::is_none")]
     pub runtime_config: Option<Value>,
+    #[serde(rename = "storeListing", skip_serializing_if = "Option::is_none")]
+    pub store_listing: Option<ApplicationStoreListing>,
     #[serde(rename = "createdAt")]
     pub created_at: String,
     #[serde(rename = "updatedAt")]
@@ -43,6 +148,8 @@ pub struct CreateSiteRequest {
     pub site_type: i32,
     #[serde(rename = "runtimeConfig", default)]
     pub runtime_config: Option<Value>,
+    #[serde(rename = "storeListing", default)]
+    pub store_listing: Option<ApplicationStoreListing>,
 }
 
 fn default_application_type() -> String {
@@ -57,6 +164,8 @@ pub struct UpdateSiteRequest {
     pub description: Option<String>,
     #[serde(rename = "runtimeConfig", default)]
     pub runtime_config: Option<Value>,
+    #[serde(rename = "storeListing", default)]
+    pub store_listing: Option<ApplicationStoreListing>,
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
@@ -170,8 +279,9 @@ pub struct DeploymentPage {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct CreateDeploymentRequest {
-    #[serde(rename = "deployType", default = "default_deploy_type")]
+    #[serde(rename = "deployType")]
     pub deploy_type: i32,
     #[serde(default)]
     pub environment: Option<String>,

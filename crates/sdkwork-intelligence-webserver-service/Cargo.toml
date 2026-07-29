@@ -13,3 +13,4 @@ sdkwork-webserver-core.workspace = true
 sdkwork-webserver-edge-runtime.workspace = true
 tokio.workspace = true
 tracing.workspace = true
+url.workspace = true

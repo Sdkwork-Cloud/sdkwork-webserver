@@ -9,5 +9,6 @@ namespace SDKWork.Web.BackendSdk.Models
         public string? Name { get; set; }
         public string? Description { get; set; }
         public Dictionary<string, object>? RuntimeConfig { get; set; }
+        public ApplicationStoreListing? StoreListing { get; set; }
     }
 }

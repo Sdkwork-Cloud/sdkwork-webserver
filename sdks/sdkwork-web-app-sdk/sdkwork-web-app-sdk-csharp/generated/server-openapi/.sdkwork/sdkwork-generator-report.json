@@ -10,37 +10,89 @@
   },
   "status": "ok",
   "mode": "apply",
-  "hasChanges": false,
+  "hasChanges": true,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "dd4bb93db51d0798de5fc27b1e0d31d8a77bea49da02d0c466cd94ac054961a2",
+  "changeFingerprint": "454d6a1eef24e79309edf4ebe70bc94b2979a32e73e95228c2d9f8697a9b9fec",
   "changeImpact": {
     "schemaVersion": 1,
-    "areas": [],
-    "details": [],
-    "requiresVerification": false,
-    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
+    "areas": [
+      "models"
+    ],
+    "details": [
+      {
+        "area": "models",
+        "paths": [
+          "Models/ApplicationStoreListing.cs",
+          "Models/CreateSiteRequest.cs",
+          "Models/MediaChecksum.cs",
+          "Models/MediaResource.cs",
+          "Models/SiteResponse.cs",
+          "Models/UpdateSiteRequest.cs"
+        ]
+      }
+    ],
+    "requiresVerification": true,
+    "summary": "Detected impact areas: models. Verification is required."
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "low",
-    "nextAction": "skip",
+    "riskLevel": "medium",
+    "nextAction": "verify",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
-    "summary": "No actionable changes were detected. No apply or verification step is required.",
+    "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
-      "no-actionable-changes"
+      "verification-required"
     ]
   },
   "executionHandoff": {
     "schemaVersion": 1,
-    "summary": "No further commands are required.",
-    "steps": []
+    "summary": "Run the required verification commands now.",
+    "steps": [
+      {
+        "id": "verify-check",
+        "title": "Unified package check",
+        "required": true,
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
+        "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-csharp\\generated\\server-openapi",
+        "command": "node",
+        "args": [
+          "./bin/publish-core.mjs",
+          "--language",
+          "csharp",
+          "--project-dir",
+          ".",
+          "--action",
+          "check"
+        ],
+        "displayCommand": "node ./bin/publish-core.mjs --language csharp --project-dir . --action check"
+      }
+    ]
   },
   "verificationPlan": {
-    "shouldRun": false,
-    "runPhase": "skip",
-    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
-    "steps": []
+    "shouldRun": true,
+    "runPhase": "now",
+    "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "steps": [
+      {
+        "id": "check",
+        "title": "Unified package check",
+        "required": true,
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
+        "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-csharp\\generated\\server-openapi",
+        "command": "node",
+        "args": [
+          "./bin/publish-core.mjs",
+          "--language",
+          "csharp",
+          "--project-dir",
+          ".",
+          "--action",
+          "check"
+        ],
+        "displayCommand": "node ./bin/publish-core.mjs --language csharp --project-dir . --action check"
+      }
+    ]
   },
   "sdk": {
     "name": "sdkwork-web-app-sdk",
@@ -56,8 +108,8 @@
     "localVersions": []
   },
   "stats": {
-    "totalFiles": 69,
-    "models": 50,
+    "totalFiles": 72,
+    "models": 53,
     "apis": 6,
     "types": 0
   },
@@ -65,15 +117,23 @@
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 0,
+    "writtenFiles": 6,
     "skippedScaffoldFiles": 1,
-    "skippedUnchangedGeneratedFiles": 68,
+    "skippedUnchangedGeneratedFiles": 65,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "dd4bb93db51d0798de5fc27b1e0d31d8a77bea49da02d0c466cd94ac054961a2",
+    "changeFingerprint": "454d6a1eef24e79309edf4ebe70bc94b2979a32e73e95228c2d9f8697a9b9fec",
     "changes": {
-      "createdGeneratedFiles": [],
-      "updatedGeneratedFiles": [],
+      "createdGeneratedFiles": [
+        "Models/ApplicationStoreListing.cs",
+        "Models/MediaChecksum.cs",
+        "Models/MediaResource.cs"
+      ],
+      "updatedGeneratedFiles": [
+        "Models/CreateSiteRequest.cs",
+        "Models/SiteResponse.cs",
+        "Models/UpdateSiteRequest.cs"
+      ],
       "unchangedGeneratedFiles": [
         "Api/Api.cs",
         "Api/ApiPaths.cs",
@@ -98,7 +158,6 @@
         "Models/CreateDomainRequest.cs",
         "Models/CreateEnvVariableRequest.cs",
         "Models/CreateHealthCheckRequest.cs",
-        "Models/CreateSiteRequest.cs",
         "Models/DeploymentPage.cs",
         "Models/DeploymentResponse.cs",
         "Models/DomainPage.cs",
@@ -119,7 +178,6 @@
         "Models/SdkWorkResourceData.cs",
         "Models/SdkWorkResourceResponse.cs",
         "Models/SitePage.cs",
-        "Models/SiteResponse.cs",
         "Models/SitesActivateResponse.cs",
         "Models/SitesCreateResponse201.cs",
         "Models/SitesDeploymentsCreateResponse201.cs",
@@ -138,7 +196,6 @@
         "Models/SitesPauseResponse.cs",
         "Models/SitesRetrieveResponse.cs",
         "Models/SitesUpdateResponse.cs",
-        "Models/UpdateSiteRequest.cs",
         "README.md",
         "sdkwork-sdk.json",
         "SDKWork.Web.AppSdk.csproj",
@@ -153,26 +210,59 @@
     },
     "impact": {
       "schemaVersion": 1,
-      "areas": [],
-      "details": [],
-      "requiresVerification": false,
-      "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
+      "areas": [
+        "models"
+      ],
+      "details": [
+        {
+          "area": "models",
+          "paths": [
+            "Models/ApplicationStoreListing.cs",
+            "Models/CreateSiteRequest.cs",
+            "Models/MediaChecksum.cs",
+            "Models/MediaResource.cs",
+            "Models/SiteResponse.cs",
+            "Models/UpdateSiteRequest.cs"
+          ]
+        }
+      ],
+      "requiresVerification": true,
+      "summary": "Detected impact areas: models. Verification is required."
     },
     "verificationPlan": {
-      "shouldRun": false,
-      "runPhase": "skip",
-      "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
-      "steps": []
+      "shouldRun": true,
+      "runPhase": "now",
+      "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
+      "steps": [
+        {
+          "id": "check",
+          "title": "Unified package check",
+          "required": true,
+          "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
+          "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-csharp\\generated\\server-openapi",
+          "command": "node",
+          "args": [
+            "./bin/publish-core.mjs",
+            "--language",
+            "csharp",
+            "--project-dir",
+            ".",
+            "--action",
+            "check"
+          ],
+          "displayCommand": "node ./bin/publish-core.mjs --language csharp --project-dir . --action check"
+        }
+      ]
     },
     "executionDecision": {
       "schemaVersion": 1,
-      "riskLevel": "low",
-      "nextAction": "skip",
+      "riskLevel": "medium",
+      "nextAction": "verify",
       "requiresManualReview": false,
       "applyRequiresExpectedFingerprint": false,
-      "summary": "No actionable changes were detected. No apply or verification step is required.",
+      "summary": "Changes have been applied. Run the required verification plan now.",
       "reasons": [
-        "no-actionable-changes"
+        "verification-required"
       ]
     },
     "backedUpFiles": [],

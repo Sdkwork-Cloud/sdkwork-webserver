@@ -5,6 +5,7 @@ import {
   hasPlatformSuperAdminAccess,
   hasWebserverSuperAdminAccess,
   WebserverWorkspace,
+  type ApplicationMediaStorage,
   type ApplicationSourceStorage,
   type WebserverResourceRegistry,
 } from "@sdkwork/webserver-pc-commons";
@@ -93,6 +94,42 @@ describe("console workspace access", () => {
 });
 
 describe("console release controls", () => {
+  it("uses App Store field shapes and enforces the shared description limits", async () => {
+    const registry: WebserverResourceRegistry = {
+      sites: {
+        actions: [{
+          id: "create",
+          label: "Create application",
+          applicationSubmission: "create",
+          bodyTemplate: {
+            shortDescription: "",
+            fullDescription: "",
+            releaseNotes: "",
+          },
+          execute: vi.fn().mockResolvedValue({}),
+        }],
+        async load(query) {
+          return { items: [], pageInfo: { page: query.page, pageSize: query.pageSize, hasMore: false, total: 0 } };
+        },
+      },
+    };
+
+    renderWorkspace("/console/sites", registry, appUserPermissionScope);
+    fireEvent.click(await screen.findByRole("button", { name: "Create application" }));
+
+    const shortDescriptionField = screen.getByText("Short description").closest("label");
+    const fullDescriptionField = screen.getByText("Full description").closest("label");
+    const releaseNotesField = screen.getByText("Release notes").closest("label");
+    const shortDescriptionInput = shortDescriptionField?.querySelector("input");
+    expect(shortDescriptionInput).toBeTruthy();
+    expect(fullDescriptionField?.querySelector("textarea")).toBeTruthy();
+    expect(releaseNotesField?.querySelector("textarea")).toBeTruthy();
+
+    fireEvent.change(shortDescriptionInput!, { target: { value: "a".repeat(81) } });
+    expect(shortDescriptionInput?.value).toHaveLength(80);
+    expect(shortDescriptionField?.textContent).toContain("80 / 80");
+  });
+
   it("creates an application, stores its source, and creates the initial deployment command", async () => {
     const createSite = vi.fn().mockResolvedValue({ id: "site-1", name: "Portal" });
     const uploadArchive = vi.fn().mockResolvedValue({
@@ -110,14 +147,15 @@ describe("console release controls", () => {
     const registry = createWebserverConsoleRegistry({
       drive: { drive: { archiveEntries: { extract, list: listArchiveEntries } }, uploader: { uploadArchive } },
       web: {
-        site: { create: createSite },
+        site: { create: createSite, update: vi.fn().mockResolvedValue({ id: "site-1" }) },
         deployment: { sites: { deployments: { create: createDeployment } } },
       },
-    } as unknown as WebserverConsoleSdkClients);
+    } as unknown as WebserverConsoleSdkClients, undefined, testMediaStorage());
     const create = registry.sites?.actions.find((action) => action.id === "create");
     const source = new File(["source"], "source.zip", { type: "application/zip" });
 
     await create?.execute({
+      applicationSubmission: defaultApplicationSubmission(),
       body: {
         name: "Portal",
         applicationType: "WEB",
@@ -161,10 +199,8 @@ describe("console release controls", () => {
       deployments: {
         actions: [{
           bodyTemplate: {
-            commitHash: "",
             deployType: 1,
             environment: "production",
-            sourceRef: "main",
             versionTag: "v1.2.3",
           },
           execute: vi.fn(),
@@ -204,7 +240,8 @@ describe("console release controls", () => {
     expect(screen.getByText("发布方式")).toBeTruthy();
     expect(screen.getByRole("option", { name: "手动上传" })).toBeTruthy();
     expect(screen.queryByRole("option", { name: "Git" })).toBeNull();
-    expect(screen.getByText("源码分支")).toBeTruthy();
+    expect(screen.queryByLabelText("源码分支")).toBeNull();
+    expect(screen.queryByLabelText("提交哈希")).toBeNull();
   });
 
   it("uploads an application package to Drive before creating a deployment", async () => {
@@ -494,6 +531,37 @@ function preparedArchive() {
     inputMode: "archive" as const,
     sourceFileCount: 1,
     uncompressedSize: archive.size,
+  };
+}
+
+function defaultApplicationSubmission() {
+  return {
+    coverMode: "remove" as const,
+    iconMode: "default" as const,
+    previewFiles: [],
+    previewsMode: "remove" as const,
+  };
+}
+
+function testMediaStorage(): ApplicationMediaStorage {
+  return {
+    createDefaultIcon: vi.fn().mockResolvedValue(new File(["icon"], "application-icon.png", { type: "image/png" })),
+    store: vi.fn(async ({ altText, applicationId, file, role, sequence = 0 }) => {
+      const nodeId = `${applicationId}-${role}-${sequence}`;
+      return {
+        id: nodeId,
+        kind: "image" as const,
+        source: "drive" as const,
+        uri: `drive://spaces/store-assets/nodes/${nodeId}`,
+        fileName: file.name,
+        mimeType: file.type,
+        sizeBytes: String(file.size),
+        width: 1024,
+        height: role === "cover" ? 500 : 1024,
+        altText,
+        metadata: { drive: { nodeId, spaceId: "store-assets" } },
+      };
+    }),
   };
 }
 

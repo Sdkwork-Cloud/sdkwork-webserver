@@ -12,22 +12,35 @@
   "mode": "apply",
   "hasChanges": true,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "6a8e366a2f2c142017baa3d976fc4c678ba040d9654f0d1f67990c8be7250c8f",
+  "changeFingerprint": "e9005c470c3f96aeea39bdf44241fbd0aae313863a865c15a51e378fdefd1aea",
   "changeImpact": {
     "schemaVersion": 1,
     "areas": [
+      "api-surface",
       "models"
     ],
     "details": [
       {
+        "area": "api-surface",
+        "paths": [
+          "sdkwork_web_backend_sdk/models/__init__.py"
+        ]
+      },
+      {
         "area": "models",
         "paths": [
-          "sdkwork_web_backend_sdk/models/create_nginx_config_request.py"
+          "sdkwork_web_backend_sdk/models/__init__.py",
+          "sdkwork_web_backend_sdk/models/application_response.py",
+          "sdkwork_web_backend_sdk/models/application_store_listing.py",
+          "sdkwork_web_backend_sdk/models/create_application_request.py",
+          "sdkwork_web_backend_sdk/models/media_checksum.py",
+          "sdkwork_web_backend_sdk/models/media_resource.py",
+          "sdkwork_web_backend_sdk/models/update_application_request.py"
         ]
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: models. Verification is required."
+    "summary": "Detected impact areas: api-surface, models. Verification is required."
   },
   "executionDecision": {
     "schemaVersion": 1,
@@ -48,7 +61,7 @@
         "id": "verify-check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-python\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -67,13 +80,13 @@
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-python\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -103,25 +116,32 @@
     "localVersions": []
   },
   "stats": {
-    "totalFiles": 97,
-    "models": 71,
+    "totalFiles": 100,
+    "models": 74,
     "apis": 9,
-    "types": 72
+    "types": 75
   },
   "warnings": [],
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 1,
+    "writtenFiles": 7,
     "skippedScaffoldFiles": 1,
-    "skippedUnchangedGeneratedFiles": 95,
+    "skippedUnchangedGeneratedFiles": 92,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "6a8e366a2f2c142017baa3d976fc4c678ba040d9654f0d1f67990c8be7250c8f",
+    "changeFingerprint": "e9005c470c3f96aeea39bdf44241fbd0aae313863a865c15a51e378fdefd1aea",
     "changes": {
-      "createdGeneratedFiles": [],
+      "createdGeneratedFiles": [
+        "sdkwork_web_backend_sdk/models/application_store_listing.py",
+        "sdkwork_web_backend_sdk/models/media_checksum.py",
+        "sdkwork_web_backend_sdk/models/media_resource.py"
+      ],
       "updatedGeneratedFiles": [
-        "sdkwork_web_backend_sdk/models/create_nginx_config_request.py"
+        "sdkwork_web_backend_sdk/models/__init__.py",
+        "sdkwork_web_backend_sdk/models/application_response.py",
+        "sdkwork_web_backend_sdk/models/create_application_request.py",
+        "sdkwork_web_backend_sdk/models/update_application_request.py"
       ],
       "unchangedGeneratedFiles": [
         "bin/publish-core.mjs",
@@ -146,7 +166,6 @@
         "sdkwork_web_backend_sdk/api/server.py",
         "sdkwork_web_backend_sdk/client.py",
         "sdkwork_web_backend_sdk/http_client.py",
-        "sdkwork_web_backend_sdk/models/__init__.py",
         "sdkwork_web_backend_sdk/models/agent_certificate_bundle.py",
         "sdkwork_web_backend_sdk/models/agent_heartbeat_request.py",
         "sdkwork_web_backend_sdk/models/agent_heartbeat_response.py",
@@ -155,7 +174,6 @@
         "sdkwork_web_backend_sdk/models/application_deployment_response.py",
         "sdkwork_web_backend_sdk/models/application_domain_response.py",
         "sdkwork_web_backend_sdk/models/application_domain_verify_response.py",
-        "sdkwork_web_backend_sdk/models/application_response.py",
         "sdkwork_web_backend_sdk/models/applications_activate_response.py",
         "sdkwork_web_backend_sdk/models/applications_create_response201.py",
         "sdkwork_web_backend_sdk/models/applications_deployments_create_response201.py",
@@ -186,8 +204,8 @@
         "sdkwork_web_backend_sdk/models/configs_validate_response.py",
         "sdkwork_web_backend_sdk/models/create_application_deployment_request.py",
         "sdkwork_web_backend_sdk/models/create_application_domain_request.py",
-        "sdkwork_web_backend_sdk/models/create_application_request.py",
         "sdkwork_web_backend_sdk/models/create_certificate_request.py",
+        "sdkwork_web_backend_sdk/models/create_nginx_config_request.py",
         "sdkwork_web_backend_sdk/models/create_server_request.py",
         "sdkwork_web_backend_sdk/models/create_server_response.py",
         "sdkwork_web_backend_sdk/models/field_error.py",
@@ -214,7 +232,6 @@
         "sdkwork_web_backend_sdk/models/servers_create_response201.py",
         "sdkwork_web_backend_sdk/models/servers_list_response.py",
         "sdkwork_web_backend_sdk/models/status_retrieve_response.py",
-        "sdkwork_web_backend_sdk/models/update_application_request.py",
         "sdkwork_web_backend_sdk/models/update_certificate_request.py",
         "sdkwork_web_backend_sdk/models/update_nginx_config_request.py",
         "sdkwork-sdk.json",
@@ -230,29 +247,42 @@
     "impact": {
       "schemaVersion": 1,
       "areas": [
+        "api-surface",
         "models"
       ],
       "details": [
         {
+          "area": "api-surface",
+          "paths": [
+            "sdkwork_web_backend_sdk/models/__init__.py"
+          ]
+        },
+        {
           "area": "models",
           "paths": [
-            "sdkwork_web_backend_sdk/models/create_nginx_config_request.py"
+            "sdkwork_web_backend_sdk/models/__init__.py",
+            "sdkwork_web_backend_sdk/models/application_response.py",
+            "sdkwork_web_backend_sdk/models/application_store_listing.py",
+            "sdkwork_web_backend_sdk/models/create_application_request.py",
+            "sdkwork_web_backend_sdk/models/media_checksum.py",
+            "sdkwork_web_backend_sdk/models/media_resource.py",
+            "sdkwork_web_backend_sdk/models/update_application_request.py"
           ]
         }
       ],
       "requiresVerification": true,
-      "summary": "Detected impact areas: models. Verification is required."
+      "summary": "Detected impact areas: api-surface, models. Verification is required."
     },
     "verificationPlan": {
       "shouldRun": true,
       "runPhase": "now",
-      "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
+      "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
       "steps": [
         {
           "id": "check",
           "title": "Unified package check",
           "required": true,
-          "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
+          "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
           "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-python\\generated\\server-openapi",
           "command": "node",
           "args": [

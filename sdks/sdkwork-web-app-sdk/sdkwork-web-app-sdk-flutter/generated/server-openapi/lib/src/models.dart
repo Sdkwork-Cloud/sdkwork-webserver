@@ -102,6 +102,228 @@ class ProblemDetail {
   }
 }
 
+class MediaChecksum {
+  final String algorithm;
+  final String value;
+
+  MediaChecksum({
+    required this.algorithm,
+    required this.value
+  });
+
+  factory MediaChecksum.fromJson(Map<String, dynamic> json) {
+    return MediaChecksum(
+      algorithm: (() {
+        final value = json['algorithm']?.toString();
+        if (value == null) {
+          throw FormatException('MediaChecksum.algorithm is required');
+        }
+        return value;
+      })(),
+      value: (() {
+        final value = json['value']?.toString();
+        if (value == null) {
+          throw FormatException('MediaChecksum.value is required');
+        }
+        return value;
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'algorithm': algorithm,
+      'value': value,
+    };
+  }
+}
+
+class MediaResource {
+  final String? id;
+  final String kind;
+  final String source;
+  final String? url;
+  final String? publicUrl;
+  final String? uri;
+  final String? objectBlobId;
+  final String? fileName;
+  final String? mimeType;
+  final String? sizeBytes;
+  final MediaChecksum? checksum;
+  final int? width;
+  final int? height;
+  final double? durationSeconds;
+  final String? altText;
+  final String? title;
+  final Map<String, dynamic>? metadata;
+
+  MediaResource({
+    this.id,
+    required this.kind,
+    required this.source,
+    this.url,
+    this.publicUrl,
+    this.uri,
+    this.objectBlobId,
+    this.fileName,
+    this.mimeType,
+    this.sizeBytes,
+    this.checksum,
+    this.width,
+    this.height,
+    this.durationSeconds,
+    this.altText,
+    this.title,
+    this.metadata
+  });
+
+  factory MediaResource.fromJson(Map<String, dynamic> json) {
+    return MediaResource(
+      id: json['id']?.toString(),
+      kind: (() {
+        final value = json['kind']?.toString();
+        if (value == null) {
+          throw FormatException('MediaResource.kind is required');
+        }
+        return value;
+      })(),
+      source: (() {
+        final value = json['source']?.toString();
+        if (value == null) {
+          throw FormatException('MediaResource.source is required');
+        }
+        return value;
+      })(),
+      url: json['url']?.toString(),
+      publicUrl: json['publicUrl']?.toString(),
+      uri: json['uri']?.toString(),
+      objectBlobId: json['objectBlobId']?.toString(),
+      fileName: json['fileName']?.toString(),
+      mimeType: json['mimeType']?.toString(),
+      sizeBytes: json['sizeBytes']?.toString(),
+      checksum: (() {
+        final map = _sdkworkAsMap(json['checksum']);
+        return map == null ? null : MediaChecksum.fromJson(map);
+      })(),
+      width: json['width'] is int ? json['width'] : null,
+      height: json['height'] is int ? json['height'] : null,
+      durationSeconds: json['durationSeconds'] is num ? json['durationSeconds'].toDouble() : null,
+      altText: json['altText']?.toString(),
+      title: json['title']?.toString(),
+      metadata: _sdkworkAsMap(json['metadata'])
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'id': id,
+      'kind': kind,
+      'source': source,
+      'url': url,
+      'publicUrl': publicUrl,
+      'uri': uri,
+      'objectBlobId': objectBlobId,
+      'fileName': fileName,
+      'mimeType': mimeType,
+      'sizeBytes': sizeBytes,
+      'checksum': checksum?.toJson(),
+      'width': width,
+      'height': height,
+      'durationSeconds': durationSeconds,
+      'altText': altText,
+      'title': title,
+      'metadata': metadata,
+    };
+  }
+}
+
+class ApplicationStoreListing {
+  final MediaResource? icon;
+  final MediaResource? cover;
+  final List<MediaResource>? previews;
+  final String? shortDescription;
+  final String? fullDescription;
+  final String? releaseNotes;
+  final String? category;
+  final List<String>? keywords;
+  final String? supportUrl;
+  final String? privacyPolicyUrl;
+  final String? officialWebsiteUrl;
+
+  ApplicationStoreListing({
+    this.icon,
+    this.cover,
+    this.previews,
+    this.shortDescription,
+    this.fullDescription,
+    this.releaseNotes,
+    this.category,
+    this.keywords,
+    this.supportUrl,
+    this.privacyPolicyUrl,
+    this.officialWebsiteUrl
+  });
+
+  factory ApplicationStoreListing.fromJson(Map<String, dynamic> json) {
+    return ApplicationStoreListing(
+      icon: (() {
+        final map = _sdkworkAsMap(json['icon']);
+        return map == null ? null : MediaResource.fromJson(map);
+      })(),
+      cover: (() {
+        final map = _sdkworkAsMap(json['cover']);
+        return map == null ? null : MediaResource.fromJson(map);
+      })(),
+      previews: (() {
+        final list = _sdkworkAsList(json['previews']);
+        if (list == null) {
+          return null;
+        }
+        return list
+            .map((item) => (() {
+        final map = _sdkworkAsMap(item);
+        return map == null ? null : MediaResource.fromJson(map);
+      })())
+            .whereType<MediaResource>()
+            .toList();
+      })(),
+      shortDescription: json['shortDescription']?.toString(),
+      fullDescription: json['fullDescription']?.toString(),
+      releaseNotes: json['releaseNotes']?.toString(),
+      category: json['category']?.toString(),
+      keywords: (() {
+        final list = _sdkworkAsList(json['keywords']);
+        if (list == null) {
+          return null;
+        }
+        return list
+            .map((item) => item?.toString())
+            .whereType<String>()
+            .toList();
+      })(),
+      supportUrl: json['supportUrl']?.toString(),
+      privacyPolicyUrl: json['privacyPolicyUrl']?.toString(),
+      officialWebsiteUrl: json['officialWebsiteUrl']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'icon': icon?.toJson(),
+      'cover': cover?.toJson(),
+      'previews': previews?.map((item) => item.toJson()).toList(),
+      'shortDescription': shortDescription,
+      'fullDescription': fullDescription,
+      'releaseNotes': releaseNotes,
+      'category': category,
+      'keywords': keywords?.map((item) => item).toList(),
+      'supportUrl': supportUrl,
+      'privacyPolicyUrl': privacyPolicyUrl,
+      'officialWebsiteUrl': officialWebsiteUrl,
+    };
+  }
+}
+
 class CreateSiteRequest {
   final String name;
   final String? slug;
@@ -109,6 +331,7 @@ class CreateSiteRequest {
   final String? applicationType;
   final int siteType;
   final Map<String, dynamic>? runtimeConfig;
+  final ApplicationStoreListing? storeListing;
 
   CreateSiteRequest({
     required this.name,
@@ -116,7 +339,8 @@ class CreateSiteRequest {
     this.description,
     this.applicationType,
     required this.siteType,
-    this.runtimeConfig
+    this.runtimeConfig,
+    this.storeListing
   });
 
   factory CreateSiteRequest.fromJson(Map<String, dynamic> json) {
@@ -138,7 +362,11 @@ class CreateSiteRequest {
         }
         return value;
       })(),
-      runtimeConfig: _sdkworkAsMap(json['runtimeConfig'])
+      runtimeConfig: _sdkworkAsMap(json['runtimeConfig']),
+      storeListing: (() {
+        final map = _sdkworkAsMap(json['storeListing']);
+        return map == null ? null : ApplicationStoreListing.fromJson(map);
+      })()
     );
   }
 
@@ -150,6 +378,7 @@ class CreateSiteRequest {
       'applicationType': applicationType,
       'siteType': siteType,
       'runtimeConfig': runtimeConfig,
+      'storeListing': storeListing?.toJson(),
     };
   }
 }
@@ -158,18 +387,24 @@ class UpdateSiteRequest {
   final String? name;
   final String? description;
   final Map<String, dynamic>? runtimeConfig;
+  final ApplicationStoreListing? storeListing;
 
   UpdateSiteRequest({
     this.name,
     this.description,
-    this.runtimeConfig
+    this.runtimeConfig,
+    this.storeListing
   });
 
   factory UpdateSiteRequest.fromJson(Map<String, dynamic> json) {
     return UpdateSiteRequest(
       name: json['name']?.toString(),
       description: json['description']?.toString(),
-      runtimeConfig: _sdkworkAsMap(json['runtimeConfig'])
+      runtimeConfig: _sdkworkAsMap(json['runtimeConfig']),
+      storeListing: (() {
+        final map = _sdkworkAsMap(json['storeListing']);
+        return map == null ? null : ApplicationStoreListing.fromJson(map);
+      })()
     );
   }
 
@@ -178,6 +413,7 @@ class UpdateSiteRequest {
       'name': name,
       'description': description,
       'runtimeConfig': runtimeConfig,
+      'storeListing': storeListing?.toJson(),
     };
   }
 }
@@ -191,6 +427,7 @@ class SiteResponse {
   final int? siteType;
   final int? status;
   final Map<String, dynamic>? runtimeConfig;
+  final ApplicationStoreListing? storeListing;
   final String? createdAt;
   final String? updatedAt;
 
@@ -203,6 +440,7 @@ class SiteResponse {
     this.siteType,
     this.status,
     this.runtimeConfig,
+    this.storeListing,
     this.createdAt,
     this.updatedAt
   });
@@ -217,6 +455,10 @@ class SiteResponse {
       siteType: json['siteType'] is int ? json['siteType'] : null,
       status: json['status'] is int ? json['status'] : null,
       runtimeConfig: _sdkworkAsMap(json['runtimeConfig']),
+      storeListing: (() {
+        final map = _sdkworkAsMap(json['storeListing']);
+        return map == null ? null : ApplicationStoreListing.fromJson(map);
+      })(),
       createdAt: json['createdAt']?.toString(),
       updatedAt: json['updatedAt']?.toString()
     );
@@ -232,6 +474,7 @@ class SiteResponse {
       'siteType': siteType,
       'status': status,
       'runtimeConfig': runtimeConfig,
+      'storeListing': storeListing?.toJson(),
       'createdAt': createdAt,
       'updatedAt': updatedAt,
     };

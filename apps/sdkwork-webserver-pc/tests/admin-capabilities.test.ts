@@ -1,7 +1,7 @@
 import { createWebserverAdminApplicationRegistry } from "@sdkwork/webserver-pc-admin-applications";
 import { createWebserverAdminCertificateRegistry } from "@sdkwork/webserver-pc-admin-certificates";
 import { createWebserverAdminRegistry, type WebserverAdminSdkClient } from "@sdkwork/webserver-pc-admin-core";
-import type { ApplicationSourceStorage } from "@sdkwork/webserver-pc-commons";
+import type { ApplicationMediaStorage, ApplicationSourceStorage } from "@sdkwork/webserver-pc-commons";
 import { describe, expect, it, vi } from "vitest";
 
 describe("admin application capability", () => {
@@ -34,10 +34,11 @@ describe("admin application capability", () => {
 
     const sourceStorage = testSourceStorage();
     const sourceArchive = new File(["source"], "source.zip", { type: "application/zip" });
-    const registry = createWebserverAdminApplicationRegistry(client, sourceStorage);
+    const registry = createWebserverAdminApplicationRegistry(client, sourceStorage, testMediaStorage());
     await registry.applications?.load({ page: 1, pageSize: 20, search: "api" });
     await registry.applications?.actions[0]?.execute({
       body: { name: "API", applicationType: "API", siteType: 6, environment: "production", versionTag: "v1.0.0" },
+      applicationSubmission: defaultApplicationSubmission(),
       files: [sourceArchive],
       idempotencyKey: "application-create-1",
       sourceInputMode: "archive",
@@ -48,11 +49,11 @@ describe("admin application capability", () => {
     createDeployment.mockClear();
 
     const applicationActions = registry.applications?.actions ?? [];
-    await applicationActions.find((candidate) => candidate.id === "update")?.execute({ body: { name: "Renamed", description: "API" }, idempotencyKey: "application-update-1", selectedItem: { id: "app-1" } });
+    await applicationActions.find((candidate) => candidate.id === "update")?.execute({ applicationSubmission: defaultApplicationSubmission(), body: { name: "Renamed", description: "API" }, idempotencyKey: "application-update-1", selectedItem: { id: "app-1" } });
     await applicationActions.find((candidate) => candidate.id === "activate")?.execute({ body: {}, idempotencyKey: "application-activate-1", selectedItem: { id: "app-1", status: 0 } });
     await applicationActions.find((candidate) => candidate.id === "pause")?.execute({ body: {}, idempotencyKey: "application-pause-1", selectedItem: { id: "app-1", status: 1 } });
     await applicationActions.find((candidate) => candidate.id === "delete")?.execute({ body: {}, idempotencyKey: "application-delete-1", selectedItem: { id: "app-1", status: 2 } });
-    expect(updateApplication).toHaveBeenCalledWith("app-1", { name: "Renamed", description: "API" }, { idempotencyKey: "application-update-1" });
+    expect(updateApplication).toHaveBeenLastCalledWith("app-1", expect.objectContaining({ name: "Renamed", description: "API", storeListing: expect.objectContaining({ icon: expect.any(Object) }) }), { idempotencyKey: "application-update-1" });
     expect(activateApplication).toHaveBeenCalledWith("app-1", { idempotencyKey: "application-activate-1" });
     expect(pauseApplication).toHaveBeenCalledWith("app-1", { idempotencyKey: "application-pause-1" });
     expect(deleteApplication).toHaveBeenCalledWith("app-1", { idempotencyKey: "application-delete-1" });
@@ -109,7 +110,7 @@ describe("admin application capability", () => {
         applications: { deployments: { create: createDeployment } },
       },
     } as unknown as WebserverAdminSdkClient;
-    const registry = createWebserverAdminApplicationRegistry(client, sourceStorage);
+    const registry = createWebserverAdminApplicationRegistry(client, sourceStorage, testMediaStorage());
     const deploy = registry["application-deployments"]?.actions.find(
       (candidate) => candidate.id === "deploy",
     );
@@ -140,6 +141,37 @@ function testSourceStorage(): ApplicationSourceStorage {
       archiveHash: "a".repeat(64),
       archiveSize: "6",
       extractedCount: "1",
+    }),
+  };
+}
+
+function defaultApplicationSubmission() {
+  return {
+    coverMode: "remove" as const,
+    iconMode: "default" as const,
+    previewFiles: [],
+    previewsMode: "remove" as const,
+  };
+}
+
+function testMediaStorage(): ApplicationMediaStorage {
+  return {
+    createDefaultIcon: vi.fn().mockResolvedValue(new File(["icon"], "application-icon.png", { type: "image/png" })),
+    store: vi.fn(async ({ altText, applicationId, file, role, sequence = 0 }) => {
+      const nodeId = `${applicationId}-${role}-${sequence}`;
+      return {
+        id: nodeId,
+        kind: "image" as const,
+        source: "drive" as const,
+        uri: `drive://spaces/releases/nodes/${nodeId}`,
+        fileName: file.name,
+        mimeType: file.type,
+        sizeBytes: String(file.size),
+        width: 1024,
+        height: role === "cover" ? 500 : 1024,
+        altText,
+        metadata: { drive: { nodeId, spaceId: "releases" } },
+      };
     }),
   };
 }

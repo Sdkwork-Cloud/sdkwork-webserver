@@ -1,8 +1,14 @@
 import {
+  applicationStoreListing,
+  createDefaultApplicationIcon,
   normalizeWebserverPage,
   prepareApplicationSourcePackage,
+  resolveApplicationStoreListing,
+  validateApplicationMediaFile,
   validateApplicationArchiveEntries,
   WebserverActionError,
+  type ApplicationMediaStorage,
+  type ApplicationStoreListingInput,
   type ApplicationSourceStorage,
   type PreparedApplicationSource,
   type StoredApplicationSource,
@@ -106,11 +112,88 @@ export function createApplicationSourceStorage(
   };
 }
 
+export function createApplicationMediaStorage(
+  driveClient: SdkworkDriveAppClient,
+): ApplicationMediaStorage {
+  return {
+    createDefaultIcon: createDefaultApplicationIcon,
+    async store(request) {
+      request.signal?.throwIfAborted();
+      request.onProgress?.(0);
+      const dimensions = await validateApplicationMediaFile(request.role, request.file);
+      request.signal?.throwIfAborted();
+      const checksum = await sha256Hex(request.file);
+      const fileName = applicationMediaFileName(request.file.name, request.role, request.sequence);
+      const identity = `${request.role}:${request.sequence ?? 0}:${checksum}`;
+      const taskId = await applicationUploadTaskId("media", request.applicationId, identity);
+      request.signal?.throwIfAborted();
+      const uploaded = await driveClient.uploader.uploadImage({
+        appResourceId: request.applicationId,
+        appResourceType: `web.application.media.${request.role}`,
+        checksumSha256Hex: `sha256:${checksum}`,
+        contentType: request.file.type,
+        file: request.file,
+        fileFingerprint: checksum,
+        onProgress: (progress) => {
+          const ratio = progress.totalBytes > 0
+            ? progress.uploadedBytes / progress.totalBytes
+            : 0;
+          request.onProgress?.(Math.round(ratio * 100));
+        },
+        originalFileName: fileName,
+        scene: "application-store-listing",
+        source: "sdkwork-webserver-pc",
+        signal: request.signal,
+        taskId,
+      });
+      request.signal?.throwIfAborted();
+      const { nodeId, spaceId } = uploaded.uploadSession;
+      if (!nodeId || !spaceId) throw new Error("Drive did not return the application media identity");
+      request.onProgress?.(100);
+      return {
+        id: nodeId,
+        kind: "image",
+        source: "drive",
+        uri: `drive://spaces/${spaceId}/nodes/${nodeId}`,
+        fileName,
+        mimeType: request.file.type,
+        sizeBytes: String(request.file.size),
+        checksum: { algorithm: "sha256", value: checksum },
+        width: dimensions.width,
+        height: dimensions.height,
+        altText: request.altText,
+        metadata: { drive: { nodeId, spaceId } },
+      };
+    },
+  };
+}
+
 async function applicationSourceUploadTaskId(applicationId: string, archiveHash: string): Promise<string> {
-  const material = UTF8_ENCODER.encode(`${applicationId}\0${archiveHash}`);
+  return applicationUploadTaskId("source", applicationId, archiveHash);
+}
+
+async function applicationUploadTaskId(kind: string, applicationId: string, identity: string): Promise<string> {
+  const material = UTF8_ENCODER.encode(`${applicationId}\0${identity}`);
   const digest = await globalThis.crypto.subtle.digest("SHA-256", material);
   const hash = Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
-  return `web-source-${hash}`;
+  return `web-${kind}-${hash}`;
+}
+
+async function sha256Hex(file: File): Promise<string> {
+  const digest = await globalThis.crypto.subtle.digest("SHA-256", await file.arrayBuffer());
+  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+function applicationMediaFileName(
+  value: string,
+  role: "icon" | "cover" | "preview",
+  sequence = 0,
+): string {
+  const normalized = value
+    .trim()
+    .replace(/[\u0000-\u001F\u007F]/g, "-")
+    .slice(0, 512);
+  return normalized || `application-${role}-${sequence}.png`;
 }
 
 function parseExtractedCount(value: string): number {
@@ -129,6 +212,7 @@ const UTF8_ENCODER = new TextEncoder();
 export function createWebserverConsoleRegistry(
   clients: WebserverConsoleSdkClients,
   sourceStorage: ApplicationSourceStorage = createApplicationSourceStorage(clients.drive),
+  mediaStorage: ApplicationMediaStorage = createApplicationMediaStorage(clients.drive),
 ): WebserverResourceRegistry {
   const client = clients.web;
   return {
@@ -143,9 +227,18 @@ export function createWebserverConsoleRegistry(
           siteType: 1,
           environment: "production",
           versionTag: "v1.0.0",
+          shortDescription: "",
+          fullDescription: "",
+          releaseNotes: "",
+          category: "",
+          keywords: "",
+          supportUrl: "",
+          privacyPolicyUrl: "",
+          officialWebsiteUrl: "",
         },
-        (context) => createApplicationWithInitialVersion(clients, sourceStorage, context),
+        (context) => createApplicationWithInitialVersion(clients, sourceStorage, mediaStorage, context),
         {
+          applicationSubmission: "create",
           fieldOptions: {
             applicationType: ["WEB", "API"],
             siteType: [1, 2, 3, 4, 5, 6],
@@ -156,7 +249,18 @@ export function createWebserverConsoleRegistry(
           sourceInput: "archive-or-directory",
         },
       ),
-      action("update", "Update", { name: "", description: "" }, async (context) => client.site.update(selectedId(context, "siteId"), updateSiteRequest(context.body)), { permission: "web.sites.write", selection: true }),
+      action("update", "Update", {
+        name: "",
+        description: "",
+        shortDescription: "",
+        fullDescription: "",
+        releaseNotes: "",
+        category: "",
+        keywords: "",
+        supportUrl: "",
+        privacyPolicyUrl: "",
+        officialWebsiteUrl: "",
+      }, (context) => updateApplicationListing(clients, mediaStorage, context), { applicationSubmission: "update", permission: "web.sites.write", selection: true }),
       action("activate", "Activate", {}, (context) => client.site.activate(selectedId(context, "siteId")), { permission: "web.sites.write", selection: true }),
       action("pause", "Disable", {}, (context) => client.site.pause(selectedId(context, "siteId")), { dangerous: true, permission: "web.sites.write", selection: true }),
       action("delete", "Delete", {}, (context) => client.site.delete(selectedId(context, "siteId")), { dangerous: true, permission: "web.sites.write", selection: true }),
@@ -186,7 +290,7 @@ export function createWebserverConsoleRegistry(
       }),
     ]),
     deployments: scopedSource((query) => client.deployment.sites.deployments.list(requiredScope(query.scopeId), { page: query.page, pageSize: query.pageSize }), [
-      action("deploy", "Deploy", { deployType: 1, environment: "production", versionTag: "", sourceRef: "", commitHash: "" }, (context) => deployApplication(clients, sourceStorage, context), {
+      action("deploy", "Deploy", { deployType: 1, environment: "production", versionTag: "" }, (context) => deployApplication(clients, sourceStorage, context), {
         confirmation: true,
         fieldOptions: { deployType: [1], environment: ["production", "staging", "test", "development"] },
         permission: "web.sites.write",
@@ -207,7 +311,7 @@ export function createWebserverConsoleRegistry(
 
 function source(load: WebserverResourceDataSource["load"] extends (query: infer Q) => Promise<unknown> ? (query: Q) => Promise<unknown> : never, actions: readonly WebserverResourceAction[]): WebserverResourceDataSource { return { actions, async load(query) { return normalizeWebserverPage(await load(query)); } }; }
 function scopedSource(load: Parameters<typeof source>[0], actions: readonly WebserverResourceAction[]): WebserverResourceDataSource { return { ...source(load, actions), requiresScope: true }; }
-function action(id: string, label: string, bodyTemplate: Record<string, unknown>, execute: WebserverResourceAction["execute"], options: { acceptedFileTypes?: string; availableWhen?: WebserverResourceAction["availableWhen"]; confirmation?: boolean; dangerous?: boolean; fieldOptions?: WebserverResourceAction["fieldOptions"]; file?: boolean; loadFieldOptions?: WebserverResourceAction["loadFieldOptions"]; permission?: string; requiredFields?: readonly string[]; scope?: boolean; selection?: boolean; sourceInput?: WebserverResourceAction["sourceInput"] } = {}): WebserverResourceAction { return { id, label, bodyTemplate, execute, acceptedFileTypes: options.acceptedFileTypes, availableWhen: options.availableWhen, dangerous: options.dangerous, fieldOptions: options.fieldOptions, loadFieldOptions: options.loadFieldOptions, permission: options.permission, requiredFields: options.requiredFields, requiresConfirmation: options.confirmation, requiresFile: options.file, requiresScope: options.scope, requiresSelection: options.selection, sourceInput: options.sourceInput }; }
+function action(id: string, label: string, bodyTemplate: Record<string, unknown>, execute: WebserverResourceAction["execute"], options: { acceptedFileTypes?: string; applicationSubmission?: WebserverResourceAction["applicationSubmission"]; availableWhen?: WebserverResourceAction["availableWhen"]; confirmation?: boolean; dangerous?: boolean; fieldOptions?: WebserverResourceAction["fieldOptions"]; file?: boolean; loadFieldOptions?: WebserverResourceAction["loadFieldOptions"]; permission?: string; requiredFields?: readonly string[]; scope?: boolean; selection?: boolean; sourceInput?: WebserverResourceAction["sourceInput"] } = {}): WebserverResourceAction { return { id, label, bodyTemplate, execute, acceptedFileTypes: options.acceptedFileTypes, applicationSubmission: options.applicationSubmission, availableWhen: options.availableWhen, dangerous: options.dangerous, fieldOptions: options.fieldOptions, loadFieldOptions: options.loadFieldOptions, permission: options.permission, requiredFields: options.requiredFields, requiresConfirmation: options.confirmation, requiresFile: options.file, requiresScope: options.scope, requiresSelection: options.selection, sourceInput: options.sourceInput }; }
 function selectedId(context: WebserverResourceActionContext, key: string): string { const value = context.selectedItem?.[key]; if (typeof value !== "string" && typeof value !== "number") throw new Error(`${key} is unavailable`); return String(value); }
 function requiredScope(value: string | undefined): string { if (!value?.trim()) throw new Error("Site ID is required"); return value.trim(); }
 function idempotencyParams(context: WebserverResourceActionContext): { idempotencyKey: string } { const idempotencyKey = context.idempotencyKey?.trim(); if (!idempotencyKey) throw new Error("Idempotency key is required"); return { idempotencyKey }; }
@@ -232,6 +336,7 @@ async function deployApplication(clients: WebserverConsoleSdkClients, sourceStor
 async function createApplicationWithInitialVersion(
   clients: WebserverConsoleSdkClients,
   sourceStorage: ApplicationSourceStorage,
+  mediaStorage: ApplicationMediaStorage,
   context: WebserverResourceActionContext,
 ): Promise<unknown> {
   const siteRequest = {
@@ -242,14 +347,33 @@ async function createApplicationWithInitialVersion(
   };
   const metadata = deploymentMetadata(context);
   const idempotency = idempotencyParams(context);
-  const prepared = await prepareSource(sourceStorage, context, 0, 22);
+  const prepared = await prepareSource(sourceStorage, context, 0, 14);
   const site = await clients.web.site.create(siteRequest, idempotency);
   const siteId = site.id?.trim();
   if (!siteId) throw new Error("The created application did not return an ID");
-  context.onProgress?.(26);
+  context.onProgress?.(16);
+  try {
+    const storeListing = await resolveApplicationStoreListing({
+      applicationId: siteId,
+      applicationName: siteRequest.name,
+      body: context.body,
+      mediaStorage,
+      onProgress: (progress) => context.onProgress?.(scaleProgress(progress, 16, 46)),
+      signal: context.signal,
+      submission: requiredApplicationSubmission(context),
+    });
+    await clients.web.site.update(siteId, { storeListing: sdkStoreListing(storeListing) });
+    context.onProgress?.(48);
+  } catch (error) {
+    throw new WebserverActionError(
+      "application-draft-media-failed",
+      { applicationId: siteId },
+      { cause: error },
+    );
+  }
   let stored: StoredApplicationSource;
   try {
-    stored = await storeSource(sourceStorage, siteId, prepared, context, 26, 92);
+    stored = await storeSource(sourceStorage, siteId, prepared, context, 48, 92);
   } catch (error) {
     throw new WebserverActionError(
       "application-draft-source-failed",
@@ -272,6 +396,32 @@ async function createApplicationWithInitialVersion(
       { cause: error },
     );
   }
+}
+
+async function updateApplicationListing(
+  clients: WebserverConsoleSdkClients,
+  mediaStorage: ApplicationMediaStorage,
+  context: WebserverResourceActionContext,
+): Promise<unknown> {
+  const siteId = selectedId(context, "siteId");
+  const applicationName = requiredText(context.body.name, "Application name");
+  const storeListing = await resolveApplicationStoreListing({
+    applicationId: siteId,
+    applicationName,
+    body: context.body,
+    current: applicationStoreListing(context.selectedItem?.storeListing),
+    mediaStorage,
+    onProgress: context.onProgress,
+    signal: context.signal,
+    submission: requiredApplicationSubmission(context),
+  });
+  context.onProgress?.(96);
+  const result = await clients.web.site.update(
+    siteId,
+    updateSiteRequest(context.body, storeListing),
+  );
+  context.onProgress?.(100);
+  return result;
 }
 
 async function prepareSource(
@@ -386,13 +536,30 @@ function optionalText(value: unknown): string | undefined {
   return typeof value === "string" && value.trim() ? value.trim() : undefined;
 }
 
-function updateSiteRequest(body: Readonly<Record<string, unknown>>): UpdateSiteRequest {
+function updateSiteRequest(
+  body: Readonly<Record<string, unknown>>,
+  storeListing: ApplicationStoreListingInput,
+): UpdateSiteRequest {
   const name = boundedOptionalText(body.name, "Application name", 100, false);
   const description = boundedOptionalText(body.description, "Description", 500, true);
-  if (name === undefined && description === undefined) {
-    throw new Error("At least one application field is required");
-  }
-  return { name, description };
+  return { name, description, storeListing: sdkStoreListing(storeListing) };
+}
+
+function sdkStoreListing(
+  storeListing: ApplicationStoreListingInput,
+): NonNullable<UpdateSiteRequest["storeListing"]> {
+  return {
+    ...storeListing,
+    keywords: storeListing.keywords ? [...storeListing.keywords] : undefined,
+    previews: storeListing.previews ? [...storeListing.previews] : undefined,
+  };
+}
+
+function requiredApplicationSubmission(
+  context: WebserverResourceActionContext,
+): NonNullable<WebserverResourceActionContext["applicationSubmission"]> {
+  if (!context.applicationSubmission) throw new Error("Application store submission is required");
+  return context.applicationSubmission;
 }
 
 function createEnvVariableRequest(body: Readonly<Record<string, unknown>>): CreateEnvVariableRequest {

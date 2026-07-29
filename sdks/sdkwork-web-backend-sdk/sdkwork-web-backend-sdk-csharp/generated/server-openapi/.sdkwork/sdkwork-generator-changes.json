@@ -9,11 +9,17 @@
     "protocol": "http",
     "packageName": "SDKWork.Web.BackendSdk"
   },
-  "changeFingerprint": "e4f3c96b6ff2ee7a050b86c47083dfef0f8b03208550fcd61fca135fe740816d",
+  "changeFingerprint": "e6a3795db9d719300a6da822559393d14478b4a94dc08f5a781289d68576c0ae",
   "changes": {
-    "createdGeneratedFiles": [],
+    "createdGeneratedFiles": [
+      "Models/ApplicationStoreListing.cs",
+      "Models/MediaChecksum.cs",
+      "Models/MediaResource.cs"
+    ],
     "updatedGeneratedFiles": [
-      "Models/CreateNginxConfigRequest.cs"
+      "Models/ApplicationResponse.cs",
+      "Models/CreateApplicationRequest.cs",
+      "Models/UpdateApplicationRequest.cs"
     ],
     "unchangedGeneratedFiles": [
       "Api/AgentApi.cs",
@@ -41,7 +47,6 @@
       "Models/ApplicationDeploymentResponse.cs",
       "Models/ApplicationDomainResponse.cs",
       "Models/ApplicationDomainVerifyResponse.cs",
-      "Models/ApplicationResponse.cs",
       "Models/ApplicationsActivateResponse.cs",
       "Models/ApplicationsCreateResponse201.cs",
       "Models/ApplicationsDeploymentsCreateResponse201.cs",
@@ -72,8 +77,8 @@
       "Models/ConfigsValidateResponse.cs",
       "Models/CreateApplicationDeploymentRequest.cs",
       "Models/CreateApplicationDomainRequest.cs",
-      "Models/CreateApplicationRequest.cs",
       "Models/CreateCertificateRequest.cs",
+      "Models/CreateNginxConfigRequest.cs",
       "Models/CreateServerRequest.cs",
       "Models/CreateServerResponse.cs",
       "Models/FieldError.cs",
@@ -100,7 +105,6 @@
       "Models/ServersCreateResponse201.cs",
       "Models/ServersListResponse.cs",
       "Models/StatusRetrieveResponse.cs",
-      "Models/UpdateApplicationRequest.cs",
       "Models/UpdateCertificateRequest.cs",
       "Models/UpdateNginxConfigRequest.cs",
       "README.md",
@@ -124,7 +128,12 @@
       {
         "area": "models",
         "paths": [
-          "Models/CreateNginxConfigRequest.cs"
+          "Models/ApplicationResponse.cs",
+          "Models/ApplicationStoreListing.cs",
+          "Models/CreateApplicationRequest.cs",
+          "Models/MediaChecksum.cs",
+          "Models/MediaResource.cs",
+          "Models/UpdateApplicationRequest.cs"
         ]
       }
     ],

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace SDKWork\Web\AppSdk\Models;
 
+use SDKWork\Web\AppSdk\Models\ApplicationStoreListing;
+
 final class SiteResponse
 {
     public ?string $id = null;
@@ -21,6 +23,8 @@ final class SiteResponse
     public ?int $status = null;
 
     public array $runtimeConfig = [];
+
+    public ?ApplicationStoreListing $storeListing = null;
 
     public ?string $createdAt = null;
 
@@ -52,6 +56,9 @@ final class SiteResponse
         $this->runtimeConfig = array_key_exists('runtimeConfig', $data)
             ? is_array($data['runtimeConfig']) ? $data['runtimeConfig'] : []
             : [];
+        $this->storeListing = array_key_exists('storeListing', $data)
+            ? is_array($data['storeListing']) ? ApplicationStoreListing::fromArray($data['storeListing']) : null
+            : null;
         $this->createdAt = array_key_exists('createdAt', $data)
             ? $data['createdAt']
             : null;
@@ -76,6 +83,7 @@ final class SiteResponse
             'siteType' => $this->siteType,
             'status' => $this->status,
             'runtimeConfig' => $this->runtimeConfig,
+            'storeListing' => $this->storeListing instanceof ApplicationStoreListing ? $this->storeListing->toArray() : $this->storeListing,
             'createdAt' => $this->createdAt,
             'updatedAt' => $this->updatedAt,
         ];

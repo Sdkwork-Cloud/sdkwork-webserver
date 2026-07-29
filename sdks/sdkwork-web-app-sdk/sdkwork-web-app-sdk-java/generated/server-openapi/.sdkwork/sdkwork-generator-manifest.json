@@ -79,6 +79,10 @@
       "sha256": "87c0130b42c481e753449c07e6933671e92f97da6148b6a9fdc14e14bc4f63fc"
     },
     {
+      "path": "src/main/java/com/sdkwork/web/app/sdk/model/ApplicationStoreListing.java",
+      "sha256": "c6e9c3d1e111338c6539c85d7378fa37200dfe552a222e70e6a6792dd70232b1"
+    },
+    {
       "path": "src/main/java/com/sdkwork/web/app/sdk/model/CertificatePage.java",
       "sha256": "200799c0ee791e4ab5e852fe1e1dc30f258ec4202ab45e5ac1043b6da00d60dc"
     },
@@ -116,7 +120,7 @@
     },
     {
       "path": "src/main/java/com/sdkwork/web/app/sdk/model/CreateSiteRequest.java",
-      "sha256": "6029e3e9a50d346e1d389787bf1cb895b8338ca3298f798c755b64d4a592f8ef"
+      "sha256": "6db0d04e3391d1996cb8d46b2931adf95ee6a9369e0d7faa5a63d047085aadfa"
     },
     {
       "path": "src/main/java/com/sdkwork/web/app/sdk/model/DeploymentPage.java",
@@ -157,6 +161,14 @@
     {
       "path": "src/main/java/com/sdkwork/web/app/sdk/model/HealthCheckResponse.java",
       "sha256": "c9917552249c3da11933cc52057999a75913306a5fa54d3c1fe4379975f7c0c6"
+    },
+    {
+      "path": "src/main/java/com/sdkwork/web/app/sdk/model/MediaChecksum.java",
+      "sha256": "aab5a098e57d5ce584d6e10d2c056ab24e6fda84b1ccbef502aa96fbad5af8d7"
+    },
+    {
+      "path": "src/main/java/com/sdkwork/web/app/sdk/model/MediaResource.java",
+      "sha256": "1bb227368e8fab6fc50312237426794b1d04862f977a78e4ccc65af77e2040cc"
     },
     {
       "path": "src/main/java/com/sdkwork/web/app/sdk/model/PageInfo.java",
@@ -200,7 +212,7 @@
     },
     {
       "path": "src/main/java/com/sdkwork/web/app/sdk/model/SiteResponse.java",
-      "sha256": "9af78337d27334964d7ccc474fb2ef11d1cd782f091000db7b050ef1f34060bb"
+      "sha256": "f3f6ab756ff3f19773cbb4d084d3f1791df8a4cffd9cb96086d9200627966d48"
     },
     {
       "path": "src/main/java/com/sdkwork/web/app/sdk/model/SitesActivateResponse.java",
@@ -276,7 +288,7 @@
     },
     {
       "path": "src/main/java/com/sdkwork/web/app/sdk/model/UpdateSiteRequest.java",
-      "sha256": "7f6a0bfe07c16fc5a201c896ac816652c019beadf283439dfde5127577015a87"
+      "sha256": "9f555179d42ae505b49cb1e6c55de8e304c291be38af65040bc379805ba0bb37"
     },
     {
       "path": "src/main/java/com/sdkwork/web/app/sdk/SdkworkAppClient.java",

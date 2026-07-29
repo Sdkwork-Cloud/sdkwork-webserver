@@ -95,6 +95,9 @@ pub enum DataPlaneError {
     #[error("candidate configuration changes restart-only listener, TLS, or admission topology")]
     ReloadRequiresRestart,
 
+    #[error("{subsystem} lifecycle coordinator is unavailable")]
+    LifecycleCoordinatorUnavailable { subsystem: &'static str },
+
     #[error("configuration reload worker failed: {0}")]
     ReloadWorker(#[source] tokio::task::JoinError),
 

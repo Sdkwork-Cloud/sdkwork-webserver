@@ -12,23 +12,48 @@
   "mode": "apply",
   "hasChanges": true,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "52a8865f6bcdb3a1543f11a6c2b8d2afd29769e5e8f460a4470cf20d0bb1385e",
+  "changeFingerprint": "f9dbd3c4256e119fe0e6accea5a55312e321d7ce99ecf57b39aa6ce392b1e40b",
   "changeImpact": {
     "schemaVersion": 1,
     "areas": [
-      "models"
+      "api-surface",
+      "models",
+      "runtime"
     ],
     "details": [
       {
+        "area": "api-surface",
+        "paths": [
+          "src/api/certificate.ts",
+          "src/api/deployment.ts",
+          "src/api/domain.ts",
+          "src/api/env-variable.ts",
+          "src/api/monitor.ts",
+          "src/api/site.ts",
+          "src/http/client.ts"
+        ]
+      },
+      {
         "area": "models",
         "paths": [
-          "src/types/create-certificate-request.ts",
-          "src/types/create-env-variable-request.ts"
+          "src/types/application-store-listing.ts",
+          "src/types/create-site-request.ts",
+          "src/types/index.ts",
+          "src/types/media-checksum.ts",
+          "src/types/media-resource.ts",
+          "src/types/site-response.ts",
+          "src/types/update-site-request.ts"
+        ]
+      },
+      {
+        "area": "runtime",
+        "paths": [
+          "src/http/client.ts"
         ]
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: models. Verification is required."
+    "summary": "Detected impact areas: api-surface, models, runtime. Verification is required."
   },
   "executionDecision": {
     "schemaVersion": 1,
@@ -49,7 +74,7 @@
         "id": "verify-check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, runtime.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-typescript\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -67,7 +92,7 @@
         "id": "verify-build",
         "title": "Unified package build",
         "required": true,
-        "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: models.",
+        "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: api-surface, models, runtime.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-typescript\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -86,13 +111,13 @@
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: api-surface, models, runtime. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, runtime.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-typescript\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -110,7 +135,7 @@
         "id": "build",
         "title": "Unified package build",
         "required": true,
-        "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: models.",
+        "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: api-surface, models, runtime.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-typescript\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -140,26 +165,39 @@
     "localVersions": []
   },
   "stats": {
-    "totalFiles": 80,
-    "models": 51,
+    "totalFiles": 83,
+    "models": 54,
     "apis": 6,
-    "types": 53
+    "types": 56
   },
   "warnings": [],
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 2,
+    "writtenFiles": 14,
     "skippedScaffoldFiles": 2,
-    "skippedUnchangedGeneratedFiles": 76,
+    "skippedUnchangedGeneratedFiles": 67,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "52a8865f6bcdb3a1543f11a6c2b8d2afd29769e5e8f460a4470cf20d0bb1385e",
+    "changeFingerprint": "f9dbd3c4256e119fe0e6accea5a55312e321d7ce99ecf57b39aa6ce392b1e40b",
     "changes": {
-      "createdGeneratedFiles": [],
+      "createdGeneratedFiles": [
+        "src/types/application-store-listing.ts",
+        "src/types/media-checksum.ts",
+        "src/types/media-resource.ts"
+      ],
       "updatedGeneratedFiles": [
-        "src/types/create-certificate-request.ts",
-        "src/types/create-env-variable-request.ts"
+        "src/api/certificate.ts",
+        "src/api/deployment.ts",
+        "src/api/domain.ts",
+        "src/api/env-variable.ts",
+        "src/api/monitor.ts",
+        "src/api/site.ts",
+        "src/http/client.ts",
+        "src/types/create-site-request.ts",
+        "src/types/index.ts",
+        "src/types/site-response.ts",
+        "src/types/update-site-request.ts"
       ],
       "unchangedGeneratedFiles": [
         "bin/publish-core.mjs",
@@ -173,16 +211,9 @@
         "README.md",
         "sdkwork-sdk.json",
         "src/api/base.ts",
-        "src/api/certificate.ts",
-        "src/api/deployment.ts",
-        "src/api/domain.ts",
-        "src/api/env-variable.ts",
         "src/api/index.ts",
-        "src/api/monitor.ts",
         "src/api/paths.ts",
-        "src/api/site.ts",
         "src/auth/index.ts",
-        "src/http/client.ts",
         "src/http/index.ts",
         "src/index.ts",
         "src/sdk.ts",
@@ -191,10 +222,11 @@
         "src/types/certificates-create-response201.ts",
         "src/types/certificates-list-response.ts",
         "src/types/common.ts",
+        "src/types/create-certificate-request.ts",
         "src/types/create-deployment-request.ts",
         "src/types/create-domain-request.ts",
+        "src/types/create-env-variable-request.ts",
         "src/types/create-health-check-request.ts",
-        "src/types/create-site-request.ts",
         "src/types/deployment-page.ts",
         "src/types/deployment-response.ts",
         "src/types/domain-page.ts",
@@ -205,7 +237,6 @@
         "src/types/field-error.ts",
         "src/types/health-check-page.ts",
         "src/types/health-check-response.ts",
-        "src/types/index.ts",
         "src/types/page-info.ts",
         "src/types/problem-detail.ts",
         "src/types/sdk-work-api-response.ts",
@@ -217,7 +248,6 @@
         "src/types/sdk-work-resource-data.ts",
         "src/types/sdk-work-resource-response.ts",
         "src/types/site-page.ts",
-        "src/types/site-response.ts",
         "src/types/sites-activate-response.ts",
         "src/types/sites-create-response201.ts",
         "src/types/sites-deployments-create-response201.ts",
@@ -236,7 +266,6 @@
         "src/types/sites-pause-response.ts",
         "src/types/sites-retrieve-response.ts",
         "src/types/sites-update-response.ts",
-        "src/types/update-site-request.ts",
         "tsconfig.json"
       ],
       "deletedGeneratedFiles": [],
@@ -250,30 +279,55 @@
     "impact": {
       "schemaVersion": 1,
       "areas": [
-        "models"
+        "api-surface",
+        "models",
+        "runtime"
       ],
       "details": [
         {
+          "area": "api-surface",
+          "paths": [
+            "src/api/certificate.ts",
+            "src/api/deployment.ts",
+            "src/api/domain.ts",
+            "src/api/env-variable.ts",
+            "src/api/monitor.ts",
+            "src/api/site.ts",
+            "src/http/client.ts"
+          ]
+        },
+        {
           "area": "models",
           "paths": [
-            "src/types/create-certificate-request.ts",
-            "src/types/create-env-variable-request.ts"
+            "src/types/application-store-listing.ts",
+            "src/types/create-site-request.ts",
+            "src/types/index.ts",
+            "src/types/media-checksum.ts",
+            "src/types/media-resource.ts",
+            "src/types/site-response.ts",
+            "src/types/update-site-request.ts"
+          ]
+        },
+        {
+          "area": "runtime",
+          "paths": [
+            "src/http/client.ts"
           ]
         }
       ],
       "requiresVerification": true,
-      "summary": "Detected impact areas: models. Verification is required."
+      "summary": "Detected impact areas: api-surface, models, runtime. Verification is required."
     },
     "verificationPlan": {
       "shouldRun": true,
       "runPhase": "now",
-      "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
+      "summary": "Detected impact areas: api-surface, models, runtime. Verification is required. Run the required verification commands now against the generated SDK output.",
       "steps": [
         {
           "id": "check",
           "title": "Unified package check",
           "required": true,
-          "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
+          "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, runtime.",
           "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-typescript\\generated\\server-openapi",
           "command": "node",
           "args": [
@@ -291,7 +345,7 @@
           "id": "build",
           "title": "Unified package build",
           "required": true,
-          "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: models.",
+          "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: api-surface, models, runtime.",
           "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-typescript\\generated\\server-openapi",
           "command": "node",
           "args": [

@@ -9,7 +9,7 @@
     "protocol": "http",
     "packageName": "sdkwork-web-backend-sdk"
   },
-  "changeFingerprint": "a0b0aaea61ee8a388f29d9d2ad2c81d9ef5650e4210d2bec4be64e3bcd0e27c3",
+  "changeFingerprint": "ade3e5bfc845ff67158835ad44c90bd9ded25d10a2751e4490eaf18ec0ba1ed2",
   "changes": {
     "createdGeneratedFiles": [],
     "updatedGeneratedFiles": [

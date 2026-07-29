@@ -1,5 +1,8 @@
 export * from './common';
 export type { ProblemDetail } from './problem-detail';
+export type { MediaChecksum } from './media-checksum';
+export type { MediaResource } from './media-resource';
+export type { ApplicationStoreListing } from './application-store-listing';
 export type { CreateSiteRequest } from './create-site-request';
 export type { UpdateSiteRequest } from './update-site-request';
 export type { SiteResponse } from './site-response';

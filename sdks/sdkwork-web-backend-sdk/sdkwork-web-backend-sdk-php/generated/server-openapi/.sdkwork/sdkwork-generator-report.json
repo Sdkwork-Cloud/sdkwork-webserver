@@ -12,7 +12,7 @@
   "mode": "apply",
   "hasChanges": true,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "25d9596cd4a1a3555f82a30e588e4a332e86942863e16a4b027022e493a1686c",
+  "changeFingerprint": "c10642b57703d4e6d3c0ffa64fa1c0c2a9cc90f9aa48b76916d95caa020cd9c7",
   "changeImpact": {
     "schemaVersion": 1,
     "areas": [
@@ -22,7 +22,12 @@
       {
         "area": "models",
         "paths": [
-          "src/Models/CreateNginxConfigRequest.php"
+          "src/Models/ApplicationResponse.php",
+          "src/Models/ApplicationStoreListing.php",
+          "src/Models/CreateApplicationRequest.php",
+          "src/Models/MediaChecksum.php",
+          "src/Models/MediaResource.php",
+          "src/Models/UpdateApplicationRequest.php"
         ]
       }
     ],
@@ -103,8 +108,8 @@
     "localVersions": []
   },
   "stats": {
-    "totalFiles": 93,
-    "models": 71,
+    "totalFiles": 96,
+    "models": 74,
     "apis": 9,
     "types": 0
   },
@@ -112,16 +117,22 @@
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 1,
+    "writtenFiles": 6,
     "skippedScaffoldFiles": 1,
-    "skippedUnchangedGeneratedFiles": 91,
+    "skippedUnchangedGeneratedFiles": 89,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "25d9596cd4a1a3555f82a30e588e4a332e86942863e16a4b027022e493a1686c",
+    "changeFingerprint": "c10642b57703d4e6d3c0ffa64fa1c0c2a9cc90f9aa48b76916d95caa020cd9c7",
     "changes": {
-      "createdGeneratedFiles": [],
+      "createdGeneratedFiles": [
+        "src/Models/ApplicationStoreListing.php",
+        "src/Models/MediaChecksum.php",
+        "src/Models/MediaResource.php"
+      ],
       "updatedGeneratedFiles": [
-        "src/Models/CreateNginxConfigRequest.php"
+        "src/Models/ApplicationResponse.php",
+        "src/Models/CreateApplicationRequest.php",
+        "src/Models/UpdateApplicationRequest.php"
       ],
       "unchangedGeneratedFiles": [
         "bin/publish-core.mjs",
@@ -151,7 +162,6 @@
         "src/Models/ApplicationDeploymentResponse.php",
         "src/Models/ApplicationDomainResponse.php",
         "src/Models/ApplicationDomainVerifyResponse.php",
-        "src/Models/ApplicationResponse.php",
         "src/Models/ApplicationsActivateResponse.php",
         "src/Models/ApplicationsCreateResponse201.php",
         "src/Models/ApplicationsDeploymentsCreateResponse201.php",
@@ -182,8 +192,8 @@
         "src/Models/ConfigsValidateResponse.php",
         "src/Models/CreateApplicationDeploymentRequest.php",
         "src/Models/CreateApplicationDomainRequest.php",
-        "src/Models/CreateApplicationRequest.php",
         "src/Models/CreateCertificateRequest.php",
+        "src/Models/CreateNginxConfigRequest.php",
         "src/Models/CreateServerRequest.php",
         "src/Models/CreateServerResponse.php",
         "src/Models/FieldError.php",
@@ -210,7 +220,6 @@
         "src/Models/ServersCreateResponse201.php",
         "src/Models/ServersListResponse.php",
         "src/Models/StatusRetrieveResponse.php",
-        "src/Models/UpdateApplicationRequest.php",
         "src/Models/UpdateCertificateRequest.php",
         "src/Models/UpdateNginxConfigRequest.php",
         "src/SdkConfig.php",
@@ -232,7 +241,12 @@
         {
           "area": "models",
           "paths": [
-            "src/Models/CreateNginxConfigRequest.php"
+            "src/Models/ApplicationResponse.php",
+            "src/Models/ApplicationStoreListing.php",
+            "src/Models/CreateApplicationRequest.php",
+            "src/Models/MediaChecksum.php",
+            "src/Models/MediaResource.php",
+            "src/Models/UpdateApplicationRequest.php"
           ]
         }
       ],

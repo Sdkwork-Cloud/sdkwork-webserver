@@ -67,6 +67,10 @@
       "sha256": "7840cc7d2b36ff364ac16c2fc5ec15b861bfe96854eecf81fb59b00edb8b1447"
     },
     {
+      "path": "Models/ApplicationStoreListing.cs",
+      "sha256": "66d69dc5ec3cc45217da548b8d74c55aad084db7361f791f1bed2e837408ec13"
+    },
+    {
       "path": "Models/CertificatePage.cs",
       "sha256": "8eb2af39714e5a4bc1820d2e49934d2e730151939e9beecfbedff5b111ae404c"
     },
@@ -104,7 +108,7 @@
     },
     {
       "path": "Models/CreateSiteRequest.cs",
-      "sha256": "32445e85fe43d4a67d4d3469cb4c83545183f5e39ac68099a61f49829c4ae727"
+      "sha256": "235f90fab2b478343514c1d64ca0185cd5c7c9c580bbefc9f69908b6f869f172"
     },
     {
       "path": "Models/DeploymentPage.cs",
@@ -145,6 +149,14 @@
     {
       "path": "Models/HealthCheckResponse.cs",
       "sha256": "2957c8d74e04f8e947de883dd948d2f6fcbceea1644a2e9b2cb640bf3cb6f73a"
+    },
+    {
+      "path": "Models/MediaChecksum.cs",
+      "sha256": "a9ed43cd33eac5c1070d85a1adba7303e5270b009cca2491aa064a4da16e2e5f"
+    },
+    {
+      "path": "Models/MediaResource.cs",
+      "sha256": "b02809decfd713cfdb1184ad8be9a79b67f139367834274abc2fecd70eff382c"
     },
     {
       "path": "Models/PageInfo.cs",
@@ -188,7 +200,7 @@
     },
     {
       "path": "Models/SiteResponse.cs",
-      "sha256": "940cc4347d1b1c25a6c644ac4e6ff0624e652bb90e9e2d5ed1d0acc8cd12a2fd"
+      "sha256": "2484d3e1c1dc497bfb166f53793fbf6ed21cc69b7b6f6c7bd5d45aa9d974ff26"
     },
     {
       "path": "Models/SitesActivateResponse.cs",
@@ -264,7 +276,7 @@
     },
     {
       "path": "Models/UpdateSiteRequest.cs",
-      "sha256": "192f413998081ac879bb1ec16cde62c9711b56d5995de77c134871e73775aa5a"
+      "sha256": "0d81bbab2da0a1dfd61e8298a3d1b15e874f3e40392c1e181444e0361ab43a17"
     },
     {
       "path": "README.md",

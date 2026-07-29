@@ -1,5 +1,6 @@
 //! Certificate renewal scan and re-issuance for autoRenew certificates.
 
+use chrono::{Duration, Utc};
 use sdkwork_webserver_contract::{
     CertificateIssueUpdate, CertificateRenewalCandidate, CertificateRenewalCycleReport,
     CertificateResponse, WebServiceError, WebServiceResult,
@@ -7,14 +8,22 @@ use sdkwork_webserver_contract::{
 
 use crate::{AuditLogWrite, WebService};
 
+const CERTIFICATE_RENEWAL_BATCH_SIZE: i32 = 50;
+const CERTIFICATE_RENEWAL_CLAIM_LEASE_SECS: i64 = 30 * 60;
+
 impl WebService {
     pub async fn run_certificate_renewal_cycle(
         &self,
     ) -> WebServiceResult<CertificateRenewalCycleReport> {
         let renew_before_days = self.certificate_issuer.renew_before_days();
+        let claim_expired_before = certificate_renewal_claim_expired_before();
         let candidates = self
             .repository
-            .list_certificates_due_for_renewal(renew_before_days, 50)
+            .list_certificates_due_for_renewal(
+                renew_before_days,
+                &claim_expired_before,
+                CERTIFICATE_RENEWAL_BATCH_SIZE,
+            )
             .await?;
 
         let mut report = CertificateRenewalCycleReport {
@@ -48,15 +57,20 @@ impl WebService {
     ) -> WebServiceResult<CertificateResponse> {
         validate_renewal_candidate(candidate, enforce_auto_renew)?;
 
-        if !self
+        let claim_expired_before = certificate_renewal_claim_expired_before();
+        let Some(claim_version) = self
             .repository
-            .mark_certificate_renewing(candidate.tenant_id, &candidate.certificate_id)
+            .claim_certificate_renewal(
+                candidate.tenant_id,
+                &candidate.certificate_id,
+                &claim_expired_before,
+            )
             .await?
-        {
+        else {
             return Err(WebServiceError::conflict(
                 "certificate renewal already in progress",
             ));
-        }
+        };
 
         let issue_result = self
             .certificate_issuer
@@ -80,6 +94,7 @@ impl WebService {
                     candidate.tenant_id,
                     &candidate.certificate_id,
                     false,
+                    Some(claim_version),
                     "certificate renewal issuer failed",
                 )
                 .await;
@@ -95,6 +110,7 @@ impl WebService {
             candidate.auto_renew,
             material,
             "certificates.renew",
+            Some(claim_version),
         )
         .await
     }
@@ -106,6 +122,7 @@ impl WebService {
         auto_renew: bool,
         material: sdkwork_webserver_acme_service::IssuedCertificateMaterial,
         audit_action: &str,
+        expected_renewal_version: Option<i64>,
     ) -> WebServiceResult<CertificateResponse> {
         let initial_issue = audit_action == "certificates.issue";
         let activation = match self
@@ -125,6 +142,7 @@ impl WebService {
                     tenant_id,
                     certificate_id,
                     initial_issue,
+                    expected_renewal_version,
                     "certificate bundle activation failed",
                 )
                 .await;
@@ -158,6 +176,7 @@ impl WebService {
                     tenant_id,
                     certificate_id,
                     initial_issue,
+                    expected_renewal_version,
                     "certificate private-key encryption failed",
                 )
                 .await;
@@ -187,7 +206,7 @@ impl WebService {
 
         let response = match self
             .repository
-            .finalize_certificate(tenant_id, certificate_id, &update)
+            .finalize_certificate(tenant_id, certificate_id, &update, expected_renewal_version)
             .await
         {
             Ok(response) => response,
@@ -204,6 +223,7 @@ impl WebService {
                     tenant_id,
                     certificate_id,
                     initial_issue,
+                    expected_renewal_version,
                     "certificate database finalization failed",
                 )
                 .await;
@@ -253,16 +273,26 @@ impl WebService {
         tenant_id: i64,
         certificate_id: &str,
         initial_issue: bool,
+        expected_renewal_version: Option<i64>,
         failure_reason: &'static str,
     ) {
         let result = if initial_issue {
             self.repository
                 .fail_certificate(tenant_id, certificate_id, failure_reason)
                 .await
-        } else {
+        } else if let Some(expected_renewal_version) = expected_renewal_version {
             self.repository
-                .fail_certificate_renewal(tenant_id, certificate_id, failure_reason)
+                .fail_certificate_renewal(
+                    tenant_id,
+                    certificate_id,
+                    expected_renewal_version,
+                    failure_reason,
+                )
                 .await
+        } else {
+            Err(WebServiceError::Internal(
+                "certificate renewal failure is missing its fencing version".to_string(),
+            ))
         };
         if let Err(error) = result {
             tracing::error!(
@@ -274,6 +304,10 @@ impl WebService {
             );
         }
     }
+}
+
+fn certificate_renewal_claim_expired_before() -> String {
+    (Utc::now() - Duration::seconds(CERTIFICATE_RENEWAL_CLAIM_LEASE_SECS)).to_rfc3339()
 }
 
 fn validate_renewal_candidate(
@@ -294,12 +328,11 @@ fn validate_renewal_candidate(
 
 #[cfg(test)]
 mod tests {
-    use super::validate_renewal_candidate;
-    use chrono::{Duration, Utc};
+    use super::{certificate_renewal_claim_expired_before, validate_renewal_candidate};
+    use chrono::{DateTime, Duration, Utc};
     use sdkwork_webserver_contract::CertificateRenewalCandidate;
 
     fn certificate_due_for_renewal(not_after: &str, renew_before_days: u32) -> bool {
-        use chrono::DateTime;
         let Ok(not_after) = DateTime::parse_from_rfc3339(not_after) else {
             return false;
         };
@@ -329,6 +362,15 @@ mod tests {
     #[test]
     fn unsupported_certificate_type_cannot_be_renewed() {
         assert!(validate_renewal_candidate(&candidate(true, 2), false).is_err());
+    }
+
+    #[test]
+    fn renewal_claim_lease_exceeds_the_maximum_acme_operation_timeout() {
+        let cutoff = DateTime::parse_from_rfc3339(&certificate_renewal_claim_expired_before())
+            .expect("renewal claim cutoff");
+        let age = Utc::now().signed_duration_since(cutoff.with_timezone(&Utc));
+        assert!(age >= Duration::minutes(29));
+        assert!(age <= Duration::minutes(31));
     }
 
     fn candidate(auto_renew: bool, cert_type: i32) -> CertificateRenewalCandidate {

@@ -21,7 +21,7 @@ export class AgentSyncApi {
     const query = buildQueryString([
       { name: 'ifSyncVersion', value: params?.ifSyncVersion, style: 'form', explode: true, allowReserved: false },
     ]);
-    return this.client.request<AgentSyncResponse>(appendQueryString(backendApiPath(`/agent/sync`), query), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any });
+    return this.client.request<AgentSyncResponse>(appendQueryString(backendApiPath(`/agent/sync`), query), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any, sdkworkUnwrapKind: 'item' });
   }
 }
 
@@ -35,7 +35,7 @@ export class AgentHeartbeatApi {
 
 /** Report an edge-agent heartbeat */
   async create(body: AgentHeartbeatRequest, requestOptions?: ApiRequestOptions): Promise<AgentHeartbeatResponse> {
-    return this.client.request<AgentHeartbeatResponse>(backendApiPath(`/agent/heartbeat`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, body, contentType: 'application/json' });
+    return this.client.request<AgentHeartbeatResponse>(backendApiPath(`/agent/heartbeat`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, body, contentType: 'application/json', sdkworkUnwrapKind: 'item' });
   }
 }
 

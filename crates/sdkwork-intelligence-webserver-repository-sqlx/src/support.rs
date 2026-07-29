@@ -140,26 +140,6 @@ pub(crate) async fn resolve_site_internal_id(
         .map_err(|error| store_error("map web_site id", error))
 }
 
-pub(crate) async fn resolve_site_uuid(
-    pool: &EnginePool,
-    tenant_id: i64,
-    site_internal_id: i64,
-) -> Result<String, WebServiceError> {
-    let row = sqlx::query(
-        "SELECT uuid FROM web_site
-         WHERE tenant_id = $1 AND id = $2 AND deleted_at IS NULL",
-    )
-    .bind(tenant_id)
-    .bind(site_internal_id)
-    .fetch_optional(pool)
-    .await
-    .map_err(|error| store_error("resolve web_site uuid", error))?;
-
-    let row = row.ok_or_else(|| WebServiceError::not_found("site not found"))?;
-    row.try_get("uuid")
-        .map_err(|error| store_error("map web_site uuid", error))
-}
-
 #[cfg(test)]
 mod tests {
     use super::{normalize_database_instant, pagination};

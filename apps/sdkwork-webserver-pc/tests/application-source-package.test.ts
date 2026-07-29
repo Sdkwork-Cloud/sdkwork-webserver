@@ -3,7 +3,10 @@
 import {
   APPLICATION_SOURCE_MAX_FILE_BYTES,
   APPLICATION_SOURCE_MAX_FILES,
+  APPLICATION_SOURCE_MAX_IGNORE_FILE_BYTES,
   APPLICATION_SOURCE_MAX_PATH_DEPTH,
+  APPLICATION_SOURCE_MAX_SELECTED_FILES,
+  APPLICATION_SOURCE_MAX_SELECTED_PATH_BYTES,
   APPLICATION_SOURCE_MAX_UNCOMPRESSED_BYTES,
   prepareApplicationSourcePackage,
   validateApplicationArchiveEntries,
@@ -43,6 +46,23 @@ describe("application source packaging", () => {
     expect(prepared.sourceFileCount).toBe(2);
   });
 
+  it("writes deterministic ZIP metadata for content-addressed directory packages", async () => {
+    const index = directoryFile("ready", "portal/index.html");
+    const manifest = directoryFile('{"name":"portal"}', "portal/package.json");
+    const first = await prepareApplicationSourcePackage({
+      files: [index, manifest],
+      mode: "directory",
+    });
+    const second = await prepareApplicationSourcePackage({
+      files: [manifest, index],
+      mode: "directory",
+    });
+    const archive = new Uint8Array(await first.archive.arrayBuffer());
+
+    expect(Array.from(archive.slice(10, 14))).toEqual([0, 0, 33, 0]);
+    expect(second.archiveHash).toBe(first.archiveHash);
+  });
+
   it("applies root .gitignore rules, negation, and filtered package metadata", async () => {
     const gitignore = directoryFile("node_modules/\ndist/\n*.log\n!important.log\n", "portal/.gitignore");
     const index = directoryFile("ready", "portal/src/index.ts");
@@ -64,6 +84,34 @@ describe("application source packaging", () => {
     ]);
     expect(prepared.sourceFileCount).toBe(3);
     expect(prepared.uncompressedSize).toBe(gitignore.size + index.size + importantLog.size);
+  });
+
+  it("does not read file bodies that match .gitignore rules", async () => {
+    let ignoredFileWasRead = false;
+    const ignoredFile = {
+      name: "secret.txt",
+      size: 6,
+      webkitRelativePath: "portal/private/secret.txt",
+      arrayBuffer: async () => {
+        ignoredFileWasRead = true;
+        throw new Error("ignored file content must not be read");
+      },
+    } as unknown as File;
+
+    const prepared = await prepareApplicationSourcePackage({
+      files: [
+        directoryFile("private/\n", "portal/.gitignore"),
+        ignoredFile,
+        directoryFile("ready", "portal/src/index.ts"),
+      ],
+      mode: "directory",
+    });
+
+    expect(Object.keys(await archiveEntries(prepared.archive)).sort()).toEqual([
+      "portal/.gitignore",
+      "portal/src/index.ts",
+    ]);
+    expect(ignoredFileWasRead).toBe(false);
   });
 
   it("honors anchored and escaped .gitignore patterns", async () => {
@@ -102,6 +150,49 @@ describe("application source packaging", () => {
     ]);
   });
 
+  it("supports recursive directory patterns and nested anchored rules", async () => {
+    const files = [
+      directoryFile("cache/\nbuild/**\n", "portal/.gitignore"),
+      directoryFile("/private/\n*.tmp\n!keep.tmp\n", "portal/packages/app/.gitignore"),
+      directoryFile("root cache", "portal/cache/root.json"),
+      directoryFile("nested cache", "portal/src/cache/nested.json"),
+      directoryFile("build output", "portal/build/client/app.js"),
+      directoryFile("private", "portal/packages/app/private/secret.txt"),
+      directoryFile("nested private", "portal/packages/app/deep/private/public.txt"),
+      directoryFile("debug", "portal/packages/app/debug.tmp"),
+      directoryFile("keep", "portal/packages/app/keep.tmp"),
+      directoryFile("sibling", "portal/packages/other/debug.tmp"),
+    ];
+
+    const prepared = await prepareApplicationSourcePackage({ files, mode: "directory" });
+
+    expect(Object.keys(await archiveEntries(prepared.archive)).sort()).toEqual([
+      "portal/.gitignore",
+      "portal/packages/app/.gitignore",
+      "portal/packages/app/deep/private/public.txt",
+      "portal/packages/app/keep.tmp",
+      "portal/packages/other/debug.tmp",
+    ]);
+  });
+
+  it("honors comments and escaped trailing spaces in .gitignore rules", async () => {
+    const files = [
+      directoryFile("\uFEFF# comment\r\n\r\nplain.txt   \r\nescaped.txt\\ \r\n", "portal/.gitignore"),
+      directoryFile("plain", "portal/plain.txt"),
+      directoryFile("escaped", "portal/escaped.txt "),
+      directoryFile("regular", "portal/escaped.txt"),
+      directoryFile("comment name", "portal/#comment"),
+    ];
+
+    const prepared = await prepareApplicationSourcePackage({ files, mode: "directory" });
+
+    expect(Object.keys(await archiveEntries(prepared.archive)).sort()).toEqual([
+      "portal/#comment",
+      "portal/.gitignore",
+      "portal/escaped.txt",
+    ]);
+  });
+
   it("does not apply nested rules or re-include files beneath an ignored parent directory", async () => {
     const files = [
       directoryFile("generated/\n!generated/keep.ts\n", "portal/.gitignore"),
@@ -126,6 +217,23 @@ describe("application source packaging", () => {
 
     await expect(prepareApplicationSourcePackage({ files, mode: "directory" }))
       .rejects.toThrow("No source files remain after applying .gitignore rules");
+  });
+
+  it("rejects an oversized .gitignore before reading it into browser memory", async () => {
+    let wasRead = false;
+    const oversizedIgnore = {
+      name: ".gitignore",
+      size: APPLICATION_SOURCE_MAX_IGNORE_FILE_BYTES + 1,
+      webkitRelativePath: "portal/.gitignore",
+      arrayBuffer: async () => {
+        wasRead = true;
+        throw new Error("must not read");
+      },
+    } as unknown as File;
+
+    await expect(prepareApplicationSourcePackage({ files: [oversizedIgnore], mode: "directory" }))
+      .rejects.toThrow("1 MiB");
+    expect(wasRead).toBe(false);
   });
 
   it("always excludes version-control metadata from directory packages", async () => {
@@ -188,12 +296,62 @@ describe("application source packaging", () => {
     await expect(prepareApplicationSourcePackage({ files: totalOversized, mode: "directory" })).rejects.toThrow("64 MiB");
   });
 
+  it("applies .gitignore before enforcing the packaged file-count limit", async () => {
+    const ignoredFiles = Array.from(
+      { length: APPLICATION_SOURCE_MAX_SELECTED_FILES - 2 },
+      (_, index) => sizedDirectoryFile(0, `portal/generated/${index}.js`),
+    );
+    const prepared = await prepareApplicationSourcePackage({
+      files: [
+        directoryFile("generated/\n", "portal/.gitignore"),
+        directoryFile("ready", "portal/src/index.ts"),
+        ...ignoredFiles,
+      ],
+      mode: "directory",
+    });
+
+    expect(Object.keys(await archiveEntries(prepared.archive)).sort()).toEqual([
+      "portal/.gitignore",
+      "portal/src/index.ts",
+    ]);
+    expect(prepared.sourceFileCount).toBe(2);
+  }, 15_000);
+
+  it("bounds aggregate selected path metadata before ignore evaluation", async () => {
+    const segment = "x".repeat(240);
+    const files = Array.from(
+      { length: Math.ceil(APPLICATION_SOURCE_MAX_SELECTED_PATH_BYTES / 240) + 1 },
+      (_, index) => sizedDirectoryFile(0, `portal/${index}-${segment}`),
+    );
+
+    await expect(prepareApplicationSourcePackage({ files, mode: "directory" }))
+      .rejects.toThrow("UTF-8 path bytes");
+  });
+
   it("stops source preparation when its abort signal is cancelled", async () => {
     const controller = new AbortController();
     controller.abort();
 
     await expect(prepareApplicationSourcePackage({
       files: [directoryFile("ready", "portal/src/index.ts")],
+      mode: "directory",
+      signal: controller.signal,
+    })).rejects.toMatchObject({ name: "AbortError" });
+  });
+
+  it("keeps cancellation responsive while filtering a large selected directory", async () => {
+    const controller = new AbortController();
+    const files = [
+      directoryFile("generated/\n", "portal/.gitignore"),
+      ...Array.from(
+        { length: 10_000 },
+        (_, index) => sizedDirectoryFile(0, `portal/generated/${index}.js`),
+      ),
+    ];
+    globalThis.setTimeout(() => controller.abort(), 0);
+
+    await expect(prepareApplicationSourcePackage({
+      files,
       mode: "directory",
       signal: controller.signal,
     })).rejects.toMatchObject({ name: "AbortError" });

@@ -27,7 +27,7 @@ export class ServerApi {
       { name: 'page', value: params?.page, style: 'form', explode: true, allowReserved: false },
       { name: 'page_size', value: params?.pageSize, style: 'form', explode: true, allowReserved: false },
     ]);
-    return this.client.request<{ items: ServerResponse[]; pageInfo: PageInfo; }>(appendQueryString(backendApiPath(`/servers`), query), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any });
+    return this.client.request<{ items: ServerResponse[]; pageInfo: PageInfo; }>(appendQueryString(backendApiPath(`/servers`), query), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any, sdkworkUnwrapKind: 'page' });
   }
 
 /** Register a managed server */
@@ -38,7 +38,7 @@ export class ServerApi {
       },
       {}
     );
-    return this.client.request<CreateServerResponse>(backendApiPath(`/servers`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, body, headers: requestHeaders, contentType: 'application/json' });
+    return this.client.request<CreateServerResponse>(backendApiPath(`/servers`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, body, headers: requestHeaders, contentType: 'application/json', sdkworkUnwrapKind: 'item' });
   }
 }
 

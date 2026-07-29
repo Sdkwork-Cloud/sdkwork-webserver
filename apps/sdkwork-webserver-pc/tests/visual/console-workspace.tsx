@@ -56,7 +56,16 @@ const registry: WebserverResourceRegistry = {
         siteType: 1,
         environment: "production",
         versionTag: "v1.0.0",
+        shortDescription: "",
+        fullDescription: "",
+        releaseNotes: "",
+        category: "",
+        keywords: "",
+        supportUrl: "",
+        privacyPolicyUrl: "",
+        officialWebsiteUrl: "",
       },
+      applicationSubmission: "create",
       execute: async () => ({}),
       fieldOptions: {
         applicationType: ["WEB", "API"],
@@ -85,8 +94,6 @@ const registry: WebserverResourceRegistry = {
         deployType: 1,
         environment: "production",
         versionTag: "v1.4.0",
-        sourceRef: "main",
-        commitHash: "",
       },
       execute: async () => ({}),
       fieldOptions: {
@@ -98,6 +105,16 @@ const registry: WebserverResourceRegistry = {
       requiresConfirmation: true,
       requiresScope: true,
       sourceInput: "archive-or-directory",
+    }, {
+      id: "rollback",
+      label: "Restore this version",
+      bodyTemplate: {},
+      execute: async () => ({}),
+      availableWhen: ({ selectedItem }) => Number(selectedItem?.status) === 2,
+      permission: "web.sites.write",
+      requiresConfirmation: true,
+      requiresScope: true,
+      requiresSelection: true,
     }],
     async load(query) {
       return {

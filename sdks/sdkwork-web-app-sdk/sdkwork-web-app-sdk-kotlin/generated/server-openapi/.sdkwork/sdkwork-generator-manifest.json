@@ -79,6 +79,10 @@
       "sha256": "04df6a422a463b2f00aa5a3db5eb3596a8373980ba8c3a74fc9b9d588878335d"
     },
     {
+      "path": "src/main/kotlin/com/sdkwork/web/app/sdk/ApplicationStoreListing.kt",
+      "sha256": "8662f4dfd08e8c395d85fc4cc06391986d77ad14e7308ff6543c69cc0d26500f"
+    },
+    {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatePage.kt",
       "sha256": "4a9158a119410bcf4e239c0eaa9ee14736c5aef81b154fc51e80ff3928631848"
     },
@@ -116,7 +120,7 @@
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/CreateSiteRequest.kt",
-      "sha256": "fa88b2159c9c17388605f6b67798ec6cda3cec39908d6caf5bf6bc8f1a70d4dd"
+      "sha256": "30c7f43a2dfee010efedc66bef3759558013976fcfedc456ba2857d655589b54"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/DeploymentPage.kt",
@@ -161,6 +165,14 @@
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/http/HttpClient.kt",
       "sha256": "07866b94c23cf774182f3eec529061ad315a39133f9fa4b5b8eedeaa429a5898"
+    },
+    {
+      "path": "src/main/kotlin/com/sdkwork/web/app/sdk/MediaChecksum.kt",
+      "sha256": "8793dfa6d3ce410f70cbed8ef6fab0ab2bf96fbd2e0040bac9634c06ccb0af2b"
+    },
+    {
+      "path": "src/main/kotlin/com/sdkwork/web/app/sdk/MediaResource.kt",
+      "sha256": "4149d1199ce1aeb4feb80e88e1bf34f97dfa399a123add99f6917bffce740288"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/PageInfo.kt",
@@ -208,7 +220,7 @@
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/SiteResponse.kt",
-      "sha256": "195318ff589e191dd5b81d9a9a90d6f3610066356cc8ca40e75a0d95a97148d9"
+      "sha256": "523829afdc52df6aadb51bc04cf27449ce1619d20d20a99089b31fb5b9528c7f"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/SitesActivateResponse.kt",
@@ -284,7 +296,7 @@
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/UpdateSiteRequest.kt",
-      "sha256": "2e32c8f34abdb91f749b18ea1c27665433802b5b216bc7a7dbf6253a8ed98fda"
+      "sha256": "b88f0f5bd12f1dc0af2a8990cdff55bc8200fb5c90fc53ff975827393a946557"
     }
   ],
   "scaffoldFiles": [

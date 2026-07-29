@@ -1,10 +1,15 @@
-import { zip } from "fflate";
+import { AsyncZipDeflate, Zip } from "fflate";
 import ignore from "ignore";
 
 export const APPLICATION_SOURCE_MAX_SELECTED_FILES = 100_000;
+export const APPLICATION_SOURCE_MAX_SELECTED_PATH_BYTES = 16 * 1024 * 1024;
 export const APPLICATION_SOURCE_MAX_FILES = 500;
 export const APPLICATION_SOURCE_MAX_FILE_BYTES = 16 * 1024 * 1024;
 export const APPLICATION_SOURCE_MAX_UNCOMPRESSED_BYTES = 64 * 1024 * 1024;
+export const APPLICATION_SOURCE_MAX_ARCHIVE_BYTES = 64 * 1024 * 1024;
+export const APPLICATION_SOURCE_MAX_IGNORE_FILES = 256;
+export const APPLICATION_SOURCE_MAX_IGNORE_FILE_BYTES = 1024 * 1024;
+export const APPLICATION_SOURCE_MAX_IGNORE_BYTES = 4 * 1024 * 1024;
 export const APPLICATION_SOURCE_MAX_PATH_DEPTH = 64;
 export const APPLICATION_SOURCE_MAX_PATH_BYTES = 4_096;
 export const APPLICATION_SOURCE_MAX_PATH_SEGMENT_BYTES = 255;
@@ -12,6 +17,9 @@ export const APPLICATION_SOURCE_MAX_PATH_SEGMENT_BYTES = 255;
 const CONTROL_CHARACTER_PATTERN = /[\u0000-\u001F\u007F]/;
 const VCS_METADATA_DIRECTORIES = new Set([".git", ".hg", ".svn"]);
 const UTF8_ENCODER = new TextEncoder();
+const UTF8_DECODER = new TextDecoder("utf-8", { fatal: true });
+const ZIP_ENTRY_TIMESTAMP = new Date(1980, 0, 1, 0, 0, 0, 0);
+const IGNORE_FILTER_BATCH_SIZE = 4_096;
 
 export type ApplicationSourceInputMode = "archive" | "directory";
 
@@ -83,24 +91,11 @@ export async function prepareApplicationSourcePackage(
 
   const selectedEntries = validateDirectorySelection(request.files);
   const sourceEntries = selectedEntries.filter((entry) => !isVcsMetadataPath(entry.relativePath));
-  const entries = await filterIgnoredDirectoryEntries(sourceEntries, request.signal);
+  const entries = (await filterIgnoredDirectoryEntries(sourceEntries, request.signal))
+    .sort((left, right) => comparePortablePaths(left.path, right.path));
   validateDirectoryPackageLimits(entries);
-  const zipEntries: Record<string, Uint8Array> = {};
-  for (const [index, entry] of entries.entries()) {
-    throwIfAborted(request.signal);
-    zipEntries[entry.path] = new Uint8Array(await entry.file.arrayBuffer());
-    request.onProgress?.(Math.round(((index + 1) / entries.length) * 55));
-  }
-
-  const zipped = await zipDirectory(zipEntries, request.signal);
+  const archive = await zipDirectory(entries, request.onProgress, request.signal);
   request.onProgress?.(85);
-  const archiveBuffer = new ArrayBuffer(zipped.byteLength);
-  new Uint8Array(archiveBuffer).set(zipped);
-  const archive = new File(
-    [archiveBuffer],
-    `${sourceDirectoryName(entries[0].path)}-source.zip`,
-    { type: "application/zip" },
-  );
   const archiveHash = await sha256Hex(archive);
   throwIfAborted(request.signal);
   request.onProgress?.(100);
@@ -191,7 +186,7 @@ function validateArchiveSelection(files: readonly File[]): File {
   if (!archive.name.toLowerCase().endsWith(".zip")) {
     throw new Error("The source package must be a ZIP archive");
   }
-  if (archive.size > APPLICATION_SOURCE_MAX_UNCOMPRESSED_BYTES) {
+  if (archive.size > APPLICATION_SOURCE_MAX_ARCHIVE_BYTES) {
     throw new Error("The ZIP source package exceeds the 64 MiB browser upload limit");
   }
   return archive;
@@ -203,10 +198,7 @@ interface DirectoryEntry {
   relativePath: string;
 }
 
-interface IgnoreScope {
-  directory: string;
-  matcher: ReturnType<typeof ignore>;
-}
+type IgnoreScopeIndex = ReadonlyMap<string, ReturnType<typeof ignore>>;
 
 function validateDirectorySelection(files: readonly File[]): DirectoryEntry[] {
   if (files.length === 0) {
@@ -219,15 +211,23 @@ function validateDirectorySelection(files: readonly File[]): DirectoryEntry[] {
   }
 
   const seenPaths = new Set<string>();
-  const entries = files.map((file) => {
+  const entries: DirectoryEntry[] = [];
+  let selectedPathBytes = 0;
+  for (const file of files) {
     const path = normalizeRelativePath(file.webkitRelativePath || file.name);
+    selectedPathBytes += UTF8_ENCODER.encode(path).byteLength;
+    if (selectedPathBytes > APPLICATION_SOURCE_MAX_SELECTED_PATH_BYTES) {
+      throw new Error(
+        `A source directory cannot exceed ${APPLICATION_SOURCE_MAX_SELECTED_PATH_BYTES} UTF-8 path bytes`,
+      );
+    }
     const collisionKey = portablePathKey(path);
     if (seenPaths.has(collisionKey)) {
       throw new Error(`The source directory contains a duplicate path: ${path}`);
     }
     seenPaths.add(collisionKey);
-    return { file, path, relativePath: path };
-  });
+    entries.push({ file, path, relativePath: path });
+  }
 
   const browserPaths = entries.filter((entry) => Boolean(entry.file.webkitRelativePath));
   if (browserPaths.length === 0) return entries;
@@ -249,24 +249,68 @@ async function filterIgnoredDirectoryEntries(
   if (entries.length === 0) {
     throw new Error("No application source files remain after excluding version-control metadata");
   }
-  const ignoreFiles = entries
-    .filter((entry) => basename(entry.relativePath) === ".gitignore")
-    .sort((left, right) => pathDepth(left.relativePath) - pathDepth(right.relativePath)
-      || left.relativePath.localeCompare(right.relativePath));
-  const scopes: IgnoreScope[] = [];
+  const ignoreFilesByDepth = Array.from(
+    { length: APPLICATION_SOURCE_MAX_PATH_DEPTH + 1 },
+    () => [] as DirectoryEntry[],
+  );
+  for (const entry of entries) {
+    if (basename(entry.relativePath) !== ".gitignore") continue;
+    ignoreFilesByDepth[pathDepth(entry.relativePath)].push(entry);
+  }
+  const scopes = new Map<string, ReturnType<typeof ignore>>();
   const scopeDirectoryCache = new Map<string, boolean>();
+  let ignoreBytes = 0;
 
-  for (const entry of ignoreFiles) {
-    throwIfAborted(signal);
-    const directory = dirname(entry.relativePath);
-    if (directory && isDirectoryIgnored(directory, scopes, scopeDirectoryCache)) continue;
-    const rules = new TextDecoder().decode(await entry.file.arrayBuffer());
-    scopes.push({ directory, matcher: ignore().add(rules) });
-    scopeDirectoryCache.clear();
+  for (const ignoreFiles of ignoreFilesByDepth) {
+    for (const entry of ignoreFiles) {
+      throwIfAborted(signal);
+      const directory = dirname(entry.relativePath);
+      if (directory && isDirectoryIgnored(directory, scopes, scopeDirectoryCache)) continue;
+      if (scopes.size >= APPLICATION_SOURCE_MAX_IGNORE_FILES) {
+        throw new Error(
+          `A source directory cannot contain more than ${APPLICATION_SOURCE_MAX_IGNORE_FILES} active .gitignore files`,
+        );
+      }
+      validateFileSize(entry.file, entry.relativePath);
+      if (entry.file.size > APPLICATION_SOURCE_MAX_IGNORE_FILE_BYTES) {
+        throw new Error(`The .gitignore file exceeds the 1 MiB rule limit: ${entry.relativePath}`);
+      }
+      ignoreBytes += entry.file.size;
+      if (ignoreBytes > APPLICATION_SOURCE_MAX_IGNORE_BYTES) {
+        throw new Error("The source directory exceeds the 4 MiB cumulative .gitignore rule limit");
+      }
+      const ruleBuffer = await entry.file.arrayBuffer();
+      throwIfAborted(signal);
+      let rules: string;
+      try {
+        rules = UTF8_DECODER.decode(ruleBuffer);
+      } catch {
+        throw new Error(`The .gitignore file is not valid UTF-8: ${entry.relativePath}`);
+      }
+      try {
+        scopes.set(directory, ignore().add(rules));
+      } catch {
+        throw new Error(`The .gitignore rules could not be parsed: ${entry.relativePath}`);
+      }
+      scopeDirectoryCache.clear();
+    }
   }
 
   const directoryCache = new Map<string, boolean>();
-  const filtered = entries.filter((entry) => !isPathIgnored(entry.relativePath, scopes, directoryCache));
+  const filtered: DirectoryEntry[] = [];
+  for (const [index, entry] of entries.entries()) {
+    if (index > 0 && index % IGNORE_FILTER_BATCH_SIZE === 0) {
+      await yieldToEventLoop();
+      throwIfAborted(signal);
+    }
+    if (isPathIgnored(entry.relativePath, scopes, directoryCache)) continue;
+    filtered.push(entry);
+    if (filtered.length > APPLICATION_SOURCE_MAX_FILES) {
+      throw new Error(
+        `A source directory cannot contain more than ${APPLICATION_SOURCE_MAX_FILES} files after applying .gitignore rules`,
+      );
+    }
+  }
   if (filtered.length === 0) {
     throw new Error("No source files remain after applying .gitignore rules");
   }
@@ -275,7 +319,7 @@ async function filterIgnoredDirectoryEntries(
 
 function isPathIgnored(
   path: string,
-  scopes: readonly IgnoreScope[],
+  scopes: IgnoreScopeIndex,
   directoryCache: Map<string, boolean>,
 ): boolean {
   const parent = dirname(path);
@@ -285,7 +329,7 @@ function isPathIgnored(
 
 function isDirectoryIgnored(
   path: string,
-  scopes: readonly IgnoreScope[],
+  scopes: IgnoreScopeIndex,
   cache: Map<string, boolean>,
 ): boolean {
   const cached = cache.get(path);
@@ -300,23 +344,25 @@ function isDirectoryIgnored(
 function evaluateIgnoreRules(
   path: string,
   directory: boolean,
-  scopes: readonly IgnoreScope[],
+  scopes: IgnoreScopeIndex,
 ): boolean {
   let ignored = false;
-  for (const scope of scopes) {
-    const scopedPath = relativeToScope(path, scope.directory);
-    if (scopedPath === undefined || scopedPath === "") continue;
-    const result = scope.matcher.test(directory ? `${scopedPath}/` : scopedPath);
-    if (result.ignored) ignored = true;
-    if (result.unignored) ignored = false;
+  let scopeEnd = 0;
+  while (true) {
+    const scopeDirectory = scopeEnd === 0 ? "" : path.slice(0, scopeEnd);
+    const matcher = scopes.get(scopeDirectory);
+    if (matcher) {
+      const scopedPath = scopeDirectory ? path.slice(scopeDirectory.length + 1) : path;
+      const result = matcher.test(directory ? `${scopedPath}/` : scopedPath);
+      if (result.ignored) ignored = true;
+      if (result.unignored) ignored = false;
+    }
+
+    const separator = path.indexOf("/", scopeEnd === 0 ? 0 : scopeEnd + 1);
+    if (separator < 0) break;
+    scopeEnd = separator;
   }
   return ignored;
-}
-
-function relativeToScope(path: string, scope: string): string | undefined {
-  if (!scope) return path;
-  if (path === scope) return "";
-  return path.startsWith(`${scope}/`) ? path.slice(scope.length + 1) : undefined;
 }
 
 function dirname(path: string): string {
@@ -330,7 +376,12 @@ function basename(path: string): string {
 }
 
 function pathDepth(path: string): number {
-  return path ? path.split("/").length : 0;
+  if (!path) return 0;
+  let depth = 1;
+  for (let separator = path.indexOf("/"); separator >= 0; separator = path.indexOf("/", separator + 1)) {
+    depth += 1;
+  }
+  return depth;
 }
 
 function validateDirectoryPackageLimits(entries: readonly DirectoryEntry[]): void {
@@ -339,6 +390,7 @@ function validateDirectoryPackageLimits(entries: readonly DirectoryEntry[]): voi
       `A source directory cannot contain more than ${APPLICATION_SOURCE_MAX_FILES} files after applying .gitignore rules`,
     );
   }
+  for (const entry of entries) validateFileSize(entry.file, entry.relativePath);
   const oversizedFile = entries.find((entry) => entry.file.size > APPLICATION_SOURCE_MAX_FILE_BYTES);
   if (oversizedFile) {
     throw new Error(`The source directory file exceeds the 16 MiB limit: ${oversizedFile.relativePath}`);
@@ -393,6 +445,12 @@ function portablePathKey(path: string): string {
   return path.normalize("NFC").toLocaleLowerCase("en-US");
 }
 
+function comparePortablePaths(left: string, right: string): number {
+  const leftKey = portablePathKey(left);
+  const rightKey = portablePathKey(right);
+  return leftKey < rightKey ? -1 : leftKey > rightKey ? 1 : 0;
+}
+
 function isVcsMetadataPath(path: string, includeDriveSanitizedNames = false): boolean {
   return path.split("/").some((segment) => {
     const normalized = segment.toLocaleLowerCase("en-US");
@@ -412,6 +470,12 @@ function archiveEntrySize(input: string, path: string): number {
   return size;
 }
 
+function validateFileSize(file: Pick<File, "size">, path: string): void {
+  if (!Number.isSafeInteger(file.size) || file.size < 0) {
+    throw new Error(`The application source contains an invalid file size: ${path}`);
+  }
+}
+
 function sourceDirectoryName(firstPath: string): string {
   const name = firstPath.split("/")[0]
     .replace(/[^A-Za-z0-9._-]+/g, "-")
@@ -419,34 +483,104 @@ function sourceDirectoryName(firstPath: string): string {
   return name || "application";
 }
 
-function zipDirectory(entries: Record<string, Uint8Array>, signal?: AbortSignal): Promise<Uint8Array> {
+async function zipDirectory(
+  entries: readonly DirectoryEntry[],
+  onProgress?: (progress: number) => void,
+  signal?: AbortSignal,
+): Promise<File> {
+  const chunks: Uint8Array<ArrayBuffer>[] = [];
+  let archiveBytes = 0;
+  let archiveError: Error | null = null;
+  let completeArchive = () => {};
+  const archiveComplete = new Promise<void>((resolve) => {
+    completeArchive = resolve;
+  });
+  const archive = new Zip((error, data, final) => {
+    if (error) {
+      archiveError = error;
+      completeArchive();
+      return;
+    }
+    if (data.byteLength > 0) {
+      archiveBytes += data.byteLength;
+      chunks.push(data);
+    }
+    if (final) completeArchive();
+  });
+
+  try {
+    for (const [index, entry] of entries.entries()) {
+      throwIfAborted(signal);
+      const source = new Uint8Array(await entry.file.arrayBuffer());
+      throwIfAborted(signal);
+      await appendZipEntry(archive, entry.path, source, signal);
+      onProgress?.(Math.round(((index + 1) / entries.length) * 80));
+    }
+    archive.end();
+    await archiveComplete;
+    throwIfAborted(signal);
+    if (archiveError) throw archiveError;
+    if (archiveBytes > APPLICATION_SOURCE_MAX_ARCHIVE_BYTES) {
+      throw new Error("The generated source ZIP exceeds the 64 MiB browser upload limit");
+    }
+    const output = new File(
+      chunks,
+      `${sourceDirectoryName(entries[0].path)}-source.zip`,
+      { type: "application/zip" },
+    );
+    chunks.length = 0;
+    return output;
+  } catch (error) {
+    archive.terminate();
+    throw error;
+  }
+}
+
+function appendZipEntry(
+  archive: Zip,
+  path: string,
+  source: Uint8Array,
+  signal?: AbortSignal,
+): Promise<void> {
   return new Promise((resolve, reject) => {
+    const entry = new AsyncZipDeflate(path, { level: 6 });
+    entry.mtime = ZIP_ENTRY_TIMESTAMP;
+    archive.add(entry);
+    const forward = entry.ondata;
     let settled = false;
-    let cancel = () => {};
-    const abort = () => {
-      cancel();
-      complete(() => reject(abortError()));
-    };
     const complete = (callback: () => void) => {
       if (settled) return;
       settled = true;
       signal?.removeEventListener("abort", abort);
       callback();
     };
-    cancel = zip(entries, { level: 6 }, (error, data) => {
+    const abort = () => {
+      entry.terminate();
+      complete(() => reject(abortError()));
+    };
+    entry.ondata = (error, data, final) => {
+      forward(error, data, final);
       if (error) {
         complete(() => reject(error));
         return;
       }
-      complete(() => resolve(data));
-    });
+      if (final) complete(resolve);
+    };
     signal?.addEventListener("abort", abort, { once: true });
-    if (signal?.aborted) abort();
+    if (signal?.aborted) {
+      abort();
+      return;
+    }
+    entry.push(source, true);
   });
 }
 
 function throwIfAborted(signal: AbortSignal | undefined): void {
   if (signal?.aborted) throw abortError();
+}
+
+function yieldToEventLoop(): Promise<void> {
+  return new Promise((resolve) => globalThis.setTimeout(resolve, 0));
 }
 
 function abortError(): Error {

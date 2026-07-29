@@ -115,6 +115,7 @@ fn acquire_certificate_activation_lock(cert_live_root: &Path) -> EdgeRuntimeResu
     }
     let lock = OpenOptions::new()
         .create(true)
+        .truncate(false)
         .read(true)
         .write(true)
         .open(&lock_path)

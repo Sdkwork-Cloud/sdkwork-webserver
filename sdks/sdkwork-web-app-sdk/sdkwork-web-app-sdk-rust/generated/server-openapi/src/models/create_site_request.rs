@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+use crate::models::{ApplicationStoreListing};
+
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct CreateSiteRequest {
     pub name: String,
@@ -20,4 +22,8 @@ pub struct CreateSiteRequest {
     #[serde(rename = "runtimeConfig")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub runtime_config: Option<serde_json::Value>,
+
+    #[serde(rename = "storeListing")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub store_listing: Option<ApplicationStoreListing>,
 }

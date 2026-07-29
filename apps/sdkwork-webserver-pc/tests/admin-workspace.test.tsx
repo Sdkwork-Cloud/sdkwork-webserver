@@ -2,7 +2,7 @@
 
 import { createWebserverAdminApplicationRegistry, webserverModule as applicationsModule } from "@sdkwork/webserver-pc-admin-applications";
 import type { WebserverAdminSdkClient } from "@sdkwork/webserver-pc-admin-core";
-import { WebserverWorkspace, type ApplicationSourceStorage } from "@sdkwork/webserver-pc-commons";
+import { WebserverWorkspace, type ApplicationMediaStorage, type ApplicationSourceStorage } from "@sdkwork/webserver-pc-commons";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -12,9 +12,11 @@ afterEach(() => cleanup());
 describe("admin workspace application controls", () => {
   it("renders constrained application fields as selects", async () => {
     const create = vi.fn().mockResolvedValue({ id: "app-1" });
+    const update = vi.fn().mockResolvedValue({ id: "app-1" });
     const createDeployment = vi.fn().mockResolvedValue({ id: "deployment-1", status: 0 });
     const sourceStorage = testSourceStorage();
-    const registry = createWebserverAdminApplicationRegistry(client({ create, createDeployment }), sourceStorage);
+    const mediaStorage = testMediaStorage();
+    const registry = createWebserverAdminApplicationRegistry(client({ create, createDeployment, update }), sourceStorage, mediaStorage);
     renderWorkspace("/admin/applications", registry);
 
     const createButton = await screen.findByRole("button", { name: "Create application" });
@@ -24,6 +26,10 @@ describe("admin workspace application controls", () => {
     const siteType = screen.getByLabelText("Runtime type");
     expect(applicationType.tagName).toBe("SELECT");
     expect(siteType.tagName).toBe("SELECT");
+    expect(Array.from((applicationType as HTMLSelectElement).options, (option) => option.text)).toEqual([
+      "Web application",
+      "API service",
+    ]);
     expect(Array.from((siteType as HTMLSelectElement).options, (option) => option.text)).toEqual([
       "Static site",
       "Single-page application (SPA)",
@@ -32,12 +38,28 @@ describe("admin workspace application controls", () => {
       "Python",
       "Other",
     ]);
+    expect(screen.getByRole("button", { name: "Choose ZIP package" })).toBeTruthy();
+    expect(screen.getByText("Store listing assets")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Generate default" }).getAttribute("aria-pressed")).toBe("true");
+    expect(screen.getByText("No source selected")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Source directory" }));
+    expect(screen.getByRole("button", { name: "Choose source directory" })).toBeTruthy();
+    const directoryInput = screen.getByTestId("application-source-input") as HTMLInputElement;
+    expect(directoryInput.multiple).toBe(true);
+    expect(directoryInput.hasAttribute("webkitdirectory")).toBe(true);
+    fireEvent.change(directoryInput, {
+      target: { files: [new File(["a"], "a.ts"), new File(["b"], "b.ts")] },
+    });
+    expect(screen.getByText("2 source files selected")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "ZIP package" }));
+    expect(screen.getByText("No source selected")).toBeTruthy();
     fireEvent.change(applicationType, { target: { value: "API" } });
     fireEvent.change(siteType, { target: { value: "6" } });
     fireEvent.change(screen.getByLabelText("Application name"), { target: { value: "Public API" } });
-    fireEvent.change(screen.getByLabelText("Application source"), {
+    fireEvent.change(screen.getByTestId("application-source-input"), {
       target: { files: [new File(["source"], "source.zip", { type: "application/zip" })] },
     });
+    expect(screen.getByText("source.zip")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
 
     await waitFor(() => expect(create).toHaveBeenCalledWith(
@@ -45,6 +67,15 @@ describe("admin workspace application controls", () => {
       { idempotencyKey: expect.any(String) },
     ));
     expect(sourceStorage.store).toHaveBeenCalledWith(expect.objectContaining({ applicationId: "app-1" }));
+    expect(mediaStorage.createDefaultIcon).toHaveBeenCalledWith("Public API");
+    expect(update).toHaveBeenCalledWith("app-1", expect.objectContaining({
+      storeListing: expect.objectContaining({
+        icon: expect.objectContaining({
+          source: "drive",
+          uri: "drive://spaces/space-1/nodes/app-1-icon-0",
+        }),
+      }),
+    }), { idempotencyKey: expect.any(String) });
     expect(createDeployment).toHaveBeenCalledWith("app-1", expect.objectContaining({
       artifactDriveUri: "drive://spaces/space-1/nodes/node-1",
       versionTag: "v1.0.0",
@@ -53,7 +84,7 @@ describe("admin workspace application controls", () => {
 
   it("uses an application-specific scope for domain management", async () => {
     const listDomains = vi.fn().mockResolvedValue({ items: [], pageInfo: { page: 1, pageSize: 20, hasMore: false } });
-    const registry = createWebserverAdminApplicationRegistry(client({ listDomains }), testSourceStorage());
+    const registry = createWebserverAdminApplicationRegistry(client({ listDomains }), testSourceStorage(), testMediaStorage());
     renderWorkspace("/admin/application-domains", registry);
 
     const scopeInput = await screen.findByRole("combobox", { name: "Application" });
@@ -71,12 +102,13 @@ describe("admin workspace application controls", () => {
     const registry = createWebserverAdminApplicationRegistry(
       client({ create, createDeployment }),
       sourceStorage,
+      testMediaStorage(),
     );
     renderWorkspace("/admin/applications", registry);
 
     fireEvent.click(await screen.findByRole("button", { name: "Create application" }));
     fireEvent.change(screen.getByLabelText("Application name"), { target: { value: "Commercial portal" } });
-    fireEvent.change(screen.getByLabelText("Application source"), {
+    fireEvent.change(screen.getByTestId("application-source-input"), {
       target: { files: [new File(["source"], "source.zip", { type: "application/zip" })] },
     });
     const dialog = screen.getByRole("dialog");
@@ -90,6 +122,8 @@ describe("admin workspace application controls", () => {
     expect((screen.getByRole("button", { name: "Close" }) as HTMLButtonElement).disabled).toBe(true);
     expect((screen.getByRole("button", { name: "Cancel" }) as HTMLButtonElement).disabled).toBe(true);
     expect(screen.getByRole("button", { name: "Submitting..." })).toBeTruthy();
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(screen.getByRole("dialog")).toBeTruthy();
 
     resolveCreate?.({ id: "app-1" });
     await waitFor(() => expect(createDeployment).toHaveBeenCalledTimes(1));
@@ -101,12 +135,13 @@ describe("admin workspace application controls", () => {
     const registry = createWebserverAdminApplicationRegistry(
       client({ create, createDeployment }),
       testSourceStorage(),
+      testMediaStorage(),
     );
     renderWorkspace("/admin/applications", registry);
 
     fireEvent.click(await screen.findByRole("button", { name: "Create application" }));
     fireEvent.change(screen.getByLabelText("Application name"), { target: { value: "Commercial portal" } });
-    fireEvent.change(screen.getByLabelText("Application source"), {
+    fireEvent.change(screen.getByTestId("application-source-input"), {
       target: { files: [new File(["source"], "source.zip", { type: "application/zip" })] },
     });
     fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
@@ -117,12 +152,51 @@ describe("admin workspace application controls", () => {
     expect(screen.queryByText("provider detail must remain hidden")).toBeNull();
   });
 
+  it("keeps the application draft recoverable when store media upload fails", async () => {
+    const create = vi.fn().mockResolvedValue({ id: "app-1" });
+    const mediaStorage = testMediaStorage();
+    vi.mocked(mediaStorage.store).mockRejectedValue(new Error("provider detail must remain hidden"));
+    const registry = createWebserverAdminApplicationRegistry(
+      client({ create }),
+      testSourceStorage(),
+      mediaStorage,
+    );
+    renderWorkspace("/admin/applications", registry);
+
+    fireEvent.click(await screen.findByRole("button", { name: "Create application" }));
+    fireEvent.change(screen.getByLabelText("Application name"), { target: { value: "Commercial portal" } });
+    fireEvent.change(screen.getByTestId("application-source-input"), {
+      target: { files: [new File(["source"], "source.zip", { type: "application/zip" })] },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
+
+    expect((await screen.findByRole("alert")).textContent).toContain(
+      "Application app-1 was created as a draft, but its store assets were not saved.",
+    );
+    expect(screen.queryByText("provider detail must remain hidden")).toBeNull();
+  });
+
+  it("closes with Escape and restores focus to the invoking command", async () => {
+    const registry = createWebserverAdminApplicationRegistry(client({}), testSourceStorage(), testMediaStorage());
+    renderWorkspace("/admin/applications", registry);
+
+    const createButton = await screen.findByRole("button", { name: "Create application" });
+    createButton.focus();
+    fireEvent.click(createButton);
+    expect(document.activeElement).toBe(screen.getByLabelText("Application name"));
+
+    fireEvent.keyDown(document, { key: "Escape" });
+
+    expect(screen.queryByRole("dialog")).toBeNull();
+    await waitFor(() => expect(document.activeElement).toBe(createButton));
+  });
+
   it("prefills updates from the selected application", async () => {
     const update = vi.fn().mockResolvedValue({ id: "app-1" });
     const registry = createWebserverAdminApplicationRegistry(client({
       applicationItems: [{ id: "app-1", name: "Public API", description: "Current description", status: 1 }],
       update,
-    }), testSourceStorage());
+    }), testSourceStorage(), testMediaStorage());
     renderWorkspace("/admin/applications", registry);
 
     fireEvent.click(await screen.findByText("Public API"));
@@ -135,7 +209,11 @@ describe("admin workspace application controls", () => {
 
     await waitFor(() => expect(update).toHaveBeenCalledWith(
       "app-1",
-      { name: "Public API v2", description: "Current description" },
+      expect.objectContaining({
+        name: "Public API v2",
+        description: "Current description",
+        storeListing: expect.objectContaining({ icon: expect.any(Object) }),
+      }),
       { idempotencyKey: expect.any(String) },
     ));
   });
@@ -145,7 +223,7 @@ describe("admin workspace application controls", () => {
     const registry = createWebserverAdminApplicationRegistry(client({
       applicationItems: [{ id: "app-1", name: "Public API", status: 1 }],
       pause,
-    }), testSourceStorage());
+    }), testSourceStorage(), testMediaStorage());
     renderWorkspace("/admin/applications", registry);
 
     fireEvent.click(await screen.findByText("Public API"));
@@ -163,7 +241,7 @@ describe("admin workspace application controls", () => {
     const registry = createWebserverAdminApplicationRegistry(client({
       deploymentItems: [{ id: "deployment-1", environment: "production", status: 2 }],
       rollback,
-    }), testSourceStorage());
+    }), testSourceStorage(), testMediaStorage());
     renderWorkspace("/admin/application-deployments", registry);
 
     fireEvent.click(await screen.findByText("Succeeded"));
@@ -181,7 +259,7 @@ describe("admin workspace application controls", () => {
   });
 
   it("hides lifecycle commands without write permission", async () => {
-    const registry = createWebserverAdminApplicationRegistry(client({}), testSourceStorage());
+    const registry = createWebserverAdminApplicationRegistry(client({}), testSourceStorage(), testMediaStorage());
     renderWorkspace("/admin/applications", registry, ["web.sites.read"]);
 
     await screen.findByText("Public API");
@@ -246,6 +324,25 @@ function testSourceStorage(): ApplicationSourceStorage {
       archiveSize: "6",
       extractedCount: "1",
     }),
+  };
+}
+
+function testMediaStorage(): ApplicationMediaStorage {
+  return {
+    createDefaultIcon: vi.fn().mockResolvedValue(new File(["icon"], "application-icon.png", { type: "image/png" })),
+    store: vi.fn(async ({ altText, applicationId, file, role, sequence = 0 }) => ({
+      id: `${applicationId}-${role}-${sequence}`,
+      kind: "image" as const,
+      source: "drive" as const,
+      uri: `drive://spaces/space-1/nodes/${applicationId}-${role}-${sequence}`,
+      fileName: file.name,
+      mimeType: file.type,
+      sizeBytes: String(file.size),
+      width: role === "cover" ? 1024 : 1024,
+      height: role === "cover" ? 500 : 1024,
+      altText,
+      metadata: { drive: { nodeId: `${applicationId}-${role}-${sequence}`, spaceId: "space-1" } },
+    })),
   };
 }
 

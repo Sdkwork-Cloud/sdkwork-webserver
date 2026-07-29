@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace SDKWork\Web\AppSdk\Models;
 
+use SDKWork\Web\AppSdk\Models\ApplicationStoreListing;
+
 final class CreateSiteRequest
 {
     public ?string $name = null;
@@ -17,6 +19,8 @@ final class CreateSiteRequest
     public ?int $siteType = null;
 
     public array $runtimeConfig = [];
+
+    public ?ApplicationStoreListing $storeListing = null;
 
     public function __construct(array $data = [])
     {
@@ -38,6 +42,9 @@ final class CreateSiteRequest
         $this->runtimeConfig = array_key_exists('runtimeConfig', $data)
             ? is_array($data['runtimeConfig']) ? $data['runtimeConfig'] : []
             : [];
+        $this->storeListing = array_key_exists('storeListing', $data)
+            ? is_array($data['storeListing']) ? ApplicationStoreListing::fromArray($data['storeListing']) : null
+            : null;
     }
 
     public static function fromArray(?array $data): ?self
@@ -54,6 +61,7 @@ final class CreateSiteRequest
             'applicationType' => $this->applicationType,
             'siteType' => $this->siteType,
             'runtimeConfig' => $this->runtimeConfig,
+            'storeListing' => $this->storeListing instanceof ApplicationStoreListing ? $this->storeListing->toArray() : $this->storeListing,
         ];
     }
 }

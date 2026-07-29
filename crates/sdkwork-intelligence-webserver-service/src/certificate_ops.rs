@@ -51,6 +51,7 @@ impl WebService {
                     tenant_id,
                     &certificate_id,
                     true,
+                    None,
                     "certificate issuer failed",
                 )
                 .await;
@@ -66,6 +67,7 @@ impl WebService {
             request.auto_renew,
             material,
             "certificates.issue",
+            None,
         )
         .await
     }

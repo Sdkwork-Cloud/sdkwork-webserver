@@ -10,6 +10,7 @@ type SiteResponse struct {
 	SiteType int `json:"siteType"`
 	Status int `json:"status"`
 	RuntimeConfig map[string]interface{} `json:"runtimeConfig"`
+	StoreListing ApplicationStoreListing `json:"storeListing"`
 	CreatedAt string `json:"createdAt"`
 	UpdatedAt string `json:"updatedAt"`
 }

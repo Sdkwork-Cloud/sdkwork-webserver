@@ -23,7 +23,7 @@ export class CertificateDistributionCertificatesDistributionApi {
       { name: 'page', value: params?.page, style: 'form', explode: true, allowReserved: false },
       { name: 'page_size', value: params?.pageSize, style: 'form', explode: true, allowReserved: false },
     ]);
-    return this.client.request<{ items: CertificateDistributionResponse[]; pageInfo: PageInfo; }>(appendQueryString(backendApiPath(`/certificate_distribution`), query), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any });
+    return this.client.request<{ items: CertificateDistributionResponse[]; pageInfo: PageInfo; }>(appendQueryString(backendApiPath(`/certificate_distribution`), query), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any, sdkworkUnwrapKind: 'page' });
   }
 }
 

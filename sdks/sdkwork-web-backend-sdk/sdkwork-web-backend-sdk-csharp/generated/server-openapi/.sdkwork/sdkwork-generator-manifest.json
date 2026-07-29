@@ -112,7 +112,7 @@
     },
     {
       "path": "Models/ApplicationResponse.cs",
-      "sha256": "94fdd2bb61e99734efef2d314677132009a8963d0c6cbb31140f69e1743cceb6"
+      "sha256": "4fba71df8b017f067dceffdf1d1ce19636330b81c1bf3f8f8b5ed2a16d31260d"
     },
     {
       "path": "Models/ApplicationsActivateResponse.cs",
@@ -157,6 +157,10 @@
     {
       "path": "Models/ApplicationsRetrieveResponse.cs",
       "sha256": "9e7e16c3503e247c6a1418dda17abb9a1ba9cc07ebee763db2b2f87000e70ceb"
+    },
+    {
+      "path": "Models/ApplicationStoreListing.cs",
+      "sha256": "553509be2606ef743b542d59e7565f25aa56cee4f34defd09100d0a42b8b0536"
     },
     {
       "path": "Models/ApplicationsUpdateResponse.cs",
@@ -236,7 +240,7 @@
     },
     {
       "path": "Models/CreateApplicationRequest.cs",
-      "sha256": "fa44323f62e61b217446150c0e712b77f0dab449e7b1cd5322b188c404ea3cdb"
+      "sha256": "3ac065ccb12fc2bbf5d3e57ec6459a24736ee9f2637d4709ba8fa976e250a22f"
     },
     {
       "path": "Models/CreateCertificateRequest.cs",
@@ -261,6 +265,14 @@
     {
       "path": "Models/HeartbeatResponse.cs",
       "sha256": "2175a904025e9cd61800f9a2ccf3d20e6ab229edb7d3aad9c8160c4bbf23a1d2"
+    },
+    {
+      "path": "Models/MediaChecksum.cs",
+      "sha256": "f7ffb2f8b81eca490053ca835f72f928e2e6369245c07ce0ee08da8503fa4ed9"
+    },
+    {
+      "path": "Models/MediaResource.cs",
+      "sha256": "531ae88771ad251e369dc24739625cda29a1c463ea9ce5d52b810a440bbdc2c6"
     },
     {
       "path": "Models/NginxConfigPage.cs",
@@ -352,7 +364,7 @@
     },
     {
       "path": "Models/UpdateApplicationRequest.cs",
-      "sha256": "63bcde8e42d7dbea6186fc37ef2db067be3326906f417cd3c665bbd39091e31f"
+      "sha256": "f46de77a06bf1624a1e900a1f70ed6dc75462c64af0bd698b8d386cd3cf62458"
     },
     {
       "path": "Models/UpdateCertificateRequest.cs",

@@ -51,7 +51,7 @@ export class ApplicationApi {
       { name: 'status', value: params?.status, style: 'form', explode: true, allowReserved: false },
       { name: 'keyword', value: params?.keyword, style: 'form', explode: true, allowReserved: false },
     ]);
-    return this.client.request<{ items: ApplicationResponse[]; pageInfo: PageInfo; }>(appendQueryString(backendApiPath(`/applications`), query), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any });
+    return this.client.request<{ items: ApplicationResponse[]; pageInfo: PageInfo; }>(appendQueryString(backendApiPath(`/applications`), query), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any, sdkworkUnwrapKind: 'page' });
   }
 
 /** Create a managed application */
@@ -62,12 +62,12 @@ export class ApplicationApi {
       },
       {}
     );
-    return this.client.request<ApplicationResponse>(backendApiPath(`/applications`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, body, headers: requestHeaders, contentType: 'application/json' });
+    return this.client.request<ApplicationResponse>(backendApiPath(`/applications`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, body, headers: requestHeaders, contentType: 'application/json', sdkworkUnwrapKind: 'item' });
   }
 
 /** Retrieve a managed application */
   async retrieve(applicationId: string, requestOptions?: ApiRequestOptions): Promise<ApplicationResponse> {
-    return this.client.request<ApplicationResponse>(backendApiPath(`/applications/${serializePathParameter(applicationId, { name: 'applicationId', style: 'simple', explode: false })}`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any });
+    return this.client.request<ApplicationResponse>(backendApiPath(`/applications/${serializePathParameter(applicationId, { name: 'applicationId', style: 'simple', explode: false })}`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any, sdkworkUnwrapKind: 'item' });
   }
 
 /** Update a managed application */
@@ -78,7 +78,7 @@ export class ApplicationApi {
       },
       {}
     );
-    return this.client.request<ApplicationResponse>(backendApiPath(`/applications/${serializePathParameter(applicationId, { name: 'applicationId', style: 'simple', explode: false })}`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'PATCH' as any, body, headers: requestHeaders, contentType: 'application/json' });
+    return this.client.request<ApplicationResponse>(backendApiPath(`/applications/${serializePathParameter(applicationId, { name: 'applicationId', style: 'simple', explode: false })}`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'PATCH' as any, body, headers: requestHeaders, contentType: 'application/json', sdkworkUnwrapKind: 'item' });
   }
 
 /** Delete a managed application */
@@ -100,7 +100,7 @@ export class ApplicationApi {
       },
       {}
     );
-    return this.client.request<ApplicationResponse>(backendApiPath(`/applications/${serializePathParameter(applicationId, { name: 'applicationId', style: 'simple', explode: false })}/activate`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, headers: requestHeaders });
+    return this.client.request<ApplicationResponse>(backendApiPath(`/applications/${serializePathParameter(applicationId, { name: 'applicationId', style: 'simple', explode: false })}/activate`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, headers: requestHeaders, sdkworkUnwrapKind: 'item' });
   }
 
 /** Pause a managed application */
@@ -111,7 +111,7 @@ export class ApplicationApi {
       },
       {}
     );
-    return this.client.request<ApplicationResponse>(backendApiPath(`/applications/${serializePathParameter(applicationId, { name: 'applicationId', style: 'simple', explode: false })}/pause`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, headers: requestHeaders });
+    return this.client.request<ApplicationResponse>(backendApiPath(`/applications/${serializePathParameter(applicationId, { name: 'applicationId', style: 'simple', explode: false })}/pause`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, headers: requestHeaders, sdkworkUnwrapKind: 'item' });
   }
 }
 

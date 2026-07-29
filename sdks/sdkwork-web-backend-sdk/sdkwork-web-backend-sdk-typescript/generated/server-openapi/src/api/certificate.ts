@@ -35,7 +35,7 @@ export class CertificateApi {
       { name: 'page', value: params?.page, style: 'form', explode: true, allowReserved: false },
       { name: 'page_size', value: params?.pageSize, style: 'form', explode: true, allowReserved: false },
     ]);
-    return this.client.request<{ items: CertificateResponse[]; pageInfo: PageInfo; }>(appendQueryString(backendApiPath(`/certificates`), query), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any });
+    return this.client.request<{ items: CertificateResponse[]; pageInfo: PageInfo; }>(appendQueryString(backendApiPath(`/certificates`), query), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any, sdkworkUnwrapKind: 'page' });
   }
 
 /** Issue a canonical certificate */
@@ -46,7 +46,7 @@ export class CertificateApi {
       },
       {}
     );
-    return this.client.request<CertificateResponse>(backendApiPath(`/certificates`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, body, headers: requestHeaders, contentType: 'application/json' });
+    return this.client.request<CertificateResponse>(backendApiPath(`/certificates`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, body, headers: requestHeaders, contentType: 'application/json', sdkworkUnwrapKind: 'item' });
   }
 
 /** Update certificate automatic renewal policy */
@@ -57,7 +57,7 @@ export class CertificateApi {
       },
       {}
     );
-    return this.client.request<CertificateResponse>(backendApiPath(`/certificates/${serializePathParameter(certificateId, { name: 'certificateId', style: 'simple', explode: false })}`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'PUT' as any, body, headers: requestHeaders, contentType: 'application/json' });
+    return this.client.request<CertificateResponse>(backendApiPath(`/certificates/${serializePathParameter(certificateId, { name: 'certificateId', style: 'simple', explode: false })}`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'PUT' as any, body, headers: requestHeaders, contentType: 'application/json', sdkworkUnwrapKind: 'item' });
   }
 
 /** Renew a canonical certificate now */
@@ -68,7 +68,7 @@ export class CertificateApi {
       },
       {}
     );
-    return this.client.request<CertificateResponse>(backendApiPath(`/certificates/${serializePathParameter(certificateId, { name: 'certificateId', style: 'simple', explode: false })}/renew`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, headers: requestHeaders });
+    return this.client.request<CertificateResponse>(backendApiPath(`/certificates/${serializePathParameter(certificateId, { name: 'certificateId', style: 'simple', explode: false })}/renew`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, headers: requestHeaders, sdkworkUnwrapKind: 'item' });
   }
 }
 

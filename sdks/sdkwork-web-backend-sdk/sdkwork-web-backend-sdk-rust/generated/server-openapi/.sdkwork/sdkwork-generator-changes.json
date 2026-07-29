@@ -9,11 +9,18 @@
     "protocol": "http",
     "packageName": "sdkwork-web-backend-sdk"
   },
-  "changeFingerprint": "a43f545c98e4a2a28671c7c9771b5d029a98407bb16556f3d12ff5a62f078f9f",
+  "changeFingerprint": "afcc0517e0ad88a510833add81a8360c4b34754e95835aebaf7fe39eaffb7b5e",
   "changes": {
-    "createdGeneratedFiles": [],
+    "createdGeneratedFiles": [
+      "src/models/application_store_listing.rs",
+      "src/models/media_checksum.rs",
+      "src/models/media_resource.rs"
+    ],
     "updatedGeneratedFiles": [
-      "src/models/create_nginx_config_request.rs"
+      "src/models/application_response.rs",
+      "src/models/create_application_request.rs",
+      "src/models/mod.rs",
+      "src/models/update_application_request.rs"
     ],
     "unchangedGeneratedFiles": [
       "bin/publish-core.mjs",
@@ -48,7 +55,6 @@
       "src/models/application_deployment_response.rs",
       "src/models/application_domain_response.rs",
       "src/models/application_domain_verify_response.rs",
-      "src/models/application_response.rs",
       "src/models/applications_activate_response.rs",
       "src/models/applications_create_response201.rs",
       "src/models/applications_deployments_create_response201.rs",
@@ -80,13 +86,12 @@
       "src/models/configs_validate_response.rs",
       "src/models/create_application_deployment_request.rs",
       "src/models/create_application_domain_request.rs",
-      "src/models/create_application_request.rs",
       "src/models/create_certificate_request.rs",
+      "src/models/create_nginx_config_request.rs",
       "src/models/create_server_request.rs",
       "src/models/create_server_response.rs",
       "src/models/field_error.rs",
       "src/models/heartbeat_response.rs",
-      "src/models/mod.rs",
       "src/models/nginx_config_page.rs",
       "src/models/nginx_config_response.rs",
       "src/models/nginx_deploy_response.rs",
@@ -109,7 +114,6 @@
       "src/models/servers_create_response201.rs",
       "src/models/servers_list_response.rs",
       "src/models/status_retrieve_response.rs",
-      "src/models/update_application_request.rs",
       "src/models/update_certificate_request.rs",
       "src/models/update_nginx_config_request.rs"
     ],
@@ -129,7 +133,13 @@
       {
         "area": "models",
         "paths": [
-          "src/models/create_nginx_config_request.rs"
+          "src/models/application_response.rs",
+          "src/models/application_store_listing.rs",
+          "src/models/create_application_request.rs",
+          "src/models/media_checksum.rs",
+          "src/models/media_resource.rs",
+          "src/models/mod.rs",
+          "src/models/update_application_request.rs"
         ]
       }
     ],

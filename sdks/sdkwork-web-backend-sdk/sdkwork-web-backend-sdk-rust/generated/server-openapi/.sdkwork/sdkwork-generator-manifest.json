@@ -140,7 +140,11 @@
     },
     {
       "path": "src/models/application_response.rs",
-      "sha256": "bfc7963dbb5f2679e30512082f55007ae8025a99f2a39a926362dac8f12500ba"
+      "sha256": "6040a7df51f6c9aa1a669e029c7a3a8d435061ec587f3ff8b04922eca378c822"
+    },
+    {
+      "path": "src/models/application_store_listing.rs",
+      "sha256": "0715f662e22202117522ae866ad0c758d61aa5bf3609db819e23ecd223b9eea7"
     },
     {
       "path": "src/models/applications_activate_response.rs",
@@ -268,7 +272,7 @@
     },
     {
       "path": "src/models/create_application_request.rs",
-      "sha256": "5f95225c2b570caf88cf34bd821d20cee86a573f77cbe4706b3dc715e30c43b8"
+      "sha256": "ba1271f78973518144426d926e7b4a4a76852d81223b5beee20f0779c1992237"
     },
     {
       "path": "src/models/create_certificate_request.rs",
@@ -295,8 +299,16 @@
       "sha256": "5501cdb7099fbaa6a2fc6f6da52974da45c67166615b2f1e80c800aca1b2d8ef"
     },
     {
+      "path": "src/models/media_checksum.rs",
+      "sha256": "ea88fdd40fa405b2b1887c425bd702fb3d792124457cb2049bf6aeb39f1adec6"
+    },
+    {
+      "path": "src/models/media_resource.rs",
+      "sha256": "85025f0800fae0146d29fe4548457f3c6775b4998b2437963d35e42c127c13bf"
+    },
+    {
       "path": "src/models/mod.rs",
-      "sha256": "ab0cda0d600fa807d339ec3e36809a05dca1ed3360c3f4ce54956b7e585f48f3"
+      "sha256": "aa6f75bbbeb337e2c6d69520077a159247e0b96bf922b54cf2047002587af9ab"
     },
     {
       "path": "src/models/nginx_config_page.rs",
@@ -388,7 +400,7 @@
     },
     {
       "path": "src/models/update_application_request.rs",
-      "sha256": "252d9af450bb4ee1a93a96ec755b182872d9ac5603f2dd60e0b9e306259cad2e"
+      "sha256": "49afb39ef03b7758598e79b81ce984439770c281aa4e293566a6071c8c3aa9f0"
     },
     {
       "path": "src/models/update_certificate_request.rs",

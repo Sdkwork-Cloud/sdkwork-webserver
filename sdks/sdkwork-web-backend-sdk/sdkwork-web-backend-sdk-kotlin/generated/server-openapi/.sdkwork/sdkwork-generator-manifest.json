@@ -124,7 +124,7 @@
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationResponse.kt",
-      "sha256": "fa71a6afaa004721de6e7cd33af050cf024a37892c947248695bbe5918c89ca5"
+      "sha256": "f77149b77c34227271bad1e0fc75d47c94596483db6b60e4cada583a611d3722"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationsActivateResponse.kt",
@@ -169,6 +169,10 @@
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationsRetrieveResponse.kt",
       "sha256": "41abf58bba12f926207fe9648b6589416ad77b225260c5bdc1f4454f6701f69a"
+    },
+    {
+      "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationStoreListing.kt",
+      "sha256": "c88fce16a36f9fef9c5478f48b99802aed93ef22acfef651260aa17794fea816"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationsUpdateResponse.kt",
@@ -248,7 +252,7 @@
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/CreateApplicationRequest.kt",
-      "sha256": "d01ffee78f22ab1dfa9a58ab8df90802c4894b72adecbc63e7d1b530b2c37a54"
+      "sha256": "a7e8b9aa4fd7358a2ae9f5d9f6ebe86a31d5a70bfe81a75c3ea5f7a5eaf1b2f8"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/CreateCertificateRequest.kt",
@@ -277,6 +281,14 @@
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/http/HttpClient.kt",
       "sha256": "9ddc43f2c0f7d2365119ff6d5eaaea2952d305abea6a786d11deb4552ba35501"
+    },
+    {
+      "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/MediaChecksum.kt",
+      "sha256": "8e1dcd288983730aeac56c647d2d68c22ceb41aee77e7105cff8a3a8d827c430"
+    },
+    {
+      "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/MediaResource.kt",
+      "sha256": "9a851f33cb88bac7cdeb46715d5f3a02d7e6cfcdee9129c4871eafc1c47cd2de"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/NginxConfigPage.kt",
@@ -372,7 +384,7 @@
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/UpdateApplicationRequest.kt",
-      "sha256": "302f5fcf4d3530480d8a6bcafe7b0ee1e199ada915dd4bd78ccc3588e7212950"
+      "sha256": "4dbebeb7d4895981e4144bd763fed99deb0f3a9a46017b3ac40a43976368494b"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/UpdateCertificateRequest.kt",

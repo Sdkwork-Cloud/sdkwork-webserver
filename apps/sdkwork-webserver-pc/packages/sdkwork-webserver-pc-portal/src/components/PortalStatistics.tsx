@@ -48,10 +48,10 @@ export function PortalStatistics({
   ] as const;
 
   return (
-    <div className="mt-9 grid max-w-[840px] grid-cols-2 border-y border-white/15 lg:grid-cols-4" aria-label={t("metrics.ariaLabel")}>
+    <div className="mt-16 grid w-full grid-cols-2 bg-white/[0.035] px-2 sm:px-4 lg:grid-cols-4" aria-label={t("metrics.ariaLabel")}>
       {metrics.map(({ description, icon: Icon, label, value }, index) => (
         <div
-          className={`min-w-0 py-4 pr-3 ${index % 2 === 1 ? "border-l border-white/15 pl-4" : ""} ${index >= 2 ? "border-t border-white/15 lg:border-t-0" : ""} ${index > 0 ? "lg:border-l lg:border-white/15 lg:pl-5" : ""}`}
+          className={`min-w-0 px-3 py-5 sm:px-4 lg:px-5 ${index >= 2 ? "bg-black/[0.06] lg:bg-transparent" : ""}`}
           key={label}
         >
           <span className="flex items-center gap-2 text-xs font-semibold text-emerald-200">

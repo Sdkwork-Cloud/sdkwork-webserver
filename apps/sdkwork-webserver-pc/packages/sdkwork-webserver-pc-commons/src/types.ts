@@ -1,6 +1,7 @@
 export type WebserverPcSurface = "app-console" | "backend-admin";
 
 export type WebserverActionErrorCode =
+  | "application-draft-media-failed"
   | "application-draft-source-failed"
   | "application-draft-deployment-failed"
   | "deployment-source-stored";
@@ -74,6 +75,7 @@ export interface WebserverResourceFilter {
 }
 
 export interface WebserverResourceActionContext {
+  applicationSubmission?: import("./application-media.ts").ApplicationSubmissionInput;
   body: Record<string, unknown>;
   file?: File;
   files?: readonly File[];
@@ -101,6 +103,7 @@ export type WebserverResourceFieldOptions = Readonly<
 
 export interface WebserverResourceAction {
   acceptedFileTypes?: string;
+  applicationSubmission?: "create" | "update";
   availableWhen?(context: WebserverResourceActionContext): boolean;
   bodyTemplate: Record<string, unknown>;
   dangerous?: boolean;

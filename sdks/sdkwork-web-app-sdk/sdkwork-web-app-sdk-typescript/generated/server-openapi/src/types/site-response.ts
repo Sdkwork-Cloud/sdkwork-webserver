@@ -1,3 +1,5 @@
+import type { ApplicationStoreListing } from './application-store-listing';
+
 export interface SiteResponse {
   id?: string;
   name?: string;
@@ -7,6 +9,7 @@ export interface SiteResponse {
   siteType?: number;
   status?: number;
   runtimeConfig?: Record<string, unknown>;
+  storeListing?: ApplicationStoreListing;
   createdAt?: string;
   updatedAt?: string;
 }

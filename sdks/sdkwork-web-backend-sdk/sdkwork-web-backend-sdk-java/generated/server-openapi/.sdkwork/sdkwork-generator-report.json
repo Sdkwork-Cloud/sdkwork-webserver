@@ -12,7 +12,7 @@
   "mode": "apply",
   "hasChanges": true,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "0df8c4bf5650280f31226b9a4aab4b222ca230ee9f0a0a2cc0909b09876b9dd5",
+  "changeFingerprint": "60f3adca39c7567b6990c5e6ec9ed97dbe01ae4147fe0d51abf560cfba2973cd",
   "changeImpact": {
     "schemaVersion": 1,
     "areas": [
@@ -22,7 +22,12 @@
       {
         "area": "models",
         "paths": [
-          "src/main/java/com/sdkwork/web/backend/sdk/model/CreateNginxConfigRequest.java"
+          "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationResponse.java",
+          "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationStoreListing.java",
+          "src/main/java/com/sdkwork/web/backend/sdk/model/CreateApplicationRequest.java",
+          "src/main/java/com/sdkwork/web/backend/sdk/model/MediaChecksum.java",
+          "src/main/java/com/sdkwork/web/backend/sdk/model/MediaResource.java",
+          "src/main/java/com/sdkwork/web/backend/sdk/model/UpdateApplicationRequest.java"
         ]
       }
     ],
@@ -103,8 +108,8 @@
     "localVersions": []
   },
   "stats": {
-    "totalFiles": 93,
-    "models": 71,
+    "totalFiles": 96,
+    "models": 74,
     "apis": 9,
     "types": 0
   },
@@ -112,16 +117,22 @@
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 1,
+    "writtenFiles": 6,
     "skippedScaffoldFiles": 1,
-    "skippedUnchangedGeneratedFiles": 91,
+    "skippedUnchangedGeneratedFiles": 89,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "0df8c4bf5650280f31226b9a4aab4b222ca230ee9f0a0a2cc0909b09876b9dd5",
+    "changeFingerprint": "60f3adca39c7567b6990c5e6ec9ed97dbe01ae4147fe0d51abf560cfba2973cd",
     "changes": {
-      "createdGeneratedFiles": [],
+      "createdGeneratedFiles": [
+        "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationStoreListing.java",
+        "src/main/java/com/sdkwork/web/backend/sdk/model/MediaChecksum.java",
+        "src/main/java/com/sdkwork/web/backend/sdk/model/MediaResource.java"
+      ],
       "updatedGeneratedFiles": [
-        "src/main/java/com/sdkwork/web/backend/sdk/model/CreateNginxConfigRequest.java"
+        "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationResponse.java",
+        "src/main/java/com/sdkwork/web/backend/sdk/model/CreateApplicationRequest.java",
+        "src/main/java/com/sdkwork/web/backend/sdk/model/UpdateApplicationRequest.java"
       ],
       "unchangedGeneratedFiles": [
         "bin/publish-core.mjs",
@@ -152,7 +163,6 @@
         "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationDeploymentResponse.java",
         "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationDomainResponse.java",
         "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationDomainVerifyResponse.java",
-        "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationResponse.java",
         "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsActivateResponse.java",
         "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsCreateResponse201.java",
         "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsDeploymentsCreateResponse201.java",
@@ -183,8 +193,8 @@
         "src/main/java/com/sdkwork/web/backend/sdk/model/ConfigsValidateResponse.java",
         "src/main/java/com/sdkwork/web/backend/sdk/model/CreateApplicationDeploymentRequest.java",
         "src/main/java/com/sdkwork/web/backend/sdk/model/CreateApplicationDomainRequest.java",
-        "src/main/java/com/sdkwork/web/backend/sdk/model/CreateApplicationRequest.java",
         "src/main/java/com/sdkwork/web/backend/sdk/model/CreateCertificateRequest.java",
+        "src/main/java/com/sdkwork/web/backend/sdk/model/CreateNginxConfigRequest.java",
         "src/main/java/com/sdkwork/web/backend/sdk/model/CreateServerRequest.java",
         "src/main/java/com/sdkwork/web/backend/sdk/model/CreateServerResponse.java",
         "src/main/java/com/sdkwork/web/backend/sdk/model/FieldError.java",
@@ -211,7 +221,6 @@
         "src/main/java/com/sdkwork/web/backend/sdk/model/ServersCreateResponse201.java",
         "src/main/java/com/sdkwork/web/backend/sdk/model/ServersListResponse.java",
         "src/main/java/com/sdkwork/web/backend/sdk/model/StatusRetrieveResponse.java",
-        "src/main/java/com/sdkwork/web/backend/sdk/model/UpdateApplicationRequest.java",
         "src/main/java/com/sdkwork/web/backend/sdk/model/UpdateCertificateRequest.java",
         "src/main/java/com/sdkwork/web/backend/sdk/model/UpdateNginxConfigRequest.java",
         "src/main/java/com/sdkwork/web/backend/sdk/SdkworkBackendClient.java"
@@ -232,7 +241,12 @@
         {
           "area": "models",
           "paths": [
-            "src/main/java/com/sdkwork/web/backend/sdk/model/CreateNginxConfigRequest.java"
+            "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationResponse.java",
+            "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationStoreListing.java",
+            "src/main/java/com/sdkwork/web/backend/sdk/model/CreateApplicationRequest.java",
+            "src/main/java/com/sdkwork/web/backend/sdk/model/MediaChecksum.java",
+            "src/main/java/com/sdkwork/web/backend/sdk/model/MediaResource.java",
+            "src/main/java/com/sdkwork/web/backend/sdk/model/UpdateApplicationRequest.java"
           ]
         }
       ],

@@ -120,7 +120,7 @@
     },
     {
       "path": "src/Models/ApplicationResponse.php",
-      "sha256": "f17e0c60d16f0329a93a10f938bd42df138ababbcd889b71ba8946d39ce56062"
+      "sha256": "883217c53cef95d909aaa7c8680eba32016dca787db2c7e987dc633466d3547e"
     },
     {
       "path": "src/Models/ApplicationsActivateResponse.php",
@@ -165,6 +165,10 @@
     {
       "path": "src/Models/ApplicationsRetrieveResponse.php",
       "sha256": "1b386a3ba37f2da3b3e085452f48a9763db6dcbab143b80376b69b955e5949a8"
+    },
+    {
+      "path": "src/Models/ApplicationStoreListing.php",
+      "sha256": "a0ed6b63ea6807c8394fa17e5812c713034638ff6885edfb217f0b1d00eda77b"
     },
     {
       "path": "src/Models/ApplicationsUpdateResponse.php",
@@ -244,7 +248,7 @@
     },
     {
       "path": "src/Models/CreateApplicationRequest.php",
-      "sha256": "bbf7957966654f00ceac2ea0184fa7d3b5e779360610e65a1659d0cc790339a7"
+      "sha256": "84edaf02d2cdead49a7d6ae532d4dacd38c071eb7e3608aa8da96d5b7e84ea8a"
     },
     {
       "path": "src/Models/CreateCertificateRequest.php",
@@ -269,6 +273,14 @@
     {
       "path": "src/Models/HeartbeatResponse.php",
       "sha256": "22c9f4d039e85bc074f8f6d38d9033b51f29ed7c0d41d685de92cdc3a79c39d5"
+    },
+    {
+      "path": "src/Models/MediaChecksum.php",
+      "sha256": "41cb613daf18ad9a30d643e8d45df27aa72672dcd7c052746fbe684190c4d161"
+    },
+    {
+      "path": "src/Models/MediaResource.php",
+      "sha256": "6ec7f86e00239144b79aa7d83b1cb74149e3daca2f3c5b68b01045c172a4b7f3"
     },
     {
       "path": "src/Models/NginxConfigPage.php",
@@ -360,7 +372,7 @@
     },
     {
       "path": "src/Models/UpdateApplicationRequest.php",
-      "sha256": "4a2072a581d717f42f8ba12e1046b2b007a398688b5f7942a14623f37e75c1dc"
+      "sha256": "446abff8c4139cc6848c32b080b9b7b60703d22b05430429c8413d9e9f053bbb"
     },
     {
       "path": "src/Models/UpdateCertificateRequest.php",

@@ -14,7 +14,7 @@ export class RuntimeRuntimeAssignmentsObservationsLatestApi {
 
 /** Retrieve the latest authenticated Web Node runtime-set observation */
   async retrieve(snapshotUuid: string, requestOptions?: ApiRequestOptions): Promise<RuntimeObservation> {
-    return this.client.request<RuntimeObservation>(customApiPath(`/web/runtime_assignments/${serializePathParameter(snapshotUuid, { name: 'snapshotUuid', style: 'simple', explode: false })}/observations/latest`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any });
+    return this.client.request<RuntimeObservation>(customApiPath(`/web/runtime_assignments/${serializePathParameter(snapshotUuid, { name: 'snapshotUuid', style: 'simple', explode: false })}/observations/latest`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any, sdkworkUnwrapKind: 'item' });
   }
 }
 
@@ -40,7 +40,7 @@ export class RuntimeRuntimeAssignmentsObservationsApi {
       },
       {}
     );
-    return this.client.request<RuntimeObservation>(customApiPath(`/web/runtime_assignments/${serializePathParameter(snapshotUuid, { name: 'snapshotUuid', style: 'simple', explode: false })}/observations`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, body, headers: requestHeaders, contentType: 'application/json' });
+    return this.client.request<RuntimeObservation>(customApiPath(`/web/runtime_assignments/${serializePathParameter(snapshotUuid, { name: 'snapshotUuid', style: 'simple', explode: false })}/observations`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, body, headers: requestHeaders, contentType: 'application/json', sdkworkUnwrapKind: 'item' });
   }
 }
 
@@ -65,7 +65,7 @@ export class RuntimeRuntimeAssignmentsCurrentApi {
       { name: 'ifGeneration', value: params.ifGeneration, style: 'form', explode: true, allowReserved: false },
       { name: 'ifSnapshotSha256', value: params.ifSnapshotSha256, style: 'form', explode: true, allowReserved: false },
     ]);
-    return this.client.request<RuntimeAssignmentDelivery>(appendQueryString(customApiPath(`/web/runtime_assignments/current`), query), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any });
+    return this.client.request<RuntimeAssignmentDelivery>(appendQueryString(customApiPath(`/web/runtime_assignments/current`), query), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any, sdkworkUnwrapKind: 'item' });
   }
 }
 
@@ -93,7 +93,7 @@ export class RuntimeRuntimeAssignmentsApi {
       },
       {}
     );
-    return this.client.request<RuntimeAssignment>(customApiPath(`/web/runtime_assignments/${serializePathParameter(nodeUuid, { name: 'nodeUuid', style: 'simple', explode: false })}/${serializePathParameter(environment, { name: 'environment', style: 'simple', explode: false })}`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'PUT' as any, body, headers: requestHeaders, contentType: 'application/json' });
+    return this.client.request<RuntimeAssignment>(customApiPath(`/web/runtime_assignments/${serializePathParameter(nodeUuid, { name: 'nodeUuid', style: 'simple', explode: false })}/${serializePathParameter(environment, { name: 'environment', style: 'simple', explode: false })}`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'PUT' as any, body, headers: requestHeaders, contentType: 'application/json', sdkworkUnwrapKind: 'item' });
   }
 }
 

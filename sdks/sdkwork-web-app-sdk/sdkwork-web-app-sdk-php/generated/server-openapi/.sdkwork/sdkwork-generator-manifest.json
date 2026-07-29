@@ -75,6 +75,10 @@
       "sha256": "77eab30fa832b4f1e5f6684c9138e191a1a08ffb3f71c5ba0d6b104504bec228"
     },
     {
+      "path": "src/Models/ApplicationStoreListing.php",
+      "sha256": "9f7551d5b12cdd87db22e9145b6ca0585b183922b9172ac81305649861ed6889"
+    },
+    {
       "path": "src/Models/CertificatePage.php",
       "sha256": "c34c5493ab2bdf7b5645ca20324cf05c9e540507ffdda209f447dce88e4a9c18"
     },
@@ -112,7 +116,7 @@
     },
     {
       "path": "src/Models/CreateSiteRequest.php",
-      "sha256": "001fccdaf21c17cb3f067397e14c9856b10f57d503259f272d481faceaaf8b42"
+      "sha256": "d0cb79b8a2f85da7541ac240081485514e7e9c507a18bcdcda6a2c3171123661"
     },
     {
       "path": "src/Models/DeploymentPage.php",
@@ -153,6 +157,14 @@
     {
       "path": "src/Models/HealthCheckResponse.php",
       "sha256": "a96b9e5d97ecbf1a49fbbcc4787db724fa2d3e80b46c7dc68891968cbd612994"
+    },
+    {
+      "path": "src/Models/MediaChecksum.php",
+      "sha256": "ac2fedad07d901e76de142e5a035a387c5b2472dc6c2ab3c29006a770bb853a4"
+    },
+    {
+      "path": "src/Models/MediaResource.php",
+      "sha256": "98ce15d4fb60a18e9d73c73b567af9f0b9b0ad2df974d9d01e508c08cf25e4ed"
     },
     {
       "path": "src/Models/PageInfo.php",
@@ -196,7 +208,7 @@
     },
     {
       "path": "src/Models/SiteResponse.php",
-      "sha256": "99232c9934483c16b1b6ce7e8e2c899a898739d39c0eaf1a1dfe7a48161eb0df"
+      "sha256": "80836e1bce9dc8f7ff5a8d6a4dbb888bb5d876a0b1a6bc2a54cf9cd8db940a42"
     },
     {
       "path": "src/Models/SitesActivateResponse.php",
@@ -272,7 +284,7 @@
     },
     {
       "path": "src/Models/UpdateSiteRequest.php",
-      "sha256": "bf0458fc5c1e6bda97797da861ccb3ccc98cd49a0e47ba131c5082747de291e2"
+      "sha256": "a903135456753712176eace45f7b6a1d8f675a195bfa3a3635a6f5cd986201f0"
     },
     {
       "path": "src/SdkConfig.php",

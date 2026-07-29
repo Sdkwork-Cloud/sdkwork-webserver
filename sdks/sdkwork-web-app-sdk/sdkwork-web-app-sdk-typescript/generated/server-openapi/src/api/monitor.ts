@@ -18,7 +18,7 @@ export class MonitorSitesHealthChecksApi {
 
 /** 获取健康检查配置 */
   async list(siteId: string, requestOptions?: ApiRequestOptions): Promise<{ items: HealthCheckResponse[]; pageInfo: PageInfo; }> {
-    return this.client.request<{ items: HealthCheckResponse[]; pageInfo: PageInfo; }>(appApiPath(`/sites/${serializePathParameter(siteId, { name: 'siteId', style: 'simple', explode: false })}/health_checks`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any });
+    return this.client.request<{ items: HealthCheckResponse[]; pageInfo: PageInfo; }>(appApiPath(`/sites/${serializePathParameter(siteId, { name: 'siteId', style: 'simple', explode: false })}/health_checks`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any, sdkworkUnwrapKind: 'page' });
   }
 
 /** 创建健康检查 */
@@ -29,7 +29,7 @@ export class MonitorSitesHealthChecksApi {
       },
       {}
     );
-    return this.client.request<HealthCheckResponse>(appApiPath(`/sites/${serializePathParameter(siteId, { name: 'siteId', style: 'simple', explode: false })}/health_checks`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, body, headers: requestHeaders, contentType: 'application/json' });
+    return this.client.request<HealthCheckResponse>(appApiPath(`/sites/${serializePathParameter(siteId, { name: 'siteId', style: 'simple', explode: false })}/health_checks`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, body, headers: requestHeaders, contentType: 'application/json', sdkworkUnwrapKind: 'item' });
   }
 }
 

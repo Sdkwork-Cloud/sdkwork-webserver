@@ -10,6 +10,8 @@ import {
   FileArchive,
   FolderOpen,
   Inbox,
+  Image,
+  Images,
   LoaderCircle,
   LockKeyhole,
   Pause,
@@ -24,12 +26,32 @@ import {
   Shield,
   Trash2,
   Upload,
+  WandSparkles,
   X,
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
+import {
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type FormEvent,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type ReactNode,
+} from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import { translateWebserver, type WebserverLocale, type WebserverMessageKey } from "./i18n/index.ts";
+import {
+  validateApplicationMediaFile,
+  validateApplicationPreviewCount,
+  type ApplicationStoreListingInput,
+  type ApplicationSubmissionInput,
+} from "./application-media.ts";
+import {
+  applicationStoreListing,
+  storeListingBody,
+} from "./application-store-submission.ts";
 import {
   hasPlatformSuperAdminAccess,
   hasWebserverPermission,
@@ -583,11 +605,42 @@ function ActionDialog({
   const [result, setResult] = useState<Record<string, unknown>>();
   const [copiedField, setCopiedField] = useState<string>();
   const [sourceInputMode, setSourceInputMode] = useState<"archive" | "directory">("archive");
+  const existingStoreListing = applicationStoreListing(selected?.storeListing);
+  const [applicationSubmission, setApplicationSubmission] = useState<ApplicationSubmissionInput>(() => ({
+    coverMode: action.applicationSubmission === "update" ? "keep" : "remove",
+    iconMode: action.applicationSubmission === "update" && existingStoreListing?.icon ? "keep" : "default",
+    previewFiles: [],
+    previewsMode: action.applicationSubmission === "update" ? "keep" : "remove",
+  }));
+  const [mediaError, setMediaError] = useState<string>();
   const abortControllerRef = useRef<AbortController | undefined>(undefined);
+  const dialogRef = useRef<HTMLFormElement>(null);
   const sourceInputRef = useRef<HTMLInputElement>(null);
   const submitInFlightRef = useRef(false);
+  const sourceSelectionId = useId();
   const confirmationRequired = Boolean(action.dangerous || action.requiresConfirmation);
   const sourceInputRequired = Boolean(action.sourceInput);
+
+  useEffect(() => {
+    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : undefined;
+    const initialFocus = dialogRef.current?.querySelector<HTMLElement>(
+      ".form-grid input:not([disabled]), .form-grid select:not([disabled]), .form-grid textarea:not([disabled]), .source-file-trigger:not([disabled]), .confirm-check input:not([disabled]), button[type='submit']:not([disabled])",
+    );
+    initialFocus?.focus();
+    return () => queueMicrotask(() => {
+      if (previousFocus?.isConnected) previousFocus.focus();
+    });
+  }, []);
+
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key !== "Escape" || busy) return;
+      event.preventDefault();
+      onClose();
+    };
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [busy, onClose]);
 
   useEffect(() => {
     const input = sourceInputRef.current;
@@ -641,6 +694,7 @@ function ActionDialog({
       (confirmationRequired && !confirmed)
       || (action.requiresFile && !file)
       || (sourceInputRequired && files.length === 0)
+      || (action.applicationSubmission && !applicationSubmissionReady(applicationSubmission, mediaError))
     ) return;
     submitInFlightRef.current = true;
     const abortController = new AbortController();
@@ -651,6 +705,7 @@ function ActionDialog({
     try {
       const response = await action.execute({
         body,
+        applicationSubmission: action.applicationSubmission ? applicationSubmission : undefined,
         file,
         files,
         idempotencyKey,
@@ -686,15 +741,14 @@ function ActionDialog({
       <form
         aria-labelledby="action-title"
         aria-modal="true"
-        className="dialog"
+        className={`dialog${action.applicationSubmission ? " application-submission-dialog" : ""}`}
+        onKeyDown={trapDialogFocus}
         onSubmit={(event) => void submit(event)}
+        ref={dialogRef}
         role="dialog"
       >
         <header>
-          <div>
-            <span className="eyebrow">{t("dialog.command")}</span>
-            <h2 id="action-title">{label}</h2>
-          </div>
+          <h2 id="action-title">{label}</h2>
           <button
             aria-label={t("dialog.close")}
             className="icon-button"
@@ -747,6 +801,17 @@ function ActionDialog({
             />
           ))}
         </div> : null}
+        {!result && action.applicationSubmission ? (
+          <ApplicationSubmissionFields
+            disabled={busy}
+            error={mediaError}
+            existing={existingStoreListing}
+            locale={locale}
+            onChange={setApplicationSubmission}
+            onError={setMediaError}
+            submission={applicationSubmission}
+          />
+        ) : null}
         {!result && action.requiresFile ? (
           <label className="file-field">
             <span><Upload aria-hidden="true" size={16} />{t("dialog.file")}</span>
@@ -788,25 +853,48 @@ function ActionDialog({
                 {t("dialog.sourceDirectory")}
               </button>
             </div>
-            <label className="file-field">
-              <span><Upload aria-hidden="true" size={16} />{t("dialog.sourceSelect")}</span>
+            <div className="source-file-control">
+              <div className="source-file-heading">
+                <Upload aria-hidden="true" size={16} />
+                <span>{t("dialog.sourceSelect")}</span>
+              </div>
+              <div className="source-file-row">
+                <button
+                  className="secondary-button source-file-trigger"
+                  disabled={busy}
+                  onClick={() => sourceInputRef.current?.click()}
+                  type="button"
+                >
+                  {sourceInputMode === "archive"
+                    ? <FileArchive aria-hidden="true" size={16} />
+                    : <FolderOpen aria-hidden="true" size={16} />}
+                  {sourceInputMode === "archive"
+                    ? t("dialog.sourceChooseArchive")
+                    : t("dialog.sourceChooseDirectory")}
+                </button>
+                <span className="source-selection" id={sourceSelectionId} role="status">
+                  {files.length === 0
+                    ? t("dialog.sourceNone")
+                    : sourceInputMode === "archive"
+                      ? files[0].name
+                      : t("dialog.sourceSelectionCount", { count: files.length })}
+                </span>
+              </div>
               <input
                 accept={sourceInputMode === "archive" ? ".zip,application/zip" : undefined}
+                data-testid="application-source-input"
                 disabled={busy}
+                hidden
                 key={sourceInputMode}
                 multiple={sourceInputMode === "directory"}
-                onChange={(event) => setFiles(Array.from(event.target.files ?? []))}
+                onChange={(event) => {
+                  const selectedFiles = Array.from(event.target.files ?? []);
+                  setFiles(sourceInputMode === "archive" ? selectedFiles.slice(0, 1) : selectedFiles);
+                }}
                 ref={sourceInputRef}
                 type="file"
               />
-            </label>
-            {files.length > 0 ? (
-              <div className="source-selection" role="status">
-                {sourceInputMode === "archive"
-                  ? files[0].name
-                  : t("dialog.sourceSelectionCount", { count: files.length })}
-              </div>
-            ) : null}
+            </div>
           </div>
         ) : null}
         {!result && busy && (action.requiresFile || action.sourceInput) ? (
@@ -842,6 +930,7 @@ function ActionDialog({
               || Boolean(confirmationRequired && !confirmed)
               || Boolean(action.requiresFile && !file)
               || Boolean(sourceInputRequired && files.length === 0)
+              || Boolean(action.applicationSubmission && !applicationSubmissionReady(applicationSubmission, mediaError))
               || hasMissingRequiredFields(body, action.requiredFields)
               || hasUnavailableOptions(body, fieldOptions)}
             type="submit"
@@ -852,6 +941,250 @@ function ActionDialog({
       </form>
     </div>
   );
+}
+
+function ApplicationSubmissionFields({
+  disabled,
+  error,
+  existing,
+  locale,
+  onChange,
+  onError,
+  submission,
+}: {
+  disabled: boolean;
+  error?: string;
+  existing?: ApplicationStoreListingInput;
+  locale: WebserverLocale;
+  onChange(value: ApplicationSubmissionInput): void;
+  onError(value: string | undefined): void;
+  submission: ApplicationSubmissionInput;
+}) {
+  const validationVersion = useRef(0);
+  const t = (key: WebserverMessageKey, values: Record<string, string | number> = {}) => translateWebserver(locale, key, values);
+  const iconPreview = useFilePreview(submission.iconFile);
+  const coverPreview = useFilePreview(submission.coverFile);
+  const previewImages = useFilePreviews(submission.previewFiles);
+
+  async function selectFile(role: "icon" | "cover", file: File | undefined): Promise<void> {
+    const version = ++validationVersion.current;
+    onChange({
+      ...submission,
+      ...(role === "icon" ? { iconFile: file, iconMode: "upload" as const } : { coverFile: file, coverMode: "upload" as const }),
+    });
+    if (!file) {
+      onError(role === "icon" ? t("dialog.mediaIconRequired") : t("dialog.mediaCoverRequired"));
+      return;
+    }
+    onError(t("dialog.mediaValidating"));
+    try {
+      await validateApplicationMediaFile(role, file);
+      if (validationVersion.current === version) onError(undefined);
+    } catch (error) {
+      if (validationVersion.current === version) onError(mediaValidationMessage(error, t));
+    }
+  }
+
+  async function selectPreviews(files: readonly File[]): Promise<void> {
+    const version = ++validationVersion.current;
+    onChange({ ...submission, previewFiles: files, previewsMode: "replace" });
+    onError(t("dialog.mediaValidating"));
+    try {
+      validateApplicationPreviewCount(files);
+      if (files.length === 0) throw new Error("PREVIEW_REQUIRED");
+      for (const file of files) await validateApplicationMediaFile("preview", file);
+      if (validationVersion.current === version) onError(undefined);
+    } catch (error) {
+      if (validationVersion.current === version) onError(mediaValidationMessage(error, t));
+    }
+  }
+
+  return (
+    <section aria-labelledby="application-store-assets" className="application-store-assets">
+      <div className="application-store-heading">
+        <div>
+          <h3 id="application-store-assets">{t("dialog.mediaTitle")}</h3>
+          <span>{t("dialog.mediaSubtitle")}</span>
+        </div>
+        <BadgeCheck aria-hidden="true" size={19} />
+      </div>
+      <div className="application-media-field">
+        <div className="application-media-label">
+          <Image aria-hidden="true" size={17} />
+          <strong>{t("dialog.mediaIcon")}</strong>
+          <span className="required-mark">{t("dialog.mediaRequired")}</span>
+          <small>1024 x 1024 PNG</small>
+        </div>
+        <div aria-label={t("dialog.mediaIconMode")} className="media-mode-toggle" role="group">
+          {existing?.icon ? (
+            <MediaModeButton
+              active={submission.iconMode === "keep"}
+              disabled={disabled}
+              icon={<BadgeCheck aria-hidden="true" size={15} />}
+              label={t("dialog.mediaKeep")}
+              onClick={() => {
+                validationVersion.current += 1;
+                onError(undefined);
+                onChange({ ...submission, iconFile: undefined, iconMode: "keep" });
+              }}
+            />
+          ) : null}
+          <MediaModeButton
+            active={submission.iconMode === "default"}
+            disabled={disabled}
+            icon={<WandSparkles aria-hidden="true" size={15} />}
+            label={t("dialog.mediaDefault")}
+            onClick={() => {
+              validationVersion.current += 1;
+              onError(undefined);
+              onChange({ ...submission, iconFile: undefined, iconMode: "default" });
+            }}
+          />
+          <MediaModeButton
+            active={submission.iconMode === "upload"}
+            disabled={disabled}
+            icon={<Upload aria-hidden="true" size={15} />}
+            label={t("dialog.mediaUpload")}
+            onClick={() => onChange({ ...submission, iconMode: "upload" })}
+          />
+        </div>
+        {submission.iconMode === "default" ? (
+          <div className="default-icon-preview" aria-label={t("dialog.mediaDefaultPreview")}>
+            <WandSparkles aria-hidden="true" size={22} />
+          </div>
+        ) : null}
+        {submission.iconMode === "keep" ? <div className="stored-media-state"><BadgeCheck aria-hidden="true" size={16} />{t("dialog.mediaStored")}</div> : null}
+        {submission.iconMode === "upload" ? (
+          <label className="media-file-input">
+            <span>{t("dialog.mediaIcon")}</span>
+            <input
+              accept="image/png"
+              aria-label={t("dialog.mediaIcon")}
+              disabled={disabled}
+              onChange={(event) => void selectFile("icon", event.target.files?.[0])}
+              type="file"
+            />
+            {iconPreview ? <img alt="" src={iconPreview} /> : null}
+          </label>
+        ) : null}
+      </div>
+      <div className="application-media-field">
+        <div className="application-media-label">
+          <Image aria-hidden="true" size={17} />
+          <strong>{t("dialog.mediaCover")}</strong>
+          <small>1024 x 500 PNG, JPEG, WebP</small>
+        </div>
+        <div aria-label={t("dialog.mediaCoverMode")} className="media-mode-toggle" role="group">
+          {existing?.cover ? <MediaModeButton active={submission.coverMode === "keep"} disabled={disabled} icon={<BadgeCheck aria-hidden="true" size={15} />} label={t("dialog.mediaKeep")} onClick={() => { validationVersion.current += 1; onError(undefined); onChange({ ...submission, coverFile: undefined, coverMode: "keep" }); }} /> : null}
+          <MediaModeButton active={submission.coverMode === "remove"} disabled={disabled} icon={<X aria-hidden="true" size={15} />} label={t("dialog.mediaNone")} onClick={() => { validationVersion.current += 1; onError(undefined); onChange({ ...submission, coverFile: undefined, coverMode: "remove" }); }} />
+          <MediaModeButton active={submission.coverMode === "upload"} disabled={disabled} icon={<Upload aria-hidden="true" size={15} />} label={t("dialog.mediaUpload")} onClick={() => onChange({ ...submission, coverMode: "upload" })} />
+        </div>
+        {submission.coverMode === "keep" ? <div className="stored-media-state"><BadgeCheck aria-hidden="true" size={16} />{t("dialog.mediaStored")}</div> : null}
+        {submission.coverMode === "upload" ? (
+          <label className="media-file-input media-file-input-wide">
+            <span>{t("dialog.mediaCover")}</span>
+            <input accept="image/png,image/jpeg,image/webp" aria-label={t("dialog.mediaCover")} disabled={disabled} onChange={(event) => void selectFile("cover", event.target.files?.[0])} type="file" />
+            {coverPreview ? <img alt="" src={coverPreview} /> : null}
+          </label>
+        ) : null}
+      </div>
+      <div className="application-media-field">
+        <div className="application-media-label">
+          <Images aria-hidden="true" size={17} />
+          <strong>{t("dialog.mediaPreviews")}</strong>
+          <small>{t("dialog.mediaPreviewLimit")}</small>
+        </div>
+        <div aria-label={t("dialog.mediaPreviewsMode")} className="media-mode-toggle" role="group">
+          {existing?.previews?.length ? <MediaModeButton active={submission.previewsMode === "keep"} disabled={disabled} icon={<BadgeCheck aria-hidden="true" size={15} />} label={t("dialog.mediaKeep")} onClick={() => { validationVersion.current += 1; onError(undefined); onChange({ ...submission, previewFiles: [], previewsMode: "keep" }); }} /> : null}
+          <MediaModeButton active={submission.previewsMode === "remove"} disabled={disabled} icon={<X aria-hidden="true" size={15} />} label={t("dialog.mediaNone")} onClick={() => { validationVersion.current += 1; onError(undefined); onChange({ ...submission, previewFiles: [], previewsMode: "remove" }); }} />
+          <MediaModeButton active={submission.previewsMode === "replace"} disabled={disabled} icon={<Upload aria-hidden="true" size={15} />} label={t("dialog.mediaUpload") } onClick={() => onChange({ ...submission, previewsMode: "replace" })} />
+        </div>
+        {submission.previewsMode === "keep" ? <div className="stored-media-state"><BadgeCheck aria-hidden="true" size={16} />{t("dialog.mediaStoredCount", { count: existing?.previews?.length ?? 0 })}</div> : null}
+        {submission.previewsMode === "replace" ? (
+          <label className="media-file-input media-file-input-wide">
+            <span>{t("dialog.mediaPreviews")}</span>
+            <input accept="image/png,image/jpeg,image/webp" aria-label={t("dialog.mediaPreviews")} disabled={disabled} multiple onChange={(event) => void selectPreviews(Array.from(event.target.files ?? []).slice(0, 9))} type="file" />
+            {previewImages.length ? <div className="media-preview-grid">{previewImages.map((url, index) => <img alt="" key={`${url}-${index}`} src={url} />)}</div> : null}
+          </label>
+        ) : null}
+      </div>
+      {error ? <div className="media-validation" role="alert">{error}</div> : null}
+    </section>
+  );
+}
+
+function MediaModeButton({ active, disabled, icon, label, onClick }: { active: boolean; disabled: boolean; icon: ReactNode; label: string; onClick(): void }) {
+  return <button aria-pressed={active} className={active ? "active" : ""} disabled={disabled} onClick={onClick} type="button">{icon}{label}</button>;
+}
+
+function useFilePreview(file: File | undefined): string | undefined {
+  const [url, setUrl] = useState<string>();
+  useEffect(() => {
+    if (!file || !URL.createObjectURL) {
+      setUrl(undefined);
+      return undefined;
+    }
+    const next = URL.createObjectURL(file);
+    setUrl(next);
+    return () => URL.revokeObjectURL(next);
+  }, [file]);
+  return url;
+}
+
+function useFilePreviews(files: readonly File[]): readonly string[] {
+  const [urls, setUrls] = useState<readonly string[]>([]);
+  useEffect(() => {
+    if (!URL.createObjectURL) {
+      setUrls([]);
+      return undefined;
+    }
+    const next = files.map((file) => URL.createObjectURL(file));
+    setUrls(next);
+    return () => next.forEach((url) => URL.revokeObjectURL(url));
+  }, [files]);
+  return urls;
+}
+
+function mediaValidationMessage(error: unknown, t: (key: WebserverMessageKey) => string): string {
+  const code = error instanceof Error ? error.message : "";
+  const keys: Record<string, WebserverMessageKey> = {
+    COVER_DIMENSIONS: "dialog.mediaCoverDimensions",
+    ICON_DIMENSIONS: "dialog.mediaIconDimensions",
+    ICON_SIZE: "dialog.mediaIconSize",
+    ICON_TYPE: "dialog.mediaIconType",
+    IMAGE_DECODE: "dialog.mediaDecode",
+    IMAGE_INSPECTION_UNAVAILABLE: "dialog.mediaDecode",
+    PREVIEW_COUNT: "dialog.mediaPreviewCount",
+    PREVIEW_DIMENSIONS: "dialog.mediaPreviewDimensions",
+    PREVIEW_REQUIRED: "dialog.mediaPreviewRequired",
+    STORE_IMAGE_SIZE: "dialog.mediaImageSize",
+    STORE_IMAGE_TYPE: "dialog.mediaImageType",
+  };
+  return t(keys[code] ?? "dialog.mediaDecode");
+}
+
+function applicationSubmissionReady(submission: ApplicationSubmissionInput, mediaError: string | undefined): boolean {
+  return !mediaError
+    && (submission.iconMode !== "upload" || Boolean(submission.iconFile))
+    && (submission.coverMode !== "upload" || Boolean(submission.coverFile))
+    && (submission.previewsMode !== "replace" || submission.previewFiles.length > 0);
+}
+
+function trapDialogFocus(event: ReactKeyboardEvent<HTMLFormElement>): void {
+  if (event.key !== "Tab") return;
+  const focusable = Array.from(event.currentTarget.querySelectorAll<HTMLElement>(
+    "button:not([disabled]), input:not([disabled]):not([tabindex='-1']), select:not([disabled]), textarea:not([disabled]), [href], [tabindex]:not([tabindex='-1'])",
+  )).filter((element) => element.getAttribute("aria-hidden") !== "true");
+  if (focusable.length === 0) return;
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
 }
 
 function Field({
@@ -905,23 +1238,51 @@ function Field({
       </label>
     );
   }
-  const multiline = name.toLowerCase().includes("content")
-    || name.toLowerCase().includes("description");
+  const text = String(value ?? "");
+  const characterLimit = textFieldCharacterLimit(name);
+  const multiline = name === "description"
+    || name === "fullDescription"
+    || name === "releaseNotes"
+    || name.toLowerCase().includes("content");
+  const wide = multiline || name === "shortDescription";
+  const updateText = (next: string) => onChange(
+    characterLimit === undefined
+      ? next
+      : Array.from(next).slice(0, characterLimit).join(""),
+  );
   return (
-    <label>
+    <label className={wide ? "form-field-wide" : undefined}>
       <span>{fieldLabel(name, locale)}</span>
       {multiline ? (
-        <textarea onChange={(event) => onChange(event.target.value)} value={String(value ?? "")} />
+        <textarea onChange={(event) => updateText(event.target.value)} value={text} />
       ) : (
         <input
           autoComplete="off"
-          onChange={(event) => onChange(event.target.value)}
-          type={sensitive(name) ? "password" : "text"}
-          value={String(value ?? "")}
+          onChange={(event) => updateText(event.target.value)}
+          type={name.toLowerCase().endsWith("url") ? "url" : sensitive(name) ? "password" : "text"}
+          value={text}
         />
+      )}
+      {characterLimit === undefined ? null : (
+        <small className="field-character-limit">
+          {Array.from(text).length} / {characterLimit}
+        </small>
       )}
     </label>
   );
+}
+
+function textFieldCharacterLimit(name: string): number | undefined {
+  switch (name) {
+    case "shortDescription":
+    case "category":
+      return 80;
+    case "fullDescription":
+    case "releaseNotes":
+      return 4_000;
+    default:
+      return undefined;
+  }
 }
 
 interface ScopeOption {
@@ -1047,6 +1408,14 @@ function fieldLabel(value: string, locale: WebserverLocale): string {
       deployedAt: "Deployed at",
       deployType: "Deployment method",
       description: "Description",
+      shortDescription: "Short description",
+      fullDescription: "Full description",
+      releaseNotes: "Release notes",
+      category: "Category",
+      keywords: "Keywords",
+      supportUrl: "Support URL",
+      privacyPolicyUrl: "Privacy policy URL",
+      officialWebsiteUrl: "Official website URL",
       domain: "Domain",
       domainId: "Domain",
       durationMs: "Duration",
@@ -1113,6 +1482,14 @@ function fieldLabel(value: string, locale: WebserverLocale): string {
       deployedAt: "发布时间",
       deployType: "发布方式",
       description: "描述",
+      shortDescription: "简短说明",
+      fullDescription: "完整说明",
+      releaseNotes: "版本说明",
+      category: "应用分类",
+      keywords: "关键词（逗号分隔）",
+      supportUrl: "支持服务地址",
+      privacyPolicyUrl: "隐私政策地址",
+      officialWebsiteUrl: "官方网站",
       domain: "域名",
       domainId: "域名",
       durationMs: "耗时",
@@ -1167,6 +1544,7 @@ function actionErrorMessage(
 ): string {
   if (!(error instanceof WebserverActionError)) return translate("error.operation");
   const keys: Record<typeof error.code, WebserverMessageKey> = {
+    "application-draft-media-failed": "error.applicationDraftMedia",
     "application-draft-source-failed": "error.applicationDraftSource",
     "application-draft-deployment-failed": "error.applicationDraftDeployment",
     "deployment-source-stored": "error.deploymentSourceStored",
@@ -1199,6 +1577,8 @@ function optionLabel(option: WebserverResourceFieldOptionValue, name: string, lo
 function codedValueLabel(name: string, value: unknown, locale: WebserverLocale): string | undefined {
   const labels: Record<WebserverLocale, Partial<Record<string, string>>> = {
     "en-US": {
+      "applicationType:API": "API service",
+      "applicationType:WEB": "Web application",
       "certType:1": "Let's Encrypt",
       "certType:2": "Custom certificate",
       "certType:3": "Self-signed certificate",
@@ -1228,6 +1608,8 @@ function codedValueLabel(name: string, value: unknown, locale: WebserverLocale):
       "targetType:server": "Server",
     },
     "zh-CN": {
+      "applicationType:API": "API 服务",
+      "applicationType:WEB": "Web 应用",
       "certType:1": "Let's Encrypt",
       "certType:2": "自定义证书",
       "certType:3": "自签名证书",
@@ -1301,10 +1683,11 @@ function initialActionBody(
   action: WebserverResourceAction,
   selected: Record<string, unknown> | undefined,
 ): Record<string, unknown> {
+  const listing = action.applicationSubmission ? storeListingBody(selected?.storeListing) : {};
   return Object.fromEntries(
     Object.entries(action.bodyTemplate).map(([field, fallback]) => [
       field,
-      selected?.[field] !== undefined ? selected[field] : fallback,
+      selected?.[field] !== undefined ? selected[field] : listing[field] ?? fallback,
     ]),
   );
 }

@@ -20,14 +20,14 @@ describe("WebserverDocumentation", () => {
   it("renders the public product guide and the injected agent catalog", () => {
     renderDocumentation("zh-CN");
 
-    expect(screen.getByRole("heading", { level: 1, name: "从应用制品到稳定公网服务" })).toBeTruthy();
-    expect(screen.getByRole("heading", { name: "四步发布第一个应用" })).toBeTruthy();
-    expect(screen.getByRole("heading", { name: "用同一套交付模型覆盖 Cloud 与 Standalone" })).toBeTruthy();
-    expect(screen.getByRole("heading", { name: "把受控发布流程带进编码会话" })).toBeTruthy();
+    expect(screen.getByRole("heading", { level: 1, name: "把应用交付变成可规模化的业务能力" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "从创建应用到可验证上线，只需四个阶段" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "同一套发布标准，覆盖云托管与私有化交付" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "把企业发布能力嵌入 AI 协作链路" })).toBeTruthy();
     expect(screen.getByText("OpenClaw")).toBeTruthy();
     expect(screen.getByText("Herms Agent")).toBeTruthy();
     expect(screen.getByText("Qoder Work")).toBeTruthy();
-    expect(screen.getByRole("link", { name: "前往首页复制接入指令" }).getAttribute("href")).toBe("/#skill");
+    expect(screen.getByRole("link", { name: "前往 Portal 获取智能体接入指令" }).getAttribute("href")).toBe("/#skill");
   });
 
   it("keeps Portal, Console, notifications, and viewer navigation available", () => {

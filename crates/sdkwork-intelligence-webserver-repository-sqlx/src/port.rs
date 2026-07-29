@@ -241,9 +241,15 @@ impl WebRepositoryPort for WebRepository {
         tenant_id: i64,
         certificate_id: &str,
         update: &CertificateIssueUpdate,
+        expected_renewal_version: Option<i64>,
     ) -> WebServiceResult<CertificateResponse> {
-        self.finalize_certificate_repo(tenant_id, certificate_id, update)
-            .await
+        self.finalize_certificate_repo(
+            tenant_id,
+            certificate_id,
+            update,
+            expected_renewal_version,
+        )
+        .await
     }
 
     async fn fail_certificate(
@@ -259,18 +265,24 @@ impl WebRepositoryPort for WebRepository {
     async fn list_certificates_due_for_renewal(
         &self,
         renew_before_days: u32,
+        claim_expired_before: &str,
         limit: i32,
     ) -> WebServiceResult<Vec<sdkwork_webserver_contract::CertificateRenewalCandidate>> {
-        self.list_certificates_due_for_renewal_repo(renew_before_days, limit)
-            .await
+        self.list_certificates_due_for_renewal_repo(
+            renew_before_days,
+            claim_expired_before,
+            limit,
+        )
+        .await
     }
 
-    async fn mark_certificate_renewing(
+    async fn claim_certificate_renewal(
         &self,
         tenant_id: i64,
         certificate_id: &str,
-    ) -> WebServiceResult<bool> {
-        self.mark_certificate_renewing_repo(tenant_id, certificate_id)
+        claim_expired_before: &str,
+    ) -> WebServiceResult<Option<i64>> {
+        self.claim_certificate_renewal_repo(tenant_id, certificate_id, claim_expired_before)
             .await
     }
 
@@ -278,10 +290,16 @@ impl WebRepositoryPort for WebRepository {
         &self,
         tenant_id: i64,
         certificate_id: &str,
+        expected_renewal_version: i64,
         reason: &str,
     ) -> WebServiceResult<()> {
-        self.fail_certificate_renewal_repo(tenant_id, certificate_id, reason)
-            .await
+        self.fail_certificate_renewal_repo(
+            tenant_id,
+            certificate_id,
+            expected_renewal_version,
+            reason,
+        )
+        .await
     }
 
     async fn retrieve_certificate_renewal_candidate(

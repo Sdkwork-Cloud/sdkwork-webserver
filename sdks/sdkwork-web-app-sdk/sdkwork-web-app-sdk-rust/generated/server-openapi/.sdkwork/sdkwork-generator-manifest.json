@@ -95,6 +95,10 @@
       "sha256": "66c33eb3d258b9c3c3fc720b89f87c48153a93755bf7ab2d025fc7a806143406"
     },
     {
+      "path": "src/models/application_store_listing.rs",
+      "sha256": "0715f662e22202117522ae866ad0c758d61aa5bf3609db819e23ecd223b9eea7"
+    },
+    {
       "path": "src/models/certificate_page.rs",
       "sha256": "644bdf780d909542b35b45b18a32f9b0a51825c26666fd1519d02064b61c7a03"
     },
@@ -136,7 +140,7 @@
     },
     {
       "path": "src/models/create_site_request.rs",
-      "sha256": "c5020f7171229835debe751375ab187bfd97885056b954276d82e4bd71649d4f"
+      "sha256": "8a3e26ebf3c6bf42bf44547d4d1be719aad55a7ed8ee39c1b6c571d07a854b53"
     },
     {
       "path": "src/models/deployment_page.rs",
@@ -179,8 +183,16 @@
       "sha256": "7ebdb3d77c667aa8280d50745904f113c4acd4e24aae63a78e48a472334840f6"
     },
     {
+      "path": "src/models/media_checksum.rs",
+      "sha256": "ea88fdd40fa405b2b1887c425bd702fb3d792124457cb2049bf6aeb39f1adec6"
+    },
+    {
+      "path": "src/models/media_resource.rs",
+      "sha256": "85025f0800fae0146d29fe4548457f3c6775b4998b2437963d35e42c127c13bf"
+    },
+    {
       "path": "src/models/mod.rs",
-      "sha256": "482014b1bf56157da37a286c944bfab02dc54e484f0debe9d63ea7b5137b7cd5"
+      "sha256": "8a40338b63c81614932202c8bfafe0550af7865ca498c1980c921783861259fb"
     },
     {
       "path": "src/models/page_info.rs",
@@ -224,7 +236,7 @@
     },
     {
       "path": "src/models/site_response.rs",
-      "sha256": "4af8779e153f9bc2c5a571899c10be76e8ad76b0d3aa675c84085ab9fe48501b"
+      "sha256": "89b547ba4ac979b944a1c124afa9641138ed240f2bec042e0773325f55cdf7a8"
     },
     {
       "path": "src/models/sites_activate_response.rs",
@@ -300,7 +312,7 @@
     },
     {
       "path": "src/models/update_site_request.rs",
-      "sha256": "016783ae2acec4fe23474379968280d48b9983f7b570d607a5880c4adecd8ce0"
+      "sha256": "12d601c5f32b1117c894fd872c3a595509d4f0d07df58871e2d159dfa210f478"
     }
   ],
   "scaffoldFiles": [

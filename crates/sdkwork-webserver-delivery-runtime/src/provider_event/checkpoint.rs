@@ -2,14 +2,17 @@ use std::{
     collections::BTreeMap,
     fs,
     path::{Path, PathBuf},
-    sync::atomic::{AtomicUsize, Ordering},
+    sync::{
+        atomic::{AtomicUsize, Ordering},
+        Mutex,
+    },
 };
 
 use async_trait::async_trait;
 use sdkwork_utils_rust::sha256_hash;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
-use tokio::{fs as tokio_fs, io::AsyncWriteExt, sync::Mutex};
+use tokio::{fs as tokio_fs, io::AsyncWriteExt, sync::Semaphore};
 
 use super::{provider_event_stream_shard, PROVIDER_EVENT_STREAM_SHARDS};
 
@@ -128,6 +131,7 @@ pub struct FileWebsiteProviderEventCheckpointStore {
     directory: PathBuf,
     maximum_streams: usize,
     stream_count: AtomicUsize,
+    persistence: [Semaphore; PROVIDER_EVENT_STREAM_SHARDS],
     state: [Mutex<BTreeMap<String, StoredCheckpoint>>; PROVIDER_EVENT_STREAM_SHARDS],
 }
 
@@ -146,12 +150,16 @@ impl FileWebsiteProviderEventCheckpointStore {
         let mut state = std::array::from_fn(|_| Mutex::new(BTreeMap::new()));
         for (stream_id, checkpoint) in checkpoints {
             let shard = provider_event_stream_shard(&stream_id);
-            state[shard].get_mut().insert(stream_id, checkpoint);
+            state[shard]
+                .get_mut()
+                .map_err(|_| WebsiteProviderEventCheckpointError::Corrupt)?
+                .insert(stream_id, checkpoint);
         }
         Ok(Self {
             directory,
             maximum_streams,
             stream_count: AtomicUsize::new(stream_count),
+            persistence: std::array::from_fn(|_| Semaphore::new(1)),
             state,
         })
     }
@@ -164,7 +172,9 @@ impl WebsiteProviderEventCheckpointStore for FileWebsiteProviderEventCheckpointS
         stream_id: &str,
     ) -> Result<Option<WebsiteProviderEventCheckpoint>, WebsiteProviderEventCheckpointError> {
         let shard = provider_event_stream_shard(stream_id);
-        let state = self.state[shard].lock().await;
+        let state = self.state[shard]
+            .lock()
+            .map_err(|_| WebsiteProviderEventCheckpointError::Corrupt)?;
         Ok(state.get(stream_id).map(|stored| stored.checkpoint.clone()))
     }
 
@@ -173,17 +183,29 @@ impl WebsiteProviderEventCheckpointStore for FileWebsiteProviderEventCheckpointS
         checkpoint: &WebsiteProviderEventCheckpoint,
     ) -> Result<(), WebsiteProviderEventCheckpointError> {
         let shard = provider_event_stream_shard(checkpoint.stream_id());
-        let mut state = self.state[shard].lock().await;
-        let is_new = !state.contains_key(checkpoint.stream_id());
-        let reservation =
-            StreamCountReservation::reserve(&self.stream_count, self.maximum_streams, is_new)?;
-        let generation = state
-            .get(checkpoint.stream_id())
-            .map_or(1, |stored| stored.generation.saturating_add(1));
-        if generation == u64::MAX {
-            return Err(WebsiteProviderEventCheckpointError::Corrupt);
-        }
+        let _persistence = self.persistence[shard]
+            .acquire()
+            .await
+            .map_err(|_| WebsiteProviderEventCheckpointError::Io)?;
+        let (generation, reservation) = {
+            let state = self.state[shard]
+                .lock()
+                .map_err(|_| WebsiteProviderEventCheckpointError::Corrupt)?;
+            let is_new = !state.contains_key(checkpoint.stream_id());
+            let reservation =
+                StreamCountReservation::reserve(&self.stream_count, self.maximum_streams, is_new)?;
+            let generation = state
+                .get(checkpoint.stream_id())
+                .map_or(1, |stored| stored.generation.saturating_add(1));
+            if generation == u64::MAX {
+                return Err(WebsiteProviderEventCheckpointError::Corrupt);
+            }
+            (generation, reservation)
+        };
         write_checkpoint(&self.directory, generation, checkpoint).await?;
+        let mut state = self.state[shard]
+            .lock()
+            .map_err(|_| WebsiteProviderEventCheckpointError::Corrupt)?;
         state.insert(
             checkpoint.stream_id().to_owned(),
             StoredCheckpoint {

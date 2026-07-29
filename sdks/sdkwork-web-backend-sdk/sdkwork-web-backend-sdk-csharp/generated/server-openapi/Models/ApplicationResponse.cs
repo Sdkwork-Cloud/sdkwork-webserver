@@ -14,6 +14,7 @@ namespace SDKWork.Web.BackendSdk.Models
         public int SiteType { get; set; }
         public int Status { get; set; }
         public Dictionary<string, object>? RuntimeConfig { get; set; }
+        public ApplicationStoreListing? StoreListing { get; set; }
         public string CreatedAt { get; set; }
         public string UpdatedAt { get; set; }
     }

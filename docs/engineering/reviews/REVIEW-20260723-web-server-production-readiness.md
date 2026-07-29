@@ -3,7 +3,7 @@
 Status: changes-requested
 Owner: SDKWork Web Platform
 Reviewed: 2026-07-23
-Last updated: 2026-07-28
+Last updated: 2026-07-29
 Application: `sdkwork-web`
 Risk: critical
 Specs: [CODE_REVIEW_SPEC.md](../../../../sdkwork-specs/CODE_REVIEW_SPEC.md),
@@ -588,3 +588,104 @@ The following blockers remain active in addition to sections 1, 11, and 13:
 
 No database migration, release exception, generated-ownership change, or production-readiness
 claim is approved by this addendum.
+
+## 15. 2026-07-29 Release Workflow, Concurrency, And Recovery Addendum
+
+Outcome: the bounded application release workflow and local concurrency controls are accepted for
+owner review; the commercial production gate remains blocked.
+
+This round tightened the paths most likely to fail under large source trees, retries, process
+restarts, and concurrent operators:
+
+1. Browser directory packaging applies root and nested `.gitignore` rules before packaging and
+   keeps VCS metadata excluded regardless of ignore negation. Active ignore files are limited to
+   256, each file to 1 MiB, and cumulative ignore text to 4 MiB; malformed UTF-8 is rejected. The
+   selected path metadata budget is 16 MiB, so 100,000 long browser paths cannot grow memory
+   without a bound before file-count and archive limits run.
+2. Directory ZIP creation uses one ordered `AsyncZipDeflate` entry at a time instead of retaining
+   every source `Uint8Array` concurrently. Cancellation terminates the active compression worker,
+   archive output remains limited to 64 MiB, file metadata uses a stable DOS epoch, and portable
+   path ordering makes the source hash deterministic for identical content regardless of browser
+   `FileList` order.
+3. Create and Deploy dialogs render `WEB`/`API`, runtime type, environment, and deployment method as
+   localized product labels. The source chooser has explicit ZIP/directory modes, an integrated
+   file-name or file-count state, and one accessible command rather than the operating system's
+   locale-dependent file control. Manual-package deployment no longer asks for Git ref or commit
+   hash while type 1 is the only available method.
+4. Dialogs focus the first input, trap Tab navigation, close on Escape, restore focus to the
+   invoking command after React unmount, and cannot be dismissed while a mutation is in flight.
+   Successful deployment rows enable the confirmed restore command; pending rows keep it disabled.
+   Desktop and 390 by 844 layouts have no horizontal overflow.
+5. Deployment idempotency hashes now include operation, actor, application, and rollback target,
+   preventing one caller's key from aliasing another operation or application. Keys are bounded to
+   1..128 bytes without surrounding whitespace before persistence.
+6. Certificate renewal claims have a bounded stale-lease recovery path and return a version fence.
+   Success and failure finalization require the current claim version, and renewal-policy mutation
+   conflicts while a claim is active. This prevents stale workers from finalizing a newer claim.
+7. Nginx listing joins the owning application in one bounded query rather than resolving every
+   application UUID with an N+1 lookup, and global/site filters use the same joined identity.
+   Provider-event checkpoints and Website recovery no longer hold standard mutex guards across
+   filesystem awaits; per-shard/per-store semaphores serialize persistence while short standard
+   mutex sections protect memory state. Gateway reload and resource-pressure lifecycle operations
+   use explicit fallible coordinators rather than poisonable or silently closed locks.
+8. Certificate activation's cross-process lock explicitly opens with `truncate(false)`. The lock
+   file is coordination state and is never truncated as a side effect of acquiring the OS lock.
+
+Verification evidence on 2026-07-29:
+
+```text
+pnpm --dir apps/sdkwork-webserver-pc typecheck
+pnpm --dir apps/sdkwork-webserver-pc test
+  15 test files and 105 tests passed
+pnpm --dir apps/sdkwork-webserver-pc build
+  standalone production build passed; main entry 320.77 kB / gzip 93.41 kB
+cargo test -p sdkwork-webserver-delivery-runtime
+  33 tests passed across unit and integration targets
+cargo test -p sdkwork-webserver-edge-runtime
+  13 tests passed
+cargo test -p sdkwork-intelligence-webserver-service
+  19 tests passed
+cargo test -p sdkwork-intelligence-webserver-repository-sqlx
+  13 tests passed; disposable PostgreSQL parity remained explicitly ignored
+cargo test -p sdkwork-api-web-server-standalone-gateway --lib
+  170 tests passed
+cargo fmt --check --package <six affected packages>
+cargo clippy -p <six affected packages> --all-targets -- -D warnings
+pnpm db:validate
+node ../sdkwork-specs/tools/check-application-layering.mjs --root .
+node ../sdkwork-specs/tools/check-rust-backend-composition.mjs --root .
+node ../sdkwork-specs/tools/check-component-port-bindings.mjs --root .
+git diff --check
+```
+
+The authenticated Console page was also opened through the normal browser route. Its IAM
+bootstrap failed with `fetch failed`, so no token or successful authenticated E2E result was
+invented. A controlled visual fixture using the production workspace components verified the
+desktop/mobile Create, Deploy, and Restore interactions, localized option labels, focus behavior,
+status gating, source chooser semantics, and zero browser warning/error messages.
+
+The following release blockers remain authoritative:
+
+1. Deployment and restore records still have no production executor, durable state-transition
+   machine, atomic traffic switch, health-gated convergence, or automatic rollback evidence.
+2. Durable health-check records still have no executor, and HTTP/TCP/ping execution lacks an
+   approved SSRF, DNS-rebinding, and egress policy.
+3. Certificate filesystem activation and database/audit finalization are not one crash-consistent
+   transaction. The lease and fence prevent stale finalization but do not make cross-resource
+   commit atomic.
+4. PostgreSQL parity requires an explicitly configured disposable instance. SQLite parity and SQL
+   compilation do not prove PostgreSQL isolation, lock, or rollback behavior.
+5. Standalone rate limit, idempotency, concurrent admission, and several HA stores remain
+   process-local. Redis-backed multi-replica, load/soak, rolling upgrade, backup/restore, and
+   failure-domain evidence is absent.
+6. Drive archive listing and extraction remove leading dots from path segments. The Web Server
+   cannot reconstruct `.env` or `.well-known` from the sanitized owner response; the Drive owner
+   must change and human-review that public archive contract.
+7. Nginx database status expresses requested control-plane state rather than observed process
+   health. Durable DB/runtime convergence and the remaining runtime/OpenAPI DTO alignment are not
+   complete.
+8. Signing, provenance, SBOM, legal/AGPL review, React Router advisory disposition, and production
+   packages are not closed. The application remains `BETA` with release packages disabled.
+
+No API exception, database migration approval, cross-repository Drive change, or commercial
+production approval is granted by this addendum.

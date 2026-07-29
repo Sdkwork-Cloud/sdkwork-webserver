@@ -2,15 +2,20 @@
 
 use async_trait::async_trait;
 use sdkwork_webserver_contract::{
-    CreateCertificateRequest, CreateDeploymentRequest, CreateDomainRequest,
-    CreateEnvVariableRequest, CreateHealthCheckRequest, CreateSiteRequest, ListSitesQuery,
-    UpdateSiteRequest, WebAppApi, WebAppRequestContext, WebAppResourceScope, WebServiceResult,
+    ApplicationStoreListing, CreateCertificateRequest, CreateDeploymentRequest,
+    CreateDomainRequest, CreateEnvVariableRequest, CreateHealthCheckRequest, CreateSiteRequest,
+    ListSitesQuery, MediaResource, UpdateSiteRequest, WebAppApi, WebAppRequestContext,
+    WebAppResourceScope, WebServiceResult,
 };
+use std::collections::HashSet;
 
 use crate::{AuditLogWrite, WebService};
 
 const MAX_DEPLOYMENT_ARTIFACT_BYTES: i64 = 64 * 1024 * 1024;
 const MAX_ENV_VARIABLE_VALUE_BYTES: usize = 64 * 1024;
+const MAX_ICON_BYTES: u64 = 2 * 1024 * 1024;
+const MAX_STORE_IMAGE_BYTES: u64 = 10 * 1024 * 1024;
+const MAX_STORE_PREVIEWS: usize = 8;
 
 impl WebService {
     fn require_tenant(context: &WebAppRequestContext) -> WebServiceResult<i64> {
@@ -53,6 +58,107 @@ impl WebService {
         ))
     }
 
+    pub(crate) fn validate_store_listing(
+        listing: Option<&ApplicationStoreListing>,
+        require_icon: bool,
+    ) -> WebServiceResult<()> {
+        let Some(listing) = listing else {
+            return if require_icon {
+                Err(sdkwork_webserver_contract::WebServiceError::conflict(
+                    "a 1024x1024 PNG application icon is required before deployment or activation",
+                ))
+            } else {
+                Ok(())
+            };
+        };
+
+        if require_icon && listing.icon.is_none() {
+            return Err(sdkwork_webserver_contract::WebServiceError::conflict(
+                "a 1024x1024 PNG application icon is required before deployment or activation",
+            ));
+        }
+        if let Some(icon) = listing.icon.as_ref() {
+            validate_store_image(
+                icon,
+                "storeListing.icon",
+                1024,
+                1024,
+                &["image/png"],
+                MAX_ICON_BYTES,
+            )?;
+        }
+        if let Some(cover) = listing.cover.as_ref() {
+            validate_store_image(
+                cover,
+                "storeListing.cover",
+                1024,
+                500,
+                &["image/png", "image/jpeg", "image/webp"],
+                MAX_STORE_IMAGE_BYTES,
+            )?;
+        }
+        if listing.previews.len() > MAX_STORE_PREVIEWS {
+            return Err(sdkwork_webserver_contract::WebServiceError::validation(
+                "storeListing.previews must contain at most 8 images",
+            ));
+        }
+        let mut preview_ids = HashSet::with_capacity(listing.previews.len());
+        for (index, preview) in listing.previews.iter().enumerate() {
+            validate_preview_image(preview, index)?;
+            let id = preview.id.as_deref().unwrap_or_default();
+            if !preview_ids.insert(id) {
+                return Err(sdkwork_webserver_contract::WebServiceError::validation(
+                    "storeListing.previews must not contain duplicate Drive resources",
+                ));
+            }
+        }
+
+        validate_store_text(
+            "storeListing.shortDescription",
+            listing.short_description.as_deref(),
+            80,
+        )?;
+        validate_store_text(
+            "storeListing.fullDescription",
+            listing.full_description.as_deref(),
+            4_000,
+        )?;
+        validate_store_text(
+            "storeListing.releaseNotes",
+            listing.release_notes.as_deref(),
+            4_000,
+        )?;
+        validate_store_text("storeListing.category", listing.category.as_deref(), 80)?;
+        if listing.keywords.len() > 10 {
+            return Err(sdkwork_webserver_contract::WebServiceError::validation(
+                "storeListing.keywords must contain at most 10 values",
+            ));
+        }
+        let mut keywords = HashSet::with_capacity(listing.keywords.len());
+        for keyword in &listing.keywords {
+            validate_store_text("storeListing.keywords", Some(keyword), 40)?;
+            if !keywords.insert(keyword.to_lowercase()) {
+                return Err(sdkwork_webserver_contract::WebServiceError::validation(
+                    "storeListing.keywords must not contain duplicates",
+                ));
+            }
+        }
+        for (field, value) in [
+            ("storeListing.supportUrl", listing.support_url.as_deref()),
+            (
+                "storeListing.privacyPolicyUrl",
+                listing.privacy_policy_url.as_deref(),
+            ),
+            (
+                "storeListing.officialWebsiteUrl",
+                listing.official_website_url.as_deref(),
+            ),
+        ] {
+            validate_store_https_url(field, value)?;
+        }
+        Ok(())
+    }
+
     pub(crate) fn validate_deployment_request(
         request: &CreateDeploymentRequest,
     ) -> WebServiceResult<()> {
@@ -61,6 +167,7 @@ impl WebService {
                 "deployType must be 1 (manual), 2 (git), 3 (ci-cd), or 4 (api)",
             ));
         }
+        validate_idempotency_key(request.idempotency_key.as_deref())?;
         if let Some(environment) = request.environment.as_deref() {
             if environment != environment.trim()
                 || !matches!(
@@ -102,24 +209,7 @@ impl WebService {
         }
 
         if let Some(uri) = request.artifact_drive_uri.as_deref() {
-            let uri = uri.trim();
-            let Some((space_id, node_id)) = uri
-                .strip_prefix("drive://spaces/")
-                .and_then(|value| value.split_once("/nodes/"))
-            else {
-                return Err(sdkwork_webserver_contract::WebServiceError::validation(
-                    "artifactDriveUri must use drive://spaces/{spaceId}/nodes/{nodeId}",
-                ));
-            };
-            if space_id.is_empty()
-                || node_id.is_empty()
-                || space_id.contains('/')
-                || node_id.contains('/')
-                || uri.contains(['?', '#'])
-                || uri.len() > 500
-                || !space_id.bytes().all(is_safe_drive_identifier_byte)
-                || !node_id.bytes().all(is_safe_drive_identifier_byte)
-            {
+            if parse_drive_uri(uri).is_none() {
                 return Err(sdkwork_webserver_contract::WebServiceError::validation(
                     "artifactDriveUri must use drive://spaces/{spaceId}/nodes/{nodeId}",
                 ));
@@ -326,6 +416,209 @@ fn validate_optional_deployment_text(
     Ok(())
 }
 
+fn validate_idempotency_key(value: Option<&str>) -> WebServiceResult<()> {
+    let Some(value) = value else {
+        return Ok(());
+    };
+    if value != value.trim() || !(1..=128).contains(&value.len()) {
+        return Err(sdkwork_webserver_contract::WebServiceError::validation(
+            "idempotency key must contain between 1 and 128 bytes without surrounding whitespace",
+        ));
+    }
+    Ok(())
+}
+
+fn validate_store_image(
+    resource: &MediaResource,
+    field: &str,
+    expected_width: i32,
+    expected_height: i32,
+    accepted_mime_types: &[&str],
+    maximum_bytes: u64,
+) -> WebServiceResult<()> {
+    validate_drive_image(resource, field, accepted_mime_types, maximum_bytes)?;
+    if resource.width != Some(expected_width) || resource.height != Some(expected_height) {
+        return Err(sdkwork_webserver_contract::WebServiceError::validation(
+            format!("{field} must be {expected_width}x{expected_height} pixels"),
+        ));
+    }
+    Ok(())
+}
+
+fn validate_preview_image(resource: &MediaResource, index: usize) -> WebServiceResult<()> {
+    let field = format!("storeListing.previews[{index}]");
+    validate_drive_image(
+        resource,
+        &field,
+        &["image/png", "image/jpeg", "image/webp"],
+        MAX_STORE_IMAGE_BYTES,
+    )?;
+    let (Some(width), Some(height)) = (resource.width, resource.height) else {
+        return Err(sdkwork_webserver_contract::WebServiceError::validation(
+            format!("{field} must include width and height"),
+        ));
+    };
+    if !(320..=3_840).contains(&width)
+        || !(320..=3_840).contains(&height)
+        || i64::from(width.max(height)) > i64::from(width.min(height)) * 5 / 2
+    {
+        return Err(sdkwork_webserver_contract::WebServiceError::validation(
+            format!("{field} dimensions must be 320..3840 pixels with an aspect ratio no greater than 2.5:1"),
+        ));
+    }
+    Ok(())
+}
+
+fn validate_drive_image(
+    resource: &MediaResource,
+    field: &str,
+    accepted_mime_types: &[&str],
+    maximum_bytes: u64,
+) -> WebServiceResult<()> {
+    if resource.kind != "image" || resource.source != "drive" {
+        return Err(sdkwork_webserver_contract::WebServiceError::validation(
+            format!("{field} must be a Drive-backed image MediaResource"),
+        ));
+    }
+    if resource.url.is_some() || resource.public_url.is_some() {
+        return Err(sdkwork_webserver_contract::WebServiceError::validation(
+            format!("{field} must not persist delivery or presigned URLs"),
+        ));
+    }
+    let uri = resource.uri.as_deref().ok_or_else(|| {
+        sdkwork_webserver_contract::WebServiceError::validation(format!("{field}.uri is required"))
+    })?;
+    let (space_id, node_id) = parse_drive_uri(uri).ok_or_else(|| {
+        sdkwork_webserver_contract::WebServiceError::validation(format!(
+            "{field}.uri must use drive://spaces/{{spaceId}}/nodes/{{nodeId}}"
+        ))
+    })?;
+    if resource.id.as_deref() != Some(node_id) {
+        return Err(sdkwork_webserver_contract::WebServiceError::validation(
+            format!("{field}.id must equal the Drive node id"),
+        ));
+    }
+    let mime_type = resource.mime_type.as_deref().ok_or_else(|| {
+        sdkwork_webserver_contract::WebServiceError::validation(format!(
+            "{field}.mimeType is required"
+        ))
+    })?;
+    if !accepted_mime_types.contains(&mime_type) {
+        return Err(sdkwork_webserver_contract::WebServiceError::validation(
+            format!("{field}.mimeType is not supported"),
+        ));
+    }
+    resource
+        .size_bytes
+        .as_deref()
+        .filter(|value| !value.is_empty() && value.bytes().all(|byte| byte.is_ascii_digit()))
+        .and_then(|value| value.parse::<u64>().ok())
+        .filter(|size| (1..=maximum_bytes).contains(size))
+        .ok_or_else(|| {
+            sdkwork_webserver_contract::WebServiceError::validation(format!(
+                "{field}.sizeBytes must be between 1 and {maximum_bytes}"
+            ))
+        })?;
+    if let Some(file_name) = resource.file_name.as_deref() {
+        validate_store_text(&format!("{field}.fileName"), Some(file_name), 512)?;
+    }
+    if let Some(alt_text) = resource.alt_text.as_deref() {
+        validate_store_text(&format!("{field}.altText"), Some(alt_text), 512)?;
+    }
+    if let Some(title) = resource.title.as_deref() {
+        validate_store_text(&format!("{field}.title"), Some(title), 255)?;
+    }
+    if let Some(checksum) = resource.checksum.as_ref() {
+        if checksum.algorithm != "sha256"
+            || checksum.value.len() != 64
+            || !checksum
+                .value
+                .bytes()
+                .all(|byte| byte.is_ascii_digit() || matches!(byte, b'a'..=b'f'))
+        {
+            return Err(sdkwork_webserver_contract::WebServiceError::validation(
+                format!("{field}.checksum must be a lowercase sha256 digest"),
+            ));
+        }
+    }
+    let drive = resource
+        .metadata
+        .as_ref()
+        .and_then(|metadata| metadata.get("drive"))
+        .and_then(serde_json::Value::as_object)
+        .ok_or_else(|| {
+            sdkwork_webserver_contract::WebServiceError::validation(format!(
+                "{field}.metadata.drive is required"
+            ))
+        })?;
+    if drive.get("spaceId").and_then(serde_json::Value::as_str) != Some(space_id)
+        || drive.get("nodeId").and_then(serde_json::Value::as_str) != Some(node_id)
+    {
+        return Err(sdkwork_webserver_contract::WebServiceError::validation(
+            format!("{field}.metadata.drive must match the stable Drive URI"),
+        ));
+    }
+    Ok(())
+}
+
+fn parse_drive_uri(uri: &str) -> Option<(&str, &str)> {
+    let (space_id, node_id) = uri.strip_prefix("drive://spaces/")?.split_once("/nodes/")?;
+    if space_id.is_empty()
+        || node_id.is_empty()
+        || space_id.contains('/')
+        || node_id.contains('/')
+        || uri.contains(['?', '#'])
+        || uri.len() > 500
+        || !space_id.bytes().all(is_safe_drive_identifier_byte)
+        || !node_id.bytes().all(is_safe_drive_identifier_byte)
+    {
+        return None;
+    }
+    Some((space_id, node_id))
+}
+
+fn validate_store_text(
+    field: &str,
+    value: Option<&str>,
+    maximum_chars: usize,
+) -> WebServiceResult<()> {
+    let Some(value) = value else {
+        return Ok(());
+    };
+    if value != value.trim()
+        || value.is_empty()
+        || value.chars().count() > maximum_chars
+        || value.chars().any(char::is_control)
+    {
+        return Err(sdkwork_webserver_contract::WebServiceError::validation(
+            format!("{field} must contain 1..{maximum_chars} trimmed characters without control characters"),
+        ));
+    }
+    Ok(())
+}
+
+fn validate_store_https_url(field: &str, value: Option<&str>) -> WebServiceResult<()> {
+    let Some(value) = value else {
+        return Ok(());
+    };
+    let parsed = url::Url::parse(value).ok();
+    if value != value.trim()
+        || value.len() > 2_000
+        || parsed.as_ref().is_none_or(|parsed| {
+            parsed.scheme() != "https"
+                || parsed.host_str().is_none()
+                || !parsed.username().is_empty()
+                || parsed.password().is_some()
+                || parsed.fragment().is_some()
+        })
+    {
+        return Err(sdkwork_webserver_contract::WebServiceError::validation(
+            format!("{field} must be an HTTPS URL without credentials or fragments"),
+        ));
+    }
+    Ok(())
+}
+
 fn is_safe_drive_identifier_byte(byte: u8) -> bool {
     byte.is_ascii_alphanumeric() || matches!(byte, b'-' | b'_' | b'.')
 }
@@ -384,6 +677,7 @@ impl WebAppApi for WebService {
         let tenant_id = Self::require_tenant(context)?;
         let owner_id = Self::owner_filter(context)?;
         Self::validate_application_type(&request.application_type)?;
+        Self::validate_store_listing(request.store_listing.as_ref(), false)?;
         let site = self
             .repository
             .create_site(tenant_id, context.organization_id, owner_id, request)
@@ -411,6 +705,7 @@ impl WebAppApi for WebService {
         site_id: &str,
         request: &UpdateSiteRequest,
     ) -> WebServiceResult<sdkwork_webserver_contract::SiteResponse> {
+        Self::validate_store_listing(request.store_listing.as_ref(), false)?;
         let tenant_id = self.require_site_access(context, site_id).await?;
         let site = self
             .repository
@@ -440,7 +735,22 @@ impl WebAppApi for WebService {
         context: &WebAppRequestContext,
         site_id: &str,
     ) -> WebServiceResult<sdkwork_webserver_contract::SiteResponse> {
-        let tenant_id = self.require_site_access(context, site_id).await?;
+        let tenant_id = Self::require_tenant(context)?;
+        let owner_id = Self::owner_filter(context)?;
+        let site = self
+            .repository
+            .retrieve_site(tenant_id, owner_id, site_id)
+            .await?;
+        Self::validate_store_listing(site.store_listing.as_ref(), true)?;
+        let successful_deployments = self
+            .repository
+            .list_deployments(tenant_id, site_id, 1, 1, Some(2))
+            .await?;
+        if successful_deployments.total == 0 {
+            return Err(sdkwork_webserver_contract::WebServiceError::conflict(
+                "at least one successful deployment is required before activation",
+            ));
+        }
         let site = self
             .repository
             .set_site_status(tenant_id, site_id, 1)
@@ -557,7 +867,13 @@ impl WebAppApi for WebService {
             request.idempotency_key = Some(idempotency_key.clone());
         }
         Self::validate_deployment_request(&request)?;
-        let tenant_id = self.require_site_access(context, site_id).await?;
+        let tenant_id = Self::require_tenant(context)?;
+        let owner_id = Self::owner_filter(context)?;
+        let site = self
+            .repository
+            .retrieve_site(tenant_id, owner_id, site_id)
+            .await?;
+        Self::validate_store_listing(site.store_listing.as_ref(), true)?;
         self.repository
             .create_deployment(tenant_id, site_id, context.actor_id, &request)
             .await
@@ -581,6 +897,7 @@ impl WebAppApi for WebService {
         site_id: &str,
         deployment_id: &str,
     ) -> WebServiceResult<sdkwork_webserver_contract::DeploymentResponse> {
+        validate_idempotency_key(context.idempotency_key.as_deref())?;
         let tenant_id = self.require_site_access(context, site_id).await?;
         self.repository
             .rollback_deployment(
@@ -671,8 +988,8 @@ impl WebAppApi for WebService {
 mod tests {
     use super::{WebService, MAX_DEPLOYMENT_ARTIFACT_BYTES, MAX_ENV_VARIABLE_VALUE_BYTES};
     use sdkwork_webserver_contract::{
-        CreateCertificateRequest, CreateDeploymentRequest, CreateDomainRequest,
-        CreateEnvVariableRequest, CreateHealthCheckRequest,
+        ApplicationStoreListing, CreateCertificateRequest, CreateDeploymentRequest,
+        CreateDomainRequest, CreateEnvVariableRequest, CreateHealthCheckRequest, MediaResource,
     };
 
     #[test]
@@ -739,6 +1056,107 @@ mod tests {
                 })
                 .is_err()
             );
+        }
+
+        for idempotency_key in ["", " padded", &"x".repeat(129)] {
+            assert!(
+                WebService::validate_deployment_request(&CreateDeploymentRequest {
+                    idempotency_key: Some(idempotency_key.to_owned()),
+                    ..valid.clone()
+                })
+                .is_err()
+            );
+        }
+    }
+
+    #[test]
+    fn deployment_request_deserialization_matches_the_strict_openapi_schema() {
+        let valid = serde_json::json!({
+            "deployType": 1,
+            "artifactDriveUri": "drive://spaces/space-1/nodes/node-1",
+            "artifactSize": "1024",
+            "artifactHash": "a".repeat(64)
+        });
+        assert!(serde_json::from_value::<CreateDeploymentRequest>(valid.clone()).is_ok());
+
+        let mut missing_type = valid.clone();
+        missing_type.as_object_mut().unwrap().remove("deployType");
+        assert!(serde_json::from_value::<CreateDeploymentRequest>(missing_type).is_err());
+
+        let mut unknown = valid;
+        unknown["unexpected"] = serde_json::json!(true);
+        assert!(serde_json::from_value::<CreateDeploymentRequest>(unknown).is_err());
+    }
+
+    #[test]
+    fn store_listing_requires_a_canonical_icon_for_release() {
+        assert!(WebService::validate_store_listing(None, false).is_ok());
+        assert!(WebService::validate_store_listing(None, true).is_err());
+        assert!(WebService::validate_store_listing(
+            Some(&ApplicationStoreListing::default()),
+            true,
+        )
+        .is_err());
+
+        let valid = ApplicationStoreListing {
+            icon: Some(test_store_image("icon-1", "image/png", 1024, 1024)),
+            cover: Some(test_store_image("cover-1", "image/jpeg", 1024, 500)),
+            previews: vec![test_store_image("preview-1", "image/webp", 1290, 2796)],
+            short_description: Some("A production application".to_string()),
+            full_description: Some("A complete store description.".to_string()),
+            release_notes: Some("Initial production release.".to_string()),
+            category: Some("Developer Tools".to_string()),
+            keywords: vec!["hosting".to_string(), "deployment".to_string()],
+            support_url: Some("https://support.example.test/help".to_string()),
+            privacy_policy_url: Some("https://example.test/privacy".to_string()),
+            official_website_url: Some("https://example.test/".to_string()),
+        };
+        assert!(WebService::validate_store_listing(Some(&valid), true).is_ok());
+
+        let mut invalid_source = valid.clone();
+        invalid_source.icon.as_mut().unwrap().source = "external_url".to_string();
+        assert!(WebService::validate_store_listing(Some(&invalid_source), true).is_err());
+
+        let mut invalid_uri = valid.clone();
+        invalid_uri.icon.as_mut().unwrap().uri =
+            Some("drive://spaces/store-assets/nodes/icon-1?token=secret".to_string());
+        assert!(WebService::validate_store_listing(Some(&invalid_uri), true).is_err());
+
+        let mut invalid_dimensions = valid.clone();
+        invalid_dimensions.icon.as_mut().unwrap().width = Some(512);
+        assert!(WebService::validate_store_listing(Some(&invalid_dimensions), true).is_err());
+
+        let mut invalid_mime = valid.clone();
+        invalid_mime.icon.as_mut().unwrap().mime_type = Some("image/jpeg".to_string());
+        assert!(WebService::validate_store_listing(Some(&invalid_mime), true).is_err());
+
+        let mut invalid_size = valid.clone();
+        invalid_size.icon.as_mut().unwrap().size_bytes = Some("2097153".to_string());
+        assert!(WebService::validate_store_listing(Some(&invalid_size), true).is_err());
+
+        let mut duplicate_previews = valid;
+        duplicate_previews
+            .previews
+            .push(duplicate_previews.previews[0].clone());
+        assert!(WebService::validate_store_listing(Some(&duplicate_previews), true).is_err());
+    }
+
+    fn test_store_image(node_id: &str, mime_type: &str, width: i32, height: i32) -> MediaResource {
+        MediaResource {
+            id: Some(node_id.to_string()),
+            kind: "image".to_string(),
+            source: "drive".to_string(),
+            uri: Some(format!("drive://spaces/store-assets/nodes/{node_id}")),
+            file_name: Some("store-image.png".to_string()),
+            mime_type: Some(mime_type.to_string()),
+            size_bytes: Some("4096".to_string()),
+            width: Some(width),
+            height: Some(height),
+            alt_text: Some("Store image".to_string()),
+            metadata: Some(serde_json::json!({
+                "drive": { "spaceId": "store-assets", "nodeId": node_id }
+            })),
+            ..MediaResource::default()
         }
     }
 

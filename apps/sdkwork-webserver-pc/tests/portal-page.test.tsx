@@ -29,8 +29,8 @@ describe("WebserverPortal", () => {
     expect(screen.getByRole("link", { name: "首页" }).getAttribute("href")).toBe("/");
     expect(screen.getAllByRole("link", { name: "Console" })[0]?.getAttribute("href")).toBe("/console");
     expect(screen.getByRole("link", { name: "通知中心" }).getAttribute("href")).toBe("http://127.0.0.1:5184/notifications");
-    expect(screen.getByRole("link", { name: "发布应用" }).getAttribute("href")).toBe("/console/sites");
-    expect(screen.getByRole("link", { name: "查看云部署" }).getAttribute("href")).toBe("/console/deployments");
+    expect(screen.getByRole("link", { name: "创建并发布应用" }).getAttribute("href")).toBe("/console/sites");
+    expect(screen.getByRole("link", { name: "管理部署" }).getAttribute("href")).toBe("/console/deployments");
     expect(screen.getAllByRole("link", { name: "文档" })[0]?.getAttribute("href")).toBe("/docs");
     expect(screen.getByText("登录后查看")).toBeTruthy();
   });
@@ -50,11 +50,11 @@ describe("WebserverPortal", () => {
     expect(screen.getByRole("button", { name: "Close navigation" })).toBeTruthy();
     expect(screen.getAllByRole("navigation", { name: "Portal navigation" })).toHaveLength(2);
     expect(screen.getAllByRole("link", { name: "Home" })).toHaveLength(2);
-    expect(screen.getAllByRole("link", { name: "Agent Skill" })).toHaveLength(2);
+    expect(screen.getAllByRole("link", { name: "Agent integration" })).toHaveLength(2);
     expect(screen.getAllByRole("link", { name: "Docs" })).toHaveLength(2);
   });
 
-  it("offers all seven agents and copies a tool-specific standards-aware instruction", async () => {
+  it("copies one concise skill integration instruction for every supported agent", async () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
     renderPortal("en-US", { writeText });
 
@@ -67,27 +67,30 @@ describe("WebserverPortal", () => {
       "Herms Agent",
       "Qoder Work",
     ]);
-    for (const { label } of portalAgentCatalog) {
-      expect(screen.getByRole("tab", { name: label })).toBeTruthy();
-    }
+    const hero = screen.getByRole("heading", { level: 1, name: "SDKWork Web Server" }).closest("section");
+    const copyButton = screen.getByRole("button", { name: "Copy agent integration instruction" });
+    const deliveryStatus = screen.getByText("Source and artifact");
 
-    fireEvent.click(screen.getByRole("tab", { name: "Herms Agent" }));
-    fireEvent.click(screen.getByRole("button", { name: "Copy integration instruction" }));
+    expect(hero?.contains(copyButton)).toBe(true);
+    expect(hero?.contains(deliveryStatus)).toBe(true);
+    expect(copyButton.compareDocumentPosition(deliveryStatus) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+
+    fireEvent.click(copyButton);
 
     await waitFor(() => expect(writeText).toHaveBeenCalledOnce());
-    expect(writeText.mock.calls[0]?.[0]).toContain("You are working in Herms Agent");
-    expect(writeText.mock.calls[0]?.[0]).toContain("sdkwork-dev-app");
-    expect(writeText.mock.calls[0]?.[0]).toContain("explicit Skill authority");
+    expect(writeText.mock.calls[0]?.[0]).toBe(
+      "Read https://www.birdcoder.com/skills/sdkwork-app-deployments/skill.md and follow the instructions to upload and deploy the current application.",
+    );
     expect(screen.getAllByText("Instruction copied").length).toBeGreaterThan(0);
   });
 
   it("surfaces clipboard failures without losing the instruction", async () => {
     renderPortal("en-US", { writeText: vi.fn().mockRejectedValue(new Error("denied")) });
 
-    fireEvent.click(screen.getByRole("button", { name: "Copy integration instruction" }));
+    fireEvent.click(screen.getByRole("button", { name: "Copy agent integration instruction" }));
 
     expect((await screen.findByRole("alert")).textContent).toContain("Clipboard access failed");
-    expect(screen.getByText(/Do not publish to production or apply changes/)).toBeTruthy();
+    expect(screen.getByText(/birdcoder\.com\/skills\/sdkwork-app-deployments\/skill\.md/)).toBeTruthy();
   });
 
   it("loads truthful workspace statistics only through the injected port", async () => {
@@ -113,8 +116,8 @@ describe("WebserverPortal", () => {
     );
 
     expect(await screen.findByText("Unavailable")).toBeTruthy();
-    const agentHeading = screen.getByRole("heading", { name: "Bring deployment capability into your coding agent" });
-    const capabilityHeading = screen.getByRole("heading", { name: "One governed path from artifact to public endpoint" });
+    const agentHeading = screen.getByRole("heading", { name: "Let coding agents publish to enterprise standards" });
+    const capabilityHeading = screen.getByRole("heading", { name: "Turn every launch into a repeatable delivery capability" });
     expect(agentHeading.compareDocumentPosition(capabilityHeading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 });

@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use async_trait::async_trait;
 use thiserror::Error;
-use tokio::sync::Mutex;
+use tokio::sync::Semaphore;
 
 use super::{
     parse_website_provider_event, provider_event_stream_shard, WebsiteProviderEvent,
@@ -71,7 +71,7 @@ pub struct WebsiteProviderEventProcessor {
     checkpoints: Arc<dyn WebsiteProviderEventCheckpointStore>,
     invalidator: Arc<dyn WebsiteProviderEventInvalidator>,
     reconciler: Arc<dyn WebsiteProviderEventReconciler>,
-    processing: [Mutex<()>; PROVIDER_EVENT_STREAM_SHARDS],
+    processing: [Semaphore; PROVIDER_EVENT_STREAM_SHARDS],
 }
 
 impl WebsiteProviderEventProcessor {
@@ -84,7 +84,7 @@ impl WebsiteProviderEventProcessor {
             checkpoints,
             invalidator,
             reconciler,
-            processing: std::array::from_fn(|_| Mutex::new(())),
+            processing: std::array::from_fn(|_| Semaphore::new(1)),
         }
     }
 
@@ -101,26 +101,27 @@ impl WebsiteProviderEventProcessor {
         event: WebsiteProviderEvent,
     ) -> Result<WebsiteProviderEventProcessOutcome, WebsiteProviderEventProcessError> {
         let processing_shard = provider_event_stream_shard(&event.scope.stream_id);
-        let _processing = self.processing[processing_shard].lock().await;
+        let _processing = self.processing[processing_shard]
+            .acquire()
+            .await
+            .map_err(|_| WebsiteProviderEventCheckpointError::Io)?;
         let mut checkpoint = self.checkpoints.load(&event.scope.stream_id).await?;
         let mut reconciled = false;
 
-        if checkpoint
-            .as_ref()
-            .is_some_and(|value| value.is_uncertain())
-        {
-            self.invalidator
-                .mark_uncertain(&event.scope)
-                .await
-                .map_err(WebsiteProviderEventProcessError::Uncertainty)?;
-            self.reconciler
-                .reconcile(&event)
-                .await
-                .map_err(WebsiteProviderEventProcessError::Reconciliation)?;
-            let current = checkpoint.as_mut().expect("checked checkpoint presence");
-            current.set_uncertain(false);
-            self.checkpoints.save(current).await?;
-            reconciled = true;
+        if let Some(current) = checkpoint.as_mut() {
+            if current.is_uncertain() {
+                self.invalidator
+                    .mark_uncertain(&event.scope)
+                    .await
+                    .map_err(WebsiteProviderEventProcessError::Uncertainty)?;
+                self.reconciler
+                    .reconcile(&event)
+                    .await
+                    .map_err(WebsiteProviderEventProcessError::Reconciliation)?;
+                current.set_uncertain(false);
+                self.checkpoints.save(current).await?;
+                reconciled = true;
+            }
         }
 
         if let Some(current) = checkpoint.as_ref() {

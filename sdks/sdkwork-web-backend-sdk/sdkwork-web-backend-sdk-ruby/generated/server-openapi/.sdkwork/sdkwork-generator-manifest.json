@@ -32,7 +32,7 @@
     },
     {
       "path": "lib/sdkwork/backend_sdk.rb",
-      "sha256": "87e8a13f0dcbd77beb56de04cb9a3bc19a1a87eac784e46dbd5292adf6af3060"
+      "sha256": "0a300da8c2f0b005c318dbf9f0e7334fa5b3946e34cb972f51f85009da7c1125"
     },
     {
       "path": "lib/sdkwork/backend_sdk/api/agent.rb",
@@ -116,7 +116,11 @@
     },
     {
       "path": "lib/sdkwork/backend_sdk/models/application_response.rb",
-      "sha256": "2ada1842eadfc200b666382d385f27c05dead43c7aa13e14f7433284e81c1c67"
+      "sha256": "9c8b229bacafe3a5c85d10d67005046f5ee450e59be79f95f5ba4cf41be248de"
+    },
+    {
+      "path": "lib/sdkwork/backend_sdk/models/application_store_listing.rb",
+      "sha256": "219b36666b39ade40e9ec82a9b756f67597522a387ab288694b53240742e0264"
     },
     {
       "path": "lib/sdkwork/backend_sdk/models/applications_activate_response.rb",
@@ -240,7 +244,7 @@
     },
     {
       "path": "lib/sdkwork/backend_sdk/models/create_application_request.rb",
-      "sha256": "7b3fafa907ebadeced6c569f6e678a8084191fa6697160212088c17b293464cb"
+      "sha256": "5eb796d7a4392f8d6270f97ca9ad27ede430bbfe7d214ed51bd4f6c37c74d5fa"
     },
     {
       "path": "lib/sdkwork/backend_sdk/models/create_certificate_request.rb",
@@ -265,6 +269,14 @@
     {
       "path": "lib/sdkwork/backend_sdk/models/heartbeat_response.rb",
       "sha256": "79e3ec869ba0b219b8a075d272c366b61b6918a395b4eeb02405dd27cb411739"
+    },
+    {
+      "path": "lib/sdkwork/backend_sdk/models/media_checksum.rb",
+      "sha256": "69de1e40cbb4253e0d90d31f4523143ecb375227f100ff2d9661fd4c42b1b60f"
+    },
+    {
+      "path": "lib/sdkwork/backend_sdk/models/media_resource.rb",
+      "sha256": "721bccfd5684385cfdcc84c256a859cc29f97484d6924c7b20a508d9e1f8f47f"
     },
     {
       "path": "lib/sdkwork/backend_sdk/models/nginx_config_page.rb",
@@ -356,7 +368,7 @@
     },
     {
       "path": "lib/sdkwork/backend_sdk/models/update_application_request.rb",
-      "sha256": "5c9cc33002800b237de21315515174fe43667137829c1d2ff1223009c7763fc7"
+      "sha256": "8fff054af4bfc0ea6e685274a39d7783ff3975333dc5c6c3c4e23e6c56ea0e42"
     },
     {
       "path": "lib/sdkwork/backend_sdk/models/update_certificate_request.rb",

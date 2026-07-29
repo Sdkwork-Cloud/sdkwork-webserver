@@ -140,7 +140,11 @@
     },
     {
       "path": "types/application_response.go",
-      "sha256": "815e6931c26db88f27a98c94cbac348259684605a72bdde25ed82876ecf9b995"
+      "sha256": "cac83f8dc9445b998bd0bbe8044bd1a3aba90058f07f20a44907770513883bce"
+    },
+    {
+      "path": "types/application_store_listing.go",
+      "sha256": "b4cc0f5f1f0d365c0c49b521c003a373ce88ea2758425114b9a6133f9813a3f3"
     },
     {
       "path": "types/applications_activate_response.go",
@@ -268,7 +272,7 @@
     },
     {
       "path": "types/create_application_request.go",
-      "sha256": "c8aa85e75a1a85035057ec826160c4feae9815cdb2f6bf30d6afb79e69881222"
+      "sha256": "7b464d2e50c0e1123b091c4a5f2d25f4911bfe724d9aae760cfe58b9088633e1"
     },
     {
       "path": "types/create_certificate_request.go",
@@ -297,6 +301,14 @@
     {
       "path": "types/heartbeat_response.go",
       "sha256": "9eac64b56d833f8f3c700486228f9ac40600e0e37d145aaaee3870fbbd986ce6"
+    },
+    {
+      "path": "types/media_checksum.go",
+      "sha256": "620cad237010debdc8e92dd9740085356b342273484fff5b440a5f8156ac74a8"
+    },
+    {
+      "path": "types/media_resource.go",
+      "sha256": "a2c2c08cc486534c3c361b787e52bd9d0fc28603f8b201a7beae61c1255df4a7"
     },
     {
       "path": "types/nginx_config_page.go",
@@ -392,7 +404,7 @@
     },
     {
       "path": "types/update_application_request.go",
-      "sha256": "d04b3bb204b734c017da95b3e2017eead625f8871ac7569ac8644e398eef7ac6"
+      "sha256": "f1a9da3448e886185ca6f9a9955f03e6d1ab66aa50eece3753086b0a99f8ca57"
     },
     {
       "path": "types/update_certificate_request.go",

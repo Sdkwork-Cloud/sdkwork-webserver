@@ -15,16 +15,24 @@ const controls = [
 
 export function SecurityBand({ t }: { t: PortalTranslator }) {
   return (
-    <section className="scroll-mt-16 border-b border-zinc-200 bg-white py-20 text-zinc-950 dark:border-white/10 dark:bg-[#0d1511] dark:text-white" id="security">
+    <section className="scroll-mt-16 bg-[#151817] py-16 text-white sm:py-24" id="security">
       <div className="mx-auto max-w-[1280px] px-5 sm:px-7 lg:px-10">
-        <span className="text-xs font-bold uppercase text-emerald-700 dark:text-emerald-300">{t("security.eyebrow")}</span>
-        <h2 className="mt-3 max-w-[760px] text-3xl font-bold leading-tight sm:text-4xl">{t("security.title")}</h2>
-        <div className="mt-12 grid gap-px overflow-hidden rounded-md border border-zinc-200 bg-zinc-200 sm:grid-cols-2 lg:grid-cols-4 dark:border-white/10 dark:bg-white/10">
-          {controls.map(({ description, icon: Icon, title }) => (
-            <article className="min-h-56 bg-white p-6 dark:bg-[#121b17]" key={title}>
-              <Icon aria-hidden="true" className="text-emerald-700 dark:text-emerald-300" size={24} />
-              <h3 className="mt-8 text-base font-bold">{t(title)}</h3>
-              <p className="mt-3 text-sm leading-6 text-zinc-600 dark:text-zinc-400">{t(description)}</p>
+        <div className="grid items-end gap-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(420px,1.1fr)] lg:gap-16">
+          <div>
+            <span className="text-xs font-bold uppercase text-emerald-300">{t("security.eyebrow")}</span>
+            <h2 className="mt-3 max-w-[760px] text-3xl font-bold leading-tight sm:text-4xl">{t("security.title")}</h2>
+          </div>
+          <p className="m-0 max-w-[680px] leading-7 text-zinc-400">{t("security.description")}</p>
+        </div>
+        <div className="mt-14 grid gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-12">
+          {controls.map(({ description, icon: Icon, title }, index) => (
+            <article className="min-w-0" key={title}>
+              <div className="flex items-center justify-between gap-4">
+                <Icon aria-hidden="true" className="text-emerald-300" size={24} />
+                <span className="font-mono text-xs font-bold text-zinc-600">0{index + 1}</span>
+              </div>
+              <h3 className="mt-7 text-base font-bold">{t(title)}</h3>
+              <p className="mt-3 text-sm leading-6 text-zinc-400">{t(description)}</p>
             </article>
           ))}
         </div>
@@ -32,4 +40,3 @@ export function SecurityBand({ t }: { t: PortalTranslator }) {
     </section>
   );
 }
-

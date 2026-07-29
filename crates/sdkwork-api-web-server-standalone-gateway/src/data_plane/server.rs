@@ -198,7 +198,7 @@ where
         None => None,
     };
     runtime.start_resource_pressure().await?;
-    runtime.start_active_health().await;
+    runtime.start_active_health().await?;
 
     let (tls_shutdown_tx, tls_watcher) = match tls_runtime {
         Some(tls_runtime) => {

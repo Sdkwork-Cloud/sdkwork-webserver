@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace SDKWork\Web\BackendSdk\Models;
 
+use SDKWork\Web\BackendSdk\Models\ApplicationStoreListing;
+
 final class UpdateApplicationRequest
 {
     public ?string $name = null;
@@ -11,6 +13,8 @@ final class UpdateApplicationRequest
     public ?string $description = null;
 
     public array $runtimeConfig = [];
+
+    public ?ApplicationStoreListing $storeListing = null;
 
     public function __construct(array $data = [])
     {
@@ -23,6 +27,9 @@ final class UpdateApplicationRequest
         $this->runtimeConfig = array_key_exists('runtimeConfig', $data)
             ? is_array($data['runtimeConfig']) ? $data['runtimeConfig'] : []
             : [];
+        $this->storeListing = array_key_exists('storeListing', $data)
+            ? is_array($data['storeListing']) ? ApplicationStoreListing::fromArray($data['storeListing']) : null
+            : null;
     }
 
     public static function fromArray(?array $data): ?self
@@ -36,6 +43,7 @@ final class UpdateApplicationRequest
             'name' => $this->name,
             'description' => $this->description,
             'runtimeConfig' => $this->runtimeConfig,
+            'storeListing' => $this->storeListing instanceof ApplicationStoreListing ? $this->storeListing->toArray() : $this->storeListing,
         ];
     }
 }

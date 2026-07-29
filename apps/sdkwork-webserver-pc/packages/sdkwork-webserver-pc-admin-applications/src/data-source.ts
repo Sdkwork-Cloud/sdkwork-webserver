@@ -1,8 +1,12 @@
 import type { WebserverAdminSdkClient } from "@sdkwork/webserver-pc-admin-core";
 import {
   normalizeWebserverPage,
+  applicationStoreListing,
+  resolveApplicationStoreListing,
   WebserverActionError,
+  type ApplicationMediaStorage,
   type ApplicationSourceStorage,
+  type ApplicationStoreListingInput,
   type PreparedApplicationSource,
   type StoredApplicationSource,
   type WebserverResourceAction,
@@ -26,6 +30,7 @@ type DeploymentMetadata = Omit<
 export function createWebserverAdminApplicationRegistry(
   client: WebserverAdminSdkClient,
   sourceStorage: ApplicationSourceStorage,
+  mediaStorage: ApplicationMediaStorage,
 ): WebserverResourceRegistry {
   return {
     applications: source(
@@ -41,9 +46,18 @@ export function createWebserverAdminApplicationRegistry(
             siteType: 1,
             environment: "production",
             versionTag: "v1.0.0",
+            shortDescription: "",
+            fullDescription: "",
+            releaseNotes: "",
+            category: "",
+            keywords: "",
+            supportUrl: "",
+            privacyPolicyUrl: "",
+            officialWebsiteUrl: "",
           },
-          (context) => createApplicationWithInitialVersion(client, sourceStorage, context),
+          (context) => createApplicationWithInitialVersion(client, sourceStorage, mediaStorage, context),
           {
+            applicationSubmission: "create",
             fieldOptions: {
               applicationType: ["WEB", "API"],
               siteType: [1, 2, 3, 4, 5, 6],
@@ -57,13 +71,20 @@ export function createWebserverAdminApplicationRegistry(
         action(
           "update",
           "Update application",
-          { name: "", description: "" },
-          async (context) => client.application.update(
-            selectedId(context),
-            updateApplicationRequest(context.body),
-            idempotencyParams(context),
-          ),
-          { requiresSelection: true, permission: "web.sites.write" },
+          {
+            name: "",
+            description: "",
+            shortDescription: "",
+            fullDescription: "",
+            releaseNotes: "",
+            category: "",
+            keywords: "",
+            supportUrl: "",
+            privacyPolicyUrl: "",
+            officialWebsiteUrl: "",
+          },
+          (context) => updateApplicationListing(client, mediaStorage, context),
+          { applicationSubmission: "update", requiresSelection: true, permission: "web.sites.write" },
         ),
         action(
           "activate",
@@ -156,8 +177,6 @@ export function createWebserverAdminApplicationRegistry(
             deployType: 1,
             environment: "production",
             versionTag: "",
-            sourceRef: "",
-            commitHash: "",
           },
           (context) => deployApplication(client, sourceStorage, context),
           {
@@ -235,6 +254,7 @@ function idempotencyParams(context: WebserverResourceActionContext): { idempoten
 async function createApplicationWithInitialVersion(
   client: WebserverAdminSdkClient,
   sourceStorage: ApplicationSourceStorage,
+  mediaStorage: ApplicationMediaStorage,
   context: WebserverResourceActionContext,
 ): Promise<unknown> {
   const applicationRequest = {
@@ -245,14 +265,38 @@ async function createApplicationWithInitialVersion(
   };
   const metadata = deploymentMetadata(context);
   const idempotency = idempotencyParams(context);
-  const prepared = await prepareSource(sourceStorage, context, 0, 22);
+  const prepared = await prepareSource(sourceStorage, context, 0, 14);
   const application = await client.application.create(applicationRequest, idempotency);
   const applicationId = application.id?.trim();
   if (!applicationId) throw new Error("The created application did not return an ID");
-  context.onProgress?.(26);
+  context.onProgress?.(16);
+  let storeListing: ApplicationStoreListingInput;
+  try {
+    storeListing = await resolveApplicationStoreListing({
+      applicationId,
+      applicationName: applicationRequest.name,
+      body: context.body,
+      mediaStorage,
+      onProgress: (progress) => context.onProgress?.(scaleProgress(progress, 16, 46)),
+      signal: context.signal,
+      submission: requiredApplicationSubmission(context),
+    });
+    await client.application.update(
+      applicationId,
+      { storeListing: sdkStoreListing(storeListing) },
+      idempotency,
+    );
+    context.onProgress?.(48);
+  } catch (error) {
+    throw new WebserverActionError(
+      "application-draft-media-failed",
+      { applicationId },
+      { cause: error },
+    );
+  }
   let stored: StoredApplicationSource;
   try {
-    stored = await storeSource(sourceStorage, applicationId, prepared, context, 26, 92);
+    stored = await storeSource(sourceStorage, applicationId, prepared, context, 48, 92);
   } catch (error) {
     throw new WebserverActionError(
       "application-draft-source-failed",
@@ -275,6 +319,33 @@ async function createApplicationWithInitialVersion(
       { cause: error },
     );
   }
+}
+
+async function updateApplicationListing(
+  client: WebserverAdminSdkClient,
+  mediaStorage: ApplicationMediaStorage,
+  context: WebserverResourceActionContext,
+): Promise<unknown> {
+  const applicationId = selectedId(context);
+  const applicationName = requiredText(context.body.name, "Application name");
+  const storeListing = await resolveApplicationStoreListing({
+    applicationId,
+    applicationName,
+    body: context.body,
+    current: applicationStoreListing(context.selectedItem?.storeListing),
+    mediaStorage,
+    onProgress: context.onProgress,
+    signal: context.signal,
+    submission: requiredApplicationSubmission(context),
+  });
+  context.onProgress?.(96);
+  const result = await client.application.update(
+    applicationId,
+    updateApplicationRequest(context.body, storeListing),
+    idempotencyParams(context),
+  );
+  context.onProgress?.(100);
+  return result;
 }
 
 async function deployApplication(
@@ -410,13 +481,30 @@ function optionalText(value: unknown): string | undefined {
   return typeof value === "string" && value.trim() ? value.trim() : undefined;
 }
 
-function updateApplicationRequest(body: Readonly<Record<string, unknown>>): ApplicationUpdateRequest {
+function updateApplicationRequest(
+  body: Readonly<Record<string, unknown>>,
+  storeListing: ApplicationStoreListingInput,
+): ApplicationUpdateRequest {
   const name = boundedOptionalText(body.name, "Application name", 100, false);
   const description = boundedOptionalText(body.description, "Description", 500, true);
-  if (name === undefined && description === undefined) {
-    throw new Error("At least one application field is required");
-  }
-  return { name, description };
+  return { name, description, storeListing: sdkStoreListing(storeListing) };
+}
+
+function sdkStoreListing(
+  storeListing: ApplicationStoreListingInput,
+): NonNullable<ApplicationUpdateRequest["storeListing"]> {
+  return {
+    ...storeListing,
+    keywords: storeListing.keywords ? [...storeListing.keywords] : undefined,
+    previews: storeListing.previews ? [...storeListing.previews] : undefined,
+  };
+}
+
+function requiredApplicationSubmission(
+  context: WebserverResourceActionContext,
+): NonNullable<WebserverResourceActionContext["applicationSubmission"]> {
+  if (!context.applicationSubmission) throw new Error("Application store submission is required");
+  return context.applicationSubmission;
 }
 
 function createApplicationDomainRequest(

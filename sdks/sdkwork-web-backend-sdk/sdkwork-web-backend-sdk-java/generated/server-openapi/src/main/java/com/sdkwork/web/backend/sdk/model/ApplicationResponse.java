@@ -11,6 +11,7 @@ public class ApplicationResponse {
     private Integer siteType;
     private Integer status;
     private Map<String, Object> runtimeConfig;
+    private ApplicationStoreListing storeListing;
     private String createdAt;
     private String updatedAt;
 
@@ -76,6 +77,14 @@ public class ApplicationResponse {
 
     public void setRuntimeConfig(Map<String, Object> runtimeConfig) {
         this.runtimeConfig = runtimeConfig;
+    }
+
+    public ApplicationStoreListing getStoreListing() {
+        return this.storeListing;
+    }
+
+    public void setStoreListing(ApplicationStoreListing storeListing) {
+        this.storeListing = storeListing;
     }
 
     public String getCreatedAt() {

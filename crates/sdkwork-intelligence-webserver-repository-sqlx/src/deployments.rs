@@ -161,12 +161,13 @@ impl WebRepository {
         // 幂等性：如果客户端提供了非空 idempotency_key，
         // 先查找是否已存在相同 (tenant_id, idempotency_key) 的 deployment。
         // 存在则直接返回已创建的记录，保证网络重试不会产生重复部署。
-        let idempotency_key_hash = request
-            .idempotency_key
-            .as_deref()
-            .map(str::trim)
-            .filter(|value| !value.is_empty())
-            .map(sha256_hex);
+        let idempotency_key_hash = deployment_idempotency_key_hash(
+            "create",
+            actor_id,
+            site_id,
+            None,
+            request.idempotency_key.as_deref(),
+        )?;
         let idempotency_key = idempotency_key_hash.as_deref();
         let idempotency_lookup = idempotency_key.map(|key| DeploymentIdempotencyLookup {
             tenant_id,
@@ -422,10 +423,13 @@ impl WebRepository {
         let artifact_hash: Option<String> = source
             .try_get("artifact_hash")
             .map_err(|error| store_error("rollback web_deployment artifact_hash", error))?;
-        let idempotency_key_hash = idempotency_key
-            .map(str::trim)
-            .filter(|value| !value.is_empty())
-            .map(sha256_hex);
+        let idempotency_key_hash = deployment_idempotency_key_hash(
+            "rollback",
+            actor_id,
+            site_id,
+            Some(deployment_id),
+            idempotency_key,
+        )?;
         let idempotency_key = idempotency_key_hash.as_deref();
         let idempotency_lookup = idempotency_key.map(|key| DeploymentIdempotencyLookup {
             tenant_id,
@@ -541,4 +545,31 @@ fn map_deployment_row(row: &EngineRow, site_id: &str) -> Result<DeploymentRespon
 
 fn normalized_optional(value: Option<&str>) -> Option<&str> {
     value.map(str::trim).filter(|value| !value.is_empty())
+}
+
+fn deployment_idempotency_key_hash(
+    operation: &str,
+    actor_id: Option<i64>,
+    site_id: &str,
+    deployment_id: Option<&str>,
+    raw_key: Option<&str>,
+) -> WebServiceResult<Option<String>> {
+    let Some(raw_key) = raw_key else {
+        return Ok(None);
+    };
+    if raw_key != raw_key.trim() || !(1..=128).contains(&raw_key.len()) {
+        return Err(WebServiceError::validation(
+            "idempotency key must contain between 1 and 128 bytes without surrounding whitespace",
+        ));
+    }
+    let deployment_id = deployment_id.unwrap_or("");
+    let scope = format!(
+        "v1:{}:{operation}:{}:{}:{site_id}:{}:{deployment_id}:{}:{raw_key}",
+        operation.len(),
+        actor_id.unwrap_or_default(),
+        site_id.len(),
+        deployment_id.len(),
+        raw_key.len(),
+    );
+    Ok(Some(sha256_hex(&scope)))
 }

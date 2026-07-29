@@ -6,5 +6,6 @@ data class CreateApplicationRequest(
     val description: String? = null,
     val applicationType: String? = null,
     val siteType: Int? = null,
-    val runtimeConfig: Map<String, Any>? = null
+    val runtimeConfig: Map<String, Any>? = null,
+    val storeListing: ApplicationStoreListing? = null
 )

@@ -12,5 +12,6 @@ namespace SDKWork.Web.AppSdk.Models
         public string? ApplicationType { get; set; }
         public int SiteType { get; set; }
         public Dictionary<string, object>? RuntimeConfig { get; set; }
+        public ApplicationStoreListing? StoreListing { get; set; }
     }
 }

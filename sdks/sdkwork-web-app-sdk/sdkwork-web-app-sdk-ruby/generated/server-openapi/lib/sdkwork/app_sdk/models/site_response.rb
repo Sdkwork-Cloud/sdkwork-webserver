@@ -2,7 +2,7 @@ module Sdkwork
   module AppSdk
     module Models
       class SiteResponse
-              attr_accessor :id, :name, :slug, :description, :application_type, :site_type, :status, :runtime_config, :created_at, :updated_at
+              attr_accessor :id, :name, :slug, :description, :application_type, :site_type, :status, :runtime_config, :store_listing, :created_at, :updated_at
 
               def initialize(attributes = {})
                 attributes = (attributes || {}).transform_keys(&:to_s)
@@ -14,6 +14,7 @@ module Sdkwork
                 @site_type = attributes['siteType']
                 @status = attributes['status']
                 @runtime_config = attributes['runtimeConfig'].is_a?(Hash) ? attributes['runtimeConfig'] : {}
+                @store_listing = attributes['storeListing'].is_a?(Hash) ? ApplicationStoreListing.from_hash(attributes['storeListing']) : nil
                 @created_at = attributes['createdAt']
                 @updated_at = attributes['updatedAt']
               end
@@ -34,6 +35,7 @@ module Sdkwork
                   'siteType' => @site_type,
                   'status' => @status,
                   'runtimeConfig' => @runtime_config,
+                  'storeListing' => @store_listing&.to_hash,
                   'createdAt' => @created_at,
                   'updatedAt' => @updated_at,
                 }

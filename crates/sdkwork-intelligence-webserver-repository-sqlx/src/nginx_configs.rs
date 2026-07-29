@@ -3,14 +3,12 @@ use sdkwork_webserver_contract::{
     NginxReloadResponse, NginxStatusResponse, NginxValidateResponse, UpdateNginxConfigRequest,
     WebServiceError, WebServiceResult,
 };
-use super::{
-    EngineArguments, EngineDatabase, EnginePool, EngineRow, WebRepository,
-};
+use super::{EngineArguments, EngineDatabase, EngineRow, WebRepository};
 use sqlx::Row;
 
 use super::support::{
     bool_from_row, instant_write_expression, new_uuid, next_id, now_rfc3339, pagination,
-    resolve_site_internal_id, resolve_site_uuid, sha256_hex, store_error,
+    resolve_site_internal_id, sha256_hex, store_error,
 };
 
 impl WebRepository {
@@ -20,42 +18,47 @@ impl WebRepository {
         query: &ListNginxConfigsQuery,
     ) -> WebServiceResult<NginxConfigPage> {
         let (page, page_size, offset) = pagination(query.page, query.page_size);
-        let mut count_sql =
-            String::from("SELECT COUNT(*) AS total FROM web_nginx_config WHERE 1=1");
+        let mut count_sql = String::from(
+            "SELECT COUNT(*) AS total
+             FROM web_nginx_config config
+             INNER JOIN web_site site
+               ON site.id = config.site_id AND site.tenant_id = config.tenant_id
+             WHERE 1=1",
+        );
         let mut list_sql = String::from(
-            "SELECT uuid, tenant_id, site_id, config_name, config_type, is_active, status
-             FROM web_nginx_config WHERE 1=1",
+            "SELECT config.uuid, config.tenant_id, site.uuid AS site_uuid,
+                    config.config_name, config.config_type, config.is_active, config.status
+             FROM web_nginx_config config
+             INNER JOIN web_site site
+               ON site.id = config.site_id AND site.tenant_id = config.tenant_id
+             WHERE 1=1",
         );
         let mut binds: Vec<BindValue> = Vec::new();
 
         if let Some(tenant_id) = tenant_id {
             let index = binds.len() + 1;
-            let clause = format!(" AND tenant_id = ${index}");
+            let clause = format!(" AND config.tenant_id = ${index}");
             count_sql.push_str(&clause);
             list_sql.push_str(&clause);
             binds.push(BindValue::I64(tenant_id));
         }
         if let Some(site_uuid) = query.site_id.as_deref() {
-            if let Some(tenant_id) = tenant_id {
-                let site_internal_id =
-                    resolve_site_internal_id(&self.pool, tenant_id, site_uuid).await?;
-                let index = binds.len() + 1;
-                let clause = format!(" AND site_id = ${index}");
-                count_sql.push_str(&clause);
-                list_sql.push_str(&clause);
-                binds.push(BindValue::I64(site_internal_id));
-            }
+            let index = binds.len() + 1;
+            let clause = format!(" AND site.uuid = ${index}");
+            count_sql.push_str(&clause);
+            list_sql.push_str(&clause);
+            binds.push(BindValue::String(site_uuid.to_string()));
         }
         if let Some(config_type) = query.config_type {
             let index = binds.len() + 1;
-            let clause = format!(" AND config_type = ${index}");
+            let clause = format!(" AND config.config_type = ${index}");
             count_sql.push_str(&clause);
             list_sql.push_str(&clause);
             binds.push(BindValue::I32(config_type));
         }
         if let Some(is_active) = query.is_active {
             let index = binds.len() + 1;
-            let clause = format!(" AND is_active = ${index}");
+            let clause = format!(" AND config.is_active = ${index}");
             count_sql.push_str(&clause);
             list_sql.push_str(&clause);
             binds.push(BindValue::Bool(is_active));
@@ -64,7 +67,7 @@ impl WebRepository {
         let limit_index = binds.len() + 1;
         let offset_index = binds.len() + 2;
         list_sql.push_str(&format!(
-            " ORDER BY updated_at DESC, id DESC LIMIT ${limit_index} OFFSET ${offset_index}"
+            " ORDER BY config.updated_at DESC, config.id DESC LIMIT ${limit_index} OFFSET ${offset_index}"
         ));
 
         let count_row = apply_binds(sqlx::query(&count_sql), &binds)
@@ -84,13 +87,9 @@ impl WebRepository {
 
         let mut items = Vec::with_capacity(rows.len());
         for row in &rows {
-            items.push(
-                map_nginx_config_row(&self.pool, row)
-                    .await
-                    .map_err(|error| {
-                        WebServiceError::Internal(format!("map web_nginx_config row: {error}"))
-                    })?,
-            );
+            items.push(map_nginx_config_row(row).map_err(|error| {
+                WebServiceError::Internal(format!("map web_nginx_config row: {error}"))
+            })?);
         }
 
         Ok(NginxConfigPage {
@@ -149,8 +148,12 @@ impl WebRepository {
     ) -> WebServiceResult<NginxConfigResponse> {
         let row = if let Some(tenant_id) = tenant_id {
             sqlx::query(
-                "SELECT uuid, tenant_id, site_id, config_name, config_type, is_active, status
-                 FROM web_nginx_config WHERE tenant_id = $1 AND uuid = $2",
+                "SELECT config.uuid, config.tenant_id, site.uuid AS site_uuid,
+                        config.config_name, config.config_type, config.is_active, config.status
+                 FROM web_nginx_config config
+                 INNER JOIN web_site site
+                   ON site.id = config.site_id AND site.tenant_id = config.tenant_id
+                 WHERE config.tenant_id = $1 AND config.uuid = $2",
             )
             .bind(tenant_id)
             .bind(config_id)
@@ -159,8 +162,12 @@ impl WebRepository {
             .map_err(|error| store_error("retrieve web_nginx_config", error))?
         } else {
             sqlx::query(
-                "SELECT uuid, tenant_id, site_id, config_name, config_type, is_active, status
-                 FROM web_nginx_config WHERE uuid = $1",
+                "SELECT config.uuid, config.tenant_id, site.uuid AS site_uuid,
+                        config.config_name, config.config_type, config.is_active, config.status
+                 FROM web_nginx_config config
+                 INNER JOIN web_site site
+                   ON site.id = config.site_id AND site.tenant_id = config.tenant_id
+                 WHERE config.uuid = $1",
             )
             .bind(config_id)
             .fetch_optional(&self.pool)
@@ -169,9 +176,7 @@ impl WebRepository {
         }
         .ok_or_else(|| WebServiceError::not_found("nginx config not found"))?;
 
-        map_nginx_config_row(&self.pool, &row)
-            .await
-            .map_err(|error| WebServiceError::Internal(error.to_string()))
+        map_nginx_config_row(&row).map_err(|error| WebServiceError::Internal(error.to_string()))
     }
 
     pub(super) async fn update_nginx_config_repo(
@@ -406,13 +411,16 @@ impl WebRepository {
                 .map_err(|error| store_error("Web web_nginx_config", error))?
         };
 
+        if result.rows_affected() == 0 {
+            tx.rollback().await.map_err(|error| {
+                store_error("rollback missing web_nginx_config activation", error)
+            })?;
+            return Err(WebServiceError::not_found("nginx config not found"));
+        }
+
         tx.commit()
             .await
             .map_err(|error| store_error("commit deploy web_nginx_config transaction", error))?;
-
-        if result.rows_affected() == 0 {
-            return Err(WebServiceError::not_found("nginx config not found"));
-        }
 
         self.retrieve_nginx_config_repo(tenant_id, config_id).await
     }
@@ -480,6 +488,7 @@ enum BindValue {
     I64(i64),
     I32(i32),
     Bool(bool),
+    String(String),
 }
 
 fn apply_binds<'q>(
@@ -491,24 +500,16 @@ fn apply_binds<'q>(
             BindValue::I64(value) => query.bind(*value),
             BindValue::I32(value) => query.bind(*value),
             BindValue::Bool(value) => query.bind(*value),
+            BindValue::String(value) => query.bind(value.clone()),
         };
     }
     query
 }
 
-async fn map_nginx_config_row(
-    pool: &EnginePool,
-    row: &EngineRow,
-) -> Result<NginxConfigResponse, sqlx::Error> {
-    let tenant_id: i64 = row.try_get("tenant_id")?;
-    let site_internal_id: i64 = row.try_get("site_id")?;
-    let site_uuid = resolve_site_uuid(pool, tenant_id, site_internal_id)
-        .await
-        .map_err(|error| sqlx::Error::Decode(error.to_string().into()))?;
-
+fn map_nginx_config_row(row: &EngineRow) -> Result<NginxConfigResponse, sqlx::Error> {
     Ok(NginxConfigResponse {
         id: row.try_get("uuid")?,
-        site_id: site_uuid,
+        site_id: row.try_get("site_uuid")?,
         config_name: row.try_get("config_name")?,
         config_type: row.try_get("config_type")?,
         is_active: bool_from_row(row, "is_active")?,

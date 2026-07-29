@@ -9,11 +9,17 @@
     "protocol": "http",
     "packageName": "com.sdkwork:sdkwork-web-backend-sdk"
   },
-  "changeFingerprint": "05d226c4a04a0e7b1cfccbd1f5fbe9b6096d5dc6a1e07af6f75a46591988bb04",
+  "changeFingerprint": "90eb985970557b0f1b1afb2781a89ebcb5a2b02131a7f7ae6414cac114e937c7",
   "changes": {
-    "createdGeneratedFiles": [],
+    "createdGeneratedFiles": [
+      "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationStoreListing.kt",
+      "src/main/kotlin/com/sdkwork/web/backend/sdk/MediaChecksum.kt",
+      "src/main/kotlin/com/sdkwork/web/backend/sdk/MediaResource.kt"
+    ],
     "updatedGeneratedFiles": [
-      "src/main/kotlin/com/sdkwork/web/backend/sdk/CreateNginxConfigRequest.kt"
+      "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationResponse.kt",
+      "src/main/kotlin/com/sdkwork/web/backend/sdk/CreateApplicationRequest.kt",
+      "src/main/kotlin/com/sdkwork/web/backend/sdk/UpdateApplicationRequest.kt"
     ],
     "unchangedGeneratedFiles": [
       "bin/publish-core.mjs",
@@ -44,7 +50,6 @@
       "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationDeploymentResponse.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationDomainResponse.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationDomainVerifyResponse.kt",
-      "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationResponse.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationsActivateResponse.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationsCreateResponse201.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationsDeploymentsCreateResponse201.kt",
@@ -75,8 +80,8 @@
       "src/main/kotlin/com/sdkwork/web/backend/sdk/ConfigsValidateResponse.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/CreateApplicationDeploymentRequest.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/CreateApplicationDomainRequest.kt",
-      "src/main/kotlin/com/sdkwork/web/backend/sdk/CreateApplicationRequest.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/CreateCertificateRequest.kt",
+      "src/main/kotlin/com/sdkwork/web/backend/sdk/CreateNginxConfigRequest.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/CreateServerRequest.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/CreateServerResponse.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/FieldError.kt",
@@ -105,7 +110,6 @@
       "src/main/kotlin/com/sdkwork/web/backend/sdk/ServersCreateResponse201.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/ServersListResponse.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/StatusRetrieveResponse.kt",
-      "src/main/kotlin/com/sdkwork/web/backend/sdk/UpdateApplicationRequest.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/UpdateCertificateRequest.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/UpdateNginxConfigRequest.kt"
     ],
@@ -125,7 +129,12 @@
       {
         "area": "unknown",
         "paths": [
-          "src/main/kotlin/com/sdkwork/web/backend/sdk/CreateNginxConfigRequest.kt"
+          "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationResponse.kt",
+          "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationStoreListing.kt",
+          "src/main/kotlin/com/sdkwork/web/backend/sdk/CreateApplicationRequest.kt",
+          "src/main/kotlin/com/sdkwork/web/backend/sdk/MediaChecksum.kt",
+          "src/main/kotlin/com/sdkwork/web/backend/sdk/MediaResource.kt",
+          "src/main/kotlin/com/sdkwork/web/backend/sdk/UpdateApplicationRequest.kt"
         ]
       }
     ],

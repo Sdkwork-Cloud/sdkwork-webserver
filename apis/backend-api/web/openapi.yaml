@@ -1464,6 +1464,120 @@ components:
           type: string
           minLength: 1
           maxLength: 200
+    MediaChecksum:
+      type: object
+      additionalProperties: false
+      required: [algorithm, value]
+      properties:
+        algorithm:
+          type: string
+          enum: [sha256]
+        value:
+          type: string
+          pattern: '^[a-f0-9]{64}$'
+    MediaResource:
+      type: object
+      additionalProperties: false
+      required: [kind, source]
+      properties:
+        id:
+          type: string
+        kind:
+          type: string
+          enum: [image, video, audio, voice, document, archive, model, other]
+        source:
+          type: string
+          enum: [drive, external_url, data_url, provider_asset, generated]
+        url:
+          type: string
+          format: uri
+        publicUrl:
+          type: string
+          format: uri
+        uri:
+          type: string
+          maxLength: 500
+        objectBlobId:
+          type: string
+        fileName:
+          type: string
+          maxLength: 512
+        mimeType:
+          type: string
+          maxLength: 256
+        sizeBytes:
+          type: string
+          pattern: '^[0-9]+$'
+        checksum:
+          $ref: '#/components/schemas/MediaChecksum'
+        width:
+          type: integer
+          minimum: 0
+        height:
+          type: integer
+          minimum: 0
+        durationSeconds:
+          type: number
+          minimum: 0
+        altText:
+          type: string
+          maxLength: 512
+        title:
+          type: string
+          maxLength: 255
+        metadata:
+          type: object
+          additionalProperties: true
+    ApplicationStoreListing:
+      type: object
+      additionalProperties: false
+      properties:
+        icon:
+          $ref: '#/components/schemas/MediaResource'
+        cover:
+          $ref: '#/components/schemas/MediaResource'
+        previews:
+          type: array
+          maxItems: 8
+          uniqueItems: true
+          items:
+            $ref: '#/components/schemas/MediaResource'
+        shortDescription:
+          type: string
+          minLength: 1
+          maxLength: 80
+        fullDescription:
+          type: string
+          minLength: 1
+          maxLength: 4000
+        releaseNotes:
+          type: string
+          minLength: 1
+          maxLength: 4000
+        category:
+          type: string
+          minLength: 1
+          maxLength: 80
+        keywords:
+          type: array
+          maxItems: 10
+          uniqueItems: true
+          items:
+            type: string
+            minLength: 1
+            maxLength: 40
+        supportUrl:
+          type: string
+          format: uri
+          maxLength: 2000
+        privacyPolicyUrl:
+          type: string
+          format: uri
+          maxLength: 2000
+        officialWebsiteUrl:
+          type: string
+          format: uri
+          maxLength: 2000
     CreateApplicationRequest:
       type: object
       additionalProperties: false
@@ -1492,6 +1606,8 @@ components:
         runtimeConfig:
           type: object
           additionalProperties: true
+        storeListing:
+          $ref: '#/components/schemas/ApplicationStoreListing'
     UpdateApplicationRequest:
       type: object
       additionalProperties: false
@@ -1506,6 +1622,8 @@ components:
         runtimeConfig:
           type: object
           additionalProperties: true
+        storeListing:
+          $ref: '#/components/schemas/ApplicationStoreListing'
     ApplicationResponse:
       type: object
       additionalProperties: false
@@ -1534,6 +1652,8 @@ components:
         runtimeConfig:
           type: object
           additionalProperties: true
+        storeListing:
+          $ref: '#/components/schemas/ApplicationStoreListing'
         createdAt:
           type: string
           format: date-time
