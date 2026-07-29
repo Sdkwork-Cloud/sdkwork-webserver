@@ -359,11 +359,15 @@ function idempotencyParams(context: WebserverResourceActionContext): { idempoten
 async function deployApplication(clients: WebserverConsoleSdkClients, context: WebserverResourceActionContext): Promise<unknown> {
   const siteId = requiredScope(context.scopeId);
   const idempotency = idempotencyParams(context);
+  const request = deploymentRequest(
+    context,
+    requiredText(context.body.sourceVersionId, "Source version"),
+  );
   let deployment: unknown;
   try {
     deployment = await clients.web.deployment.sites.deployments.create(
       siteId,
-      deploymentRequest(context, requiredText(context.body.sourceVersionId, "Source version")),
+      request,
       idempotency,
     );
   } catch (error) {

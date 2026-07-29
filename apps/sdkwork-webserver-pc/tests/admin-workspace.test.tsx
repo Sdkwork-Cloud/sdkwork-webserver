@@ -146,7 +146,7 @@ describe("admin workspace application controls", () => {
     fireEvent.change(versionInput, { target: { value: "v1.0.1" } });
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
     expect(screen.getByRole("heading", { name: "Deployment configuration" })).toBeTruthy();
-    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+    fireEvent.click(screen.getByRole("button", { name: "Review" }));
     expect(screen.getByRole("heading", { name: "Review and create" })).toBeTruthy();
 
     fireEvent.click(screen.getByRole("button", { name: "Back" }));
@@ -221,7 +221,7 @@ describe("admin workspace application controls", () => {
     await waitFor(() => expect(document.activeElement).toBe(repositoryInput));
 
     fireEvent.change(repositoryInput, { target: { value: "http://github.com/sdkwork/example.git" } });
-    fireEvent.click(screen.getByRole("button", { name: "Review" }));
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
     expect(screen.getByRole("alert").textContent).toContain("Enter a valid HTTPS Git repository");
     await waitFor(() => expect(document.activeElement).toBe(repositoryInput));
 

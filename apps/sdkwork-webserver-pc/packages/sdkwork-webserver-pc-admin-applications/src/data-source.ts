@@ -424,11 +424,15 @@ async function deployApplication(
 ): Promise<unknown> {
   const applicationId = requiredApplicationId(context.scopeId);
   const idempotency = idempotencyParams(context);
+  const request = deploymentRequest(
+    context,
+    requiredText(context.body.sourceVersionId, "Source version"),
+  );
   let deployment: unknown;
   try {
     deployment = await client.applicationDeployment.applications.deployments.create(
       applicationId,
-      deploymentRequest(context, requiredText(context.body.sourceVersionId, "Source version")),
+      request,
       idempotency,
     );
   } catch (error) {
