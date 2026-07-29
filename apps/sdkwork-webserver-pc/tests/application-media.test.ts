@@ -56,7 +56,8 @@ describe("application store media", () => {
       "icon",
       fileWithBytes("icon.jpg", "image/jpeg", 1024),
     )).rejects.toThrow("ICON_TYPE");
-    expect(() => validateApplicationPreviewCount(Array.from({ length: 9 }, () => icon))).toThrow(
+    expect(() => validateApplicationPreviewCount(Array.from({ length: 10 }, () => icon))).not.toThrow();
+    expect(() => validateApplicationPreviewCount(Array.from({ length: 11 }, () => icon))).toThrow(
       "PREVIEW_COUNT",
     );
   });

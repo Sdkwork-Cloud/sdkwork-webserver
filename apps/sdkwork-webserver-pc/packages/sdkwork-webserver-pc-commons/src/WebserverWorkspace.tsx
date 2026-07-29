@@ -1522,7 +1522,12 @@ function ApplicationSubmissionFields({
           </div>
           <div aria-label={t("dialog.mediaPreviews")} className="application-preview-strip" role="list">
             {previewImages.map((url, index) => (
-              <article className="application-preview-item" key={`${url}-${index}`} role="listitem">
+              <article
+                aria-label={submission.previewFiles[index]?.name}
+                className="application-preview-item"
+                key={`${url}-${index}`}
+                role="listitem"
+              >
                 <img alt="" src={url} />
                 <span className="application-preview-sequence">{index + 1}</span>
                 <div className="application-preview-item-actions">
