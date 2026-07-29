@@ -10,6 +10,10 @@ pub struct DeploymentResponse {
     #[serde(rename = "deployType")]
     pub deploy_type: i64,
 
+    #[serde(rename = "sourceVersionId")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_version_id: Option<String>,
+
     #[serde(rename = "versionTag")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub version_tag: Option<String>,

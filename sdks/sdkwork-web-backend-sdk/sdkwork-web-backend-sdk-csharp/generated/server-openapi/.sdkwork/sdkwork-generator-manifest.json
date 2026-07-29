@@ -16,7 +16,7 @@
     },
     {
       "path": "Api/Api.cs",
-      "sha256": "7e74952f366504a05da9d4f86e51661034fc30ccf2a5022ea6b3d09a760a7d02"
+      "sha256": "19a450f81d395828c38dd50bf29b754d14a49a08832166604423f007a8148016"
     },
     {
       "path": "Api/ApiPaths.cs",
@@ -33,6 +33,10 @@
     {
       "path": "Api/ApplicationDomainApi.cs",
       "sha256": "b47affdb144f3ffdb7ccd744116e0f77dbd680a9ada1f6057bfc9df1418e243d"
+    },
+    {
+      "path": "Api/ApplicationSourceVersionApi.cs",
+      "sha256": "65d17f5f2be5cc3a45197ae9a7cc77c5c4070c7737ab7ba584605122511da4ce"
     },
     {
       "path": "Api/AuditApi.cs",
@@ -100,7 +104,7 @@
     },
     {
       "path": "Models/ApplicationDeploymentResponse.cs",
-      "sha256": "a33a4e847c946bb143582c471d431db93cb3dd3056d2bfeecfce1302653d089a"
+      "sha256": "3372f6b41d70292742852ae381492d83a68cec7c9c4116d8a5b8803e947d7726"
     },
     {
       "path": "Models/ApplicationDomainResponse.cs",
@@ -151,12 +155,36 @@
       "sha256": "d7c8c77bab76a76dd5e5b81c22dce6b93063ef748762e3e046596df2bdabda19"
     },
     {
+      "path": "Models/ApplicationSourceVersionConfigSnapshot.cs",
+      "sha256": "eab86228dc6ba835a6a9553cd35905ee79633f8019aa4201d97b11daeb33e9e7"
+    },
+    {
+      "path": "Models/ApplicationSourceVersionResponse.cs",
+      "sha256": "ae5fa113b37bd92b89d11e81e447394e67cc7c91024eebcfb33fb868324ab6b7"
+    },
+    {
       "path": "Models/ApplicationsPauseResponse.cs",
       "sha256": "f414bdbdd31f84a9df53fb9210ab766698f2239778882221ba01b42304bb8d13"
     },
     {
       "path": "Models/ApplicationsRetrieveResponse.cs",
       "sha256": "9e7e16c3503e247c6a1418dda17abb9a1ba9cc07ebee763db2b2f87000e70ceb"
+    },
+    {
+      "path": "Models/ApplicationsSourceVersionsCreateResponse201.cs",
+      "sha256": "158c512396b1ba8c82465021f5e6382530a21293102ea0bb0a7755b944ba6c4a"
+    },
+    {
+      "path": "Models/ApplicationsSourceVersionsImportGitResponse201.cs",
+      "sha256": "42011c4bd36ce1d6fc8dedd7ca68a570d03718fb8e8e3d312a77165d83adb755"
+    },
+    {
+      "path": "Models/ApplicationsSourceVersionsListResponse.cs",
+      "sha256": "869952010a3e7696735d07876e15700fdd75003f383ef420912dc352dbc44d50"
+    },
+    {
+      "path": "Models/ApplicationsSourceVersionsRetrieveResponse.cs",
+      "sha256": "886d03e2a7f9b81239da6036de6a2b6650bdd178c0378d7c6414fe231d81b794"
     },
     {
       "path": "Models/ApplicationStoreListing.cs",
@@ -232,7 +260,7 @@
     },
     {
       "path": "Models/CreateApplicationDeploymentRequest.cs",
-      "sha256": "21751927f9393127461bb8509b47082c4d7e6ae2c66239771f17b50ca1c3ad95"
+      "sha256": "2fe325d382aa780b2eebeb81f28357aa9b5f2a5555f775e8aa621ff134439cb8"
     },
     {
       "path": "Models/CreateApplicationDomainRequest.cs",
@@ -241,6 +269,10 @@
     {
       "path": "Models/CreateApplicationRequest.cs",
       "sha256": "3ac065ccb12fc2bbf5d3e57ec6459a24736ee9f2637d4709ba8fa976e250a22f"
+    },
+    {
+      "path": "Models/CreateApplicationSourceVersionRequest.cs",
+      "sha256": "10092d610debabe5364e3889328927598fb30c82a5386725f6c3ed3c2fe9ff67"
     },
     {
       "path": "Models/CreateCertificateRequest.cs",
@@ -265,6 +297,10 @@
     {
       "path": "Models/HeartbeatResponse.cs",
       "sha256": "2175a904025e9cd61800f9a2ccf3d20e6ab229edb7d3aad9c8160c4bbf23a1d2"
+    },
+    {
+      "path": "Models/ImportApplicationGitSourceVersionRequest.cs",
+      "sha256": "ab0c8f8d53352f94b7b933fea3a4c758a3fc6b83ca8e025c9c1b120f5450b3cf"
     },
     {
       "path": "Models/MediaChecksum.cs",
@@ -376,7 +412,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "fae9c2d0fccd5f73d94736cf9c8c58d08e86404af317aec1af7731c6dd052ca2"
+      "sha256": "46d4988e161d4709f707a3cf40ca337ce26e550a5f5c4ab35f2a6587849937f1"
     },
     {
       "path": "sdkwork-sdk.json",
@@ -388,7 +424,7 @@
     },
     {
       "path": "SdkworkBackendClient.cs",
-      "sha256": "17e67ddd561f3f1f1f74c7d635ae84e648ecc4e7ef6cc6cebcbc90ef56eb311c"
+      "sha256": "75bdf50ef9ff2b0a920e5600559db7b38584fc57d9ded908fe0de11dd5f98a31"
     }
   ],
   "scaffoldFiles": [

@@ -44,8 +44,12 @@ public class SiteApi {
     }
 
     /** 更新站点 */
-    public SitesUpdateResponse sitesUpdate(String siteId, UpdateSiteRequest body) throws Exception {
-        Object raw = client.patch(ApiPaths.appPath("/sites/" + serializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false)) + ""), body, null, null, "application/json");
+    public SitesUpdateResponse sitesUpdate(String siteId, UpdateSiteRequest body, String idempotencyKey) throws Exception {
+        Map<String, String> requestHeaders = buildRequestHeaders(
+                Map.of("Idempotency-Key", new HeaderParameterSpec(idempotencyKey, "simple", false, null)),
+                Map.of()
+        );
+        Object raw = client.patch(ApiPaths.appPath("/sites/" + serializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false)) + ""), body, null, requestHeaders, "application/json");
         return client.convertValue(raw, new TypeReference<SitesUpdateResponse>() {});
     }
 

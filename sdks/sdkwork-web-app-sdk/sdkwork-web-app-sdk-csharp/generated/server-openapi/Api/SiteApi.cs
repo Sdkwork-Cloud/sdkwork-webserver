@@ -58,9 +58,16 @@ namespace SDKWork.Web.AppSdk.Api
         /// <summary>
         /// 更新站点
         /// </summary>
-        public async Task<SDKWork.Web.AppSdk.Models.SitesUpdateResponse?> SitesUpdateAsync(string siteId, SDKWork.Web.AppSdk.Models.UpdateSiteRequest body)
+        public async Task<SDKWork.Web.AppSdk.Models.SitesUpdateResponse?> SitesUpdateAsync(string siteId, SDKWork.Web.AppSdk.Models.UpdateSiteRequest body, string idempotencyKey)
         {
-            return await _client.PatchAsync<SDKWork.Web.AppSdk.Models.SitesUpdateResponse>(ApiPaths.AppPath($"/sites/{SerializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false))}"), body, null, null, "application/json");
+            var requestHeaders = BuildRequestHeaders(
+                new Dictionary<string, HeaderParameterSpec>
+                {
+                    ["Idempotency-Key"] = new HeaderParameterSpec(idempotencyKey, "simple", false, null),
+                },
+                new Dictionary<string, HeaderParameterSpec>()
+            );
+            return await _client.PatchAsync<SDKWork.Web.AppSdk.Models.SitesUpdateResponse>(ApiPaths.AppPath($"/sites/{SerializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false))}"), body, null, requestHeaders, "application/json");
         }
 
         /// <summary>

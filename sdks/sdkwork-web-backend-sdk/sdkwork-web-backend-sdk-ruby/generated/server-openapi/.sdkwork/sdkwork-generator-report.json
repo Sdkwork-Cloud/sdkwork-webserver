@@ -12,31 +12,64 @@
   "mode": "apply",
   "hasChanges": true,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "1321c250733329ea80c35d2ee6a0e0036d2f9e4bd99d37639934bab1c59b21c1",
+  "changeFingerprint": "7b88a03b9efc127198f4b8c414dbd294a49512eea868f9ecd0f7134feff94ec2",
   "changeImpact": {
     "schemaVersion": 1,
     "areas": [
-      "models"
+      "api-surface",
+      "models",
+      "documentation",
+      "unknown"
     ],
     "details": [
       {
+        "area": "api-surface",
+        "paths": [
+          "lib/sdkwork/backend_sdk/api/application_source_version.rb",
+          "lib/sdkwork/backend_sdk/client.rb"
+        ]
+      },
+      {
         "area": "models",
         "paths": [
-          "lib/sdkwork/backend_sdk/models/create_application_deployment_request.rb"
+          "lib/sdkwork/backend_sdk/models/application_deployment_response.rb",
+          "lib/sdkwork/backend_sdk/models/application_source_version_config_snapshot.rb",
+          "lib/sdkwork/backend_sdk/models/application_source_version_response.rb",
+          "lib/sdkwork/backend_sdk/models/applications_source_versions_create_response201.rb",
+          "lib/sdkwork/backend_sdk/models/applications_source_versions_import_git_response201.rb",
+          "lib/sdkwork/backend_sdk/models/applications_source_versions_list_response.rb",
+          "lib/sdkwork/backend_sdk/models/applications_source_versions_retrieve_response.rb",
+          "lib/sdkwork/backend_sdk/models/create_application_deployment_request.rb",
+          "lib/sdkwork/backend_sdk/models/create_application_source_version_request.rb",
+          "lib/sdkwork/backend_sdk/models/import_application_git_source_version_request.rb"
+        ]
+      },
+      {
+        "area": "documentation",
+        "paths": [
+          "README.md"
+        ]
+      },
+      {
+        "area": "unknown",
+        "paths": [
+          "lib/sdkwork/backend_sdk.rb"
         ]
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: models. Verification is required."
+    "summary": "Detected impact areas: api-surface, models, documentation, unknown. Verification is required."
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "medium",
+    "riskLevel": "high",
     "nextAction": "verify",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
     "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
+      "manual-review-required",
+      "unknown-impact",
       "verification-required"
     ]
   },
@@ -48,7 +81,7 @@
         "id": "verify-check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, documentation, unknown.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-ruby\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -67,13 +100,13 @@
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: api-surface, models, documentation, unknown. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, documentation, unknown.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-ruby\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -103,25 +136,39 @@
     "localVersions": []
   },
   "stats": {
-    "totalFiles": 99,
-    "models": 74,
-    "apis": 9,
-    "types": 74
+    "totalFiles": 108,
+    "models": 82,
+    "apis": 10,
+    "types": 82
   },
   "warnings": [],
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 1,
+    "writtenFiles": 14,
     "skippedScaffoldFiles": 1,
-    "skippedUnchangedGeneratedFiles": 97,
+    "skippedUnchangedGeneratedFiles": 93,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "1321c250733329ea80c35d2ee6a0e0036d2f9e4bd99d37639934bab1c59b21c1",
+    "changeFingerprint": "7b88a03b9efc127198f4b8c414dbd294a49512eea868f9ecd0f7134feff94ec2",
     "changes": {
-      "createdGeneratedFiles": [],
+      "createdGeneratedFiles": [
+        "lib/sdkwork/backend_sdk/api/application_source_version.rb",
+        "lib/sdkwork/backend_sdk/models/application_source_version_config_snapshot.rb",
+        "lib/sdkwork/backend_sdk/models/application_source_version_response.rb",
+        "lib/sdkwork/backend_sdk/models/applications_source_versions_create_response201.rb",
+        "lib/sdkwork/backend_sdk/models/applications_source_versions_import_git_response201.rb",
+        "lib/sdkwork/backend_sdk/models/applications_source_versions_list_response.rb",
+        "lib/sdkwork/backend_sdk/models/applications_source_versions_retrieve_response.rb",
+        "lib/sdkwork/backend_sdk/models/create_application_source_version_request.rb",
+        "lib/sdkwork/backend_sdk/models/import_application_git_source_version_request.rb"
+      ],
       "updatedGeneratedFiles": [
-        "lib/sdkwork/backend_sdk/models/create_application_deployment_request.rb"
+        "lib/sdkwork/backend_sdk.rb",
+        "lib/sdkwork/backend_sdk/client.rb",
+        "lib/sdkwork/backend_sdk/models/application_deployment_response.rb",
+        "lib/sdkwork/backend_sdk/models/create_application_deployment_request.rb",
+        "README.md"
       ],
       "unchangedGeneratedFiles": [
         "bin/publish-core.mjs",
@@ -129,7 +176,6 @@
         "bin/publish.sh",
         "CHANGELOG.md",
         "Gemfile",
-        "lib/sdkwork/backend_sdk.rb",
         "lib/sdkwork/backend_sdk/api/agent.rb",
         "lib/sdkwork/backend_sdk/api/application_deployment.rb",
         "lib/sdkwork/backend_sdk/api/application_domain.rb",
@@ -140,14 +186,12 @@
         "lib/sdkwork/backend_sdk/api/certificate.rb",
         "lib/sdkwork/backend_sdk/api/nginx.rb",
         "lib/sdkwork/backend_sdk/api/server.rb",
-        "lib/sdkwork/backend_sdk/client.rb",
         "lib/sdkwork/backend_sdk/http/client.rb",
         "lib/sdkwork/backend_sdk/models/agent_certificate_bundle.rb",
         "lib/sdkwork/backend_sdk/models/agent_heartbeat_request.rb",
         "lib/sdkwork/backend_sdk/models/agent_heartbeat_response.rb",
         "lib/sdkwork/backend_sdk/models/agent_nginx_config_bundle.rb",
         "lib/sdkwork/backend_sdk/models/agent_sync_response.rb",
-        "lib/sdkwork/backend_sdk/models/application_deployment_response.rb",
         "lib/sdkwork/backend_sdk/models/application_domain_response.rb",
         "lib/sdkwork/backend_sdk/models/application_domain_verify_response.rb",
         "lib/sdkwork/backend_sdk/models/application_response.rb",
@@ -218,7 +262,6 @@
         "lib/sdkwork/backend_sdk/sdk_config.rb",
         "lib/sdkwork/backend_sdk/version.rb",
         "LICENSE",
-        "README.md",
         "sdkwork-sdk.json",
         "sdkwork-web-backend-sdk.gemspec"
       ],
@@ -232,29 +275,60 @@
     "impact": {
       "schemaVersion": 1,
       "areas": [
-        "models"
+        "api-surface",
+        "models",
+        "documentation",
+        "unknown"
       ],
       "details": [
         {
+          "area": "api-surface",
+          "paths": [
+            "lib/sdkwork/backend_sdk/api/application_source_version.rb",
+            "lib/sdkwork/backend_sdk/client.rb"
+          ]
+        },
+        {
           "area": "models",
           "paths": [
-            "lib/sdkwork/backend_sdk/models/create_application_deployment_request.rb"
+            "lib/sdkwork/backend_sdk/models/application_deployment_response.rb",
+            "lib/sdkwork/backend_sdk/models/application_source_version_config_snapshot.rb",
+            "lib/sdkwork/backend_sdk/models/application_source_version_response.rb",
+            "lib/sdkwork/backend_sdk/models/applications_source_versions_create_response201.rb",
+            "lib/sdkwork/backend_sdk/models/applications_source_versions_import_git_response201.rb",
+            "lib/sdkwork/backend_sdk/models/applications_source_versions_list_response.rb",
+            "lib/sdkwork/backend_sdk/models/applications_source_versions_retrieve_response.rb",
+            "lib/sdkwork/backend_sdk/models/create_application_deployment_request.rb",
+            "lib/sdkwork/backend_sdk/models/create_application_source_version_request.rb",
+            "lib/sdkwork/backend_sdk/models/import_application_git_source_version_request.rb"
+          ]
+        },
+        {
+          "area": "documentation",
+          "paths": [
+            "README.md"
+          ]
+        },
+        {
+          "area": "unknown",
+          "paths": [
+            "lib/sdkwork/backend_sdk.rb"
           ]
         }
       ],
       "requiresVerification": true,
-      "summary": "Detected impact areas: models. Verification is required."
+      "summary": "Detected impact areas: api-surface, models, documentation, unknown. Verification is required."
     },
     "verificationPlan": {
       "shouldRun": true,
       "runPhase": "now",
-      "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
+      "summary": "Detected impact areas: api-surface, models, documentation, unknown. Verification is required. Run the required verification commands now against the generated SDK output.",
       "steps": [
         {
           "id": "check",
           "title": "Unified package check",
           "required": true,
-          "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
+          "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, documentation, unknown.",
           "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-ruby\\generated\\server-openapi",
           "command": "node",
           "args": [
@@ -272,12 +346,14 @@
     },
     "executionDecision": {
       "schemaVersion": 1,
-      "riskLevel": "medium",
+      "riskLevel": "high",
       "nextAction": "verify",
       "requiresManualReview": false,
       "applyRequiresExpectedFingerprint": false,
       "summary": "Changes have been applied. Run the required verification plan now.",
       "reasons": [
+        "manual-review-required",
+        "unknown-impact",
         "verification-required"
       ]
     },

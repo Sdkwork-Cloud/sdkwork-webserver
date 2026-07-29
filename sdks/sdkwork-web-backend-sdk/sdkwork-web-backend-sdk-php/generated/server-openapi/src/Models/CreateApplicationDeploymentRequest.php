@@ -9,6 +9,9 @@ namespace SDKWork\Web\BackendSdk\Models;
  */
 final class CreateApplicationDeploymentRequest
 {
+    /** Ready, retained application source version selected for this release. */
+    public ?string $sourceVersionId = null;
+
     /** 1 for a stored package, 2 for a Git repository, 3 for CI/CD, or 4 for API delivery. */
     public ?int $deployType = null;
 
@@ -31,6 +34,9 @@ final class CreateApplicationDeploymentRequest
 
     public function __construct(array $data = [])
     {
+        $this->sourceVersionId = array_key_exists('sourceVersionId', $data)
+            ? $data['sourceVersionId']
+            : null;
         $this->deployType = array_key_exists('deployType', $data)
             ? $data['deployType']
             : null;
@@ -65,6 +71,7 @@ final class CreateApplicationDeploymentRequest
     public function toArray(): array
     {
         return [
+            'sourceVersionId' => $this->sourceVersionId,
             'deployType' => $this->deployType,
             'environment' => $this->environment,
             'versionTag' => $this->versionTag,

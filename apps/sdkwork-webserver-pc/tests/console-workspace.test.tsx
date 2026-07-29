@@ -145,11 +145,13 @@ describe("console release controls", () => {
       pageInfo: { page: 1, pageSize: 2, hasMore: false },
     });
     const extract = vi.fn().mockResolvedValue({ extractedCount: "2", items: [] });
+    const createSourceVersion = vi.fn().mockResolvedValue({ id: "source-version-1", status: 1 });
     const createDeployment = vi.fn().mockResolvedValue({ id: "deployment-1", status: 0 });
     const registry = createWebserverConsoleRegistry({
       drive: { drive: { archiveEntries: { extract, list: listArchiveEntries } }, uploader: { uploadArchive } },
       web: {
         site: { create: createSite, update: vi.fn().mockResolvedValue({ id: "site-1" }) },
+        sourceVersion: { sites: { sourceVersions: { create: createSourceVersion } } },
         deployment: { sites: { deployments: { create: createDeployment } } },
       },
     } as unknown as WebserverConsoleSdkClients, undefined, testMediaStorage());
@@ -164,6 +166,11 @@ describe("console release controls", () => {
         siteType: 1,
         environment: "production",
         versionTag: "v1.0.0",
+        sourceVersionRetentionLimit: 5,
+        appConfigPath: "sdkwork.app.config.json",
+        deploymentConfigPath: "etc/sdkwork.deployment.config.json",
+        publicRoot: "dist",
+        spaFallback: "index.html",
       },
       files: [source],
       idempotencyKey: "create-portal-v1",
@@ -181,18 +188,27 @@ describe("console release controls", () => {
       file: source,
     }));
     expect(extract).toHaveBeenCalledWith("source-1", { entryPaths: ["index.html", "assets/app.js"] });
-    expect(createDeployment).toHaveBeenCalledWith("site-1", expect.objectContaining({
+    expect(createSourceVersion).toHaveBeenCalledWith("site-1", expect.objectContaining({
       artifactDriveUri: "drive://spaces/space-1/nodes/source-1",
+      sourceType: "ARCHIVE",
+      versionTag: "v1.0.0",
+    }), { idempotencyKey: "create-portal-v1" });
+    expect(createDeployment).toHaveBeenCalledWith("site-1", expect.objectContaining({
+      sourceVersionId: "source-version-1",
       versionTag: "v1.0.0",
     }), { idempotencyKey: "create-portal-v1" });
     expect(createSite.mock.invocationCallOrder[0]).toBeLessThan(uploadArchive.mock.invocationCallOrder[0]);
-    expect(uploadArchive.mock.invocationCallOrder[0]).toBeLessThan(createDeployment.mock.invocationCallOrder[0]);
+    expect(uploadArchive.mock.invocationCallOrder[0]).toBeLessThan(createSourceVersion.mock.invocationCallOrder[0]);
+    expect(createSourceVersion.mock.invocationCallOrder[0]).toBeLessThan(createDeployment.mock.invocationCallOrder[0]);
   });
 
-  it("creates and redeploys Git-backed applications without storing a source package", async () => {
+  it("imports Git source versions before publishing them without storing a browser package", async () => {
     const prepare = vi.fn();
     const store = vi.fn();
     const sourceStorage: ApplicationSourceStorage = { prepare, store };
+    const importGit = vi.fn()
+      .mockResolvedValueOnce({ id: "source-git-1", status: 1 })
+      .mockResolvedValueOnce({ id: "source-git-2", status: 1 });
     const createDeployment = vi.fn().mockResolvedValue({ id: "deployment-1", status: 0 });
     const registry = createWebserverConsoleRegistry({
       drive: {},
@@ -201,12 +217,14 @@ describe("console release controls", () => {
           create: vi.fn().mockResolvedValue({ id: "site-1", name: "Git portal" }),
           update: vi.fn().mockResolvedValue({ id: "site-1" }),
         },
+        sourceVersion: { sites: { sourceVersions: { importGit } } },
         deployment: { sites: { deployments: { create: createDeployment } } },
       },
     } as unknown as WebserverConsoleSdkClients, sourceStorage, testMediaStorage());
     const create = registry.sites?.actions.find((candidate) => candidate.id === "create");
+    const saveSource = registry["source-versions"]?.actions.find((candidate) => candidate.id === "create");
     const deploy = registry.deployments?.actions.find((candidate) => candidate.id === "deploy");
-    if (!create || !deploy) throw new Error("Git deployment actions are unavailable");
+    if (!create || !saveSource || !deploy) throw new Error("Git source version actions are unavailable");
 
     expect(create.sourceInput).toBe("archive-directory-or-git");
     await create.execute({
@@ -217,33 +235,49 @@ describe("console release controls", () => {
         siteType: 1,
         environment: "production",
         versionTag: "v1.0.0",
+        sourceVersionRetentionLimit: 5,
+        appConfigPath: "sdkwork.app.config.json",
+        deploymentConfigPath: "etc/sdkwork.deployment.config.json",
+        publicRoot: "dist",
+        spaFallback: "index.html",
       },
       idempotencyKey: "git-site-create-1",
       sourceInputMode: "git",
       sourceRepository: "https://github.com/sdkwork/example.git",
     });
+    expect(importGit).toHaveBeenLastCalledWith("site-1", {
+      repositoryUrl: "https://github.com/sdkwork/example.git",
+      versionTag: "v1.0.0",
+    }, { idempotencyKey: "git-site-create-1" });
     expect(createDeployment).toHaveBeenLastCalledWith("site-1", {
-      commitHash: undefined,
-      deployType: 2,
+      deployType: 1,
       environment: "production",
-      sourceRef: "https://github.com/sdkwork/example.git",
+      sourceVersionId: "source-git-1",
       versionTag: "v1.0.0",
     }, { idempotencyKey: "git-site-create-1" });
 
-    await deploy.execute({
-      body: { deployType: 1, environment: "staging", versionTag: "v1.1.0" },
+    await saveSource.execute({
+      body: { versionTag: "v1.1.0" },
       idempotencyKey: "git-site-deploy-1",
       scopeId: "site-1",
       sourceInputMode: "git",
       sourceRepository: "https://git.example.test/team/portal.git",
     });
-    expect(createDeployment).toHaveBeenLastCalledWith("site-1", {
-      commitHash: undefined,
-      deployType: 2,
-      environment: "staging",
-      sourceRef: "https://git.example.test/team/portal.git",
+    expect(importGit).toHaveBeenLastCalledWith("site-1", {
+      repositoryUrl: "https://git.example.test/team/portal.git",
       versionTag: "v1.1.0",
     }, { idempotencyKey: "git-site-deploy-1" });
+    await deploy.execute({
+      body: { deployType: 1, sourceVersionId: "source-git-2", environment: "staging", versionTag: "v1.1.0" },
+      idempotencyKey: "git-site-release-1",
+      scopeId: "site-1",
+    });
+    expect(createDeployment).toHaveBeenLastCalledWith("site-1", {
+      deployType: 1,
+      environment: "staging",
+      sourceVersionId: "source-git-2",
+      versionTag: "v1.1.0",
+    }, { idempotencyKey: "git-site-release-1" });
     expect(prepare).not.toHaveBeenCalled();
     expect(store).not.toHaveBeenCalled();
   });
@@ -305,7 +339,7 @@ describe("console release controls", () => {
     expect(screen.queryByLabelText("提交哈希")).toBeNull();
   });
 
-  it("uploads an application package to Drive before creating a deployment", async () => {
+  it("uploads an application package to Drive before registering a source version", async () => {
     const uploadArchive = vi.fn().mockResolvedValue({
       uploadSession: { spaceId: "space-1", nodeId: "node-1" },
     });
@@ -314,20 +348,18 @@ describe("console release controls", () => {
       pageInfo: { page: 1, pageSize: 500, hasMore: false },
     });
     const extract = vi.fn().mockResolvedValue({ extractedCount: "1", items: [] });
-    const createDeployment = vi.fn().mockResolvedValue({ id: "deployment-1", status: 0 });
+    const createSourceVersion = vi.fn().mockResolvedValue({ id: "source-version-1", status: 1 });
     const registry = createWebserverConsoleRegistry({
       drive: { drive: { archiveEntries: { extract, list: listArchiveEntries } }, uploader: { uploadArchive } },
       web: {
-        deployment: { sites: { deployments: { create: createDeployment } } },
+        sourceVersion: { sites: { sourceVersions: { create: createSourceVersion } } },
       },
     } as unknown as WebserverConsoleSdkClients);
-    const deploy = registry.deployments?.actions.find((action) => action.id === "deploy");
+    const saveSource = registry["source-versions"]?.actions.find((action) => action.id === "create");
     const file = new File(["hello"], "release.zip", { type: "application/zip" });
 
-    expect(deploy?.fieldOptions?.deployType).toEqual([1]);
-
-    await deploy?.execute({
-      body: { deployType: 1, environment: "production", versionTag: "v1.2.3" },
+    await saveSource?.execute({
+      body: { versionTag: "v1.2.3" },
       file,
       idempotencyKey: "release-attempt-1",
       scopeId: "site-1",
@@ -345,19 +377,18 @@ describe("console release controls", () => {
     }));
     expect(listArchiveEntries).toHaveBeenCalledWith("node-1");
     expect(extract).toHaveBeenCalledWith("node-1", { entryPaths: ["index.html"] });
-    expect(createDeployment).toHaveBeenCalledWith("site-1", expect.objectContaining({
+    expect(createSourceVersion).toHaveBeenCalledWith("site-1", expect.objectContaining({
       artifactDriveUri: "drive://spaces/space-1/nodes/node-1",
       artifactHash: "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824",
       artifactSize: "5",
-      deployType: 1,
-      environment: "production",
+      sourceType: "ARCHIVE",
       versionTag: "v1.2.3",
     }), { idempotencyKey: "release-attempt-1" });
   });
 
   it.each([
-    [{ deployType: 0, environment: "production", versionTag: "v1.2.3" }, "deployType"],
-    [{ deployType: 1, environment: "qa", versionTag: "v1.2.3" }, "environment"],
+    [{ deployType: 0, sourceVersionId: "source-version-1", environment: "production", versionTag: "v1.2.3" }, "deployType"],
+    [{ deployType: 1, sourceVersionId: "source-version-1", environment: "qa", versionTag: "v1.2.3" }, "environment"],
   ])("rejects an invalid deployment enum before processing source files", async (body, field) => {
     const prepare = vi.fn();
     const store = vi.fn();
@@ -439,9 +470,9 @@ describe("console release controls", () => {
     expect(extract).not.toHaveBeenCalled();
   });
 
-  it("does not create a deployment when source storage is cancelled during extraction", async () => {
+  it("does not register a source version when source storage is cancelled during extraction", async () => {
     const controller = new AbortController();
-    const createDeployment = vi.fn();
+    const createSourceVersion = vi.fn();
     const registry = createWebserverConsoleRegistry({
       drive: {
         drive: {
@@ -463,19 +494,19 @@ describe("console release controls", () => {
         },
       },
       web: {
-        deployment: { sites: { deployments: { create: createDeployment } } },
+        sourceVersion: { sites: { sourceVersions: { create: createSourceVersion } } },
       },
     } as unknown as WebserverConsoleSdkClients);
-    const deploy = registry.deployments?.actions.find((action) => action.id === "deploy");
+    const saveSource = registry["source-versions"]?.actions.find((action) => action.id === "create");
 
-    await expect(deploy?.execute({
-      body: { deployType: 1, environment: "production", versionTag: "v1.2.3" },
+    await expect(saveSource?.execute({
+      body: { versionTag: "v1.2.3" },
       file: new File(["hello"], "release.zip", { type: "application/zip" }),
       idempotencyKey: "cancelled-release-attempt",
       scopeId: "site-1",
       signal: controller.signal,
     })).rejects.toMatchObject({ name: "AbortError" });
-    expect(createDeployment).not.toHaveBeenCalled();
+    expect(createSourceVersion).not.toHaveBeenCalled();
   });
 
   it("rejects a successful Drive response when the extracted file count is incomplete", async () => {

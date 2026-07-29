@@ -8,6 +8,7 @@ import com.sdkwork.web.backend.sdk.http.HttpClient
 class Api(private val client: HttpClient) {
     val application: ApplicationApi = ApplicationApi(client)
     val applicationDomain: ApplicationDomainApi = ApplicationDomainApi(client)
+    val applicationSourceVersion: ApplicationSourceVersionApi = ApplicationSourceVersionApi(client)
     val applicationDeployment: ApplicationDeploymentApi = ApplicationDeploymentApi(client)
     val certificate: CertificateApi = CertificateApi(client)
     val certificateDistribution: CertificateDistributionApi = CertificateDistributionApi(client)

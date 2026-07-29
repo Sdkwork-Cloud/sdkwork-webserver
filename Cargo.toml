@@ -10,6 +10,7 @@ members = [
   "crates/sdkwork-webserver-delivery-runtime",
   "crates/sdkwork-webserver-drive-provider",
   "crates/sdkwork-webserver-knowledgebase-provider",
+  "crates/sdkwork-webserver-source-provider",
   "crates/sdkwork-webserver-acme-service",
   "crates/sdkwork-webserver-edge-runtime",
   "crates/sdkwork-web-agent",
@@ -98,6 +99,7 @@ sdkwork-webserver-core = { path = "crates/sdkwork-webserver-core" }
 sdkwork-webserver-delivery-runtime = { path = "crates/sdkwork-webserver-delivery-runtime" }
 sdkwork-webserver-drive-provider = { path = "crates/sdkwork-webserver-drive-provider" }
 sdkwork-webserver-knowledgebase-provider = { path = "crates/sdkwork-webserver-knowledgebase-provider" }
+sdkwork-webserver-source-provider = { path = "crates/sdkwork-webserver-source-provider" }
 sdkwork-webserver-database-host = { path = "crates/sdkwork-webserver-database-host" }
 sdkwork-webserver-http-host = { path = "crates/sdkwork-webserver-http-host" }
 sdkwork-intelligence-webserver-service = { path = "crates/sdkwork-intelligence-webserver-service" }
@@ -129,5 +131,10 @@ sdkwork-database-sqlx = { path = "../sdkwork-database/crates/sdkwork-database-sq
 sdkwork-database-id = { path = "../sdkwork-database/crates/sdkwork-database-id", package = "sdkwork-database-id" }
 sdkwork-utils-rust = { path = "../sdkwork-utils/packages/sdkwork-utils-rust" }
 sdkwork-drive-contract = { path = "../sdkwork-drive/crates/sdkwork-drive-contract" }
+sdkwork-drive-config = { path = "../sdkwork-drive/crates/sdkwork-drive-config" }
+sdkwork-drive-object-runtime = { path = "../sdkwork-drive/crates/sdkwork-drive-object-runtime" }
+sdkwork-drive-uploader-service = { path = "../sdkwork-drive/crates/sdkwork-drive-uploader-service" }
+sdkwork-drive-workspace-service = { path = "../sdkwork-drive/crates/sdkwork-drive-workspace-service" }
 sdkwork-drive-internal-sdk = { path = "../sdkwork-drive/sdks/sdkwork-drive-internal-sdk/sdkwork-drive-internal-sdk-rust/generated/server-openapi", package = "sdkwork-drive-internal-sdk-generated-rust" }
 sdkwork-knowledgebase-internal-sdk = { path = "../sdkwork-knowledgebase/sdks/sdkwork-knowledgebase-internal-sdk/sdkwork-knowledgebase-internal-sdk-rust/generated/server-openapi", package = "sdkwork-knowledgebase-internal-sdk-generated-rust" }
+zip = { version = "8.6.0", default-features = false, features = ["deflate-flate2-zlib-rs"] }

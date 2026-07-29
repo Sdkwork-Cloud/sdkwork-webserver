@@ -44,6 +44,7 @@ client.set_header('X-Custom-Header', 'value')
 
 - `client.application` - application API
 - `client.application_domain` - application_domain API
+- `client.application_source_version` - application_source_version API
 - `client.application_deployment` - application_deployment API
 - `client.certificate` - certificate API
 - `client.certificate_distribution` - certificate_distribution API
@@ -70,6 +71,16 @@ puts result.inspect
 application_id = '1'
 params = { 'page' => 1, 'page_size' => 2 }
 result = client.application_domain.applications_domains_list(application_id, params: params)
+puts result.inspect
+```
+
+### application_source_version
+
+```ruby
+# List immutable application source versions
+application_id = '1'
+params = { 'page' => 1, 'page_size' => 2 }
+result = client.application_source_version.applications_source_versions_list(application_id, params: params)
 puts result.inspect
 ```
 

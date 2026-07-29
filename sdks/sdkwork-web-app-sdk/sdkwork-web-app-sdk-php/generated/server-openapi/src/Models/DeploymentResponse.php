@@ -12,6 +12,8 @@ final class DeploymentResponse
 
     public ?int $deployType = null;
 
+    public ?string $sourceVersionId = null;
+
     public ?string $versionTag = null;
 
     public ?string $commitHash = null;
@@ -50,6 +52,9 @@ final class DeploymentResponse
             : null;
         $this->deployType = array_key_exists('deployType', $data)
             ? $data['deployType']
+            : null;
+        $this->sourceVersionId = array_key_exists('sourceVersionId', $data)
+            ? $data['sourceVersionId']
             : null;
         $this->versionTag = array_key_exists('versionTag', $data)
             ? $data['versionTag']
@@ -103,6 +108,7 @@ final class DeploymentResponse
             'id' => $this->id,
             'siteId' => $this->siteId,
             'deployType' => $this->deployType,
+            'sourceVersionId' => $this->sourceVersionId,
             'versionTag' => $this->versionTag,
             'commitHash' => $this->commitHash,
             'sourceRef' => $this->sourceRef,

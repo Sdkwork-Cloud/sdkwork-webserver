@@ -37,8 +37,14 @@ public class SiteApi {
     }
 
     /// 更新站点
-    public func sitesUpdate(siteId: String, body: UpdateSiteRequest) async throws -> SitesUpdateResponse? {
-        return try await client.patch(ApiPaths.appPath("/sites/\(serializePathParameter(siteId, PathParameterSpec(name: "siteId", style: "simple", explode: false)))"), body: body, params: nil, headers: nil, contentType: "application/json", responseType: SitesUpdateResponse.self)
+    public func sitesUpdate(siteId: String, body: UpdateSiteRequest, idempotencyKey: String) async throws -> SitesUpdateResponse? {
+        let requestHeaders = buildRequestHeaders(
+            [
+                "Idempotency-Key": HeaderParameterSpec(value: idempotencyKey, style: "simple", explode: false, contentType: nil),
+            ],
+            [:]
+        )
+        return try await client.patch(ApiPaths.appPath("/sites/\(serializePathParameter(siteId, PathParameterSpec(name: "siteId", style: "simple", explode: false)))"), body: body, params: nil, headers: requestHeaders, contentType: "application/json", responseType: SitesUpdateResponse.self)
     }
 
     /// 删除站点

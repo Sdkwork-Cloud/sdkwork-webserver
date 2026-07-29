@@ -4,6 +4,7 @@ import com.sdkwork.common.core.SdkConfig
 import com.sdkwork.web.backend.sdk.http.HttpClient
 import com.sdkwork.web.backend.sdk.api.ApplicationApi
 import com.sdkwork.web.backend.sdk.api.ApplicationDomainApi
+import com.sdkwork.web.backend.sdk.api.ApplicationSourceVersionApi
 import com.sdkwork.web.backend.sdk.api.ApplicationDeploymentApi
 import com.sdkwork.web.backend.sdk.api.CertificateApi
 import com.sdkwork.web.backend.sdk.api.CertificateDistributionApi
@@ -17,6 +18,7 @@ open class SdkworkBackendClient {
 
     lateinit var application: ApplicationApi
     lateinit var applicationDomain: ApplicationDomainApi
+    lateinit var applicationSourceVersion: ApplicationSourceVersionApi
     lateinit var applicationDeployment: ApplicationDeploymentApi
     lateinit var certificate: CertificateApi
     lateinit var certificateDistribution: CertificateDistributionApi
@@ -29,6 +31,7 @@ open class SdkworkBackendClient {
         this.httpClient = HttpClient(baseUrl)
         application = ApplicationApi(httpClient)
         applicationDomain = ApplicationDomainApi(httpClient)
+        applicationSourceVersion = ApplicationSourceVersionApi(httpClient)
         applicationDeployment = ApplicationDeploymentApi(httpClient)
         certificate = CertificateApi(httpClient)
         certificateDistribution = CertificateDistributionApi(httpClient)
@@ -42,6 +45,7 @@ open class SdkworkBackendClient {
         this.httpClient = HttpClient(config)
         application = ApplicationApi(httpClient)
         applicationDomain = ApplicationDomainApi(httpClient)
+        applicationSourceVersion = ApplicationSourceVersionApi(httpClient)
         applicationDeployment = ApplicationDeploymentApi(httpClient)
         certificate = CertificateApi(httpClient)
         certificateDistribution = CertificateDistributionApi(httpClient)

@@ -4,6 +4,7 @@ import type { AuthTokenManager } from '@sdkwork/sdk-common';
 
 import { ApplicationApi, createApplicationApi } from './api/application';
 import { ApplicationDomainApi, createApplicationDomainApi } from './api/application-domain';
+import { ApplicationSourceVersionApi, createApplicationSourceVersionApi } from './api/application-source-version';
 import { ApplicationDeploymentApi, createApplicationDeploymentApi } from './api/application-deployment';
 import { CertificateApi, createCertificateApi } from './api/certificate';
 import { CertificateDistributionApi, createCertificateDistributionApi } from './api/certificate-distribution';
@@ -17,6 +18,7 @@ export class SdkworkBackendClient {
 
   public readonly application: ApplicationApi;
   public readonly applicationDomain: ApplicationDomainApi;
+  public readonly applicationSourceVersion: ApplicationSourceVersionApi;
   public readonly applicationDeployment: ApplicationDeploymentApi;
   public readonly certificate: CertificateApi;
   public readonly certificateDistribution: CertificateDistributionApi;
@@ -30,6 +32,8 @@ export class SdkworkBackendClient {
     this.application = createApplicationApi(this.httpClient);
 
     this.applicationDomain = createApplicationDomainApi(this.httpClient);
+
+    this.applicationSourceVersion = createApplicationSourceVersionApi(this.httpClient);
 
     this.applicationDeployment = createApplicationDeploymentApi(this.httpClient);
 

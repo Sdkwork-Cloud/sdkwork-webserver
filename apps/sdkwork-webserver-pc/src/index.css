@@ -293,6 +293,10 @@ tbody tr:last-child td { border-bottom: 0; }
 .server-status-0 { background: var(--webserver-color-danger-surface); color: var(--webserver-color-danger-text); }
 .deployment-status-3 { background: var(--webserver-color-danger-surface); color: var(--webserver-color-danger-text); }
 .deployment-status-4, .deployment-status-5, .deployment-status-6 { background: var(--sdk-color-surface-elevated); color: var(--sdk-color-text-secondary); }
+.source-version-status-1 { background: var(--webserver-color-success-surface); color: var(--webserver-color-success-text); }
+.source-version-status-0 { background: var(--webserver-color-warning-surface); color: var(--webserver-color-warning-text); }
+.source-version-status-2 { background: var(--webserver-color-danger-surface); color: var(--webserver-color-danger-text); }
+.source-version-status-3 { background: var(--sdk-color-surface-elevated); color: var(--sdk-color-text-muted); }
 .dialog footer { justify-content: flex-end; }
 @keyframes workspace-spin { to { transform: rotate(360deg); } }
 @keyframes workspace-loading {
@@ -806,7 +810,10 @@ html[data-sdk-color-mode="dark"] .webserver-auth-page {
 .application-wizard-stage-content {
   min-width: 0;
   min-height: 0;
-  overflow: hidden;
+  padding-right: 4px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
 }
 .application-step-pane {
   min-width: 0;
@@ -1194,6 +1201,17 @@ html[data-sdk-color-mode="dark"] .webserver-auth-page {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.application-listing-subsection {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--sdk-color-border-default);
+}
+.application-listing-subsection .application-subsection-heading {
+  color: var(--sdk-color-text-secondary);
+}
+.application-listing-subsection .application-subsection-heading > svg {
+  color: var(--sdk-color-text-muted);
+}
 .application-listing-fields { grid-template-columns: 1fr; }
 .application-listing-fields [data-field] { grid-column: auto; grid-row: auto; }
 .application-creation-dialog .application-listing-fields textarea {
@@ -1220,6 +1238,7 @@ html[data-sdk-color-mode="dark"] .webserver-auth-page {
   border-right: 1px solid var(--sdk-color-border-default);
 }
 .application-release-fields { grid-template-columns: 1fr; }
+.application-configuration-fields { grid-template-columns: 1fr; }
 .application-creation-dialog .application-source-step {
   margin: 0;
   padding: 0;
@@ -1319,7 +1338,7 @@ html[data-sdk-color-mode="dark"] .webserver-auth-page {
     border-bottom: 1px solid var(--sdk-color-border-default);
   }
   .application-creation-dialog .application-wizard-progress ol {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 6px;
   }
   .application-creation-dialog .application-wizard-progress li::after { display: none; }
@@ -1363,7 +1382,7 @@ html[data-sdk-color-mode="dark"] .webserver-auth-page {
     scrollbar-width: none;
   }
   .application-wizard-stage::-webkit-scrollbar { display: none; }
-  .application-wizard-stage-content { overflow: visible; }
+  .application-wizard-stage-content { padding-right: 0; overflow: visible; }
   .application-step-pane { height: auto; }
   .application-identity-fields,
   .application-listing-fields,

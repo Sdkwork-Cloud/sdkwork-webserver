@@ -44,7 +44,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "490db06ba511308c2d6413f06bcdd6fefc60d211e14f90392cc8e71043856aab"
+      "sha256": "6eb0bfb69c7fb0f55a46e368e8b7a8858f37403eff5cf5aa7f94de108c6ee0e1"
     },
     {
       "path": "sdkwork-sdk.json",
@@ -61,6 +61,10 @@
     {
       "path": "src/api/application-domain.ts",
       "sha256": "159ebe2b7e4586e3f0e8482e1de02fbf3448e9c4af8f9d3ba69d679053266c71"
+    },
+    {
+      "path": "src/api/application-source-version.ts",
+      "sha256": "0d1e1715059c5bdc0430ff80039a395711f7d675971c674f0216f4871de42904"
     },
     {
       "path": "src/api/application.ts",
@@ -84,7 +88,7 @@
     },
     {
       "path": "src/api/index.ts",
-      "sha256": "e789a3b828a77c2f1439702a38fd1f3868760971a135784d9302f32e85b09f8c"
+      "sha256": "89ba98e913262eeadb34505f88083b5136a1022a9b520ee6ccee29a46de495a3"
     },
     {
       "path": "src/api/nginx.ts",
@@ -116,7 +120,7 @@
     },
     {
       "path": "src/sdk.ts",
-      "sha256": "bee243ce56c0e34e36a2c23a3b272aa087afc043fd789fe8bfcece41dd1915cc"
+      "sha256": "9a276db517242f6e84a526d6f48289460c98916018e09d58d937c155f34e261c"
     },
     {
       "path": "src/types/agent-certificate-bundle.ts",
@@ -140,7 +144,7 @@
     },
     {
       "path": "src/types/application-deployment-response.ts",
-      "sha256": "2b4667b4f022126a9a18614454ff813cf49a8b3d04d6e24038f11fd0d6674478"
+      "sha256": "35530760870bd66d0afad9a4d1f0499c1f6e3e3b7f795dc16d216fc84dc3819f"
     },
     {
       "path": "src/types/application-domain-response.ts",
@@ -153,6 +157,14 @@
     {
       "path": "src/types/application-response.ts",
       "sha256": "eef3972409abcc724e7641e9dec943d8e493f06c3f5e07f3c49a6855c9e80dfa"
+    },
+    {
+      "path": "src/types/application-source-version-config-snapshot.ts",
+      "sha256": "f6f60855e3890ae8f3a887d67e6798df57912de96e9d7bad238bedc4c0d3b147"
+    },
+    {
+      "path": "src/types/application-source-version-response.ts",
+      "sha256": "079d9974a688a20675ff419506ae3f5af93d48c81e409e0f3ef41ba991e441d4"
     },
     {
       "path": "src/types/application-store-listing.ts",
@@ -201,6 +213,22 @@
     {
       "path": "src/types/applications-retrieve-response.ts",
       "sha256": "cc2c395ae09b12398a00f45a55662ec66363fef17e7c3669ced8ae52470c7b2e"
+    },
+    {
+      "path": "src/types/applications-source-versions-create-response201.ts",
+      "sha256": "eec182846b7bfb31d3b8c14f354ed02f4c4a4c01d52c68e18bc4a8c70a12a953"
+    },
+    {
+      "path": "src/types/applications-source-versions-import-git-response201.ts",
+      "sha256": "87a9cce27fb2527a04e86a3e52fe01b4901a6c26d13aa5f58ef4d2e480cbb88a"
+    },
+    {
+      "path": "src/types/applications-source-versions-list-response.ts",
+      "sha256": "9083ac5449be7a6ca323bfc7621ddbb9731e74ccc9553ad22d42653bf1f27b6b"
+    },
+    {
+      "path": "src/types/applications-source-versions-retrieve-response.ts",
+      "sha256": "9c129e63171fd0b12ca942ca96efa1c90f788ac05c4d0389320fd113c7edb4cc"
     },
     {
       "path": "src/types/applications-update-response.ts",
@@ -276,7 +304,7 @@
     },
     {
       "path": "src/types/create-application-deployment-request.ts",
-      "sha256": "8e527de70d8ee8678ece9f5f16fb5292525910ea02dce6e1b3a1467d297c93c5"
+      "sha256": "255fe7f2d8a381952426455b8b85715e854cc0d36cc7f664c3012f8478db46c2"
     },
     {
       "path": "src/types/create-application-domain-request.ts",
@@ -285,6 +313,10 @@
     {
       "path": "src/types/create-application-request.ts",
       "sha256": "a526c1edfd82e0c38c81be2546c7b5adb16b6576fa2158021542e361a180cd16"
+    },
+    {
+      "path": "src/types/create-application-source-version-request.ts",
+      "sha256": "63a903b182cac82995a6eba3d6c13b53c25aac5bb39f8b6c339a488e3a2773cf"
     },
     {
       "path": "src/types/create-certificate-request.ts",
@@ -311,8 +343,12 @@
       "sha256": "7f1cfdc85799f17219e56671002950b8060ded4b3af9155a8cfaf4a7acf05feb"
     },
     {
+      "path": "src/types/import-application-git-source-version-request.ts",
+      "sha256": "930bebd5c254306649d37a0ef9ced890ad3f1c8c8423aae8d7142d6b98a45bc1"
+    },
+    {
       "path": "src/types/index.ts",
-      "sha256": "6e7ec2370adf40e1810e7a3a17d265f6b195b47cf166006446e745f2365f8bda"
+      "sha256": "33f8400a8f18bf94c8eb5890798ca690087e6bf90e5545fcb457202b2844557f"
     },
     {
       "path": "src/types/media-checksum.ts",

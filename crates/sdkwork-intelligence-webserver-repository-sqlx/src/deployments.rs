@@ -14,6 +14,7 @@ struct DeploymentIdempotencyLookup<'a> {
     tenant_id: i64,
     site_internal_id: i64,
     site_id: &'a str,
+    source_version_internal_id: Option<i64>,
     deploy_type: i32,
     environment: &'a str,
     version_tag: Option<&'a str>,
@@ -55,6 +56,7 @@ impl WebRepository {
                         deployment.deploy_type, deployment.environment, deployment.version_tag,
                         deployment.commit_hash, deployment.source_ref, deployment.artifact_path,
                         deployment.artifact_size, deployment.artifact_hash,
+                        source_version.uuid AS source_version_id,
                         source.uuid AS rollback_from_deployment_id,
                         CAST(deployment.started_at AS TEXT) AS started_at,
                         CAST(deployment.completed_at AS TEXT) AS completed_at,
@@ -65,6 +67,10 @@ impl WebRepository {
                    ON source.id = deployment.rollback_from
                   AND source.tenant_id = deployment.tenant_id
                   AND source.site_id = deployment.site_id
+                 LEFT JOIN web_source_version source_version
+                   ON source_version.id = deployment.source_version_id
+                  AND source_version.tenant_id = deployment.tenant_id
+                  AND source_version.site_id = deployment.site_id
                  WHERE deployment.tenant_id = $1
                    AND deployment.site_id = $2
                    AND deployment.status = $3
@@ -96,6 +102,7 @@ impl WebRepository {
                         deployment.deploy_type, deployment.environment, deployment.version_tag,
                         deployment.commit_hash, deployment.source_ref, deployment.artifact_path,
                         deployment.artifact_size, deployment.artifact_hash,
+                        source_version.uuid AS source_version_id,
                         source.uuid AS rollback_from_deployment_id,
                         CAST(deployment.started_at AS TEXT) AS started_at,
                         CAST(deployment.completed_at AS TEXT) AS completed_at,
@@ -106,6 +113,10 @@ impl WebRepository {
                    ON source.id = deployment.rollback_from
                   AND source.tenant_id = deployment.tenant_id
                   AND source.site_id = deployment.site_id
+                 LEFT JOIN web_source_version source_version
+                   ON source_version.id = deployment.source_version_id
+                  AND source_version.tenant_id = deployment.tenant_id
+                  AND source_version.site_id = deployment.site_id
                  WHERE deployment.tenant_id = $1 AND deployment.site_id = $2
                  ORDER BY deployment.created_at DESC, deployment.id DESC LIMIT $3 OFFSET $4",
             )
@@ -157,6 +168,24 @@ impl WebRepository {
         let source_ref = normalized_optional(request.source_ref.as_deref());
         let artifact_drive_uri = normalized_optional(request.artifact_drive_uri.as_deref());
         let artifact_hash = normalized_optional(request.artifact_hash.as_deref());
+        let source_version_internal_id = if let Some(source_version_id) = request.source_version_id.as_deref() {
+            let row = sqlx::query(
+                "SELECT id FROM web_source_version
+                 WHERE tenant_id = $1 AND site_id = $2 AND uuid = $3",
+            )
+            .bind(tenant_id)
+            .bind(site_internal_id)
+            .bind(source_version_id)
+            .fetch_optional(&self.pool)
+            .await
+            .map_err(|error| store_error("resolve deployment source version", error))?
+            .ok_or_else(|| WebServiceError::not_found("source version not found"))?;
+            Some(row.try_get("id").map_err(|error| {
+                store_error("map deployment source version id", error)
+            })?)
+        } else {
+            None
+        };
 
         // 幂等性：如果客户端提供了非空 idempotency_key，
         // 先查找是否已存在相同 (tenant_id, idempotency_key) 的 deployment。
@@ -173,6 +202,7 @@ impl WebRepository {
             tenant_id,
             site_internal_id,
             site_id,
+            source_version_internal_id,
             deploy_type: request.deploy_type,
             environment,
             version_tag,
@@ -194,17 +224,18 @@ impl WebRepository {
         let uuid = new_uuid();
         let now = now_rfc3339();
         let engine = self.database_engine().await?;
-        let now_expression = instant_write_expression(engine, "$15");
+        let now_expression = instant_write_expression(engine, "$16");
         let insert_sql = format!(
             "INSERT INTO web_deployment (
-                id, uuid, tenant_id, organization_id, user_id, site_id, deploy_type, environment, version_tag,
+                id, uuid, tenant_id, organization_id, user_id, site_id, source_version_id,
+                deploy_type, environment, version_tag,
                 commit_hash, source_ref, artifact_path, artifact_size, artifact_hash, status,
                 idempotency_key, metadata,
                 created_at, updated_at, version
              ) VALUES (
                 $1, $2, $3,
                 COALESCE((SELECT organization_id FROM web_site WHERE tenant_id = $3 AND id = $5), 0),
-                $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, 0, $14, '{{}}',
+                $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, 0, $15, '{{}}',
                 {now_expression}, {now_expression}, 0
              )"
         );
@@ -214,6 +245,7 @@ impl WebRepository {
             .bind(tenant_id)
             .bind(actor_id)
             .bind(site_internal_id)
+            .bind(source_version_internal_id)
             .bind(request.deploy_type)
             .bind(environment)
             .bind(version_tag)
@@ -254,7 +286,9 @@ impl WebRepository {
                     deployment.deploy_type, deployment.environment, deployment.version_tag,
                     deployment.commit_hash, deployment.source_ref, deployment.artifact_path,
                     deployment.artifact_size, deployment.artifact_hash,
+                    deployment.source_version_id AS source_version_internal_id,
                     deployment.rollback_from,
+                    source_version.uuid AS source_version_id,
                     source.uuid AS rollback_from_deployment_id,
                     CAST(deployment.started_at AS TEXT) AS started_at,
                     CAST(deployment.completed_at AS TEXT) AS completed_at,
@@ -265,6 +299,10 @@ impl WebRepository {
                ON source.id = deployment.rollback_from
               AND source.tenant_id = deployment.tenant_id
               AND source.site_id = deployment.site_id
+             LEFT JOIN web_source_version source_version
+               ON source_version.id = deployment.source_version_id
+              AND source_version.tenant_id = deployment.tenant_id
+              AND source_version.site_id = deployment.site_id
              WHERE deployment.tenant_id = $1 AND deployment.idempotency_key = $2",
         )
         .bind(lookup.tenant_id)
@@ -306,7 +344,11 @@ impl WebRepository {
         let existing_rollback_from_internal_id: Option<i64> = row
             .try_get("rollback_from")
             .map_err(|error| store_error("map idempotent deployment rollback_from", error))?;
+        let existing_source_version_internal_id: Option<i64> = row
+            .try_get("source_version_internal_id")
+            .map_err(|error| store_error("map idempotent deployment source_version_id", error))?;
         if existing_site_internal_id != lookup.site_internal_id
+            || existing_source_version_internal_id != lookup.source_version_internal_id
             || existing_deploy_type != lookup.deploy_type
             || existing_environment != lookup.environment
             || existing_version_tag.as_deref() != lookup.version_tag
@@ -339,6 +381,7 @@ impl WebRepository {
                     deployment.deploy_type, deployment.environment, deployment.version_tag,
                     deployment.commit_hash, deployment.source_ref, deployment.artifact_path,
                     deployment.artifact_size, deployment.artifact_hash,
+                    source_version.uuid AS source_version_id,
                     source.uuid AS rollback_from_deployment_id,
                     CAST(deployment.started_at AS TEXT) AS started_at,
                     CAST(deployment.completed_at AS TEXT) AS completed_at,
@@ -349,6 +392,10 @@ impl WebRepository {
                ON source.id = deployment.rollback_from
               AND source.tenant_id = deployment.tenant_id
               AND source.site_id = deployment.site_id
+             LEFT JOIN web_source_version source_version
+               ON source_version.id = deployment.source_version_id
+              AND source_version.tenant_id = deployment.tenant_id
+              AND source_version.site_id = deployment.site_id
              WHERE deployment.tenant_id = $1
                AND deployment.site_id = $2
                AND deployment.uuid = $3",
@@ -375,10 +422,17 @@ impl WebRepository {
     ) -> WebServiceResult<DeploymentResponse> {
         let site_internal_id = resolve_site_internal_id(&self.pool, tenant_id, site_id).await?;
         let source = sqlx::query(
-            "SELECT id, status, deploy_type, environment, version_tag, commit_hash, source_ref,
-                    artifact_path, artifact_size, artifact_hash
-             FROM web_deployment
-             WHERE tenant_id = $1 AND site_id = $2 AND uuid = $3",
+            "SELECT deployment.id, deployment.status, deployment.deploy_type,
+                    deployment.environment, deployment.version_tag, deployment.commit_hash,
+                    deployment.source_ref, deployment.artifact_path, deployment.artifact_size,
+                    deployment.artifact_hash, deployment.source_version_id,
+                    source_version.status AS source_version_status
+             FROM web_deployment deployment
+             LEFT JOIN web_source_version source_version
+               ON source_version.id = deployment.source_version_id
+              AND source_version.tenant_id = deployment.tenant_id
+              AND source_version.site_id = deployment.site_id
+             WHERE deployment.tenant_id = $1 AND deployment.site_id = $2 AND deployment.uuid = $3",
         )
         .bind(tenant_id)
         .bind(site_internal_id)
@@ -423,6 +477,17 @@ impl WebRepository {
         let artifact_hash: Option<String> = source
             .try_get("artifact_hash")
             .map_err(|error| store_error("rollback web_deployment artifact_hash", error))?;
+        let source_version_internal_id: Option<i64> = source
+            .try_get("source_version_id")
+            .map_err(|error| store_error("rollback web_deployment source_version_id", error))?;
+        let source_version_status: Option<i32> = source
+            .try_get("source_version_status")
+            .map_err(|error| store_error("rollback web_deployment source version status", error))?;
+        if source_version_internal_id.is_some() && source_version_status != Some(1) {
+            return Err(WebServiceError::conflict(
+                "the source version artifact has been pruned and cannot be rolled back",
+            ));
+        }
         let idempotency_key_hash = deployment_idempotency_key_hash(
             "rollback",
             actor_id,
@@ -435,6 +500,7 @@ impl WebRepository {
             tenant_id,
             site_internal_id,
             site_id,
+            source_version_internal_id,
             deploy_type,
             environment: &environment,
             version_tag: version_tag.as_deref(),
@@ -456,17 +522,18 @@ impl WebRepository {
         let id = next_id(self.id_generator())?;
         let uuid = new_uuid();
         let engine = self.database_engine().await?;
-        let rollback_insert_time = instant_write_expression(engine, "$16");
+        let rollback_insert_time = instant_write_expression(engine, "$17");
         let insert_sql = format!(
             "INSERT INTO web_deployment (
-                id, uuid, tenant_id, organization_id, user_id, site_id, deploy_type, environment, version_tag,
+                id, uuid, tenant_id, organization_id, user_id, site_id, source_version_id,
+                deploy_type, environment, version_tag,
                 commit_hash, source_ref, artifact_path, artifact_size, artifact_hash, status,
                 rollback_from, idempotency_key, metadata,
                 created_at, updated_at, version
              ) VALUES (
                 $1, $2, $3,
                 COALESCE((SELECT organization_id FROM web_site WHERE tenant_id = $3 AND id = $5), 0),
-                $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, 0, $14, $15, '{{}}',
+                $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, 0, $15, $16, '{{}}',
                 {rollback_insert_time}, {rollback_insert_time}, 0
              )"
         );
@@ -484,6 +551,7 @@ impl WebRepository {
             .bind(tenant_id)
             .bind(actor_id)
             .bind(site_internal_id)
+            .bind(source_version_internal_id)
             .bind(deploy_type)
             .bind(&environment)
             .bind(&version_tag)
@@ -528,6 +596,7 @@ fn map_deployment_row(row: &EngineRow, site_id: &str) -> Result<DeploymentRespon
         site_id: site_id.to_owned(),
         status: row.try_get("status")?,
         deploy_type: row.try_get("deploy_type")?,
+        source_version_id: row.try_get("source_version_id")?,
         environment: row.try_get("environment")?,
         version_tag: row.try_get("version_tag")?,
         commit_hash: row.try_get("commit_hash")?,

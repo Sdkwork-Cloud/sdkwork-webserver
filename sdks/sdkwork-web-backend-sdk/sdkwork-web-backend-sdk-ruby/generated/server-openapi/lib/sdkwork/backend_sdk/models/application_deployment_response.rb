@@ -2,12 +2,13 @@ module Sdkwork
   module BackendSdk
     module Models
       class ApplicationDeploymentResponse
-              attr_accessor :id, :site_id, :status, :deploy_type, :environment, :version_tag, :commit_hash, :source_ref, :rollback_from_deployment_id, :artifact_drive_uri, :artifact_size, :artifact_hash, :started_at, :completed_at, :duration_ms, :created_at
+              attr_accessor :id, :site_id, :source_version_id, :status, :deploy_type, :environment, :version_tag, :commit_hash, :source_ref, :rollback_from_deployment_id, :artifact_drive_uri, :artifact_size, :artifact_hash, :started_at, :completed_at, :duration_ms, :created_at
 
               def initialize(attributes = {})
                 attributes = (attributes || {}).transform_keys(&:to_s)
                 @id = attributes['id']
                 @site_id = attributes['siteId']
+                @source_version_id = attributes['sourceVersionId']
                 @status = attributes['status']
                 @deploy_type = attributes['deployType']
                 @environment = attributes['environment']
@@ -34,6 +35,7 @@ module Sdkwork
                 {
                   'id' => @id,
                   'siteId' => @site_id,
+                  'sourceVersionId' => @source_version_id,
                   'status' => @status,
                   'deployType' => @deploy_type,
                   'environment' => @environment,

@@ -10,6 +10,8 @@ final class ApplicationDeploymentResponse
 
     public ?string $siteId = null;
 
+    public ?string $sourceVersionId = null;
+
     public ?int $status = null;
 
     public ?int $deployType = null;
@@ -46,6 +48,9 @@ final class ApplicationDeploymentResponse
             : null;
         $this->siteId = array_key_exists('siteId', $data)
             ? $data['siteId']
+            : null;
+        $this->sourceVersionId = array_key_exists('sourceVersionId', $data)
+            ? $data['sourceVersionId']
             : null;
         $this->status = array_key_exists('status', $data)
             ? $data['status']
@@ -101,6 +106,7 @@ final class ApplicationDeploymentResponse
         return [
             'id' => $this->id,
             'siteId' => $this->siteId,
+            'sourceVersionId' => $this->sourceVersionId,
             'status' => $this->status,
             'deployType' => $this->deployType,
             'environment' => $this->environment,

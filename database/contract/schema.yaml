@@ -2,7 +2,7 @@ schema_version: 1
 kind: sdkwork.database.schema
 database_role: authoritative-server
 module_id: web
-contract_version: 1.1.0
+contract_version: 1.2.0
 owner_team: web-platform
 compliance_level: L2
 engines:
@@ -158,6 +158,48 @@ tables:
       - { name: idx_web_certificate_expiry, columns: [not_after], predicate: status = 1 }
       - { name: idx_web_certificate_renewal, columns: [renewal_status, not_after], predicate: auto_renew = true AND status = 1 }
 
+  - name: web_source_version
+    lifecycle_status: active
+    owner: web-platform
+    columns:
+      id: { type: int64, required: true }
+      uuid: { type: string, required: true }
+      tenant_id: { type: int64, required: true }
+      organization_id: { type: int64, required: true }
+      user_id: { type: int64, required: false }
+      site_id: { type: int64, required: true }
+      version_tag: { type: string, required: true }
+      source_type: { type: string, required: true }
+      source_ref: { type: string, required: false }
+      commit_hash: { type: string, required: false }
+      artifact_path: { type: string, required: true }
+      artifact_size: { type: int64, required: true }
+      artifact_hash: { type: string, required: true }
+      config_snapshot: { type: json, required: true }
+      status: { type: enum_int32, required: true }
+      pruned_at: { type: instant, required: false }
+      pruned_by: { type: int64, required: false }
+      metadata: { type: json, required: true }
+      created_at: { type: instant, required: true }
+      updated_at: { type: instant, required: true }
+      version: { type: int64, required: true }
+    constraints:
+      - { name: web_source_version_pkey, type: primary_key, columns: [id] }
+      - { name: uk_web_source_version_uuid, type: unique, columns: [uuid] }
+      - { name: uk_web_source_version_site_tag, type: unique, columns: [tenant_id, site_id, version_tag] }
+      - { name: chk_web_source_version_type, type: check }
+      - { name: chk_web_source_version_status, type: check }
+      - name: fk_web_source_version_site
+        type: foreign_key
+        columns: [site_id]
+        references_table: web_site
+        references_columns: [id]
+    indexes:
+      - { name: uk_web_source_version_uuid, columns: [uuid], unique: true }
+      - { name: uk_web_source_version_site_tag, columns: [tenant_id, site_id, version_tag], unique: true }
+      - { name: idx_web_source_version_site_created, columns: [site_id, created_at] }
+      - { name: idx_web_source_version_retention, columns: [tenant_id, site_id, status, created_at] }
+
   - name: web_deployment
     lifecycle_status: active
     owner: web-platform
@@ -168,6 +210,7 @@ tables:
       organization_id: { type: int64, required: true }
       user_id: { type: int64, required: false }
       site_id: { type: int64, required: true }
+      source_version_id: { type: int64, required: false }
       deploy_type: { type: enum_int32, required: true }
       version_tag: { type: string, required: false }
       commit_hash: { type: string, required: false }
@@ -198,10 +241,16 @@ tables:
         columns: [site_id]
         references_table: web_site
         references_columns: [id]
+      - name: fk_web_deployment_source_version
+        type: foreign_key
+        columns: [source_version_id]
+        references_table: web_source_version
+        references_columns: [id]
     indexes:
       - { name: uk_web_deployment_uuid, columns: [uuid], unique: true }
       - { name: uk_web_deployment_idempotency, columns: [tenant_id, idempotency_key], unique: true }
       - { name: idx_web_deployment_site_created, columns: [site_id, created_at] }
+      - { name: idx_web_deployment_source_version, columns: [source_version_id] }
       - { name: idx_web_deployment_tenant_status, columns: [tenant_id, status, created_at] }
       - { name: idx_web_deployment_status, columns: [status], predicate: "(status = ANY (ARRAY[0, 1, 2]))" }
 

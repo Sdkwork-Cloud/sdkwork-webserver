@@ -33,6 +33,12 @@
       "lifecycle_status": "active"
     },
     {
+      "table_name": "web_source_version",
+      "owner": "web-platform",
+      "compliance_level": "L2",
+      "lifecycle_status": "active"
+    },
+    {
       "table_name": "web_env_variable",
       "owner": "web-platform",
       "compliance_level": "L2",

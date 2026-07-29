@@ -54,9 +54,15 @@ class SiteApi {
   }
 
   /// 更新站点
-  Future<SitesUpdateResponse?> sitesUpdate(String siteId, UpdateSiteRequest body) async {
+  Future<SitesUpdateResponse?> sitesUpdate(String siteId, UpdateSiteRequest body, String idempotencyKey) async {
+    final requestHeaders = buildRequestHeaders(
+      <String, HeaderParameterSpec>{
+        'Idempotency-Key': HeaderParameterSpec(idempotencyKey, 'simple', false, null),
+      },
+      <String, HeaderParameterSpec>{},
+    );
     final payload = body.toJson();
-    final response = await _client.patch(ApiPaths.appPath('/sites/${serializePathParameter(siteId, const PathParameterSpec('siteId', 'simple', false))}'), body: payload, contentType: 'application/json');
+    final response = await _client.patch(ApiPaths.appPath('/sites/${serializePathParameter(siteId, const PathParameterSpec('siteId', 'simple', false))}'), body: payload, headers: requestHeaders, contentType: 'application/json');
     return (() {
       final map = sdkworkResponseAsMap(response);
       return map == null ? null : SitesUpdateResponse.fromJson(map);

@@ -9,11 +9,26 @@
     "protocol": "http",
     "packageName": "sdkwork-web-backend-sdk"
   },
-  "changeFingerprint": "4c48991afc14e06c896aae8c9bdf1caa36181d34ff067cea0ae136ed41e68086",
+  "changeFingerprint": "225f45cb2d138e6f619d25f6954122f97ea960934a7f3ea000a70c2fcd1666ed",
   "changes": {
-    "createdGeneratedFiles": [],
+    "createdGeneratedFiles": [
+      "src/api/application_source_version.rs",
+      "src/models/application_source_version_config_snapshot.rs",
+      "src/models/application_source_version_response.rs",
+      "src/models/applications_source_versions_create_response201.rs",
+      "src/models/applications_source_versions_import_git_response201.rs",
+      "src/models/applications_source_versions_list_response.rs",
+      "src/models/applications_source_versions_retrieve_response.rs",
+      "src/models/create_application_source_version_request.rs",
+      "src/models/import_application_git_source_version_request.rs"
+    ],
     "updatedGeneratedFiles": [
-      "src/models/create_application_deployment_request.rs"
+      "README.md",
+      "src/api/mod.rs",
+      "src/client.rs",
+      "src/models/application_deployment_response.rs",
+      "src/models/create_application_deployment_request.rs",
+      "src/models/mod.rs"
     ],
     "unchangedGeneratedFiles": [
       "bin/publish-core.mjs",
@@ -22,7 +37,6 @@
       "Cargo.toml",
       "CHANGELOG.md",
       "LICENSE",
-      "README.md",
       "sdkwork-sdk.json",
       "src/api/agent.rs",
       "src/api/application_deployment.rs",
@@ -32,11 +46,9 @@
       "src/api/base.rs",
       "src/api/certificate_distribution.rs",
       "src/api/certificate.rs",
-      "src/api/mod.rs",
       "src/api/nginx.rs",
       "src/api/paths.rs",
       "src/api/server.rs",
-      "src/client.rs",
       "src/http/client.rs",
       "src/http/mod.rs",
       "src/lib.rs",
@@ -45,7 +57,6 @@
       "src/models/agent_heartbeat_response.rs",
       "src/models/agent_nginx_config_bundle.rs",
       "src/models/agent_sync_response.rs",
-      "src/models/application_deployment_response.rs",
       "src/models/application_domain_response.rs",
       "src/models/application_domain_verify_response.rs",
       "src/models/application_response.rs",
@@ -89,7 +100,6 @@
       "src/models/heartbeat_response.rs",
       "src/models/media_checksum.rs",
       "src/models/media_resource.rs",
-      "src/models/mod.rs",
       "src/models/nginx_config_page.rs",
       "src/models/nginx_config_response.rs",
       "src/models/nginx_deploy_response.rs",
@@ -126,29 +136,61 @@
   "impact": {
     "schemaVersion": 1,
     "areas": [
-      "models"
+      "api-surface",
+      "models",
+      "documentation",
+      "unknown"
     ],
     "details": [
       {
+        "area": "api-surface",
+        "paths": [
+          "src/api/application_source_version.rs",
+          "src/api/mod.rs"
+        ]
+      },
+      {
         "area": "models",
         "paths": [
-          "src/models/create_application_deployment_request.rs"
+          "src/models/application_deployment_response.rs",
+          "src/models/application_source_version_config_snapshot.rs",
+          "src/models/application_source_version_response.rs",
+          "src/models/applications_source_versions_create_response201.rs",
+          "src/models/applications_source_versions_import_git_response201.rs",
+          "src/models/applications_source_versions_list_response.rs",
+          "src/models/applications_source_versions_retrieve_response.rs",
+          "src/models/create_application_deployment_request.rs",
+          "src/models/create_application_source_version_request.rs",
+          "src/models/import_application_git_source_version_request.rs",
+          "src/models/mod.rs"
+        ]
+      },
+      {
+        "area": "documentation",
+        "paths": [
+          "README.md"
+        ]
+      },
+      {
+        "area": "unknown",
+        "paths": [
+          "src/client.rs"
         ]
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: models. Verification is required."
+    "summary": "Detected impact areas: api-surface, models, documentation, unknown. Verification is required."
   },
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: api-surface, models, documentation, unknown. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, documentation, unknown.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-rust\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -166,7 +208,7 @@
         "id": "build",
         "title": "Unified package build",
         "required": true,
-        "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: models.",
+        "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: api-surface, models, documentation, unknown.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-rust\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -184,12 +226,14 @@
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "medium",
+    "riskLevel": "high",
     "nextAction": "verify",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
     "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
+      "manual-review-required",
+      "unknown-impact",
       "verification-required"
     ]
   },

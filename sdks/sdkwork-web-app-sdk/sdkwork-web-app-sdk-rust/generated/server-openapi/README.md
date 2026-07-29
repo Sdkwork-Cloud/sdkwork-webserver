@@ -50,6 +50,7 @@ client.set_header("X-Custom-Header", "value");
 
 - `client.site()` - site API
 - `client.domain()` - domain API
+- `client.source_version()` - source_version API
 - `client.deployment()` - deployment API
 - `client.env_variable()` - env_variable API
 - `client.certificate()` - certificate API
@@ -83,6 +84,19 @@ let mut query = HashMap::new();
 query.insert("page".to_string(), serde_json::json!(1));
 query.insert("page_size".to_string(), serde_json::json!(2));
 let result = client.domain().sites_domains_list(site_id, Some(&query)).await?;
+println!("{result:?}");
+```
+
+### source_version
+
+```rust
+use std::collections::HashMap;
+// 获取应用源码版本
+let site_id = "1";
+let mut query = HashMap::new();
+query.insert("page".to_string(), serde_json::json!(1));
+query.insert("page_size".to_string(), serde_json::json!(2));
+let result = client.source_version().sites_source_versions_list(site_id, Some(&query)).await?;
 println!("{result:?}");
 ```
 

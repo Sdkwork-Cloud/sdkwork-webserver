@@ -6,9 +6,10 @@ use axum::{
 };
 use sdkwork_webserver_contract::{
     CreateCertificateRequest, CreateDeploymentRequest, CreateDomainRequest,
-    CreateNginxConfigRequest, CreateServerRequest, CreateSiteRequest, ListNginxConfigsQuery,
-    ListSitesQuery, UpdateCertificateRequest, UpdateNginxConfigRequest, UpdateSiteRequest,
-    WebBackendApi, WebBackendRequestContext,
+    CreateNginxConfigRequest, CreateServerRequest, CreateSiteRequest, CreateSourceVersionRequest,
+    ImportGitSourceVersionRequest, ListNginxConfigsQuery, ListSitesQuery,
+    UpdateCertificateRequest, UpdateNginxConfigRequest, UpdateSiteRequest, WebBackendApi,
+    WebBackendRequestContext,
 };
 use serde::Deserialize;
 use std::sync::Arc;
@@ -17,7 +18,7 @@ use crate::{agent_routes, auth::require_backend_context, paths};
 use sdkwork_routes_webserver_common::{
     created_resource, no_content, ok_audit_log_page, ok_certificate_distribution_page,
     ok_certificate_page, ok_deployment_page, ok_domain_page, ok_nginx_config_page, ok_resource,
-    ok_server_page, ok_site_page, WebApiError,
+    ok_server_page, ok_site_page, ok_source_version_page, WebApiError,
 };
 
 #[derive(Clone)]
@@ -57,6 +58,18 @@ pub fn build_router_with_shared_backend_api(api: Arc<dyn WebBackendApi>) -> Rout
         .route(
             paths::APPLICATION_DOMAIN_VERIFY,
             post(verify_application_domain),
+        )
+        .route(
+            paths::APPLICATION_SOURCE_VERSIONS,
+            get(list_application_source_versions).post(create_application_source_version),
+        )
+        .route(
+            paths::APPLICATION_SOURCE_VERSION_IMPORT_GIT,
+            post(import_application_git_source_version),
+        )
+        .route(
+            paths::APPLICATION_SOURCE_VERSION,
+            get(retrieve_application_source_version),
         )
         .route(
             paths::APPLICATION_DEPLOYMENTS,
@@ -266,6 +279,74 @@ async fn delete_application_domain(
         state
             .api
             .delete_application_domain(&context, &application_id, &domain_id)
+            .await,
+    )
+}
+
+async fn list_application_source_versions(
+    State(state): State<BackendState>,
+    context: Option<Extension<WebBackendRequestContext>>,
+    Path(application_id): Path<String>,
+    Query(query): Query<PageQuery>,
+) -> Result<Response, WebApiError> {
+    let context = require_backend_context(context)?;
+    ok_source_version_page(
+        state
+            .api
+            .list_application_source_versions(
+                &context,
+                &application_id,
+                query.page,
+                query.page_size,
+            )
+            .await,
+    )
+}
+
+async fn create_application_source_version(
+    State(state): State<BackendState>,
+    context: Option<Extension<WebBackendRequestContext>>,
+    Path(application_id): Path<String>,
+    Json(request): Json<CreateSourceVersionRequest>,
+) -> Result<Response, WebApiError> {
+    let context = require_backend_context(context)?;
+    created_resource(
+        state
+            .api
+            .create_application_source_version(&context, &application_id, &request)
+            .await,
+    )
+}
+
+async fn import_application_git_source_version(
+    State(state): State<BackendState>,
+    context: Option<Extension<WebBackendRequestContext>>,
+    Path(application_id): Path<String>,
+    Json(request): Json<ImportGitSourceVersionRequest>,
+) -> Result<Response, WebApiError> {
+    let context = require_backend_context(context)?;
+    created_resource(
+        state
+            .api
+            .import_application_git_source_version(&context, &application_id, &request)
+            .await,
+    )
+}
+
+async fn retrieve_application_source_version(
+    State(state): State<BackendState>,
+    context: Option<Extension<WebBackendRequestContext>>,
+    Path((application_id, source_version_id)): Path<(String, String)>,
+) -> Result<Response, WebApiError> {
+    let context = require_backend_context(context)?;
+    ok_resource(
+        state
+            .api
+            .retrieve_application_source_version(
+                &context,
+                &application_id,
+                &source_version_id,
+            )
             .await,
     )
 }

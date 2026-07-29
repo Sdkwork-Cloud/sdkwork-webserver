@@ -224,6 +224,98 @@ pub struct DomainVerifyResponse {
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct SourceVersionConfigSnapshot {
+    #[serde(rename = "appConfigPath", default = "default_app_config_path")]
+    pub app_config_path: String,
+    #[serde(
+        rename = "deploymentConfigPath",
+        default = "default_deployment_config_path"
+    )]
+    pub deployment_config_path: String,
+    #[serde(rename = "appConfigDetected", default)]
+    pub app_config_detected: bool,
+    #[serde(rename = "deploymentConfigDetected", default)]
+    pub deployment_config_detected: bool,
+}
+
+fn default_app_config_path() -> String {
+    "sdkwork.app.config.json".to_string()
+}
+
+fn default_deployment_config_path() -> String {
+    "etc/sdkwork.deployment.config.json".to_string()
+}
+
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+pub struct SourceVersionResponse {
+    pub id: String,
+    #[serde(rename = "siteId")]
+    pub site_id: String,
+    #[serde(rename = "versionTag")]
+    pub version_tag: String,
+    #[serde(rename = "sourceType")]
+    pub source_type: String,
+    #[serde(rename = "sourceRef", skip_serializing_if = "Option::is_none")]
+    pub source_ref: Option<String>,
+    #[serde(rename = "commitHash", skip_serializing_if = "Option::is_none")]
+    pub commit_hash: Option<String>,
+    #[serde(rename = "artifactDriveUri")]
+    pub artifact_drive_uri: String,
+    #[serde(rename = "artifactSize", with = "sdkwork_utils_rust::serde_int64")]
+    pub artifact_size: i64,
+    #[serde(rename = "artifactHash")]
+    pub artifact_hash: String,
+    #[serde(rename = "configSnapshot")]
+    pub config_snapshot: SourceVersionConfigSnapshot,
+    pub status: i32,
+    pub retained: bool,
+    #[serde(rename = "createdAt")]
+    pub created_at: String,
+}
+
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+pub struct SourceVersionPage {
+    pub items: Vec<SourceVersionResponse>,
+    #[serde(with = "sdkwork_utils_rust::serde_int64")]
+    pub total: i64,
+    pub page: i32,
+    pub page_size: i32,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct CreateSourceVersionRequest {
+    #[serde(rename = "versionTag")]
+    pub version_tag: String,
+    #[serde(rename = "sourceType")]
+    pub source_type: String,
+    #[serde(rename = "sourceRef", default)]
+    pub source_ref: Option<String>,
+    #[serde(rename = "commitHash", default)]
+    pub commit_hash: Option<String>,
+    #[serde(rename = "artifactDriveUri")]
+    pub artifact_drive_uri: String,
+    #[serde(rename = "artifactSize", with = "sdkwork_utils_rust::serde_int64")]
+    pub artifact_size: i64,
+    #[serde(rename = "artifactHash")]
+    pub artifact_hash: String,
+    #[serde(rename = "configSnapshot", default)]
+    pub config_snapshot: SourceVersionConfigSnapshot,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct ImportGitSourceVersionRequest {
+    #[serde(rename = "versionTag")]
+    pub version_tag: String,
+    #[serde(rename = "repositoryUrl")]
+    pub repository_url: String,
+    #[serde(rename = "gitRef", default)]
+    pub git_ref: Option<String>,
+}
+
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct DeploymentResponse {
     pub id: String,
     #[serde(rename = "siteId")]
@@ -231,6 +323,8 @@ pub struct DeploymentResponse {
     pub status: i32,
     #[serde(rename = "deployType")]
     pub deploy_type: i32,
+    #[serde(rename = "sourceVersionId", skip_serializing_if = "Option::is_none")]
+    pub source_version_id: Option<String>,
     pub environment: String,
     #[serde(rename = "versionTag", skip_serializing_if = "Option::is_none")]
     pub version_tag: Option<String>,
@@ -283,6 +377,8 @@ pub struct DeploymentPage {
 pub struct CreateDeploymentRequest {
     #[serde(rename = "deployType")]
     pub deploy_type: i32,
+    #[serde(rename = "sourceVersionId", default)]
+    pub source_version_id: Option<String>,
     #[serde(default)]
     pub environment: Option<String>,
     #[serde(rename = "versionTag", default)]
@@ -315,6 +411,7 @@ impl Default for CreateDeploymentRequest {
     fn default() -> Self {
         Self {
             deploy_type: default_deploy_type(),
+            source_version_id: None,
             environment: None,
             version_tag: None,
             commit_hash: None,

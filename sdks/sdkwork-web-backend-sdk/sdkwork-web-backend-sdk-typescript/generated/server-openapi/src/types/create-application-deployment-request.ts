@@ -1,5 +1,7 @@
 /** Deployment source command. Git deployments (deployType 2) require an HTTPS sourceRef and may omit artifact fields. Other deployment types require artifactDriveUri, artifactSize, and artifactHash together. */
 export interface CreateApplicationDeploymentRequest {
+  /** Ready, retained application source version selected for this release. */
+  sourceVersionId?: string;
   /** 1 for a stored package, 2 for a Git repository, 3 for CI/CD, or 4 for API delivery. */
   deployType?: 1 | 2 | 3 | 4;
   environment?: 'development' | 'test' | 'staging' | 'production';

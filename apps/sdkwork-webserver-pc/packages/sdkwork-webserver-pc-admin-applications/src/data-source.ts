@@ -19,14 +19,13 @@ import {
 type DeploymentCreateRequest = Parameters<
   WebserverAdminSdkClient["applicationDeployment"]["applications"]["deployments"]["create"]
 >[1];
+type SourceVersionCreateRequest = Parameters<
+  WebserverAdminSdkClient["applicationSourceVersion"]["applications"]["sourceVersions"]["create"]
+>[1];
 type ApplicationUpdateRequest = Parameters<WebserverAdminSdkClient["application"]["update"]>[1];
 type ApplicationDomainCreateRequest = Parameters<
   WebserverAdminSdkClient["applicationDomain"]["applications"]["domains"]["create"]
 >[1];
-type DeploymentMetadata = Omit<
-  DeploymentCreateRequest,
-  "artifactDriveUri" | "artifactSize" | "artifactHash"
->;
 
 export function createWebserverAdminApplicationRegistry(
   client: WebserverAdminSdkClient,
@@ -47,6 +46,11 @@ export function createWebserverAdminApplicationRegistry(
             siteType: 1,
             environment: "production",
             versionTag: "v1.0.0",
+            sourceVersionRetentionLimit: 5,
+            appConfigPath: "sdkwork.app.config.json",
+            deploymentConfigPath: "etc/sdkwork.deployment.config.json",
+            publicRoot: "dist",
+            spaFallback: "index.html",
             shortDescription: "",
             fullDescription: "",
             releaseNotes: "",
@@ -124,6 +128,26 @@ export function createWebserverAdminApplicationRegistry(
         ),
       ],
     ),
+    "application-source-versions": applicationSource(
+      (query) => client.applicationSourceVersion.applications.sourceVersions.list(
+        requiredApplicationId(query.scopeId),
+        { page: query.page, pageSize: query.pageSize },
+      ),
+      [
+        action(
+          "create",
+          "Save source version",
+          { versionTag: "" },
+          (context) => storeApplicationSourceVersion(client, sourceStorage, context),
+          {
+            permission: "web.sites.write",
+            requiredFields: ["versionTag"],
+            requiresScope: true,
+            sourceInput: "archive-directory-or-git",
+          },
+        ),
+      ],
+    ),
     "application-domains": applicationSource(
       (query) => client.applicationDomain.applications.domains.list(requiredApplicationId(query.scopeId), { page: query.page, pageSize: query.pageSize }),
       [
@@ -176,20 +200,35 @@ export function createWebserverAdminApplicationRegistry(
           "Create deployment command",
           {
             deployType: 1,
+            sourceVersionId: "",
             environment: "production",
             versionTag: "",
           },
-          (context) => deployApplication(client, sourceStorage, context),
+          (context) => deployApplication(client, context),
           {
             requiresConfirmation: true,
             requiresScope: true,
             fieldOptions: {
               deployType: [1],
+              sourceVersionId: [],
               environment: ["production", "staging", "test", "development"],
             },
+            loadFieldOptions: async (context) => {
+              const versions = await client.applicationSourceVersion.applications.sourceVersions.list(
+                requiredApplicationId(context.scopeId),
+                { page: 1, pageSize: 100 },
+              );
+              return {
+                sourceVersionId: versions.items
+                  .filter((version) => version.status === 1 && version.retained)
+                  .map((version) => ({
+                    label: `${version.versionTag} · ${version.sourceType}`,
+                    value: version.id,
+                  })),
+              };
+            },
             permission: "web.sites.write",
-            requiredFields: ["versionTag"],
-            sourceInput: "archive-directory-or-git",
+            requiredFields: ["sourceVersionId", "versionTag"],
           },
         ),
         action(
@@ -263,8 +302,8 @@ async function createApplicationWithInitialVersion(
     description: optionalText(context.body.description),
     applicationType: applicationType(context.body.applicationType),
     siteType: siteType(context.body.siteType),
+    runtimeConfig: deploymentConfiguration(context.body),
   };
-  const metadata = deploymentMetadata(context);
   const idempotency = idempotencyParams(context);
   const prepared = context.sourceInputMode === "git"
     ? undefined
@@ -297,10 +336,17 @@ async function createApplicationWithInitialVersion(
       { cause: error },
     );
   }
-  let stored: StoredApplicationSource | undefined;
+  let sourceVersionId: string;
   if (prepared) {
     try {
-      stored = await storeSource(sourceStorage, applicationId, prepared, context, 48, 92);
+      const stored = await storeSource(sourceStorage, applicationId, prepared, context, 48, 86);
+      const sourceVersion = await client.applicationSourceVersion.applications.sourceVersions.create(
+        applicationId,
+        sourceVersionRequest(context, stored, prepared.inputMode),
+        idempotency,
+      );
+      sourceVersionId = sourceVersion.id;
+      context.onProgress?.(92);
     } catch (error) {
       throw new WebserverActionError(
         "application-draft-source-failed",
@@ -309,12 +355,29 @@ async function createApplicationWithInitialVersion(
       );
     }
   } else {
-    context.onProgress?.(92);
+    try {
+      const sourceVersion = await client.applicationSourceVersion.applications.sourceVersions.importGit(
+        applicationId,
+        {
+          repositoryUrl: normalizeApplicationGitRepositoryUrl(context.sourceRepository),
+          versionTag: requiredText(context.body.versionTag, "Version"),
+        },
+        idempotency,
+      );
+      sourceVersionId = sourceVersion.id;
+      context.onProgress?.(92);
+    } catch (error) {
+      throw new WebserverActionError(
+        "application-draft-source-failed",
+        { applicationId },
+        { cause: error },
+      );
+    }
   }
   try {
     const deployment = await client.applicationDeployment.applications.deployments.create(
       applicationId,
-      deploymentRequest(metadata, stored),
+      deploymentRequest(context, sourceVersionId),
       idempotency,
     );
     context.onProgress?.(100);
@@ -357,24 +420,15 @@ async function updateApplicationListing(
 
 async function deployApplication(
   client: WebserverAdminSdkClient,
-  sourceStorage: ApplicationSourceStorage,
   context: WebserverResourceActionContext,
 ): Promise<unknown> {
   const applicationId = requiredApplicationId(context.scopeId);
-  const metadata = deploymentMetadata(context);
   const idempotency = idempotencyParams(context);
-  let stored: StoredApplicationSource | undefined;
-  if (context.sourceInputMode !== "git") {
-    const prepared = await prepareSource(sourceStorage, context, 0, 24);
-    stored = await storeSource(sourceStorage, applicationId, prepared, context, 24, 94);
-  } else {
-    context.onProgress?.(94);
-  }
   let deployment: unknown;
   try {
     deployment = await client.applicationDeployment.applications.deployments.create(
       applicationId,
-      deploymentRequest(metadata, stored),
+      deploymentRequest(context, requiredText(context.body.sourceVersionId, "Source version")),
       idempotency,
     );
   } catch (error) {
@@ -382,6 +436,37 @@ async function deployApplication(
   }
   context.onProgress?.(100);
   return deployment;
+}
+
+async function storeApplicationSourceVersion(
+  client: WebserverAdminSdkClient,
+  sourceStorage: ApplicationSourceStorage,
+  context: WebserverResourceActionContext,
+): Promise<unknown> {
+  const applicationId = requiredApplicationId(context.scopeId);
+  const idempotency = idempotencyParams(context);
+  if (context.sourceInputMode === "git") {
+    context.onProgress?.(8);
+    const sourceVersion = await client.applicationSourceVersion.applications.sourceVersions.importGit(
+      applicationId,
+      {
+        repositoryUrl: normalizeApplicationGitRepositoryUrl(context.sourceRepository),
+        versionTag: requiredText(context.body.versionTag, "Version"),
+      },
+      idempotency,
+    );
+    context.onProgress?.(100);
+    return sourceVersion;
+  }
+  const prepared = await prepareSource(sourceStorage, context, 0, 24);
+  const stored = await storeSource(sourceStorage, applicationId, prepared, context, 24, 88);
+  const sourceVersion = await client.applicationSourceVersion.applications.sourceVersions.create(
+    applicationId,
+    sourceVersionRequest(context, stored, prepared.inputMode),
+    idempotency,
+  );
+  context.onProgress?.(100);
+  return sourceVersion;
 }
 
 async function prepareSource(
@@ -414,29 +499,44 @@ async function storeSource(
   });
 }
 
-function deploymentRequest(
-  metadata: DeploymentMetadata,
-  stored?: StoredApplicationSource,
-): DeploymentCreateRequest {
-  if (!stored) return metadata;
+function sourceVersionRequest(
+  context: WebserverResourceActionContext,
+  stored: StoredApplicationSource,
+  inputMode: "archive" | "directory",
+): SourceVersionCreateRequest {
   return {
-    ...metadata,
     artifactDriveUri: stored.archiveDriveUri,
     artifactSize: stored.archiveSize,
     artifactHash: stored.archiveHash,
+    configSnapshot: stored.configSnapshot,
+    sourceType: inputMode === "directory" ? "DIRECTORY" : "ARCHIVE",
+    versionTag: requiredText(context.body.versionTag, "Version"),
   };
 }
 
-function deploymentMetadata(context: WebserverResourceActionContext): DeploymentMetadata {
-  const gitSource = context.sourceInputMode === "git";
+function deploymentRequest(
+  context: WebserverResourceActionContext,
+  sourceVersionId: string,
+): DeploymentCreateRequest {
   return {
-    deployType: gitSource ? 2 : deploymentType(context.body.deployType),
+    deployType: deploymentType(context.body.deployType),
     environment: deploymentEnvironment(context.body.environment),
+    sourceVersionId,
     versionTag: requiredText(context.body.versionTag, "Version"),
-    sourceRef: gitSource
-      ? normalizeApplicationGitRepositoryUrl(context.sourceRepository)
-      : optionalText(context.body.sourceRef),
-    commitHash: optionalText(context.body.commitHash),
+  };
+}
+
+function deploymentConfiguration(body: Readonly<Record<string, unknown>>): Record<string, unknown> {
+  const retentionLimit = Number(body.sourceVersionRetentionLimit ?? 5);
+  if (!Number.isInteger(retentionLimit) || retentionLimit < 1 || retentionLimit > 50) {
+    throw new Error("sourceVersionRetentionLimit must be between 1 and 50");
+  }
+  return {
+    appConfigPath: requiredText(body.appConfigPath, "Application config path"),
+    deploymentConfigPath: requiredText(body.deploymentConfigPath, "Deployment config path"),
+    publicRoot: requiredText(body.publicRoot, "Public root"),
+    sourceVersionRetentionLimit: retentionLimit,
+    spaFallback: requiredText(body.spaFallback, "SPA fallback"),
   };
 }
 

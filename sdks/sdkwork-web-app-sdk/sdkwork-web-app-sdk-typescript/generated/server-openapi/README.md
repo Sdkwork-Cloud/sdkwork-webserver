@@ -61,6 +61,7 @@ const client = new SdkworkAppClient({
 
 - `client.site` - site API
 - `client.domain` - domain API
+- `client.sourceVersion` - source_version API
 - `client.deployment` - deployment API
 - `client.envVariable` - env_variable API
 - `client.certificate` - certificate API
@@ -93,6 +94,18 @@ const params = {
   page_size: 2,
 };
 const result = await client.domain.sites.domains.list(siteId, params);
+```
+
+### source_version
+
+```typescript
+// 获取应用源码版本
+const siteId = '1';
+const params = {
+  page: 1,
+  page_size: 2,
+};
+const result = await client.sourceVersion.sites.sourceVersions.list(siteId, params);
 ```
 
 ### deployment

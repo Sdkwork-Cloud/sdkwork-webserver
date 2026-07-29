@@ -27,6 +27,7 @@ import {
   type CreateDomainRequest,
   type CreateEnvVariableRequest,
   type CreateHealthCheckRequest,
+  type CreateSourceVersionRequest,
   type SdkworkAppClient as SdkworkWebAppClient,
   type UpdateSiteRequest,
 } from "@sdkwork/web-app-sdk";
@@ -108,6 +109,12 @@ export function createApplicationSourceStorage(
         archiveHash,
         archiveSize: String(archive.size),
         extractedCount: String(extractedCount),
+        configSnapshot: {
+          appConfigDetected: validated.entryPaths.includes("sdkwork.app.config.json"),
+          appConfigPath: "sdkwork.app.config.json",
+          deploymentConfigDetected: validated.entryPaths.includes("etc/sdkwork.deployment.config.json"),
+          deploymentConfigPath: "etc/sdkwork.deployment.config.json",
+        },
       };
     },
   };
@@ -228,6 +235,11 @@ export function createWebserverConsoleRegistry(
           siteType: 1,
           environment: "production",
           versionTag: "v1.0.0",
+          sourceVersionRetentionLimit: 5,
+          appConfigPath: "sdkwork.app.config.json",
+          deploymentConfigPath: "etc/sdkwork.deployment.config.json",
+          publicRoot: "dist",
+          spaFallback: "index.html",
           shortDescription: "",
           fullDescription: "",
           releaseNotes: "",
@@ -270,6 +282,23 @@ export function createWebserverConsoleRegistry(
       action("create-variable", "Add variable", { key: "", value: "", environment: "production", isSecret: false }, async (context) => client.envVariable.sites.envVariables.create(requiredScope(context.scopeId), createEnvVariableRequest(context.body), idempotencyParams(context)), { permission: "web.sites.write", scope: true }),
       action("create-check", "Add health check", { checkType: 1, checkUrl: "/health", checkInterval: 30, timeoutMs: 5_000, retryCount: 3 }, async (context) => client.monitor.sites.healthChecks.create(requiredScope(context.scopeId), createHealthCheckRequest(context.body), idempotencyParams(context)), { fieldOptions: { checkType: [1, 2, 3] }, permission: "web.sites.write", scope: true }),
     ]),
+    "source-versions": scopedSource(
+      (query) => client.sourceVersion.sites.sourceVersions.list(requiredScope(query.scopeId), { page: query.page, pageSize: query.pageSize }),
+      [
+        action(
+          "create",
+          "Save source version",
+          { versionTag: "" },
+          (context) => storeApplicationSourceVersion(clients, sourceStorage, context),
+          {
+            permission: "web.sites.write",
+            requiredFields: ["versionTag"],
+            scope: true,
+            sourceInput: "archive-directory-or-git",
+          },
+        ),
+      ],
+    ),
     domains: scopedSource((query) => client.domain.sites.domains.list(requiredScope(query.scopeId), { page: query.page, pageSize: query.pageSize }), [
       action("create", "Bind domain", { hostname: "", isPrimary: false, sslEnabled: true, sslProvider: "letsencrypt" }, async (context) => client.domain.sites.domains.create(requiredScope(context.scopeId), createDomainRequest(context.body), idempotencyParams(context)), { fieldOptions: { sslProvider: ["letsencrypt", "custom", "none"] }, permission: "web.sites.write", scope: true }),
       action("verify", "Verify", {}, (context) => client.domain.sites.domains.verify(requiredScope(context.scopeId), selectedId(context, "domainId"), idempotencyParams(context)), { permission: "web.sites.write", scope: true, selection: true }),
@@ -291,13 +320,23 @@ export function createWebserverConsoleRegistry(
       }),
     ]),
     deployments: scopedSource((query) => client.deployment.sites.deployments.list(requiredScope(query.scopeId), { page: query.page, pageSize: query.pageSize }), [
-      action("deploy", "Deploy", { deployType: 1, environment: "production", versionTag: "" }, (context) => deployApplication(clients, sourceStorage, context), {
+      action("deploy", "Deploy", { deployType: 1, sourceVersionId: "", environment: "production", versionTag: "" }, (context) => deployApplication(clients, context), {
         confirmation: true,
-        fieldOptions: { deployType: [1], environment: ["production", "staging", "test", "development"] },
+        fieldOptions: { deployType: [1], sourceVersionId: [], environment: ["production", "staging", "test", "development"] },
+        loadFieldOptions: async (context) => {
+          const versions = await client.sourceVersion.sites.sourceVersions.list(requiredScope(context.scopeId), { page: 1, pageSize: 100 });
+          return {
+            sourceVersionId: versions.items
+              .filter((version) => version.status === 1 && version.retained)
+              .map((version) => ({
+                label: `${version.versionTag} · ${version.sourceType}`,
+                value: version.id,
+              })),
+          };
+        },
         permission: "web.sites.write",
-        requiredFields: ["versionTag"],
+        requiredFields: ["sourceVersionId", "versionTag"],
         scope: true,
-        sourceInput: "archive-directory-or-git",
       }),
       action("rollback", "Restore this version", {}, (context) => client.deployment.sites.deployments.rollback(requiredScope(context.scopeId), selectedId(context, "deploymentId"), idempotencyParams(context)), {
         availableWhen: (context) => Number(context.selectedItem?.status) === 2,
@@ -317,21 +356,16 @@ function selectedId(context: WebserverResourceActionContext, key: string): strin
 function requiredScope(value: string | undefined): string { if (!value?.trim()) throw new Error("Site ID is required"); return value.trim(); }
 function idempotencyParams(context: WebserverResourceActionContext): { idempotencyKey: string } { const idempotencyKey = context.idempotencyKey?.trim(); if (!idempotencyKey) throw new Error("Idempotency key is required"); return { idempotencyKey }; }
 
-async function deployApplication(clients: WebserverConsoleSdkClients, sourceStorage: ApplicationSourceStorage, context: WebserverResourceActionContext): Promise<unknown> {
+async function deployApplication(clients: WebserverConsoleSdkClients, context: WebserverResourceActionContext): Promise<unknown> {
   const siteId = requiredScope(context.scopeId);
-  const metadata = deploymentMetadata(context);
   const idempotency = idempotencyParams(context);
-  let stored: StoredApplicationSource | undefined;
-  if (context.sourceInputMode !== "git") {
-    const prepared = await prepareSource(sourceStorage, context, 0, 24);
-    stored = await storeSource(sourceStorage, siteId, prepared, context, 24, 94);
-  } else {
-    context.onProgress?.(94);
-  }
-  const request = deploymentRequest(metadata, stored);
   let deployment: unknown;
   try {
-    deployment = await clients.web.deployment.sites.deployments.create(siteId, request, idempotency);
+    deployment = await clients.web.deployment.sites.deployments.create(
+      siteId,
+      deploymentRequest(context, requiredText(context.body.sourceVersionId, "Source version")),
+      idempotency,
+    );
   } catch (error) {
     throw new WebserverActionError("deployment-source-stored", {}, { cause: error });
   }
@@ -350,8 +384,8 @@ async function createApplicationWithInitialVersion(
     description: optionalText(context.body.description),
     applicationType: applicationType(context.body.applicationType),
     siteType: siteType(context.body.siteType),
+    runtimeConfig: deploymentConfiguration(context.body),
   };
-  const metadata = deploymentMetadata(context);
   const idempotency = idempotencyParams(context);
   const prepared = context.sourceInputMode === "git"
     ? undefined
@@ -370,7 +404,11 @@ async function createApplicationWithInitialVersion(
       signal: context.signal,
       submission: requiredApplicationSubmission(context),
     });
-    await clients.web.site.update(siteId, { storeListing: sdkStoreListing(storeListing) });
+    await clients.web.site.update(
+      siteId,
+      { storeListing: sdkStoreListing(storeListing) },
+      idempotency,
+    );
     context.onProgress?.(48);
   } catch (error) {
     throw new WebserverActionError(
@@ -379,10 +417,17 @@ async function createApplicationWithInitialVersion(
       { cause: error },
     );
   }
-  let stored: StoredApplicationSource | undefined;
+  let sourceVersionId: string;
   if (prepared) {
     try {
-      stored = await storeSource(sourceStorage, siteId, prepared, context, 48, 92);
+      const stored = await storeSource(sourceStorage, siteId, prepared, context, 48, 86);
+      const sourceVersion = await clients.web.sourceVersion.sites.sourceVersions.create(
+        siteId,
+        sourceVersionRequest(context, stored, prepared.inputMode),
+        idempotency,
+      );
+      sourceVersionId = sourceVersion.id;
+      context.onProgress?.(92);
     } catch (error) {
       throw new WebserverActionError(
         "application-draft-source-failed",
@@ -391,12 +436,29 @@ async function createApplicationWithInitialVersion(
       );
     }
   } else {
-    context.onProgress?.(92);
+    try {
+      const sourceVersion = await clients.web.sourceVersion.sites.sourceVersions.importGit(
+        siteId,
+        {
+          repositoryUrl: normalizeApplicationGitRepositoryUrl(context.sourceRepository),
+          versionTag: requiredText(context.body.versionTag, "Version"),
+        },
+        idempotency,
+      );
+      sourceVersionId = sourceVersion.id;
+      context.onProgress?.(92);
+    } catch (error) {
+      throw new WebserverActionError(
+        "application-draft-source-failed",
+        { applicationId: siteId },
+        { cause: error },
+      );
+    }
   }
   try {
     const deployment = await clients.web.deployment.sites.deployments.create(
       siteId,
-      deploymentRequest(metadata, stored),
+      deploymentRequest(context, sourceVersionId),
       idempotency,
     );
     context.onProgress?.(100);
@@ -431,6 +493,7 @@ async function updateApplicationListing(
   const result = await clients.web.site.update(
     siteId,
     updateSiteRequest(context.body, storeListing),
+    idempotencyParams(context),
   );
   context.onProgress?.(100);
   return result;
@@ -466,34 +529,75 @@ async function storeSource(
   });
 }
 
-type DeploymentMetadata = Omit<
-  CreateDeploymentRequest,
-  "artifactDriveUri" | "artifactSize" | "artifactHash"
->;
+async function storeApplicationSourceVersion(
+  clients: WebserverConsoleSdkClients,
+  sourceStorage: ApplicationSourceStorage,
+  context: WebserverResourceActionContext,
+): Promise<unknown> {
+  const siteId = requiredScope(context.scopeId);
+  const idempotency = idempotencyParams(context);
+  if (context.sourceInputMode === "git") {
+    context.onProgress?.(8);
+    const sourceVersion = await clients.web.sourceVersion.sites.sourceVersions.importGit(
+      siteId,
+      {
+        repositoryUrl: normalizeApplicationGitRepositoryUrl(context.sourceRepository),
+        versionTag: requiredText(context.body.versionTag, "Version"),
+      },
+      idempotency,
+    );
+    context.onProgress?.(100);
+    return sourceVersion;
+  }
+  const prepared = await prepareSource(sourceStorage, context, 0, 24);
+  const stored = await storeSource(sourceStorage, siteId, prepared, context, 24, 88);
+  const sourceVersion = await clients.web.sourceVersion.sites.sourceVersions.create(
+    siteId,
+    sourceVersionRequest(context, stored, prepared.inputMode),
+    idempotency,
+  );
+  context.onProgress?.(100);
+  return sourceVersion;
+}
 
-function deploymentRequest(
-  metadata: DeploymentMetadata,
-  stored?: StoredApplicationSource,
-): CreateDeploymentRequest {
-  if (!stored) return metadata;
+function sourceVersionRequest(
+  context: WebserverResourceActionContext,
+  stored: StoredApplicationSource,
+  inputMode: "archive" | "directory",
+): CreateSourceVersionRequest {
   return {
-    ...metadata,
     artifactDriveUri: stored.archiveDriveUri,
     artifactSize: stored.archiveSize,
     artifactHash: stored.archiveHash,
+    configSnapshot: stored.configSnapshot,
+    sourceType: inputMode === "directory" ? "DIRECTORY" : "ARCHIVE",
+    versionTag: requiredText(context.body.versionTag, "Version"),
   };
 }
 
-function deploymentMetadata(context: WebserverResourceActionContext): DeploymentMetadata {
-  const gitSource = context.sourceInputMode === "git";
+function deploymentRequest(
+  context: WebserverResourceActionContext,
+  sourceVersionId: string,
+): CreateDeploymentRequest {
   return {
-    deployType: gitSource ? 2 : deploymentType(context.body.deployType),
+    deployType: deploymentType(context.body.deployType),
     environment: deploymentEnvironment(context.body.environment),
+    sourceVersionId,
     versionTag: requiredText(context.body.versionTag, "Version"),
-    sourceRef: gitSource
-      ? normalizeApplicationGitRepositoryUrl(context.sourceRepository)
-      : optionalText(context.body.sourceRef),
-    commitHash: optionalText(context.body.commitHash),
+  };
+}
+
+function deploymentConfiguration(body: Readonly<Record<string, unknown>>): Record<string, unknown> {
+  const retentionLimit = Number(body.sourceVersionRetentionLimit ?? 5);
+  if (!Number.isInteger(retentionLimit) || retentionLimit < 1 || retentionLimit > 50) {
+    throw new Error("sourceVersionRetentionLimit must be between 1 and 50");
+  }
+  return {
+    appConfigPath: requiredText(body.appConfigPath, "Application config path"),
+    deploymentConfigPath: requiredText(body.deploymentConfigPath, "Deployment config path"),
+    publicRoot: requiredText(body.publicRoot, "Public root"),
+    sourceVersionRetentionLimit: retentionLimit,
+    spaFallback: requiredText(body.spaFallback, "SPA fallback"),
   };
 }
 

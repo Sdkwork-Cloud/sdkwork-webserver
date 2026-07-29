@@ -50,6 +50,12 @@ export interface StoredApplicationSource {
   archiveHash: string;
   archiveSize: string;
   extractedCount: string;
+  configSnapshot: {
+    appConfigDetected: boolean;
+    appConfigPath: string;
+    deploymentConfigDetected: boolean;
+    deploymentConfigPath: string;
+  };
 }
 
 export interface ApplicationSourceStorage {

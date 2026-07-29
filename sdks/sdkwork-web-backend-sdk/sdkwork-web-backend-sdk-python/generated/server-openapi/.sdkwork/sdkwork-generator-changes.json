@@ -9,10 +9,25 @@
     "protocol": "http",
     "packageName": "sdkwork-web-backend-sdk"
   },
-  "changeFingerprint": "85f57d7fbed184177abe4625d8cdeca42fe5b3bb17a3b44cba3a688acd2fb560",
+  "changeFingerprint": "b9c65fd4c9c2b98606424af98ee09f17c4c15126cf0ec84762d3d28691491946",
   "changes": {
-    "createdGeneratedFiles": [],
+    "createdGeneratedFiles": [
+      "sdkwork_web_backend_sdk/api/application_source_version.py",
+      "sdkwork_web_backend_sdk/models/application_source_version_config_snapshot.py",
+      "sdkwork_web_backend_sdk/models/application_source_version_response.py",
+      "sdkwork_web_backend_sdk/models/applications_source_versions_create_response201.py",
+      "sdkwork_web_backend_sdk/models/applications_source_versions_import_git_response201.py",
+      "sdkwork_web_backend_sdk/models/applications_source_versions_list_response.py",
+      "sdkwork_web_backend_sdk/models/applications_source_versions_retrieve_response.py",
+      "sdkwork_web_backend_sdk/models/create_application_source_version_request.py",
+      "sdkwork_web_backend_sdk/models/import_application_git_source_version_request.py"
+    ],
     "updatedGeneratedFiles": [
+      "README.md",
+      "sdkwork_web_backend_sdk/api/__init__.py",
+      "sdkwork_web_backend_sdk/client.py",
+      "sdkwork_web_backend_sdk/models/__init__.py",
+      "sdkwork_web_backend_sdk/models/application_deployment_response.py",
       "sdkwork_web_backend_sdk/models/create_application_deployment_request.py"
     ],
     "unchangedGeneratedFiles": [
@@ -23,10 +38,8 @@
       "LICENSE",
       "MANIFEST.in",
       "pyproject.toml",
-      "README.md",
       "requirements.txt",
       "sdkwork_web_backend_sdk/__init__.py",
-      "sdkwork_web_backend_sdk/api/__init__.py",
       "sdkwork_web_backend_sdk/api/agent.py",
       "sdkwork_web_backend_sdk/api/application_deployment.py",
       "sdkwork_web_backend_sdk/api/application_domain.py",
@@ -36,15 +49,12 @@
       "sdkwork_web_backend_sdk/api/certificate.py",
       "sdkwork_web_backend_sdk/api/nginx.py",
       "sdkwork_web_backend_sdk/api/server.py",
-      "sdkwork_web_backend_sdk/client.py",
       "sdkwork_web_backend_sdk/http_client.py",
-      "sdkwork_web_backend_sdk/models/__init__.py",
       "sdkwork_web_backend_sdk/models/agent_certificate_bundle.py",
       "sdkwork_web_backend_sdk/models/agent_heartbeat_request.py",
       "sdkwork_web_backend_sdk/models/agent_heartbeat_response.py",
       "sdkwork_web_backend_sdk/models/agent_nginx_config_bundle.py",
       "sdkwork_web_backend_sdk/models/agent_sync_response.py",
-      "sdkwork_web_backend_sdk/models/application_deployment_response.py",
       "sdkwork_web_backend_sdk/models/application_domain_response.py",
       "sdkwork_web_backend_sdk/models/application_domain_verify_response.py",
       "sdkwork_web_backend_sdk/models/application_response.py",
@@ -125,29 +135,56 @@
   "impact": {
     "schemaVersion": 1,
     "areas": [
-      "models"
+      "api-surface",
+      "models",
+      "documentation"
     ],
     "details": [
       {
+        "area": "api-surface",
+        "paths": [
+          "sdkwork_web_backend_sdk/api/__init__.py",
+          "sdkwork_web_backend_sdk/api/application_source_version.py",
+          "sdkwork_web_backend_sdk/client.py",
+          "sdkwork_web_backend_sdk/models/__init__.py"
+        ]
+      },
+      {
         "area": "models",
         "paths": [
-          "sdkwork_web_backend_sdk/models/create_application_deployment_request.py"
+          "sdkwork_web_backend_sdk/models/__init__.py",
+          "sdkwork_web_backend_sdk/models/application_deployment_response.py",
+          "sdkwork_web_backend_sdk/models/application_source_version_config_snapshot.py",
+          "sdkwork_web_backend_sdk/models/application_source_version_response.py",
+          "sdkwork_web_backend_sdk/models/applications_source_versions_create_response201.py",
+          "sdkwork_web_backend_sdk/models/applications_source_versions_import_git_response201.py",
+          "sdkwork_web_backend_sdk/models/applications_source_versions_list_response.py",
+          "sdkwork_web_backend_sdk/models/applications_source_versions_retrieve_response.py",
+          "sdkwork_web_backend_sdk/models/create_application_deployment_request.py",
+          "sdkwork_web_backend_sdk/models/create_application_source_version_request.py",
+          "sdkwork_web_backend_sdk/models/import_application_git_source_version_request.py"
+        ]
+      },
+      {
+        "area": "documentation",
+        "paths": [
+          "README.md"
         ]
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: models. Verification is required."
+    "summary": "Detected impact areas: api-surface, models, documentation. Verification is required."
   },
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: api-surface, models, documentation. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, documentation.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-python\\generated\\server-openapi",
         "command": "node",
         "args": [

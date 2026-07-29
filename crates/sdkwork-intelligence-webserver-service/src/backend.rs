@@ -3,10 +3,11 @@
 use async_trait::async_trait;
 use sdkwork_webserver_contract::{
     CreateCertificateRequest, CreateDeploymentRequest, CreateDomainRequest,
-    CreateNginxConfigRequest, CreateServerRequest, CreateSiteRequest, ListNginxConfigsQuery,
-    ListSitesQuery, UpdateCertificateRequest, UpdateNginxConfigRequest, UpdateSiteRequest,
-    WebAppApi, WebAppRequestContext, WebAppResourceScope, WebBackendApi, WebBackendRequestContext,
-    WebServiceError, WebServiceResult,
+    CreateNginxConfigRequest, CreateServerRequest, CreateSiteRequest, CreateSourceVersionRequest,
+    ImportGitSourceVersionRequest, ListNginxConfigsQuery, ListSitesQuery, UpdateCertificateRequest,
+    UpdateNginxConfigRequest, UpdateSiteRequest, WebAppApi, WebAppRequestContext,
+    WebAppResourceScope, WebBackendApi, WebBackendRequestContext, WebServiceError,
+    WebServiceResult,
 };
 
 use crate::{AuditLogWrite, WebService};
@@ -194,6 +195,53 @@ impl WebBackendApi for WebService {
     ) -> WebServiceResult<()> {
         let app_context = Self::backend_app_context(context)?;
         WebAppApi::delete_domain(self, &app_context, application_id, domain_id).await
+    }
+
+    async fn list_application_source_versions(
+        &self,
+        context: &WebBackendRequestContext,
+        application_id: &str,
+        page: i32,
+        page_size: i32,
+    ) -> WebServiceResult<sdkwork_webserver_contract::SourceVersionPage> {
+        let app_context = Self::backend_app_context(context)?;
+        WebAppApi::list_source_versions(self, &app_context, application_id, page, page_size).await
+    }
+
+    async fn create_application_source_version(
+        &self,
+        context: &WebBackendRequestContext,
+        application_id: &str,
+        request: &CreateSourceVersionRequest,
+    ) -> WebServiceResult<sdkwork_webserver_contract::SourceVersionResponse> {
+        let app_context = Self::backend_app_context(context)?;
+        WebAppApi::create_source_version(self, &app_context, application_id, request).await
+    }
+
+    async fn import_application_git_source_version(
+        &self,
+        context: &WebBackendRequestContext,
+        application_id: &str,
+        request: &ImportGitSourceVersionRequest,
+    ) -> WebServiceResult<sdkwork_webserver_contract::SourceVersionResponse> {
+        let app_context = Self::backend_app_context(context)?;
+        WebAppApi::import_git_source_version(self, &app_context, application_id, request).await
+    }
+
+    async fn retrieve_application_source_version(
+        &self,
+        context: &WebBackendRequestContext,
+        application_id: &str,
+        source_version_id: &str,
+    ) -> WebServiceResult<sdkwork_webserver_contract::SourceVersionResponse> {
+        let app_context = Self::backend_app_context(context)?;
+        WebAppApi::retrieve_source_version(
+            self,
+            &app_context,
+            application_id,
+            source_version_id,
+        )
+        .await
     }
 
     async fn list_application_deployments(

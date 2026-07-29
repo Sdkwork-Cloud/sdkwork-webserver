@@ -20,10 +20,12 @@ export class WebserverActionError extends Error {
 export type WebserverResourceKey =
   | "sites"
   | "configuration"
+  | "source-versions"
   | "domains"
   | "certificates"
   | "deployments"
   | "applications"
+  | "application-source-versions"
   | "application-domains"
   | "application-deployments"
   | "managed-certificates"

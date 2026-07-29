@@ -7,6 +7,11 @@ pub const SITE_PAUSE: &str = "/app/v3/api/sites/{siteId}/pause";
 pub const SITE_DOMAINS: &str = "/app/v3/api/sites/{siteId}/domains";
 pub const SITE_DOMAIN: &str = "/app/v3/api/sites/{siteId}/domains/{domainId}";
 pub const SITE_DOMAIN_VERIFY: &str = "/app/v3/api/sites/{siteId}/domains/{domainId}/verify";
+pub const SITE_SOURCE_VERSIONS: &str = "/app/v3/api/sites/{siteId}/source_versions";
+pub const SITE_SOURCE_VERSION: &str =
+    "/app/v3/api/sites/{siteId}/source_versions/{sourceVersionId}";
+pub const SITE_SOURCE_VERSION_GIT_IMPORT: &str =
+    "/app/v3/api/sites/{siteId}/source_versions/git_import";
 pub const SITE_DEPLOYMENTS: &str = "/app/v3/api/sites/{siteId}/deployments";
 pub const SITE_DEPLOYMENT: &str = "/app/v3/api/sites/{siteId}/deployments/{deploymentId}";
 pub const SITE_DEPLOYMENT_ROLLBACK: &str =

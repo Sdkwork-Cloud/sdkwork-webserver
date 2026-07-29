@@ -17,6 +17,10 @@ export interface SiteCreateParams {
   idempotencyKey: string;
 }
 
+export interface SiteUpdateParams {
+  idempotencyKey: string;
+}
+
 export class SiteApi {
   private client: HttpClient;
 
@@ -55,8 +59,14 @@ export class SiteApi {
   }
 
 /** 更新站点 */
-  async update(siteId: string, body: UpdateSiteRequest, requestOptions?: ApiRequestOptions): Promise<SiteResponse> {
-    return this.client.request<SiteResponse>(appApiPath(`/sites/${serializePathParameter(siteId, { name: 'siteId', style: 'simple', explode: false })}`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'PATCH' as any, body, contentType: 'application/json', sdkworkUnwrapKind: 'item' });
+  async update(siteId: string, body: UpdateSiteRequest, params: SiteUpdateParams, requestOptions?: ApiRequestOptions): Promise<SiteResponse> {
+    const requestHeaders = buildRequestHeaders(
+      {
+        'Idempotency-Key': { value: params.idempotencyKey, style: 'simple', explode: false },
+      },
+      {}
+    );
+    return this.client.request<SiteResponse>(appApiPath(`/sites/${serializePathParameter(siteId, { name: 'siteId', style: 'simple', explode: false })}`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'PATCH' as any, body, headers: requestHeaders, contentType: 'application/json', sdkworkUnwrapKind: 'item' });
   }
 
 /** 删除站点 */

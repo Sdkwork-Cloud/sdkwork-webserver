@@ -44,7 +44,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "b4b4855c72e0ec9dca4cda6b935e439e684011b123480fe419291bfa8e694e7b"
+      "sha256": "0f00ccecc09a0a8e32bfc37d48f9b9b3b76a3555cf1db9951cd38888ab74ab61"
     },
     {
       "path": "sdkwork-sdk.json",
@@ -72,7 +72,7 @@
     },
     {
       "path": "src/api/index.ts",
-      "sha256": "86a8c3a75044a3f1cfa2b5aa35c42e4219c6c9bfd5a4e92088fbf5946100300b"
+      "sha256": "1d6a119fb8818562099fe7990f6d27950792ef82007d5e29cd3399626e7a0b8b"
     },
     {
       "path": "src/api/monitor.ts",
@@ -84,7 +84,11 @@
     },
     {
       "path": "src/api/site.ts",
-      "sha256": "6f1384f1fbc1e25941f913c3f4727ecb5aae4180cd1f57c8c6171d08104a03ed"
+      "sha256": "9c89bac854e66a89b9d4dbc90555dc75e5c7725d59d90c3d2896ff33171c432e"
+    },
+    {
+      "path": "src/api/source-version.ts",
+      "sha256": "eb707f8c6ea5970a661953bd6065334812ce46bb2e8387ae38fb8b8295fce9bb"
     },
     {
       "path": "src/auth/index.ts",
@@ -104,7 +108,7 @@
     },
     {
       "path": "src/sdk.ts",
-      "sha256": "08aa4a9b22cd21311ef7308a199d782d922f2d832cb7fd2c4769b4025ad13ad4"
+      "sha256": "c4bfa7700fff0c82293421d639f418a7e0beffb22ff08e44e4851f486ba997e9"
     },
     {
       "path": "src/types/application-store-listing.ts",
@@ -136,7 +140,7 @@
     },
     {
       "path": "src/types/create-deployment-request.ts",
-      "sha256": "6da96edb2a7862a0d2f0f2ae611e53ae188a6594e19015e2cdc6b0f3db47a1d9"
+      "sha256": "494bbb3b6cd49464847bf5614c6cb23b3c516feaa51a2c41e0eca8533e770be6"
     },
     {
       "path": "src/types/create-domain-request.ts",
@@ -155,12 +159,16 @@
       "sha256": "1fcb371bc3ffb61bc278c2288158f68efe95b4227bcaf920011692dfd5272e7e"
     },
     {
+      "path": "src/types/create-source-version-request.ts",
+      "sha256": "a12d03b15b14b6dc24ab0b46fc4806c3c78296b7e523c62a11afe5dc84f444bc"
+    },
+    {
       "path": "src/types/deployment-page.ts",
       "sha256": "fb54bbc89e510293ba6854dee2f6c128e1f973e1988c98f6833343104463a7b7"
     },
     {
       "path": "src/types/deployment-response.ts",
-      "sha256": "0cd9d665284ad367e284d5694676c2581b5d4f381e009789a7306515564fe624"
+      "sha256": "fa4c13737892a7d26b20328c2fb81ba945b137a7b7516baecf7eccb3441c24ec"
     },
     {
       "path": "src/types/domain-page.ts",
@@ -195,8 +203,12 @@
       "sha256": "1a3ccef44eaf917fc387112ed2a5dfa9233c259d4bc222b63a1cb4d22b6b6767"
     },
     {
+      "path": "src/types/import-git-source-version-request.ts",
+      "sha256": "480386c894345f009510ea4e0219aff011dd02c253956e005f65a3652d312bfd"
+    },
+    {
       "path": "src/types/index.ts",
-      "sha256": "a497bd88e535984c72067c234b9dbb1b6b6c3c4d0f24ad8d25112afa1e2c7ca0"
+      "sha256": "1cd7fb0730379ab81834593f8b8aec2bcc3c85a1ecf91ff14b1e0505a3f47c30"
     },
     {
       "path": "src/types/media-checksum.ts",
@@ -323,8 +335,36 @@
       "sha256": "c44f5e76114106b770fc233d249f20757a549603a4fa9bc5d0cab51d593ff833"
     },
     {
+      "path": "src/types/sites-source-versions-create-response201.ts",
+      "sha256": "6be4b30ba9bfa37277d8a91934e108cbfb9ae87cdb28a3ab6756825607b3d048"
+    },
+    {
+      "path": "src/types/sites-source-versions-import-git-response201.ts",
+      "sha256": "8ea9478d68623a6d80e10ed28367712879958b5adffb51a1df5da42228c87f85"
+    },
+    {
+      "path": "src/types/sites-source-versions-list-response.ts",
+      "sha256": "7cb9a59fd086db6069862adbc0ede7cdc61ff7593052aa5c1df48320251bb3b4"
+    },
+    {
+      "path": "src/types/sites-source-versions-retrieve-response.ts",
+      "sha256": "3902e141ae4cba525be4d18a4197ffca3bd0d033d523bac59616b32a13defa81"
+    },
+    {
       "path": "src/types/sites-update-response.ts",
       "sha256": "e7976c8283d16fb6d986632e9acadd8ac70514a20c92526cedefe4a3b5475859"
+    },
+    {
+      "path": "src/types/source-version-config-snapshot.ts",
+      "sha256": "48f140925b3e95c10f6450bc318e5c731c04e5e38366fe887989c6324424c75d"
+    },
+    {
+      "path": "src/types/source-version-page.ts",
+      "sha256": "aa5f391aa3471962da4bc22f2566469305bc6cc034f12ecb5ef34550e10320ee"
+    },
+    {
+      "path": "src/types/source-version-response.ts",
+      "sha256": "19477dfcf27a8e7f95310923672204b3aaf8b5df5786063d5a91379b780afe31"
     },
     {
       "path": "src/types/update-site-request.ts",

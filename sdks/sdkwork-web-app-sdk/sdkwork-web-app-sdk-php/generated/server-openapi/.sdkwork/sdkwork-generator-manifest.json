@@ -36,7 +36,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "a0d3179f9b4075e0e2767e3244d379632343c9ce763cce308ec01d95c4500b12"
+      "sha256": "f47fc0d7037cbaf1bf6339f3e0a42235faeb5913864e4589bc66c35dc0135721"
     },
     {
       "path": "sdkwork-sdk.json",
@@ -68,7 +68,11 @@
     },
     {
       "path": "src/Api/Site.php",
-      "sha256": "03810a60439dde91b68eaf5e660c976b0cf20b219334099b4ebb43994bdecdb4"
+      "sha256": "6847e4d5f2212a0b2626aaa97fc505f8c6f2fe4b49f95eb38c9a6c05d79b9f54"
+    },
+    {
+      "path": "src/Api/SourceVersion.php",
+      "sha256": "3e45efb724744d683a2ca03e5c9551850b36ea4424bad57074fc5498c4da7718"
     },
     {
       "path": "src/Http/HttpClient.php",
@@ -100,7 +104,7 @@
     },
     {
       "path": "src/Models/CreateDeploymentRequest.php",
-      "sha256": "5df3db93b1cf1fd53fbdf56e5f913f29aa68ce51a6f322aa6d8a314581f94c83"
+      "sha256": "74026e9caa331c24ae3df7047d2939a66a506f15ce51ba46e341619d71084aea"
     },
     {
       "path": "src/Models/CreateDomainRequest.php",
@@ -119,12 +123,16 @@
       "sha256": "d0cb79b8a2f85da7541ac240081485514e7e9c507a18bcdcda6a2c3171123661"
     },
     {
+      "path": "src/Models/CreateSourceVersionRequest.php",
+      "sha256": "6dc705f30ae77fe2f20610093836672b188af15035bebdd4a405f1e97236a399"
+    },
+    {
       "path": "src/Models/DeploymentPage.php",
       "sha256": "ab51d65037500cb2a681a7edb8c22862f1845b984bc6da955a7d68600e2d4a19"
     },
     {
       "path": "src/Models/DeploymentResponse.php",
-      "sha256": "99d4c8743a1b71e3df8ce3789effd433d54fa64c20f25e08a74f73839b8174bb"
+      "sha256": "ec349786d8b75865f83913ee4e385a11053aec659a8bb05b7b71ed0d783d3d55"
     },
     {
       "path": "src/Models/DomainPage.php",
@@ -157,6 +165,10 @@
     {
       "path": "src/Models/HealthCheckResponse.php",
       "sha256": "a96b9e5d97ecbf1a49fbbcc4787db724fa2d3e80b46c7dc68891968cbd612994"
+    },
+    {
+      "path": "src/Models/ImportGitSourceVersionRequest.php",
+      "sha256": "3fe7d844d6b5f98e3b987816ab6970b4f6ebb311f549e90a8899d06d753b3da6"
     },
     {
       "path": "src/Models/MediaChecksum.php",
@@ -279,8 +291,36 @@
       "sha256": "1659bf7e03f0ad50368efa5cbb94d86d4e0cd9ba4a95b977f5a93b1026ef9748"
     },
     {
+      "path": "src/Models/SitesSourceVersionsCreateResponse201.php",
+      "sha256": "69ff1735c82ee87d53c15d84bd180b6adf853abc76d185ddb2d2576714fea113"
+    },
+    {
+      "path": "src/Models/SitesSourceVersionsImportGitResponse201.php",
+      "sha256": "74d5248fc7cbe57f3081ff0d751f726c42957301cced25a311dd7583c0f1e838"
+    },
+    {
+      "path": "src/Models/SitesSourceVersionsListResponse.php",
+      "sha256": "d878f4f9b596451e033f3308aa601995a110a9bfb52e61d737d87cb948e0348f"
+    },
+    {
+      "path": "src/Models/SitesSourceVersionsRetrieveResponse.php",
+      "sha256": "264659d77a45aabb4178ba4d78141348dc62861c54bfbca3084c4c36fb81b095"
+    },
+    {
       "path": "src/Models/SitesUpdateResponse.php",
       "sha256": "d1612f20c8d999370b8972416eb5ac5326d51cd60ea78376ea03ffd3b8e9ddc8"
+    },
+    {
+      "path": "src/Models/SourceVersionConfigSnapshot.php",
+      "sha256": "04d85476a9a7cd02f6d790ab609ea14463a2090f0a95f4323e84cc13e46e181d"
+    },
+    {
+      "path": "src/Models/SourceVersionPage.php",
+      "sha256": "1f9b0f3ed94d535f41b4bdd06c78caf8109c15cabbf66b786c0e3b5772e4f25a"
+    },
+    {
+      "path": "src/Models/SourceVersionResponse.php",
+      "sha256": "4d0a3ea6ccf0f72e87c19a4edf02f98dab34f73ddba4f82c9db9d7ae1de5d8a9"
     },
     {
       "path": "src/Models/UpdateSiteRequest.php",
@@ -292,7 +332,7 @@
     },
     {
       "path": "src/SdkworkAppClient.php",
-      "sha256": "50b4a5f6ec99313453ea1f03de28269ea7f91088f9fa470e5b34446d725c7cea"
+      "sha256": "9db843f5abd3a4eda069eb331de89c1de842a37120fba8c398ddd42c6741f996"
     }
   ],
   "scaffoldFiles": [

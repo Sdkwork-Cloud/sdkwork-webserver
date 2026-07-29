@@ -44,6 +44,7 @@ client.set_header('X-Custom-Header', 'value')
 
 - `client.site` - site API
 - `client.domain` - domain API
+- `client.source_version` - source_version API
 - `client.deployment` - deployment API
 - `client.env_variable` - env_variable API
 - `client.certificate` - certificate API
@@ -67,6 +68,16 @@ puts result.inspect
 site_id = '1'
 params = { 'page' => 1, 'page_size' => 2 }
 result = client.domain.sites_domains_list(site_id, params: params)
+puts result.inspect
+```
+
+### source_version
+
+```ruby
+# 获取应用源码版本
+site_id = '1'
+params = { 'page' => 1, 'page_size' => 2 }
+result = client.source_version.sites_source_versions_list(site_id, params: params)
 puts result.inspect
 ```
 

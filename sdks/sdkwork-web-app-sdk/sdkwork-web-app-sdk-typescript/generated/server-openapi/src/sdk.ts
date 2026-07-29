@@ -4,6 +4,7 @@ import type { AuthTokenManager } from '@sdkwork/sdk-common';
 
 import { SiteApi, createSiteApi } from './api/site';
 import { DomainApi, createDomainApi } from './api/domain';
+import { SourceVersionApi, createSourceVersionApi } from './api/source-version';
 import { DeploymentApi, createDeploymentApi } from './api/deployment';
 import { EnvVariableApi, createEnvVariableApi } from './api/env-variable';
 import { CertificateApi, createCertificateApi } from './api/certificate';
@@ -14,6 +15,7 @@ export class SdkworkAppClient {
 
   public readonly site: SiteApi;
   public readonly domain: DomainApi;
+  public readonly sourceVersion: SourceVersionApi;
   public readonly deployment: DeploymentApi;
   public readonly envVariable: EnvVariableApi;
   public readonly certificate: CertificateApi;
@@ -24,6 +26,8 @@ export class SdkworkAppClient {
     this.site = createSiteApi(this.httpClient);
 
     this.domain = createDomainApi(this.httpClient);
+
+    this.sourceVersion = createSourceVersionApi(this.httpClient);
 
     this.deployment = createDeploymentApi(this.httpClient);
 

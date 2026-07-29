@@ -9,6 +9,7 @@ type SdkworkBackendClient struct {
     http *sdkhttp.Client
     Application *api.ApplicationApi
     ApplicationDomain *api.ApplicationDomainApi
+    ApplicationSourceVersion *api.ApplicationSourceVersionApi
     ApplicationDeployment *api.ApplicationDeploymentApi
     Certificate *api.CertificateApi
     CertificateDistribution *api.CertificateDistributionApi
@@ -29,6 +30,7 @@ func NewSdkworkBackendClientWithConfig(config sdkhttp.Config) *SdkworkBackendCli
         http: client,
         Application: api.NewApplicationApi(client),
         ApplicationDomain: api.NewApplicationDomainApi(client),
+        ApplicationSourceVersion: api.NewApplicationSourceVersionApi(client),
         ApplicationDeployment: api.NewApplicationDeploymentApi(client),
         Certificate: api.NewCertificateApi(client),
         CertificateDistribution: api.NewCertificateDistributionApi(client),

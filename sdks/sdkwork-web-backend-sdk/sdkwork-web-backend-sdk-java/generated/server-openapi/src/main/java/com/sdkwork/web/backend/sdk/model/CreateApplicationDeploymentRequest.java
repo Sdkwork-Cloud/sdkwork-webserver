@@ -2,6 +2,7 @@ package com.sdkwork.web.backend.sdk.model;
 
 
 public class CreateApplicationDeploymentRequest {
+    private String sourceVersionId;
     private Integer deployType;
     private String environment;
     private String versionTag;
@@ -10,6 +11,14 @@ public class CreateApplicationDeploymentRequest {
     private String artifactDriveUri;
     private String artifactSize;
     private String artifactHash;
+
+    public String getSourceVersionId() {
+        return this.sourceVersionId;
+    }
+
+    public void setSourceVersionId(String sourceVersionId) {
+        this.sourceVersionId = sourceVersionId;
+    }
 
     public Integer getDeployType() {
         return this.deployType;

@@ -12,22 +12,48 @@
   "mode": "apply",
   "hasChanges": true,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "6ec44010a62d1cc1be43034a99314723adcafe33e96207c3412569feeb12c938",
+  "changeFingerprint": "cdb2546efbc10b54a1ff87637c69d1e68f565e38fefde8e6d6d443a8091b0b2b",
   "changeImpact": {
     "schemaVersion": 1,
     "areas": [
-      "models"
+      "api-surface",
+      "models",
+      "documentation"
     ],
     "details": [
       {
+        "area": "api-surface",
+        "paths": [
+          "src/Api/Site.php",
+          "src/Api/SourceVersion.php",
+          "src/SdkworkAppClient.php"
+        ]
+      },
+      {
         "area": "models",
         "paths": [
-          "src/Models/CreateDeploymentRequest.php"
+          "src/Models/CreateDeploymentRequest.php",
+          "src/Models/CreateSourceVersionRequest.php",
+          "src/Models/DeploymentResponse.php",
+          "src/Models/ImportGitSourceVersionRequest.php",
+          "src/Models/SitesSourceVersionsCreateResponse201.php",
+          "src/Models/SitesSourceVersionsImportGitResponse201.php",
+          "src/Models/SitesSourceVersionsListResponse.php",
+          "src/Models/SitesSourceVersionsRetrieveResponse.php",
+          "src/Models/SourceVersionConfigSnapshot.php",
+          "src/Models/SourceVersionPage.php",
+          "src/Models/SourceVersionResponse.php"
+        ]
+      },
+      {
+        "area": "documentation",
+        "paths": [
+          "README.md"
         ]
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: models. Verification is required."
+    "summary": "Detected impact areas: api-surface, models, documentation. Verification is required."
   },
   "executionDecision": {
     "schemaVersion": 1,
@@ -48,7 +74,7 @@
         "id": "verify-check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, documentation.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-php\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -67,13 +93,13 @@
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: api-surface, models, documentation. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, documentation.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-php\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -103,25 +129,40 @@
     "localVersions": []
   },
   "stats": {
-    "totalFiles": 72,
-    "models": 53,
-    "apis": 6,
+    "totalFiles": 82,
+    "models": 62,
+    "apis": 7,
     "types": 0
   },
   "warnings": [],
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 1,
+    "writtenFiles": 15,
     "skippedScaffoldFiles": 1,
-    "skippedUnchangedGeneratedFiles": 70,
+    "skippedUnchangedGeneratedFiles": 66,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "6ec44010a62d1cc1be43034a99314723adcafe33e96207c3412569feeb12c938",
+    "changeFingerprint": "cdb2546efbc10b54a1ff87637c69d1e68f565e38fefde8e6d6d443a8091b0b2b",
     "changes": {
-      "createdGeneratedFiles": [],
+      "createdGeneratedFiles": [
+        "src/Api/SourceVersion.php",
+        "src/Models/CreateSourceVersionRequest.php",
+        "src/Models/ImportGitSourceVersionRequest.php",
+        "src/Models/SitesSourceVersionsCreateResponse201.php",
+        "src/Models/SitesSourceVersionsImportGitResponse201.php",
+        "src/Models/SitesSourceVersionsListResponse.php",
+        "src/Models/SitesSourceVersionsRetrieveResponse.php",
+        "src/Models/SourceVersionConfigSnapshot.php",
+        "src/Models/SourceVersionPage.php",
+        "src/Models/SourceVersionResponse.php"
+      ],
       "updatedGeneratedFiles": [
-        "src/Models/CreateDeploymentRequest.php"
+        "README.md",
+        "src/Api/Site.php",
+        "src/Models/CreateDeploymentRequest.php",
+        "src/Models/DeploymentResponse.php",
+        "src/SdkworkAppClient.php"
       ],
       "unchangedGeneratedFiles": [
         "bin/publish-core.mjs",
@@ -130,7 +171,6 @@
         "CHANGELOG.md",
         "composer.json",
         "LICENSE",
-        "README.md",
         "sdkwork-sdk.json",
         "src/Api/BaseApi.php",
         "src/Api/Certificate.php",
@@ -138,7 +178,6 @@
         "src/Api/Domain.php",
         "src/Api/EnvVariable.php",
         "src/Api/Monitor.php",
-        "src/Api/Site.php",
         "src/Http/HttpClient.php",
         "src/Models/ApplicationStoreListing.php",
         "src/Models/CertificatePage.php",
@@ -151,7 +190,6 @@
         "src/Models/CreateHealthCheckRequest.php",
         "src/Models/CreateSiteRequest.php",
         "src/Models/DeploymentPage.php",
-        "src/Models/DeploymentResponse.php",
         "src/Models/DomainPage.php",
         "src/Models/DomainResponse.php",
         "src/Models/DomainVerifyResponse.php",
@@ -192,8 +230,7 @@
         "src/Models/SitesRetrieveResponse.php",
         "src/Models/SitesUpdateResponse.php",
         "src/Models/UpdateSiteRequest.php",
-        "src/SdkConfig.php",
-        "src/SdkworkAppClient.php"
+        "src/SdkConfig.php"
       ],
       "deletedGeneratedFiles": [],
       "scaffoldedFiles": [],
@@ -205,29 +242,55 @@
     "impact": {
       "schemaVersion": 1,
       "areas": [
-        "models"
+        "api-surface",
+        "models",
+        "documentation"
       ],
       "details": [
         {
+          "area": "api-surface",
+          "paths": [
+            "src/Api/Site.php",
+            "src/Api/SourceVersion.php",
+            "src/SdkworkAppClient.php"
+          ]
+        },
+        {
           "area": "models",
           "paths": [
-            "src/Models/CreateDeploymentRequest.php"
+            "src/Models/CreateDeploymentRequest.php",
+            "src/Models/CreateSourceVersionRequest.php",
+            "src/Models/DeploymentResponse.php",
+            "src/Models/ImportGitSourceVersionRequest.php",
+            "src/Models/SitesSourceVersionsCreateResponse201.php",
+            "src/Models/SitesSourceVersionsImportGitResponse201.php",
+            "src/Models/SitesSourceVersionsListResponse.php",
+            "src/Models/SitesSourceVersionsRetrieveResponse.php",
+            "src/Models/SourceVersionConfigSnapshot.php",
+            "src/Models/SourceVersionPage.php",
+            "src/Models/SourceVersionResponse.php"
+          ]
+        },
+        {
+          "area": "documentation",
+          "paths": [
+            "README.md"
           ]
         }
       ],
       "requiresVerification": true,
-      "summary": "Detected impact areas: models. Verification is required."
+      "summary": "Detected impact areas: api-surface, models, documentation. Verification is required."
     },
     "verificationPlan": {
       "shouldRun": true,
       "runPhase": "now",
-      "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
+      "summary": "Detected impact areas: api-surface, models, documentation. Verification is required. Run the required verification commands now against the generated SDK output.",
       "steps": [
         {
           "id": "check",
           "title": "Unified package check",
           "required": true,
-          "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
+          "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, documentation.",
           "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-php\\generated\\server-openapi",
           "command": "node",
           "args": [

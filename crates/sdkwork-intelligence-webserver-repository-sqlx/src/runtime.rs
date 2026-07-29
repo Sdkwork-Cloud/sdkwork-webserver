@@ -12,6 +12,7 @@ use sdkwork_webserver_acme_service::{
 use sdkwork_webserver_contract::{web_environment_name, web_is_production_like_environment};
 use sdkwork_webserver_database_host::bootstrap_web_database_from_env;
 use sdkwork_webserver_edge_runtime::EdgeRuntime;
+use sdkwork_webserver_source_provider::GitDriveSourceImporter;
 
 use crate::{PostgresWebRepository, SecretEncryptionKey, SqliteWebRepository};
 
@@ -172,8 +173,14 @@ pub async fn bootstrap_web_runtime_from_env() -> Result<WebRuntime, String> {
         EdgeRuntime::from_env()
             .map_err(|error| format!("edge runtime bootstrap failed: {error}"))?,
     );
+    let source_importer = Arc::new(GitDriveSourceImporter::from_env().await?);
 
     Ok(WebRuntime {
-        service: WebService::new(repository, certificate_issuer, edge_runtime),
+        service: WebService::new_with_source_importer(
+            repository,
+            certificate_issuer,
+            edge_runtime,
+            source_importer,
+        ),
     })
 }

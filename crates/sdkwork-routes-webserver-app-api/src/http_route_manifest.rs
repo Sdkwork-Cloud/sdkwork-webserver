@@ -26,7 +26,8 @@ const HTTP_ROUTES: &[HttpRoute] = &[
         "site",
         "sites.update",
     )
-    .with_required_permission("web.sites.write"),
+    .with_required_permission("web.sites.write")
+    .with_idempotent(true),
     HttpRoute::dual_token(
         HttpMethod::Delete,
         "/app/v3/api/sites/{siteId}",
@@ -86,6 +87,37 @@ const HTTP_ROUTES: &[HttpRoute] = &[
     .with_required_permission("web.sites.write")
     .with_idempotent(true)
     .with_rate_limit_tier(RateLimitTier::AuthCritical),
+    HttpRoute::dual_token(
+        HttpMethod::Get,
+        "/app/v3/api/sites/{siteId}/source_versions",
+        "sourceVersion",
+        "sites.sourceVersions.list",
+    )
+    .with_required_permission("web.sites.write"),
+    HttpRoute::dual_token(
+        HttpMethod::Post,
+        "/app/v3/api/sites/{siteId}/source_versions",
+        "sourceVersion",
+        "sites.sourceVersions.create",
+    )
+    .with_required_permission("web.sites.write")
+    .with_idempotent(true),
+    HttpRoute::dual_token(
+        HttpMethod::Post,
+        "/app/v3/api/sites/{siteId}/source_versions/git_import",
+        "sourceVersion",
+        "sites.sourceVersions.importGit",
+    )
+    .with_required_permission("web.sites.write")
+    .with_idempotent(true)
+    .with_rate_limit_tier(RateLimitTier::AuthCritical),
+    HttpRoute::dual_token(
+        HttpMethod::Get,
+        "/app/v3/api/sites/{siteId}/source_versions/{sourceVersionId}",
+        "sourceVersion",
+        "sites.sourceVersions.retrieve",
+    )
+    .with_required_permission("web.sites.write"),
     HttpRoute::dual_token(
         HttpMethod::Get,
         "/app/v3/api/sites/{siteId}/deployments",

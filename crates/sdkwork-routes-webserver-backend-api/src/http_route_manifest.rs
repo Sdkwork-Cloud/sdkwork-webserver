@@ -94,6 +94,37 @@ const HTTP_ROUTES: &[HttpRoute] = &[
     .with_idempotent(true),
     HttpRoute::dual_token(
         HttpMethod::Get,
+        "/backend/v3/api/applications/{applicationId}/source_versions",
+        "applicationSourceVersion",
+        "applications.sourceVersions.list",
+    )
+    .with_required_permission("web.sites.read"),
+    HttpRoute::dual_token(
+        HttpMethod::Post,
+        "/backend/v3/api/applications/{applicationId}/source_versions",
+        "applicationSourceVersion",
+        "applications.sourceVersions.create",
+    )
+    .with_required_permission("web.sites.write")
+    .with_idempotent(true),
+    HttpRoute::dual_token(
+        HttpMethod::Post,
+        "/backend/v3/api/applications/{applicationId}/source_versions/git_import",
+        "applicationSourceVersion",
+        "applications.sourceVersions.importGit",
+    )
+    .with_required_permission("web.sites.write")
+    .with_idempotent(true)
+    .with_rate_limit_tier(RateLimitTier::AuthCritical),
+    HttpRoute::dual_token(
+        HttpMethod::Get,
+        "/backend/v3/api/applications/{applicationId}/source_versions/{sourceVersionId}",
+        "applicationSourceVersion",
+        "applications.sourceVersions.retrieve",
+    )
+    .with_required_permission("web.sites.read"),
+    HttpRoute::dual_token(
+        HttpMethod::Get,
         "/backend/v3/api/applications/{applicationId}/deployments",
         "applicationDeployment",
         "applications.deployments.list",

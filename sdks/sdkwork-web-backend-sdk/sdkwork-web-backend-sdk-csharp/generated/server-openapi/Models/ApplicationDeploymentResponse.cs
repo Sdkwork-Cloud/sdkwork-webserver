@@ -8,6 +8,7 @@ namespace SDKWork.Web.BackendSdk.Models
     {
         public string Id { get; set; }
         public string SiteId { get; set; }
+        public string? SourceVersionId { get; set; }
         public int Status { get; set; }
         public int DeployType { get; set; }
         public string Environment { get; set; }

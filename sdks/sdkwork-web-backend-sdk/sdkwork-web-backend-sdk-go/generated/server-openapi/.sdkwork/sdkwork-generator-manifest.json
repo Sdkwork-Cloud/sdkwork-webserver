@@ -23,6 +23,10 @@
       "sha256": "31036ffc70a658d3483cc33dd700e8ee5ca0200c974903e8a3c6ddca5707460f"
     },
     {
+      "path": "api/application_source_version.go",
+      "sha256": "d255fbb2d85b421912bbf93383324de9895ac7dfb51ebd56cce72f32d8e3fe2f"
+    },
+    {
       "path": "api/application.go",
       "sha256": "9a91955965c042102784d43385415bc3898fd616ab9f1c29c2a9b0efe0271357"
     },
@@ -96,11 +100,11 @@
     },
     {
       "path": "README.md",
-      "sha256": "7a1d3be2fb07718cb9a1703570c9eb27127c02302c47ad214e95cf2eb0503187"
+      "sha256": "7a7ca7d46c0541a690a6d127d7a0803ffa581357565985653769ee9d1824bdc8"
     },
     {
       "path": "sdk.go",
-      "sha256": "81381fc1d5fb4d194f791782dc9c333c259b448c7203d3994da4cd223c7e1961"
+      "sha256": "4ce78c31bf95b98f97d0d9322646200fe383c95a7072251e738cdc62b59a3b6d"
     },
     {
       "path": "sdkwork-sdk.json",
@@ -128,7 +132,7 @@
     },
     {
       "path": "types/application_deployment_response.go",
-      "sha256": "1fea960b95a909e463fac74d2da0784c3dda6d1b6763b8a92058fd095ef5d669"
+      "sha256": "712b4dc907db46e1fc3724467d1339f9bfb00e339dde41d0306afbbef0a67a70"
     },
     {
       "path": "types/application_domain_response.go",
@@ -141,6 +145,14 @@
     {
       "path": "types/application_response.go",
       "sha256": "cac83f8dc9445b998bd0bbe8044bd1a3aba90058f07f20a44907770513883bce"
+    },
+    {
+      "path": "types/application_source_version_config_snapshot.go",
+      "sha256": "de6eb8fe8c39014175b57e15dec3787f12cb9ff3231521e711b1f36955362b9c"
+    },
+    {
+      "path": "types/application_source_version_response.go",
+      "sha256": "4891190699889b051a58043f2169c2cab4d7dc585091ecd9478e034c00f49144"
     },
     {
       "path": "types/application_store_listing.go",
@@ -189,6 +201,22 @@
     {
       "path": "types/applications_retrieve_response.go",
       "sha256": "aa0c80dcc8fc6adda641dd6e5ae482b675c7d1f01310eef0faa308bf4b92ecc5"
+    },
+    {
+      "path": "types/applications_source_versions_create_response201.go",
+      "sha256": "b26659f938840017a721d46d44aef5704af1058bdf406c7390b329cd5aa20f30"
+    },
+    {
+      "path": "types/applications_source_versions_import_git_response201.go",
+      "sha256": "cbdc7f36c917dc4fed49c6e1441b7bbb96e18f8f07866f19533f1391534a65bd"
+    },
+    {
+      "path": "types/applications_source_versions_list_response.go",
+      "sha256": "6cc3c3909b41e0493faf04474abed32efe2f8ae193e45ce74f435f15b8c589e4"
+    },
+    {
+      "path": "types/applications_source_versions_retrieve_response.go",
+      "sha256": "7277564771d78e5b96f02ba823176c04da461851634790a64234002a8c29e8a8"
     },
     {
       "path": "types/applications_update_response.go",
@@ -264,7 +292,7 @@
     },
     {
       "path": "types/create_application_deployment_request.go",
-      "sha256": "3b4c03e7cd5a139a86e0befe1d623e6ba92d8a01ac986efdbd44699c0e95e933"
+      "sha256": "d7677763ce5dde15643450c93a0bcf8b9b5c8d9647eb9bc075225312cf1c9bd1"
     },
     {
       "path": "types/create_application_domain_request.go",
@@ -273,6 +301,10 @@
     {
       "path": "types/create_application_request.go",
       "sha256": "7b464d2e50c0e1123b091c4a5f2d25f4911bfe724d9aae760cfe58b9088633e1"
+    },
+    {
+      "path": "types/create_application_source_version_request.go",
+      "sha256": "34e6692d7704b70dd9308a0d5d5c0e62bb7d7243726062de6bb10ab4d55e2c60"
     },
     {
       "path": "types/create_certificate_request.go",
@@ -301,6 +333,10 @@
     {
       "path": "types/heartbeat_response.go",
       "sha256": "9eac64b56d833f8f3c700486228f9ac40600e0e37d145aaaee3870fbbd986ce6"
+    },
+    {
+      "path": "types/import_application_git_source_version_request.go",
+      "sha256": "d346c8a416f0fa3d490c50dad97f6bd48eb692194adbb9e2a1c92c795b32ac1d"
     },
     {
       "path": "types/media_checksum.go",

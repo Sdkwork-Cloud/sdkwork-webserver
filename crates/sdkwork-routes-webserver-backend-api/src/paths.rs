@@ -9,6 +9,12 @@ pub const APPLICATION_DOMAIN: &str =
     "/backend/v3/api/applications/{applicationId}/domains/{domainId}";
 pub const APPLICATION_DOMAIN_VERIFY: &str =
     "/backend/v3/api/applications/{applicationId}/domains/{domainId}/verify";
+pub const APPLICATION_SOURCE_VERSIONS: &str =
+    "/backend/v3/api/applications/{applicationId}/source_versions";
+pub const APPLICATION_SOURCE_VERSION_IMPORT_GIT: &str =
+    "/backend/v3/api/applications/{applicationId}/source_versions/git_import";
+pub const APPLICATION_SOURCE_VERSION: &str =
+    "/backend/v3/api/applications/{applicationId}/source_versions/{sourceVersionId}";
 pub const APPLICATION_DEPLOYMENTS: &str =
     "/backend/v3/api/applications/{applicationId}/deployments";
 pub const APPLICATION_DEPLOYMENT_ROLLBACK: &str =

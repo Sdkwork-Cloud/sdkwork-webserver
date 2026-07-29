@@ -57,6 +57,7 @@ client.SetHeader("X-Custom-Header", "value")
 
 - `client.Application` - application API
 - `client.ApplicationDomain` - application_domain API
+- `client.ApplicationSourceVersion` - application_source_version API
 - `client.ApplicationDeployment` - application_deployment API
 - `client.Certificate` - certificate API
 - `client.CertificateDistribution` - certificate_distribution API
@@ -96,6 +97,22 @@ params := map[string]interface{}{
     "page_size": 2,
 }
 result, err := client.ApplicationDomain.ApplicationsDomainsList(applicationId, params)
+if err != nil {
+    panic(err)
+}
+fmt.Println(result)
+```
+
+### application_source_version
+
+```go
+// List immutable application source versions
+applicationId := "1"
+params := map[string]interface{}{
+    "page": 1,
+    "page_size": 2,
+}
+result, err := client.ApplicationSourceVersion.ApplicationsSourceVersionsList(applicationId, params)
 if err != nil {
     panic(err)
 }

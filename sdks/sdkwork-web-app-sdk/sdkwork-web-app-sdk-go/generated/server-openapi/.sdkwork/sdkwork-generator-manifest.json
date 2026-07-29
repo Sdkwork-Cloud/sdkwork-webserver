@@ -44,7 +44,11 @@
     },
     {
       "path": "api/site.go",
-      "sha256": "bd9e81084a97de1d636fd78da193129fbd94e387c8556154d7f9bab273b1a0c5"
+      "sha256": "db518f4d6a5e6aff92c048bb531a8b6b6cbf8e6e789125e365384e1393329cf3"
+    },
+    {
+      "path": "api/source_version.go",
+      "sha256": "2fbd749cb53355ca72c305e5870cfe060b49817c746dff6650544dee5a72cc2d"
     },
     {
       "path": "bin/publish-core.mjs",
@@ -84,11 +88,11 @@
     },
     {
       "path": "README.md",
-      "sha256": "f6766c8de531f88eed77b3ac5e77d692c2a9aaae1efe9f83c71bcd71407dfc15"
+      "sha256": "17abe1f2c481f480d297c765267df5609beea6b21081bd49b3d6b27b8bdc5d2b"
     },
     {
       "path": "sdk.go",
-      "sha256": "bf8356747898bcf75496f52390e4aa405ab862d6477c8a17c7bc9ace5f7b8b20"
+      "sha256": "f4907881b09846050fb6e9f469e1896f9f3185ca0f685988c5e5308cabd6fe57"
     },
     {
       "path": "sdkwork-sdk.json",
@@ -124,7 +128,7 @@
     },
     {
       "path": "types/create_deployment_request.go",
-      "sha256": "8519bd71eb18058aff72fbdae178649a4338438df9cc6b91395a79d9f98a4c56"
+      "sha256": "f9d9c2dfe5cefeaf1b6370b5b30eacfea1a62628c8586af2c1bba5ff00c6382a"
     },
     {
       "path": "types/create_domain_request.go",
@@ -143,12 +147,16 @@
       "sha256": "32389aa36b3021afe0c1cd94b60138451b59bda32a2b37678fb29d422bd55149"
     },
     {
+      "path": "types/create_source_version_request.go",
+      "sha256": "67775eeec9ce475ef18431ccf59864f59e1d9aae870f99b299b31300a91d90aa"
+    },
+    {
       "path": "types/deployment_page.go",
       "sha256": "2805ef5b708349906616d1b18e7f5628f2137fce683d2b3ef267c03bf6279075"
     },
     {
       "path": "types/deployment_response.go",
-      "sha256": "790ce877879cffc0837f0043a108ff9fecd8dfc3fa9d9bdc4f7f9b02dcb0b8c5"
+      "sha256": "9e6cbc0536dd0cdc54f9b52a854fadcc05754bb7adc12ebf3b00deeb81ae3cf0"
     },
     {
       "path": "types/doc.go",
@@ -185,6 +193,10 @@
     {
       "path": "types/health_check_response.go",
       "sha256": "99daa0bb6337434d0efeb03cebef62143c518cdd373c8b91181605be5a0376c2"
+    },
+    {
+      "path": "types/import_git_source_version_request.go",
+      "sha256": "a297e43078e079d7a2f0450e3cfab3900aa7ccc6392d8b3826920440495949ad"
     },
     {
       "path": "types/media_checksum.go",
@@ -311,8 +323,36 @@
       "sha256": "286016a889254002dbd8ad9f2b23ff791d0944f908a8c88de350f33d4a96fe7a"
     },
     {
+      "path": "types/sites_source_versions_create_response201.go",
+      "sha256": "e4a6bbc9426c51c3203747c5fdc89f093149dd914379e4517eaae8deb7960998"
+    },
+    {
+      "path": "types/sites_source_versions_import_git_response201.go",
+      "sha256": "fcaf8bb1afbdc35c6becee58e9b278d4622415c45b82ad06aeb7b7f9388af779"
+    },
+    {
+      "path": "types/sites_source_versions_list_response.go",
+      "sha256": "fb856e2f1b44b592b9753a565d9c11ef7caa18794d777f0984a33e18ce7e9615"
+    },
+    {
+      "path": "types/sites_source_versions_retrieve_response.go",
+      "sha256": "798f704335ff2df5fc02ef2c0bf0f412bed28dfc6721b5de74ca14ec133be8d5"
+    },
+    {
       "path": "types/sites_update_response.go",
       "sha256": "bcf3f39c7cc51435b56cc7005532a2ed25a0e56aec05b08df099d4c50b60e9df"
+    },
+    {
+      "path": "types/source_version_config_snapshot.go",
+      "sha256": "dd7d1b8887aa2447aa14fe14c9bccf4f702078c7b508cb34b350229b3c11deb3"
+    },
+    {
+      "path": "types/source_version_page.go",
+      "sha256": "536badda3ece12c05ff9bacb39bd649cf4582a9bb33f6b0eadf7895153d52bc8"
+    },
+    {
+      "path": "types/source_version_response.go",
+      "sha256": "bb42b005eacf7d3b214ec4a5013d52f602abd2dfa17d37afd26c5aed1247a7ea"
     },
     {
       "path": "types/update_site_request.go",

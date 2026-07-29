@@ -131,6 +131,51 @@ pub trait WebAppApi: Send + Sync {
         domain_id: &str,
     ) -> WebServiceResult<DomainVerifyResponse>;
 
+    async fn list_source_versions(
+        &self,
+        _context: &WebAppRequestContext,
+        _site_id: &str,
+        _page: i32,
+        _page_size: i32,
+    ) -> WebServiceResult<SourceVersionPage> {
+        Err(crate::WebServiceError::Internal(
+            "source versions are unavailable".to_string(),
+        ))
+    }
+
+    async fn create_source_version(
+        &self,
+        _context: &WebAppRequestContext,
+        _site_id: &str,
+        _request: &CreateSourceVersionRequest,
+    ) -> WebServiceResult<SourceVersionResponse> {
+        Err(crate::WebServiceError::Internal(
+            "source versions are unavailable".to_string(),
+        ))
+    }
+
+    async fn import_git_source_version(
+        &self,
+        _context: &WebAppRequestContext,
+        _site_id: &str,
+        _request: &ImportGitSourceVersionRequest,
+    ) -> WebServiceResult<SourceVersionResponse> {
+        Err(crate::WebServiceError::Internal(
+            "Git source import is unavailable".to_string(),
+        ))
+    }
+
+    async fn retrieve_source_version(
+        &self,
+        _context: &WebAppRequestContext,
+        _site_id: &str,
+        _source_version_id: &str,
+    ) -> WebServiceResult<SourceVersionResponse> {
+        Err(crate::WebServiceError::Internal(
+            "source versions are unavailable".to_string(),
+        ))
+    }
+
     async fn list_deployments(
         &self,
         context: &WebAppRequestContext,
@@ -276,6 +321,35 @@ pub trait WebBackendApi: Send + Sync {
         application_id: &str,
         domain_id: &str,
     ) -> WebServiceResult<()>;
+
+    async fn list_application_source_versions(
+        &self,
+        context: &WebBackendRequestContext,
+        application_id: &str,
+        page: i32,
+        page_size: i32,
+    ) -> WebServiceResult<SourceVersionPage>;
+
+    async fn create_application_source_version(
+        &self,
+        context: &WebBackendRequestContext,
+        application_id: &str,
+        request: &CreateSourceVersionRequest,
+    ) -> WebServiceResult<SourceVersionResponse>;
+
+    async fn import_application_git_source_version(
+        &self,
+        context: &WebBackendRequestContext,
+        application_id: &str,
+        request: &ImportGitSourceVersionRequest,
+    ) -> WebServiceResult<SourceVersionResponse>;
+
+    async fn retrieve_application_source_version(
+        &self,
+        context: &WebBackendRequestContext,
+        application_id: &str,
+        source_version_id: &str,
+    ) -> WebServiceResult<SourceVersionResponse>;
 
     async fn list_application_deployments(
         &self,

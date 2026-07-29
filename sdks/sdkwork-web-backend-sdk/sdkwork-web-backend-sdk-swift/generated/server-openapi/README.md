@@ -50,6 +50,7 @@ client.setHeader("X-Custom-Header", value: "value")
 
 - `client.application` - application API
 - `client.applicationDomain` - application_domain API
+- `client.applicationSourceVersion` - application_source_version API
 - `client.applicationDeployment` - application_deployment API
 - `client.certificate` - certificate API
 - `client.certificateDistribution` - certificate_distribution API
@@ -86,6 +87,19 @@ let params: [String: Any] = [
     "page_size": 2
 ]
 let result = try await client.applicationDomain.applicationsDomainsList(applicationId: applicationId, params: params)
+print(result)
+```
+
+### application_source_version
+
+```swift
+// List immutable application source versions
+let applicationId = "1"
+let params: [String: Any] = [
+    "page": 1,
+    "page_size": 2
+]
+let result = try await client.applicationSourceVersion.applicationsSourceVersionsList(applicationId: applicationId, params: params)
 print(result)
 ```
 

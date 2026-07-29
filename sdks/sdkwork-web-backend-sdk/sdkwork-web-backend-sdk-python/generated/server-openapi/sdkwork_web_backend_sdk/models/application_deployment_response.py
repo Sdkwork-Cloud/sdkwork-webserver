@@ -11,6 +11,7 @@ class ApplicationDeploymentResponse:
     deploy_type: int
     environment: str
     created_at: str
+    source_version_id: Optional[str] = None
     version_tag: Optional[str] = None
     commit_hash: Optional[str] = None
     source_ref: Optional[str] = None

@@ -45,6 +45,7 @@ client.set_header("X-Custom-Header", "value");
 
 - `client.application()` - application API
 - `client.application_domain()` - application_domain API
+- `client.application_source_version()` - application_source_version API
 - `client.application_deployment()` - application_deployment API
 - `client.certificate()` - certificate API
 - `client.certificate_distribution()` - certificate_distribution API
@@ -81,6 +82,19 @@ let mut query = HashMap::new();
 query.insert("page".to_string(), serde_json::json!(1));
 query.insert("page_size".to_string(), serde_json::json!(2));
 let result = client.application_domain().applications_domains_list(application_id, Some(&query)).await?;
+println!("{result:?}");
+```
+
+### application_source_version
+
+```rust
+use std::collections::HashMap;
+// List immutable application source versions
+let application_id = "1";
+let mut query = HashMap::new();
+query.insert("page".to_string(), serde_json::json!(1));
+query.insert("page_size".to_string(), serde_json::json!(2));
+let result = client.application_source_version().applications_source_versions_list(application_id, Some(&query)).await?;
 println!("{result:?}");
 ```
 

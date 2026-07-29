@@ -19,6 +19,7 @@ sdkwork-database-id.workspace = true
 sdkwork-intelligence-webserver-service.workspace = true
 sdkwork-webserver-acme-service.workspace = true
 sdkwork-webserver-edge-runtime.workspace = true
+sdkwork-webserver-source-provider.workspace = true
 sdkwork-utils-rust.workspace = true
 tracing.workspace = true
 

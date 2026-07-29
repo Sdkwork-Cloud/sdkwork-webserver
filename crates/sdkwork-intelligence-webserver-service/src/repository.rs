@@ -13,7 +13,8 @@ use sdkwork_webserver_contract::{
     HealthCheckResponse, ListNginxConfigsQuery, ListSitesQuery, NginxConfigPage,
     NginxConfigResponse, NginxReloadResponse, NginxStatusResponse, NginxValidateResponse,
     RuntimeAssignment, RuntimeAssignmentDelivery, RuntimeObservation, RuntimeObservationState,
-    ServerPage, SitePage, SiteResponse, UpdateNginxConfigRequest, UpdateSiteRequest,
+    ServerPage, SitePage, SiteResponse, SourceVersionPage, SourceVersionResponse,
+    CreateSourceVersionRequest, UpdateNginxConfigRequest, UpdateSiteRequest,
 };
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -147,6 +148,42 @@ pub trait WebRepositoryPort: Send + Sync {
         site_id: &str,
         domain_id: &str,
     ) -> WebServiceResult<DomainVerifyResponse>;
+
+    async fn list_source_versions(
+        &self,
+        _tenant_id: i64,
+        _site_id: &str,
+        _page: i32,
+        _page_size: i32,
+    ) -> WebServiceResult<SourceVersionPage> {
+        Err(sdkwork_webserver_contract::WebServiceError::Internal(
+            "source versions are unavailable".to_string(),
+        ))
+    }
+
+    async fn create_source_version(
+        &self,
+        _tenant_id: i64,
+        _site_id: &str,
+        _actor_id: Option<i64>,
+        _retention_limit: i32,
+        _request: &CreateSourceVersionRequest,
+    ) -> WebServiceResult<SourceVersionResponse> {
+        Err(sdkwork_webserver_contract::WebServiceError::Internal(
+            "source versions are unavailable".to_string(),
+        ))
+    }
+
+    async fn retrieve_source_version(
+        &self,
+        _tenant_id: i64,
+        _site_id: &str,
+        _source_version_id: &str,
+    ) -> WebServiceResult<SourceVersionResponse> {
+        Err(sdkwork_webserver_contract::WebServiceError::Internal(
+            "source versions are unavailable".to_string(),
+        ))
+    }
 
     async fn list_deployments(
         &self,

@@ -52,6 +52,7 @@ $client->setHeader('X-Custom-Header', 'value');
 
 - `$client->application` - application API
 - `$client->applicationDomain` - application_domain API
+- `$client->applicationSourceVersion` - application_source_version API
 - `$client->applicationDeployment` - application_deployment API
 - `$client->certificate` - certificate API
 - `$client->certificateDistribution` - certificate_distribution API
@@ -82,6 +83,18 @@ var_dump($result);
 $applicationId = '1';
 $params = ['page' => 1, 'page_size' => 2];
 $result = $client->applicationDomain->applicationsDomainsList($applicationId, $params);
+var_dump($result);
+```
+
+### application_source_version
+
+```php
+<?php
+
+// List immutable application source versions
+$applicationId = '1';
+$params = ['page' => 1, 'page_size' => 2];
+$result = $client->applicationSourceVersion->applicationsSourceVersionsList($applicationId, $params);
 var_dump($result);
 ```
 

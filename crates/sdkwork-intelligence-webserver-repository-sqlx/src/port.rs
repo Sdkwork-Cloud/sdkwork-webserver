@@ -16,7 +16,8 @@ use sdkwork_webserver_contract::{
     HealthCheckResponse, ListNginxConfigsQuery, ListSitesQuery, NginxConfigPage,
     NginxConfigResponse, NginxReloadResponse, NginxStatusResponse, NginxValidateResponse,
     RuntimeAssignment, RuntimeAssignmentDelivery, RuntimeObservation, ServerPage, SitePage,
-    SiteResponse, UpdateNginxConfigRequest, UpdateSiteRequest,
+    SiteResponse, SourceVersionPage, SourceVersionResponse, CreateSourceVersionRequest,
+    UpdateNginxConfigRequest, UpdateSiteRequest,
 };
 use sdkwork_webserver_contract::{WebServiceError, WebServiceResult};
 
@@ -135,6 +136,45 @@ impl WebRepositoryPort for WebRepository {
         domain_id: &str,
     ) -> WebServiceResult<DomainVerifyResponse> {
         self.verify_domain_repo(tenant_id, site_id, domain_id).await
+    }
+
+    async fn list_source_versions(
+        &self,
+        tenant_id: i64,
+        site_id: &str,
+        page: i32,
+        page_size: i32,
+    ) -> WebServiceResult<SourceVersionPage> {
+        self.list_source_versions_repo(tenant_id, site_id, page, page_size)
+            .await
+    }
+
+    async fn create_source_version(
+        &self,
+        tenant_id: i64,
+        site_id: &str,
+        actor_id: Option<i64>,
+        retention_limit: i32,
+        request: &CreateSourceVersionRequest,
+    ) -> WebServiceResult<SourceVersionResponse> {
+        self.create_source_version_repo(
+            tenant_id,
+            site_id,
+            actor_id,
+            retention_limit,
+            request,
+        )
+        .await
+    }
+
+    async fn retrieve_source_version(
+        &self,
+        tenant_id: i64,
+        site_id: &str,
+        source_version_id: &str,
+    ) -> WebServiceResult<SourceVersionResponse> {
+        self.retrieve_source_version_repo(tenant_id, site_id, source_version_id)
+            .await
     }
 
     async fn list_deployments(

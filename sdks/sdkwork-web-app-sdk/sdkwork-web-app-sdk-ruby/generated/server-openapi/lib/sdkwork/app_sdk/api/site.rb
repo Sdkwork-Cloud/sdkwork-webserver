@@ -57,10 +57,17 @@ module Sdkwork
           end
 
           # 更新站点
-          def sites_update(site_id, body: nil)
+          def sites_update(site_id, idempotency_key, body: nil)
             path = interpolate_path('/app/v3/api/sites/{siteId}', siteId: serialize_path_parameter(site_id, PathParameterSpec.new('siteId', 'simple', false)))
             payload = body.respond_to?(:to_hash) ? body.to_hash : body
+            request_headers = build_request_headers(
+              {
+                'Idempotency-Key' => HeaderParameterSpec.new(idempotency_key, 'simple', false, nil),
+              },
+              {}
+            )
             options = {}
+            options[:headers] = request_headers unless request_headers.empty?
             options[:json] = payload unless payload.nil?
             result = @client.request('PATCH', path, **options)
             result.is_a?(Hash) ? Models::SitesUpdateResponse.from_hash(result) : nil

@@ -6,8 +6,9 @@ use axum::{
 };
 use sdkwork_webserver_contract::{
     CreateCertificateRequest, CreateDeploymentRequest, CreateDomainRequest,
-    CreateEnvVariableRequest, CreateHealthCheckRequest, CreateSiteRequest, ListSitesQuery,
-    UpdateSiteRequest, WebAppApi, WebAppRequestContext,
+    CreateEnvVariableRequest, CreateHealthCheckRequest, CreateSiteRequest,
+    CreateSourceVersionRequest, ImportGitSourceVersionRequest, ListSitesQuery, UpdateSiteRequest,
+    WebAppApi, WebAppRequestContext,
 };
 use serde::Deserialize;
 use std::sync::Arc;
@@ -15,7 +16,8 @@ use std::sync::Arc;
 use crate::{auth::require_app_context, paths};
 use sdkwork_routes_webserver_common::{
     created_resource, no_content, ok_certificate_page, ok_deployment_page, ok_domain_page,
-    ok_env_variable_page, ok_health_check_page, ok_resource, ok_site_page, WebApiError,
+    ok_env_variable_page, ok_health_check_page, ok_resource, ok_site_page,
+    ok_source_version_page, WebApiError,
 };
 
 #[derive(Clone)]
@@ -45,6 +47,15 @@ pub fn build_router_with_shared_app_api(api: Arc<dyn WebAppApi>) -> Router {
             get(retrieve_domain).delete(delete_domain),
         )
         .route(paths::SITE_DOMAIN_VERIFY, post(verify_domain))
+        .route(
+            paths::SITE_SOURCE_VERSIONS,
+            get(list_source_versions).post(create_source_version),
+        )
+        .route(
+            paths::SITE_SOURCE_VERSION_GIT_IMPORT,
+            post(import_git_source_version),
+        )
+        .route(paths::SITE_SOURCE_VERSION, get(retrieve_source_version))
         .route(
             paths::SITE_DEPLOYMENTS,
             get(list_deployments).post(create_deployment),
@@ -256,6 +267,65 @@ async fn list_deployments(
                 query.page_size,
                 query.status,
             )
+            .await,
+    )
+}
+
+async fn list_source_versions(
+    State(state): State<AppState>,
+    context: Option<Extension<WebAppRequestContext>>,
+    Path(site_id): Path<String>,
+    Query(query): Query<PageQuery>,
+) -> Result<Response, WebApiError> {
+    let context = require_app_context(context)?;
+    ok_source_version_page(
+        state
+            .api
+            .list_source_versions(&context, &site_id, query.page, query.page_size)
+            .await,
+    )
+}
+
+async fn create_source_version(
+    State(state): State<AppState>,
+    context: Option<Extension<WebAppRequestContext>>,
+    Path(site_id): Path<String>,
+    Json(request): Json<CreateSourceVersionRequest>,
+) -> Result<Response, WebApiError> {
+    let context = require_app_context(context)?;
+    created_resource(
+        state
+            .api
+            .create_source_version(&context, &site_id, &request)
+            .await,
+    )
+}
+
+async fn import_git_source_version(
+    State(state): State<AppState>,
+    context: Option<Extension<WebAppRequestContext>>,
+    Path(site_id): Path<String>,
+    Json(request): Json<ImportGitSourceVersionRequest>,
+) -> Result<Response, WebApiError> {
+    let context = require_app_context(context)?;
+    created_resource(
+        state
+            .api
+            .import_git_source_version(&context, &site_id, &request)
+            .await,
+    )
+}
+
+async fn retrieve_source_version(
+    State(state): State<AppState>,
+    context: Option<Extension<WebAppRequestContext>>,
+    Path((site_id, source_version_id)): Path<(String, String)>,
+) -> Result<Response, WebApiError> {
+    let context = require_app_context(context)?;
+    ok_resource(
+        state
+            .api
+            .retrieve_source_version(&context, &site_id, &source_version_id)
             .await,
     )
 }

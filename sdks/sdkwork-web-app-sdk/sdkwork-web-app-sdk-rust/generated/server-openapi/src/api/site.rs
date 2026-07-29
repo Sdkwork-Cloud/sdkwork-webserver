@@ -49,9 +49,15 @@ impl SiteApi {
     }
 
     /// 更新站点
-    pub async fn sites_update(&self, site_id: &str, body: &UpdateSiteRequest) -> Result<SiteResponse, SdkworkError> {
+    pub async fn sites_update(&self, site_id: &str, body: &UpdateSiteRequest, idempotency_key: &str) -> Result<SiteResponse, SdkworkError> {
         let path = app_path(&format!("/sites/{}", serialize_path_parameter(site_id, PathParameterSpec::new("siteId", "simple", false))));
-        self.client.patch(&path, Some(body), None, None, Some("application/json")).await
+        let headers = build_request_headers(
+            &[
+                ("Idempotency-Key", HeaderParameterSpec::new(idempotency_key, "simple", false, None)),
+            ],
+            &[],
+        );
+        self.client.patch(&path, Some(body), None, headers.as_ref(), Some("application/json")).await
     }
 
     /// 删除站点

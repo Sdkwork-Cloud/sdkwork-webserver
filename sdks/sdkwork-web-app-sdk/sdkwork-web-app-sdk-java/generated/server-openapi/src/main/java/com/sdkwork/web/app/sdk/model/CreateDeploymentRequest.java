@@ -2,6 +2,7 @@ package com.sdkwork.web.app.sdk.model;
 
 
 public class CreateDeploymentRequest {
+    private String sourceVersionId;
     private Integer deployType;
     private String versionTag;
     private String commitHash;
@@ -10,6 +11,14 @@ public class CreateDeploymentRequest {
     private String artifactSize;
     private String artifactHash;
     private String environment;
+
+    public String getSourceVersionId() {
+        return this.sourceVersionId;
+    }
+
+    public void setSourceVersionId(String sourceVersionId) {
+        this.sourceVersionId = sourceVersionId;
+    }
 
     public Integer getDeployType() {
         return this.deployType;

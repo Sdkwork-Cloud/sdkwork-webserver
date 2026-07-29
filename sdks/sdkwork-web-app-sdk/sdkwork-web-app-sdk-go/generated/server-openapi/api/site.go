@@ -60,8 +60,12 @@ func (a *SiteApi) SitesRetrieve(siteId string) (sdktypes.SitesRetrieveResponse, 
 }
 
 // 更新站点
-func (a *SiteApi) SitesUpdate(siteId string, body sdktypes.UpdateSiteRequest) (sdktypes.SitesUpdateResponse, error) {
-    raw, err := a.client.Patch(AppApiPath(fmt.Sprintf("/sites/%s", SerializePathParameter(siteId, PathParameterSpec{Name: "siteId", Style: "simple", Explode: false}))), body, nil, nil, "application/json")
+func (a *SiteApi) SitesUpdate(siteId string, body sdktypes.UpdateSiteRequest, idempotencyKey string) (sdktypes.SitesUpdateResponse, error) {
+    headers := BuildRequestHeaders(
+        map[string]ParameterSpec{"Idempotency-Key": ParameterSpec{Value: idempotencyKey, Style: "simple", Explode: false},},
+        map[string]ParameterSpec{},
+    )
+    raw, err := a.client.Patch(AppApiPath(fmt.Sprintf("/sites/%s", SerializePathParameter(siteId, PathParameterSpec{Name: "siteId", Style: "simple", Explode: false}))), body, nil, headers, "application/json")
     if err != nil {
         var zero sdktypes.SitesUpdateResponse
         return zero, err

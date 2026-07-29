@@ -1,0 +1,24 @@
+[package]
+name = "sdkwork-webserver-source-provider"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+async-trait.workspace = true
+chrono.workspace = true
+sdkwork-drive-config.workspace = true
+sdkwork-drive-object-runtime.workspace = true
+sdkwork-drive-uploader-service.workspace = true
+sdkwork-drive-workspace-service.workspace = true
+sdkwork-intelligence-webserver-service.workspace = true
+sdkwork-utils-rust.workspace = true
+sdkwork-webserver-contract.workspace = true
+sha2.workspace = true
+sqlx.workspace = true
+tempfile.workspace = true
+tokio = { workspace = true, features = ["process"] }
+url.workspace = true
+zip.workspace = true
+
+[dev-dependencies]
+tokio.workspace = true

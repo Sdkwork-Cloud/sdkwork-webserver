@@ -9,11 +9,28 @@
     "protocol": "http",
     "packageName": "@sdkwork/web-app-sdk"
   },
-  "changeFingerprint": "45abb86b8b97a20cea8535269fff177fe795b318d933cebdd594b0cc11028750",
+  "changeFingerprint": "21fee5752aabe82549bfe35cf07a09992d03f5576eed59f61385063e371c4938",
   "changes": {
-    "createdGeneratedFiles": [],
+    "createdGeneratedFiles": [
+      "src/api/source-version.ts",
+      "src/types/create-source-version-request.ts",
+      "src/types/import-git-source-version-request.ts",
+      "src/types/sites-source-versions-create-response201.ts",
+      "src/types/sites-source-versions-import-git-response201.ts",
+      "src/types/sites-source-versions-list-response.ts",
+      "src/types/sites-source-versions-retrieve-response.ts",
+      "src/types/source-version-config-snapshot.ts",
+      "src/types/source-version-page.ts",
+      "src/types/source-version-response.ts"
+    ],
     "updatedGeneratedFiles": [
-      "src/types/create-deployment-request.ts"
+      "README.md",
+      "src/api/index.ts",
+      "src/api/site.ts",
+      "src/sdk.ts",
+      "src/types/create-deployment-request.ts",
+      "src/types/deployment-response.ts",
+      "src/types/index.ts"
     ],
     "unchangedGeneratedFiles": [
       "bin/publish-core.mjs",
@@ -24,22 +41,18 @@
       "CHANGELOG.md",
       "LICENSE",
       "package.json",
-      "README.md",
       "sdkwork-sdk.json",
       "src/api/base.ts",
       "src/api/certificate.ts",
       "src/api/deployment.ts",
       "src/api/domain.ts",
       "src/api/env-variable.ts",
-      "src/api/index.ts",
       "src/api/monitor.ts",
       "src/api/paths.ts",
-      "src/api/site.ts",
       "src/auth/index.ts",
       "src/http/client.ts",
       "src/http/index.ts",
       "src/index.ts",
-      "src/sdk.ts",
       "src/types/application-store-listing.ts",
       "src/types/certificate-page.ts",
       "src/types/certificate-response.ts",
@@ -52,7 +65,6 @@
       "src/types/create-health-check-request.ts",
       "src/types/create-site-request.ts",
       "src/types/deployment-page.ts",
-      "src/types/deployment-response.ts",
       "src/types/domain-page.ts",
       "src/types/domain-response.ts",
       "src/types/domain-verify-response.ts",
@@ -61,7 +73,6 @@
       "src/types/field-error.ts",
       "src/types/health-check-page.ts",
       "src/types/health-check-response.ts",
-      "src/types/index.ts",
       "src/types/media-checksum.ts",
       "src/types/media-resource.ts",
       "src/types/page-info.ts",
@@ -108,29 +119,57 @@
   "impact": {
     "schemaVersion": 1,
     "areas": [
-      "models"
+      "api-surface",
+      "models",
+      "documentation"
     ],
     "details": [
       {
+        "area": "api-surface",
+        "paths": [
+          "src/api/index.ts",
+          "src/api/site.ts",
+          "src/api/source-version.ts",
+          "src/sdk.ts"
+        ]
+      },
+      {
         "area": "models",
         "paths": [
-          "src/types/create-deployment-request.ts"
+          "src/types/create-deployment-request.ts",
+          "src/types/create-source-version-request.ts",
+          "src/types/deployment-response.ts",
+          "src/types/import-git-source-version-request.ts",
+          "src/types/index.ts",
+          "src/types/sites-source-versions-create-response201.ts",
+          "src/types/sites-source-versions-import-git-response201.ts",
+          "src/types/sites-source-versions-list-response.ts",
+          "src/types/sites-source-versions-retrieve-response.ts",
+          "src/types/source-version-config-snapshot.ts",
+          "src/types/source-version-page.ts",
+          "src/types/source-version-response.ts"
+        ]
+      },
+      {
+        "area": "documentation",
+        "paths": [
+          "README.md"
         ]
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: models. Verification is required."
+    "summary": "Detected impact areas: api-surface, models, documentation. Verification is required."
   },
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: api-surface, models, documentation. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, documentation.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-typescript\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -148,7 +187,7 @@
         "id": "build",
         "title": "Unified package build",
         "required": true,
-        "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: models.",
+        "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: api-surface, models, documentation.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-typescript\\generated\\server-openapi",
         "command": "node",
         "args": [

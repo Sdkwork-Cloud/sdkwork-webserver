@@ -1,6 +1,7 @@
 export interface ApplicationDeploymentResponse {
   id: string;
   siteId: string;
+  sourceVersionId?: string;
   status: number;
   deployType: number;
   environment: 'development' | 'test' | 'staging' | 'production';

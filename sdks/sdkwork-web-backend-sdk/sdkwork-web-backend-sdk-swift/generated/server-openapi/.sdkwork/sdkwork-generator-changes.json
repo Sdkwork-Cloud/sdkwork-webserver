@@ -9,10 +9,17 @@
     "protocol": "http",
     "packageName": "sdkwork-web-backend-sdk"
   },
-  "changeFingerprint": "80e697dd72a581beb8941068ed1c82e7fa2ae24fcdadd98b677b588a9c2fbffe",
+  "changeFingerprint": "61076caab64cc353c82512a9f93a1140d69eb156c4e0a2edab5754e5ebc4200f",
   "changes": {
-    "createdGeneratedFiles": [],
-    "updatedGeneratedFiles": [],
+    "createdGeneratedFiles": [
+      "Sources/API/ApplicationSourceVersionApi.swift"
+    ],
+    "updatedGeneratedFiles": [
+      "README.md",
+      "Sources/API/API.swift",
+      "Sources/Models.swift",
+      "Sources/SdkworkBackendClient.swift"
+    ],
     "unchangedGeneratedFiles": [
       "bin/publish-core.mjs",
       "bin/publish.ps1",
@@ -20,10 +27,8 @@
       "CHANGELOG.md",
       "LICENSE",
       "Package.swift",
-      "README.md",
       "sdkwork-sdk.json",
       "Sources/API/AgentApi.swift",
-      "Sources/API/API.swift",
       "Sources/API/ApiPaths.swift",
       "Sources/API/ApplicationApi.swift",
       "Sources/API/ApplicationDeploymentApi.swift",
@@ -33,9 +38,7 @@
       "Sources/API/CertificateDistributionApi.swift",
       "Sources/API/NginxApi.swift",
       "Sources/API/ServerApi.swift",
-      "Sources/HTTP/HttpClient.swift",
-      "Sources/Models.swift",
-      "Sources/SdkworkBackendClient.swift"
+      "Sources/HTTP/HttpClient.swift"
     ],
     "deletedGeneratedFiles": [],
     "scaffoldedFiles": [],
@@ -46,26 +49,78 @@
   },
   "impact": {
     "schemaVersion": 1,
-    "areas": [],
-    "details": [],
-    "requiresVerification": false,
-    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
+    "areas": [
+      "api-surface",
+      "models",
+      "documentation",
+      "unknown"
+    ],
+    "details": [
+      {
+        "area": "api-surface",
+        "paths": [
+          "Sources/API/API.swift",
+          "Sources/API/ApplicationSourceVersionApi.swift"
+        ]
+      },
+      {
+        "area": "models",
+        "paths": [
+          "Sources/Models.swift"
+        ]
+      },
+      {
+        "area": "documentation",
+        "paths": [
+          "README.md"
+        ]
+      },
+      {
+        "area": "unknown",
+        "paths": [
+          "Sources/SdkworkBackendClient.swift"
+        ]
+      }
+    ],
+    "requiresVerification": true,
+    "summary": "Detected impact areas: api-surface, models, documentation, unknown. Verification is required."
   },
   "verificationPlan": {
-    "shouldRun": false,
-    "runPhase": "skip",
-    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
-    "steps": []
+    "shouldRun": true,
+    "runPhase": "now",
+    "summary": "Detected impact areas: api-surface, models, documentation, unknown. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "steps": [
+      {
+        "id": "check",
+        "title": "Unified package check",
+        "required": true,
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, documentation, unknown.",
+        "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-swift\\generated\\server-openapi",
+        "command": "node",
+        "args": [
+          "./bin/publish-core.mjs",
+          "--language",
+          "swift",
+          "--project-dir",
+          ".",
+          "--action",
+          "check"
+        ],
+        "displayCommand": "node ./bin/publish-core.mjs --language swift --project-dir . --action check"
+      }
+    ]
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "low",
-    "nextAction": "skip",
+    "riskLevel": "high",
+    "nextAction": "verify",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
-    "summary": "No actionable changes were detected. No apply or verification step is required.",
+    "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
-      "no-actionable-changes"
+      "manual-review-required",
+      "unknown-impact",
+      "verification-required"
     ]
   },
   "preservedLegacyFiles": false

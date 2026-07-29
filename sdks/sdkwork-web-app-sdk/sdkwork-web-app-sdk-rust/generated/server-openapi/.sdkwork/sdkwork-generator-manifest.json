@@ -36,7 +36,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "f8535ad38b1764b5f867d6b47499df9a902c4db9f6bf2fbab6892184eca91dcb"
+      "sha256": "cf96cd5275e10bf1be5949c670844e7e08d3503cc601350338eeb47c2c3a19d0"
     },
     {
       "path": "sdkwork-sdk.json",
@@ -64,7 +64,7 @@
     },
     {
       "path": "src/api/mod.rs",
-      "sha256": "4bc7b7ba8e6c546fd1f590d34ba63e787eccb1c4d4ee77fc6d8e81d319b9f2b0"
+      "sha256": "597f37e3538de00f88ad2c2d063ca3b370f6a8728a2062e35c8f0308f9cfb042"
     },
     {
       "path": "src/api/monitor.rs",
@@ -76,11 +76,15 @@
     },
     {
       "path": "src/api/site.rs",
-      "sha256": "fb4c81ce198abd0b68d566f8b492d759ef52b114073bc273a0e5d6f0c08457ae"
+      "sha256": "2b3171b9672eb5f6ee4d66a4450cc750d175521f24675397b51a66e68aa2fa98"
+    },
+    {
+      "path": "src/api/source_version.rs",
+      "sha256": "06e5c6eb994432f25319b59fbac277cb966652e7255c29b001eb747b6b951f1b"
     },
     {
       "path": "src/client.rs",
-      "sha256": "cb25281019b002990bbb3284d34770c6db92d2d139509a1e2f8232b973f82994"
+      "sha256": "65cd41790855a0e51855776eb03cc734b11a8be7aea4806594e8d1a31d33ce46"
     },
     {
       "path": "src/http/client.rs",
@@ -124,7 +128,7 @@
     },
     {
       "path": "src/models/create_deployment_request.rs",
-      "sha256": "9a6073ec8e9696c1fe4e75888ad8aa5cf6c358d1a478f88a7ac5948b2294f6dc"
+      "sha256": "f1f67540774b892d4ac2a9aa1d90864be57368e71d1e4d858fc08ffc75c86f06"
     },
     {
       "path": "src/models/create_domain_request.rs",
@@ -143,12 +147,16 @@
       "sha256": "8a3e26ebf3c6bf42bf44547d4d1be719aad55a7ed8ee39c1b6c571d07a854b53"
     },
     {
+      "path": "src/models/create_source_version_request.rs",
+      "sha256": "a63c391d61795e3e76c797f3e17f0624552d96ab0e816ded78d87db530f309b4"
+    },
+    {
       "path": "src/models/deployment_page.rs",
       "sha256": "dc56e0e18911a862d8bd2ac4c9e137fb9e7f77d88cef14f27e91f5b43efbe36a"
     },
     {
       "path": "src/models/deployment_response.rs",
-      "sha256": "89763330d35b7bdd69995dabd8d24326ffda4a6b3854e7d2b50538bde7f94afc"
+      "sha256": "5c3ab995ce0d8d80639079c15d78c3d9254fccf09d25d717e249152e3a1b966d"
     },
     {
       "path": "src/models/domain_page.rs",
@@ -183,6 +191,10 @@
       "sha256": "7ebdb3d77c667aa8280d50745904f113c4acd4e24aae63a78e48a472334840f6"
     },
     {
+      "path": "src/models/import_git_source_version_request.rs",
+      "sha256": "d7904ab015539d74fea4b5901ab137e801b935db604995935ea68fc3277fd023"
+    },
+    {
       "path": "src/models/media_checksum.rs",
       "sha256": "ea88fdd40fa405b2b1887c425bd702fb3d792124457cb2049bf6aeb39f1adec6"
     },
@@ -192,7 +204,7 @@
     },
     {
       "path": "src/models/mod.rs",
-      "sha256": "8a40338b63c81614932202c8bfafe0550af7865ca498c1980c921783861259fb"
+      "sha256": "81f00e9703c0af0d98605ec1e1f3ad1c0def3b91cee25a6f28cfca116d43fac9"
     },
     {
       "path": "src/models/page_info.rs",
@@ -307,8 +319,36 @@
       "sha256": "520752b03cd2e006f33c38fc0367e8af2d17c6c5ff7cf3af659fb7a46011c345"
     },
     {
+      "path": "src/models/sites_source_versions_create_response201.rs",
+      "sha256": "706d8733ec9544ce8379b8f374769df6b610772d83f54485df9ed956c6892b77"
+    },
+    {
+      "path": "src/models/sites_source_versions_import_git_response201.rs",
+      "sha256": "1e0a606d93b91b7bc57c7965873a9f329906cb3ff800dde6bd4b43512d238b52"
+    },
+    {
+      "path": "src/models/sites_source_versions_list_response.rs",
+      "sha256": "c853945b2769ef8907e300c0bd8ed2811e34704b088749d0a0b2348a457d2d14"
+    },
+    {
+      "path": "src/models/sites_source_versions_retrieve_response.rs",
+      "sha256": "c94b167b6530e2c673e69c8f6be2f77ffcfcd566accecbc1b17bf7e4c7a3177d"
+    },
+    {
       "path": "src/models/sites_update_response.rs",
       "sha256": "875375660c576710d0f29b70ed611cf73bbcdbc210c4a839e1339d8251a1c0e6"
+    },
+    {
+      "path": "src/models/source_version_config_snapshot.rs",
+      "sha256": "33705cce23745dfce1165ce78caa87b3e07be3b9f7f4094a259b226063753dae"
+    },
+    {
+      "path": "src/models/source_version_page.rs",
+      "sha256": "a91dfbcdd9095351c46f1ff4f2d30c17625939af28190d825fc6e8d834b9e6b5"
+    },
+    {
+      "path": "src/models/source_version_response.rs",
+      "sha256": "c6a3acd37fa1481f8f806123742a04609c29354c632e99c5b0310817a4f843a3"
     },
     {
       "path": "src/models/update_site_request.rs",

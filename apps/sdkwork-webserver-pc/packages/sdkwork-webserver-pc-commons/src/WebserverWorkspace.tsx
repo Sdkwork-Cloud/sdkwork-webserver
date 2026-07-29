@@ -91,7 +91,7 @@ export interface WebserverWorkspaceProps {
   userLabel?: string;
 }
 
-type ApplicationWizardStep = 0 | 1 | 2 | 3;
+type ApplicationWizardStep = 0 | 1 | 2 | 3 | 4;
 
 export function WebserverWorkspace({
   locale,
@@ -644,8 +644,23 @@ function ActionDialog({
     "privacyPolicyUrl",
     "officialWebsiteUrl",
   ] as const;
-  const applicationReleaseFields = ["environment", "versionTag"] as const;
-  const applicationRequiredFields = ["name", "versionTag"] as const;
+  const applicationSourceFields = ["versionTag"] as const;
+  const applicationConfigurationFields = [
+    "environment",
+    "sourceVersionRetentionLimit",
+    "appConfigPath",
+    "deploymentConfigPath",
+    "publicRoot",
+    "spaFallback",
+  ] as const;
+  const applicationRequiredFields: readonly string[] = [
+    "name",
+    "versionTag",
+    "appConfigPath",
+    "deploymentConfigPath",
+    "publicRoot",
+    "spaFallback",
+  ];
 
   const sourceInputError = (): WebserverMessageKey | undefined => {
     if (!sourceInputRequired) return undefined;
@@ -670,7 +685,7 @@ function ActionDialog({
             name={name}
             onChange={(next) => setBody((current) => ({ ...current, [name]: next }))}
             options={fieldOptions[name]}
-            required={applicationCreationWizard && applicationRequiredFields.includes(name as "name" | "versionTag")}
+            required={applicationCreationWizard && applicationRequiredFields.includes(name)}
             value={body[name]}
           />
         ))}
@@ -681,9 +696,21 @@ function ActionDialog({
   const applicationStepError = (step: ApplicationWizardStep): WebserverMessageKey | undefined => {
     if (step === 0) {
       return hasMissingRequiredFields(body, ["name"])
-        || !applicationSubmissionReady(applicationSubmission, mediaError)
         ? "dialog.applicationBasicRequired"
         : undefined;
+    }
+    if (step === 1) {
+      return !applicationSubmissionReady(applicationSubmission, mediaError)
+        ? "dialog.applicationMediaRequired"
+        : undefined;
+    }
+    if (step === 3) {
+      return hasMissingRequiredFields(body, [
+        "appConfigPath",
+        "deploymentConfigPath",
+        "publicRoot",
+        "spaFallback",
+      ]) ? "dialog.applicationConfigRequired" : undefined;
     }
     if (step === 2) {
       const versionMissing = hasMissingRequiredFields(body, ["versionTag"]);
@@ -791,7 +818,7 @@ function ActionDialog({
   async function submit(event: FormEvent): Promise<void> {
     event.preventDefault();
     if (submitInFlightRef.current) return;
-    if (applicationCreationWizard && applicationStep < 3) {
+    if (applicationCreationWizard && applicationStep < 4) {
       moveToApplicationStep((applicationStep + 1) as ApplicationWizardStep);
       return;
     }
@@ -857,7 +884,7 @@ function ActionDialog({
           <div className="dialog-title-group">
             <h2 id="action-title">{label}</h2>
             {applicationCreationWizard ? (
-              <span>{t("dialog.applicationStepCount", { current: applicationStep + 1, total: 4 })}</span>
+              <span>{t("dialog.applicationStepCount", { current: applicationStep + 1, total: 5 })}</span>
             ) : null}
           </div>
           <button
@@ -919,6 +946,16 @@ function ActionDialog({
                       <AppWindow aria-hidden="true" size={19} />
                     </div>
                     {renderFields(applicationIdentityFields, "application-identity-fields")}
+                  </section>
+                ) : null}
+                {applicationStep === 1 ? (
+                  <section className="application-step-pane application-media-step" aria-labelledby="application-media-title">
+                    <div className="application-step-heading">
+                      <div>
+                        <h3 data-application-step-heading id="application-media-title" tabIndex={-1}>{t("dialog.applicationMedia")}</h3>
+                      </div>
+                      <Images aria-hidden="true" size={19} />
+                    </div>
                     <ApplicationSubmissionFields
                       compact
                       disabled={busy}
@@ -929,30 +966,26 @@ function ActionDialog({
                       onError={setMediaError}
                       submission={applicationSubmission}
                     />
-                  </section>
-                ) : null}
-                {applicationStep === 1 ? (
-                  <section className="application-step-pane application-listing-step" aria-labelledby="application-listing-title">
-                    <div className="application-step-heading">
-                      <div>
-                        <h3 data-application-step-heading id="application-listing-title" tabIndex={-1}>{t("dialog.applicationListing")}</h3>
+                    <div className="application-listing-subsection">
+                      <div className="application-step-heading application-subsection-heading">
+                        <h4>{t("dialog.applicationListing")}</h4>
+                        <Pencil aria-hidden="true" size={16} />
                       </div>
-                      <Pencil aria-hidden="true" size={19} />
+                      {renderFields(applicationListingFields, "application-listing-fields")}
                     </div>
-                    {renderFields(applicationListingFields, "application-listing-fields")}
                   </section>
                 ) : null}
                 {applicationStep === 2 ? (
-                  <section className="application-step-pane application-release-step" aria-labelledby="application-release-title">
+                  <section className="application-step-pane application-source-version-step" aria-labelledby="application-source-version-title">
                     <div className="application-step-heading">
                       <div>
-                        <h3 data-application-step-heading id="application-release-title" tabIndex={-1}>{t("dialog.applicationRelease")}</h3>
+                        <h3 data-application-step-heading id="application-source-version-title" tabIndex={-1}>{t("dialog.applicationStepSource")}</h3>
                       </div>
-                      <Rocket aria-hidden="true" size={19} />
+                      <FileArchive aria-hidden="true" size={19} />
                     </div>
                     <div className="application-release-layout">
                       <section className="application-release-settings">
-                        {renderFields(applicationReleaseFields, "application-release-fields")}
+                        {renderFields(applicationSourceFields, "application-release-fields")}
                       </section>
                       {action.sourceInput ? (
                         <section className="application-source-step" aria-labelledby="application-source-title">
@@ -987,6 +1020,17 @@ function ActionDialog({
                   </section>
                 ) : null}
                 {applicationStep === 3 ? (
+                  <section className="application-step-pane application-configuration-step" aria-labelledby="application-configuration-title">
+                    <div className="application-step-heading">
+                      <div>
+                        <h3 data-application-step-heading id="application-configuration-title" tabIndex={-1}>{t("dialog.applicationDeploymentConfig")}</h3>
+                      </div>
+                      <Settings2 aria-hidden="true" size={19} />
+                    </div>
+                    {renderFields(applicationConfigurationFields, "application-configuration-fields")}
+                  </section>
+                ) : null}
+                {applicationStep === 4 ? (
                   <ApplicationCreationReview
                     body={body}
                     fieldOptions={fieldOptions}
@@ -1098,14 +1142,14 @@ function ActionDialog({
                   {t("dialog.back")}
                 </button>
               ) : null}
-              {applicationStep < 3 ? (
+              {applicationStep < 4 ? (
                 <button
                   className="command-button"
                   disabled={busy || optionsBusy}
                   onClick={() => moveToApplicationStep((applicationStep + 1) as ApplicationWizardStep)}
                   type="button"
                 >
-                  {applicationStep === 2 ? t("dialog.review") : t("dialog.next")}
+                  {applicationStep === 3 ? t("dialog.review") : t("dialog.next")}
                   <ChevronRight aria-hidden="true" size={16} />
                 </button>
               ) : (
@@ -1114,7 +1158,9 @@ function ActionDialog({
                   disabled={busy
                     || optionsBusy
                     || !applicationStepReady(0)
+                    || !applicationStepReady(1)
                     || !applicationStepReady(2)
+                    || !applicationStepReady(3)
                     || hasUnavailableOptions(body, fieldOptions)}
                   type="submit"
                 >
@@ -1302,8 +1348,9 @@ function ApplicationWizardProgress({
   const t = (key: WebserverMessageKey, values: Record<string, string | number> = {}) => translateWebserver(locale, key, values);
   const steps = [
     t("dialog.applicationStepBasics"),
-    t("dialog.applicationStepListing"),
-    t("dialog.applicationStepRelease"),
+    t("dialog.applicationStepMedia"),
+    t("dialog.applicationStepSource"),
+    t("dialog.applicationStepConfig"),
     t("dialog.applicationStepReview"),
   ];
   return (
@@ -1364,8 +1411,13 @@ function ApplicationCreationReview({
     "supportUrl",
     "privacyPolicyUrl",
     "officialWebsiteUrl",
-    "environment",
     "versionTag",
+    "environment",
+    "sourceVersionRetentionLimit",
+    "appConfigPath",
+    "deploymentConfigPath",
+    "publicRoot",
+    "spaFallback",
   ];
   const mediaMode = (mode: string): string => {
     switch (mode) {
@@ -2162,6 +2214,9 @@ function displayValue(value: unknown, column: string, resource: WebserverResourc
     const label = deploymentStatus(value, locale);
     return <span className={`status-badge deployment-status-${String(value).toLowerCase()}`}>{label}</span>;
   }
+  if ((resource === "source-versions" || resource === "application-source-versions") && column === "status") {
+    return <span className={`status-badge source-version-status-${String(value).toLowerCase()}`}>{sourceVersionStatus(value, locale)}</span>;
+  }
   if ((resource === "certificates" || resource === "managed-certificates") && column === "status") {
     return <span className={`status-badge certificate-status-${String(value).toLowerCase()}`}>{certificateStatus(value, locale)}</span>;
   }
@@ -2170,10 +2225,20 @@ function displayValue(value: unknown, column: string, resource: WebserverResourc
   }
   if (column === "artifactSize") return formatBytes(value);
   if (column === "durationMs") return formatDuration(value);
+  if (column === "configSnapshot" && isRecord(value)) {
+    const appConfigDetected = value.appConfigDetected === true;
+    const deploymentConfigDetected = value.deploymentConfigDetected === true;
+    const detected = Number(appConfigDetected) + Number(deploymentConfigDetected);
+    const label = locale === "zh-CN" ? `已发现 ${detected}/2` : `${detected}/2 detected`;
+    return <span title={JSON.stringify(value)}>{label}</span>;
+  }
   if (column === "artifactHash" && typeof value === "string") {
     return <span title={value}>{value.length > 16 ? `${value.slice(0, 12)}...${value.slice(-4)}` : value}</span>;
   }
   if (column === "rollbackFromDeploymentId" && typeof value === "string") {
+    return <span title={value}>{value.length > 18 ? `${value.slice(0, 8)}...${value.slice(-6)}` : value}</span>;
+  }
+  if (column === "sourceVersionId" && typeof value === "string") {
     return <span title={value}>{value.length > 18 ? `${value.slice(0, 8)}...${value.slice(-6)}` : value}</span>;
   }
   if (column === "artifactDriveUri" && typeof value === "string") {
@@ -2200,6 +2265,7 @@ function fieldLabel(value: string, locale: WebserverLocale): string {
       action: "Action",
       agentToken: "Node credential",
       applicationType: "Application type",
+      appConfigPath: "Application manifest path",
       artifactDriveUri: "Package",
       artifactHash: "Package hash",
       artifactSize: "Package size",
@@ -2217,6 +2283,7 @@ function fieldLabel(value: string, locale: WebserverLocale): string {
       createdAt: "Created at",
       deployedAt: "Deployed at",
       deployType: "Deployment method",
+      deploymentConfigPath: "Deployment config path",
       description: "Description",
       shortDescription: "Short description",
       fullDescription: "Full description",
@@ -2225,6 +2292,7 @@ function fieldLabel(value: string, locale: WebserverLocale): string {
       keywords: "Keywords",
       supportUrl: "Support URL",
       privacyPolicyUrl: "Privacy policy URL",
+      publicRoot: "Public root",
       officialWebsiteUrl: "Official website URL",
       domain: "Domain",
       domainId: "Domain",
@@ -2249,7 +2317,11 @@ function fieldLabel(value: string, locale: WebserverLocale): string {
       rollbackFromDeploymentId: "Restored from",
       retryCount: "Retry count",
       siteType: "Runtime type",
+      sourceType: "Source type",
+      sourceVersionId: "Source version",
+      sourceVersionRetentionLimit: "Versions retained",
       sourceRef: "Source ref",
+      spaFallback: "SPA fallback",
       sshPort: "SSH port",
       startDate: "Start date",
       serverName: "Server",
@@ -2257,6 +2329,8 @@ function fieldLabel(value: string, locale: WebserverLocale): string {
       sslProvider: "Certificate provider",
       startedAt: "Started at",
       status: "Status",
+      retained: "Retained",
+      configSnapshot: "Standard configuration",
       timeoutMs: "Timeout (ms)",
       targetType: "Target type",
       targetUuid: "Target ID",
@@ -2274,6 +2348,7 @@ function fieldLabel(value: string, locale: WebserverLocale): string {
       action: "操作动作",
       agentToken: "节点凭据",
       applicationType: "应用类型",
+      appConfigPath: "应用清单路径",
       artifactDriveUri: "发布包",
       artifactHash: "发布包哈希",
       artifactSize: "包大小",
@@ -2291,6 +2366,7 @@ function fieldLabel(value: string, locale: WebserverLocale): string {
       createdAt: "创建时间",
       deployedAt: "发布时间",
       deployType: "发布方式",
+      deploymentConfigPath: "部署配置路径",
       description: "描述",
       shortDescription: "简短说明",
       fullDescription: "完整说明",
@@ -2299,6 +2375,7 @@ function fieldLabel(value: string, locale: WebserverLocale): string {
       keywords: "关键词（逗号分隔）",
       supportUrl: "支持服务地址",
       privacyPolicyUrl: "隐私政策地址",
+      publicRoot: "静态资源根目录",
       officialWebsiteUrl: "官方网站",
       domain: "域名",
       domainId: "域名",
@@ -2323,7 +2400,11 @@ function fieldLabel(value: string, locale: WebserverLocale): string {
       rollbackFromDeploymentId: "还原来源版本",
       retryCount: "重试次数",
       siteType: "运行类型",
+      sourceType: "源码类型",
+      sourceVersionId: "源码版本",
+      sourceVersionRetentionLimit: "保留版本数",
       sourceRef: "源码分支",
+      spaFallback: "SPA 回退页面",
       sshPort: "SSH 端口",
       startDate: "开始日期",
       serverName: "服务器",
@@ -2331,6 +2412,8 @@ function fieldLabel(value: string, locale: WebserverLocale): string {
       sslProvider: "证书来源",
       startedAt: "开始时间",
       status: "状态",
+      retained: "保留中",
+      configSnapshot: "标准配置",
       timeoutMs: "超时时间（毫秒）",
       targetType: "目标类型",
       targetUuid: "目标 ID",
@@ -2524,6 +2607,8 @@ function resourceColumns(
     "managed-certificates": ["id", "domain", "certName", "issuer", "status", "renewalStatus", "notAfter", "autoRenew"],
     "certificate-distribution": ["serverName", "host", "desiredSyncVersion", "appliedSyncVersion", "status", "lastHeartbeatAt"],
     deployments: ["versionTag", "environment", "status", "rollbackFromDeploymentId", "artifactHash", "createdAt", "startedAt", "completedAt", "durationMs"],
+    "source-versions": ["versionTag", "sourceType", "retained", "configSnapshot", "artifactSize", "artifactHash", "status", "createdAt"],
+    "application-source-versions": ["versionTag", "sourceType", "retained", "configSnapshot", "artifactSize", "artifactHash", "status", "createdAt"],
     "application-deployments": ["versionTag", "environment", "status", "rollbackFromDeploymentId", "artifactHash", "createdAt", "startedAt", "completedAt", "durationMs"],
     nginx: ["id", "configName", "configType", "isActive", "status", "versionNo", "deployedAt", "updatedAt"],
     servers: ["id", "name", "host", "sshPort", "status", "lastHeartbeatAt", "createdAt"],
@@ -2572,6 +2657,14 @@ function deploymentStatus(value: unknown, locale: WebserverLocale): string {
       "5": "回滚源版本",
       "6": "已取消",
     },
+  };
+  return statuses[locale][String(value)] ?? String(value);
+}
+
+function sourceVersionStatus(value: unknown, locale: WebserverLocale): string {
+  const statuses: Record<WebserverLocale, Record<string, string>> = {
+    "en-US": { "0": "Processing", "1": "Ready", "2": "Failed", "3": "Pruned" },
+    "zh-CN": { "0": "处理中", "1": "可发布", "2": "存储失败", "3": "已清理" },
   };
   return statuses[locale][String(value)] ?? String(value);
 }

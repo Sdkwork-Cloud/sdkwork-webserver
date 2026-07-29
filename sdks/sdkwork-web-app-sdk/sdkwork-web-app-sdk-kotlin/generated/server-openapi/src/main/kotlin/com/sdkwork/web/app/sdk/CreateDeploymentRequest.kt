@@ -1,6 +1,7 @@
 package com.sdkwork.web.app.sdk
 
 data class CreateDeploymentRequest(
+    val sourceVersionId: String? = null,
     val deployType: Int? = null,
     val versionTag: String? = null,
     val commitHash: String? = null,

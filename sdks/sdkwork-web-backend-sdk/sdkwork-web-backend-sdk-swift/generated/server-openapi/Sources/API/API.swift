@@ -4,6 +4,7 @@ import Foundation
 public struct API {
     public static let application = ApplicationApi.self
     public static let applicationDomain = ApplicationDomainApi.self
+    public static let applicationSourceVersion = ApplicationSourceVersionApi.self
     public static let applicationDeployment = ApplicationDeploymentApi.self
     public static let certificate = CertificateApi.self
     public static let certificateDistribution = CertificateDistributionApi.self

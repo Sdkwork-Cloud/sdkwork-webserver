@@ -59,11 +59,18 @@ final class SiteApi extends BaseApi
     }
 
     /** 更新站点 */
-    public function sitesUpdate(string $siteId, array|UpdateSiteRequest $body): ?SitesUpdateResponse
+    public function sitesUpdate(string $siteId, array|UpdateSiteRequest $body, string $idempotencyKey): ?SitesUpdateResponse
     {
         $path = $this->interpolatePath('/app/v3/api/sites/{siteId}', ['siteId' => $this->serializePathParameter($siteId, new PathParameterSpec('siteId', 'simple', false))]);
         $payload = $body instanceof UpdateSiteRequest ? $body->toArray() : $body;
+        $requestHeaders = $this->buildRequestHeaders(
+            [
+                'Idempotency-Key' => new HeaderParameterSpec($idempotencyKey, 'simple', false, null),
+            ],
+            []
+        );
         $result = $this->client->request('PATCH', $path, [
+            'headers' => $requestHeaders,
             'json' => $payload,
         ]);
         return is_array($result) ? SitesUpdateResponse::fromArray($result) : null;

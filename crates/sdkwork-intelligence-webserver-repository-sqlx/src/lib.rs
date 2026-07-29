@@ -102,6 +102,9 @@ macro_rules! repository_engine {
             mod sites {
                 include!("sites.rs");
             }
+            mod source_versions {
+                include!("source_versions.rs");
+            }
             mod port {
                 include!("port.rs");
             }

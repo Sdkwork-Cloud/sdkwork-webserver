@@ -246,7 +246,103 @@ public struct DomainVerifyResponse: Codable {
     }
 }
 
+public struct SourceVersionConfigSnapshot: Codable {
+    public let appConfigPath: String?
+    public let deploymentConfigPath: String?
+    public let appConfigDetected: Bool?
+    public let deploymentConfigDetected: Bool?
+
+
+    public init(appConfigPath: String? = nil, deploymentConfigPath: String? = nil, appConfigDetected: Bool? = nil, deploymentConfigDetected: Bool? = nil) {
+        self.appConfigPath = appConfigPath
+        self.deploymentConfigPath = deploymentConfigPath
+        self.appConfigDetected = appConfigDetected
+        self.deploymentConfigDetected = deploymentConfigDetected
+    }
+}
+
+public struct CreateSourceVersionRequest: Codable {
+    public let versionTag: String?
+    public let sourceType: String?
+    public let sourceRef: String?
+    public let commitHash: String?
+    public let artifactDriveUri: String?
+    public let artifactSize: String?
+    public let artifactHash: String?
+    public let configSnapshot: SourceVersionConfigSnapshot?
+
+
+    public init(versionTag: String? = nil, sourceType: String? = nil, sourceRef: String? = nil, commitHash: String? = nil, artifactDriveUri: String? = nil, artifactSize: String? = nil, artifactHash: String? = nil, configSnapshot: SourceVersionConfigSnapshot? = nil) {
+        self.versionTag = versionTag
+        self.sourceType = sourceType
+        self.sourceRef = sourceRef
+        self.commitHash = commitHash
+        self.artifactDriveUri = artifactDriveUri
+        self.artifactSize = artifactSize
+        self.artifactHash = artifactHash
+        self.configSnapshot = configSnapshot
+    }
+}
+
+public struct ImportGitSourceVersionRequest: Codable {
+    public let versionTag: String?
+    public let repositoryUrl: String?
+    public let gitRef: String?
+
+
+    public init(versionTag: String? = nil, repositoryUrl: String? = nil, gitRef: String? = nil) {
+        self.versionTag = versionTag
+        self.repositoryUrl = repositoryUrl
+        self.gitRef = gitRef
+    }
+}
+
+public struct SourceVersionResponse: Codable {
+    public let id: String?
+    public let siteId: String?
+    public let versionTag: String?
+    public let sourceType: String?
+    public let sourceRef: String?
+    public let commitHash: String?
+    public let artifactDriveUri: String?
+    public let artifactSize: String?
+    public let artifactHash: String?
+    public let configSnapshot: SourceVersionConfigSnapshot?
+    public let status: Int?
+    public let retained: Bool?
+    public let createdAt: String?
+
+
+    public init(id: String? = nil, siteId: String? = nil, versionTag: String? = nil, sourceType: String? = nil, sourceRef: String? = nil, commitHash: String? = nil, artifactDriveUri: String? = nil, artifactSize: String? = nil, artifactHash: String? = nil, configSnapshot: SourceVersionConfigSnapshot? = nil, status: Int? = nil, retained: Bool? = nil, createdAt: String? = nil) {
+        self.id = id
+        self.siteId = siteId
+        self.versionTag = versionTag
+        self.sourceType = sourceType
+        self.sourceRef = sourceRef
+        self.commitHash = commitHash
+        self.artifactDriveUri = artifactDriveUri
+        self.artifactSize = artifactSize
+        self.artifactHash = artifactHash
+        self.configSnapshot = configSnapshot
+        self.status = status
+        self.retained = retained
+        self.createdAt = createdAt
+    }
+}
+
+public struct SourceVersionPage: Codable {
+    public let items: [SourceVersionResponse]?
+    public let total: String?
+
+
+    public init(items: [SourceVersionResponse]? = nil, total: String? = nil) {
+        self.items = items
+        self.total = total
+    }
+}
+
 public struct CreateDeploymentRequest: Codable {
+    public let sourceVersionId: String?
     public let deployType: Int?
     public let versionTag: String?
     public let commitHash: String?
@@ -257,7 +353,8 @@ public struct CreateDeploymentRequest: Codable {
     public let environment: String?
 
 
-    public init(deployType: Int? = nil, versionTag: String? = nil, commitHash: String? = nil, sourceRef: String? = nil, artifactDriveUri: String? = nil, artifactSize: String? = nil, artifactHash: String? = nil, environment: String? = nil) {
+    public init(sourceVersionId: String? = nil, deployType: Int? = nil, versionTag: String? = nil, commitHash: String? = nil, sourceRef: String? = nil, artifactDriveUri: String? = nil, artifactSize: String? = nil, artifactHash: String? = nil, environment: String? = nil) {
+        self.sourceVersionId = sourceVersionId
         self.deployType = deployType
         self.versionTag = versionTag
         self.commitHash = commitHash
@@ -273,6 +370,7 @@ public struct DeploymentResponse: Codable {
     public let id: String?
     public let siteId: String?
     public let deployType: Int?
+    public let sourceVersionId: String?
     public let versionTag: String?
     public let commitHash: String?
     public let sourceRef: String?
@@ -288,10 +386,11 @@ public struct DeploymentResponse: Codable {
     public let createdAt: String?
 
 
-    public init(id: String? = nil, siteId: String? = nil, deployType: Int? = nil, versionTag: String? = nil, commitHash: String? = nil, sourceRef: String? = nil, rollbackFromDeploymentId: String? = nil, environment: String? = nil, artifactDriveUri: String? = nil, artifactSize: String? = nil, artifactHash: String? = nil, status: Int? = nil, startedAt: String? = nil, completedAt: String? = nil, durationMs: String? = nil, createdAt: String? = nil) {
+    public init(id: String? = nil, siteId: String? = nil, deployType: Int? = nil, sourceVersionId: String? = nil, versionTag: String? = nil, commitHash: String? = nil, sourceRef: String? = nil, rollbackFromDeploymentId: String? = nil, environment: String? = nil, artifactDriveUri: String? = nil, artifactSize: String? = nil, artifactHash: String? = nil, status: Int? = nil, startedAt: String? = nil, completedAt: String? = nil, durationMs: String? = nil, createdAt: String? = nil) {
         self.id = id
         self.siteId = siteId
         self.deployType = deployType
+        self.sourceVersionId = sourceVersionId
         self.versionTag = versionTag
         self.commitHash = commitHash
         self.sourceRef = sourceRef
@@ -705,6 +804,58 @@ public struct SitesDomainsRetrieveResponse: Codable {
 }
 
 public struct SitesDomainsVerifyResponse: Codable {
+    public let code: Int?
+    public let data: Any?
+    public let traceId: String?
+
+
+    public init(code: Int? = nil, data: Any? = nil, traceId: String? = nil) {
+        self.code = code
+        self.data = data
+        self.traceId = traceId
+    }
+}
+
+public struct SitesSourceVersionsListResponse: Codable {
+    public let code: Int?
+    public let data: Any?
+    public let traceId: String?
+
+
+    public init(code: Int? = nil, data: Any? = nil, traceId: String? = nil) {
+        self.code = code
+        self.data = data
+        self.traceId = traceId
+    }
+}
+
+public struct SitesSourceVersionsCreateResponse201: Codable {
+    public let code: Int?
+    public let data: Any?
+    public let traceId: String?
+
+
+    public init(code: Int? = nil, data: Any? = nil, traceId: String? = nil) {
+        self.code = code
+        self.data = data
+        self.traceId = traceId
+    }
+}
+
+public struct SitesSourceVersionsImportGitResponse201: Codable {
+    public let code: Int?
+    public let data: Any?
+    public let traceId: String?
+
+
+    public init(code: Int? = nil, data: Any? = nil, traceId: String? = nil) {
+        self.code = code
+        self.data = data
+        self.traceId = traceId
+    }
+}
+
+public struct SitesSourceVersionsRetrieveResponse: Codable {
     public let code: Int?
     public let data: Any?
     public let traceId: String?

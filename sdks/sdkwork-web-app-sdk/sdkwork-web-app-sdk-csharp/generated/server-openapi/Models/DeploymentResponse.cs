@@ -9,6 +9,7 @@ namespace SDKWork.Web.AppSdk.Models
         public string Id { get; set; }
         public string SiteId { get; set; }
         public int DeployType { get; set; }
+        public string? SourceVersionId { get; set; }
         public string? VersionTag { get; set; }
         public string? CommitHash { get; set; }
         public string? SourceRef { get; set; }

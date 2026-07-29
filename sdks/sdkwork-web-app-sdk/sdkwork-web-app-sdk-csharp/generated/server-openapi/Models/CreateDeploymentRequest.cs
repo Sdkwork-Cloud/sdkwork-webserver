@@ -6,6 +6,7 @@ namespace SDKWork.Web.AppSdk.Models
 {
     public class CreateDeploymentRequest
     {
+        public string? SourceVersionId { get; set; }
         public int DeployType { get; set; }
         public string? VersionTag { get; set; }
         public string? CommitHash { get; set; }

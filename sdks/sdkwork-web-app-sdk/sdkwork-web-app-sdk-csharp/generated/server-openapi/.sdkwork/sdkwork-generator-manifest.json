@@ -12,7 +12,7 @@
   "generatedFiles": [
     {
       "path": "Api/Api.cs",
-      "sha256": "e364bc3f68ea97ed07b0f3f744f654e476c218c511855008bc8642a38f62c307"
+      "sha256": "1c348f45b9ec6ce5787668f803387b783efa9bb6fc84c9836a139d03007dfd83"
     },
     {
       "path": "Api/ApiPaths.cs",
@@ -40,7 +40,11 @@
     },
     {
       "path": "Api/SiteApi.cs",
-      "sha256": "2b8bab2e24f8e057985497d7619fc261171cb41168064a08d5b0de8ffd868475"
+      "sha256": "fee67e8452338139fb0182573023a2bbca3d19dd4d6de792cfdde929d043dd45"
+    },
+    {
+      "path": "Api/SourceVersionApi.cs",
+      "sha256": "9b8d71c08f3e82b31de3c57e1d8c6d14c9d75287ae0475bd8fd739430c994ddd"
     },
     {
       "path": "bin/publish-core.mjs",
@@ -92,7 +96,7 @@
     },
     {
       "path": "Models/CreateDeploymentRequest.cs",
-      "sha256": "c6fe337e9ae59938bf921458cfb3ef15358bad00320b62ffdf2beb914ec3b89d"
+      "sha256": "f0a563ce7f7c865c23b7191c95067d73823890215f9e74299c6ac6d72782c47f"
     },
     {
       "path": "Models/CreateDomainRequest.cs",
@@ -111,12 +115,16 @@
       "sha256": "235f90fab2b478343514c1d64ca0185cd5c7c9c580bbefc9f69908b6f869f172"
     },
     {
+      "path": "Models/CreateSourceVersionRequest.cs",
+      "sha256": "5ff5fb4f1f87019137b5275822f0f9b817c4a8dfccf4a632b737f6737d29a7b9"
+    },
+    {
       "path": "Models/DeploymentPage.cs",
       "sha256": "8386785ee32ed5b9b84fd2c98bdedaac19102648c6602bba320d2a1f9f65e5fc"
     },
     {
       "path": "Models/DeploymentResponse.cs",
-      "sha256": "b13613696355c1ba62829ed159d39ea2878098d609fa469d469cc50433edfe47"
+      "sha256": "bcdf6fe62433ef585147c7945fea9f645705cac2dfbc1ce7994b3b0f25ce1a0d"
     },
     {
       "path": "Models/DomainPage.cs",
@@ -149,6 +157,10 @@
     {
       "path": "Models/HealthCheckResponse.cs",
       "sha256": "2957c8d74e04f8e947de883dd948d2f6fcbceea1644a2e9b2cb640bf3cb6f73a"
+    },
+    {
+      "path": "Models/ImportGitSourceVersionRequest.cs",
+      "sha256": "6e1e58dcc04cf33d7b6d6e0634305a5206963f3573a2df387e31c18f9fc039e6"
     },
     {
       "path": "Models/MediaChecksum.cs",
@@ -271,8 +283,36 @@
       "sha256": "e7709d16f6f2d2282337d003b35323261b2bdb55574944248fb9c575ef6fad6a"
     },
     {
+      "path": "Models/SitesSourceVersionsCreateResponse201.cs",
+      "sha256": "4528035e4511f775b9112786b0e660f3f8b6ec3035228ee550f26f4d72d3e11c"
+    },
+    {
+      "path": "Models/SitesSourceVersionsImportGitResponse201.cs",
+      "sha256": "16015fb19eb718c7f4ad9912aa6abed6351ccfcac5c73cdebc0585c6e65d69c0"
+    },
+    {
+      "path": "Models/SitesSourceVersionsListResponse.cs",
+      "sha256": "d5fd74b4c71b1841d977228be9e898eaab673865d894f204e48abe276d318f5e"
+    },
+    {
+      "path": "Models/SitesSourceVersionsRetrieveResponse.cs",
+      "sha256": "c68f6660a53a0421ae1ebccf92af416d55a1e16dc34f045f07eceb0d41ac7043"
+    },
+    {
       "path": "Models/SitesUpdateResponse.cs",
       "sha256": "d184b5a8f5129bf40c9c0a668c75eaac3b19c1a7a5901845b56ab533aec66d81"
+    },
+    {
+      "path": "Models/SourceVersionConfigSnapshot.cs",
+      "sha256": "0174c19b60a8bdf8021b3c970a2d3518c95172e8ee43b6cfd8e5a2cc8757fb77"
+    },
+    {
+      "path": "Models/SourceVersionPage.cs",
+      "sha256": "8631c8f59e45df5f3b9474db2f320f3182cc986a483d4e7dd40c2e3e58a56d61"
+    },
+    {
+      "path": "Models/SourceVersionResponse.cs",
+      "sha256": "081eda6cb6074437f220c24a79aa08a8852ece6c78066b95b03d412090e9435b"
     },
     {
       "path": "Models/UpdateSiteRequest.cs",
@@ -280,7 +320,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "6232de62dfa9699a17435771b2d4018e5dba47211da87f7b364e7c484de2b4c9"
+      "sha256": "6e92e6b1f7747b4ba6a9ad0dc9eb9fc327943fd7f9044e327bc1cb78698f73c1"
     },
     {
       "path": "sdkwork-sdk.json",
@@ -292,7 +332,7 @@
     },
     {
       "path": "SdkworkAppClient.cs",
-      "sha256": "61fb49a84a986edb400838c3c66d271c88ec064d5fd49df0ef821ebd735d994c"
+      "sha256": "b1dde90cffd2c5ffb75bf485c73e486424e1c344ac1698a6fa7855a0ffc60d00"
     }
   ],
   "scaffoldFiles": [

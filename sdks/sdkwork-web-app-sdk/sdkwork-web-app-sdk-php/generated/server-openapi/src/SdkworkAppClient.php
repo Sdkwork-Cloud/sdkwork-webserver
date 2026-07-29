@@ -7,6 +7,7 @@ namespace SDKWork\Web\AppSdk;
 use SDKWork\Web\AppSdk\Http\HttpClient;
 use SDKWork\Web\AppSdk\Api\SiteApi;
 use SDKWork\Web\AppSdk\Api\DomainApi;
+use SDKWork\Web\AppSdk\Api\SourceVersionApi;
 use SDKWork\Web\AppSdk\Api\DeploymentApi;
 use SDKWork\Web\AppSdk\Api\EnvVariableApi;
 use SDKWork\Web\AppSdk\Api\CertificateApi;
@@ -17,6 +18,7 @@ final class SdkworkAppClient
     public HttpClient $http;
     public SiteApi $site;
     public DomainApi $domain;
+    public SourceVersionApi $sourceVersion;
     public DeploymentApi $deployment;
     public EnvVariableApi $envVariable;
     public CertificateApi $certificate;
@@ -27,6 +29,7 @@ final class SdkworkAppClient
         $this->http = new HttpClient($config);
         $this->site = new SiteApi($this->http);
         $this->domain = new DomainApi($this->http);
+        $this->sourceVersion = new SourceVersionApi($this->http);
         $this->deployment = new DeploymentApi($this->http);
         $this->envVariable = new EnvVariableApi($this->http);
         $this->certificate = new CertificateApi($this->http);

@@ -4,6 +4,7 @@ import com.sdkwork.common.core.SdkConfig
 import com.sdkwork.web.app.sdk.http.HttpClient
 import com.sdkwork.web.app.sdk.api.SiteApi
 import com.sdkwork.web.app.sdk.api.DomainApi
+import com.sdkwork.web.app.sdk.api.SourceVersionApi
 import com.sdkwork.web.app.sdk.api.DeploymentApi
 import com.sdkwork.web.app.sdk.api.EnvVariableApi
 import com.sdkwork.web.app.sdk.api.CertificateApi
@@ -14,6 +15,7 @@ open class SdkworkAppClient {
 
     lateinit var site: SiteApi
     lateinit var domain: DomainApi
+    lateinit var sourceVersion: SourceVersionApi
     lateinit var deployment: DeploymentApi
     lateinit var envVariable: EnvVariableApi
     lateinit var certificate: CertificateApi
@@ -23,6 +25,7 @@ open class SdkworkAppClient {
         this.httpClient = HttpClient(baseUrl)
         site = SiteApi(httpClient)
         domain = DomainApi(httpClient)
+        sourceVersion = SourceVersionApi(httpClient)
         deployment = DeploymentApi(httpClient)
         envVariable = EnvVariableApi(httpClient)
         certificate = CertificateApi(httpClient)
@@ -33,6 +36,7 @@ open class SdkworkAppClient {
         this.httpClient = HttpClient(config)
         site = SiteApi(httpClient)
         domain = DomainApi(httpClient)
+        sourceVersion = SourceVersionApi(httpClient)
         deployment = DeploymentApi(httpClient)
         envVariable = EnvVariableApi(httpClient)
         certificate = CertificateApi(httpClient)

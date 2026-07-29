@@ -63,6 +63,7 @@ client.getHttpClient().setHeader("X-Custom-Header", "value");
 
 - `client.getApplication()` - application API
 - `client.getApplicationDomain()` - application_domain API
+- `client.getApplicationSourceVersion()` - application_source_version API
 - `client.getApplicationDeployment()` - application_deployment API
 - `client.getCertificate()` - certificate API
 - `client.getCertificateDistribution()` - certificate_distribution API
@@ -97,6 +98,18 @@ Map<String, Object> params = new LinkedHashMap<>();
 params.put("page", 1);
 params.put("page_size", 2);
 ApplicationsDomainsListResponse result = client.getApplicationDomain().applicationsDomainsList(applicationId, params);
+System.out.println(result);
+```
+
+### application_source_version
+
+```java
+// List immutable application source versions
+String applicationId = "1";
+Map<String, Object> params = new LinkedHashMap<>();
+params.put("page", 1);
+params.put("page_size", 2);
+ApplicationsSourceVersionsListResponse result = client.getApplicationSourceVersion().applicationsSourceVersionsList(applicationId, params);
 System.out.println(result);
 ```
 

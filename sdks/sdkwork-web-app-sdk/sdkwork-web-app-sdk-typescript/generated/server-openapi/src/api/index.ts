@@ -2,6 +2,7 @@ export { BaseApi } from './base';
 export { appApiPath } from './paths';
 export { SiteApi, createSiteApi } from './site';
 export { DomainApi, createDomainApi } from './domain';
+export { SourceVersionApi, createSourceVersionApi } from './source-version';
 export { DeploymentApi, createDeploymentApi } from './deployment';
 export { EnvVariableApi, createEnvVariableApi } from './env-variable';
 export { CertificateApi, createCertificateApi } from './certificate';

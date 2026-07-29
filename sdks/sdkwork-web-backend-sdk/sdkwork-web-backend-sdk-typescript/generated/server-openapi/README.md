@@ -56,6 +56,7 @@ const client = new SdkworkBackendClient({
 
 - `client.application` - application API
 - `client.applicationDomain` - application_domain API
+- `client.applicationSourceVersion` - application_source_version API
 - `client.applicationDeployment` - application_deployment API
 - `client.certificate` - certificate API
 - `client.certificateDistribution` - certificate_distribution API
@@ -91,6 +92,18 @@ const params = {
   page_size: 2,
 };
 const result = await client.applicationDomain.applications.domains.list(applicationId, params);
+```
+
+### application_source_version
+
+```typescript
+// List immutable application source versions
+const applicationId = '1';
+const params = {
+  page: 1,
+  page_size: 2,
+};
+const result = await client.applicationSourceVersion.applications.sourceVersions.list(applicationId, params);
 ```
 
 ### application_deployment

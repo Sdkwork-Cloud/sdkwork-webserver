@@ -4,6 +4,7 @@ package com.sdkwork.web.backend.sdk.model;
 public class ApplicationDeploymentResponse {
     private String id;
     private String siteId;
+    private String sourceVersionId;
     private Integer status;
     private Integer deployType;
     private String environment;
@@ -33,6 +34,14 @@ public class ApplicationDeploymentResponse {
 
     public void setSiteId(String siteId) {
         this.siteId = siteId;
+    }
+
+    public String getSourceVersionId() {
+        return this.sourceVersionId;
+    }
+
+    public void setSourceVersionId(String sourceVersionId) {
+        this.sourceVersionId = sourceVersionId;
     }
 
     public Integer getStatus() {

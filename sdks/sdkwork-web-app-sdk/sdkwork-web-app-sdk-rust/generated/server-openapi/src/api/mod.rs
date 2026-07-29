@@ -4,6 +4,8 @@ pub mod site;
 pub use site::SiteApi;
 pub mod domain;
 pub use domain::DomainApi;
+pub mod source_version;
+pub use source_version::SourceVersionApi;
 pub mod deployment;
 pub use deployment::DeploymentApi;
 pub mod env_variable;

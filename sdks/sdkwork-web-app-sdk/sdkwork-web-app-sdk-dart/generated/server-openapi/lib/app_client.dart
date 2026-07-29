@@ -2,6 +2,7 @@ import 'src/http/client.dart';
 import 'src/http/sdk_config.dart';
 import 'src/api/site.dart';
 import 'src/api/domain.dart';
+import 'src/api/source_version.dart';
 import 'src/api/deployment.dart';
 import 'src/api/env_variable.dart';
 import 'src/api/certificate.dart';
@@ -12,6 +13,7 @@ class SdkworkAppClient {
 
   late final SiteApi site;
   late final DomainApi domain;
+  late final SourceVersionApi sourceVersion;
   late final DeploymentApi deployment;
   late final EnvVariableApi envVariable;
   late final CertificateApi certificate;
@@ -22,6 +24,7 @@ class SdkworkAppClient {
   }) : _httpClient = HttpClient(config: config) {
     site = SiteApi(_httpClient);
     domain = DomainApi(_httpClient);
+    sourceVersion = SourceVersionApi(_httpClient);
     deployment = DeploymentApi(_httpClient);
     envVariable = EnvVariableApi(_httpClient);
     certificate = CertificateApi(_httpClient);

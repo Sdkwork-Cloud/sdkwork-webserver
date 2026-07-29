@@ -5,6 +5,7 @@ import {
   Boxes,
   Globe2,
   House,
+  Layers3,
   LogOut,
   Rocket,
   ScrollText,
@@ -147,6 +148,9 @@ function ResourceIcon({ resource }: { resource: WebserverResourceKey }): ReactNo
     case "deployments":
     case "application-deployments":
       return <Rocket {...iconProps} />;
+    case "source-versions":
+    case "application-source-versions":
+      return <Layers3 {...iconProps} />;
     case "nginx":
       return <ServerCog {...iconProps} />;
     case "servers":

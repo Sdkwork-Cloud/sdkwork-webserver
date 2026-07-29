@@ -270,9 +270,15 @@ class SiteApi:
         """获取站点详情"""
         return self._client.get(f"/app/v3/api/sites/{serialize_path_parameter(site_id, {'name': 'siteId', 'style': 'simple', 'explode': False})}")
 
-    def update(self, site_id: str, body: UpdateSiteRequest) -> SitesUpdateResponse:
+    def update(self, site_id: str, body: UpdateSiteRequest, idempotency_key: str) -> SitesUpdateResponse:
         """更新站点"""
-        return self._client.patch(f"/app/v3/api/sites/{serialize_path_parameter(site_id, {'name': 'siteId', 'style': 'simple', 'explode': False})}", json=body)
+        request_headers = build_request_headers(
+            {
+                'Idempotency-Key': {'value': idempotency_key, 'style': 'simple', 'explode': False},
+            },
+            {}
+        )
+        return self._client.patch(f"/app/v3/api/sites/{serialize_path_parameter(site_id, {'name': 'siteId', 'style': 'simple', 'explode': False})}", json=body, headers=request_headers)
 
     def delete(self, site_id: str) -> None:
         """删除站点"""

@@ -5,6 +5,7 @@ public class SdkworkAppClient {
     private let httpClient: HttpClient
     public let site: SiteApi
     public let domain: DomainApi
+    public let sourceVersion: SourceVersionApi
     public let deployment: DeploymentApi
     public let envVariable: EnvVariableApi
     public let certificate: CertificateApi
@@ -14,6 +15,7 @@ public class SdkworkAppClient {
         self.httpClient = HttpClient(baseURL: baseURL)
         self.site = SiteApi(client: httpClient)
         self.domain = DomainApi(client: httpClient)
+        self.sourceVersion = SourceVersionApi(client: httpClient)
         self.deployment = DeploymentApi(client: httpClient)
         self.envVariable = EnvVariableApi(client: httpClient)
         self.certificate = CertificateApi(client: httpClient)
@@ -24,6 +26,7 @@ public class SdkworkAppClient {
         self.httpClient = HttpClient(config: config)
         self.site = SiteApi(client: httpClient)
         self.domain = DomainApi(client: httpClient)
+        self.sourceVersion = SourceVersionApi(client: httpClient)
         self.deployment = DeploymentApi(client: httpClient)
         self.envVariable = EnvVariableApi(client: httpClient)
         self.certificate = CertificateApi(client: httpClient)

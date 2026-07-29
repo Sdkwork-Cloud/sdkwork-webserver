@@ -2,6 +2,7 @@ export interface DeploymentResponse {
   id: string;
   siteId: string;
   deployType: number;
+  sourceVersionId?: string;
   versionTag?: string;
   commitHash?: string;
   sourceRef?: string;

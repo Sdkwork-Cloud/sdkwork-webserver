@@ -4,6 +4,7 @@ import com.sdkwork.common.core.Types;
 import com.sdkwork.web.backend.sdk.http.HttpClient;
 import com.sdkwork.web.backend.sdk.api.ApplicationApi;
 import com.sdkwork.web.backend.sdk.api.ApplicationDomainApi;
+import com.sdkwork.web.backend.sdk.api.ApplicationSourceVersionApi;
 import com.sdkwork.web.backend.sdk.api.ApplicationDeploymentApi;
 import com.sdkwork.web.backend.sdk.api.CertificateApi;
 import com.sdkwork.web.backend.sdk.api.CertificateDistributionApi;
@@ -16,6 +17,7 @@ public class SdkworkBackendClient {
     private final HttpClient httpClient;
     private ApplicationApi application;
     private ApplicationDomainApi applicationDomain;
+    private ApplicationSourceVersionApi applicationSourceVersion;
     private ApplicationDeploymentApi applicationDeployment;
     private CertificateApi certificate;
     private CertificateDistributionApi certificateDistribution;
@@ -28,6 +30,7 @@ public class SdkworkBackendClient {
         this.httpClient = new HttpClient(baseUrl);
         this.application = new ApplicationApi(httpClient);
         this.applicationDomain = new ApplicationDomainApi(httpClient);
+        this.applicationSourceVersion = new ApplicationSourceVersionApi(httpClient);
         this.applicationDeployment = new ApplicationDeploymentApi(httpClient);
         this.certificate = new CertificateApi(httpClient);
         this.certificateDistribution = new CertificateDistributionApi(httpClient);
@@ -41,6 +44,7 @@ public class SdkworkBackendClient {
         this.httpClient = new HttpClient(config);
         this.application = new ApplicationApi(httpClient);
         this.applicationDomain = new ApplicationDomainApi(httpClient);
+        this.applicationSourceVersion = new ApplicationSourceVersionApi(httpClient);
         this.applicationDeployment = new ApplicationDeploymentApi(httpClient);
         this.certificate = new CertificateApi(httpClient);
         this.certificateDistribution = new CertificateDistributionApi(httpClient);
@@ -56,6 +60,10 @@ public class SdkworkBackendClient {
 
     public ApplicationDomainApi getApplicationDomain() {
         return this.applicationDomain;
+    }
+
+    public ApplicationSourceVersionApi getApplicationSourceVersion() {
+        return this.applicationSourceVersion;
     }
 
     public ApplicationDeploymentApi getApplicationDeployment() {

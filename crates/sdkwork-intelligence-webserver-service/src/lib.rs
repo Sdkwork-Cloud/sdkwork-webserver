@@ -8,10 +8,14 @@ pub mod certificate_renewal_ops;
 pub mod nginx_ops;
 pub mod repository;
 pub mod runtime_assignment_ops;
+pub mod source_import;
 
 pub use repository::{
     AuditLogWrite, RuntimeAssignmentTarget, RuntimeAssignmentWrite, RuntimeObservationWrite,
     WebRepositoryPort,
+};
+pub use source_import::{
+    ApplicationSourceImporter, GitSourceImportRequest, ImportedApplicationSource,
 };
 
 use std::sync::Arc;
@@ -25,6 +29,7 @@ pub struct WebService {
     pub(crate) repository: Arc<dyn WebRepositoryPort>,
     pub(crate) certificate_issuer: Arc<CertificateIssuer>,
     pub(crate) edge_runtime: Arc<EdgeRuntime>,
+    pub(crate) source_importer: Arc<dyn ApplicationSourceImporter>,
 }
 
 impl WebService {
@@ -33,10 +38,25 @@ impl WebService {
         certificate_issuer: Arc<CertificateIssuer>,
         edge_runtime: Arc<EdgeRuntime>,
     ) -> Self {
+        Self::new_with_source_importer(
+            repository,
+            certificate_issuer,
+            edge_runtime,
+            Arc::new(source_import::UnavailableApplicationSourceImporter),
+        )
+    }
+
+    pub fn new_with_source_importer(
+        repository: Arc<dyn WebRepositoryPort>,
+        certificate_issuer: Arc<CertificateIssuer>,
+        edge_runtime: Arc<EdgeRuntime>,
+        source_importer: Arc<dyn ApplicationSourceImporter>,
+    ) -> Self {
         Self {
             repository,
             certificate_issuer,
             edge_runtime,
+            source_importer,
         }
     }
 

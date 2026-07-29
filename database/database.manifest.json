@@ -12,7 +12,7 @@
   "defaultEngine": "postgres",
   "tablePrefix": "web_",
   "baselineAnchorTable": "web_site",
-  "contractVersion": "1.1.0",
+  "contractVersion": "1.2.0",
   "baselineStrategy": "baseline-plus-migrations",
   "modules": [],
   "lifecycle": {

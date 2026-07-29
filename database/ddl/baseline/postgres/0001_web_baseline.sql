@@ -204,6 +204,45 @@ CREATE INDEX idx_web_certificate_renewal
     ON web_certificate (renewal_status, not_after)
     WHERE auto_renew = true AND status = 1;
 
+CREATE TABLE web_source_version (
+    id              BIGINT       NOT NULL,
+    uuid            VARCHAR(64)  NOT NULL,
+    tenant_id       BIGINT       NOT NULL,
+    organization_id BIGINT       NOT NULL DEFAULT 0,
+    user_id         BIGINT,
+    site_id         BIGINT       NOT NULL,
+    version_tag     VARCHAR(100) NOT NULL,
+    source_type     VARCHAR(16)  NOT NULL,
+    source_ref      VARCHAR(500),
+    commit_hash     VARCHAR(64),
+    artifact_path   VARCHAR(500) NOT NULL,
+    artifact_size   BIGINT       NOT NULL,
+    artifact_hash   VARCHAR(64)  NOT NULL,
+    config_snapshot JSONB        NOT NULL DEFAULT '{}',
+    status          INTEGER      NOT NULL DEFAULT 1,
+    pruned_at       TIMESTAMPTZ,
+    pruned_by       BIGINT,
+    metadata        JSONB        NOT NULL DEFAULT '{}',
+    created_at      TIMESTAMPTZ  NOT NULL,
+    updated_at      TIMESTAMPTZ  NOT NULL,
+    version         BIGINT       NOT NULL DEFAULT 0,
+    PRIMARY KEY (id),
+    CONSTRAINT uk_web_source_version_uuid UNIQUE (uuid),
+    CONSTRAINT uk_web_source_version_site_tag UNIQUE (tenant_id, site_id, version_tag),
+    CONSTRAINT chk_web_source_version_type CHECK (source_type IN ('ARCHIVE', 'DIRECTORY', 'GIT')),
+    CONSTRAINT chk_web_source_version_status CHECK (status IN (0, 1, 2, 3)),
+    CONSTRAINT fk_web_source_version_site FOREIGN KEY (site_id) REFERENCES web_site(id)
+);
+
+COMMENT ON TABLE web_source_version IS 'Immutable Drive-backed application source version';
+COMMENT ON COLUMN web_source_version.status IS 'Status: 0=preparing, 1=ready, 2=failed, 3=pruned';
+
+CREATE INDEX idx_web_source_version_site_created
+    ON web_source_version (site_id, created_at DESC);
+
+CREATE INDEX idx_web_source_version_retention
+    ON web_source_version (tenant_id, site_id, status, created_at DESC);
+
 -- source: migrations/005_create_web_deployment.sql
 -- Migration: 005_create_web_deployment
 -- Description: Web deployment record table
@@ -217,6 +256,7 @@ CREATE TABLE web_deployment (
     organization_id BIGINT       NOT NULL DEFAULT 0,
     user_id         BIGINT,
     site_id         BIGINT       NOT NULL,
+    source_version_id BIGINT,
     deploy_type     INTEGER      NOT NULL DEFAULT 1,
     version_tag     VARCHAR(100),
     commit_hash     VARCHAR(64),
@@ -241,7 +281,8 @@ CREATE TABLE web_deployment (
     PRIMARY KEY (id),
     CONSTRAINT uk_web_deployment_uuid UNIQUE (uuid),
     CONSTRAINT uk_web_deployment_idempotency UNIQUE (tenant_id, idempotency_key),
-    CONSTRAINT fk_web_deployment_site FOREIGN KEY (site_id) REFERENCES web_site(id)
+    CONSTRAINT fk_web_deployment_site FOREIGN KEY (site_id) REFERENCES web_site(id),
+    CONSTRAINT fk_web_deployment_source_version FOREIGN KEY (source_version_id) REFERENCES web_source_version(id)
 );
 
 COMMENT ON TABLE web_deployment IS 'Web deployment record';
@@ -253,6 +294,9 @@ COMMENT ON COLUMN web_deployment.idempotency_key IS 'Client-provided idempotency
 
 CREATE INDEX idx_web_deployment_site_created
     ON web_deployment (site_id, created_at DESC);
+
+CREATE INDEX idx_web_deployment_source_version
+    ON web_deployment (source_version_id);
 
 CREATE INDEX idx_web_deployment_tenant_status
     ON web_deployment (tenant_id, status, created_at DESC);

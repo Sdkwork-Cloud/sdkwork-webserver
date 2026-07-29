@@ -6,6 +6,7 @@ namespace SDKWork.Web.BackendSdk.Models
 {
     public class CreateApplicationDeploymentRequest
     {
+        public string? SourceVersionId { get; set; }
         public int? DeployType { get; set; }
         public string? Environment { get; set; }
         public string? VersionTag { get; set; }

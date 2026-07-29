@@ -7,6 +7,7 @@ namespace SDKWork\Web\BackendSdk;
 use SDKWork\Web\BackendSdk\Http\HttpClient;
 use SDKWork\Web\BackendSdk\Api\ApplicationApi;
 use SDKWork\Web\BackendSdk\Api\ApplicationDomainApi;
+use SDKWork\Web\BackendSdk\Api\ApplicationSourceVersionApi;
 use SDKWork\Web\BackendSdk\Api\ApplicationDeploymentApi;
 use SDKWork\Web\BackendSdk\Api\CertificateApi;
 use SDKWork\Web\BackendSdk\Api\CertificateDistributionApi;
@@ -20,6 +21,7 @@ final class SdkworkBackendClient
     public HttpClient $http;
     public ApplicationApi $application;
     public ApplicationDomainApi $applicationDomain;
+    public ApplicationSourceVersionApi $applicationSourceVersion;
     public ApplicationDeploymentApi $applicationDeployment;
     public CertificateApi $certificate;
     public CertificateDistributionApi $certificateDistribution;
@@ -33,6 +35,7 @@ final class SdkworkBackendClient
         $this->http = new HttpClient($config);
         $this->application = new ApplicationApi($this->http);
         $this->applicationDomain = new ApplicationDomainApi($this->http);
+        $this->applicationSourceVersion = new ApplicationSourceVersionApi($this->http);
         $this->applicationDeployment = new ApplicationDeploymentApi($this->http);
         $this->certificate = new CertificateApi($this->http);
         $this->certificateDistribution = new CertificateDistributionApi($this->http);

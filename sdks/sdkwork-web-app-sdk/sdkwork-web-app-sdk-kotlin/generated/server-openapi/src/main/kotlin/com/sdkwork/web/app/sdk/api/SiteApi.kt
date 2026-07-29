@@ -41,8 +41,14 @@ class SiteApi(private val client: HttpClient) {
     }
 
     /** 更新站点 */
-    suspend fun sitesUpdate(siteId: String, body: UpdateSiteRequest): SitesUpdateResponse? {
-        val raw = client.patch(ApiPaths.appPath("/sites/${serializePathParameter(siteId, PathParameterSpec("siteId", "simple", false))}"), body, null, null, "application/json")
+    suspend fun sitesUpdate(siteId: String, body: UpdateSiteRequest, idempotencyKey: String): SitesUpdateResponse? {
+        val requestHeaders = buildRequestHeaders(
+            mapOf(
+                "Idempotency-Key" to HeaderParameterSpec(idempotencyKey, "simple", false, null),
+            ),
+            emptyMap()
+        )
+        val raw = client.patch(ApiPaths.appPath("/sites/${serializePathParameter(siteId, PathParameterSpec("siteId", "simple", false))}"), body, null, requestHeaders, "application/json")
         return client.convertValue(raw, object : TypeReference<SitesUpdateResponse>() {})
     }
 

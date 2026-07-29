@@ -9,11 +9,26 @@
     "protocol": "http",
     "packageName": "github.com/sdkwork/sdkwork-web-app-sdk"
   },
-  "changeFingerprint": "c9e7b2f5e0e9dece7a3dad744b8b45c56d012b5efa7fc95ea8f384690ef01996",
+  "changeFingerprint": "8bf80c75f1c5ed5a26685586e46b4e12bf679aab719657b36c090d0daa025fbe",
   "changes": {
-    "createdGeneratedFiles": [],
+    "createdGeneratedFiles": [
+      "api/source_version.go",
+      "types/create_source_version_request.go",
+      "types/import_git_source_version_request.go",
+      "types/sites_source_versions_create_response201.go",
+      "types/sites_source_versions_import_git_response201.go",
+      "types/sites_source_versions_list_response.go",
+      "types/sites_source_versions_retrieve_response.go",
+      "types/source_version_config_snapshot.go",
+      "types/source_version_page.go",
+      "types/source_version_response.go"
+    ],
     "updatedGeneratedFiles": [
-      "types/create_deployment_request.go"
+      "api/site.go",
+      "README.md",
+      "sdk.go",
+      "types/create_deployment_request.go",
+      "types/deployment_response.go"
     ],
     "unchangedGeneratedFiles": [
       "api/base.go",
@@ -24,7 +39,6 @@
       "api/env_variable.go",
       "api/monitor.go",
       "api/paths.go",
-      "api/site.go",
       "bin/publish-core.mjs",
       "bin/publish.ps1",
       "bin/publish.sh",
@@ -34,8 +48,6 @@
       "http/client.go",
       "http/doc.go",
       "LICENSE",
-      "README.md",
-      "sdk.go",
       "sdkwork-sdk.json",
       "types/application_store_listing.go",
       "types/certificate_page.go",
@@ -49,7 +61,6 @@
       "types/create_health_check_request.go",
       "types/create_site_request.go",
       "types/deployment_page.go",
-      "types/deployment_response.go",
       "types/doc.go",
       "types/domain_page.go",
       "types/domain_response.go",
@@ -103,29 +114,61 @@
   "impact": {
     "schemaVersion": 1,
     "areas": [
-      "models"
+      "api-surface",
+      "models",
+      "documentation",
+      "unknown"
     ],
     "details": [
       {
+        "area": "api-surface",
+        "paths": [
+          "api/site.go",
+          "api/source_version.go"
+        ]
+      },
+      {
         "area": "models",
         "paths": [
-          "types/create_deployment_request.go"
+          "types/create_deployment_request.go",
+          "types/create_source_version_request.go",
+          "types/deployment_response.go",
+          "types/import_git_source_version_request.go",
+          "types/sites_source_versions_create_response201.go",
+          "types/sites_source_versions_import_git_response201.go",
+          "types/sites_source_versions_list_response.go",
+          "types/sites_source_versions_retrieve_response.go",
+          "types/source_version_config_snapshot.go",
+          "types/source_version_page.go",
+          "types/source_version_response.go"
+        ]
+      },
+      {
+        "area": "documentation",
+        "paths": [
+          "README.md"
+        ]
+      },
+      {
+        "area": "unknown",
+        "paths": [
+          "sdk.go"
         ]
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: models. Verification is required."
+    "summary": "Detected impact areas: api-surface, models, documentation, unknown. Verification is required."
   },
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: api-surface, models, documentation, unknown. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, documentation, unknown.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-go\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -143,12 +186,14 @@
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "medium",
+    "riskLevel": "high",
     "nextAction": "verify",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
     "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
+      "manual-review-required",
+      "unknown-impact",
       "verification-required"
     ]
   },

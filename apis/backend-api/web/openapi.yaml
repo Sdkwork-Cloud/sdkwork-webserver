@@ -420,6 +420,170 @@ paths:
                       properties:
                         item:
                           $ref: '#/components/schemas/ApplicationDomainVerifyResponse'
+  /backend/v3/api/applications/{applicationId}/source_versions:
+    parameters:
+    - $ref: '#/components/parameters/ApplicationIdParam'
+    get:
+      operationId: applications.sourceVersions.list
+      summary: List immutable application source versions
+      tags: [applicationSourceVersion]
+      security:
+      - AuthToken: []
+        AccessToken: []
+      x-sdkwork-api-surface: backend-api
+      x-sdkwork-api-authority: sdkwork-web.backend
+      x-sdkwork-request-context: WebRequestContext
+      x-sdkwork-auth-mode: dual-token
+      x-sdkwork-permission: web.sites.read
+      x-sdkwork-owner: sdkwork-web-server
+      parameters:
+      - $ref: '#/components/parameters/PageParam'
+      - $ref: '#/components/parameters/PageSizeParam'
+      responses:
+        '200':
+          description: Application source versions returned successfully.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SdkWorkApiResponse'
+                - type: object
+                  required: [data]
+                  properties:
+                    data:
+                      type: object
+                      required: [items, pageInfo]
+                      properties:
+                        items:
+                          type: array
+                          items:
+                            $ref: '#/components/schemas/ApplicationSourceVersionResponse'
+                        pageInfo:
+                          $ref: '#/components/schemas/PageInfo'
+    post:
+      operationId: applications.sourceVersions.create
+      summary: Register an immutable Drive-backed application source version
+      tags: [applicationSourceVersion]
+      security:
+      - AuthToken: []
+        AccessToken: []
+      x-sdkwork-api-surface: backend-api
+      x-sdkwork-api-authority: sdkwork-web.backend
+      x-sdkwork-request-context: WebRequestContext
+      x-sdkwork-auth-mode: dual-token
+      x-sdkwork-permission: web.sites.write
+      x-sdkwork-idempotent: true
+      x-sdkwork-owner: sdkwork-web-server
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateApplicationSourceVersionRequest'
+      responses:
+        '201':
+          description: Application source version registered successfully.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SdkWorkApiResponse'
+                - type: object
+                  required: [data]
+                  properties:
+                    data:
+                      type: object
+                      required: [item]
+                      properties:
+                        item:
+                          $ref: '#/components/schemas/ApplicationSourceVersionResponse'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  /backend/v3/api/applications/{applicationId}/source_versions/git_import:
+    parameters:
+    - $ref: '#/components/parameters/ApplicationIdParam'
+    post:
+      operationId: applications.sourceVersions.importGit
+      summary: Import an immutable application source version from a public Git repository
+      tags: [applicationSourceVersion]
+      security:
+      - AuthToken: []
+        AccessToken: []
+      x-sdkwork-api-surface: backend-api
+      x-sdkwork-api-authority: sdkwork-web.backend
+      x-sdkwork-request-context: WebRequestContext
+      x-sdkwork-auth-mode: dual-token
+      x-sdkwork-permission: web.sites.write
+      x-sdkwork-idempotent: true
+      x-sdkwork-rate-limit-tier: auth-critical
+      x-sdkwork-owner: sdkwork-web-server
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImportApplicationGitSourceVersionRequest'
+      responses:
+        '201':
+          description: Git source version imported into Drive successfully.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SdkWorkApiResponse'
+                - type: object
+                  required: [data]
+                  properties:
+                    data:
+                      type: object
+                      required: [item]
+                      properties:
+                        item:
+                          $ref: '#/components/schemas/ApplicationSourceVersionResponse'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  /backend/v3/api/applications/{applicationId}/source_versions/{sourceVersionId}:
+    parameters:
+    - $ref: '#/components/parameters/ApplicationIdParam'
+    - $ref: '#/components/parameters/SourceVersionIdParam'
+    get:
+      operationId: applications.sourceVersions.retrieve
+      summary: Retrieve an application source version
+      tags: [applicationSourceVersion]
+      security:
+      - AuthToken: []
+        AccessToken: []
+      x-sdkwork-api-surface: backend-api
+      x-sdkwork-api-authority: sdkwork-web.backend
+      x-sdkwork-request-context: WebRequestContext
+      x-sdkwork-auth-mode: dual-token
+      x-sdkwork-permission: web.sites.read
+      x-sdkwork-owner: sdkwork-web-server
+      responses:
+        '200':
+          description: Application source version returned successfully.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SdkWorkApiResponse'
+                - type: object
+                  required: [data]
+                  properties:
+                    data:
+                      type: object
+                      required: [item]
+                      properties:
+                        item:
+                          $ref: '#/components/schemas/ApplicationSourceVersionResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
   /backend/v3/api/applications/{applicationId}/deployments:
     parameters:
     - $ref: '#/components/parameters/ApplicationIdParam'
@@ -1368,6 +1532,13 @@ components:
       schema:
         type: string
         format: uuid
+    SourceVersionIdParam:
+      name: sourceVersionId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
     CertificateIdParam:
       name: certificateId
       in: path
@@ -1710,6 +1881,117 @@ components:
           type: boolean
         verifyToken:
           type: string
+    ApplicationSourceVersionConfigSnapshot:
+      type: object
+      additionalProperties: false
+      required: [appConfigPath, deploymentConfigPath, appConfigDetected, deploymentConfigDetected]
+      properties:
+        appConfigPath:
+          type: string
+          default: sdkwork.app.config.json
+        deploymentConfigPath:
+          type: string
+          default: etc/sdkwork.deployment.config.json
+        appConfigDetected:
+          type: boolean
+        deploymentConfigDetected:
+          type: boolean
+    CreateApplicationSourceVersionRequest:
+      type: object
+      additionalProperties: false
+      required: [versionTag, sourceType, artifactDriveUri, artifactSize, artifactHash]
+      properties:
+        versionTag:
+          type: string
+          minLength: 1
+          maxLength: 100
+        sourceType:
+          type: string
+          enum: [ARCHIVE, DIRECTORY]
+        sourceRef:
+          type: string
+          minLength: 1
+          maxLength: 500
+        commitHash:
+          type: string
+          minLength: 7
+          maxLength: 64
+          pattern: '^[a-f0-9]{7,64}$'
+        artifactDriveUri:
+          type: string
+          maxLength: 500
+          pattern: '^drive://spaces/[^/?#]+/nodes/[^/?#]+$'
+        artifactSize:
+          type: string
+          format: int64
+          pattern: '^[1-9][0-9]*$'
+          x-sdkwork-int64-string: true
+          x-sdkwork-rust-type: i64
+        artifactHash:
+          type: string
+          pattern: '^[a-f0-9]{64}$'
+        configSnapshot:
+          $ref: '#/components/schemas/ApplicationSourceVersionConfigSnapshot'
+    ImportApplicationGitSourceVersionRequest:
+      type: object
+      additionalProperties: false
+      required: [versionTag, repositoryUrl]
+      properties:
+        versionTag:
+          type: string
+          minLength: 1
+          maxLength: 100
+        repositoryUrl:
+          type: string
+          format: uri
+          minLength: 1
+          maxLength: 500
+        gitRef:
+          type: string
+          minLength: 1
+          maxLength: 200
+    ApplicationSourceVersionResponse:
+      type: object
+      additionalProperties: false
+      required: [id, siteId, versionTag, sourceType, artifactDriveUri, artifactSize, artifactHash, configSnapshot, status, retained, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        siteId:
+          type: string
+          format: uuid
+        versionTag:
+          type: string
+        sourceType:
+          type: string
+          enum: [ARCHIVE, DIRECTORY, GIT]
+        sourceRef:
+          type: string
+        commitHash:
+          type: string
+        artifactDriveUri:
+          type: string
+          pattern: '^drive://spaces/[^/?#]+/nodes/[^/?#]+$'
+        artifactSize:
+          type: string
+          format: int64
+          pattern: '^[1-9][0-9]*$'
+          x-sdkwork-int64-string: true
+          x-sdkwork-rust-type: i64
+        artifactHash:
+          type: string
+          pattern: '^[a-f0-9]{64}$'
+        configSnapshot:
+          $ref: '#/components/schemas/ApplicationSourceVersionConfigSnapshot'
+        status:
+          type: integer
+          enum: [0, 1, 2, 3]
+        retained:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
     CreateApplicationDeploymentRequest:
       type: object
       additionalProperties: false
@@ -1718,6 +2000,10 @@ components:
         may omit artifact fields. Other deployment types require artifactDriveUri, artifactSize,
         and artifactHash together.
       properties:
+        sourceVersionId:
+          type: string
+          format: uuid
+          description: Ready, retained application source version selected for this release.
         deployType:
           type: integer
           enum: [1, 2, 3, 4]
@@ -1765,6 +2051,9 @@ components:
           type: string
           format: uuid
         siteId:
+          type: string
+          format: uuid
+        sourceVersionId:
           type: string
           format: uuid
         status:
@@ -2400,6 +2689,12 @@ components:
             $ref: '#/components/schemas/ProblemDetail'
     Conflict:
       description: Resource conflict.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
+    ValidationError:
+      description: Request validation failed.
       content:
         application/problem+json:
           schema:

@@ -4,6 +4,7 @@ package types
 type ApplicationDeploymentResponse struct {
 	Id string `json:"id"`
 	SiteId string `json:"siteId"`
+	SourceVersionId string `json:"sourceVersionId"`
 	Status int `json:"status"`
 	DeployType int `json:"deployType"`
 	Environment string `json:"environment"`

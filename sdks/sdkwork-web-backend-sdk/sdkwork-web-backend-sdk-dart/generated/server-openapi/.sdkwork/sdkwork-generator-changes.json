@@ -9,20 +9,25 @@
     "protocol": "http",
     "packageName": "sdkwork_web_backend_sdk"
   },
-  "changeFingerprint": "9d94d2edc3841b3065d30364e6fff14485d19d701c7e47cbf4e4bc561846fe1b",
+  "changeFingerprint": "2b09e96bc1b28675e870b448f17cf87e1a5c10969a19a69f881dac1713decc1e",
   "changes": {
-    "createdGeneratedFiles": [],
-    "updatedGeneratedFiles": [],
+    "createdGeneratedFiles": [
+      "lib/src/api/application_source_version.dart"
+    ],
+    "updatedGeneratedFiles": [
+      "lib/backend_client.dart",
+      "lib/src/api/api.dart",
+      "lib/src/models.dart",
+      "README.md"
+    ],
     "unchangedGeneratedFiles": [
       "analysis_options.yaml",
       "bin/publish-core.mjs",
       "bin/publish.ps1",
       "bin/publish.sh",
       "CHANGELOG.md",
-      "lib/backend_client.dart",
       "lib/sdkwork_web_backend_sdk.dart",
       "lib/src/api/agent.dart",
-      "lib/src/api/api.dart",
       "lib/src/api/application_deployment.dart",
       "lib/src/api/application_domain.dart",
       "lib/src/api/application.dart",
@@ -35,10 +40,8 @@
       "lib/src/api/server.dart",
       "lib/src/http/client.dart",
       "lib/src/http/sdk_config.dart",
-      "lib/src/models.dart",
       "LICENSE",
       "pubspec.yaml",
-      "README.md",
       "sdkwork-sdk.json"
     ],
     "deletedGeneratedFiles": [],
@@ -50,26 +53,70 @@
   },
   "impact": {
     "schemaVersion": 1,
-    "areas": [],
-    "details": [],
-    "requiresVerification": false,
-    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
+    "areas": [
+      "api-surface",
+      "models",
+      "documentation"
+    ],
+    "details": [
+      {
+        "area": "api-surface",
+        "paths": [
+          "lib/backend_client.dart",
+          "lib/src/api/api.dart",
+          "lib/src/api/application_source_version.dart"
+        ]
+      },
+      {
+        "area": "models",
+        "paths": [
+          "lib/src/models.dart"
+        ]
+      },
+      {
+        "area": "documentation",
+        "paths": [
+          "README.md"
+        ]
+      }
+    ],
+    "requiresVerification": true,
+    "summary": "Detected impact areas: api-surface, models, documentation. Verification is required."
   },
   "verificationPlan": {
-    "shouldRun": false,
-    "runPhase": "skip",
-    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
-    "steps": []
+    "shouldRun": true,
+    "runPhase": "now",
+    "summary": "Detected impact areas: api-surface, models, documentation. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "steps": [
+      {
+        "id": "check",
+        "title": "Unified package check",
+        "required": true,
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, documentation.",
+        "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-dart\\generated\\server-openapi",
+        "command": "node",
+        "args": [
+          "./bin/publish-core.mjs",
+          "--language",
+          "dart",
+          "--project-dir",
+          ".",
+          "--action",
+          "check"
+        ],
+        "displayCommand": "node ./bin/publish-core.mjs --language dart --project-dir . --action check"
+      }
+    ]
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "low",
-    "nextAction": "skip",
+    "riskLevel": "medium",
+    "nextAction": "verify",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
-    "summary": "No actionable changes were detected. No apply or verification step is required.",
+    "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
-      "no-actionable-changes"
+      "verification-required"
     ]
   },
   "preservedLegacyFiles": false

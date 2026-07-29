@@ -46,6 +46,7 @@ client.setHeader('X-Custom-Header', 'value');
 
 - `client.application` - application API
 - `client.applicationDomain` - application_domain API
+- `client.applicationSourceVersion` - application_source_version API
 - `client.applicationDeployment` - application_deployment API
 - `client.certificate` - certificate API
 - `client.certificateDistribution` - certificate_distribution API
@@ -80,6 +81,18 @@ final params = <String, dynamic>{
   'page_size': 2,
 };
 final result = await client.applicationDomain.applicationsDomainsList(applicationId, params);
+print(result);
+```
+
+### application_source_version
+```dart
+// List immutable application source versions
+final applicationId = '1';
+final params = <String, dynamic>{
+  'page': 1,
+  'page_size': 2,
+};
+final result = await client.applicationSourceVersion.applicationsSourceVersionsList(applicationId, params);
 print(result);
 ```
 

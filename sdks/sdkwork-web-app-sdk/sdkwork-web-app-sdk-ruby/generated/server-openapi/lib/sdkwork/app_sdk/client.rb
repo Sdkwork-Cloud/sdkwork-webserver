@@ -1,11 +1,12 @@
 module Sdkwork
   module AppSdk
     class SdkworkAppClient
-      attr_reader :http, :site, :domain, :deployment, :env_variable, :certificate, :monitor
+      attr_reader :http, :site, :domain, :source_version, :deployment, :env_variable, :certificate, :monitor
       def initialize(config)
         @http = Http::Client.new(config)
         @site = Api::SiteApi.new(@http)
         @domain = Api::DomainApi.new(@http)
+        @source_version = Api::SourceVersionApi.new(@http)
         @deployment = Api::DeploymentApi.new(@http)
         @env_variable = Api::EnvVariableApi.new(@http)
         @certificate = Api::CertificateApi.new(@http)

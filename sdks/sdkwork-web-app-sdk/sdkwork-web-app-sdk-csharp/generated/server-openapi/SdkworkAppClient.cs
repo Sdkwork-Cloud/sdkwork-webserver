@@ -11,6 +11,7 @@ namespace SDKWork.Web.AppSdk
 
         public SiteApi Site { get; }
         public DomainApi Domain { get; }
+        public SourceVersionApi SourceVersion { get; }
         public DeploymentApi Deployment { get; }
         public EnvVariableApi EnvVariable { get; }
         public CertificateApi Certificate { get; }
@@ -21,6 +22,7 @@ namespace SDKWork.Web.AppSdk
             _httpClient = new SdkHttpClient(baseUrl);
             Site = new SiteApi(_httpClient);
             Domain = new DomainApi(_httpClient);
+            SourceVersion = new SourceVersionApi(_httpClient);
             Deployment = new DeploymentApi(_httpClient);
             EnvVariable = new EnvVariableApi(_httpClient);
             Certificate = new CertificateApi(_httpClient);
@@ -32,6 +34,7 @@ namespace SDKWork.Web.AppSdk
             _httpClient = new SdkHttpClient(config);
             Site = new SiteApi(_httpClient);
             Domain = new DomainApi(_httpClient);
+            SourceVersion = new SourceVersionApi(_httpClient);
             Deployment = new DeploymentApi(_httpClient);
             EnvVariable = new EnvVariableApi(_httpClient);
             Certificate = new CertificateApi(_httpClient);

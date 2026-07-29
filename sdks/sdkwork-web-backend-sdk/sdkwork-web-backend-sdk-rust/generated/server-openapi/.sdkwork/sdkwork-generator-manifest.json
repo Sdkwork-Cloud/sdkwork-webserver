@@ -36,7 +36,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "38eb7345f12643afc66de745a5f15497ab9959b1a3450fa8f65b279c4e381cc3"
+      "sha256": "faf30693eb95fcc5405b9720a31a33f4ef944a1ed00bbe570c9f9f29695dd682"
     },
     {
       "path": "sdkwork-sdk.json",
@@ -53,6 +53,10 @@
     {
       "path": "src/api/application_domain.rs",
       "sha256": "99fee515ae6e01f570156135db7ee6a3a86fa1b6c274f9161c0385eb83bd8b1d"
+    },
+    {
+      "path": "src/api/application_source_version.rs",
+      "sha256": "bc02f13110e93d634e45ac562d3a6c61097df7816effc61eb7156429080b065c"
     },
     {
       "path": "src/api/application.rs",
@@ -76,7 +80,7 @@
     },
     {
       "path": "src/api/mod.rs",
-      "sha256": "96bcdaab90087c0d237b35ec045d7baa1b8604dc6437a72cd8f6e7c1eaa78266"
+      "sha256": "551f935029f010fa38c528e2b97236b3a71638a66264ee7650a45410402b552e"
     },
     {
       "path": "src/api/nginx.rs",
@@ -92,7 +96,7 @@
     },
     {
       "path": "src/client.rs",
-      "sha256": "5da5ed9a9b762529d04ed13f158c346d9a176965f93088cea15c9dc862392bf9"
+      "sha256": "5a22ced6812b81007b2ff664256c5c98a7180d3bfde4191a691d99e4ba4423ac"
     },
     {
       "path": "src/http/client.rs",
@@ -128,7 +132,7 @@
     },
     {
       "path": "src/models/application_deployment_response.rs",
-      "sha256": "f72c97ef389958d0bcc0164264b34b68a9f8c168261468f0cc311826963fa5d3"
+      "sha256": "ebffd5e1e3d2b55d0a91b4ff3a1c4856daad23d6602866301a5efdac5af6171f"
     },
     {
       "path": "src/models/application_domain_response.rs",
@@ -141,6 +145,14 @@
     {
       "path": "src/models/application_response.rs",
       "sha256": "6040a7df51f6c9aa1a669e029c7a3a8d435061ec587f3ff8b04922eca378c822"
+    },
+    {
+      "path": "src/models/application_source_version_config_snapshot.rs",
+      "sha256": "72a05f1422ebdffbe35352a272fee8bb1cc92ae8584ad4008356cc25ac0d143d"
+    },
+    {
+      "path": "src/models/application_source_version_response.rs",
+      "sha256": "3a48bab717293f5d5ba2d5f68113dbd99334a646e3f6f56cfbfbaa4dc597ff7c"
     },
     {
       "path": "src/models/application_store_listing.rs",
@@ -189,6 +201,22 @@
     {
       "path": "src/models/applications_retrieve_response.rs",
       "sha256": "e8b826f09eb9a8792bd66e3d72b6eead1a8def6e28470fe633c0f2cda93851e4"
+    },
+    {
+      "path": "src/models/applications_source_versions_create_response201.rs",
+      "sha256": "03fcbb4054b2dc21b239552b34d1f999e3aae90dfd3b7e731bd55417a1e3f190"
+    },
+    {
+      "path": "src/models/applications_source_versions_import_git_response201.rs",
+      "sha256": "5a2be4f7391b2fdffbbd8c1fa92fbee87eacebef60520121c9ee8f21dec337e8"
+    },
+    {
+      "path": "src/models/applications_source_versions_list_response.rs",
+      "sha256": "0a4f28f63174e5e60dcddda3f3da64cf0a8d1003c9a2d5af899090be00b1d0ed"
+    },
+    {
+      "path": "src/models/applications_source_versions_retrieve_response.rs",
+      "sha256": "517c9295708bf7cacb800c945bc815f5dcecb76692c4f8ce3ddbf3a17536db03"
     },
     {
       "path": "src/models/applications_update_response.rs",
@@ -264,7 +292,7 @@
     },
     {
       "path": "src/models/create_application_deployment_request.rs",
-      "sha256": "c3081d3dbd505800504f67b335239d5c4be015d0345925d3620dfa1c6b4a07af"
+      "sha256": "5017e731d76a3c63c21e52143614c57900c6a2447e7d632e0daa6489e95bb81a"
     },
     {
       "path": "src/models/create_application_domain_request.rs",
@@ -273,6 +301,10 @@
     {
       "path": "src/models/create_application_request.rs",
       "sha256": "ba1271f78973518144426d926e7b4a4a76852d81223b5beee20f0779c1992237"
+    },
+    {
+      "path": "src/models/create_application_source_version_request.rs",
+      "sha256": "fbd57d41cac15b2ff86aab287aadbc0e3a5f78eb5c442eba64f4b6109af26a94"
     },
     {
       "path": "src/models/create_certificate_request.rs",
@@ -299,6 +331,10 @@
       "sha256": "5501cdb7099fbaa6a2fc6f6da52974da45c67166615b2f1e80c800aca1b2d8ef"
     },
     {
+      "path": "src/models/import_application_git_source_version_request.rs",
+      "sha256": "deee29ce48d4aa848ca3c0cc9bf28dbb41ad5fd56d812c4d80bf405973befb14"
+    },
+    {
       "path": "src/models/media_checksum.rs",
       "sha256": "ea88fdd40fa405b2b1887c425bd702fb3d792124457cb2049bf6aeb39f1adec6"
     },
@@ -308,7 +344,7 @@
     },
     {
       "path": "src/models/mod.rs",
-      "sha256": "aa6f75bbbeb337e2c6d69520077a159247e0b96bf922b54cf2047002587af9ab"
+      "sha256": "b6643f7a8da56238c8c70a3ccf95341af7f753842ab9370fa23ef0f6839a97e2"
     },
     {
       "path": "src/models/nginx_config_page.rs",

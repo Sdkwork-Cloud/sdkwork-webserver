@@ -5,6 +5,7 @@ public class DeploymentResponse {
     private String id;
     private String siteId;
     private Integer deployType;
+    private String sourceVersionId;
     private String versionTag;
     private String commitHash;
     private String sourceRef;
@@ -41,6 +42,14 @@ public class DeploymentResponse {
 
     public void setDeployType(Integer deployType) {
         this.deployType = deployType;
+    }
+
+    public String getSourceVersionId() {
+        return this.sourceVersionId;
+    }
+
+    public void setSourceVersionId(String sourceVersionId) {
+        this.sourceVersionId = sourceVersionId;
     }
 
     public String getVersionTag() {

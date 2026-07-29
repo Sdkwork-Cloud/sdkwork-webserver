@@ -5,6 +5,7 @@ type DeploymentResponse struct {
 	Id string `json:"id"`
 	SiteId string `json:"siteId"`
 	DeployType int `json:"deployType"`
+	SourceVersionId string `json:"sourceVersionId"`
 	VersionTag string `json:"versionTag"`
 	CommitHash string `json:"commitHash"`
 	SourceRef string `json:"sourceRef"`

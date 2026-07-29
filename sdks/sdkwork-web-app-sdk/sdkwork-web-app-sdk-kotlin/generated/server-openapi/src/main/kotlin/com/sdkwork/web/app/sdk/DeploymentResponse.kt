@@ -4,6 +4,7 @@ data class DeploymentResponse(
     val id: String? = null,
     val siteId: String? = null,
     val deployType: Int? = null,
+    val sourceVersionId: String? = null,
     val versionTag: String? = null,
     val commitHash: String? = null,
     val sourceRef: String? = null,

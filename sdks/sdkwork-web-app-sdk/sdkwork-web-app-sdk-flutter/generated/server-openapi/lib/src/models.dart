@@ -675,7 +675,355 @@ class DomainVerifyResponse {
   }
 }
 
+class SourceVersionConfigSnapshot {
+  final String appConfigPath;
+  final String deploymentConfigPath;
+  final bool appConfigDetected;
+  final bool deploymentConfigDetected;
+
+  SourceVersionConfigSnapshot({
+    required this.appConfigPath,
+    required this.deploymentConfigPath,
+    required this.appConfigDetected,
+    required this.deploymentConfigDetected
+  });
+
+  factory SourceVersionConfigSnapshot.fromJson(Map<String, dynamic> json) {
+    return SourceVersionConfigSnapshot(
+      appConfigPath: (() {
+        final value = json['appConfigPath']?.toString();
+        if (value == null) {
+          throw FormatException('SourceVersionConfigSnapshot.appConfigPath is required');
+        }
+        return value;
+      })(),
+      deploymentConfigPath: (() {
+        final value = json['deploymentConfigPath']?.toString();
+        if (value == null) {
+          throw FormatException('SourceVersionConfigSnapshot.deploymentConfigPath is required');
+        }
+        return value;
+      })(),
+      appConfigDetected: (() {
+        final value = json['appConfigDetected'];
+        if (value is! bool) {
+          throw FormatException('SourceVersionConfigSnapshot.appConfigDetected is required');
+        }
+        return value;
+      })(),
+      deploymentConfigDetected: (() {
+        final value = json['deploymentConfigDetected'];
+        if (value is! bool) {
+          throw FormatException('SourceVersionConfigSnapshot.deploymentConfigDetected is required');
+        }
+        return value;
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'appConfigPath': appConfigPath,
+      'deploymentConfigPath': deploymentConfigPath,
+      'appConfigDetected': appConfigDetected,
+      'deploymentConfigDetected': deploymentConfigDetected,
+    };
+  }
+}
+
+class CreateSourceVersionRequest {
+  final String versionTag;
+  final String sourceType;
+  final String? sourceRef;
+  final String? commitHash;
+  final String artifactDriveUri;
+  final String artifactSize;
+  final String artifactHash;
+  final SourceVersionConfigSnapshot? configSnapshot;
+
+  CreateSourceVersionRequest({
+    required this.versionTag,
+    required this.sourceType,
+    this.sourceRef,
+    this.commitHash,
+    required this.artifactDriveUri,
+    required this.artifactSize,
+    required this.artifactHash,
+    this.configSnapshot
+  });
+
+  factory CreateSourceVersionRequest.fromJson(Map<String, dynamic> json) {
+    return CreateSourceVersionRequest(
+      versionTag: (() {
+        final value = json['versionTag']?.toString();
+        if (value == null) {
+          throw FormatException('CreateSourceVersionRequest.versionTag is required');
+        }
+        return value;
+      })(),
+      sourceType: (() {
+        final value = json['sourceType']?.toString();
+        if (value == null) {
+          throw FormatException('CreateSourceVersionRequest.sourceType is required');
+        }
+        return value;
+      })(),
+      sourceRef: json['sourceRef']?.toString(),
+      commitHash: json['commitHash']?.toString(),
+      artifactDriveUri: (() {
+        final value = json['artifactDriveUri']?.toString();
+        if (value == null) {
+          throw FormatException('CreateSourceVersionRequest.artifactDriveUri is required');
+        }
+        return value;
+      })(),
+      artifactSize: (() {
+        final value = json['artifactSize']?.toString();
+        if (value == null) {
+          throw FormatException('CreateSourceVersionRequest.artifactSize is required');
+        }
+        return value;
+      })(),
+      artifactHash: (() {
+        final value = json['artifactHash']?.toString();
+        if (value == null) {
+          throw FormatException('CreateSourceVersionRequest.artifactHash is required');
+        }
+        return value;
+      })(),
+      configSnapshot: (() {
+        final map = _sdkworkAsMap(json['configSnapshot']);
+        return map == null ? null : SourceVersionConfigSnapshot.fromJson(map);
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'versionTag': versionTag,
+      'sourceType': sourceType,
+      'sourceRef': sourceRef,
+      'commitHash': commitHash,
+      'artifactDriveUri': artifactDriveUri,
+      'artifactSize': artifactSize,
+      'artifactHash': artifactHash,
+      'configSnapshot': configSnapshot?.toJson(),
+    };
+  }
+}
+
+class ImportGitSourceVersionRequest {
+  final String versionTag;
+  final String repositoryUrl;
+  final String? gitRef;
+
+  ImportGitSourceVersionRequest({
+    required this.versionTag,
+    required this.repositoryUrl,
+    this.gitRef
+  });
+
+  factory ImportGitSourceVersionRequest.fromJson(Map<String, dynamic> json) {
+    return ImportGitSourceVersionRequest(
+      versionTag: (() {
+        final value = json['versionTag']?.toString();
+        if (value == null) {
+          throw FormatException('ImportGitSourceVersionRequest.versionTag is required');
+        }
+        return value;
+      })(),
+      repositoryUrl: (() {
+        final value = json['repositoryUrl']?.toString();
+        if (value == null) {
+          throw FormatException('ImportGitSourceVersionRequest.repositoryUrl is required');
+        }
+        return value;
+      })(),
+      gitRef: json['gitRef']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'versionTag': versionTag,
+      'repositoryUrl': repositoryUrl,
+      'gitRef': gitRef,
+    };
+  }
+}
+
+class SourceVersionResponse {
+  final String id;
+  final String siteId;
+  final String versionTag;
+  final String sourceType;
+  final String? sourceRef;
+  final String? commitHash;
+  final String artifactDriveUri;
+  final String artifactSize;
+  final String artifactHash;
+  final SourceVersionConfigSnapshot configSnapshot;
+  final int status;
+  final bool retained;
+  final String createdAt;
+
+  SourceVersionResponse({
+    required this.id,
+    required this.siteId,
+    required this.versionTag,
+    required this.sourceType,
+    this.sourceRef,
+    this.commitHash,
+    required this.artifactDriveUri,
+    required this.artifactSize,
+    required this.artifactHash,
+    required this.configSnapshot,
+    required this.status,
+    required this.retained,
+    required this.createdAt
+  });
+
+  factory SourceVersionResponse.fromJson(Map<String, dynamic> json) {
+    return SourceVersionResponse(
+      id: (() {
+        final value = json['id']?.toString();
+        if (value == null) {
+          throw FormatException('SourceVersionResponse.id is required');
+        }
+        return value;
+      })(),
+      siteId: (() {
+        final value = json['siteId']?.toString();
+        if (value == null) {
+          throw FormatException('SourceVersionResponse.siteId is required');
+        }
+        return value;
+      })(),
+      versionTag: (() {
+        final value = json['versionTag']?.toString();
+        if (value == null) {
+          throw FormatException('SourceVersionResponse.versionTag is required');
+        }
+        return value;
+      })(),
+      sourceType: (() {
+        final value = json['sourceType']?.toString();
+        if (value == null) {
+          throw FormatException('SourceVersionResponse.sourceType is required');
+        }
+        return value;
+      })(),
+      sourceRef: json['sourceRef']?.toString(),
+      commitHash: json['commitHash']?.toString(),
+      artifactDriveUri: (() {
+        final value = json['artifactDriveUri']?.toString();
+        if (value == null) {
+          throw FormatException('SourceVersionResponse.artifactDriveUri is required');
+        }
+        return value;
+      })(),
+      artifactSize: (() {
+        final value = json['artifactSize']?.toString();
+        if (value == null) {
+          throw FormatException('SourceVersionResponse.artifactSize is required');
+        }
+        return value;
+      })(),
+      artifactHash: (() {
+        final value = json['artifactHash']?.toString();
+        if (value == null) {
+          throw FormatException('SourceVersionResponse.artifactHash is required');
+        }
+        return value;
+      })(),
+      configSnapshot: (() {
+        final map = _sdkworkAsMap(json['configSnapshot']);
+        if (map == null) {
+          throw FormatException('SourceVersionResponse.configSnapshot is required');
+        }
+        return SourceVersionConfigSnapshot.fromJson(map);
+      })(),
+      status: (() {
+        final value = json['status'];
+        if (value is! int) {
+          throw FormatException('SourceVersionResponse.status is required');
+        }
+        return value;
+      })(),
+      retained: (() {
+        final value = json['retained'];
+        if (value is! bool) {
+          throw FormatException('SourceVersionResponse.retained is required');
+        }
+        return value;
+      })(),
+      createdAt: (() {
+        final value = json['createdAt']?.toString();
+        if (value == null) {
+          throw FormatException('SourceVersionResponse.createdAt is required');
+        }
+        return value;
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'id': id,
+      'siteId': siteId,
+      'versionTag': versionTag,
+      'sourceType': sourceType,
+      'sourceRef': sourceRef,
+      'commitHash': commitHash,
+      'artifactDriveUri': artifactDriveUri,
+      'artifactSize': artifactSize,
+      'artifactHash': artifactHash,
+      'configSnapshot': configSnapshot.toJson(),
+      'status': status,
+      'retained': retained,
+      'createdAt': createdAt,
+    };
+  }
+}
+
+class SourceVersionPage {
+  final List<SourceVersionResponse>? items;
+  final String? total;
+
+  SourceVersionPage({
+    this.items,
+    this.total
+  });
+
+  factory SourceVersionPage.fromJson(Map<String, dynamic> json) {
+    return SourceVersionPage(
+      items: (() {
+        final list = _sdkworkAsList(json['items']);
+        if (list == null) {
+          return null;
+        }
+        return list
+            .map((item) => (() {
+        final map = _sdkworkAsMap(item);
+        return map == null ? null : SourceVersionResponse.fromJson(map);
+      })())
+            .whereType<SourceVersionResponse>()
+            .toList();
+      })(),
+      total: json['total']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'items': items?.map((item) => item.toJson()).toList(),
+      'total': total,
+    };
+  }
+}
+
 class CreateDeploymentRequest {
+  final String? sourceVersionId;
   final int deployType;
   final String? versionTag;
   final String? commitHash;
@@ -686,6 +1034,7 @@ class CreateDeploymentRequest {
   final String? environment;
 
   CreateDeploymentRequest({
+    this.sourceVersionId,
     required this.deployType,
     this.versionTag,
     this.commitHash,
@@ -698,6 +1047,7 @@ class CreateDeploymentRequest {
 
   factory CreateDeploymentRequest.fromJson(Map<String, dynamic> json) {
     return CreateDeploymentRequest(
+      sourceVersionId: json['sourceVersionId']?.toString(),
       deployType: (() {
         final value = json['deployType'];
         if (value is! int) {
@@ -717,6 +1067,7 @@ class CreateDeploymentRequest {
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
+      'sourceVersionId': sourceVersionId,
       'deployType': deployType,
       'versionTag': versionTag,
       'commitHash': commitHash,
@@ -733,6 +1084,7 @@ class DeploymentResponse {
   final String id;
   final String siteId;
   final int deployType;
+  final String? sourceVersionId;
   final String? versionTag;
   final String? commitHash;
   final String? sourceRef;
@@ -751,6 +1103,7 @@ class DeploymentResponse {
     required this.id,
     required this.siteId,
     required this.deployType,
+    this.sourceVersionId,
     this.versionTag,
     this.commitHash,
     this.sourceRef,
@@ -789,6 +1142,7 @@ class DeploymentResponse {
         }
         return value;
       })(),
+      sourceVersionId: json['sourceVersionId']?.toString(),
       versionTag: json['versionTag']?.toString(),
       commitHash: json['commitHash']?.toString(),
       sourceRef: json['sourceRef']?.toString(),
@@ -828,6 +1182,7 @@ class DeploymentResponse {
       'id': id,
       'siteId': siteId,
       'deployType': deployType,
+      'sourceVersionId': sourceVersionId,
       'versionTag': versionTag,
       'commitHash': commitHash,
       'sourceRef': sourceRef,
@@ -2135,6 +2490,190 @@ class SitesDomainsVerifyResponse {
         final value = json['traceId']?.toString();
         if (value == null) {
           throw FormatException('SitesDomainsVerifyResponse.traceId is required');
+        }
+        return value;
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SitesSourceVersionsListResponse {
+  final int code;
+  final dynamic data;
+  final String traceId;
+
+  SitesSourceVersionsListResponse({
+    required this.code,
+    required this.data,
+    required this.traceId
+  });
+
+  factory SitesSourceVersionsListResponse.fromJson(Map<String, dynamic> json) {
+    return SitesSourceVersionsListResponse(
+      code: (() {
+        final value = json['code'];
+        if (value is! int) {
+          throw FormatException('SitesSourceVersionsListResponse.code is required');
+        }
+        return value;
+      })(),
+      data: (() {
+        final map = _sdkworkAsMap(json['data']);
+        if (map == null) {
+          throw FormatException('SitesSourceVersionsListResponse.data is required');
+        }
+        return map;
+      })(),
+      traceId: (() {
+        final value = json['traceId']?.toString();
+        if (value == null) {
+          throw FormatException('SitesSourceVersionsListResponse.traceId is required');
+        }
+        return value;
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SitesSourceVersionsCreateResponse201 {
+  final int code;
+  final dynamic data;
+  final String traceId;
+
+  SitesSourceVersionsCreateResponse201({
+    required this.code,
+    required this.data,
+    required this.traceId
+  });
+
+  factory SitesSourceVersionsCreateResponse201.fromJson(Map<String, dynamic> json) {
+    return SitesSourceVersionsCreateResponse201(
+      code: (() {
+        final value = json['code'];
+        if (value is! int) {
+          throw FormatException('SitesSourceVersionsCreateResponse201.code is required');
+        }
+        return value;
+      })(),
+      data: (() {
+        final map = _sdkworkAsMap(json['data']);
+        if (map == null) {
+          throw FormatException('SitesSourceVersionsCreateResponse201.data is required');
+        }
+        return map;
+      })(),
+      traceId: (() {
+        final value = json['traceId']?.toString();
+        if (value == null) {
+          throw FormatException('SitesSourceVersionsCreateResponse201.traceId is required');
+        }
+        return value;
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SitesSourceVersionsImportGitResponse201 {
+  final int code;
+  final dynamic data;
+  final String traceId;
+
+  SitesSourceVersionsImportGitResponse201({
+    required this.code,
+    required this.data,
+    required this.traceId
+  });
+
+  factory SitesSourceVersionsImportGitResponse201.fromJson(Map<String, dynamic> json) {
+    return SitesSourceVersionsImportGitResponse201(
+      code: (() {
+        final value = json['code'];
+        if (value is! int) {
+          throw FormatException('SitesSourceVersionsImportGitResponse201.code is required');
+        }
+        return value;
+      })(),
+      data: (() {
+        final map = _sdkworkAsMap(json['data']);
+        if (map == null) {
+          throw FormatException('SitesSourceVersionsImportGitResponse201.data is required');
+        }
+        return map;
+      })(),
+      traceId: (() {
+        final value = json['traceId']?.toString();
+        if (value == null) {
+          throw FormatException('SitesSourceVersionsImportGitResponse201.traceId is required');
+        }
+        return value;
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SitesSourceVersionsRetrieveResponse {
+  final int code;
+  final dynamic data;
+  final String traceId;
+
+  SitesSourceVersionsRetrieveResponse({
+    required this.code,
+    required this.data,
+    required this.traceId
+  });
+
+  factory SitesSourceVersionsRetrieveResponse.fromJson(Map<String, dynamic> json) {
+    return SitesSourceVersionsRetrieveResponse(
+      code: (() {
+        final value = json['code'];
+        if (value is! int) {
+          throw FormatException('SitesSourceVersionsRetrieveResponse.code is required');
+        }
+        return value;
+      })(),
+      data: (() {
+        final map = _sdkworkAsMap(json['data']);
+        if (map == null) {
+          throw FormatException('SitesSourceVersionsRetrieveResponse.data is required');
+        }
+        return map;
+      })(),
+      traceId: (() {
+        final value = json['traceId']?.toString();
+        if (value == null) {
+          throw FormatException('SitesSourceVersionsRetrieveResponse.traceId is required');
         }
         return value;
       })()
