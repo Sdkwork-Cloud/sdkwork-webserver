@@ -187,6 +187,37 @@ describe("admin workspace application controls", () => {
     expect(screen.getByRole("heading", { name: "Store listing details" })).toBeTruthy();
   });
 
+  it("validates and reviews a Git repository as the initial deployment source", async () => {
+    const registry = createWebserverAdminApplicationRegistry(
+      client({}),
+      testSourceStorage(),
+      testMediaStorage(),
+    );
+    renderWorkspace("/admin/applications", registry);
+
+    fireEvent.click(await screen.findByRole("button", { name: "Create application" }));
+    fireEvent.change(screen.getByLabelText("Application name"), { target: { value: "Git portal" } });
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+    fireEvent.click(screen.getByRole("button", { name: "Git repository" }));
+
+    const repositoryInput = screen.getByLabelText("HTTPS Git repository") as HTMLInputElement;
+    fireEvent.click(screen.getByRole("button", { name: "Review" }));
+    expect(screen.getByRole("alert").textContent).toContain("Enter a Git repository");
+    expect(screen.getByRole("alert").textContent).not.toContain("version");
+    await waitFor(() => expect(document.activeElement).toBe(repositoryInput));
+
+    fireEvent.change(repositoryInput, { target: { value: "http://github.com/sdkwork/example.git" } });
+    fireEvent.click(screen.getByRole("button", { name: "Review" }));
+    expect(screen.getByRole("alert").textContent).toContain("Enter a valid HTTPS Git repository");
+    await waitFor(() => expect(document.activeElement).toBe(repositoryInput));
+
+    fireEvent.change(repositoryInput, { target: { value: "https://github.com/sdkwork/example.git" } });
+    fireEvent.click(screen.getByRole("button", { name: "Review" }));
+    expect(screen.getByRole("heading", { name: "Review and create" })).toBeTruthy();
+    expect(screen.getByText("https://github.com/sdkwork/example.git")).toBeTruthy();
+  });
+
   it("manages preview images as an ordered ten-slot strip", async () => {
     class PreviewUrl extends URL {
       static createObjectURL(file: Blob): string {
@@ -313,7 +344,7 @@ describe("admin workspace application controls", () => {
     fireEvent.click(screen.getAllByRole("button", { name: "Create application" }).at(-1)!);
 
     expect((await screen.findByRole("alert")).textContent).toContain(
-      "Application app-1 and its source package were created, but the initial deployment command was not accepted.",
+      "Application app-1 was created, but the initial deployment command was not accepted.",
     );
     expect(screen.queryByText("provider detail must remain hidden")).toBeNull();
   });

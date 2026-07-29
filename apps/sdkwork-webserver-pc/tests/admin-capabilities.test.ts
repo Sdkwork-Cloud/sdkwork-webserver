@@ -97,6 +97,67 @@ describe("admin application capability", () => {
     expect(registry["application-deployments"]?.actions.find((candidate) => candidate.id === "rollback")?.availableWhen?.({ body: {}, selectedItem: { status: 3 } })).toBe(false);
   });
 
+  it("creates and redeploys Git-backed applications without storing a source package", async () => {
+    const prepare = vi.fn();
+    const store = vi.fn();
+    const createDeployment = vi.fn().mockResolvedValue({ id: "deployment-1" });
+    const sourceStorage: ApplicationSourceStorage = { prepare, store };
+    const client = {
+      application: {
+        create: vi.fn().mockResolvedValue({ id: "app-1" }),
+        update: vi.fn().mockResolvedValue({ id: "app-1" }),
+      },
+      applicationDeployment: {
+        applications: { deployments: { create: createDeployment } },
+      },
+    } as unknown as WebserverAdminSdkClient;
+    const registry = createWebserverAdminApplicationRegistry(client, sourceStorage, testMediaStorage());
+    const create = registry.applications?.actions.find((candidate) => candidate.id === "create");
+    const deploy = registry["application-deployments"]?.actions.find(
+      (candidate) => candidate.id === "deploy",
+    );
+    if (!create || !deploy) throw new Error("Git deployment actions are unavailable");
+
+    expect(create.sourceInput).toBe("archive-directory-or-git");
+    await create.execute({
+      applicationSubmission: defaultApplicationSubmission(),
+      body: {
+        name: "Git portal",
+        applicationType: "WEB",
+        siteType: 1,
+        environment: "production",
+        versionTag: "v1.0.0",
+      },
+      idempotencyKey: "git-application-create-1",
+      sourceInputMode: "git",
+      sourceRepository: "  https://github.com/sdkwork/example.git  ",
+    });
+    expect(createDeployment).toHaveBeenLastCalledWith("app-1", {
+      commitHash: undefined,
+      deployType: 2,
+      environment: "production",
+      sourceRef: "https://github.com/sdkwork/example.git",
+      versionTag: "v1.0.0",
+    }, { idempotencyKey: "git-application-create-1" });
+
+    await deploy.execute({
+      body: { deployType: 1, environment: "staging", versionTag: "v1.1.0" },
+      idempotencyKey: "git-application-deploy-1",
+      scopeId: "app-1",
+      sourceInputMode: "git",
+      sourceRepository: "https://git.example.test/team/portal.git",
+    });
+    expect(createDeployment).toHaveBeenLastCalledWith("app-1", {
+      commitHash: undefined,
+      deployType: 2,
+      environment: "staging",
+      sourceRef: "https://git.example.test/team/portal.git",
+      versionTag: "v1.1.0",
+    }, { idempotencyKey: "git-application-deploy-1" });
+    expect(prepare).not.toHaveBeenCalled();
+    expect(store).not.toHaveBeenCalled();
+  });
+
   it.each([
     [{ deployType: 0, environment: "production", versionTag: "v1.1.0" }, "Deployment method is invalid"],
     [{ deployType: 1, environment: "qa", versionTag: "v1.1.0" }, "Deployment environment is invalid"],

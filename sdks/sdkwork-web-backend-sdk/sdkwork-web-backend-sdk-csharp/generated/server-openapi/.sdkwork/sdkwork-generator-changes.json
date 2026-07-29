@@ -9,18 +9,10 @@
     "protocol": "http",
     "packageName": "SDKWork.Web.BackendSdk"
   },
-  "changeFingerprint": "e6a3795db9d719300a6da822559393d14478b4a94dc08f5a781289d68576c0ae",
+  "changeFingerprint": "df21738913ffa2b2983d8e24aa6e7568916dd29504b84ccbed2210299e25b67b",
   "changes": {
-    "createdGeneratedFiles": [
-      "Models/ApplicationStoreListing.cs",
-      "Models/MediaChecksum.cs",
-      "Models/MediaResource.cs"
-    ],
-    "updatedGeneratedFiles": [
-      "Models/ApplicationResponse.cs",
-      "Models/CreateApplicationRequest.cs",
-      "Models/UpdateApplicationRequest.cs"
-    ],
+    "createdGeneratedFiles": [],
+    "updatedGeneratedFiles": [],
     "unchangedGeneratedFiles": [
       "Api/AgentApi.cs",
       "Api/Api.cs",
@@ -47,6 +39,7 @@
       "Models/ApplicationDeploymentResponse.cs",
       "Models/ApplicationDomainResponse.cs",
       "Models/ApplicationDomainVerifyResponse.cs",
+      "Models/ApplicationResponse.cs",
       "Models/ApplicationsActivateResponse.cs",
       "Models/ApplicationsCreateResponse201.cs",
       "Models/ApplicationsDeploymentsCreateResponse201.cs",
@@ -58,6 +51,7 @@
       "Models/ApplicationsListResponse.cs",
       "Models/ApplicationsPauseResponse.cs",
       "Models/ApplicationsRetrieveResponse.cs",
+      "Models/ApplicationStoreListing.cs",
       "Models/ApplicationsUpdateResponse.cs",
       "Models/AuditLogPage.cs",
       "Models/AuditLogResponse.cs",
@@ -77,12 +71,15 @@
       "Models/ConfigsValidateResponse.cs",
       "Models/CreateApplicationDeploymentRequest.cs",
       "Models/CreateApplicationDomainRequest.cs",
+      "Models/CreateApplicationRequest.cs",
       "Models/CreateCertificateRequest.cs",
       "Models/CreateNginxConfigRequest.cs",
       "Models/CreateServerRequest.cs",
       "Models/CreateServerResponse.cs",
       "Models/FieldError.cs",
       "Models/HeartbeatResponse.cs",
+      "Models/MediaChecksum.cs",
+      "Models/MediaResource.cs",
       "Models/NginxConfigPage.cs",
       "Models/NginxConfigResponse.cs",
       "Models/NginxDeployResponse.cs",
@@ -105,6 +102,7 @@
       "Models/ServersCreateResponse201.cs",
       "Models/ServersListResponse.cs",
       "Models/StatusRetrieveResponse.cs",
+      "Models/UpdateApplicationRequest.cs",
       "Models/UpdateCertificateRequest.cs",
       "Models/UpdateNginxConfigRequest.cs",
       "README.md",
@@ -121,59 +119,26 @@
   },
   "impact": {
     "schemaVersion": 1,
-    "areas": [
-      "models"
-    ],
-    "details": [
-      {
-        "area": "models",
-        "paths": [
-          "Models/ApplicationResponse.cs",
-          "Models/ApplicationStoreListing.cs",
-          "Models/CreateApplicationRequest.cs",
-          "Models/MediaChecksum.cs",
-          "Models/MediaResource.cs",
-          "Models/UpdateApplicationRequest.cs"
-        ]
-      }
-    ],
-    "requiresVerification": true,
-    "summary": "Detected impact areas: models. Verification is required."
+    "areas": [],
+    "details": [],
+    "requiresVerification": false,
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
   },
   "verificationPlan": {
-    "shouldRun": true,
-    "runPhase": "now",
-    "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
-    "steps": [
-      {
-        "id": "check",
-        "title": "Unified package check",
-        "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
-        "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-csharp\\generated\\server-openapi",
-        "command": "node",
-        "args": [
-          "./bin/publish-core.mjs",
-          "--language",
-          "csharp",
-          "--project-dir",
-          ".",
-          "--action",
-          "check"
-        ],
-        "displayCommand": "node ./bin/publish-core.mjs --language csharp --project-dir . --action check"
-      }
-    ]
+    "shouldRun": false,
+    "runPhase": "skip",
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
+    "steps": []
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "medium",
-    "nextAction": "verify",
+    "riskLevel": "low",
+    "nextAction": "skip",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
-    "summary": "Changes have been applied. Run the required verification plan now.",
+    "summary": "No actionable changes were detected. No apply or verification step is required.",
     "reasons": [
-      "verification-required"
+      "no-actionable-changes"
     ]
   },
   "preservedLegacyFiles": false

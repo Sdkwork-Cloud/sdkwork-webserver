@@ -12,7 +12,7 @@
   "mode": "apply",
   "hasChanges": true,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "6845833975d98af92f9d991141b1803f91c35144d734826d2c3ce0e976217a54",
+  "changeFingerprint": "6ec44010a62d1cc1be43034a99314723adcafe33e96207c3412569feeb12c938",
   "changeImpact": {
     "schemaVersion": 1,
     "areas": [
@@ -22,12 +22,7 @@
       {
         "area": "models",
         "paths": [
-          "src/Models/ApplicationStoreListing.php",
-          "src/Models/CreateSiteRequest.php",
-          "src/Models/MediaChecksum.php",
-          "src/Models/MediaResource.php",
-          "src/Models/SiteResponse.php",
-          "src/Models/UpdateSiteRequest.php"
+          "src/Models/CreateDeploymentRequest.php"
         ]
       }
     ],
@@ -117,22 +112,16 @@
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 6,
+    "writtenFiles": 1,
     "skippedScaffoldFiles": 1,
-    "skippedUnchangedGeneratedFiles": 65,
+    "skippedUnchangedGeneratedFiles": 70,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "6845833975d98af92f9d991141b1803f91c35144d734826d2c3ce0e976217a54",
+    "changeFingerprint": "6ec44010a62d1cc1be43034a99314723adcafe33e96207c3412569feeb12c938",
     "changes": {
-      "createdGeneratedFiles": [
-        "src/Models/ApplicationStoreListing.php",
-        "src/Models/MediaChecksum.php",
-        "src/Models/MediaResource.php"
-      ],
+      "createdGeneratedFiles": [],
       "updatedGeneratedFiles": [
-        "src/Models/CreateSiteRequest.php",
-        "src/Models/SiteResponse.php",
-        "src/Models/UpdateSiteRequest.php"
+        "src/Models/CreateDeploymentRequest.php"
       ],
       "unchangedGeneratedFiles": [
         "bin/publish-core.mjs",
@@ -151,15 +140,16 @@
         "src/Api/Monitor.php",
         "src/Api/Site.php",
         "src/Http/HttpClient.php",
+        "src/Models/ApplicationStoreListing.php",
         "src/Models/CertificatePage.php",
         "src/Models/CertificateResponse.php",
         "src/Models/CertificatesCreateResponse201.php",
         "src/Models/CertificatesListResponse.php",
         "src/Models/CreateCertificateRequest.php",
-        "src/Models/CreateDeploymentRequest.php",
         "src/Models/CreateDomainRequest.php",
         "src/Models/CreateEnvVariableRequest.php",
         "src/Models/CreateHealthCheckRequest.php",
+        "src/Models/CreateSiteRequest.php",
         "src/Models/DeploymentPage.php",
         "src/Models/DeploymentResponse.php",
         "src/Models/DomainPage.php",
@@ -170,6 +160,8 @@
         "src/Models/FieldError.php",
         "src/Models/HealthCheckPage.php",
         "src/Models/HealthCheckResponse.php",
+        "src/Models/MediaChecksum.php",
+        "src/Models/MediaResource.php",
         "src/Models/PageInfo.php",
         "src/Models/ProblemDetail.php",
         "src/Models/SdkWorkApiResponse.php",
@@ -180,6 +172,7 @@
         "src/Models/SdkWorkResourceData.php",
         "src/Models/SdkWorkResourceResponse.php",
         "src/Models/SitePage.php",
+        "src/Models/SiteResponse.php",
         "src/Models/SitesActivateResponse.php",
         "src/Models/SitesCreateResponse201.php",
         "src/Models/SitesDeploymentsCreateResponse201.php",
@@ -198,6 +191,7 @@
         "src/Models/SitesPauseResponse.php",
         "src/Models/SitesRetrieveResponse.php",
         "src/Models/SitesUpdateResponse.php",
+        "src/Models/UpdateSiteRequest.php",
         "src/SdkConfig.php",
         "src/SdkworkAppClient.php"
       ],
@@ -217,12 +211,7 @@
         {
           "area": "models",
           "paths": [
-            "src/Models/ApplicationStoreListing.php",
-            "src/Models/CreateSiteRequest.php",
-            "src/Models/MediaChecksum.php",
-            "src/Models/MediaResource.php",
-            "src/Models/SiteResponse.php",
-            "src/Models/UpdateSiteRequest.php"
+            "src/Models/CreateDeploymentRequest.php"
           ]
         }
       ],

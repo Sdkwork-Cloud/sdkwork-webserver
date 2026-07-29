@@ -2,7 +2,7 @@
 
 ```yaml
 id: REQ-2026-0062
-title: Publish owner-scoped applications with Drive-backed artifacts, domains, and certificates
+title: Publish owner-scoped applications from artifacts or Git repositories with domains and certificates
 owner: sdkwork-web-server
 status: in-progress
 source: user
@@ -11,6 +11,7 @@ goals:
   - Keep the complete Console shell and sign-out command visible for every authenticated account, with resource-level unauthorized states for unavailable capabilities.
   - List and mutate only sites owned by the authenticated app user, including configuration, domains, deployments, and certificates.
   - Upload a non-empty application archive through the generated Drive App SDK before creating the Web Server deployment command.
+  - Allow creation and redeployment from a public HTTPS Git repository without packaging or storing a Drive artifact.
   - Apply one bounded application-source policy to browser directory packages and uploaded ZIP archives before Drive extraction.
   - Keep source preparation, upload, archive inspection, and extraction cancellable or fail-closed without allowing duplicate UI submission.
   - Persist a stable Drive resource URI, package size, lowercase SHA-256 digest, environment, version metadata, and idempotency key without storing signed URLs, object keys, or provider credentials.
@@ -31,7 +32,10 @@ acceptance_criteria:
   - An app user sees only their own applications; a second user in the same tenant cannot list or mutate the first user's applications, domains, deployments, or certificates.
   - Certificate list accepts an optional siteId, verifies owner access, and performs owner plus site filtering in SQL.
   - Certificate creation rejects a domain owned by another app user in the same tenant.
-  - The Console release action requires an archive, reports upload progress, computes SHA-256, uploads through Drive, and submits the stable Drive URI and artifact metadata through the generated Web App SDK.
+  - For ZIP and directory sources, the Console release action requires a non-empty archive, reports upload progress, computes SHA-256, uploads through Drive, and submits the stable Drive URI and artifact metadata through the generated Web App SDK.
+  - Application creation and redeployment offer ZIP archive, local directory, and Git repository as mutually exclusive source modes; Git submissions use deployType 2 and submit the repository URL as sourceRef without artifact fields.
+  - Git repository input accepts only an absolute HTTPS URL with a non-root repository path, rejects embedded credentials, query parameters, fragments, HTTP URLs, and values longer than 500 characters, and reports source-specific validation errors without invalidating a populated version.
+  - Git source creation and redeployment do not invoke source packaging, archive inspection, Drive upload, or Drive extraction; ZIP and directory behavior remains unchanged.
   - Directory packaging applies root and nested `.gitignore` files with Git-compatible ordering, negation, anchoring, escaping, and ignored-parent semantics.
   - Directory and ZIP source packages exclude VCS metadata directories and reject unsafe, duplicate, excessively deep, excessively long, or control-character paths before extraction.
   - Application source extraction is bounded to at most 500 files, 16 MiB per file, and 64 MiB total uncompressed content, matching the active Drive extraction profile.
@@ -86,6 +90,7 @@ verification:
   - pnpm --dir apps/sdkwork-webserver-pc test
   - pnpm --dir apps/sdkwork-webserver-pc typecheck
   - pnpm --dir apps/sdkwork-webserver-pc build
+  - pnpm check:repository-docs
 ```
 
 ## Decision

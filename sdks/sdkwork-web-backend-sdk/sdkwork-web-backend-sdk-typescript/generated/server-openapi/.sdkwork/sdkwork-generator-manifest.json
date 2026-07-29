@@ -276,7 +276,7 @@
     },
     {
       "path": "src/types/create-application-deployment-request.ts",
-      "sha256": "7ea593509f9033a53effdfb32289e8bd05dff6b1124ebf98e6bff2c6342cd7f3"
+      "sha256": "8e527de70d8ee8678ece9f5f16fb5292525910ea02dce6e1b3a1467d297c93c5"
     },
     {
       "path": "src/types/create-application-domain-request.ts",

@@ -260,11 +260,15 @@ tbody tr:last-child td { border-bottom: 0; }
 .media-preview-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 7px; }
 .media-preview-grid img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border: 1px solid var(--sdk-color-border-default); border-radius: 4px; }
 .media-validation { padding: 10px 2px; color: var(--webserver-color-danger-text); font-size: 12px; line-height: 1.45; }
-.source-mode-toggle { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 3px; border: 1px solid var(--sdk-color-border-default); border-radius: 6px; background: var(--sdk-color-surface-panel-muted); }
+.source-mode-toggle { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 3px; border: 1px solid var(--sdk-color-border-default); border-radius: 6px; background: var(--sdk-color-surface-panel-muted); }
 .source-mode-toggle button { min-width: 0; min-height: 38px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; color: var(--sdk-color-text-secondary); background: transparent; border: 0; border-radius: 4px; font-weight: 650; cursor: pointer; }
 .source-mode-toggle button.active { color: var(--sdk-color-text-primary); background: var(--sdk-color-surface-panel); box-shadow: var(--sdk-shadow-sm); }
 .source-mode-toggle button:disabled { cursor: not-allowed; opacity: .6; }
 .source-file-control { display: grid; gap: 8px; }
+.source-repository-control { min-width: 0; display: grid; gap: 8px; }
+.source-repository-input { width: 100%; min-height: 42px; padding: 9px 10px; color: var(--sdk-color-text-primary); background: var(--sdk-color-surface-panel-muted); border: 1px solid var(--sdk-color-border-strong); border-radius: 5px; font: inherit; }
+.source-repository-input::placeholder { color: var(--sdk-color-text-muted); }
+.source-repository-input:focus-visible { outline: 2px solid color-mix(in srgb, var(--sdk-color-brand-primary) 36%, transparent); outline-offset: 1px; border-color: var(--sdk-color-brand-primary); }
 .source-file-heading { display: flex; align-items: center; gap: 7px; color: var(--sdk-color-text-primary); font-size: 13px; font-weight: 650; }
 .source-file-row { min-width: 0; display: grid; grid-template-columns: max-content minmax(0, 1fr); align-items: center; gap: 10px; min-height: 50px; padding: 6px; border: 1px solid var(--sdk-color-border-strong); border-radius: 5px; background: var(--sdk-color-surface-panel-muted); }
 .source-file-trigger { min-width: 0; display: inline-flex; align-items: center; justify-content: center; gap: 7px; margin: 0; white-space: nowrap; }
@@ -1244,6 +1248,11 @@ html[data-sdk-color-mode="dark"] .webserver-auth-page {
   padding: 4px 0;
   border: 0;
   border-bottom: 1px solid var(--sdk-color-border-subtle);
+  border-radius: 0;
+  background: transparent;
+}
+.application-creation-dialog .source-repository-input {
+  border-width: 0 0 1px;
   border-radius: 0;
   background: transparent;
 }

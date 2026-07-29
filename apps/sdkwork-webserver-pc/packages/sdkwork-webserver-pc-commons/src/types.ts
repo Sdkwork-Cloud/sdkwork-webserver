@@ -74,6 +74,8 @@ export interface WebserverResourceFilter {
   type: "date" | "select" | "text";
 }
 
+export type ApplicationDeploymentSourceMode = "archive" | "directory" | "git";
+
 export interface WebserverResourceActionContext {
   applicationSubmission?: import("./application-media.ts").ApplicationSubmissionInput;
   body: Record<string, unknown>;
@@ -83,7 +85,8 @@ export interface WebserverResourceActionContext {
   onProgress?(progress: number): void;
   selectedItem?: Record<string, unknown>;
   signal?: AbortSignal;
-  sourceInputMode?: "archive" | "directory";
+  sourceInputMode?: ApplicationDeploymentSourceMode;
+  sourceRepository?: string;
   scopeId?: string;
 }
 
@@ -119,7 +122,7 @@ export interface WebserverResourceAction {
   requiresFile?: boolean;
   requiresScope?: boolean;
   requiresSelection?: boolean;
-  sourceInput?: "archive-or-directory";
+  sourceInput?: "archive-directory-or-git";
 }
 
 export interface WebserverResourceDataSource {

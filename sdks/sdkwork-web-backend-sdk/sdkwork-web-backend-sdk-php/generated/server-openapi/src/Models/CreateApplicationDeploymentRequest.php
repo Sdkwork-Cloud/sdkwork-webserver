@@ -4,8 +4,12 @@ declare(strict_types=1);
 
 namespace SDKWork\Web\BackendSdk\Models;
 
+/**
+ * Deployment source command. Git deployments (deployType 2) require an HTTPS sourceRef and may omit artifact fields. Other deployment types require artifactDriveUri, artifactSize, and artifactHash together.
+ */
 final class CreateApplicationDeploymentRequest
 {
+    /** 1 for a stored package, 2 for a Git repository, 3 for CI/CD, or 4 for API delivery. */
     public ?int $deployType = null;
 
     public ?string $environment = null;
@@ -14,9 +18,10 @@ final class CreateApplicationDeploymentRequest
 
     public ?string $commitHash = null;
 
+    /** HTTPS Git repository URL when deployType is 2. Credentials, query parameters, and fragments are forbidden. */
     public ?string $sourceRef = null;
 
-    /** Stable Drive resource identity. Signed delivery URLs are forbidden. */
+    /** Stable Drive resource identity for package deployments. Signed delivery URLs are forbidden. */
     public ?string $artifactDriveUri = null;
 
     public ?string $artifactSize = null;

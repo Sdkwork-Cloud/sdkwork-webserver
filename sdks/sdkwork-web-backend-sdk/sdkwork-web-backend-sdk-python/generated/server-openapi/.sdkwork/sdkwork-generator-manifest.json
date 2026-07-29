@@ -256,7 +256,7 @@
     },
     {
       "path": "sdkwork_web_backend_sdk/models/create_application_deployment_request.py",
-      "sha256": "b210f4a607785e332bcf77c81fb0aea08af9d73557f4112624fd45549a2e90f9"
+      "sha256": "79984247b69e39b0e6c3da108b1d83e63c205efbbd15a04bca8671fc1ac90c22"
     },
     {
       "path": "sdkwork_web_backend_sdk/models/create_application_domain_request.py",

@@ -124,7 +124,7 @@
     },
     {
       "path": "src/models/create_deployment_request.rs",
-      "sha256": "d58b028b51cf02fba0939fd30606346fbd1c477aaacd07044a6ee42b2be483e7"
+      "sha256": "9a6073ec8e9696c1fe4e75888ad8aa5cf6c358d1a478f88a7ac5948b2294f6dc"
     },
     {
       "path": "src/models/create_domain_request.rs",

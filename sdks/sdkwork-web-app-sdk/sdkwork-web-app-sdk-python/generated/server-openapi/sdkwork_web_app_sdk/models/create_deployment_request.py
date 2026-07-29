@@ -5,11 +5,12 @@ from typing import TYPE_CHECKING, Optional, List, Dict, Any
 
 @dataclass
 class CreateDeploymentRequest:
+    """Deployment source command. Git deployments (deployType 2) require an HTTPS sourceRef and may omit artifact fields. Other deployment types require artifactDriveUri, artifactSize, and artifactHash together."""
     deploy_type: int
-    artifact_drive_uri: str
-    artifact_size: str
-    artifact_hash: str
     version_tag: Optional[str] = None
     commit_hash: Optional[str] = None
     source_ref: Optional[str] = None
+    artifact_drive_uri: Optional[str] = None
+    artifact_size: Optional[str] = None
+    artifact_hash: Optional[str] = None
     environment: Optional[str] = None

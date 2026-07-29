@@ -202,9 +202,25 @@ impl WebService {
             request.artifact_size.is_some(),
             request.artifact_hash.is_some(),
         ];
-        if !artifact_fields.into_iter().all(|present| present) {
+        let artifact_count = artifact_fields
+            .into_iter()
+            .filter(|present| *present)
+            .count();
+        if artifact_count != 0 && artifact_count != artifact_fields.len() {
             return Err(sdkwork_webserver_contract::WebServiceError::validation(
-                "artifactDriveUri, artifactSize, and artifactHash are required together",
+                "artifactDriveUri, artifactSize, and artifactHash must be provided together",
+            ));
+        }
+        if request.deploy_type == 2 {
+            let source_ref = request.source_ref.as_deref().ok_or_else(|| {
+                sdkwork_webserver_contract::WebServiceError::validation(
+                    "sourceRef is required for Git deployments",
+                )
+            })?;
+            validate_git_repository_url(source_ref)?;
+        } else if artifact_count == 0 {
+            return Err(sdkwork_webserver_contract::WebServiceError::validation(
+                "artifactDriveUri, artifactSize, and artifactHash are required for non-Git deployments",
             ));
         }
 
@@ -619,6 +635,25 @@ fn validate_store_https_url(field: &str, value: Option<&str>) -> WebServiceResul
     Ok(())
 }
 
+fn validate_git_repository_url(value: &str) -> WebServiceResult<()> {
+    let parsed = url::Url::parse(value).ok();
+    if parsed.as_ref().is_none_or(|parsed| {
+        parsed.scheme() != "https"
+            || parsed.host_str().is_none()
+            || parsed.path().is_empty()
+            || parsed.path() == "/"
+            || !parsed.username().is_empty()
+            || parsed.password().is_some()
+            || parsed.query().is_some()
+            || parsed.fragment().is_some()
+    }) {
+        return Err(sdkwork_webserver_contract::WebServiceError::validation(
+            "sourceRef must be an HTTPS Git repository URL without credentials, query parameters, or fragments",
+        ));
+    }
+    Ok(())
+}
+
 fn is_safe_drive_identifier_byte(byte: u8) -> bool {
     byte.is_ascii_alphanumeric() || matches!(byte, b'-' | b'_' | b'.')
 }
@@ -1010,8 +1045,17 @@ mod tests {
             ..CreateDeploymentRequest::default()
         };
         assert!(WebService::validate_deployment_request(&valid).is_ok());
+        assert!(
+            WebService::validate_deployment_request(&CreateDeploymentRequest {
+                deploy_type: 2,
+                source_ref: Some("https://github.com/sdkwork/example.git".to_owned()),
+                ..CreateDeploymentRequest::default()
+            })
+            .is_ok()
+        );
 
         for invalid in [
+            CreateDeploymentRequest::default(),
             CreateDeploymentRequest {
                 deploy_type: 0,
                 ..valid.clone()
@@ -1040,6 +1084,10 @@ mod tests {
                 commit_hash: Some("not-a-commit".to_string()),
                 ..valid.clone()
             },
+            CreateDeploymentRequest {
+                deploy_type: 2,
+                ..CreateDeploymentRequest::default()
+            },
         ] {
             assert!(WebService::validate_deployment_request(&invalid).is_err());
         }
@@ -1052,6 +1100,23 @@ mod tests {
             assert!(
                 WebService::validate_deployment_request(&CreateDeploymentRequest {
                     artifact_drive_uri: Some(artifact_drive_uri.to_owned()),
+                    ..valid.clone()
+                })
+                .is_err()
+            );
+        }
+
+        for source_ref in [
+            "http://github.com/sdkwork/example.git",
+            "https://user:secret@github.com/sdkwork/example.git",
+            "https://github.com/sdkwork/example.git?token=secret",
+            "https://github.com/sdkwork/example.git#main",
+            "https://github.com/",
+        ] {
+            assert!(
+                WebService::validate_deployment_request(&CreateDeploymentRequest {
+                    deploy_type: 2,
+                    source_ref: Some(source_ref.to_owned()),
                     ..CreateDeploymentRequest::default()
                 })
                 .is_err()
@@ -1078,6 +1143,13 @@ mod tests {
             "artifactHash": "a".repeat(64)
         });
         assert!(serde_json::from_value::<CreateDeploymentRequest>(valid.clone()).is_ok());
+        assert!(
+            serde_json::from_value::<CreateDeploymentRequest>(serde_json::json!({
+                "deployType": 2,
+                "sourceRef": "https://github.com/sdkwork/example.git"
+            }))
+            .is_ok()
+        );
 
         let mut missing_type = valid.clone();
         missing_type.as_object_mut().unwrap().remove("deployType");

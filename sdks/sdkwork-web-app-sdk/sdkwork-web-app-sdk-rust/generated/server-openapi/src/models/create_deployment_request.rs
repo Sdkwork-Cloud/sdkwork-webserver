@@ -1,7 +1,9 @@
 use serde::{Deserialize, Serialize};
 
+/// Deployment source command. Git deployments (deployType 2) require an HTTPS sourceRef and may omit artifact fields. Other deployment types require artifactDriveUri, artifactSize, and artifactHash together.
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct CreateDeploymentRequest {
+    /// 1 for a stored package, 2 for a Git repository, 3 for CI/CD, or 4 for API delivery.
     #[serde(rename = "deployType")]
     pub deploy_type: i64,
 
@@ -13,20 +15,24 @@ pub struct CreateDeploymentRequest {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub commit_hash: Option<String>,
 
+    /// HTTPS Git repository URL when deployType is 2. Credentials, query parameters, and fragments are forbidden.
     #[serde(rename = "sourceRef")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub source_ref: Option<String>,
 
-    /// Stable Drive resource identity. Signed delivery URLs are forbidden.
+    /// Stable Drive resource identity for package deployments. Signed delivery URLs are forbidden.
     #[serde(rename = "artifactDriveUri")]
-    pub artifact_drive_uri: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub artifact_drive_uri: Option<String>,
 
     #[serde(rename = "artifactSize")]
-    pub artifact_size: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub artifact_size: Option<String>,
 
     /// Lowercase SHA-256 hexadecimal digest of the uploaded package.
     #[serde(rename = "artifactHash")]
-    pub artifact_hash: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub artifact_hash: Option<String>,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub environment: Option<String>,

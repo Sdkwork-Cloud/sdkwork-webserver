@@ -124,7 +124,7 @@
     },
     {
       "path": "types/create_deployment_request.go",
-      "sha256": "995823a4631fe927d2a1d6f3e1e375c6a27ed1d03fead9ac1b6d8a54e82b9666"
+      "sha256": "8519bd71eb18058aff72fbdae178649a4338438df9cc6b91395a79d9f98a4c56"
     },
     {
       "path": "types/create_domain_request.go",

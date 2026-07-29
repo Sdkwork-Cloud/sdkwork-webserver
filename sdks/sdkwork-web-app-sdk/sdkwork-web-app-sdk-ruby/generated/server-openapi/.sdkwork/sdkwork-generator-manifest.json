@@ -96,7 +96,7 @@
     },
     {
       "path": "lib/sdkwork/app_sdk/models/create_deployment_request.rb",
-      "sha256": "b7f9264d319eb6419dddc21f89cf08689daca379063fca121730b3ecfb8fc643"
+      "sha256": "52a803094c6e8aa8249f4d3804a3a3d51012ff9ec7e813e69427fabaf7aa8754"
     },
     {
       "path": "lib/sdkwork/app_sdk/models/create_domain_request.rb",

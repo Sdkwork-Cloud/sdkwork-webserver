@@ -236,7 +236,7 @@
     },
     {
       "path": "lib/sdkwork/backend_sdk/models/create_application_deployment_request.rb",
-      "sha256": "c7a9ff4ecd0eb3b1df5d8755a17c9d42b06acc388777c01811c4ff35384495ce"
+      "sha256": "7cb39ad0b375c3a59eafc17b014923aea5f72fbd11f95597d9b44f586e5b4652"
     },
     {
       "path": "lib/sdkwork/backend_sdk/models/create_application_domain_request.rb",

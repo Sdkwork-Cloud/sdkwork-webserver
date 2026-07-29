@@ -9,17 +9,11 @@
     "protocol": "http",
     "packageName": "SDKWork.Web.AppSdk"
   },
-  "changeFingerprint": "454d6a1eef24e79309edf4ebe70bc94b2979a32e73e95228c2d9f8697a9b9fec",
+  "changeFingerprint": "ad58d872c02e1f118877a9ae8dcc7e9e476e67424ee3f4c4a73f5823b67487a2",
   "changes": {
-    "createdGeneratedFiles": [
-      "Models/ApplicationStoreListing.cs",
-      "Models/MediaChecksum.cs",
-      "Models/MediaResource.cs"
-    ],
+    "createdGeneratedFiles": [],
     "updatedGeneratedFiles": [
-      "Models/CreateSiteRequest.cs",
-      "Models/SiteResponse.cs",
-      "Models/UpdateSiteRequest.cs"
+      "Models/CreateDeploymentRequest.cs"
     ],
     "unchangedGeneratedFiles": [
       "Api/Api.cs",
@@ -36,15 +30,16 @@
       "CHANGELOG.md",
       "Http/HttpClient.cs",
       "LICENSE",
+      "Models/ApplicationStoreListing.cs",
       "Models/CertificatePage.cs",
       "Models/CertificateResponse.cs",
       "Models/CertificatesCreateResponse201.cs",
       "Models/CertificatesListResponse.cs",
       "Models/CreateCertificateRequest.cs",
-      "Models/CreateDeploymentRequest.cs",
       "Models/CreateDomainRequest.cs",
       "Models/CreateEnvVariableRequest.cs",
       "Models/CreateHealthCheckRequest.cs",
+      "Models/CreateSiteRequest.cs",
       "Models/DeploymentPage.cs",
       "Models/DeploymentResponse.cs",
       "Models/DomainPage.cs",
@@ -55,6 +50,8 @@
       "Models/FieldError.cs",
       "Models/HealthCheckPage.cs",
       "Models/HealthCheckResponse.cs",
+      "Models/MediaChecksum.cs",
+      "Models/MediaResource.cs",
       "Models/PageInfo.cs",
       "Models/ProblemDetail.cs",
       "Models/SdkWorkApiResponse.cs",
@@ -65,6 +62,7 @@
       "Models/SdkWorkResourceData.cs",
       "Models/SdkWorkResourceResponse.cs",
       "Models/SitePage.cs",
+      "Models/SiteResponse.cs",
       "Models/SitesActivateResponse.cs",
       "Models/SitesCreateResponse201.cs",
       "Models/SitesDeploymentsCreateResponse201.cs",
@@ -83,6 +81,7 @@
       "Models/SitesPauseResponse.cs",
       "Models/SitesRetrieveResponse.cs",
       "Models/SitesUpdateResponse.cs",
+      "Models/UpdateSiteRequest.cs",
       "README.md",
       "sdkwork-sdk.json",
       "SDKWork.Web.AppSdk.csproj",
@@ -104,12 +103,7 @@
       {
         "area": "models",
         "paths": [
-          "Models/ApplicationStoreListing.cs",
-          "Models/CreateSiteRequest.cs",
-          "Models/MediaChecksum.cs",
-          "Models/MediaResource.cs",
-          "Models/SiteResponse.cs",
-          "Models/UpdateSiteRequest.cs"
+          "Models/CreateDeploymentRequest.cs"
         ]
       }
     ],

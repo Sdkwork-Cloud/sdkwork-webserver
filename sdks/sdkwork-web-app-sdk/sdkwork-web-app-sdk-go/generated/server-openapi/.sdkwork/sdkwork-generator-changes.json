@@ -9,17 +9,11 @@
     "protocol": "http",
     "packageName": "github.com/sdkwork/sdkwork-web-app-sdk"
   },
-  "changeFingerprint": "252dac4921f8f2946d6e71291331e71e7f74e2682e455a67b28eda78f8562fbd",
+  "changeFingerprint": "c9e7b2f5e0e9dece7a3dad744b8b45c56d012b5efa7fc95ea8f384690ef01996",
   "changes": {
-    "createdGeneratedFiles": [
-      "types/application_store_listing.go",
-      "types/media_checksum.go",
-      "types/media_resource.go"
-    ],
+    "createdGeneratedFiles": [],
     "updatedGeneratedFiles": [
-      "types/create_site_request.go",
-      "types/site_response.go",
-      "types/update_site_request.go"
+      "types/create_deployment_request.go"
     ],
     "unchangedGeneratedFiles": [
       "api/base.go",
@@ -43,16 +37,17 @@
       "README.md",
       "sdk.go",
       "sdkwork-sdk.json",
+      "types/application_store_listing.go",
       "types/certificate_page.go",
       "types/certificate_response.go",
       "types/certificates_create_response201.go",
       "types/certificates_list_response.go",
       "types/common.go",
       "types/create_certificate_request.go",
-      "types/create_deployment_request.go",
       "types/create_domain_request.go",
       "types/create_env_variable_request.go",
       "types/create_health_check_request.go",
+      "types/create_site_request.go",
       "types/deployment_page.go",
       "types/deployment_response.go",
       "types/doc.go",
@@ -64,6 +59,8 @@
       "types/field_error.go",
       "types/health_check_page.go",
       "types/health_check_response.go",
+      "types/media_checksum.go",
+      "types/media_resource.go",
       "types/page_info.go",
       "types/problem_detail.go",
       "types/sdk_work_api_response.go",
@@ -75,6 +72,7 @@
       "types/sdk_work_resource_data.go",
       "types/sdk_work_resource_response.go",
       "types/site_page.go",
+      "types/site_response.go",
       "types/sites_activate_response.go",
       "types/sites_create_response201.go",
       "types/sites_deployments_create_response201.go",
@@ -92,7 +90,8 @@
       "types/sites_list_response.go",
       "types/sites_pause_response.go",
       "types/sites_retrieve_response.go",
-      "types/sites_update_response.go"
+      "types/sites_update_response.go",
+      "types/update_site_request.go"
     ],
     "deletedGeneratedFiles": [],
     "scaffoldedFiles": [],
@@ -110,12 +109,7 @@
       {
         "area": "models",
         "paths": [
-          "types/application_store_listing.go",
-          "types/create_site_request.go",
-          "types/media_checksum.go",
-          "types/media_resource.go",
-          "types/site_response.go",
-          "types/update_site_request.go"
+          "types/create_deployment_request.go"
         ]
       }
     ],

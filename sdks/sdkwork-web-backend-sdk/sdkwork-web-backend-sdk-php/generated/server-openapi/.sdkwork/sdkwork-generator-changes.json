@@ -9,17 +9,11 @@
     "protocol": "http",
     "packageName": "sdkwork/web-backend-sdk"
   },
-  "changeFingerprint": "c10642b57703d4e6d3c0ffa64fa1c0c2a9cc90f9aa48b76916d95caa020cd9c7",
+  "changeFingerprint": "787710e2f6f57cfe34087b2740b8f97521ce885b2cba6f6f49082c298783c83d",
   "changes": {
-    "createdGeneratedFiles": [
-      "src/Models/ApplicationStoreListing.php",
-      "src/Models/MediaChecksum.php",
-      "src/Models/MediaResource.php"
-    ],
+    "createdGeneratedFiles": [],
     "updatedGeneratedFiles": [
-      "src/Models/ApplicationResponse.php",
-      "src/Models/CreateApplicationRequest.php",
-      "src/Models/UpdateApplicationRequest.php"
+      "src/Models/CreateApplicationDeploymentRequest.php"
     ],
     "unchangedGeneratedFiles": [
       "bin/publish-core.mjs",
@@ -49,6 +43,7 @@
       "src/Models/ApplicationDeploymentResponse.php",
       "src/Models/ApplicationDomainResponse.php",
       "src/Models/ApplicationDomainVerifyResponse.php",
+      "src/Models/ApplicationResponse.php",
       "src/Models/ApplicationsActivateResponse.php",
       "src/Models/ApplicationsCreateResponse201.php",
       "src/Models/ApplicationsDeploymentsCreateResponse201.php",
@@ -60,6 +55,7 @@
       "src/Models/ApplicationsListResponse.php",
       "src/Models/ApplicationsPauseResponse.php",
       "src/Models/ApplicationsRetrieveResponse.php",
+      "src/Models/ApplicationStoreListing.php",
       "src/Models/ApplicationsUpdateResponse.php",
       "src/Models/AuditLogPage.php",
       "src/Models/AuditLogResponse.php",
@@ -77,14 +73,16 @@
       "src/Models/ConfigsRetrieveResponse.php",
       "src/Models/ConfigsUpdateResponse.php",
       "src/Models/ConfigsValidateResponse.php",
-      "src/Models/CreateApplicationDeploymentRequest.php",
       "src/Models/CreateApplicationDomainRequest.php",
+      "src/Models/CreateApplicationRequest.php",
       "src/Models/CreateCertificateRequest.php",
       "src/Models/CreateNginxConfigRequest.php",
       "src/Models/CreateServerRequest.php",
       "src/Models/CreateServerResponse.php",
       "src/Models/FieldError.php",
       "src/Models/HeartbeatResponse.php",
+      "src/Models/MediaChecksum.php",
+      "src/Models/MediaResource.php",
       "src/Models/NginxConfigPage.php",
       "src/Models/NginxConfigResponse.php",
       "src/Models/NginxDeployResponse.php",
@@ -107,6 +105,7 @@
       "src/Models/ServersCreateResponse201.php",
       "src/Models/ServersListResponse.php",
       "src/Models/StatusRetrieveResponse.php",
+      "src/Models/UpdateApplicationRequest.php",
       "src/Models/UpdateCertificateRequest.php",
       "src/Models/UpdateNginxConfigRequest.php",
       "src/SdkConfig.php",
@@ -128,12 +127,7 @@
       {
         "area": "models",
         "paths": [
-          "src/Models/ApplicationResponse.php",
-          "src/Models/ApplicationStoreListing.php",
-          "src/Models/CreateApplicationRequest.php",
-          "src/Models/MediaChecksum.php",
-          "src/Models/MediaResource.php",
-          "src/Models/UpdateApplicationRequest.php"
+          "src/Models/CreateApplicationDeploymentRequest.php"
         ]
       }
     ],

@@ -100,7 +100,7 @@
     },
     {
       "path": "src/Models/CreateDeploymentRequest.php",
-      "sha256": "fd11ab66327dc7ea78d5ccc6ced63386fec7c284d046b3488f4e975208910d39"
+      "sha256": "5df3db93b1cf1fd53fbdf56e5f913f29aa68ce51a6f322aa6d8a314581f94c83"
     },
     {
       "path": "src/Models/CreateDomainRequest.php",

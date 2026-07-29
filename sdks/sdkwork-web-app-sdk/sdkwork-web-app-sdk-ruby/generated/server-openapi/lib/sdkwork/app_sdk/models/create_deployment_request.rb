@@ -2,6 +2,7 @@ module Sdkwork
   module AppSdk
     module Models
       class CreateDeploymentRequest
+              # Deployment source command. Git deployments (deployType 2) require an HTTPS sourceRef and may omit artifact fields. Other deployment types require artifactDriveUri, artifactSize, and artifactHash together.
               attr_accessor :deploy_type, :version_tag, :commit_hash, :source_ref, :artifact_drive_uri, :artifact_size, :artifact_hash, :environment
 
               def initialize(attributes = {})

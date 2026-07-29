@@ -680,9 +680,9 @@ class CreateDeploymentRequest {
   final String? versionTag;
   final String? commitHash;
   final String? sourceRef;
-  final String artifactDriveUri;
-  final String artifactSize;
-  final String artifactHash;
+  final String? artifactDriveUri;
+  final String? artifactSize;
+  final String? artifactHash;
   final String? environment;
 
   CreateDeploymentRequest({
@@ -690,9 +690,9 @@ class CreateDeploymentRequest {
     this.versionTag,
     this.commitHash,
     this.sourceRef,
-    required this.artifactDriveUri,
-    required this.artifactSize,
-    required this.artifactHash,
+    this.artifactDriveUri,
+    this.artifactSize,
+    this.artifactHash,
     this.environment
   });
 
@@ -708,27 +708,9 @@ class CreateDeploymentRequest {
       versionTag: json['versionTag']?.toString(),
       commitHash: json['commitHash']?.toString(),
       sourceRef: json['sourceRef']?.toString(),
-      artifactDriveUri: (() {
-        final value = json['artifactDriveUri']?.toString();
-        if (value == null) {
-          throw FormatException('CreateDeploymentRequest.artifactDriveUri is required');
-        }
-        return value;
-      })(),
-      artifactSize: (() {
-        final value = json['artifactSize']?.toString();
-        if (value == null) {
-          throw FormatException('CreateDeploymentRequest.artifactSize is required');
-        }
-        return value;
-      })(),
-      artifactHash: (() {
-        final value = json['artifactHash']?.toString();
-        if (value == null) {
-          throw FormatException('CreateDeploymentRequest.artifactHash is required');
-        }
-        return value;
-      })(),
+      artifactDriveUri: json['artifactDriveUri']?.toString(),
+      artifactSize: json['artifactSize']?.toString(),
+      artifactHash: json['artifactHash']?.toString(),
       environment: json['environment']?.toString()
     );
   }

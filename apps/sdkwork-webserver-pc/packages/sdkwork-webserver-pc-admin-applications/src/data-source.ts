@@ -1,6 +1,7 @@
 import type { WebserverAdminSdkClient } from "@sdkwork/webserver-pc-admin-core";
 import {
   normalizeWebserverPage,
+  normalizeApplicationGitRepositoryUrl,
   applicationStoreListing,
   resolveApplicationStoreListing,
   WebserverActionError,
@@ -65,7 +66,7 @@ export function createWebserverAdminApplicationRegistry(
             },
             permission: "web.sites.write",
             requiredFields: ["name", "versionTag"],
-            sourceInput: "archive-or-directory",
+            sourceInput: "archive-directory-or-git",
           },
         ),
         action(
@@ -188,7 +189,7 @@ export function createWebserverAdminApplicationRegistry(
             },
             permission: "web.sites.write",
             requiredFields: ["versionTag"],
-            sourceInput: "archive-or-directory",
+            sourceInput: "archive-directory-or-git",
           },
         ),
         action(
@@ -265,7 +266,9 @@ async function createApplicationWithInitialVersion(
   };
   const metadata = deploymentMetadata(context);
   const idempotency = idempotencyParams(context);
-  const prepared = await prepareSource(sourceStorage, context, 0, 14);
+  const prepared = context.sourceInputMode === "git"
+    ? undefined
+    : await prepareSource(sourceStorage, context, 0, 14);
   const application = await client.application.create(applicationRequest, idempotency);
   const applicationId = application.id?.trim();
   if (!applicationId) throw new Error("The created application did not return an ID");
@@ -294,15 +297,19 @@ async function createApplicationWithInitialVersion(
       { cause: error },
     );
   }
-  let stored: StoredApplicationSource;
-  try {
-    stored = await storeSource(sourceStorage, applicationId, prepared, context, 48, 92);
-  } catch (error) {
-    throw new WebserverActionError(
-      "application-draft-source-failed",
-      { applicationId },
-      { cause: error },
-    );
+  let stored: StoredApplicationSource | undefined;
+  if (prepared) {
+    try {
+      stored = await storeSource(sourceStorage, applicationId, prepared, context, 48, 92);
+    } catch (error) {
+      throw new WebserverActionError(
+        "application-draft-source-failed",
+        { applicationId },
+        { cause: error },
+      );
+    }
+  } else {
+    context.onProgress?.(92);
   }
   try {
     const deployment = await client.applicationDeployment.applications.deployments.create(
@@ -356,8 +363,13 @@ async function deployApplication(
   const applicationId = requiredApplicationId(context.scopeId);
   const metadata = deploymentMetadata(context);
   const idempotency = idempotencyParams(context);
-  const prepared = await prepareSource(sourceStorage, context, 0, 24);
-  const stored = await storeSource(sourceStorage, applicationId, prepared, context, 24, 94);
+  let stored: StoredApplicationSource | undefined;
+  if (context.sourceInputMode !== "git") {
+    const prepared = await prepareSource(sourceStorage, context, 0, 24);
+    stored = await storeSource(sourceStorage, applicationId, prepared, context, 24, 94);
+  } else {
+    context.onProgress?.(94);
+  }
   let deployment: unknown;
   try {
     deployment = await client.applicationDeployment.applications.deployments.create(
@@ -380,7 +392,7 @@ async function prepareSource(
 ): Promise<PreparedApplicationSource> {
   return sourceStorage.prepare({
     files: sourceFiles(context),
-    mode: context.sourceInputMode ?? "archive",
+    mode: packageSourceMode(context),
     onProgress: (progress) => context.onProgress?.(scaleProgress(progress, start, end)),
     signal: context.signal,
   });
@@ -404,8 +416,9 @@ async function storeSource(
 
 function deploymentRequest(
   metadata: DeploymentMetadata,
-  stored: StoredApplicationSource,
+  stored?: StoredApplicationSource,
 ): DeploymentCreateRequest {
+  if (!stored) return metadata;
   return {
     ...metadata,
     artifactDriveUri: stored.archiveDriveUri,
@@ -415,11 +428,14 @@ function deploymentRequest(
 }
 
 function deploymentMetadata(context: WebserverResourceActionContext): DeploymentMetadata {
+  const gitSource = context.sourceInputMode === "git";
   return {
-    deployType: deploymentType(context.body.deployType),
+    deployType: gitSource ? 2 : deploymentType(context.body.deployType),
     environment: deploymentEnvironment(context.body.environment),
     versionTag: requiredText(context.body.versionTag, "Version"),
-    sourceRef: optionalText(context.body.sourceRef),
+    sourceRef: gitSource
+      ? normalizeApplicationGitRepositoryUrl(context.sourceRepository)
+      : optionalText(context.body.sourceRef),
     commitHash: optionalText(context.body.commitHash),
   };
 }
@@ -452,6 +468,12 @@ function sourceFiles(context: WebserverResourceActionContext): readonly File[] {
   if (context.files?.length) return context.files;
   if (context.file) return [context.file];
   throw new Error("Application source is required");
+}
+
+function packageSourceMode(context: WebserverResourceActionContext): "archive" | "directory" {
+  const mode = context.sourceInputMode ?? "archive";
+  if (mode === "git") throw new Error("Git repositories do not use application source packages");
+  return mode;
 }
 
 function scaleProgress(progress: number, start: number, end: number): number {

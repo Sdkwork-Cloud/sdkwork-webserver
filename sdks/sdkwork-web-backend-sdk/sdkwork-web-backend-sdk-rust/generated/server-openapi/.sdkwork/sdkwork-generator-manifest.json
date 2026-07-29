@@ -264,7 +264,7 @@
     },
     {
       "path": "src/models/create_application_deployment_request.rs",
-      "sha256": "fc53b0eb6fd5878a8f3ef943c715dad07d2c7c63167306fa06c16b0cfc82ad64"
+      "sha256": "c3081d3dbd505800504f67b335239d5c4be015d0345925d3620dfa1c6b4a07af"
     },
     {
       "path": "src/models/create_application_domain_request.rs",

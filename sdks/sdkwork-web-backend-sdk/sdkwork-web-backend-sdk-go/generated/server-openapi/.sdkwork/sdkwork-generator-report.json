@@ -12,7 +12,7 @@
   "mode": "apply",
   "hasChanges": true,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "f7c2aa7c7cac9945a97295e506199132f95b07ff4695f691db350c1111cfeba9",
+  "changeFingerprint": "a476ec99a97cdd34a101996db802477c9c8b0ae17bf07eeb7728e4868bd03e75",
   "changeImpact": {
     "schemaVersion": 1,
     "areas": [
@@ -22,12 +22,7 @@
       {
         "area": "models",
         "paths": [
-          "types/application_response.go",
-          "types/application_store_listing.go",
-          "types/create_application_request.go",
-          "types/media_checksum.go",
-          "types/media_resource.go",
-          "types/update_application_request.go"
+          "types/create_application_deployment_request.go"
         ]
       }
     ],
@@ -117,22 +112,16 @@
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 6,
+    "writtenFiles": 1,
     "skippedScaffoldFiles": 1,
-    "skippedUnchangedGeneratedFiles": 95,
+    "skippedUnchangedGeneratedFiles": 100,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "f7c2aa7c7cac9945a97295e506199132f95b07ff4695f691db350c1111cfeba9",
+    "changeFingerprint": "a476ec99a97cdd34a101996db802477c9c8b0ae17bf07eeb7728e4868bd03e75",
     "changes": {
-      "createdGeneratedFiles": [
-        "types/application_store_listing.go",
-        "types/media_checksum.go",
-        "types/media_resource.go"
-      ],
+      "createdGeneratedFiles": [],
       "updatedGeneratedFiles": [
-        "types/application_response.go",
-        "types/create_application_request.go",
-        "types/update_application_request.go"
+        "types/create_application_deployment_request.go"
       ],
       "unchangedGeneratedFiles": [
         "api/agent.go",
@@ -167,6 +156,8 @@
         "types/application_deployment_response.go",
         "types/application_domain_response.go",
         "types/application_domain_verify_response.go",
+        "types/application_response.go",
+        "types/application_store_listing.go",
         "types/applications_activate_response.go",
         "types/applications_create_response201.go",
         "types/applications_deployments_create_response201.go",
@@ -196,8 +187,8 @@
         "types/configs_retrieve_response.go",
         "types/configs_update_response.go",
         "types/configs_validate_response.go",
-        "types/create_application_deployment_request.go",
         "types/create_application_domain_request.go",
+        "types/create_application_request.go",
         "types/create_certificate_request.go",
         "types/create_nginx_config_request.go",
         "types/create_server_request.go",
@@ -205,6 +196,8 @@
         "types/doc.go",
         "types/field_error.go",
         "types/heartbeat_response.go",
+        "types/media_checksum.go",
+        "types/media_resource.go",
         "types/nginx_config_page.go",
         "types/nginx_config_response.go",
         "types/nginx_deploy_response.go",
@@ -228,6 +221,7 @@
         "types/servers_create_response201.go",
         "types/servers_list_response.go",
         "types/status_retrieve_response.go",
+        "types/update_application_request.go",
         "types/update_certificate_request.go",
         "types/update_nginx_config_request.go"
       ],
@@ -247,12 +241,7 @@
         {
           "area": "models",
           "paths": [
-            "types/application_response.go",
-            "types/application_store_listing.go",
-            "types/create_application_request.go",
-            "types/media_checksum.go",
-            "types/media_resource.go",
-            "types/update_application_request.go"
+            "types/create_application_deployment_request.go"
           ]
         }
       ],

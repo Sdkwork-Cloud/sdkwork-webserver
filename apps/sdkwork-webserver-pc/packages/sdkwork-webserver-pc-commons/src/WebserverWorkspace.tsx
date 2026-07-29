@@ -9,6 +9,7 @@ import {
   Filter,
   FileArchive,
   FolderOpen,
+  GitBranch,
   Inbox,
   Image,
   ImagePlus,
@@ -55,11 +56,16 @@ import {
   storeListingBody,
 } from "./application-store-submission.ts";
 import {
+  APPLICATION_GIT_REPOSITORY_MAX_LENGTH,
+  isValidApplicationGitRepositoryUrl,
+} from "./application-source-repository.ts";
+import {
   hasPlatformSuperAdminAccess,
   hasWebserverPermission,
   hasWebserverSuperAdminAccess,
 } from "./permissions.ts";
 import type {
+  ApplicationDeploymentSourceMode,
   WebserverPageInfo,
   WebserverPcModuleDefinition,
   WebserverResourceAction,
@@ -608,7 +614,8 @@ function ActionDialog({
   const [progress, setProgress] = useState(0);
   const [result, setResult] = useState<Record<string, unknown>>();
   const [copiedField, setCopiedField] = useState<string>();
-  const [sourceInputMode, setSourceInputMode] = useState<"archive" | "directory">("archive");
+  const [sourceInputMode, setSourceInputMode] = useState<ApplicationDeploymentSourceMode>("archive");
+  const [sourceRepository, setSourceRepository] = useState("");
   const existingStoreListing = applicationStoreListing(selected?.storeListing);
   const [applicationSubmission, setApplicationSubmission] = useState<ApplicationSubmissionInput>(() => ({
     coverMode: action.applicationSubmission === "update" ? "keep" : "remove",
@@ -640,6 +647,18 @@ function ActionDialog({
   const applicationReleaseFields = ["environment", "versionTag"] as const;
   const applicationRequiredFields = ["name", "versionTag"] as const;
 
+  const sourceInputError = (): WebserverMessageKey | undefined => {
+    if (!sourceInputRequired) return undefined;
+    if (sourceInputMode === "git") {
+      if (!sourceRepository.trim()) return "dialog.applicationGitRepositoryRequired";
+      if (!isValidApplicationGitRepositoryUrl(sourceRepository)) {
+        return "dialog.applicationGitRepositoryInvalid";
+      }
+      return undefined;
+    }
+    return files.length === 0 ? "dialog.applicationSourceRequired" : undefined;
+  };
+
   const renderFields = (fields?: readonly string[], className?: string) => {
     const names = fields ?? Object.keys(body);
     return (
@@ -668,10 +687,10 @@ function ActionDialog({
     }
     if (step === 2) {
       const versionMissing = hasMissingRequiredFields(body, ["versionTag"]);
-      const sourceMissing = sourceInputRequired && files.length === 0;
-      if (versionMissing && sourceMissing) return "dialog.applicationReleaseRequired";
+      const sourceError = sourceInputError();
+      if (versionMissing && sourceError) return "dialog.applicationReleaseRequired";
       if (versionMissing) return "dialog.applicationVersionRequired";
-      if (sourceMissing) return "dialog.applicationSourceRequired";
+      if (sourceError) return sourceError;
     }
     return undefined;
   };
@@ -685,8 +704,10 @@ function ActionDialog({
         : step === 2 && invalid
           ? hasMissingRequiredFields(body, ["versionTag"])
             ? "[data-field='versionTag'] input:not([disabled])"
-            : ".source-file-trigger:not([disabled])"
-          : ".form-grid input:not([disabled]), .form-grid select:not([disabled]), .form-grid textarea:not([disabled]), .source-file-trigger:not([disabled]), [data-application-step-heading]";
+            : sourceInputMode === "git"
+              ? ".source-repository-input:not([disabled])"
+              : ".source-file-trigger:not([disabled])"
+          : ".form-grid input:not([disabled]), .form-grid select:not([disabled]), .form-grid textarea:not([disabled]), .source-file-trigger:not([disabled]), .source-repository-input:not([disabled]), [data-application-step-heading]";
       applicationStageRef.current?.querySelector<HTMLElement>(selector)?.focus();
     });
   };
@@ -711,7 +732,7 @@ function ActionDialog({
   useEffect(() => {
     const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : undefined;
     const initialFocus = dialogRef.current?.querySelector<HTMLElement>(
-      ".form-grid input:not([disabled]), .form-grid select:not([disabled]), .form-grid textarea:not([disabled]), .source-file-trigger:not([disabled]), .confirm-check input:not([disabled]), button[type='submit']:not([disabled])",
+      ".form-grid input:not([disabled]), .form-grid select:not([disabled]), .form-grid textarea:not([disabled]), .source-file-trigger:not([disabled]), .source-repository-input:not([disabled]), .confirm-check input:not([disabled]), button[type='submit']:not([disabled])",
     );
     initialFocus?.focus();
     return () => queueMicrotask(() => {
@@ -777,7 +798,7 @@ function ActionDialog({
     if (
       (confirmationRequired && !confirmed)
       || (action.requiresFile && !file)
-      || (sourceInputRequired && files.length === 0)
+      || Boolean(sourceInputError())
       || (action.applicationSubmission && !applicationSubmissionReady(applicationSubmission, mediaError))
     ) return;
     submitInFlightRef.current = true;
@@ -798,6 +819,7 @@ function ActionDialog({
         selectedItem: selected,
         signal: abortController.signal,
         sourceInputMode,
+        sourceRepository: sourceInputMode === "git" ? sourceRepository : undefined,
       });
       if (action.resultFields?.length && isRecord(response)) {
         setResult(response);
@@ -945,8 +967,19 @@ function ActionDialog({
                             files={files}
                             locale={locale}
                             mode={sourceInputMode}
-                            onFilesChange={setFiles}
-                            onModeChange={setSourceInputMode}
+                            onFilesChange={(nextFiles) => {
+                              setFiles(nextFiles);
+                              setError(undefined);
+                            }}
+                            onModeChange={(nextMode) => {
+                              setSourceInputMode(nextMode);
+                              setError(undefined);
+                            }}
+                            onRepositoryChange={(repository) => {
+                              setSourceRepository(repository);
+                              setError(undefined);
+                            }}
+                            repository={sourceRepository}
                           />
                         </section>
                       ) : null}
@@ -959,6 +992,7 @@ function ActionDialog({
                     fieldOptions={fieldOptions}
                     files={files}
                     locale={locale}
+                    sourceRepository={sourceRepository}
                     sourceInputMode={sourceInputMode}
                     submission={applicationSubmission}
                   />
@@ -1021,6 +1055,8 @@ function ActionDialog({
             mode={sourceInputMode}
             onFilesChange={setFiles}
             onModeChange={setSourceInputMode}
+            onRepositoryChange={setSourceRepository}
+            repository={sourceRepository}
           />
         ) : null}
         {!result && !applicationCreationWizard && busy && (action.requiresFile || action.sourceInput) ? (
@@ -1095,7 +1131,7 @@ function ActionDialog({
               || optionsBusy
               || Boolean(confirmationRequired && !confirmed)
               || Boolean(action.requiresFile && !file)
-              || Boolean(sourceInputRequired && files.length === 0)
+              || Boolean(sourceInputError())
               || Boolean(action.applicationSubmission && !applicationSubmissionReady(applicationSubmission, mediaError))
               || hasMissingRequiredFields(body, action.requiredFields)
               || hasUnavailableOptions(body, fieldOptions)}
@@ -1116,13 +1152,17 @@ function ApplicationSourcePicker({
   mode,
   onFilesChange,
   onModeChange,
+  onRepositoryChange,
+  repository,
 }: {
   busy: boolean;
   files: readonly File[];
   locale: WebserverLocale;
-  mode: "archive" | "directory";
+  mode: ApplicationDeploymentSourceMode;
   onFilesChange(files: readonly File[]): void;
-  onModeChange(mode: "archive" | "directory"): void;
+  onModeChange(mode: ApplicationDeploymentSourceMode): void;
+  onRepositoryChange(repository: string): void;
+  repository: string;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const selectionId = useId();
@@ -1169,8 +1209,40 @@ function ApplicationSourcePicker({
           <FolderOpen aria-hidden="true" size={16} />
           {t("dialog.sourceDirectory")}
         </button>
+        <button
+          aria-pressed={mode === "git"}
+          className={mode === "git" ? "active" : ""}
+          disabled={busy}
+          onClick={() => {
+            onModeChange("git");
+            onFilesChange([]);
+          }}
+          type="button"
+        >
+          <GitBranch aria-hidden="true" size={16} />
+          {t("dialog.sourceGit")}
+        </button>
       </div>
-      <div className="source-file-control">
+      {mode === "git" ? (
+        <label className="source-repository-control">
+          <span className="source-file-heading">
+            <GitBranch aria-hidden="true" size={16} />
+            {t("dialog.sourceGitRepository")}
+          </span>
+          <input
+            aria-label={t("dialog.sourceGitRepository")}
+            autoComplete="off"
+            className="source-repository-input"
+            disabled={busy}
+            maxLength={APPLICATION_GIT_REPOSITORY_MAX_LENGTH}
+            onChange={(event) => onRepositoryChange(event.target.value)}
+            placeholder="https://github.com/organization/repository.git"
+            spellCheck={false}
+            type="url"
+            value={repository}
+          />
+        </label>
+      ) : <div className="source-file-control">
         <div className="source-file-heading">
           <Upload aria-hidden="true" size={16} />
           <span>{t("dialog.sourceSelect")}</span>
@@ -1211,7 +1283,7 @@ function ApplicationSourcePicker({
           ref={inputRef}
           type="file"
         />
-      </div>
+      </div>}
     </div>
   );
 }
@@ -1266,6 +1338,7 @@ function ApplicationCreationReview({
   fieldOptions,
   files,
   locale,
+  sourceRepository,
   sourceInputMode,
   submission,
 }: {
@@ -1273,7 +1346,8 @@ function ApplicationCreationReview({
   fieldOptions: WebserverResourceFieldOptions;
   files: readonly File[];
   locale: WebserverLocale;
-  sourceInputMode: "archive" | "directory";
+  sourceRepository: string;
+  sourceInputMode: ApplicationDeploymentSourceMode;
   submission: ApplicationSubmissionInput;
 }) {
   const t = (key: WebserverMessageKey, values: Record<string, string | number> = {}) => translateWebserver(locale, key, values);
@@ -1317,11 +1391,13 @@ function ApplicationCreationReview({
     }
     return String(value ?? "-") || "-";
   };
-  const sourceSummary = files.length === 0
-    ? t("dialog.sourceNone")
-    : sourceInputMode === "archive"
-      ? files[0].name
-      : t("dialog.sourceSelectionCount", { count: files.length });
+  const sourceSummary = sourceInputMode === "git"
+    ? sourceRepository || t("dialog.sourceNone")
+    : files.length === 0
+      ? t("dialog.sourceNone")
+      : sourceInputMode === "archive"
+        ? files[0].name
+        : t("dialog.sourceSelectionCount", { count: files.length });
 
   return (
     <section aria-labelledby="application-review-title" className="application-review">

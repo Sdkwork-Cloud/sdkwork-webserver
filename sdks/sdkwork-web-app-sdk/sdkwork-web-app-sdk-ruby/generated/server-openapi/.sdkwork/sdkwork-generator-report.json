@@ -12,45 +12,31 @@
   "mode": "apply",
   "hasChanges": true,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "9812ad433a6664ce464861d42af233cad6f493eb01ee9d424e823d907cf26000",
+  "changeFingerprint": "44987d1d2a8de64da44e0f5b93a45619e8c9651d682a8c899a0928904a2ae221",
   "changeImpact": {
     "schemaVersion": 1,
     "areas": [
-      "models",
-      "unknown"
+      "models"
     ],
     "details": [
       {
         "area": "models",
         "paths": [
-          "lib/sdkwork/app_sdk/models/application_store_listing.rb",
-          "lib/sdkwork/app_sdk/models/create_site_request.rb",
-          "lib/sdkwork/app_sdk/models/media_checksum.rb",
-          "lib/sdkwork/app_sdk/models/media_resource.rb",
-          "lib/sdkwork/app_sdk/models/site_response.rb",
-          "lib/sdkwork/app_sdk/models/update_site_request.rb"
-        ]
-      },
-      {
-        "area": "unknown",
-        "paths": [
-          "lib/sdkwork/app_sdk.rb"
+          "lib/sdkwork/app_sdk/models/create_deployment_request.rb"
         ]
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: models, unknown. Verification is required."
+    "summary": "Detected impact areas: models. Verification is required."
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "high",
+    "riskLevel": "medium",
     "nextAction": "verify",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
     "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
-      "manual-review-required",
-      "unknown-impact",
       "verification-required"
     ]
   },
@@ -62,7 +48,7 @@
         "id": "verify-check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models, unknown.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-ruby\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -81,13 +67,13 @@
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: models, unknown. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models, unknown.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-ruby\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -126,23 +112,16 @@
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 7,
+    "writtenFiles": 1,
     "skippedScaffoldFiles": 1,
-    "skippedUnchangedGeneratedFiles": 67,
+    "skippedUnchangedGeneratedFiles": 73,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "9812ad433a6664ce464861d42af233cad6f493eb01ee9d424e823d907cf26000",
+    "changeFingerprint": "44987d1d2a8de64da44e0f5b93a45619e8c9651d682a8c899a0928904a2ae221",
     "changes": {
-      "createdGeneratedFiles": [
-        "lib/sdkwork/app_sdk/models/application_store_listing.rb",
-        "lib/sdkwork/app_sdk/models/media_checksum.rb",
-        "lib/sdkwork/app_sdk/models/media_resource.rb"
-      ],
+      "createdGeneratedFiles": [],
       "updatedGeneratedFiles": [
-        "lib/sdkwork/app_sdk.rb",
-        "lib/sdkwork/app_sdk/models/create_site_request.rb",
-        "lib/sdkwork/app_sdk/models/site_response.rb",
-        "lib/sdkwork/app_sdk/models/update_site_request.rb"
+        "lib/sdkwork/app_sdk/models/create_deployment_request.rb"
       ],
       "unchangedGeneratedFiles": [
         "bin/publish-core.mjs",
@@ -150,6 +129,7 @@
         "bin/publish.sh",
         "CHANGELOG.md",
         "Gemfile",
+        "lib/sdkwork/app_sdk.rb",
         "lib/sdkwork/app_sdk/api/base_api.rb",
         "lib/sdkwork/app_sdk/api/certificate.rb",
         "lib/sdkwork/app_sdk/api/deployment.rb",
@@ -159,15 +139,16 @@
         "lib/sdkwork/app_sdk/api/site.rb",
         "lib/sdkwork/app_sdk/client.rb",
         "lib/sdkwork/app_sdk/http/client.rb",
+        "lib/sdkwork/app_sdk/models/application_store_listing.rb",
         "lib/sdkwork/app_sdk/models/certificate_page.rb",
         "lib/sdkwork/app_sdk/models/certificate_response.rb",
         "lib/sdkwork/app_sdk/models/certificates_create_response201.rb",
         "lib/sdkwork/app_sdk/models/certificates_list_response.rb",
         "lib/sdkwork/app_sdk/models/create_certificate_request.rb",
-        "lib/sdkwork/app_sdk/models/create_deployment_request.rb",
         "lib/sdkwork/app_sdk/models/create_domain_request.rb",
         "lib/sdkwork/app_sdk/models/create_env_variable_request.rb",
         "lib/sdkwork/app_sdk/models/create_health_check_request.rb",
+        "lib/sdkwork/app_sdk/models/create_site_request.rb",
         "lib/sdkwork/app_sdk/models/deployment_page.rb",
         "lib/sdkwork/app_sdk/models/deployment_response.rb",
         "lib/sdkwork/app_sdk/models/domain_page.rb",
@@ -178,6 +159,8 @@
         "lib/sdkwork/app_sdk/models/field_error.rb",
         "lib/sdkwork/app_sdk/models/health_check_page.rb",
         "lib/sdkwork/app_sdk/models/health_check_response.rb",
+        "lib/sdkwork/app_sdk/models/media_checksum.rb",
+        "lib/sdkwork/app_sdk/models/media_resource.rb",
         "lib/sdkwork/app_sdk/models/page_info.rb",
         "lib/sdkwork/app_sdk/models/problem_detail.rb",
         "lib/sdkwork/app_sdk/models/sdk_work_api_response.rb",
@@ -188,6 +171,7 @@
         "lib/sdkwork/app_sdk/models/sdk_work_resource_data.rb",
         "lib/sdkwork/app_sdk/models/sdk_work_resource_response.rb",
         "lib/sdkwork/app_sdk/models/site_page.rb",
+        "lib/sdkwork/app_sdk/models/site_response.rb",
         "lib/sdkwork/app_sdk/models/sites_activate_response.rb",
         "lib/sdkwork/app_sdk/models/sites_create_response201.rb",
         "lib/sdkwork/app_sdk/models/sites_deployments_create_response201.rb",
@@ -206,6 +190,7 @@
         "lib/sdkwork/app_sdk/models/sites_pause_response.rb",
         "lib/sdkwork/app_sdk/models/sites_retrieve_response.rb",
         "lib/sdkwork/app_sdk/models/sites_update_response.rb",
+        "lib/sdkwork/app_sdk/models/update_site_request.rb",
         "lib/sdkwork/app_sdk/sdk_config.rb",
         "lib/sdkwork/app_sdk/version.rb",
         "LICENSE",
@@ -223,41 +208,29 @@
     "impact": {
       "schemaVersion": 1,
       "areas": [
-        "models",
-        "unknown"
+        "models"
       ],
       "details": [
         {
           "area": "models",
           "paths": [
-            "lib/sdkwork/app_sdk/models/application_store_listing.rb",
-            "lib/sdkwork/app_sdk/models/create_site_request.rb",
-            "lib/sdkwork/app_sdk/models/media_checksum.rb",
-            "lib/sdkwork/app_sdk/models/media_resource.rb",
-            "lib/sdkwork/app_sdk/models/site_response.rb",
-            "lib/sdkwork/app_sdk/models/update_site_request.rb"
-          ]
-        },
-        {
-          "area": "unknown",
-          "paths": [
-            "lib/sdkwork/app_sdk.rb"
+            "lib/sdkwork/app_sdk/models/create_deployment_request.rb"
           ]
         }
       ],
       "requiresVerification": true,
-      "summary": "Detected impact areas: models, unknown. Verification is required."
+      "summary": "Detected impact areas: models. Verification is required."
     },
     "verificationPlan": {
       "shouldRun": true,
       "runPhase": "now",
-      "summary": "Detected impact areas: models, unknown. Verification is required. Run the required verification commands now against the generated SDK output.",
+      "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
       "steps": [
         {
           "id": "check",
           "title": "Unified package check",
           "required": true,
-          "rationale": "Validate the generated package with the unified publish helper. Triggered by: models, unknown.",
+          "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
           "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-ruby\\generated\\server-openapi",
           "command": "node",
           "args": [
@@ -275,14 +248,12 @@
     },
     "executionDecision": {
       "schemaVersion": 1,
-      "riskLevel": "high",
+      "riskLevel": "medium",
       "nextAction": "verify",
       "requiresManualReview": false,
       "applyRequiresExpectedFingerprint": false,
       "summary": "Changes have been applied. Run the required verification plan now.",
       "reasons": [
-        "manual-review-required",
-        "unknown-impact",
         "verification-required"
       ]
     },

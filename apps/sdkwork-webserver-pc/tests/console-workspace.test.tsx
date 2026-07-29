@@ -189,6 +189,65 @@ describe("console release controls", () => {
     expect(uploadArchive.mock.invocationCallOrder[0]).toBeLessThan(createDeployment.mock.invocationCallOrder[0]);
   });
 
+  it("creates and redeploys Git-backed applications without storing a source package", async () => {
+    const prepare = vi.fn();
+    const store = vi.fn();
+    const sourceStorage: ApplicationSourceStorage = { prepare, store };
+    const createDeployment = vi.fn().mockResolvedValue({ id: "deployment-1", status: 0 });
+    const registry = createWebserverConsoleRegistry({
+      drive: {},
+      web: {
+        site: {
+          create: vi.fn().mockResolvedValue({ id: "site-1", name: "Git portal" }),
+          update: vi.fn().mockResolvedValue({ id: "site-1" }),
+        },
+        deployment: { sites: { deployments: { create: createDeployment } } },
+      },
+    } as unknown as WebserverConsoleSdkClients, sourceStorage, testMediaStorage());
+    const create = registry.sites?.actions.find((candidate) => candidate.id === "create");
+    const deploy = registry.deployments?.actions.find((candidate) => candidate.id === "deploy");
+    if (!create || !deploy) throw new Error("Git deployment actions are unavailable");
+
+    expect(create.sourceInput).toBe("archive-directory-or-git");
+    await create.execute({
+      applicationSubmission: defaultApplicationSubmission(),
+      body: {
+        name: "Git portal",
+        applicationType: "WEB",
+        siteType: 1,
+        environment: "production",
+        versionTag: "v1.0.0",
+      },
+      idempotencyKey: "git-site-create-1",
+      sourceInputMode: "git",
+      sourceRepository: "https://github.com/sdkwork/example.git",
+    });
+    expect(createDeployment).toHaveBeenLastCalledWith("site-1", {
+      commitHash: undefined,
+      deployType: 2,
+      environment: "production",
+      sourceRef: "https://github.com/sdkwork/example.git",
+      versionTag: "v1.0.0",
+    }, { idempotencyKey: "git-site-create-1" });
+
+    await deploy.execute({
+      body: { deployType: 1, environment: "staging", versionTag: "v1.1.0" },
+      idempotencyKey: "git-site-deploy-1",
+      scopeId: "site-1",
+      sourceInputMode: "git",
+      sourceRepository: "https://git.example.test/team/portal.git",
+    });
+    expect(createDeployment).toHaveBeenLastCalledWith("site-1", {
+      commitHash: undefined,
+      deployType: 2,
+      environment: "staging",
+      sourceRef: "https://git.example.test/team/portal.git",
+      versionTag: "v1.1.0",
+    }, { idempotencyKey: "git-site-deploy-1" });
+    expect(prepare).not.toHaveBeenCalled();
+    expect(store).not.toHaveBeenCalled();
+  });
+
   it("presents deployment contract fields as localized product labels", async () => {
     const registry: WebserverResourceRegistry = {
       sites: {

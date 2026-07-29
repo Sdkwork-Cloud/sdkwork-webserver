@@ -2974,6 +2974,7 @@
       "CreateApplicationDeploymentRequest": {
         "type": "object",
         "additionalProperties": false,
+        "description": "Deployment source command. Git deployments (deployType 2) require an HTTPS sourceRef and may omit artifact fields. Other deployment types require artifactDriveUri, artifactSize, and artifactHash together.",
         "properties": {
           "deployType": {
             "type": "integer",
@@ -2983,7 +2984,8 @@
               3,
               4
             ],
-            "default": 1
+            "default": 1,
+            "description": "1 for a stored package, 2 for a Git repository, 3 for CI/CD, or 4 for API delivery."
           },
           "environment": {
             "type": "string",
@@ -3009,13 +3011,14 @@
           "sourceRef": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 500
+            "maxLength": 500,
+            "description": "HTTPS Git repository URL when deployType is 2. Credentials, query parameters, and fragments are forbidden."
           },
           "artifactDriveUri": {
             "type": "string",
             "maxLength": 500,
             "pattern": "^drive://spaces/[^/?#]+/nodes/[^/?#]+$",
-            "description": "Stable Drive resource identity. Signed delivery URLs are forbidden."
+            "description": "Stable Drive resource identity for package deployments. Signed delivery URLs are forbidden."
           },
           "artifactSize": {
             "type": "string",

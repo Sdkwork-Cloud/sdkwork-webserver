@@ -1,6 +1,6 @@
 package types
 
-
+// Deployment source command. Git deployments (deployType 2) require an HTTPS sourceRef and may omit artifact fields. Other deployment types require artifactDriveUri, artifactSize, and artifactHash together.
 type CreateDeploymentRequest struct {
 	DeployType int `json:"deployType"`
 	VersionTag string `json:"versionTag"`

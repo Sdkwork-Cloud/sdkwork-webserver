@@ -9,6 +9,7 @@ source: operator
 problem: The tenant console exposes site, domain, deployment, and certificate workflows, but the backend-admin surface has no application deployment or certificate modules. The existing siteType field describes the runtime technology and cannot represent the operator-facing WEB/API application category. Certificate renewal and Web Node synchronization exist, but operators cannot manage the canonical certificate lifecycle or observe fleet convergence from the admin surface.
 goals:
   - Add backend-admin application workflows for creating WEB/API applications, binding and verifying public domains, and creating deployments.
+  - Let operators create and redeploy applications from an uploaded ZIP archive, a browser-selected directory, or a public HTTPS Git repository.
   - Make application media selection direct and recoverable during creation with image placeholders, in-place previews, and removal controls.
   - Keep applicationType independent from the existing siteType runtime technology classification.
   - Add an independent backend-admin certificate module for issuance, automatic-renewal policy, manual renewal, and distribution status.
@@ -25,6 +26,9 @@ users:
 acceptance_criteria:
   - Backend OpenAPI and the generated Backend SDK expose application list/create, domain list/create/verify, and deployment list/create operations.
   - New applications persist applicationType as WEB or API without changing the meaning of siteType.
+  - Application creation and redeployment offer ZIP archive, local directory, and Git repository as mutually exclusive source modes; Git submissions use deployType 2 and persist the repository URL as sourceRef without artifact fields.
+  - Git repository input accepts only an absolute HTTPS URL with a non-root repository path, rejects embedded credentials, query parameters, fragments, HTTP URLs, and values longer than 500 characters, and reports source-specific validation errors without invalidating a populated version.
+  - Git deployment creation does not package local files or call Drive storage, while ZIP and directory sources continue through the existing archive validation and artifact upload workflow.
   - Backend OpenAPI and the generated Backend SDK expose certificate list/create/update/renew and certificate-distribution list operations.
   - Automatic renewal updates the existing canonical certificate record and changes the tenant Node Sync Manifest version when the leaf fingerprint changes.
   - Every registered server reports its last applied manifest version, and admin distribution status compares that observation with one current desired manifest version.
@@ -68,8 +72,14 @@ verification:
   - cargo test -p sdkwork-intelligence-webserver-repository-sqlx --test repository_parity sqlite_repository
   - cargo test -p sdkwork-webserver-certificate-worker
   - pnpm sdk:generate:backend
+  - pnpm sdk:generate:check
   - pnpm --dir apps/sdkwork-webserver-pc check
+  - pnpm --dir apps/sdkwork-webserver-pc test
+  - pnpm --dir apps/sdkwork-webserver-pc typecheck
+  - pnpm --dir apps/sdkwork-webserver-pc build
   - node ../sdkwork-specs/tools/check-pagination.mjs --workspace .
+  - node ../sdkwork-specs/tools/check-app-sdk-consumer-imports.mjs --workspace .
+  - pnpm check:repository-docs
   - pnpm check:api-envelope
 ```
 

@@ -74,7 +74,7 @@ const registry: WebserverResourceRegistry = {
       },
       permission: "web.sites.write",
       requiredFields: ["name", "versionTag"],
-      sourceInput: "archive-or-directory",
+      sourceInput: "archive-directory-or-git",
     }],
     async load(query) {
       return {
@@ -104,7 +104,7 @@ const registry: WebserverResourceRegistry = {
       requiredFields: ["versionTag"],
       requiresConfirmation: true,
       requiresScope: true,
-      sourceInput: "archive-or-directory",
+      sourceInput: "archive-directory-or-git",
     }, {
       id: "rollback",
       label: "Restore this version",

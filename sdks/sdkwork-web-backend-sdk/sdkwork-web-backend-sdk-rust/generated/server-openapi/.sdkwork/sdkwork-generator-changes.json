@@ -9,18 +9,11 @@
     "protocol": "http",
     "packageName": "sdkwork-web-backend-sdk"
   },
-  "changeFingerprint": "afcc0517e0ad88a510833add81a8360c4b34754e95835aebaf7fe39eaffb7b5e",
+  "changeFingerprint": "4c48991afc14e06c896aae8c9bdf1caa36181d34ff067cea0ae136ed41e68086",
   "changes": {
-    "createdGeneratedFiles": [
-      "src/models/application_store_listing.rs",
-      "src/models/media_checksum.rs",
-      "src/models/media_resource.rs"
-    ],
+    "createdGeneratedFiles": [],
     "updatedGeneratedFiles": [
-      "src/models/application_response.rs",
-      "src/models/create_application_request.rs",
-      "src/models/mod.rs",
-      "src/models/update_application_request.rs"
+      "src/models/create_application_deployment_request.rs"
     ],
     "unchangedGeneratedFiles": [
       "bin/publish-core.mjs",
@@ -55,6 +48,8 @@
       "src/models/application_deployment_response.rs",
       "src/models/application_domain_response.rs",
       "src/models/application_domain_verify_response.rs",
+      "src/models/application_response.rs",
+      "src/models/application_store_listing.rs",
       "src/models/applications_activate_response.rs",
       "src/models/applications_create_response201.rs",
       "src/models/applications_deployments_create_response201.rs",
@@ -84,14 +79,17 @@
       "src/models/configs_retrieve_response.rs",
       "src/models/configs_update_response.rs",
       "src/models/configs_validate_response.rs",
-      "src/models/create_application_deployment_request.rs",
       "src/models/create_application_domain_request.rs",
+      "src/models/create_application_request.rs",
       "src/models/create_certificate_request.rs",
       "src/models/create_nginx_config_request.rs",
       "src/models/create_server_request.rs",
       "src/models/create_server_response.rs",
       "src/models/field_error.rs",
       "src/models/heartbeat_response.rs",
+      "src/models/media_checksum.rs",
+      "src/models/media_resource.rs",
+      "src/models/mod.rs",
       "src/models/nginx_config_page.rs",
       "src/models/nginx_config_response.rs",
       "src/models/nginx_deploy_response.rs",
@@ -114,6 +112,7 @@
       "src/models/servers_create_response201.rs",
       "src/models/servers_list_response.rs",
       "src/models/status_retrieve_response.rs",
+      "src/models/update_application_request.rs",
       "src/models/update_certificate_request.rs",
       "src/models/update_nginx_config_request.rs"
     ],
@@ -133,13 +132,7 @@
       {
         "area": "models",
         "paths": [
-          "src/models/application_response.rs",
-          "src/models/application_store_listing.rs",
-          "src/models/create_application_request.rs",
-          "src/models/media_checksum.rs",
-          "src/models/media_resource.rs",
-          "src/models/mod.rs",
-          "src/models/update_application_request.rs"
+          "src/models/create_application_deployment_request.rs"
         ]
       }
     ],
