@@ -100,7 +100,7 @@ export function PortalHeader({
       {navigationOpen ? (
         <nav
           aria-label={t("header.navigation")}
-          className="absolute inset-x-0 top-full bg-[#0b1b14] shadow-xl shadow-black/20 xl:hidden"
+          className="border-t border-white/[0.06] bg-[#0b1b14] shadow-xl shadow-black/20 xl:hidden"
           id="portal-mobile-navigation"
         >
           <div className="grid grid-cols-2 gap-x-4 px-4 py-2 sm:grid-cols-3 sm:px-6 lg:grid-cols-6 lg:px-8">
