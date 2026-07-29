@@ -69,7 +69,7 @@ describe("WebserverPortal", () => {
     ]);
     const hero = screen.getByRole("heading", { level: 1, name: "SDKWork Web Server" }).closest("section");
     const copyButton = screen.getByRole("button", { name: "Copy agent integration instruction" });
-    const deliveryStatus = screen.getByText("Business release");
+    const deliveryStatus = screen.getByText("Version verified");
 
     expect(hero?.contains(copyButton)).toBe(true);
     expect(hero?.contains(deliveryStatus)).toBe(true);
@@ -81,7 +81,7 @@ describe("WebserverPortal", () => {
     expect(writeText.mock.calls[0]?.[0]).toBe(
       "Read https://www.birdcoder.com/skills/sdkwork-app-deployments/skill.md and follow the instructions to upload and deploy the current application.",
     );
-    expect(screen.getAllByText("Instruction copied").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Integration instruction copied").length).toBeGreaterThan(0);
   });
 
   it("surfaces clipboard failures without losing the instruction", async () => {
