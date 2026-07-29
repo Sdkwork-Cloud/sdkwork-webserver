@@ -1717,7 +1717,20 @@ function ApplicationSubmissionFields({
 }
 
 function MediaModeButton({ active, disabled, icon, label, onClick }: { active: boolean; disabled: boolean; icon: ReactNode; label: string; onClick(): void }) {
-  return <button aria-pressed={active} className={active ? "active" : ""} disabled={disabled} onClick={onClick} type="button">{icon}{label}</button>;
+  return (
+    <button
+      aria-label={label}
+      aria-pressed={active}
+      className={active ? "active" : ""}
+      disabled={disabled}
+      onClick={onClick}
+      title={label}
+      type="button"
+    >
+      {icon}
+      <span>{label}</span>
+    </button>
+  );
 }
 
 function mergeApplicationPreviewFiles(

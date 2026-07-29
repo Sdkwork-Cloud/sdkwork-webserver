@@ -244,6 +244,7 @@ tbody tr:last-child td { border-bottom: 0; }
 .required-mark { padding: 2px 5px; color: var(--webserver-color-danger-text); border: 1px solid var(--webserver-color-danger-border); border-radius: 3px; font-size: 10px; line-height: 1; }
 .media-mode-toggle { min-width: 0; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); padding: 3px; border: 1px solid var(--sdk-color-border-default); border-radius: 6px; background: var(--sdk-color-surface-panel-muted); }
 .media-mode-toggle button { min-width: 0; min-height: 34px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 0 8px; overflow: hidden; color: var(--sdk-color-text-secondary); background: transparent; border: 0; border-radius: 4px; font-size: 12px; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+.media-mode-toggle button > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .media-mode-toggle button.active { color: var(--sdk-color-text-primary); background: var(--sdk-color-surface-panel); box-shadow: var(--sdk-shadow-sm); }
 .media-mode-toggle button:disabled { cursor: not-allowed; opacity: .62; }
 .default-icon-preview, .stored-media-state, .media-file-input { grid-column: 2; }
@@ -1153,6 +1154,33 @@ html[data-sdk-color-mode="dark"] .webserver-auth-page {
 .application-creation-dialog .application-subsection-heading { margin-bottom: 8px; }
 .application-subsection-heading h4 { margin: 0; font-size: 13px; }
 .application-creation-dialog .source-picker { margin: 0; }
+.application-creation-dialog .source-mode-toggle {
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid var(--sdk-color-border-subtle);
+  border-radius: 0;
+  background: transparent;
+}
+.application-creation-dialog .source-mode-toggle button {
+  min-height: 36px;
+  border-radius: 0;
+}
+.application-creation-dialog .source-mode-toggle button.active {
+  background: transparent;
+  box-shadow: inset 0 -2px var(--sdk-color-brand-primary);
+}
+.application-creation-dialog .source-file-row {
+  min-height: 46px;
+  padding: 4px 0;
+  border: 0;
+  border-bottom: 1px solid var(--sdk-color-border-subtle);
+  border-radius: 0;
+  background: transparent;
+}
+.application-creation-dialog .source-file-trigger {
+  border: 0;
+  background: var(--sdk-color-surface-panel-muted);
+}
 .application-creation-dialog .application-review {
   height: 100%;
   margin: 0;
@@ -1265,9 +1293,25 @@ html[data-sdk-color-mode="dark"] .webserver-auth-page {
   .application-listing-fields [data-field] { grid-column: 1; grid-row: auto; }
   .application-media-primary-grid { grid-template-columns: 1fr; }
   .application-media-flat-field { min-height: 76px; }
+  .application-media-flat-field .media-mode-toggle {
+    width: fit-content;
+    grid-auto-flow: column;
+    grid-auto-columns: 34px;
+    grid-auto-rows: auto;
+  }
+  .application-media-flat-field .media-mode-toggle button { width: 34px; padding: 0; }
+  .application-media-flat-field .media-mode-toggle button > span { display: none; }
   .application-preview-manager-heading { align-items: flex-start; }
   .application-preview-manager-actions { flex: 0 0 auto; }
-  .application-preview-manager-actions .media-mode-toggle button { padding-inline: 6px; }
+  .application-preview-manager-actions .media-mode-toggle button {
+    width: 30px;
+    padding: 0;
+  }
+  .application-preview-manager-actions .media-mode-toggle {
+    grid-auto-flow: column;
+    grid-auto-rows: auto;
+  }
+  .application-preview-manager-actions .media-mode-toggle button > span { display: none; }
   .application-release-settings { padding-right: 0; padding-bottom: 14px; border-right: 0; border-bottom: 1px solid var(--sdk-color-border-default); }
   .application-creation-dialog .application-review-grid { grid-template-columns: 1fr; }
   .application-creation-dialog .application-review-grid > div { border-right: 0; }
