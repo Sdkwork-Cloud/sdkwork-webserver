@@ -1,4 +1,5 @@
 export interface WebserverAuthHostMessages {
+  backToPortal: string;
   metadataConnecting: string;
   metadataUnavailable: string;
   retry: string;
@@ -10,6 +11,7 @@ export interface WebserverAuthHostMessages {
 
 const AUTH_HOST_MESSAGES: Record<"en-US" | "zh-CN", WebserverAuthHostMessages> = {
   "en-US": {
+    backToPortal: "Back to Portal home",
     metadataConnecting: "Connecting to the identity service...",
     metadataUnavailable: "The identity service is currently unavailable.",
     retry: "Retry",
@@ -19,6 +21,7 @@ const AUTH_HOST_MESSAGES: Record<"en-US" | "zh-CN", WebserverAuthHostMessages> =
     switchToLightMode: "Switch to light mode",
   },
   "zh-CN": {
+    backToPortal: "返回 Portal 首页",
     metadataConnecting: "正在连接身份服务...",
     metadataUnavailable: "身份服务暂时不可用。",
     retry: "重试",

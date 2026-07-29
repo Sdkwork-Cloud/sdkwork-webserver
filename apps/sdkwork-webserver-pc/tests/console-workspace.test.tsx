@@ -116,6 +116,8 @@ describe("console release controls", () => {
 
     renderWorkspace("/console/sites", registry, appUserPermissionScope);
     fireEvent.click(await screen.findByRole("button", { name: "Create application" }));
+    fireEvent.change(screen.getByLabelText("Application name"), { target: { value: "Store listing test" } });
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
 
     const shortDescriptionField = screen.getByText("Short description").closest("label");
     const fullDescriptionField = screen.getByText("Full description").closest("label");

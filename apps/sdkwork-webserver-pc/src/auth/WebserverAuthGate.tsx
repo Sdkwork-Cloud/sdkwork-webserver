@@ -61,6 +61,8 @@ export function WebserverAuthGate({
   if (bootstrapStatus === "unavailable") {
     return (
       <WebserverAuthStatus
+        homeHref="/"
+        homeLabel={messages.backToPortal}
         message={messages.sessionUnavailable}
         onRetry={() => setAttempt((current) => current + 1)}
         retryLabel={messages.retry}

@@ -1,10 +1,14 @@
-import { LoaderCircle, RefreshCw, TriangleAlert } from "lucide-react";
+import { House, LoaderCircle, RefreshCw, TriangleAlert } from "lucide-react";
 
 export function WebserverAuthStatus({
+  homeHref,
+  homeLabel,
   message,
   onRetry,
   retryLabel,
 }: {
+  homeHref?: string;
+  homeLabel?: string;
   message: string;
   onRetry?: () => void;
   retryLabel?: string;
@@ -27,11 +31,21 @@ export function WebserverAuthStatus({
           : <LoaderCircle aria-hidden="true" className="webserver-auth-status__spinner" size={20} />}
         <span>{message}</span>
       </div>
-      {onRetry ? (
-        <button className="webserver-auth-status__retry" onClick={onRetry} type="button">
-          <RefreshCw aria-hidden="true" size={16} />
-          <span>{retryLabel}</span>
-        </button>
+      {homeHref || onRetry ? (
+        <div className="webserver-auth-status__actions">
+          {homeHref && homeLabel ? (
+            <a className="webserver-auth-status__home" href={homeHref}>
+              <House aria-hidden="true" size={16} />
+              <span>{homeLabel}</span>
+            </a>
+          ) : null}
+          {onRetry ? (
+            <button className="webserver-auth-status__retry" onClick={onRetry} type="button">
+              <RefreshCw aria-hidden="true" size={16} />
+              <span>{retryLabel}</span>
+            </button>
+          ) : null}
+        </div>
       ) : null}
     </main>
   );

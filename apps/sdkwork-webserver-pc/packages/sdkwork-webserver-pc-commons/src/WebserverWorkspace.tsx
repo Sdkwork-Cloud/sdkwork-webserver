@@ -43,6 +43,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 
 import { translateWebserver, type WebserverLocale, type WebserverMessageKey } from "./i18n/index.ts";
 import {
+  APPLICATION_PREVIEW_LIMIT,
   validateApplicationMediaFile,
   validateApplicationPreviewCount,
   type ApplicationStoreListingInput,
@@ -82,6 +83,8 @@ export interface WebserverWorkspaceProps {
   surface: "app-console" | "backend-admin";
   userLabel?: string;
 }
+
+type ApplicationWizardStep = 0 | 1 | 2 | 3;
 
 export function WebserverWorkspace({
   locale,
@@ -615,11 +618,86 @@ function ActionDialog({
   const [mediaError, setMediaError] = useState<string>();
   const abortControllerRef = useRef<AbortController | undefined>(undefined);
   const dialogRef = useRef<HTMLFormElement>(null);
-  const sourceInputRef = useRef<HTMLInputElement>(null);
+  const applicationStageRef = useRef<HTMLDivElement>(null);
   const submitInFlightRef = useRef(false);
-  const sourceSelectionId = useId();
   const confirmationRequired = Boolean(action.dangerous || action.requiresConfirmation);
   const sourceInputRequired = Boolean(action.sourceInput);
+  const applicationCreationWizard = action.applicationSubmission === "create";
+  const [applicationStep, setApplicationStep] = useState<ApplicationWizardStep>(0);
+  const [furthestApplicationStep, setFurthestApplicationStep] = useState<ApplicationWizardStep>(0);
+  const applicationIdentityFields = ["name", "description", "applicationType", "siteType"] as const;
+  const applicationListingFields = [
+    "shortDescription",
+    "fullDescription",
+    "releaseNotes",
+    "category",
+    "keywords",
+    "supportUrl",
+    "privacyPolicyUrl",
+    "officialWebsiteUrl",
+  ] as const;
+  const applicationReleaseFields = ["environment", "versionTag"] as const;
+  const applicationRequiredFields = ["name", "versionTag"] as const;
+
+  const renderFields = (fields?: readonly string[], className?: string) => {
+    const names = fields ?? Object.keys(body);
+    return (
+      <div className={`form-grid${className ? ` ${className}` : ""}`}>
+        {names.map((name) => (
+          <Field
+            key={name}
+            locale={locale}
+            name={name}
+            onChange={(next) => setBody((current) => ({ ...current, [name]: next }))}
+            options={fieldOptions[name]}
+            required={applicationCreationWizard && applicationRequiredFields.includes(name as "name" | "versionTag")}
+            value={body[name]}
+          />
+        ))}
+      </div>
+    );
+  };
+
+  const applicationStepReady = (step: ApplicationWizardStep): boolean => {
+    if (step === 0) {
+      return !hasMissingRequiredFields(body, ["name"])
+        && applicationSubmissionReady(applicationSubmission, mediaError);
+    }
+    if (step === 2) {
+      return !hasMissingRequiredFields(body, ["versionTag"])
+        && (!sourceInputRequired || files.length > 0);
+    }
+    return true;
+  };
+
+  const focusApplicationStep = (step: ApplicationWizardStep, invalid = false): void => {
+    queueMicrotask(() => {
+      const selector = step === 0
+        ? "[data-field='name'] input:not([disabled])"
+        : step === 2 && invalid
+          ? hasMissingRequiredFields(body, ["versionTag"])
+            ? "[data-field='versionTag'] input:not([disabled])"
+            : ".source-file-trigger:not([disabled])"
+          : ".form-grid input:not([disabled]), .form-grid select:not([disabled]), .form-grid textarea:not([disabled]), .source-file-trigger:not([disabled]), [data-application-step-heading]";
+      applicationStageRef.current?.querySelector<HTMLElement>(selector)?.focus();
+    });
+  };
+
+  const moveToApplicationStep = (nextStep: ApplicationWizardStep): void => {
+    if (nextStep > applicationStep) {
+      for (let step = 0; step < nextStep; step += 1) {
+        const checkedStep = step as ApplicationWizardStep;
+        if (applicationStepReady(checkedStep)) continue;
+        setApplicationStep(checkedStep);
+        setError(t(checkedStep === 0 ? "dialog.applicationBasicRequired" : "dialog.applicationReleaseRequired"));
+        focusApplicationStep(checkedStep, true);
+        return;
+      }
+    }
+    setError(undefined);
+    setApplicationStep(nextStep);
+    setFurthestApplicationStep((current) => Math.max(current, nextStep) as ApplicationWizardStep);
+  };
 
   useEffect(() => {
     const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : undefined;
@@ -633,6 +711,11 @@ function ActionDialog({
   }, []);
 
   useEffect(() => {
+    if (!applicationCreationWizard) return;
+    focusApplicationStep(applicationStep);
+  }, [applicationCreationWizard, applicationStep]);
+
+  useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key !== "Escape" || busy) return;
       event.preventDefault();
@@ -641,18 +724,6 @@ function ActionDialog({
     document.addEventListener("keydown", handleEscape);
     return () => document.removeEventListener("keydown", handleEscape);
   }, [busy, onClose]);
-
-  useEffect(() => {
-    const input = sourceInputRef.current;
-    if (!input) return;
-    if (sourceInputMode === "directory") {
-      input.setAttribute("webkitdirectory", "");
-      input.setAttribute("directory", "");
-      return;
-    }
-    input.removeAttribute("webkitdirectory");
-    input.removeAttribute("directory");
-  }, [sourceInputMode]);
 
   useEffect(() => () => abortControllerRef.current?.abort(), []);
 
@@ -690,6 +761,10 @@ function ActionDialog({
   async function submit(event: FormEvent): Promise<void> {
     event.preventDefault();
     if (submitInFlightRef.current) return;
+    if (applicationCreationWizard && applicationStep < 3) {
+      moveToApplicationStep((applicationStep + 1) as ApplicationWizardStep);
+      return;
+    }
     if (
       (confirmationRequired && !confirmed)
       || (action.requiresFile && !file)
@@ -741,14 +816,19 @@ function ActionDialog({
       <form
         aria-labelledby="action-title"
         aria-modal="true"
-        className={`dialog${action.applicationSubmission ? " application-submission-dialog" : ""}`}
+        className={`dialog${action.applicationSubmission ? " application-submission-dialog" : ""}${applicationCreationWizard ? " application-creation-dialog" : ""}`}
         onKeyDown={trapDialogFocus}
         onSubmit={(event) => void submit(event)}
         ref={dialogRef}
         role="dialog"
       >
         <header>
-          <h2 id="action-title">{label}</h2>
+          <div className="dialog-title-group">
+            <h2 id="action-title">{label}</h2>
+            {applicationCreationWizard ? (
+              <span>{t("dialog.applicationStepCount", { current: applicationStep + 1, total: 4 })}</span>
+            ) : null}
+          </div>
           <button
             aria-label={t("dialog.close")}
             className="icon-button"
@@ -789,7 +869,108 @@ function ActionDialog({
           </div>
         ) : null}
         {!result && confirmationRequired ? <div className="warning">{t("dialog.warning")}</div> : null}
-        {!result ? <div className="form-grid">
+        {!result && applicationCreationWizard ? (
+          <div className="application-wizard-workspace">
+            <ApplicationWizardProgress
+              currentStep={applicationStep}
+              furthestStep={furthestApplicationStep}
+              locale={locale}
+              onStepChange={moveToApplicationStep}
+            />
+            <div className="application-wizard-stage" data-testid="application-wizard-stage" ref={applicationStageRef}>
+              <div className="application-wizard-stage-content">
+                {applicationStep === 0 ? (
+                  <section className="application-step-pane application-basics-step" aria-labelledby="application-basics-title">
+                    <div className="application-step-heading">
+                      <div>
+                        <h3 data-application-step-heading id="application-basics-title" tabIndex={-1}>{t("dialog.applicationBasics")}</h3>
+                      </div>
+                      <AppWindow aria-hidden="true" size={19} />
+                    </div>
+                    {renderFields(applicationIdentityFields, "application-identity-fields")}
+                    <ApplicationSubmissionFields
+                      compact
+                      disabled={busy}
+                      error={mediaError}
+                      existing={existingStoreListing}
+                      locale={locale}
+                      onChange={setApplicationSubmission}
+                      onError={setMediaError}
+                      submission={applicationSubmission}
+                    />
+                  </section>
+                ) : null}
+                {applicationStep === 1 ? (
+                  <section className="application-step-pane application-listing-step" aria-labelledby="application-listing-title">
+                    <div className="application-step-heading">
+                      <div>
+                        <h3 data-application-step-heading id="application-listing-title" tabIndex={-1}>{t("dialog.applicationListing")}</h3>
+                      </div>
+                      <Pencil aria-hidden="true" size={19} />
+                    </div>
+                    {renderFields(applicationListingFields, "application-listing-fields")}
+                  </section>
+                ) : null}
+                {applicationStep === 2 ? (
+                  <section className="application-step-pane application-release-step" aria-labelledby="application-release-title">
+                    <div className="application-step-heading">
+                      <div>
+                        <h3 data-application-step-heading id="application-release-title" tabIndex={-1}>{t("dialog.applicationRelease")}</h3>
+                      </div>
+                      <Rocket aria-hidden="true" size={19} />
+                    </div>
+                    <div className="application-release-layout">
+                      <section className="application-release-settings">
+                        {renderFields(applicationReleaseFields, "application-release-fields")}
+                      </section>
+                      {action.sourceInput ? (
+                        <section className="application-source-step" aria-labelledby="application-source-title">
+                          <div className="application-step-heading application-subsection-heading">
+                            <div>
+                              <h4 id="application-source-title">{t("dialog.applicationSource")}</h4>
+                            </div>
+                            <span className="required-mark">{t("dialog.mediaRequired")}</span>
+                          </div>
+                          <ApplicationSourcePicker
+                            busy={busy}
+                            files={files}
+                            locale={locale}
+                            mode={sourceInputMode}
+                            onFilesChange={setFiles}
+                            onModeChange={setSourceInputMode}
+                          />
+                        </section>
+                      ) : null}
+                    </div>
+                  </section>
+                ) : null}
+                {applicationStep === 3 ? (
+                  <ApplicationCreationReview
+                    body={body}
+                    fieldOptions={fieldOptions}
+                    files={files}
+                    locale={locale}
+                    sourceInputMode={sourceInputMode}
+                    submission={applicationSubmission}
+                  />
+                ) : null}
+              </div>
+              <div className="application-wizard-status" aria-live="polite">
+                {busy && (action.requiresFile || action.sourceInput) ? (
+                  <div className="upload-progress" role="status">
+                    <div>
+                      <span>{t("dialog.uploadProgress")}</span>
+                      <strong>{progress}%</strong>
+                    </div>
+                    <progress aria-label={t("dialog.uploadProgress")} max={100} value={progress} />
+                  </div>
+                ) : null}
+                {error ? <div className="error-banner" role="alert">{error}</div> : null}
+              </div>
+            </div>
+          </div>
+        ) : null}
+        {!result && !applicationCreationWizard ? <div className="form-grid">
           {Object.entries(body).map(([name, value]) => (
             <Field
               key={name}
@@ -801,7 +982,7 @@ function ActionDialog({
             />
           ))}
         </div> : null}
-        {!result && action.applicationSubmission ? (
+        {!result && !applicationCreationWizard && action.applicationSubmission ? (
           <ApplicationSubmissionFields
             disabled={busy}
             error={mediaError}
@@ -823,81 +1004,17 @@ function ActionDialog({
             />
           </label>
         ) : null}
-        {!result && action.sourceInput ? (
-          <div className="source-picker">
-            <div aria-label={t("dialog.sourceMode")} className="source-mode-toggle" role="group">
-              <button
-                aria-pressed={sourceInputMode === "archive"}
-                className={sourceInputMode === "archive" ? "active" : ""}
-                disabled={busy}
-                onClick={() => {
-                  setSourceInputMode("archive");
-                  setFiles([]);
-                }}
-                type="button"
-              >
-                <FileArchive aria-hidden="true" size={16} />
-                {t("dialog.sourceArchive")}
-              </button>
-              <button
-                aria-pressed={sourceInputMode === "directory"}
-                className={sourceInputMode === "directory" ? "active" : ""}
-                disabled={busy}
-                onClick={() => {
-                  setSourceInputMode("directory");
-                  setFiles([]);
-                }}
-                type="button"
-              >
-                <FolderOpen aria-hidden="true" size={16} />
-                {t("dialog.sourceDirectory")}
-              </button>
-            </div>
-            <div className="source-file-control">
-              <div className="source-file-heading">
-                <Upload aria-hidden="true" size={16} />
-                <span>{t("dialog.sourceSelect")}</span>
-              </div>
-              <div className="source-file-row">
-                <button
-                  className="secondary-button source-file-trigger"
-                  disabled={busy}
-                  onClick={() => sourceInputRef.current?.click()}
-                  type="button"
-                >
-                  {sourceInputMode === "archive"
-                    ? <FileArchive aria-hidden="true" size={16} />
-                    : <FolderOpen aria-hidden="true" size={16} />}
-                  {sourceInputMode === "archive"
-                    ? t("dialog.sourceChooseArchive")
-                    : t("dialog.sourceChooseDirectory")}
-                </button>
-                <span className="source-selection" id={sourceSelectionId} role="status">
-                  {files.length === 0
-                    ? t("dialog.sourceNone")
-                    : sourceInputMode === "archive"
-                      ? files[0].name
-                      : t("dialog.sourceSelectionCount", { count: files.length })}
-                </span>
-              </div>
-              <input
-                accept={sourceInputMode === "archive" ? ".zip,application/zip" : undefined}
-                data-testid="application-source-input"
-                disabled={busy}
-                hidden
-                key={sourceInputMode}
-                multiple={sourceInputMode === "directory"}
-                onChange={(event) => {
-                  const selectedFiles = Array.from(event.target.files ?? []);
-                  setFiles(sourceInputMode === "archive" ? selectedFiles.slice(0, 1) : selectedFiles);
-                }}
-                ref={sourceInputRef}
-                type="file"
-              />
-            </div>
-          </div>
+        {!result && !applicationCreationWizard && action.sourceInput ? (
+          <ApplicationSourcePicker
+            busy={busy}
+            files={files}
+            locale={locale}
+            mode={sourceInputMode}
+            onFilesChange={setFiles}
+            onModeChange={setSourceInputMode}
+          />
         ) : null}
-        {!result && busy && (action.requiresFile || action.sourceInput) ? (
+        {!result && !applicationCreationWizard && busy && (action.requiresFile || action.sourceInput) ? (
           <div className="upload-progress" role="status">
             <div>
               <span>{t("dialog.uploadProgress")}</span>
@@ -916,10 +1033,50 @@ function ActionDialog({
             {t("dialog.confirmRisk")}
           </label>
         ) : null}
-        {error ? <div className="error-banner" role="alert">{error}</div> : null}
+        {!applicationCreationWizard && error ? <div className="error-banner" role="alert">{error}</div> : null}
         {result ? (
           <footer>
             <button className="command-button" onClick={onClose} type="button">{t("dialog.close")}</button>
+          </footer>
+        ) : applicationCreationWizard ? (
+          <footer className="application-wizard-footer">
+            <button className="secondary-button" disabled={busy} onClick={onClose} type="button">{t("dialog.cancel")}</button>
+            <div className="application-wizard-navigation">
+              {applicationStep > 0 ? (
+                <button
+                  className="secondary-button"
+                  disabled={busy}
+                  onClick={() => moveToApplicationStep((applicationStep - 1) as ApplicationWizardStep)}
+                  type="button"
+                >
+                  <ChevronLeft aria-hidden="true" size={16} />
+                  {t("dialog.back")}
+                </button>
+              ) : null}
+              {applicationStep < 3 ? (
+                <button
+                  className="command-button"
+                  disabled={busy || optionsBusy}
+                  onClick={() => moveToApplicationStep((applicationStep + 1) as ApplicationWizardStep)}
+                  type="button"
+                >
+                  {applicationStep === 2 ? t("dialog.review") : t("dialog.next")}
+                  <ChevronRight aria-hidden="true" size={16} />
+                </button>
+              ) : (
+                <button
+                  className="command-button"
+                  disabled={busy
+                    || optionsBusy
+                    || !applicationStepReady(0)
+                    || !applicationStepReady(2)
+                    || hasUnavailableOptions(body, fieldOptions)}
+                  type="submit"
+                >
+                  {busy ? t("dialog.submitting") : t("dialog.createApplication")}
+                </button>
+              )}
+            </div>
           </footer>
         ) : <footer>
           <button className="secondary-button" disabled={busy} onClick={onClose} type="button">{t("dialog.cancel")}</button>
@@ -943,7 +1100,260 @@ function ActionDialog({
   );
 }
 
+function ApplicationSourcePicker({
+  busy,
+  files,
+  locale,
+  mode,
+  onFilesChange,
+  onModeChange,
+}: {
+  busy: boolean;
+  files: readonly File[];
+  locale: WebserverLocale;
+  mode: "archive" | "directory";
+  onFilesChange(files: readonly File[]): void;
+  onModeChange(mode: "archive" | "directory"): void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const selectionId = useId();
+  const t = (key: WebserverMessageKey, values: Record<string, string | number> = {}) => translateWebserver(locale, key, values);
+
+  useEffect(() => {
+    const input = inputRef.current;
+    if (!input) return;
+    if (mode === "directory") {
+      input.setAttribute("webkitdirectory", "");
+      input.setAttribute("directory", "");
+      return;
+    }
+    input.removeAttribute("webkitdirectory");
+    input.removeAttribute("directory");
+  }, [mode]);
+
+  return (
+    <div className="source-picker">
+      <div aria-label={t("dialog.sourceMode")} className="source-mode-toggle" role="group">
+        <button
+          aria-pressed={mode === "archive"}
+          className={mode === "archive" ? "active" : ""}
+          disabled={busy}
+          onClick={() => {
+            onModeChange("archive");
+            onFilesChange([]);
+          }}
+          type="button"
+        >
+          <FileArchive aria-hidden="true" size={16} />
+          {t("dialog.sourceArchive")}
+        </button>
+        <button
+          aria-pressed={mode === "directory"}
+          className={mode === "directory" ? "active" : ""}
+          disabled={busy}
+          onClick={() => {
+            onModeChange("directory");
+            onFilesChange([]);
+          }}
+          type="button"
+        >
+          <FolderOpen aria-hidden="true" size={16} />
+          {t("dialog.sourceDirectory")}
+        </button>
+      </div>
+      <div className="source-file-control">
+        <div className="source-file-heading">
+          <Upload aria-hidden="true" size={16} />
+          <span>{t("dialog.sourceSelect")}</span>
+        </div>
+        <div className="source-file-row">
+          <button
+            className="secondary-button source-file-trigger"
+            disabled={busy}
+            onClick={() => inputRef.current?.click()}
+            type="button"
+          >
+            {mode === "archive"
+              ? <FileArchive aria-hidden="true" size={16} />
+              : <FolderOpen aria-hidden="true" size={16} />}
+            {mode === "archive"
+              ? t("dialog.sourceChooseArchive")
+              : t("dialog.sourceChooseDirectory")}
+          </button>
+          <span className="source-selection" id={selectionId} role="status">
+            {files.length === 0
+              ? t("dialog.sourceNone")
+              : mode === "archive"
+                ? files[0].name
+                : t("dialog.sourceSelectionCount", { count: files.length })}
+          </span>
+        </div>
+        <input
+          accept={mode === "archive" ? ".zip,application/zip" : undefined}
+          data-testid="application-source-input"
+          disabled={busy}
+          hidden
+          key={mode}
+          multiple={mode === "directory"}
+          onChange={(event) => {
+            const selectedFiles = Array.from(event.target.files ?? []);
+            onFilesChange(mode === "archive" ? selectedFiles.slice(0, 1) : selectedFiles);
+          }}
+          ref={inputRef}
+          type="file"
+        />
+      </div>
+    </div>
+  );
+}
+
+function ApplicationWizardProgress({
+  currentStep,
+  furthestStep,
+  locale,
+  onStepChange,
+}: {
+  currentStep: ApplicationWizardStep;
+  furthestStep: ApplicationWizardStep;
+  locale: WebserverLocale;
+  onStepChange(step: ApplicationWizardStep): void;
+}) {
+  const t = (key: WebserverMessageKey, values: Record<string, string | number> = {}) => translateWebserver(locale, key, values);
+  const steps = [
+    t("dialog.applicationStepBasics"),
+    t("dialog.applicationStepListing"),
+    t("dialog.applicationStepRelease"),
+    t("dialog.applicationStepReview"),
+  ];
+  return (
+    <nav aria-label={t("dialog.applicationSteps")} className="application-wizard-progress" data-testid="application-wizard-progress">
+      <ol>
+        {steps.map((step, index) => (
+          <li
+            className={index === currentStep ? "active" : index < currentStep ? "complete" : index <= furthestStep ? "visited" : undefined}
+            key={step}
+          >
+            <button
+              aria-label={`${index + 1}. ${step}`}
+              aria-current={index === currentStep ? "step" : undefined}
+              disabled={index > furthestStep}
+              onClick={() => onStepChange(index as ApplicationWizardStep)}
+              type="button"
+            >
+              <span className="application-wizard-step-number">
+                {index < currentStep ? <Check aria-hidden="true" size={14} /> : index + 1}
+              </span>
+              <span className="application-wizard-step-label">{step}</span>
+            </button>
+          </li>
+        ))}
+      </ol>
+    </nav>
+  );
+}
+
+function ApplicationCreationReview({
+  body,
+  fieldOptions,
+  files,
+  locale,
+  sourceInputMode,
+  submission,
+}: {
+  body: Readonly<Record<string, unknown>>;
+  fieldOptions: WebserverResourceFieldOptions;
+  files: readonly File[];
+  locale: WebserverLocale;
+  sourceInputMode: "archive" | "directory";
+  submission: ApplicationSubmissionInput;
+}) {
+  const t = (key: WebserverMessageKey, values: Record<string, string | number> = {}) => translateWebserver(locale, key, values);
+  const bodyFields = [
+    "name",
+    "description",
+    "applicationType",
+    "siteType",
+    "shortDescription",
+    "fullDescription",
+    "releaseNotes",
+    "category",
+    "keywords",
+    "supportUrl",
+    "privacyPolicyUrl",
+    "officialWebsiteUrl",
+    "environment",
+    "versionTag",
+  ];
+  const mediaMode = (mode: string): string => {
+    switch (mode) {
+      case "default":
+        return t("dialog.mediaDefault");
+      case "upload":
+      case "replace":
+        return t("dialog.mediaUpload");
+      case "keep":
+        return t("dialog.mediaKeep");
+      case "remove":
+        return t("dialog.mediaNone");
+      default:
+        return mode;
+    }
+  };
+  const displayBodyValue = (field: string): string => {
+    const value = body[field];
+    const options = fieldOptions[field];
+    if (options) {
+      const match = options.find((option) => String(optionValue(option)) === String(value));
+      if (match !== undefined) return optionLabel(match, field, locale);
+    }
+    return String(value ?? "-") || "-";
+  };
+  const sourceSummary = files.length === 0
+    ? t("dialog.sourceNone")
+    : sourceInputMode === "archive"
+      ? files[0].name
+      : t("dialog.sourceSelectionCount", { count: files.length });
+
+  return (
+    <section aria-labelledby="application-review-title" className="application-review">
+      <div className="application-step-heading">
+        <div>
+          <h3 data-application-step-heading id="application-review-title" tabIndex={-1}>{t("dialog.applicationReview")}</h3>
+        </div>
+        <BadgeCheck aria-hidden="true" size={19} />
+      </div>
+      <dl className="application-review-grid">
+        {bodyFields.map((field) => (
+          <div className={field === "description" || field === "fullDescription" || field === "releaseNotes" ? "wide" : undefined} data-field={field} key={field}>
+            <dt>{fieldLabel(field, locale)}</dt>
+            <dd>{displayBodyValue(field)}</dd>
+          </div>
+        ))}
+        <div>
+          <dt>{t("dialog.mediaIcon")}</dt>
+          <dd>{mediaMode(submission.iconMode)}</dd>
+        </div>
+        <div>
+          <dt>{t("dialog.mediaCover")}</dt>
+          <dd>{mediaMode(submission.coverMode)}</dd>
+        </div>
+        <div>
+          <dt>{t("dialog.mediaPreviews")}</dt>
+          <dd>{submission.previewsMode === "replace"
+            ? t("dialog.mediaSelectedCount", { count: submission.previewFiles.length })
+            : mediaMode(submission.previewsMode)}</dd>
+        </div>
+        <div className="wide">
+          <dt>{t("dialog.applicationSource")}</dt>
+          <dd>{sourceSummary}</dd>
+        </div>
+      </dl>
+    </section>
+  );
+}
+
 function ApplicationSubmissionFields({
+  compact = false,
   disabled,
   error,
   existing,
@@ -952,6 +1362,7 @@ function ApplicationSubmissionFields({
   onError,
   submission,
 }: {
+  compact?: boolean;
   disabled: boolean;
   error?: string;
   existing?: ApplicationStoreListingInput;
@@ -965,6 +1376,9 @@ function ApplicationSubmissionFields({
   const iconPreview = useFilePreview(submission.iconFile);
   const coverPreview = useFilePreview(submission.coverFile);
   const previewImages = useFilePreviews(submission.previewFiles);
+  const iconInputRef = useRef<HTMLInputElement>(null);
+  const coverInputRef = useRef<HTMLInputElement>(null);
+  const previewsInputRef = useRef<HTMLInputElement>(null);
 
   async function selectFile(role: "icon" | "cover", file: File | undefined): Promise<void> {
     const version = ++validationVersion.current;
@@ -985,18 +1399,201 @@ function ApplicationSubmissionFields({
     }
   }
 
-  async function selectPreviews(files: readonly File[]): Promise<void> {
+  async function selectPreviews(files: readonly File[], append = false): Promise<void> {
+    const currentFiles = append && submission.previewsMode === "replace" ? submission.previewFiles : [];
+    const nextFiles = mergeApplicationPreviewFiles(currentFiles, files);
     const version = ++validationVersion.current;
-    onChange({ ...submission, previewFiles: files, previewsMode: "replace" });
     onError(t("dialog.mediaValidating"));
     try {
-      validateApplicationPreviewCount(files);
-      if (files.length === 0) throw new Error("PREVIEW_REQUIRED");
+      validateApplicationPreviewCount(nextFiles);
+      if (nextFiles.length === 0) throw new Error("PREVIEW_REQUIRED");
       for (const file of files) await validateApplicationMediaFile("preview", file);
-      if (validationVersion.current === version) onError(undefined);
+      if (validationVersion.current === version) {
+        onChange({ ...submission, previewFiles: nextFiles, previewsMode: "replace" });
+        onError(undefined);
+      }
     } catch (error) {
       if (validationVersion.current === version) onError(mediaValidationMessage(error, t));
     }
+  }
+
+  function removePreview(index: number): void {
+    validationVersion.current += 1;
+    onError(undefined);
+    const previewFiles = submission.previewFiles.filter((_, candidateIndex) => candidateIndex !== index);
+    onChange({
+      ...submission,
+      previewFiles,
+      previewsMode: previewFiles.length > 0 ? "replace" : "remove",
+    });
+  }
+
+  function movePreview(index: number, offset: -1 | 1): void {
+    const targetIndex = index + offset;
+    if (targetIndex < 0 || targetIndex >= submission.previewFiles.length) return;
+    validationVersion.current += 1;
+    onError(undefined);
+    const previewFiles = [...submission.previewFiles];
+    [previewFiles[index], previewFiles[targetIndex]] = [previewFiles[targetIndex], previewFiles[index]];
+    onChange({ ...submission, previewFiles, previewsMode: "replace" });
+  }
+
+  if (compact) {
+    const chooseMedia = (role: "icon" | "cover" | "previews"): void => {
+      if (role === "icon") {
+        queueMicrotask(() => iconInputRef.current?.click());
+        return;
+      }
+      if (role === "cover") {
+        queueMicrotask(() => coverInputRef.current?.click());
+        return;
+      }
+      queueMicrotask(() => previewsInputRef.current?.click());
+    };
+
+    return (
+      <section aria-labelledby="application-store-assets" className="application-store-assets application-store-assets-compact">
+        <div className="application-store-heading">
+          <div>
+            <h3 id="application-store-assets">{t("dialog.mediaTitle")}</h3>
+          </div>
+          <BadgeCheck aria-hidden="true" size={18} />
+        </div>
+        <div className="application-media-primary-grid">
+          <section className="application-media-flat-field">
+            <div className="application-media-flat-heading">
+              <Image aria-hidden="true" size={17} />
+              <div>
+                <strong>{t("dialog.mediaIcon")}</strong>
+                <small>1024 x 1024 PNG</small>
+              </div>
+              <span className="required-mark">{t("dialog.mediaRequired")}</span>
+            </div>
+            <div className="application-media-flat-preview application-media-flat-preview-icon">
+              {iconPreview ? <img alt="" src={iconPreview} /> : <WandSparkles aria-hidden="true" size={24} />}
+              <span>{submission.iconMode === "default" ? t("dialog.mediaDefault") : t("dialog.mediaUpload")}</span>
+            </div>
+            <div aria-label={t("dialog.mediaIconMode")} className="media-mode-toggle" role="group">
+              {existing?.icon ? <MediaModeButton active={submission.iconMode === "keep"} disabled={disabled} icon={<BadgeCheck aria-hidden="true" size={15} />} label={t("dialog.mediaKeep")} onClick={() => { validationVersion.current += 1; onError(undefined); onChange({ ...submission, iconFile: undefined, iconMode: "keep" }); }} /> : null}
+              <MediaModeButton active={submission.iconMode === "default"} disabled={disabled} icon={<WandSparkles aria-hidden="true" size={15} />} label={t("dialog.mediaDefault")} onClick={() => { validationVersion.current += 1; onError(undefined); onChange({ ...submission, iconFile: undefined, iconMode: "default" }); }} />
+              <MediaModeButton active={submission.iconMode === "upload"} disabled={disabled} icon={<Upload aria-hidden="true" size={15} />} label={t("dialog.mediaUpload")} onClick={() => chooseMedia("icon")} />
+            </div>
+            <input accept="image/png" aria-label={t("dialog.mediaIcon")} disabled={disabled} hidden onChange={(event) => void selectFile("icon", event.target.files?.[0])} ref={iconInputRef} type="file" />
+          </section>
+          <section className="application-media-flat-field">
+            <div className="application-media-flat-heading">
+              <Image aria-hidden="true" size={17} />
+              <div>
+                <strong>{t("dialog.mediaCover")}</strong>
+                <small>1024 x 500 PNG, JPEG, WebP</small>
+              </div>
+            </div>
+            <div className="application-media-flat-preview application-media-flat-preview-cover">
+              {coverPreview ? <img alt="" src={coverPreview} /> : <Image aria-hidden="true" size={24} />}
+              <span>{submission.coverMode === "remove" ? t("dialog.mediaNone") : submission.coverMode === "keep" ? t("dialog.mediaKeep") : t("dialog.mediaUpload")}</span>
+            </div>
+            <div aria-label={t("dialog.mediaCoverMode")} className="media-mode-toggle" role="group">
+              {existing?.cover ? <MediaModeButton active={submission.coverMode === "keep"} disabled={disabled} icon={<BadgeCheck aria-hidden="true" size={15} />} label={t("dialog.mediaKeep")} onClick={() => { validationVersion.current += 1; onError(undefined); onChange({ ...submission, coverFile: undefined, coverMode: "keep" }); }} /> : null}
+              <MediaModeButton active={submission.coverMode === "remove"} disabled={disabled} icon={<X aria-hidden="true" size={15} />} label={t("dialog.mediaNone")} onClick={() => { validationVersion.current += 1; onError(undefined); onChange({ ...submission, coverFile: undefined, coverMode: "remove" }); }} />
+              <MediaModeButton active={submission.coverMode === "upload"} disabled={disabled} icon={<Upload aria-hidden="true" size={15} />} label={t("dialog.mediaUpload")} onClick={() => chooseMedia("cover")} />
+            </div>
+            <input accept="image/png,image/jpeg,image/webp" aria-label={t("dialog.mediaCover")} disabled={disabled} hidden onChange={(event) => void selectFile("cover", event.target.files?.[0])} ref={coverInputRef} type="file" />
+          </section>
+        </div>
+        <section className="application-preview-manager">
+          <div className="application-preview-manager-heading">
+            <div className="application-media-flat-heading">
+              <Images aria-hidden="true" size={17} />
+              <div>
+                <strong>{t("dialog.mediaPreviews")}</strong>
+                <small>{t("dialog.mediaPreviewLimit")}</small>
+              </div>
+            </div>
+            <div className="application-preview-manager-actions">
+              <span className="application-preview-count" aria-live="polite">
+                {t("dialog.mediaPreviewCountStatus", { count: submission.previewFiles.length, limit: APPLICATION_PREVIEW_LIMIT })}
+              </span>
+              <div aria-label={t("dialog.mediaPreviewsMode")} className="media-mode-toggle" role="group">
+                {existing?.previews?.length ? <MediaModeButton active={submission.previewsMode === "keep"} disabled={disabled} icon={<BadgeCheck aria-hidden="true" size={15} />} label={t("dialog.mediaKeep")} onClick={() => { validationVersion.current += 1; onError(undefined); onChange({ ...submission, previewFiles: [], previewsMode: "keep" }); }} /> : null}
+                <MediaModeButton active={submission.previewsMode === "remove"} disabled={disabled} icon={<X aria-hidden="true" size={15} />} label={t("dialog.mediaNone")} onClick={() => { validationVersion.current += 1; onError(undefined); onChange({ ...submission, previewFiles: [], previewsMode: "remove" }); }} />
+                <MediaModeButton active={submission.previewsMode === "replace"} disabled={disabled} icon={<Upload aria-hidden="true" size={15} />} label={t("dialog.mediaUpload")} onClick={() => chooseMedia("previews")} />
+              </div>
+            </div>
+          </div>
+          <div aria-label={t("dialog.mediaPreviews")} className="application-preview-strip" role="list">
+            {previewImages.map((url, index) => (
+              <article className="application-preview-item" key={`${url}-${index}`} role="listitem">
+                <img alt="" src={url} />
+                <span className="application-preview-sequence">{index + 1}</span>
+                <div className="application-preview-item-actions">
+                  <button
+                    aria-label={t("dialog.mediaPreviewMoveBefore", { index: index + 1 })}
+                    disabled={disabled || index === 0}
+                    onClick={() => movePreview(index, -1)}
+                    title={t("dialog.mediaPreviewMoveBefore", { index: index + 1 })}
+                    type="button"
+                  >
+                    <ChevronLeft aria-hidden="true" size={14} />
+                  </button>
+                  <button
+                    aria-label={t("dialog.mediaPreviewMoveAfter", { index: index + 1 })}
+                    disabled={disabled || index === previewImages.length - 1}
+                    onClick={() => movePreview(index, 1)}
+                    title={t("dialog.mediaPreviewMoveAfter", { index: index + 1 })}
+                    type="button"
+                  >
+                    <ChevronRight aria-hidden="true" size={14} />
+                  </button>
+                  <button
+                    aria-label={t("dialog.mediaPreviewRemove", { index: index + 1 })}
+                    disabled={disabled}
+                    onClick={() => removePreview(index)}
+                    title={t("dialog.mediaPreviewRemove", { index: index + 1 })}
+                    type="button"
+                  >
+                    <Trash2 aria-hidden="true" size={14} />
+                  </button>
+                </div>
+              </article>
+            ))}
+            {submission.previewsMode === "keep" ? (
+              <div className="application-preview-stored" role="listitem">
+                <BadgeCheck aria-hidden="true" size={19} />
+                <span>{t("dialog.mediaStoredCount", { count: existing?.previews?.length ?? 0 })}</span>
+              </div>
+            ) : null}
+            {submission.previewFiles.length < APPLICATION_PREVIEW_LIMIT ? (
+              <button
+                aria-label={t("dialog.mediaPreviewAdd")}
+                className="application-preview-add"
+                disabled={disabled}
+                onClick={() => chooseMedia("previews")}
+                title={t("dialog.mediaPreviewAdd")}
+                type="button"
+              >
+                <Plus aria-hidden="true" size={20} />
+                <span>{t("dialog.mediaPreviewAdd")}</span>
+              </button>
+            ) : null}
+          </div>
+          <input
+            accept="image/png,image/jpeg,image/webp"
+            aria-label={t("dialog.mediaPreviews")}
+            disabled={disabled}
+            hidden
+            multiple
+            onChange={(event) => {
+              const selectedFiles = Array.from(event.target.files ?? []);
+              event.target.value = "";
+              void selectPreviews(selectedFiles, true);
+            }}
+            ref={previewsInputRef}
+            type="file"
+          />
+        </section>
+        <div className="media-validation" role={error ? "alert" : undefined}>{error ?? ""}</div>
+      </section>
+    );
   }
 
   return (
@@ -1103,7 +1700,7 @@ function ApplicationSubmissionFields({
         {submission.previewsMode === "replace" ? (
           <label className="media-file-input media-file-input-wide">
             <span>{t("dialog.mediaPreviews")}</span>
-            <input accept="image/png,image/jpeg,image/webp" aria-label={t("dialog.mediaPreviews")} disabled={disabled} multiple onChange={(event) => void selectPreviews(Array.from(event.target.files ?? []).slice(0, 9))} type="file" />
+            <input accept="image/png,image/jpeg,image/webp" aria-label={t("dialog.mediaPreviews")} disabled={disabled} multiple onChange={(event) => void selectPreviews(Array.from(event.target.files ?? []))} type="file" />
             {previewImages.length ? <div className="media-preview-grid">{previewImages.map((url, index) => <img alt="" key={`${url}-${index}`} src={url} />)}</div> : null}
           </label>
         ) : null}
@@ -1115,6 +1712,26 @@ function ApplicationSubmissionFields({
 
 function MediaModeButton({ active, disabled, icon, label, onClick }: { active: boolean; disabled: boolean; icon: ReactNode; label: string; onClick(): void }) {
   return <button aria-pressed={active} className={active ? "active" : ""} disabled={disabled} onClick={onClick} type="button">{icon}{label}</button>;
+}
+
+function mergeApplicationPreviewFiles(
+  currentFiles: readonly File[],
+  selectedFiles: readonly File[],
+): readonly File[] {
+  const identities = new Set(currentFiles.map(applicationPreviewFileIdentity));
+  return [
+    ...currentFiles,
+    ...selectedFiles.filter((file) => {
+      const identity = applicationPreviewFileIdentity(file);
+      if (identities.has(identity)) return false;
+      identities.add(identity);
+      return true;
+    }),
+  ];
+}
+
+function applicationPreviewFileIdentity(file: File): string {
+  return `${file.name}:${file.size}:${file.type}:${file.lastModified}`;
 }
 
 function useFilePreview(file: File | undefined): string | undefined {
@@ -1192,27 +1809,34 @@ function Field({
   name,
   onChange,
   options,
+  required = false,
   value,
 }: {
   locale: WebserverLocale;
   name: string;
   onChange(value: unknown): void;
   options?: readonly WebserverResourceFieldOptionValue[];
+  required?: boolean;
   value: unknown;
 }) {
   if (typeof value === "boolean") {
     return (
-      <label className="checkbox-field">
-        <input checked={value} onChange={(event) => onChange(event.target.checked)} type="checkbox" />
+      <label className="checkbox-field" data-field={name}>
+        <input aria-label={fieldLabel(name, locale)} checked={value} onChange={(event) => onChange(event.target.checked)} type="checkbox" />
         <span>{fieldLabel(name, locale)}</span>
       </label>
     );
   }
   if (options) {
     return (
-      <label>
-        <span>{fieldLabel(name, locale)}</span>
+      <label data-field={name}>
+        <span className="field-label-row">
+          {fieldLabel(name, locale)}
+          {required ? <small aria-hidden="true" className="field-required" data-label={locale === "zh-CN" ? "必填" : "Required"} /> : null}
+        </span>
         <select
+          aria-label={fieldLabel(name, locale)}
+          aria-required={required}
           disabled={options.length === 0}
           onChange={(event) => onChange(
             optionValue(options.find((option) => String(optionValue(option)) === event.target.value)
@@ -1232,9 +1856,12 @@ function Field({
   }
   if (typeof value === "number") {
     return (
-      <label>
-        <span>{fieldLabel(name, locale)}</span>
-        <input onChange={(event) => onChange(Number(event.target.value))} type="number" value={value} />
+      <label data-field={name}>
+        <span className="field-label-row">
+          {fieldLabel(name, locale)}
+          {required ? <small aria-hidden="true" className="field-required" data-label={locale === "zh-CN" ? "必填" : "Required"} /> : null}
+        </span>
+        <input aria-label={fieldLabel(name, locale)} aria-required={required} onChange={(event) => onChange(Number(event.target.value))} type="number" value={value} />
       </label>
     );
   }
@@ -1251,12 +1878,17 @@ function Field({
       : Array.from(next).slice(0, characterLimit).join(""),
   );
   return (
-    <label className={wide ? "form-field-wide" : undefined}>
-      <span>{fieldLabel(name, locale)}</span>
+    <label className={wide ? "form-field-wide" : undefined} data-field={name}>
+      <span className="field-label-row">
+        {fieldLabel(name, locale)}
+        {required ? <small aria-hidden="true" className="field-required" data-label={locale === "zh-CN" ? "必填" : "Required"} /> : null}
+      </span>
       {multiline ? (
-        <textarea onChange={(event) => updateText(event.target.value)} value={text} />
+        <textarea aria-label={fieldLabel(name, locale)} aria-required={required} onChange={(event) => updateText(event.target.value)} value={text} />
       ) : (
         <input
+          aria-label={fieldLabel(name, locale)}
+          aria-required={required}
           autoComplete="off"
           onChange={(event) => updateText(event.target.value)}
           type={name.toLowerCase().endsWith("url") ? "url" : sensitive(name) ? "password" : "text"}

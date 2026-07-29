@@ -115,6 +115,8 @@ export function WebserverAuthRoutes({
   if (runtimeConfig.status === "unavailable") {
     return (
       <WebserverAuthStatus
+        homeHref="/"
+        homeLabel={messages.backToPortal}
         message={messages.metadataUnavailable}
         onRetry={() => setAttempt((current) => current + 1)}
         retryLabel={messages.retry}

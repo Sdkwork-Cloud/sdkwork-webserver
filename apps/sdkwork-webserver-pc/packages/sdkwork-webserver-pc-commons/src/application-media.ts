@@ -68,7 +68,7 @@ export interface ApplicationImageDimensions {
 
 const ICON_BYTES = 2 * 1024 * 1024;
 const STORE_IMAGE_BYTES = 10 * 1024 * 1024;
-const PREVIEW_LIMIT = 8;
+export const APPLICATION_PREVIEW_LIMIT = 10;
 const PREVIEW_MIME_TYPES = new Set(["image/png", "image/jpeg", "image/webp"]);
 
 export async function validateApplicationMediaFile(
@@ -106,7 +106,7 @@ export async function validateApplicationMediaFile(
 }
 
 export function validateApplicationPreviewCount(files: readonly File[]): void {
-  if (files.length > PREVIEW_LIMIT) throw new Error("PREVIEW_COUNT");
+  if (files.length > APPLICATION_PREVIEW_LIMIT) throw new Error("PREVIEW_COUNT");
 }
 
 export async function readApplicationImageDimensions(file: File): Promise<ApplicationImageDimensions> {

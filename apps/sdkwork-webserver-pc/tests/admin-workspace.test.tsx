@@ -38,9 +38,20 @@ describe("admin workspace application controls", () => {
       "Python",
       "Other",
     ]);
-    expect(screen.getByRole("button", { name: "Choose ZIP package" })).toBeTruthy();
-    expect(screen.getByText("Store listing assets")).toBeTruthy();
+    const wizardProgress = screen.getByTestId("application-wizard-progress");
+    expect(wizardProgress).toBeTruthy();
+    expect(screen.getByText("Application media")).toBeTruthy();
+    expect(screen.getByText("Step 1 of 4")).toBeTruthy();
+    expect((screen.getByRole("button", { name: "2. Store listing" }) as HTMLButtonElement).disabled).toBe(true);
     expect(screen.getByRole("button", { name: "Generate default" }).getAttribute("aria-pressed")).toBe("true");
+    fireEvent.change(screen.getByLabelText("Application name"), { target: { value: "Public API" } });
+    fireEvent.change(applicationType, { target: { value: "API" } });
+    fireEvent.change(siteType, { target: { value: "6" } });
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+    expect(screen.getByRole("heading", { name: "Store listing details" })).toBeTruthy();
+    fireEvent.change(screen.getByLabelText(/Short description/), { target: { value: "Public API gateway" } });
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+    expect(screen.getByRole("button", { name: "Choose ZIP package" })).toBeTruthy();
     expect(screen.getByText("No source selected")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Source directory" }));
     expect(screen.getByRole("button", { name: "Choose source directory" })).toBeTruthy();
@@ -53,14 +64,13 @@ describe("admin workspace application controls", () => {
     expect(screen.getByText("2 source files selected")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "ZIP package" }));
     expect(screen.getByText("No source selected")).toBeTruthy();
-    fireEvent.change(applicationType, { target: { value: "API" } });
-    fireEvent.change(siteType, { target: { value: "6" } });
-    fireEvent.change(screen.getByLabelText("Application name"), { target: { value: "Public API" } });
     fireEvent.change(screen.getByTestId("application-source-input"), {
       target: { files: [new File(["source"], "source.zip", { type: "application/zip" })] },
     });
     expect(screen.getByText("source.zip")).toBeTruthy();
-    fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
+    fireEvent.click(screen.getByRole("button", { name: "Review" }));
+    expect(screen.getByRole("heading", { name: "Review and create" })).toBeTruthy();
+    fireEvent.click(screen.getAllByRole("button", { name: "Create application" }).at(-1)!);
 
     await waitFor(() => expect(create).toHaveBeenCalledWith(
       expect.objectContaining({ name: "Public API", applicationType: "API", siteType: 6 }),
@@ -80,6 +90,35 @@ describe("admin workspace application controls", () => {
       artifactDriveUri: "drive://spaces/space-1/nodes/node-1",
       versionTag: "v1.0.0",
     }), { idempotencyKey: expect.any(String) });
+  });
+
+  it("keeps the creation order explicit and preserves basic input when going back", async () => {
+    const registry = createWebserverAdminApplicationRegistry(client({}), testSourceStorage(), testMediaStorage());
+    renderWorkspace("/admin/applications", registry);
+
+    fireEvent.click(await screen.findByRole("button", { name: "Create application" }));
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+    expect(screen.getByRole("alert").textContent).toContain("Enter an application name");
+    expect(screen.getByRole("heading", { name: "Application basics" })).toBeTruthy();
+
+    fireEvent.change(screen.getByLabelText("Application name"), { target: { value: "Portal" } });
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+    expect(screen.getByRole("heading", { name: "Store listing details" })).toBeTruthy();
+    expect(screen.queryByRole("heading", { name: "Application basics" })).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+    expect(screen.getByRole("heading", { name: "Release setup" })).toBeTruthy();
+
+    const sourceTrigger = screen.getByRole("button", { name: "Choose ZIP package" });
+    fireEvent.click(screen.getByRole("button", { name: "Review" }));
+    expect(screen.getByRole("alert").textContent).toContain("select the initial application source");
+    await waitFor(() => expect(document.activeElement).toBe(sourceTrigger));
+
+    fireEvent.click(screen.getByRole("button", { name: "Back" }));
+    expect(screen.getByRole("heading", { name: "Store listing details" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Back" }));
+    expect(screen.getByRole("heading", { name: "Application basics" })).toBeTruthy();
+    expect((screen.getByLabelText("Application name") as HTMLInputElement).value).toBe("Portal");
   });
 
   it("uses an application-specific scope for domain management", async () => {
@@ -108,9 +147,12 @@ describe("admin workspace application controls", () => {
 
     fireEvent.click(await screen.findByRole("button", { name: "Create application" }));
     fireEvent.change(screen.getByLabelText("Application name"), { target: { value: "Commercial portal" } });
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
     fireEvent.change(screen.getByTestId("application-source-input"), {
       target: { files: [new File(["source"], "source.zip", { type: "application/zip" })] },
     });
+    fireEvent.click(screen.getByRole("button", { name: "Review" }));
     const dialog = screen.getByRole("dialog");
     fireEvent.submit(dialog);
     fireEvent.submit(dialog);
@@ -141,10 +183,13 @@ describe("admin workspace application controls", () => {
 
     fireEvent.click(await screen.findByRole("button", { name: "Create application" }));
     fireEvent.change(screen.getByLabelText("Application name"), { target: { value: "Commercial portal" } });
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
     fireEvent.change(screen.getByTestId("application-source-input"), {
       target: { files: [new File(["source"], "source.zip", { type: "application/zip" })] },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
+    fireEvent.click(screen.getByRole("button", { name: "Review" }));
+    fireEvent.click(screen.getAllByRole("button", { name: "Create application" }).at(-1)!);
 
     expect((await screen.findByRole("alert")).textContent).toContain(
       "Application app-1 and its source package were created, but the initial deployment command was not accepted.",
@@ -165,10 +210,13 @@ describe("admin workspace application controls", () => {
 
     fireEvent.click(await screen.findByRole("button", { name: "Create application" }));
     fireEvent.change(screen.getByLabelText("Application name"), { target: { value: "Commercial portal" } });
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
     fireEvent.change(screen.getByTestId("application-source-input"), {
       target: { files: [new File(["source"], "source.zip", { type: "application/zip" })] },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
+    fireEvent.click(screen.getByRole("button", { name: "Review" }));
+    fireEvent.click(screen.getAllByRole("button", { name: "Create application" }).at(-1)!);
 
     expect((await screen.findByRole("alert")).textContent).toContain(
       "Application app-1 was created as a draft, but its store assets were not saved.",

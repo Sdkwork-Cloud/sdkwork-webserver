@@ -36,6 +36,7 @@ describe("WebserverAuthGate", () => {
     renderGate(controller, "/console");
 
     expect(await screen.findByText("暂时无法验证登录状态。")).toBeTruthy();
+    expect(screen.getByRole("link", { name: "返回 Portal 首页" }).getAttribute("href")).toBe("/");
     fireEvent.click(screen.getByRole("button", { name: "重试" }));
     await waitFor(() => expect(screen.getByTestId("location").textContent).toBe(
       "/auth/login?redirect=%2Fconsole",
