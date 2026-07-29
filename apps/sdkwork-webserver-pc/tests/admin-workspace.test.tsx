@@ -142,7 +142,7 @@ describe("admin workspace application controls", () => {
     renderWorkspace("/admin/applications", registry);
 
     fireEvent.click(await screen.findByRole("button", { name: "Create application" }));
-    const previewInput = screen.getByLabelText("Preview images") as HTMLInputElement;
+    const previewInput = screen.getByTestId("application-preview-input") as HTMLInputElement;
     const first = new File(["first"], "first.png", { lastModified: 1, type: "image/png" });
     const second = new File(["second"], "second.png", { lastModified: 2, type: "image/png" });
     const third = new File(["third"], "third.png", { lastModified: 3, type: "image/png" });

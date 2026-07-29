@@ -1584,6 +1584,7 @@ function ApplicationSubmissionFields({
           <input
             accept="image/png,image/jpeg,image/webp"
             aria-label={t("dialog.mediaPreviews")}
+            data-testid="application-preview-input"
             disabled={disabled}
             hidden
             multiple
