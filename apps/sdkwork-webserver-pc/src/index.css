@@ -846,6 +846,12 @@ html[data-sdk-color-mode="dark"] .webserver-auth-page {
   white-space: nowrap;
 }
 .application-creation-dialog .field-required { flex: 0 0 auto; }
+.application-creation-dialog .field-required::after { content: "*"; }
+.application-creation-dialog .required-mark {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
 .application-creation-dialog .field-character-limit {
   min-width: 44px;
   text-align: right;
@@ -947,11 +953,7 @@ html[data-sdk-color-mode="dark"] .webserver-auth-page {
   border-radius: 5px;
 }
 .application-media-flat-preview > span {
-  max-width: 55%;
-  overflow: hidden;
-  font-size: 10px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  display: none;
 }
 .application-media-flat-preview > img {
   width: 48px;
@@ -1095,7 +1097,7 @@ html[data-sdk-color-mode="dark"] .webserver-auth-page {
   text-align: center;
 }
 .application-preview-add {
-  flex: 0 0 104px;
+  flex: 0 0 76px;
   height: 94px;
   display: flex;
   flex-direction: column;
