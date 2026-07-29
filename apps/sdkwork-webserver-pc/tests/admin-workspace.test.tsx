@@ -153,11 +153,13 @@ describe("admin workspace application controls", () => {
     await screen.findByText("3 / 10");
 
     const previewList = screen.getByRole("list", { name: "Preview images" });
-    expect(within(previewList).getAllByRole("listitem").map((item) => item.getAttribute("aria-label"))).toEqual([
-      "first.png",
-      "second.png",
-      "third.png",
-    ]);
+    await waitFor(() => {
+      expect(within(previewList).getAllByRole("listitem").map((item) => item.getAttribute("aria-label"))).toEqual([
+        "first.png",
+        "second.png",
+        "third.png",
+      ]);
+    });
     fireEvent.click(screen.getByRole("button", { name: "Move preview 3 left" }));
     expect(within(previewList).getAllByRole("listitem").map((item) => item.getAttribute("aria-label"))).toEqual([
       "first.png",
