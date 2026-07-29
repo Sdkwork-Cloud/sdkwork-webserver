@@ -69,7 +69,7 @@ describe("WebserverPortal", () => {
     ]);
     const hero = screen.getByRole("heading", { level: 1, name: "SDKWork Web Server" }).closest("section");
     const copyButton = screen.getByRole("button", { name: "Copy agent integration instruction" });
-    const deliveryStatus = screen.getByText("Source and artifact");
+    const deliveryStatus = screen.getByText("Business release");
 
     expect(hero?.contains(copyButton)).toBe(true);
     expect(hero?.contains(deliveryStatus)).toBe(true);
@@ -89,7 +89,7 @@ describe("WebserverPortal", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Copy agent integration instruction" }));
 
-    expect((await screen.findByRole("alert")).textContent).toContain("Clipboard access failed");
+    expect((await screen.findByRole("alert")).textContent).toContain("Unable to copy");
     expect(screen.getByText(/birdcoder\.com\/skills\/sdkwork-app-deployments\/skill\.md/)).toBeTruthy();
   });
 
