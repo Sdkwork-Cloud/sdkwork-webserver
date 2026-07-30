@@ -261,6 +261,7 @@ Health or SLO checks detect a failed canary. The control plane stops rollout, re
 
 ## 11. Linked Requirements
 
+- [REQ-2026-0067 Detached custom domain assets](../requirements/REQ-2026-0067-detached-custom-domain-assets.md) - allows tenant administrators to register and verify domains before application binding, retain multiple certificates per domain, and activate them only through deployment and TLS runtime contracts.
 - [REQ-2026-0066 Idempotency contract closure](../requirements/REQ-2026-0066-idempotency-contract-closure.md) - makes retry safety a generated contract across OpenAPI, route metadata, SDKs, PC actions, framework validation, durable deployment deduplication, and CI.
 - [REQ-2026-0065 Standalone browser same-origin delivery](../requirements/REQ-2026-0065-standalone-browser-same-origin-delivery.md) - makes page/API browser origin explicit, uses a topology-derived Vite proxy for development, and packages the PC shell behind the production Rust application ingress.
 - [REQ-2026-0064 Embedded standalone dependency APIs](../requirements/REQ-2026-0064-embedded-standalone-dependency-apis.md) - links IAM and Drive owner App API assemblies into the Web Server standalone gateway, unifies browser SDK origins on application public ingress, and rejects standalone platform-gateway URL drift.

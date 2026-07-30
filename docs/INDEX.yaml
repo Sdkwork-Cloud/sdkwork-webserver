@@ -9,8 +9,8 @@ entries:
     path: docs/architecture/decisions/ADR-20260730-detached-domain-assets-and-certificate-bindings.md
     kind: adr
     status: accepted
-  - id: REQ-2026-0066
-    path: docs/product/requirements/REQ-2026-0066-detached-custom-domain-assets.md
+  - id: REQ-2026-0067
+    path: docs/product/requirements/REQ-2026-0067-detached-custom-domain-assets.md
     kind: req
     status: in-progress
   - id: ADR-20260730-drive-backed-application-source-versions

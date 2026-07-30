@@ -200,6 +200,7 @@ The request path does not call management services or repositories. Management r
 
 ## 8. Architecture Decision Index
 
+- [ADR-20260730 Detached Domain Assets And Certificate Bindings](../decisions/ADR-20260730-detached-domain-assets-and-certificate-bindings.md) - accepted tenant-owned domain assets, optional application binding, canonical one-to-many certificates, and fail-closed deployment activation.
 - [ADR-20260730 Drive-Backed Application Source Versions](../decisions/ADR-20260730-drive-backed-application-source-versions.md) - accepted immutable Drive source catalog, five-version default retention, and release provenance through `sourceVersionId`.
 - [ADR-20260728 Idempotency Contract Closure](../decisions/ADR-20260728-idempotency-contract-closure.md) - accepted strict marker/Header/route/SDK parity, stable action keys, bounded runtime validation, and Header-owned durable deduplication.
 - [ADR-20260728 Standalone Browser Same-Origin Delivery](../decisions/ADR-20260728-standalone-browser-same-origin-delivery.md) - accepted topology-derived development proxy and production gateway-static delivery for one browser-visible origin.
@@ -208,6 +209,7 @@ The request path does not call management services or repositories. Management r
 
 | ADR | Topic | Status |
 | --- | --- | --- |
+| ADR-20260730-detached-domain-assets-and-certificate-bindings | Detached tenant domains and one-to-many certificate bindings | accepted |
 | ADR-20260730-drive-backed-application-source-versions | Immutable Drive source versions and release provenance | accepted |
 | ADR-20260728-idempotency-contract-closure | Generated replay-safe API/SDK idempotency contract | accepted |
 | ADR-20260716-canonical-uri-dual-representation | Raw request URI preservation and bounded canonical routing Path | proposed; human review required |

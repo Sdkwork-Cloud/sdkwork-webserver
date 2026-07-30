@@ -1,7 +1,7 @@
-# REQ-2026-0066 Detached Custom Domain Assets
+# REQ-2026-0067 Detached Custom Domain Assets
 
 ```yaml
-id: REQ-2026-0066
+id: REQ-2026-0067
 title: Register custom domains before application binding and manage multiple certificates per domain
 owner: sdkwork-web-server
 status: in-progress
@@ -80,6 +80,11 @@ verification:
   - node ../sdkwork-specs/tools/check-pagination.mjs --workspace .
   - pnpm --dir apps/sdkwork-webserver-pc check
 ```
+
+## Change Control
+
+- 2026-07-30: Renumbered from the duplicate provisional id `REQ-2026-0066` to
+  `REQ-2026-0067`. The canonical `REQ-2026-0066` remains Idempotency Contract Closure.
 
 ## Product Decision
 

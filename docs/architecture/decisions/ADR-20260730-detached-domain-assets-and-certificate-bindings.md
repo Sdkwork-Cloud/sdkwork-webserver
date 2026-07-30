@@ -1,7 +1,7 @@
 # ADR-20260730 Detached Domain Assets And Certificate Bindings
 
 Status: accepted
-Requirement: REQ-2026-0066
+Requirement: REQ-2026-0067
 Owner: sdkwork-web-server
 Date: 2026-07-30
 Specs: DATABASE_SPEC.md, API_SPEC.md, WEB_BACKEND_SPEC.md, SDK_SPEC.md, BACKEND_UI_SPEC.md, DEPLOYMENT_SPEC.md, NGINX_SPEC.md, SECURITY_SPEC.md
