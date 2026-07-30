@@ -40,7 +40,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "03696da583ae5344df3a9d41078d1fee5c7f4bda5468399577677f0246f94043"
+      "sha256": "6b508a667e61b2d6daf4a310fe45e5eaf88849d8c524778308be9b8bbaf8c76c"
     },
     {
       "path": "requirements.txt",
@@ -52,7 +52,7 @@
     },
     {
       "path": "sdkwork_web_backend_sdk/api/__init__.py",
-      "sha256": "30fe1715fdb2fe90b7854d10666490e010f7d6ecb7e64bb3e4652d28ab166d96"
+      "sha256": "686f997fe5d242b20ffe3aa204072d33b6eab68e393400e30dfe54d62ff35735"
     },
     {
       "path": "sdkwork_web_backend_sdk/api/agent.py",
@@ -87,6 +87,10 @@
       "sha256": "d018bc62bca395ed1022e6b578d3e6685999efb39d7c97395dd3bfabf4ff9932"
     },
     {
+      "path": "sdkwork_web_backend_sdk/api/domain.py",
+      "sha256": "a34a4d2f00069b9bf4a846ee770f7963e8bb2a439623111b46d86ff20010c179"
+    },
+    {
       "path": "sdkwork_web_backend_sdk/api/nginx.py",
       "sha256": "dfa83a81c8afae93e1aaa5d196b77efdad8888fd08221b17b0d1cff68e67d02e"
     },
@@ -96,7 +100,7 @@
     },
     {
       "path": "sdkwork_web_backend_sdk/client.py",
-      "sha256": "e094f1b5826c92c2b8d1098886bf375db189fe207702aaabdcdf16b0e72e2cb2"
+      "sha256": "e6e5b96f2935c7d21c0ffa17ec854881329a4ca5b77c74cb58c5f451fee11214"
     },
     {
       "path": "sdkwork_web_backend_sdk/http_client.py",
@@ -104,7 +108,7 @@
     },
     {
       "path": "sdkwork_web_backend_sdk/models/__init__.py",
-      "sha256": "ffb90bd6067b46cd1ee59a2d927f4e55fee68edf7debe05e463b34b5fd519c79"
+      "sha256": "d8b2731a88a71c79882ea81f2e0436675271aaf29e731a0a1370188892c64b6a"
     },
     {
       "path": "sdkwork_web_backend_sdk/models/agent_certificate_bundle.py",
@@ -132,7 +136,7 @@
     },
     {
       "path": "sdkwork_web_backend_sdk/models/application_domain_response.py",
-      "sha256": "5894d8dd70dc044d0b5e5ea3ae718be3763b7fdaffe9b311753d01b2837345c4"
+      "sha256": "f268d56f53829878e42de673a94d0ce3961ecf7c676befc4343671dbdf42d846"
     },
     {
       "path": "sdkwork_web_backend_sdk/models/application_domain_verify_response.py",
@@ -236,7 +240,7 @@
     },
     {
       "path": "sdkwork_web_backend_sdk/models/certificate_response.py",
-      "sha256": "2b0244a034ac2aa98059948e1b1f189712a25ab7ed62b75acdd4c12386e81010"
+      "sha256": "51689a8b83e4ada2c95e4bf9df8851f3d5df93d32ac7bf8e485fdb13a7526838"
     },
     {
       "path": "sdkwork_web_backend_sdk/models/certificates_create_response201.py",
@@ -303,6 +307,10 @@
       "sha256": "c257e0b03575bb1a76b45af840c0fd0c491f7ada5a92d4de88d7ab4062b2b54e"
     },
     {
+      "path": "sdkwork_web_backend_sdk/models/create_managed_domain_request.py",
+      "sha256": "85d3d43e19849b9473c76322889e09bab9114fa7d26d100f714c8fd654c6a843"
+    },
+    {
       "path": "sdkwork_web_backend_sdk/models/create_nginx_config_request.py",
       "sha256": "12b1f48a1c81453110f8a12abe521b08416d16a5b516000150104fa3914d7745"
     },
@@ -313,6 +321,22 @@
     {
       "path": "sdkwork_web_backend_sdk/models/create_server_response.py",
       "sha256": "b09668d404de5f6d62ac75100fa6cc430e102654deb57587937f3f052aa51614"
+    },
+    {
+      "path": "sdkwork_web_backend_sdk/models/domains_application_binding_update_response.py",
+      "sha256": "af0c951f168be961e02ff15c39298d79d44cc40199076cf74406ea08407b073e"
+    },
+    {
+      "path": "sdkwork_web_backend_sdk/models/domains_create_response201.py",
+      "sha256": "cf77fbf34c17aff6195bca721a88f2a8b8e86359da0677b1eb21503657367d38"
+    },
+    {
+      "path": "sdkwork_web_backend_sdk/models/domains_list_response.py",
+      "sha256": "60e7e24e2d72c76302051e13862b33bcfff790bce9b0cd4268de4fa83133af40"
+    },
+    {
+      "path": "sdkwork_web_backend_sdk/models/domains_verify_response.py",
+      "sha256": "f0e235e39d410adbdea77df6f31e15d1df43b35636fa23baa3c1f57748cf8702"
     },
     {
       "path": "sdkwork_web_backend_sdk/models/field_error.py",
@@ -429,6 +453,10 @@
     {
       "path": "sdkwork_web_backend_sdk/models/update_certificate_request.py",
       "sha256": "80a05732a9fa4f270469b799a1ac23b7a59baa9096b75ecf5a07fa61eeef0e48"
+    },
+    {
+      "path": "sdkwork_web_backend_sdk/models/update_domain_application_binding_request.py",
+      "sha256": "a507c23406b3a5b82caf45d1a5f0f824e6727f2c9c64a53793d6bfdb539688c3"
     },
     {
       "path": "sdkwork_web_backend_sdk/models/update_nginx_config_request.py",

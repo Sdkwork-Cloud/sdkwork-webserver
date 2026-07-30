@@ -92,7 +92,7 @@
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/CertificateResponse.kt",
-      "sha256": "f738e5d87e74387348461b664d7b736fde16f38c4599207e8521716635403b3c"
+      "sha256": "bbf3a445d2cf3f7f156b6b968b710aa660fcc46e62224d600fc50bca22829e6f"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatesCreateResponse201.kt",
@@ -144,7 +144,7 @@
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/DomainResponse.kt",
-      "sha256": "3e6899ca6984fc187a63803be1ef4c427c6eb616202f2f808b6f067b41661e56"
+      "sha256": "5b556ddcde03a35cff394ddbd38ef2c35ea18c4c89f3627381407e39428b052a"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/DomainVerifyResponse.kt",

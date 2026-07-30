@@ -4,6 +4,7 @@ import {
   type WebserverResourceAction,
   type WebserverResourceActionContext,
   type WebserverResourceDataSource,
+  type WebserverResourceFieldOption,
   type WebserverResourceRegistry,
 } from "@sdkwork/webserver-pc-commons";
 
@@ -20,7 +21,12 @@ export function createWebserverAdminCertificateRegistry(client: WebserverAdminSd
           "Issue certificate",
           { domainId: "", certType: 1, autoRenew: true },
           async (context) => client.certificate.create(createCertificateRequest(context.body), idempotencyParams(context)),
-          { fieldOptions: { certType: [1, 3] }, permission: "web.certificates.write" },
+          {
+            fieldOptions: { domainId: [], certType: [1, 3] },
+            loadFieldOptions: async () => ({ domainId: await domainOptions(client) }),
+            permission: "web.certificates.write",
+            requiredFields: ["domainId"],
+          },
         ),
         action(
           "update-renewal",
@@ -43,6 +49,24 @@ export function createWebserverAdminCertificateRegistry(client: WebserverAdminSd
       [],
     ),
   };
+}
+
+async function domainOptions(
+  client: WebserverAdminSdkClient,
+): Promise<WebserverResourceFieldOption[]> {
+  const options: WebserverResourceFieldOption[] = [];
+  let page = 1;
+  let hasMore = true;
+  while (hasMore) {
+    const response = await client.domain.list({ page, pageSize: 100 });
+    options.push(...response.items.map((domain) => ({
+      label: `${domain.hostname} - ${domain.applicationName ?? "Unbound"}`,
+      value: domain.id,
+    })));
+    hasMore = response.pageInfo.hasMore === true;
+    page += 1;
+  }
+  return options;
 }
 
 function source(

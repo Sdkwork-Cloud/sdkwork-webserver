@@ -12,6 +12,8 @@ final class CertificateResponse
 
     public ?string $domain = null;
 
+    public ?string $domainId = null;
+
     public ?int $certType = null;
 
     public ?string $issuer = null;
@@ -42,6 +44,9 @@ final class CertificateResponse
             : null;
         $this->domain = array_key_exists('domain', $data)
             ? $data['domain']
+            : null;
+        $this->domainId = array_key_exists('domainId', $data)
+            ? $data['domainId']
             : null;
         $this->certType = array_key_exists('certType', $data)
             ? $data['certType']
@@ -83,6 +88,7 @@ final class CertificateResponse
             'id' => $this->id,
             'certName' => $this->certName,
             'domain' => $this->domain,
+            'domainId' => $this->domainId,
             'certType' => $this->certType,
             'issuer' => $this->issuer,
             'fingerprint' => $this->fingerprint,

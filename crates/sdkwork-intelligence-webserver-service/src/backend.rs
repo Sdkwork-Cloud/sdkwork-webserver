@@ -3,8 +3,9 @@
 use async_trait::async_trait;
 use sdkwork_webserver_contract::{
     CreateCertificateRequest, CreateDeploymentRequest, CreateDomainRequest,
-    CreateNginxConfigRequest, CreateServerRequest, CreateSiteRequest, CreateSourceVersionRequest,
-    ImportGitSourceVersionRequest, ListNginxConfigsQuery, ListSitesQuery, UpdateCertificateRequest,
+    CreateManagedDomainRequest, CreateNginxConfigRequest, CreateServerRequest, CreateSiteRequest,
+    CreateSourceVersionRequest, ImportGitSourceVersionRequest, ListNginxConfigsQuery,
+    ListSitesQuery, UpdateCertificateRequest, UpdateDomainApplicationBindingRequest,
     UpdateNginxConfigRequest, UpdateSiteRequest, WebAppApi, WebAppRequestContext,
     WebAppResourceScope, WebBackendApi, WebBackendRequestContext, WebServiceError,
     WebServiceResult,
@@ -197,6 +198,118 @@ impl WebBackendApi for WebService {
         WebAppApi::delete_domain(self, &app_context, application_id, domain_id).await
     }
 
+    async fn list_managed_domains(
+        &self,
+        context: &WebBackendRequestContext,
+        page: i32,
+        page_size: i32,
+    ) -> WebServiceResult<sdkwork_webserver_contract::DomainPage> {
+        let tenant_id = Self::require_backend_tenant(context)?;
+        self.repository
+            .list_managed_domains(tenant_id, page, page_size)
+            .await
+    }
+
+    async fn create_managed_domain(
+        &self,
+        context: &WebBackendRequestContext,
+        request: &CreateManagedDomainRequest,
+    ) -> WebServiceResult<sdkwork_webserver_contract::DomainResponse> {
+        Self::validate_domain_request(&CreateDomainRequest {
+            hostname: request.hostname.clone(),
+            is_primary: request.is_primary,
+            ssl_enabled: request.ssl_enabled,
+            ssl_provider: request.ssl_provider.clone(),
+        })?;
+        if request.application_id.is_none() && request.is_primary {
+            return Err(WebServiceError::validation(
+                "an unbound domain cannot be primary",
+            ));
+        }
+        let tenant_id = Self::require_backend_tenant(context)?;
+        let domain = self
+            .repository
+            .create_managed_domain(tenant_id, request)
+            .await?;
+        self.audit_backend_action(context, "domains.create", "domain", &domain.id)
+            .await;
+        Ok(domain)
+    }
+
+    async fn delete_managed_domain(
+        &self,
+        context: &WebBackendRequestContext,
+        domain_id: &str,
+    ) -> WebServiceResult<()> {
+        let tenant_id = Self::require_backend_tenant(context)?;
+        self.repository
+            .delete_managed_domain(tenant_id, domain_id)
+            .await?;
+        self.audit_backend_action(context, "domains.delete", "domain", domain_id)
+            .await;
+        Ok(())
+    }
+
+    async fn verify_managed_domain(
+        &self,
+        context: &WebBackendRequestContext,
+        domain_id: &str,
+    ) -> WebServiceResult<sdkwork_webserver_contract::DomainVerifyResponse> {
+        let tenant_id = Self::require_backend_tenant(context)?;
+        let verification = self
+            .repository
+            .verify_managed_domain(tenant_id, domain_id)
+            .await?;
+        self.audit_backend_action(context, "domains.verify", "domain", domain_id)
+            .await;
+        Ok(verification)
+    }
+
+    async fn update_domain_application_binding(
+        &self,
+        context: &WebBackendRequestContext,
+        domain_id: &str,
+        request: &UpdateDomainApplicationBindingRequest,
+    ) -> WebServiceResult<sdkwork_webserver_contract::DomainResponse> {
+        if request.application_id.trim().is_empty() {
+            return Err(WebServiceError::validation(
+                "applicationId must not be empty",
+            ));
+        }
+        let tenant_id = Self::require_backend_tenant(context)?;
+        let domain = self
+            .repository
+            .bind_managed_domain(tenant_id, domain_id, request)
+            .await?;
+        self.audit_backend_action(
+            context,
+            "domains.application_binding.update",
+            "domain",
+            domain_id,
+        )
+        .await;
+        Ok(domain)
+    }
+
+    async fn delete_domain_application_binding(
+        &self,
+        context: &WebBackendRequestContext,
+        domain_id: &str,
+    ) -> WebServiceResult<()> {
+        let tenant_id = Self::require_backend_tenant(context)?;
+        self.repository
+            .unbind_managed_domain(tenant_id, domain_id)
+            .await?;
+        self.audit_backend_action(
+            context,
+            "domains.application_binding.delete",
+            "domain",
+            domain_id,
+        )
+        .await;
+        Ok(())
+    }
+
     async fn list_application_source_versions(
         &self,
         context: &WebBackendRequestContext,
@@ -235,13 +348,8 @@ impl WebBackendApi for WebService {
         source_version_id: &str,
     ) -> WebServiceResult<sdkwork_webserver_contract::SourceVersionResponse> {
         let app_context = Self::backend_app_context(context)?;
-        WebAppApi::retrieve_source_version(
-            self,
-            &app_context,
-            application_id,
-            source_version_id,
-        )
-        .await
+        WebAppApi::retrieve_source_version(self, &app_context, application_id, source_version_id)
+            .await
     }
 
     async fn list_application_deployments(

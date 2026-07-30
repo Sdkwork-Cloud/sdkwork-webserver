@@ -46,6 +46,7 @@ client.setHeader('X-Custom-Header', 'value');
 
 - `client.application` - application API
 - `client.applicationDomain` - application_domain API
+- `client.domain` - domain API
 - `client.applicationSourceVersion` - application_source_version API
 - `client.applicationDeployment` - application_deployment API
 - `client.certificate` - certificate API
@@ -81,6 +82,17 @@ final params = <String, dynamic>{
   'page_size': 2,
 };
 final result = await client.applicationDomain.applicationsDomainsList(applicationId, params);
+print(result);
+```
+
+### domain
+```dart
+// List tenant custom domain assets
+final params = <String, dynamic>{
+  'page': 1,
+  'page_size': 2,
+};
+final result = await client.domain.domainsList(params);
 print(result);
 ```
 

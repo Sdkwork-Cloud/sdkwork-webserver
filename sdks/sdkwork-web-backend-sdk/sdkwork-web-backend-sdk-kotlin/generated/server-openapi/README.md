@@ -55,6 +55,7 @@ val client = SdkworkBackendClient(config)
 
 - `client.application` - application API
 - `client.applicationDomain` - application_domain API
+- `client.domain` - domain API
 - `client.applicationSourceVersion` - application_source_version API
 - `client.applicationDeployment` - application_deployment API
 - `client.certificate` - certificate API
@@ -92,6 +93,18 @@ val params = linkedMapOf<String, Any>(
     "page_size" to 2
 )
 val result = client.applicationDomain.applicationsDomainsList(applicationId, params)
+println(result)
+```
+
+### domain
+
+```kotlin
+// List tenant custom domain assets
+val params = linkedMapOf<String, Any>(
+    "page" to 1,
+    "page_size" to 2
+)
+val result = client.domain.domainsList(params)
 println(result)
 ```
 

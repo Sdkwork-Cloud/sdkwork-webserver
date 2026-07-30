@@ -94,6 +94,56 @@ const HTTP_ROUTES: &[HttpRoute] = &[
     .with_idempotent(true),
     HttpRoute::dual_token(
         HttpMethod::Get,
+        "/backend/v3/api/domains",
+        "domain",
+        "domains.list",
+    )
+    .with_required_permission("web.sites.read"),
+    HttpRoute::dual_token(
+        HttpMethod::Post,
+        "/backend/v3/api/domains",
+        "domain",
+        "domains.create",
+    )
+    .with_required_permission("web.sites.write")
+    .with_idempotent(true),
+    HttpRoute::dual_token(
+        HttpMethod::Delete,
+        "/backend/v3/api/domains/{domainId}",
+        "domain",
+        "domains.delete",
+    )
+    .with_required_permission("web.sites.write")
+    .with_idempotent(true)
+    .with_rate_limit_tier(RateLimitTier::AuthCritical),
+    HttpRoute::dual_token(
+        HttpMethod::Post,
+        "/backend/v3/api/domains/{domainId}/verify",
+        "domain",
+        "domains.verify",
+    )
+    .with_required_permission("web.sites.write")
+    .with_idempotent(true),
+    HttpRoute::dual_token(
+        HttpMethod::Put,
+        "/backend/v3/api/domains/{domainId}/application_binding",
+        "domain",
+        "domains.applicationBinding.update",
+    )
+    .with_required_permission("web.sites.write")
+    .with_idempotent(true)
+    .with_rate_limit_tier(RateLimitTier::AuthCritical),
+    HttpRoute::dual_token(
+        HttpMethod::Delete,
+        "/backend/v3/api/domains/{domainId}/application_binding",
+        "domain",
+        "domains.applicationBinding.delete",
+    )
+    .with_required_permission("web.sites.write")
+    .with_idempotent(true)
+    .with_rate_limit_tier(RateLimitTier::AuthCritical),
+    HttpRoute::dual_token(
+        HttpMethod::Get,
         "/backend/v3/api/applications/{applicationId}/source_versions",
         "applicationSourceVersion",
         "applications.sourceVersions.list",

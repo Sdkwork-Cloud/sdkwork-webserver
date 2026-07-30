@@ -45,6 +45,7 @@
     "@sdkwork/webserver-pc-admin-certificates": "workspace:*",
     "@sdkwork/webserver-pc-admin-core": "workspace:*",
     "@sdkwork/webserver-pc-admin-diagnostics": "workspace:*",
+    "@sdkwork/webserver-pc-admin-domains": "workspace:*",
     "@sdkwork/webserver-pc-admin-nginx": "workspace:*",
     "@sdkwork/webserver-pc-admin-servers": "workspace:*",
     "@sdkwork/webserver-pc-admin-shell": "workspace:*",

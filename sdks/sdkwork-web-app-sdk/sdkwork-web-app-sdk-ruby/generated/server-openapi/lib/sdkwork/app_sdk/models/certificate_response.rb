@@ -2,13 +2,14 @@ module Sdkwork
   module AppSdk
     module Models
       class CertificateResponse
-              attr_accessor :id, :cert_name, :domain, :cert_type, :issuer, :fingerprint, :not_before, :not_after, :auto_renew, :renewal_status, :status, :created_at
+              attr_accessor :id, :cert_name, :domain, :domain_id, :cert_type, :issuer, :fingerprint, :not_before, :not_after, :auto_renew, :renewal_status, :status, :created_at
 
               def initialize(attributes = {})
                 attributes = (attributes || {}).transform_keys(&:to_s)
                 @id = attributes['id']
                 @cert_name = attributes['certName']
                 @domain = attributes['domain']
+                @domain_id = attributes['domainId']
                 @cert_type = attributes['certType']
                 @issuer = attributes['issuer']
                 @fingerprint = attributes['fingerprint']
@@ -31,6 +32,7 @@ module Sdkwork
                   'id' => @id,
                   'certName' => @cert_name,
                   'domain' => @domain,
+                  'domainId' => @domain_id,
                   'certType' => @cert_type,
                   'issuer' => @issuer,
                   'fingerprint' => @fingerprint,

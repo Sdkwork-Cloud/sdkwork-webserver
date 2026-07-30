@@ -10,6 +10,7 @@ class CertificateResponse:
     status: int
     created_at: str
     domain: Optional[str] = None
+    domain_id: Optional[str] = None
     cert_type: Optional[int] = None
     issuer: Optional[str] = None
     fingerprint: Optional[str] = None

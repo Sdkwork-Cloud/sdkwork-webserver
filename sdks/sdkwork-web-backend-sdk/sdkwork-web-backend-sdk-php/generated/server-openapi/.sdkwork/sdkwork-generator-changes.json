@@ -9,25 +9,10 @@
     "protocol": "http",
     "packageName": "sdkwork/web-backend-sdk"
   },
-  "changeFingerprint": "cbcebdbd569835098c892d12683880dc3945002c55df1c188b499ce1651a9ed5",
+  "changeFingerprint": "87e33a892cc28d770ba284f9c25743e9dfb6f3a1146b47a8265d87504d25421d",
   "changes": {
-    "createdGeneratedFiles": [
-      "src/Api/ApplicationSourceVersion.php",
-      "src/Models/ApplicationSourceVersionConfigSnapshot.php",
-      "src/Models/ApplicationSourceVersionResponse.php",
-      "src/Models/ApplicationsSourceVersionsCreateResponse201.php",
-      "src/Models/ApplicationsSourceVersionsImportGitResponse201.php",
-      "src/Models/ApplicationsSourceVersionsListResponse.php",
-      "src/Models/ApplicationsSourceVersionsRetrieveResponse.php",
-      "src/Models/CreateApplicationSourceVersionRequest.php",
-      "src/Models/ImportApplicationGitSourceVersionRequest.php"
-    ],
-    "updatedGeneratedFiles": [
-      "README.md",
-      "src/Models/ApplicationDeploymentResponse.php",
-      "src/Models/CreateApplicationDeploymentRequest.php",
-      "src/SdkworkBackendClient.php"
-    ],
+    "createdGeneratedFiles": [],
+    "updatedGeneratedFiles": [],
     "unchangedGeneratedFiles": [
       "bin/publish-core.mjs",
       "bin/publish.ps1",
@@ -35,15 +20,18 @@
       "CHANGELOG.md",
       "composer.json",
       "LICENSE",
+      "README.md",
       "sdkwork-sdk.json",
       "src/Api/Agent.php",
       "src/Api/Application.php",
       "src/Api/ApplicationDeployment.php",
       "src/Api/ApplicationDomain.php",
+      "src/Api/ApplicationSourceVersion.php",
       "src/Api/Audit.php",
       "src/Api/BaseApi.php",
       "src/Api/Certificate.php",
       "src/Api/CertificateDistribution.php",
+      "src/Api/Domain.php",
       "src/Api/Nginx.php",
       "src/Api/Server.php",
       "src/Http/HttpClient.php",
@@ -52,6 +40,7 @@
       "src/Models/AgentHeartbeatResponse.php",
       "src/Models/AgentNginxConfigBundle.php",
       "src/Models/AgentSyncResponse.php",
+      "src/Models/ApplicationDeploymentResponse.php",
       "src/Models/ApplicationDomainResponse.php",
       "src/Models/ApplicationDomainVerifyResponse.php",
       "src/Models/ApplicationResponse.php",
@@ -64,8 +53,14 @@
       "src/Models/ApplicationsDomainsListResponse.php",
       "src/Models/ApplicationsDomainsVerifyResponse.php",
       "src/Models/ApplicationsListResponse.php",
+      "src/Models/ApplicationSourceVersionConfigSnapshot.php",
+      "src/Models/ApplicationSourceVersionResponse.php",
       "src/Models/ApplicationsPauseResponse.php",
       "src/Models/ApplicationsRetrieveResponse.php",
+      "src/Models/ApplicationsSourceVersionsCreateResponse201.php",
+      "src/Models/ApplicationsSourceVersionsImportGitResponse201.php",
+      "src/Models/ApplicationsSourceVersionsListResponse.php",
+      "src/Models/ApplicationsSourceVersionsRetrieveResponse.php",
       "src/Models/ApplicationStoreListing.php",
       "src/Models/ApplicationsUpdateResponse.php",
       "src/Models/AuditLogPage.php",
@@ -84,14 +79,22 @@
       "src/Models/ConfigsRetrieveResponse.php",
       "src/Models/ConfigsUpdateResponse.php",
       "src/Models/ConfigsValidateResponse.php",
+      "src/Models/CreateApplicationDeploymentRequest.php",
       "src/Models/CreateApplicationDomainRequest.php",
       "src/Models/CreateApplicationRequest.php",
+      "src/Models/CreateApplicationSourceVersionRequest.php",
       "src/Models/CreateCertificateRequest.php",
+      "src/Models/CreateManagedDomainRequest.php",
       "src/Models/CreateNginxConfigRequest.php",
       "src/Models/CreateServerRequest.php",
       "src/Models/CreateServerResponse.php",
+      "src/Models/DomainsApplicationBindingUpdateResponse.php",
+      "src/Models/DomainsCreateResponse201.php",
+      "src/Models/DomainsListResponse.php",
+      "src/Models/DomainsVerifyResponse.php",
       "src/Models/FieldError.php",
       "src/Models/HeartbeatResponse.php",
+      "src/Models/ImportApplicationGitSourceVersionRequest.php",
       "src/Models/MediaChecksum.php",
       "src/Models/MediaResource.php",
       "src/Models/NginxConfigPage.php",
@@ -118,8 +121,10 @@
       "src/Models/StatusRetrieveResponse.php",
       "src/Models/UpdateApplicationRequest.php",
       "src/Models/UpdateCertificateRequest.php",
+      "src/Models/UpdateDomainApplicationBindingRequest.php",
       "src/Models/UpdateNginxConfigRequest.php",
-      "src/SdkConfig.php"
+      "src/SdkConfig.php",
+      "src/SdkworkBackendClient.php"
     ],
     "deletedGeneratedFiles": [],
     "scaffoldedFiles": [],
@@ -130,78 +135,26 @@
   },
   "impact": {
     "schemaVersion": 1,
-    "areas": [
-      "api-surface",
-      "models",
-      "documentation"
-    ],
-    "details": [
-      {
-        "area": "api-surface",
-        "paths": [
-          "src/Api/ApplicationSourceVersion.php",
-          "src/SdkworkBackendClient.php"
-        ]
-      },
-      {
-        "area": "models",
-        "paths": [
-          "src/Models/ApplicationDeploymentResponse.php",
-          "src/Models/ApplicationSourceVersionConfigSnapshot.php",
-          "src/Models/ApplicationSourceVersionResponse.php",
-          "src/Models/ApplicationsSourceVersionsCreateResponse201.php",
-          "src/Models/ApplicationsSourceVersionsImportGitResponse201.php",
-          "src/Models/ApplicationsSourceVersionsListResponse.php",
-          "src/Models/ApplicationsSourceVersionsRetrieveResponse.php",
-          "src/Models/CreateApplicationDeploymentRequest.php",
-          "src/Models/CreateApplicationSourceVersionRequest.php",
-          "src/Models/ImportApplicationGitSourceVersionRequest.php"
-        ]
-      },
-      {
-        "area": "documentation",
-        "paths": [
-          "README.md"
-        ]
-      }
-    ],
-    "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, models, documentation. Verification is required."
+    "areas": [],
+    "details": [],
+    "requiresVerification": false,
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
   },
   "verificationPlan": {
-    "shouldRun": true,
-    "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, models, documentation. Verification is required. Run the required verification commands now against the generated SDK output.",
-    "steps": [
-      {
-        "id": "check",
-        "title": "Unified package check",
-        "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, documentation.",
-        "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-php\\generated\\server-openapi",
-        "command": "node",
-        "args": [
-          "./bin/publish-core.mjs",
-          "--language",
-          "php",
-          "--project-dir",
-          ".",
-          "--action",
-          "check"
-        ],
-        "displayCommand": "node ./bin/publish-core.mjs --language php --project-dir . --action check"
-      }
-    ]
+    "shouldRun": false,
+    "runPhase": "skip",
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
+    "steps": []
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "medium",
-    "nextAction": "verify",
+    "riskLevel": "low",
+    "nextAction": "skip",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
-    "summary": "Changes have been applied. Run the required verification plan now.",
+    "summary": "No actionable changes were detected. No apply or verification step is required.",
     "reasons": [
-      "verification-required"
+      "no-actionable-changes"
     ]
   },
   "preservedLegacyFiles": false

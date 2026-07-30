@@ -52,6 +52,7 @@ client.SetHeader("X-Custom-Header", "value");
 
 - `client.Application` - application API
 - `client.ApplicationDomain` - application_domain API
+- `client.Domain` - domain API
 - `client.ApplicationSourceVersion` - application_source_version API
 - `client.ApplicationDeployment` - application_deployment API
 - `client.Certificate` - certificate API
@@ -91,6 +92,19 @@ var query = new Dictionary<string, object>
     ["page_size"] = 2,
 };
 var result = await client.ApplicationDomain.ApplicationsDomainsListAsync(applicationId, query);
+Console.WriteLine(result);
+```
+
+### domain
+
+```csharp
+// List tenant custom domain assets
+var query = new Dictionary<string, object>
+{
+    ["page"] = 1,
+    ["page_size"] = 2,
+};
+var result = await client.Domain.DomainsListAsync(query);
 Console.WriteLine(result);
 ```
 

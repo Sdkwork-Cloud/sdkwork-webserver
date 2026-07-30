@@ -11,13 +11,13 @@ use sdkwork_webserver_contract::{
     CertificateRenewalCandidate, CertificateResponse, CreateCertificateRequest,
     CreateDeploymentRequest, CreateDomainRequest, CreateEnvVariableRequest,
     CreateHealthCheckRequest, CreateNginxConfigRequest, CreateServerRequest, CreateServerResponse,
-    CreateSiteRequest, DeploymentPage, DeploymentResponse, DomainPage, DomainResponse,
-    DomainVerifyResponse, EnvVariablePage, EnvVariableResponse, HealthCheckPage,
+    CreateManagedDomainRequest, CreateSiteRequest, DeploymentPage, DeploymentResponse, DomainPage,
+    DomainResponse, DomainVerifyResponse, EnvVariablePage, EnvVariableResponse, HealthCheckPage,
     HealthCheckResponse, ListNginxConfigsQuery, ListSitesQuery, NginxConfigPage,
     NginxConfigResponse, NginxReloadResponse, NginxStatusResponse, NginxValidateResponse,
     RuntimeAssignment, RuntimeAssignmentDelivery, RuntimeObservation, ServerPage, SitePage,
     SiteResponse, SourceVersionPage, SourceVersionResponse, CreateSourceVersionRequest,
-    UpdateNginxConfigRequest, UpdateSiteRequest,
+    UpdateDomainApplicationBindingRequest, UpdateNginxConfigRequest, UpdateSiteRequest,
 };
 use sdkwork_webserver_contract::{WebServiceError, WebServiceResult};
 
@@ -136,6 +136,59 @@ impl WebRepositoryPort for WebRepository {
         domain_id: &str,
     ) -> WebServiceResult<DomainVerifyResponse> {
         self.verify_domain_repo(tenant_id, site_id, domain_id).await
+    }
+
+    async fn list_managed_domains(
+        &self,
+        tenant_id: i64,
+        page: i32,
+        page_size: i32,
+    ) -> WebServiceResult<DomainPage> {
+        self.list_managed_domains_repo(tenant_id, page, page_size)
+            .await
+    }
+
+    async fn create_managed_domain(
+        &self,
+        tenant_id: i64,
+        request: &CreateManagedDomainRequest,
+    ) -> WebServiceResult<DomainResponse> {
+        self.create_managed_domain_repo(tenant_id, request).await
+    }
+
+    async fn delete_managed_domain(
+        &self,
+        tenant_id: i64,
+        domain_id: &str,
+    ) -> WebServiceResult<()> {
+        self.delete_managed_domain_repo(tenant_id, domain_id).await
+    }
+
+    async fn bind_managed_domain(
+        &self,
+        tenant_id: i64,
+        domain_id: &str,
+        request: &UpdateDomainApplicationBindingRequest,
+    ) -> WebServiceResult<DomainResponse> {
+        self.bind_managed_domain_repo(tenant_id, domain_id, request)
+            .await
+    }
+
+    async fn unbind_managed_domain(
+        &self,
+        tenant_id: i64,
+        domain_id: &str,
+    ) -> WebServiceResult<DomainResponse> {
+        self.unbind_managed_domain_repo(tenant_id, domain_id, None)
+            .await
+    }
+
+    async fn verify_managed_domain(
+        &self,
+        tenant_id: i64,
+        domain_id: &str,
+    ) -> WebServiceResult<DomainVerifyResponse> {
+        self.verify_managed_domain_repo(tenant_id, domain_id).await
     }
 
     async fn list_source_versions(

@@ -2688,6 +2688,16 @@
       },
       "DomainResponse": {
         "type": "object",
+        "required": [
+          "id",
+          "hostname",
+          "certificateCount",
+          "isPrimary",
+          "isVerified",
+          "sslEnabled",
+          "status",
+          "createdAt"
+        ],
         "properties": {
           "id": {
             "type": "string",
@@ -2695,6 +2705,20 @@
           },
           "hostname": {
             "type": "string"
+          },
+          "applicationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "applicationName": {
+            "type": "string"
+          },
+          "certificateCount": {
+            "type": "string",
+            "format": "int64",
+            "pattern": "^[0-9]+$",
+            "x-sdkwork-int64-string": true,
+            "x-sdkwork-rust-type": "i64"
           },
           "isPrimary": {
             "type": "boolean"
@@ -3245,6 +3269,10 @@
           },
           "domain": {
             "type": "string"
+          },
+          "domainId": {
+            "type": "string",
+            "format": "uuid"
           },
           "certType": {
             "type": "integer"

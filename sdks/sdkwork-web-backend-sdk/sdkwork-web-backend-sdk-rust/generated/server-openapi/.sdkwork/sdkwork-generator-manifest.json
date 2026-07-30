@@ -36,7 +36,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "faf30693eb95fcc5405b9720a31a33f4ef944a1ed00bbe570c9f9f29695dd682"
+      "sha256": "691da205c1f35fe44c64d7d3e446735dd88121c95e7fdfb3242bbbd8cfa364c0"
     },
     {
       "path": "sdkwork-sdk.json",
@@ -79,8 +79,12 @@
       "sha256": "1d8dfcf64000795bdb139dd94d8e3a6375aa78adde4db81acf7116633b102055"
     },
     {
+      "path": "src/api/domain.rs",
+      "sha256": "8684b82e1450f2b5a9e02b80379ae0ff81aaba80956da73464b8c0eae87c7866"
+    },
+    {
       "path": "src/api/mod.rs",
-      "sha256": "551f935029f010fa38c528e2b97236b3a71638a66264ee7650a45410402b552e"
+      "sha256": "2ed09d2a9a496af80f1d85eb1cbbc8066a78bdcfa39afa9809a47d1bccd1147d"
     },
     {
       "path": "src/api/nginx.rs",
@@ -96,7 +100,7 @@
     },
     {
       "path": "src/client.rs",
-      "sha256": "5a22ced6812b81007b2ff664256c5c98a7180d3bfde4191a691d99e4ba4423ac"
+      "sha256": "e3d6ca35f5c544070098f364c1aafecacfc8fb0268d5896dfcb3a1b49b1f1b68"
     },
     {
       "path": "src/http/client.rs",
@@ -136,7 +140,7 @@
     },
     {
       "path": "src/models/application_domain_response.rs",
-      "sha256": "8bf60f45b16e12a7b06c753fa2b9bce51eece1333d0552f2eee276913bd2dc9a"
+      "sha256": "6d50512aae3741f41cd5a287ff91afdb71a063f6b6cb56955b43efda24476c10"
     },
     {
       "path": "src/models/application_domain_verify_response.rs",
@@ -240,7 +244,7 @@
     },
     {
       "path": "src/models/certificate_response.rs",
-      "sha256": "7f9d41469092d019db2359ceb3d2e6193c17a55c8e43ed53687330133d566a08"
+      "sha256": "be1be81a259631aed53d0923dbec5115101dd68c4fd4a2355c446cc499a9579d"
     },
     {
       "path": "src/models/certificates_create_response201.rs",
@@ -311,6 +315,10 @@
       "sha256": "6672295aae78b972b6cf7bc307eb6d8fe02e09afe7e53ead2b8002e83846e838"
     },
     {
+      "path": "src/models/create_managed_domain_request.rs",
+      "sha256": "7b589814c993f03e4ebb853dd3bee3840133242eaa8618f01a50ac2bce197d32"
+    },
+    {
       "path": "src/models/create_nginx_config_request.rs",
       "sha256": "74fa25a35cd54dc0a14bf71111c53a395e094ebadf4bc995f81139f8e27a1bc2"
     },
@@ -321,6 +329,22 @@
     {
       "path": "src/models/create_server_response.rs",
       "sha256": "b007e328c6030e0c7b62b7c6755d8a2c829acfa86204ae0fafb27cabd94b58d4"
+    },
+    {
+      "path": "src/models/domains_application_binding_update_response.rs",
+      "sha256": "e596e779b5dbb706d182d715f5bdd522c2f1e2099bf7dd395ee70c4a58d8911f"
+    },
+    {
+      "path": "src/models/domains_create_response201.rs",
+      "sha256": "e193a42d9fd1f5e9f1d167dc4e54e73abf4390a53d3d285321ed8000eb846be7"
+    },
+    {
+      "path": "src/models/domains_list_response.rs",
+      "sha256": "6920760556f2fb1164e0c3fb57702b7d30dacfef1af0006c0638a98b51a1bf98"
+    },
+    {
+      "path": "src/models/domains_verify_response.rs",
+      "sha256": "b133109e9d5ca5f5d95b53453b43a053ad04878eaa72457cd1404a5a4524caa6"
     },
     {
       "path": "src/models/field_error.rs",
@@ -344,7 +368,7 @@
     },
     {
       "path": "src/models/mod.rs",
-      "sha256": "b6643f7a8da56238c8c70a3ccf95341af7f753842ab9370fa23ef0f6839a97e2"
+      "sha256": "2a4970699fb86a79cc98583b41d57aa1f3ab7f7bbead3df23d2cb7513c41ec35"
     },
     {
       "path": "src/models/nginx_config_page.rs",
@@ -441,6 +465,10 @@
     {
       "path": "src/models/update_certificate_request.rs",
       "sha256": "e94948bb8bfdd7c24d4aa0f089ce5a83d13e8afcd2f2f8c2672cb597b1646e5e"
+    },
+    {
+      "path": "src/models/update_domain_application_binding_request.rs",
+      "sha256": "e8ab52268935005ebed27d22efa21f5d0395935cde202c54a9caed48576b9dbf"
     },
     {
       "path": "src/models/update_nginx_config_request.rs",

@@ -9,26 +9,12 @@
     "protocol": "http",
     "packageName": "github.com/sdkwork/sdkwork-web-app-sdk"
   },
-  "changeFingerprint": "8bf80c75f1c5ed5a26685586e46b4e12bf679aab719657b36c090d0daa025fbe",
+  "changeFingerprint": "1b1d7f893f13b4abfa9b64a7b3f48fcfd1ab25f5e01339ca46d2a6961dc7ee30",
   "changes": {
-    "createdGeneratedFiles": [
-      "api/source_version.go",
-      "types/create_source_version_request.go",
-      "types/import_git_source_version_request.go",
-      "types/sites_source_versions_create_response201.go",
-      "types/sites_source_versions_import_git_response201.go",
-      "types/sites_source_versions_list_response.go",
-      "types/sites_source_versions_retrieve_response.go",
-      "types/source_version_config_snapshot.go",
-      "types/source_version_page.go",
-      "types/source_version_response.go"
-    ],
+    "createdGeneratedFiles": [],
     "updatedGeneratedFiles": [
-      "api/site.go",
-      "README.md",
-      "sdk.go",
-      "types/create_deployment_request.go",
-      "types/deployment_response.go"
+      "types/certificate_response.go",
+      "types/domain_response.go"
     ],
     "unchangedGeneratedFiles": [
       "api/base.go",
@@ -39,6 +25,8 @@
       "api/env_variable.go",
       "api/monitor.go",
       "api/paths.go",
+      "api/site.go",
+      "api/source_version.go",
       "bin/publish-core.mjs",
       "bin/publish.ps1",
       "bin/publish.sh",
@@ -48,28 +36,32 @@
       "http/client.go",
       "http/doc.go",
       "LICENSE",
+      "README.md",
+      "sdk.go",
       "sdkwork-sdk.json",
       "types/application_store_listing.go",
       "types/certificate_page.go",
-      "types/certificate_response.go",
       "types/certificates_create_response201.go",
       "types/certificates_list_response.go",
       "types/common.go",
       "types/create_certificate_request.go",
+      "types/create_deployment_request.go",
       "types/create_domain_request.go",
       "types/create_env_variable_request.go",
       "types/create_health_check_request.go",
       "types/create_site_request.go",
+      "types/create_source_version_request.go",
       "types/deployment_page.go",
+      "types/deployment_response.go",
       "types/doc.go",
       "types/domain_page.go",
-      "types/domain_response.go",
       "types/domain_verify_response.go",
       "types/env_variable_page.go",
       "types/env_variable_response.go",
       "types/field_error.go",
       "types/health_check_page.go",
       "types/health_check_response.go",
+      "types/import_git_source_version_request.go",
       "types/media_checksum.go",
       "types/media_resource.go",
       "types/page_info.go",
@@ -101,7 +93,14 @@
       "types/sites_list_response.go",
       "types/sites_pause_response.go",
       "types/sites_retrieve_response.go",
+      "types/sites_source_versions_create_response201.go",
+      "types/sites_source_versions_import_git_response201.go",
+      "types/sites_source_versions_list_response.go",
+      "types/sites_source_versions_retrieve_response.go",
       "types/sites_update_response.go",
+      "types/source_version_config_snapshot.go",
+      "types/source_version_page.go",
+      "types/source_version_response.go",
       "types/update_site_request.go"
     ],
     "deletedGeneratedFiles": [],
@@ -114,61 +113,30 @@
   "impact": {
     "schemaVersion": 1,
     "areas": [
-      "api-surface",
-      "models",
-      "documentation",
-      "unknown"
+      "models"
     ],
     "details": [
       {
-        "area": "api-surface",
-        "paths": [
-          "api/site.go",
-          "api/source_version.go"
-        ]
-      },
-      {
         "area": "models",
         "paths": [
-          "types/create_deployment_request.go",
-          "types/create_source_version_request.go",
-          "types/deployment_response.go",
-          "types/import_git_source_version_request.go",
-          "types/sites_source_versions_create_response201.go",
-          "types/sites_source_versions_import_git_response201.go",
-          "types/sites_source_versions_list_response.go",
-          "types/sites_source_versions_retrieve_response.go",
-          "types/source_version_config_snapshot.go",
-          "types/source_version_page.go",
-          "types/source_version_response.go"
-        ]
-      },
-      {
-        "area": "documentation",
-        "paths": [
-          "README.md"
-        ]
-      },
-      {
-        "area": "unknown",
-        "paths": [
-          "sdk.go"
+          "types/certificate_response.go",
+          "types/domain_response.go"
         ]
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, models, documentation, unknown. Verification is required."
+    "summary": "Detected impact areas: models. Verification is required."
   },
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, models, documentation, unknown. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, documentation, unknown.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-go\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -186,14 +154,12 @@
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "high",
+    "riskLevel": "medium",
     "nextAction": "verify",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
     "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
-      "manual-review-required",
-      "unknown-impact",
       "verification-required"
     ]
   },

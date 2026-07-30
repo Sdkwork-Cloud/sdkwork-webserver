@@ -2,6 +2,7 @@ export { BaseApi } from './base';
 export { backendApiPath } from './paths';
 export { ApplicationApi, createApplicationApi } from './application';
 export { ApplicationDomainApi, createApplicationDomainApi } from './application-domain';
+export { DomainApi, createDomainApi } from './domain';
 export { ApplicationSourceVersionApi, createApplicationSourceVersionApi } from './application-source-version';
 export { ApplicationDeploymentApi, createApplicationDeploymentApi } from './application-deployment';
 export { CertificateApi, createCertificateApi } from './certificate';

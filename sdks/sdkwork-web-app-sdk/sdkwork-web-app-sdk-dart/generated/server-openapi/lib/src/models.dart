@@ -494,6 +494,9 @@ class CreateDomainRequest {
 class DomainResponse {
   final String? id;
   final String? hostname;
+  final String? applicationId;
+  final String? applicationName;
+  final String? certificateCount;
   final bool? isPrimary;
   final bool? isVerified;
   final bool? sslEnabled;
@@ -504,6 +507,9 @@ class DomainResponse {
   DomainResponse({
     this.id,
     this.hostname,
+    this.applicationId,
+    this.applicationName,
+    this.certificateCount,
     this.isPrimary,
     this.isVerified,
     this.sslEnabled,
@@ -516,6 +522,9 @@ class DomainResponse {
     return DomainResponse(
       id: json['id']?.toString(),
       hostname: json['hostname']?.toString(),
+      applicationId: json['applicationId']?.toString(),
+      applicationName: json['applicationName']?.toString(),
+      certificateCount: json['certificateCount']?.toString(),
       isPrimary: json['isPrimary'] is bool ? json['isPrimary'] : null,
       isVerified: json['isVerified'] is bool ? json['isVerified'] : null,
       sslEnabled: json['sslEnabled'] is bool ? json['sslEnabled'] : null,
@@ -529,6 +538,9 @@ class DomainResponse {
     return <String, dynamic>{
       'id': id,
       'hostname': hostname,
+      'applicationId': applicationId,
+      'applicationName': applicationName,
+      'certificateCount': certificateCount,
       'isPrimary': isPrimary,
       'isVerified': isVerified,
       'sslEnabled': sslEnabled,
@@ -1129,6 +1141,7 @@ class CertificateResponse {
   final String? id;
   final String? certName;
   final String? domain;
+  final String? domainId;
   final int? certType;
   final String? issuer;
   final String? fingerprint;
@@ -1143,6 +1156,7 @@ class CertificateResponse {
     this.id,
     this.certName,
     this.domain,
+    this.domainId,
     this.certType,
     this.issuer,
     this.fingerprint,
@@ -1159,6 +1173,7 @@ class CertificateResponse {
       id: json['id']?.toString(),
       certName: json['certName']?.toString(),
       domain: json['domain']?.toString(),
+      domainId: json['domainId']?.toString(),
       certType: json['certType'] is int ? json['certType'] : null,
       issuer: json['issuer']?.toString(),
       fingerprint: json['fingerprint']?.toString(),
@@ -1176,6 +1191,7 @@ class CertificateResponse {
       'id': id,
       'certName': certName,
       'domain': domain,
+      'domainId': domainId,
       'certType': certType,
       'issuer': issuer,
       'fingerprint': fingerprint,

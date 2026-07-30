@@ -274,9 +274,45 @@ export function createWebserverConsoleRegistry(
         privacyPolicyUrl: "",
         officialWebsiteUrl: "",
       }, (context) => updateApplicationListing(clients, mediaStorage, context), { applicationSubmission: "update", permission: "web.sites.write", selection: true }),
-      action("activate", "Activate", {}, (context) => client.site.activate(selectedId(context, "siteId")), { permission: "web.sites.write", selection: true }),
-      action("pause", "Disable", {}, (context) => client.site.pause(selectedId(context, "siteId")), { dangerous: true, permission: "web.sites.write", selection: true }),
-      action("delete", "Delete", {}, (context) => client.site.delete(selectedId(context, "siteId")), { dangerous: true, permission: "web.sites.write", selection: true }),
+      action("update-source", "Update code", { versionTag: "" }, (context) => storeApplicationSourceVersion(clients, sourceStorage, context), {
+        loadSourceInputDefaults: async (context) => {
+          const versions = await client.sourceVersion.sites.sourceVersions.list(
+            selectedId(context, "siteId"),
+            { page: 1, pageSize: 1 },
+          );
+          const latest = versions.items[0];
+          return latest?.sourceType === "GIT" && latest.sourceRef?.trim()
+            ? { mode: "git", repository: latest.sourceRef }
+            : {};
+        },
+        permission: "web.sites.write",
+        requiredFields: ["versionTag"],
+        selection: true,
+        sourceInput: "archive-directory-or-git",
+      }),
+      action("publish", "Publish", { deployType: 1, sourceVersionId: "", environment: "production", versionTag: "" }, (context) => deployApplication(clients, context), {
+        confirmation: true,
+        fieldOptions: { deployType: [1], sourceVersionId: [], environment: ["production", "staging", "test", "development"] },
+        loadFieldOptions: async (context) => {
+          const versions = await client.sourceVersion.sites.sourceVersions.list(selectedId(context, "siteId"), { page: 1, pageSize: 100 });
+          return {
+            sourceVersionId: versions.items
+              .filter((version) => version.status === 1 && version.retained)
+              .map((version) => ({
+                label: `${version.versionTag} · ${version.sourceType}`,
+                relatedValues: { versionTag: version.versionTag },
+                value: version.id,
+              })),
+          };
+        },
+        permission: "web.sites.write",
+        readOnlyFields: ["versionTag"],
+        requiredFields: ["sourceVersionId", "versionTag"],
+        selection: true,
+      }),
+      action("activate", "Activate", {}, (context) => client.site.activate(selectedId(context, "siteId")), { availableWhen: ({ selectedItem }) => Number(selectedItem?.status) !== 1, permission: "web.sites.write", selection: true }),
+      action("pause", "Disable", {}, (context) => client.site.pause(selectedId(context, "siteId")), { availableWhen: ({ selectedItem }) => Number(selectedItem?.status) === 1, dangerous: true, permission: "web.sites.write", selection: true }),
+      action("delete", "Delete", {}, (context) => client.site.delete(selectedId(context, "siteId")), { availableWhen: ({ selectedItem }) => Number(selectedItem?.status) !== 1, dangerous: true, permission: "web.sites.write", selection: true }),
     ]),
     configuration: scopedSource((query) => client.envVariable.sites.envVariables.list(requiredScope(query.scopeId)), [
       action("create-variable", "Add variable", { key: "", value: "", environment: "production", isSecret: false }, async (context) => client.envVariable.sites.envVariables.create(requiredScope(context.scopeId), createEnvVariableRequest(context.body), idempotencyParams(context)), { permission: "web.sites.write", scope: true }),
@@ -330,6 +366,7 @@ export function createWebserverConsoleRegistry(
               .filter((version) => version.status === 1 && version.retained)
               .map((version) => ({
                 label: `${version.versionTag} · ${version.sourceType}`,
+                relatedValues: { versionTag: version.versionTag },
                 value: version.id,
               })),
           };
@@ -351,13 +388,15 @@ export function createWebserverConsoleRegistry(
 
 function source(load: WebserverResourceDataSource["load"] extends (query: infer Q) => Promise<unknown> ? (query: Q) => Promise<unknown> : never, actions: readonly WebserverResourceAction[]): WebserverResourceDataSource { return { actions, async load(query) { return normalizeWebserverPage(await load(query)); } }; }
 function scopedSource(load: Parameters<typeof source>[0], actions: readonly WebserverResourceAction[]): WebserverResourceDataSource { return { ...source(load, actions), requiresScope: true }; }
-function action(id: string, label: string, bodyTemplate: Record<string, unknown>, execute: WebserverResourceAction["execute"], options: { acceptedFileTypes?: string; applicationSubmission?: WebserverResourceAction["applicationSubmission"]; availableWhen?: WebserverResourceAction["availableWhen"]; confirmation?: boolean; dangerous?: boolean; fieldOptions?: WebserverResourceAction["fieldOptions"]; file?: boolean; loadFieldOptions?: WebserverResourceAction["loadFieldOptions"]; permission?: string; requiredFields?: readonly string[]; scope?: boolean; selection?: boolean; sourceInput?: WebserverResourceAction["sourceInput"] } = {}): WebserverResourceAction { return { id, label, bodyTemplate, execute, acceptedFileTypes: options.acceptedFileTypes, applicationSubmission: options.applicationSubmission, availableWhen: options.availableWhen, dangerous: options.dangerous, fieldOptions: options.fieldOptions, loadFieldOptions: options.loadFieldOptions, permission: options.permission, requiredFields: options.requiredFields, requiresConfirmation: options.confirmation, requiresFile: options.file, requiresScope: options.scope, requiresSelection: options.selection, sourceInput: options.sourceInput }; }
-function selectedId(context: WebserverResourceActionContext, key: string): string { const value = context.selectedItem?.[key]; if (typeof value !== "string" && typeof value !== "number") throw new Error(`${key} is unavailable`); return String(value); }
+function action(id: string, label: string, bodyTemplate: Record<string, unknown>, execute: WebserverResourceAction["execute"], options: { acceptedFileTypes?: string; applicationSubmission?: WebserverResourceAction["applicationSubmission"]; availableWhen?: WebserverResourceAction["availableWhen"]; confirmation?: boolean; dangerous?: boolean; fieldOptions?: WebserverResourceAction["fieldOptions"]; file?: boolean; loadFieldOptions?: WebserverResourceAction["loadFieldOptions"]; loadSourceInputDefaults?: WebserverResourceAction["loadSourceInputDefaults"]; permission?: string; readOnlyFields?: readonly string[]; requiredFields?: readonly string[]; scope?: boolean; selection?: boolean; sourceInput?: WebserverResourceAction["sourceInput"] } = {}): WebserverResourceAction { return { id, label, bodyTemplate, execute, acceptedFileTypes: options.acceptedFileTypes, applicationSubmission: options.applicationSubmission, availableWhen: options.availableWhen, dangerous: options.dangerous, fieldOptions: options.fieldOptions, loadFieldOptions: options.loadFieldOptions, loadSourceInputDefaults: options.loadSourceInputDefaults, permission: options.permission, readOnlyFields: options.readOnlyFields, requiredFields: options.requiredFields, requiresConfirmation: options.confirmation, requiresFile: options.file, requiresScope: options.scope, requiresSelection: options.selection, sourceInput: options.sourceInput }; }
+function selectedId(context: WebserverResourceActionContext, key: string): string { const value = context.selectedItem?.[key] ?? context.selectedItem?.id; if (typeof value !== "string" && typeof value !== "number") throw new Error(`${key} is unavailable`); return String(value); }
 function requiredScope(value: string | undefined): string { if (!value?.trim()) throw new Error("Site ID is required"); return value.trim(); }
 function idempotencyParams(context: WebserverResourceActionContext): { idempotencyKey: string } { const idempotencyKey = context.idempotencyKey?.trim(); if (!idempotencyKey) throw new Error("Idempotency key is required"); return { idempotencyKey }; }
 
 async function deployApplication(clients: WebserverConsoleSdkClients, context: WebserverResourceActionContext): Promise<unknown> {
-  const siteId = requiredScope(context.scopeId);
+  const siteId = context.scopeId?.trim()
+    ? requiredScope(context.scopeId)
+    : selectedId(context, "siteId");
   const idempotency = idempotencyParams(context);
   const request = deploymentRequest(
     context,
@@ -538,7 +577,9 @@ async function storeApplicationSourceVersion(
   sourceStorage: ApplicationSourceStorage,
   context: WebserverResourceActionContext,
 ): Promise<unknown> {
-  const siteId = requiredScope(context.scopeId);
+  const siteId = context.scopeId?.trim()
+    ? requiredScope(context.scopeId)
+    : selectedId(context, "siteId");
   const idempotency = idempotencyParams(context);
   if (context.sourceInputMode === "git") {
     context.onProgress?.(8);

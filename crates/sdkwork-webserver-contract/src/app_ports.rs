@@ -322,6 +322,44 @@ pub trait WebBackendApi: Send + Sync {
         domain_id: &str,
     ) -> WebServiceResult<()>;
 
+    async fn list_managed_domains(
+        &self,
+        context: &WebBackendRequestContext,
+        page: i32,
+        page_size: i32,
+    ) -> WebServiceResult<DomainPage>;
+
+    async fn create_managed_domain(
+        &self,
+        context: &WebBackendRequestContext,
+        request: &CreateManagedDomainRequest,
+    ) -> WebServiceResult<DomainResponse>;
+
+    async fn delete_managed_domain(
+        &self,
+        context: &WebBackendRequestContext,
+        domain_id: &str,
+    ) -> WebServiceResult<()>;
+
+    async fn verify_managed_domain(
+        &self,
+        context: &WebBackendRequestContext,
+        domain_id: &str,
+    ) -> WebServiceResult<DomainVerifyResponse>;
+
+    async fn update_domain_application_binding(
+        &self,
+        context: &WebBackendRequestContext,
+        domain_id: &str,
+        request: &UpdateDomainApplicationBindingRequest,
+    ) -> WebServiceResult<DomainResponse>;
+
+    async fn delete_domain_application_binding(
+        &self,
+        context: &WebBackendRequestContext,
+        domain_id: &str,
+    ) -> WebServiceResult<()>;
+
     async fn list_application_source_versions(
         &self,
         context: &WebBackendRequestContext,

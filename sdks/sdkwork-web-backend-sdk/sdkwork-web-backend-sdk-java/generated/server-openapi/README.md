@@ -63,6 +63,7 @@ client.getHttpClient().setHeader("X-Custom-Header", "value");
 
 - `client.getApplication()` - application API
 - `client.getApplicationDomain()` - application_domain API
+- `client.getDomain()` - domain API
 - `client.getApplicationSourceVersion()` - application_source_version API
 - `client.getApplicationDeployment()` - application_deployment API
 - `client.getCertificate()` - certificate API
@@ -98,6 +99,17 @@ Map<String, Object> params = new LinkedHashMap<>();
 params.put("page", 1);
 params.put("page_size", 2);
 ApplicationsDomainsListResponse result = client.getApplicationDomain().applicationsDomainsList(applicationId, params);
+System.out.println(result);
+```
+
+### domain
+
+```java
+// List tenant custom domain assets
+Map<String, Object> params = new LinkedHashMap<>();
+params.put("page", 1);
+params.put("page_size", 2);
+DomainsListResponse result = client.getDomain().domainsList(params);
 System.out.println(result);
 ```
 

@@ -80,7 +80,7 @@
     },
     {
       "path": "Models/CertificateResponse.cs",
-      "sha256": "d7f93cab00eeb16526576db6c8f39e61b746ddda5be2d0f583099fededf4c50f"
+      "sha256": "4ef6ba93069bc756e9fda9fddacd57af5c309fe4f17edf519599511f105a8f12"
     },
     {
       "path": "Models/CertificatesCreateResponse201.cs",
@@ -132,7 +132,7 @@
     },
     {
       "path": "Models/DomainResponse.cs",
-      "sha256": "1ca5c86dcdcf7901d50b5c0d3af6fff428f4429c3108ced7421e0984c954f0a5"
+      "sha256": "481359a8b8e9ff727e36b2c86cdb7cdea2de626c5279d701bdbad8e1be887444"
     },
     {
       "path": "Models/DomainVerifyResponse.cs",

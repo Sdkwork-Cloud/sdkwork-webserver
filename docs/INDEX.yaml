@@ -5,6 +5,14 @@ canon:
   prd: docs/product/prd/PRD.md
   techArchitecture: docs/architecture/tech/TECH_ARCHITECTURE.md
 entries:
+  - id: ADR-20260730-detached-domain-assets-and-certificate-bindings
+    path: docs/architecture/decisions/ADR-20260730-detached-domain-assets-and-certificate-bindings.md
+    kind: adr
+    status: accepted
+  - id: REQ-2026-0066
+    path: docs/product/requirements/REQ-2026-0066-detached-custom-domain-assets.md
+    kind: req
+    status: in-progress
   - id: ADR-20260730-drive-backed-application-source-versions
     path: docs/architecture/decisions/ADR-20260730-drive-backed-application-source-versions.md
     kind: adr

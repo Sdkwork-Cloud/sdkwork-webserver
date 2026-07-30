@@ -36,7 +36,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "8000d80bd2facda9efcb24936d08cd45d7bc4abe8a0cb7a3b5070e45332ba007"
+      "sha256": "5f283f0c75150330d54e16f23e7b9244204ae07bfd59e181de026e529a3756a1"
     },
     {
       "path": "sdkwork-sdk.json",
@@ -79,12 +79,16 @@
       "sha256": "57d3676646f9e3e87caec5b5f120abc994268c171860f7d31b3715111d3c1ee9"
     },
     {
+      "path": "src/main/java/com/sdkwork/web/backend/sdk/api/DomainApi.java",
+      "sha256": "73733b236a984de598d31fe923c209c76b186e86ad7cd190dade7a205d11bd9f"
+    },
+    {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/api/NginxApi.java",
       "sha256": "417f03d3f04fbeda7281213d8372894ddcffb2d5ff4bb18a21f3333cc8b6e0c4"
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/api/package-info.java",
-      "sha256": "f13e9ed4d485e3686676f407920b55695f1aa33b070cb1ce62d7f2bd73418b43"
+      "sha256": "6e7075e5e02ef02461cf4713c539c5d282b16a882defebb07035cf792f8dacc8"
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/api/ServerApi.java",
@@ -120,7 +124,7 @@
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationDomainResponse.java",
-      "sha256": "9feeb46843f0833c135f5908678964986efe7b79b3ed976bbf9ae0cc116a85f0"
+      "sha256": "4d194814a9070f304d5e9f15fdb9fb0a85544a200b869a5abecc4b917dc561e4"
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationDomainVerifyResponse.java",
@@ -224,7 +228,7 @@
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/model/CertificateResponse.java",
-      "sha256": "aaf5e2852d9c2c0b843e6b258c972c3af2e5d189bcababc21745bfa10ff671f0"
+      "sha256": "402783523a65c503c12702d74518eff5fda47af20b8163c1cd28a24bb0dc4338"
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/model/CertificatesCreateResponse201.java",
@@ -291,6 +295,10 @@
       "sha256": "7e1c5c88e2bcc7047a3b86101095f2d958d6b37ec64591eaef33eb0e20b63cce"
     },
     {
+      "path": "src/main/java/com/sdkwork/web/backend/sdk/model/CreateManagedDomainRequest.java",
+      "sha256": "ddf3b34a631173dc0ac1d193ae5de3bf81febdf8de456be76384491a64f55dd7"
+    },
+    {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/model/CreateNginxConfigRequest.java",
       "sha256": "3b7c1b0566a0c8490551151fcefcea8c5f6d884a7cdfcd21d91edaa981cc6478"
     },
@@ -301,6 +309,22 @@
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/model/CreateServerResponse.java",
       "sha256": "63a55d44a0bc9c1dda258f239c15e41d71ca70430309e15542b0e28755f1627c"
+    },
+    {
+      "path": "src/main/java/com/sdkwork/web/backend/sdk/model/DomainsApplicationBindingUpdateResponse.java",
+      "sha256": "9b72ca0ab8592d43c8354a794db22f70bea847c6b657087e5f9d3f2285e6c8ad"
+    },
+    {
+      "path": "src/main/java/com/sdkwork/web/backend/sdk/model/DomainsCreateResponse201.java",
+      "sha256": "01d125607393dced618e4f33f21a6a34cca3ff8e8dd84ce16767405fb9323b0a"
+    },
+    {
+      "path": "src/main/java/com/sdkwork/web/backend/sdk/model/DomainsListResponse.java",
+      "sha256": "82e78ee9bf5db73e32447c271af1d9ad5e8f8e36e19eeea78f929b512c8e040e"
+    },
+    {
+      "path": "src/main/java/com/sdkwork/web/backend/sdk/model/DomainsVerifyResponse.java",
+      "sha256": "77e734c22ef679295870945c5cb98f3a8e00403b9a85a2044d34800889c8ac25"
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/model/FieldError.java",
@@ -419,12 +443,16 @@
       "sha256": "436321fae288f389b935bc63be1acec4e5953e4edd5ed7494aa1a0fe09a55b33"
     },
     {
+      "path": "src/main/java/com/sdkwork/web/backend/sdk/model/UpdateDomainApplicationBindingRequest.java",
+      "sha256": "7729a8683a64346edb2214416dd6f6e944894dcb38657bc1b558ab65204d3983"
+    },
+    {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/model/UpdateNginxConfigRequest.java",
       "sha256": "7c6d2469ce8c6a29c98047b90d4786643eee57fbfc8ef3943dfbcdf85807bd3e"
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/SdkworkBackendClient.java",
-      "sha256": "196eb97e9611b64843a6a1cc7839b134dbc4377f77faf0e7cc74f0ecf793fd43"
+      "sha256": "a930b2d8fcadff2dfc6d83655d06c0dee484c45e02ac23f9b1d410ce301f540c"
     }
   ],
   "scaffoldFiles": [

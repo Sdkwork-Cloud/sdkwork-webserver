@@ -13,11 +13,12 @@ use sdkwork_webserver_acme_service::{AcmeConfig, CertificateIssuer};
 use sdkwork_webserver_contract::{
     AgentHeartbeatRequest, ApplicationStoreListing, CertificateIssueUpdate,
     CreateCertificateRequest, CreateDeploymentRequest, CreateDomainRequest,
-    CreateEnvVariableRequest, CreateHealthCheckRequest, CreateNginxConfigRequest,
-    CreateServerRequest, CreateSiteRequest, CreateSourceVersionRequest, ListNginxConfigsQuery,
-    ListSitesQuery, MediaResource, RuntimeObservationState, SourceVersionConfigSnapshot,
-    UpdateNginxConfigRequest, UpdateSiteRequest, WebAppRequestContext, WebAppResourceScope,
-    WebServiceErrorKind, WebsiteRuntimeSetSnapshot,
+    CreateEnvVariableRequest, CreateHealthCheckRequest, CreateManagedDomainRequest,
+    CreateNginxConfigRequest, CreateServerRequest, CreateSiteRequest, CreateSourceVersionRequest,
+    ListNginxConfigsQuery, ListSitesQuery, MediaResource, RuntimeObservationState,
+    SourceVersionConfigSnapshot, UpdateDomainApplicationBindingRequest, UpdateNginxConfigRequest,
+    UpdateSiteRequest, WebAppRequestContext, WebAppResourceScope, WebServiceErrorKind,
+    WebsiteRuntimeSetSnapshot,
 };
 use sdkwork_webserver_core::website_runtime::website_runtime_set_snapshot_sha256;
 use sdkwork_webserver_database_host::bootstrap_web_database;
@@ -763,6 +764,139 @@ async fn verify_public_repository_surface(context: &TestContext, site_id: &str) 
             .verified
     );
 
+    let detached_domain = repository
+        .create_managed_domain(
+            TENANT_A,
+            &CreateManagedDomainRequest {
+                hostname: "detached.example.test".to_string(),
+                application_id: None,
+                is_primary: false,
+                ssl_enabled: true,
+                ssl_provider: Some("letsencrypt".to_string()),
+            },
+        )
+        .await
+        .expect("create detached managed domain");
+    assert!(detached_domain.application_id.is_none());
+    assert_eq!(detached_domain.certificate_count, 0);
+    assert!(
+        repository
+            .verify_managed_domain(TENANT_A, &detached_domain.id)
+            .await
+            .expect("verify detached managed domain")
+            .verified
+    );
+    assert_eq!(
+        repository
+            .list_managed_domains(TENANT_A, 1, 20)
+            .await
+            .expect("list tenant managed domains")
+            .total,
+        2
+    );
+    assert_eq!(
+        repository
+            .list_managed_domains(TENANT_B, 1, 20)
+            .await
+            .expect("list other tenant managed domains")
+            .total,
+        0
+    );
+
+    let detached_certificate = repository
+        .create_certificate(
+            TENANT_A,
+            None,
+            &CreateCertificateRequest {
+                domain_id: detached_domain.id.clone(),
+                cert_type: 3,
+                auto_renew: false,
+            },
+        )
+        .await
+        .expect("create certificate for detached domain");
+    assert_eq!(
+        detached_certificate.domain_id.as_deref(),
+        Some(detached_domain.id.as_str())
+    );
+    assert!(repository
+        .list_certificates(TENANT_A, None, None, 1, 20)
+        .await
+        .expect("list detached certificate for backend admin")
+        .items
+        .iter()
+        .any(|item| item.id == detached_certificate.id));
+    assert!(!repository
+        .list_certificates(TENANT_A, Some(91), None, 1, 20)
+        .await
+        .expect("list owner-scoped certificates")
+        .items
+        .iter()
+        .any(|item| item.id == detached_certificate.id));
+
+    let bound_domain = repository
+        .bind_managed_domain(
+            TENANT_A,
+            &detached_domain.id,
+            &UpdateDomainApplicationBindingRequest {
+                application_id: site_id.to_string(),
+                is_primary: false,
+            },
+        )
+        .await
+        .expect("bind detached domain to application");
+    assert_eq!(bound_domain.application_id.as_deref(), Some(site_id));
+    let projected_site_id: Option<i64> = sqlx::query_scalar(
+        "SELECT site_id FROM web_certificate WHERE tenant_id = $1 AND uuid = $2",
+    )
+    .bind(TENANT_A)
+    .bind(&detached_certificate.id)
+    .fetch_one(&context.pool)
+    .await
+    .expect("read bound certificate application projection");
+    assert!(projected_site_id.is_some());
+
+    let unbound_domain = repository
+        .unbind_managed_domain(TENANT_A, &detached_domain.id)
+        .await
+        .expect("unbind managed domain");
+    assert!(unbound_domain.application_id.is_none());
+    let projected_site_id: Option<i64> = sqlx::query_scalar(
+        "SELECT site_id FROM web_certificate WHERE tenant_id = $1 AND uuid = $2",
+    )
+    .bind(TENANT_A)
+    .bind(&detached_certificate.id)
+    .fetch_one(&context.pool)
+    .await
+    .expect("read unbound certificate application projection");
+    assert!(projected_site_id.is_none());
+    assert_eq!(
+        repository
+            .delete_managed_domain(TENANT_A, &detached_domain.id)
+            .await
+            .expect_err("domain with certificates must not be deleted")
+            .kind(),
+        WebServiceErrorKind::Conflict
+    );
+
+    let disposable_domain = repository
+        .create_managed_domain(
+            TENANT_A,
+            &CreateManagedDomainRequest {
+                hostname: "disposable.example.test".to_string(),
+                application_id: None,
+                is_primary: false,
+                ssl_enabled: false,
+                ssl_provider: Some("none".to_string()),
+            },
+        )
+        .await
+        .expect("create disposable managed domain");
+    repository
+        .delete_managed_domain(TENANT_A, &disposable_domain.id)
+        .await
+        .expect("delete unbound domain without certificates");
+
     let public_env = repository
         .create_env_variable(
             TENANT_A,
@@ -945,7 +1079,7 @@ async fn verify_public_repository_surface(context: &TestContext, site_id: &str) 
             .await
             .expect("list certificate timestamp projections")
             .total,
-        1
+        2
     );
     assert_eq!(
         repository
@@ -997,7 +1131,7 @@ async fn verify_public_repository_surface(context: &TestContext, site_id: &str) 
             .await
             .expect("automatic renewal update preserves canonical row")
             .total,
-        1
+        2
     );
     assert!(repository
         .list_certificates_due_for_renewal(3650, "2020-01-01T00:00:00Z", 20)

@@ -108,7 +108,7 @@
     },
     {
       "path": "src/models/certificate_response.rs",
-      "sha256": "7f9d41469092d019db2359ceb3d2e6193c17a55c8e43ed53687330133d566a08"
+      "sha256": "be1be81a259631aed53d0923dbec5115101dd68c4fd4a2355c446cc499a9579d"
     },
     {
       "path": "src/models/certificates_create_response201.rs",
@@ -164,7 +164,7 @@
     },
     {
       "path": "src/models/domain_response.rs",
-      "sha256": "5910420d5cffd5da6f81ea3a6d8971e156cccd21a3915b4e99c2489cbc36b417"
+      "sha256": "6716113340695403f64f6398124cd055899301e8101472b3dd43568a65f5e815"
     },
     {
       "path": "src/models/domain_verify_response.rs",

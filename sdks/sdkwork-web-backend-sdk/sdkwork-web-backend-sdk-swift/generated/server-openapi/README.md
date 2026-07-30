@@ -50,6 +50,7 @@ client.setHeader("X-Custom-Header", value: "value")
 
 - `client.application` - application API
 - `client.applicationDomain` - application_domain API
+- `client.domain` - domain API
 - `client.applicationSourceVersion` - application_source_version API
 - `client.applicationDeployment` - application_deployment API
 - `client.certificate` - certificate API
@@ -87,6 +88,18 @@ let params: [String: Any] = [
     "page_size": 2
 ]
 let result = try await client.applicationDomain.applicationsDomainsList(applicationId: applicationId, params: params)
+print(result)
+```
+
+### domain
+
+```swift
+// List tenant custom domain assets
+let params: [String: Any] = [
+    "page": 1,
+    "page_size": 2
+]
+let result = try await client.domain.domainsList(params: params)
 print(result)
 ```
 

@@ -51,6 +51,10 @@
       "sha256": "41d33ffa2bacf89a13480c29578a68900d8df695b20c3de0e83413cd00e8d9f0"
     },
     {
+      "path": "api/domain.go",
+      "sha256": "592a4d1e71b019b5badd4c11544e6fef7c6672405a5d2a9395a238b407010b79"
+    },
+    {
       "path": "api/nginx.go",
       "sha256": "5e9f4e635d778c7f5a09087e421aa92cf7da8e7d9cdf6dbc8b1c2cf43a5747bc"
     },
@@ -100,11 +104,11 @@
     },
     {
       "path": "README.md",
-      "sha256": "7a7ca7d46c0541a690a6d127d7a0803ffa581357565985653769ee9d1824bdc8"
+      "sha256": "d71cb876255708e65d6ffed874b3b156ed157356202d9dc5b03518bb7c41b7da"
     },
     {
       "path": "sdk.go",
-      "sha256": "4ce78c31bf95b98f97d0d9322646200fe383c95a7072251e738cdc62b59a3b6d"
+      "sha256": "d66cf2718372f797579185258c0093af22394d6891ab21dbbb8d721d73096106"
     },
     {
       "path": "sdkwork-sdk.json",
@@ -136,7 +140,7 @@
     },
     {
       "path": "types/application_domain_response.go",
-      "sha256": "8792d252c3630f37eb60e7c211bb470f008fbee53e91cc9e8a6f7025c2e1ade2"
+      "sha256": "c2c0af3c397986c7212b27216e018a8db120e2ff79fda5cf64ea96fc3031dad9"
     },
     {
       "path": "types/application_domain_verify_response.go",
@@ -240,7 +244,7 @@
     },
     {
       "path": "types/certificate_response.go",
-      "sha256": "84176b4e1fc2625df3b085cd790a00bbf1d2aeae022872985ed0dad0a0f78f21"
+      "sha256": "fecf90a3d212ccfed966ded074e8ab70bc2f448a7edea4f4319a6fa975964ebe"
     },
     {
       "path": "types/certificates_create_response201.go",
@@ -311,6 +315,10 @@
       "sha256": "04db313463e2f4d9984b898b84e78f1829811608a900637544d9cd78eabd8536"
     },
     {
+      "path": "types/create_managed_domain_request.go",
+      "sha256": "7df0ee8fdbb30a0bb3fcb1959e4d5d4debe88054417f2ee6de8684455bac21fc"
+    },
+    {
       "path": "types/create_nginx_config_request.go",
       "sha256": "bd11b5eff9ac695a704b288e23f3a1a4cf363ca4b14c3059aa3adfd5a1682c06"
     },
@@ -325,6 +333,22 @@
     {
       "path": "types/doc.go",
       "sha256": "1f1b498c45e150895704917ca8f9b0e68d388e938fa59e57ed15f1f04b0cbfd1"
+    },
+    {
+      "path": "types/domains_application_binding_update_response.go",
+      "sha256": "0b3b756a3c3592baaef6a0090b4974ccb44de8661518f90803c3c2e7e93b114b"
+    },
+    {
+      "path": "types/domains_create_response201.go",
+      "sha256": "e79571a660e28233536c045b3faf431588b162d1fa7eee5ea09c3c74cf995fae"
+    },
+    {
+      "path": "types/domains_list_response.go",
+      "sha256": "f2a01f855e4a43e198c38a781689a10b3decf4a93673843ee284f89c2a511bb5"
+    },
+    {
+      "path": "types/domains_verify_response.go",
+      "sha256": "f5ad23520ce13857ae5c5fb702de33f91a9b215ff85d6674715a036e4441fc35"
     },
     {
       "path": "types/field_error.go",
@@ -445,6 +469,10 @@
     {
       "path": "types/update_certificate_request.go",
       "sha256": "603a926ae470b67c804451b66ae2710ae6db22d739b559a2d1eb85ced7342667"
+    },
+    {
+      "path": "types/update_domain_application_binding_request.go",
+      "sha256": "11bcd2025244fba9d48a14de041ae6977312c6352aa731aef567d3629f70ff7d"
     },
     {
       "path": "types/update_nginx_config_request.go",

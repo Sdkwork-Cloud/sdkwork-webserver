@@ -1,11 +1,12 @@
 module Sdkwork
   module BackendSdk
     class SdkworkBackendClient
-      attr_reader :http, :application, :application_domain, :application_source_version, :application_deployment, :certificate, :certificate_distribution, :nginx, :server, :agent, :audit
+      attr_reader :http, :application, :application_domain, :domain, :application_source_version, :application_deployment, :certificate, :certificate_distribution, :nginx, :server, :agent, :audit
       def initialize(config)
         @http = Http::Client.new(config)
         @application = Api::ApplicationApi.new(@http)
         @application_domain = Api::ApplicationDomainApi.new(@http)
+        @domain = Api::DomainApi.new(@http)
         @application_source_version = Api::ApplicationSourceVersionApi.new(@http)
         @application_deployment = Api::ApplicationDeploymentApi.new(@http)
         @certificate = Api::CertificateApi.new(@http)

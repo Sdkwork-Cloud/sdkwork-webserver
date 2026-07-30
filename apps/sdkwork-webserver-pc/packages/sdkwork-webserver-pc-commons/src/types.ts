@@ -28,6 +28,7 @@ export type WebserverResourceKey =
   | "application-source-versions"
   | "application-domains"
   | "application-deployments"
+  | "managed-domains"
   | "managed-certificates"
   | "certificate-distribution"
   | "nginx"
@@ -78,6 +79,11 @@ export interface WebserverResourceFilter {
 
 export type ApplicationDeploymentSourceMode = "archive" | "directory" | "git";
 
+export interface ApplicationDeploymentSourceDefaults {
+  mode?: ApplicationDeploymentSourceMode;
+  repository?: string;
+}
+
 export interface WebserverResourceActionContext {
   applicationSubmission?: import("./application-media.ts").ApplicationSubmissionInput;
   body: Record<string, unknown>;
@@ -94,6 +100,7 @@ export interface WebserverResourceActionContext {
 
 export interface WebserverResourceFieldOption {
   label: string;
+  relatedValues?: Readonly<Record<string, number | string>>;
   value: number | string;
 }
 
@@ -117,7 +124,11 @@ export interface WebserverResourceAction {
   id: string;
   label: string;
   loadFieldOptions?(context: WebserverResourceActionContext): Promise<WebserverResourceFieldOptions>;
+  loadSourceInputDefaults?(
+    context: WebserverResourceActionContext,
+  ): Promise<ApplicationDeploymentSourceDefaults>;
   permission?: string;
+  readOnlyFields?: readonly string[];
   requiredFields?: readonly string[];
   resultFields?: readonly string[];
   requiresConfirmation?: boolean;

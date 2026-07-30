@@ -420,6 +420,219 @@ paths:
                       properties:
                         item:
                           $ref: '#/components/schemas/ApplicationDomainVerifyResponse'
+  /backend/v3/api/domains:
+    get:
+      operationId: domains.list
+      summary: List tenant custom domain assets
+      tags: [domain]
+      security:
+      - AuthToken: []
+        AccessToken: []
+      x-sdkwork-api-surface: backend-api
+      x-sdkwork-api-authority: sdkwork-web.backend
+      x-sdkwork-request-context: WebRequestContext
+      x-sdkwork-auth-mode: dual-token
+      x-sdkwork-permission: web.sites.read
+      x-sdkwork-owner: sdkwork-web-server
+      parameters:
+      - $ref: '#/components/parameters/PageParam'
+      - $ref: '#/components/parameters/PageSizeParam'
+      responses:
+        '200':
+          description: Tenant custom domain assets returned successfully.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SdkWorkApiResponse'
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      required: [items, pageInfo]
+                      properties:
+                        items:
+                          type: array
+                          items:
+                            $ref: '#/components/schemas/ApplicationDomainResponse'
+                        pageInfo:
+                          $ref: '#/components/schemas/PageInfo'
+    post:
+      operationId: domains.create
+      summary: Register a tenant custom domain asset
+      tags: [domain]
+      security:
+      - AuthToken: []
+        AccessToken: []
+      x-sdkwork-api-surface: backend-api
+      x-sdkwork-api-authority: sdkwork-web.backend
+      x-sdkwork-request-context: WebRequestContext
+      x-sdkwork-auth-mode: dual-token
+      x-sdkwork-permission: web.sites.write
+      x-sdkwork-idempotent: true
+      x-sdkwork-owner: sdkwork-web-server
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateManagedDomainRequest'
+      responses:
+        '201':
+          description: Tenant custom domain asset registered successfully.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SdkWorkApiResponse'
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      required: [item]
+                      properties:
+                        item:
+                          $ref: '#/components/schemas/ApplicationDomainResponse'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  /backend/v3/api/domains/{domainId}:
+    parameters:
+    - $ref: '#/components/parameters/DomainIdParam'
+    delete:
+      operationId: domains.delete
+      summary: Delete an unbound tenant custom domain asset
+      tags: [domain]
+      security:
+      - AuthToken: []
+        AccessToken: []
+      x-sdkwork-api-surface: backend-api
+      x-sdkwork-api-authority: sdkwork-web.backend
+      x-sdkwork-request-context: WebRequestContext
+      x-sdkwork-auth-mode: dual-token
+      x-sdkwork-permission: web.sites.write
+      x-sdkwork-idempotent: true
+      x-sdkwork-rate-limit-tier: auth-critical
+      x-sdkwork-owner: sdkwork-web-server
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '204':
+          description: Tenant custom domain asset deleted successfully.
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /backend/v3/api/domains/{domainId}/verify:
+    parameters:
+    - $ref: '#/components/parameters/DomainIdParam'
+    post:
+      operationId: domains.verify
+      summary: Verify a tenant custom domain asset
+      tags: [domain]
+      security:
+      - AuthToken: []
+        AccessToken: []
+      x-sdkwork-api-surface: backend-api
+      x-sdkwork-api-authority: sdkwork-web.backend
+      x-sdkwork-request-context: WebRequestContext
+      x-sdkwork-auth-mode: dual-token
+      x-sdkwork-permission: web.sites.write
+      x-sdkwork-idempotent: true
+      x-sdkwork-owner: sdkwork-web-server
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Tenant custom domain verification result returned successfully.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SdkWorkApiResponse'
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      required: [item]
+                      properties:
+                        item:
+                          $ref: '#/components/schemas/ApplicationDomainVerifyResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /backend/v3/api/domains/{domainId}/application_binding:
+    parameters:
+    - $ref: '#/components/parameters/DomainIdParam'
+    put:
+      operationId: domains.applicationBinding.update
+      summary: Bind a tenant custom domain to an application
+      tags: [domain]
+      security:
+      - AuthToken: []
+        AccessToken: []
+      x-sdkwork-api-surface: backend-api
+      x-sdkwork-api-authority: sdkwork-web.backend
+      x-sdkwork-request-context: WebRequestContext
+      x-sdkwork-auth-mode: dual-token
+      x-sdkwork-permission: web.sites.write
+      x-sdkwork-idempotent: true
+      x-sdkwork-rate-limit-tier: auth-critical
+      x-sdkwork-owner: sdkwork-web-server
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateDomainApplicationBindingRequest'
+      responses:
+        '200':
+          description: Tenant custom domain application binding updated successfully.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SdkWorkApiResponse'
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      required: [item]
+                      properties:
+                        item:
+                          $ref: '#/components/schemas/ApplicationDomainResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+    delete:
+      operationId: domains.applicationBinding.delete
+      summary: Unbind a tenant custom domain from its application
+      tags: [domain]
+      security:
+      - AuthToken: []
+        AccessToken: []
+      x-sdkwork-api-surface: backend-api
+      x-sdkwork-api-authority: sdkwork-web.backend
+      x-sdkwork-request-context: WebRequestContext
+      x-sdkwork-auth-mode: dual-token
+      x-sdkwork-permission: web.sites.write
+      x-sdkwork-idempotent: true
+      x-sdkwork-rate-limit-tier: auth-critical
+      x-sdkwork-owner: sdkwork-web-server
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '204':
+          description: Tenant custom domain application binding deleted successfully.
+        '404':
+          $ref: '#/components/responses/NotFound'
   /backend/v3/api/applications/{applicationId}/source_versions:
     parameters:
     - $ref: '#/components/parameters/ApplicationIdParam'
@@ -475,7 +688,7 @@ paths:
       x-sdkwork-idempotent: true
       x-sdkwork-owner: sdkwork-web-server
       parameters:
-      - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
         required: true
         content:
@@ -522,7 +735,7 @@ paths:
       x-sdkwork-rate-limit-tier: auth-critical
       x-sdkwork-owner: sdkwork-web-server
       parameters:
-      - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
         required: true
         content:
@@ -1849,16 +2062,59 @@ components:
         sslProvider:
           type: string
           enum: [letsencrypt, custom, none]
+    CreateManagedDomainRequest:
+      type: object
+      additionalProperties: false
+      required: [hostname]
+      properties:
+        hostname:
+          type: string
+          minLength: 1
+          maxLength: 253
+        applicationId:
+          type: string
+          format: uuid
+        isPrimary:
+          type: boolean
+          default: false
+        sslEnabled:
+          type: boolean
+          default: true
+        sslProvider:
+          type: string
+          enum: [letsencrypt, custom, none]
+    UpdateDomainApplicationBindingRequest:
+      type: object
+      additionalProperties: false
+      required: [applicationId]
+      properties:
+        applicationId:
+          type: string
+          format: uuid
+        isPrimary:
+          type: boolean
+          default: false
     ApplicationDomainResponse:
       type: object
       additionalProperties: false
-      required: [id, hostname, isPrimary, isVerified, sslEnabled, status, createdAt]
+      required: [id, hostname, certificateCount, isPrimary, isVerified, sslEnabled, status, createdAt]
       properties:
         id:
           type: string
           format: uuid
         hostname:
           type: string
+        applicationId:
+          type: string
+          format: uuid
+        applicationName:
+          type: string
+        certificateCount:
+          type: string
+          format: int64
+          pattern: '^[0-9]+$'
+          x-sdkwork-int64-string: true
+          x-sdkwork-rust-type: i64
         isPrimary:
           type: boolean
         isVerified:
@@ -2134,6 +2390,9 @@ components:
           type: string
         domain:
           type: string
+        domainId:
+          type: string
+          format: uuid
         certType:
           type: integer
         issuer:

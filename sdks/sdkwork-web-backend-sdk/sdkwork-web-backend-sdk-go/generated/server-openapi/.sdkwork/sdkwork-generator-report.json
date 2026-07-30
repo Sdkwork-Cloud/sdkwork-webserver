@@ -10,116 +10,37 @@
   },
   "status": "ok",
   "mode": "apply",
-  "hasChanges": true,
+  "hasChanges": false,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "f7afa16dd38e1401633f557b549bf02978f0860fcb2b5ace637f5dede2c25240",
+  "changeFingerprint": "c8ff7d66c03dddda8efa1e3999967f90e3dcc0f51d812549a9dffbc1ee2ec167",
   "changeImpact": {
     "schemaVersion": 1,
-    "areas": [
-      "api-surface",
-      "models",
-      "documentation",
-      "unknown"
-    ],
-    "details": [
-      {
-        "area": "api-surface",
-        "paths": [
-          "api/application_source_version.go"
-        ]
-      },
-      {
-        "area": "models",
-        "paths": [
-          "types/application_deployment_response.go",
-          "types/application_source_version_config_snapshot.go",
-          "types/application_source_version_response.go",
-          "types/applications_source_versions_create_response201.go",
-          "types/applications_source_versions_import_git_response201.go",
-          "types/applications_source_versions_list_response.go",
-          "types/applications_source_versions_retrieve_response.go",
-          "types/create_application_deployment_request.go",
-          "types/create_application_source_version_request.go",
-          "types/import_application_git_source_version_request.go"
-        ]
-      },
-      {
-        "area": "documentation",
-        "paths": [
-          "README.md"
-        ]
-      },
-      {
-        "area": "unknown",
-        "paths": [
-          "sdk.go"
-        ]
-      }
-    ],
-    "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, models, documentation, unknown. Verification is required."
+    "areas": [],
+    "details": [],
+    "requiresVerification": false,
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "high",
-    "nextAction": "verify",
+    "riskLevel": "low",
+    "nextAction": "skip",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
-    "summary": "Changes have been applied. Run the required verification plan now.",
+    "summary": "No actionable changes were detected. No apply or verification step is required.",
     "reasons": [
-      "manual-review-required",
-      "unknown-impact",
-      "verification-required"
+      "no-actionable-changes"
     ]
   },
   "executionHandoff": {
     "schemaVersion": 1,
-    "summary": "Run the required verification commands now.",
-    "steps": [
-      {
-        "id": "verify-check",
-        "title": "Unified package check",
-        "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, documentation, unknown.",
-        "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-go\\generated\\server-openapi",
-        "command": "node",
-        "args": [
-          "./bin/publish-core.mjs",
-          "--language",
-          "go",
-          "--project-dir",
-          ".",
-          "--action",
-          "check"
-        ],
-        "displayCommand": "node ./bin/publish-core.mjs --language go --project-dir . --action check"
-      }
-    ]
+    "summary": "No further commands are required.",
+    "steps": []
   },
   "verificationPlan": {
-    "shouldRun": true,
-    "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, models, documentation, unknown. Verification is required. Run the required verification commands now against the generated SDK output.",
-    "steps": [
-      {
-        "id": "check",
-        "title": "Unified package check",
-        "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, documentation, unknown.",
-        "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-go\\generated\\server-openapi",
-        "command": "node",
-        "args": [
-          "./bin/publish-core.mjs",
-          "--language",
-          "go",
-          "--project-dir",
-          ".",
-          "--action",
-          "check"
-        ],
-        "displayCommand": "node ./bin/publish-core.mjs --language go --project-dir . --action check"
-      }
-    ]
+    "shouldRun": false,
+    "runPhase": "skip",
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
+    "steps": []
   },
   "sdk": {
     "name": "sdkwork-web-backend-sdk",
@@ -135,49 +56,36 @@
     "localVersions": []
   },
   "stats": {
-    "totalFiles": 111,
-    "models": 83,
-    "apis": 10,
+    "totalFiles": 118,
+    "models": 89,
+    "apis": 11,
     "types": 0
   },
   "warnings": [],
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 13,
+    "writtenFiles": 0,
     "skippedScaffoldFiles": 1,
-    "skippedUnchangedGeneratedFiles": 97,
+    "skippedUnchangedGeneratedFiles": 117,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "f7afa16dd38e1401633f557b549bf02978f0860fcb2b5ace637f5dede2c25240",
+    "changeFingerprint": "c8ff7d66c03dddda8efa1e3999967f90e3dcc0f51d812549a9dffbc1ee2ec167",
     "changes": {
-      "createdGeneratedFiles": [
-        "api/application_source_version.go",
-        "types/application_source_version_config_snapshot.go",
-        "types/application_source_version_response.go",
-        "types/applications_source_versions_create_response201.go",
-        "types/applications_source_versions_import_git_response201.go",
-        "types/applications_source_versions_list_response.go",
-        "types/applications_source_versions_retrieve_response.go",
-        "types/create_application_source_version_request.go",
-        "types/import_application_git_source_version_request.go"
-      ],
-      "updatedGeneratedFiles": [
-        "README.md",
-        "sdk.go",
-        "types/application_deployment_response.go",
-        "types/create_application_deployment_request.go"
-      ],
+      "createdGeneratedFiles": [],
+      "updatedGeneratedFiles": [],
       "unchangedGeneratedFiles": [
         "api/agent.go",
         "api/application_deployment.go",
         "api/application_domain.go",
+        "api/application_source_version.go",
         "api/application.go",
         "api/audit.go",
         "api/base.go",
         "api/certificate_distribution.go",
         "api/certificate.go",
         "api/doc.go",
+        "api/domain.go",
         "api/nginx.go",
         "api/paths.go",
         "api/server.go",
@@ -190,15 +98,20 @@
         "http/client.go",
         "http/doc.go",
         "LICENSE",
+        "README.md",
+        "sdk.go",
         "sdkwork-sdk.json",
         "types/agent_certificate_bundle.go",
         "types/agent_heartbeat_request.go",
         "types/agent_heartbeat_response.go",
         "types/agent_nginx_config_bundle.go",
         "types/agent_sync_response.go",
+        "types/application_deployment_response.go",
         "types/application_domain_response.go",
         "types/application_domain_verify_response.go",
         "types/application_response.go",
+        "types/application_source_version_config_snapshot.go",
+        "types/application_source_version_response.go",
         "types/application_store_listing.go",
         "types/applications_activate_response.go",
         "types/applications_create_response201.go",
@@ -211,6 +124,10 @@
         "types/applications_list_response.go",
         "types/applications_pause_response.go",
         "types/applications_retrieve_response.go",
+        "types/applications_source_versions_create_response201.go",
+        "types/applications_source_versions_import_git_response201.go",
+        "types/applications_source_versions_list_response.go",
+        "types/applications_source_versions_retrieve_response.go",
         "types/applications_update_response.go",
         "types/audit_log_page.go",
         "types/audit_log_response.go",
@@ -229,15 +146,23 @@
         "types/configs_retrieve_response.go",
         "types/configs_update_response.go",
         "types/configs_validate_response.go",
+        "types/create_application_deployment_request.go",
         "types/create_application_domain_request.go",
         "types/create_application_request.go",
+        "types/create_application_source_version_request.go",
         "types/create_certificate_request.go",
+        "types/create_managed_domain_request.go",
         "types/create_nginx_config_request.go",
         "types/create_server_request.go",
         "types/create_server_response.go",
         "types/doc.go",
+        "types/domains_application_binding_update_response.go",
+        "types/domains_create_response201.go",
+        "types/domains_list_response.go",
+        "types/domains_verify_response.go",
         "types/field_error.go",
         "types/heartbeat_response.go",
+        "types/import_application_git_source_version_request.go",
         "types/media_checksum.go",
         "types/media_resource.go",
         "types/nginx_config_page.go",
@@ -265,6 +190,7 @@
         "types/status_retrieve_response.go",
         "types/update_application_request.go",
         "types/update_certificate_request.go",
+        "types/update_domain_application_binding_request.go",
         "types/update_nginx_config_request.go"
       ],
       "deletedGeneratedFiles": [],
@@ -276,86 +202,26 @@
     },
     "impact": {
       "schemaVersion": 1,
-      "areas": [
-        "api-surface",
-        "models",
-        "documentation",
-        "unknown"
-      ],
-      "details": [
-        {
-          "area": "api-surface",
-          "paths": [
-            "api/application_source_version.go"
-          ]
-        },
-        {
-          "area": "models",
-          "paths": [
-            "types/application_deployment_response.go",
-            "types/application_source_version_config_snapshot.go",
-            "types/application_source_version_response.go",
-            "types/applications_source_versions_create_response201.go",
-            "types/applications_source_versions_import_git_response201.go",
-            "types/applications_source_versions_list_response.go",
-            "types/applications_source_versions_retrieve_response.go",
-            "types/create_application_deployment_request.go",
-            "types/create_application_source_version_request.go",
-            "types/import_application_git_source_version_request.go"
-          ]
-        },
-        {
-          "area": "documentation",
-          "paths": [
-            "README.md"
-          ]
-        },
-        {
-          "area": "unknown",
-          "paths": [
-            "sdk.go"
-          ]
-        }
-      ],
-      "requiresVerification": true,
-      "summary": "Detected impact areas: api-surface, models, documentation, unknown. Verification is required."
+      "areas": [],
+      "details": [],
+      "requiresVerification": false,
+      "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
     },
     "verificationPlan": {
-      "shouldRun": true,
-      "runPhase": "now",
-      "summary": "Detected impact areas: api-surface, models, documentation, unknown. Verification is required. Run the required verification commands now against the generated SDK output.",
-      "steps": [
-        {
-          "id": "check",
-          "title": "Unified package check",
-          "required": true,
-          "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, documentation, unknown.",
-          "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-go\\generated\\server-openapi",
-          "command": "node",
-          "args": [
-            "./bin/publish-core.mjs",
-            "--language",
-            "go",
-            "--project-dir",
-            ".",
-            "--action",
-            "check"
-          ],
-          "displayCommand": "node ./bin/publish-core.mjs --language go --project-dir . --action check"
-        }
-      ]
+      "shouldRun": false,
+      "runPhase": "skip",
+      "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
+      "steps": []
     },
     "executionDecision": {
       "schemaVersion": 1,
-      "riskLevel": "high",
-      "nextAction": "verify",
+      "riskLevel": "low",
+      "nextAction": "skip",
       "requiresManualReview": false,
       "applyRequiresExpectedFingerprint": false,
-      "summary": "Changes have been applied. Run the required verification plan now.",
+      "summary": "No actionable changes were detected. No apply or verification step is required.",
       "reasons": [
-        "manual-review-required",
-        "unknown-impact",
-        "verification-required"
+        "no-actionable-changes"
       ]
     },
     "backedUpFiles": [],

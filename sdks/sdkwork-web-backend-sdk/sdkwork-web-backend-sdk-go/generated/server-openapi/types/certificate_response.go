@@ -5,6 +5,7 @@ type CertificateResponse struct {
 	Id string `json:"id"`
 	CertName string `json:"certName"`
 	Domain string `json:"domain"`
+	DomainId string `json:"domainId"`
 	CertType int `json:"certType"`
 	Issuer string `json:"issuer"`
 	Fingerprint string `json:"fingerprint"`

@@ -6,7 +6,7 @@ use super::EnginePool;
 #[derive(Clone, Debug)]
 pub struct DomainRecord {
     pub internal_id: i64,
-    pub site_internal_id: i64,
+    pub site_internal_id: Option<i64>,
     pub hostname: String,
     pub is_verified: bool,
 }
@@ -20,9 +20,11 @@ pub(crate) async fn resolve_domain_by_uuid(
     let row = sqlx::query(
         "SELECT d.id, d.site_id, d.hostname, d.is_verified
          FROM web_domain d
-         INNER JOIN web_site s ON s.id = d.site_id
-         WHERE d.tenant_id = $1 AND d.uuid = $2 AND d.deleted_at IS NULL AND s.deleted_at IS NULL
-           AND ($3 IS NULL OR (s.data_scope = 3 AND s.user_id = $3))",
+         LEFT JOIN web_site s ON s.id = d.site_id
+         WHERE d.tenant_id = $1 AND d.uuid = $2 AND d.deleted_at IS NULL
+           AND ($3 IS NULL OR (
+                s.deleted_at IS NULL AND s.data_scope = 3 AND s.user_id = $3
+           ))",
     )
     .bind(tenant_id)
     .bind(domain_uuid)

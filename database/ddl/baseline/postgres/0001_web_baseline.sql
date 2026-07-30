@@ -74,7 +74,7 @@ CREATE TABLE web_domain (
     uuid            VARCHAR(64)  NOT NULL,
     tenant_id       BIGINT       NOT NULL DEFAULT 0,
     organization_id BIGINT       NOT NULL DEFAULT 0,
-    site_id         BIGINT       NOT NULL,
+    site_id         BIGINT,
     hostname        VARCHAR(255) NOT NULL,
     is_primary      BOOLEAN      NOT NULL DEFAULT false,
     is_verified     BOOLEAN      NOT NULL DEFAULT false,
@@ -91,11 +91,13 @@ CREATE TABLE web_domain (
     PRIMARY KEY (id),
     CONSTRAINT uk_web_domain_uuid UNIQUE (uuid),
     CONSTRAINT uk_web_domain_hostname UNIQUE (hostname),
+    CONSTRAINT chk_web_domain_primary_binding CHECK (site_id IS NOT NULL OR is_primary = false),
     CONSTRAINT fk_web_domain_site FOREIGN KEY (site_id) REFERENCES web_site(id)
 );
 
 COMMENT ON TABLE web_domain IS 'Web domain registry';
 COMMENT ON COLUMN web_domain.hostname IS 'Fully qualified domain name';
+COMMENT ON COLUMN web_domain.site_id IS 'Optional current application binding';
 COMMENT ON COLUMN web_domain.is_primary IS 'Whether this is the primary domain for the site';
 COMMENT ON COLUMN web_domain.is_verified IS 'Whether domain ownership is verified';
 COMMENT ON COLUMN web_domain.ssl_enabled IS 'Whether SSL/TLS is enabled';

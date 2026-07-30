@@ -9,6 +9,7 @@ namespace SDKWork.Web.AppSdk.Models
         public string Id { get; set; }
         public string CertName { get; set; }
         public string? Domain { get; set; }
+        public string? DomainId { get; set; }
         public int? CertType { get; set; }
         public string? Issuer { get; set; }
         public string? Fingerprint { get; set; }

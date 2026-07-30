@@ -7,14 +7,15 @@ use sdkwork_webserver_contract::{
     CertificateDistributionPage, CertificateIssueUpdate, CertificatePage,
     CertificateRenewalCandidate, CertificateResponse, CreateCertificateRequest,
     CreateDeploymentRequest, CreateDomainRequest, CreateEnvVariableRequest,
-    CreateHealthCheckRequest, CreateNginxConfigRequest, CreateServerRequest, CreateServerResponse,
-    CreateSiteRequest, DeploymentPage, DeploymentResponse, DomainPage, DomainResponse,
-    DomainVerifyResponse, EnvVariablePage, EnvVariableResponse, HealthCheckPage,
-    HealthCheckResponse, ListNginxConfigsQuery, ListSitesQuery, NginxConfigPage,
-    NginxConfigResponse, NginxReloadResponse, NginxStatusResponse, NginxValidateResponse,
-    RuntimeAssignment, RuntimeAssignmentDelivery, RuntimeObservation, RuntimeObservationState,
-    ServerPage, SitePage, SiteResponse, SourceVersionPage, SourceVersionResponse,
-    CreateSourceVersionRequest, UpdateNginxConfigRequest, UpdateSiteRequest,
+    CreateHealthCheckRequest, CreateManagedDomainRequest, CreateNginxConfigRequest,
+    CreateServerRequest, CreateServerResponse, CreateSiteRequest, CreateSourceVersionRequest,
+    DeploymentPage, DeploymentResponse, DomainPage, DomainResponse, DomainVerifyResponse,
+    EnvVariablePage, EnvVariableResponse, HealthCheckPage, HealthCheckResponse,
+    ListNginxConfigsQuery, ListSitesQuery, NginxConfigPage, NginxConfigResponse,
+    NginxReloadResponse, NginxStatusResponse, NginxValidateResponse, RuntimeAssignment,
+    RuntimeAssignmentDelivery, RuntimeObservation, RuntimeObservationState, ServerPage, SitePage,
+    SiteResponse, SourceVersionPage, SourceVersionResponse, UpdateDomainApplicationBindingRequest,
+    UpdateNginxConfigRequest, UpdateSiteRequest,
 };
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -146,6 +147,40 @@ pub trait WebRepositoryPort: Send + Sync {
         &self,
         tenant_id: i64,
         site_id: &str,
+        domain_id: &str,
+    ) -> WebServiceResult<DomainVerifyResponse>;
+
+    async fn list_managed_domains(
+        &self,
+        tenant_id: i64,
+        page: i32,
+        page_size: i32,
+    ) -> WebServiceResult<DomainPage>;
+
+    async fn create_managed_domain(
+        &self,
+        tenant_id: i64,
+        request: &CreateManagedDomainRequest,
+    ) -> WebServiceResult<DomainResponse>;
+
+    async fn delete_managed_domain(&self, tenant_id: i64, domain_id: &str) -> WebServiceResult<()>;
+
+    async fn bind_managed_domain(
+        &self,
+        tenant_id: i64,
+        domain_id: &str,
+        request: &UpdateDomainApplicationBindingRequest,
+    ) -> WebServiceResult<DomainResponse>;
+
+    async fn unbind_managed_domain(
+        &self,
+        tenant_id: i64,
+        domain_id: &str,
+    ) -> WebServiceResult<DomainResponse>;
+
+    async fn verify_managed_domain(
+        &self,
+        tenant_id: i64,
         domain_id: &str,
     ) -> WebServiceResult<DomainVerifyResponse>;
 

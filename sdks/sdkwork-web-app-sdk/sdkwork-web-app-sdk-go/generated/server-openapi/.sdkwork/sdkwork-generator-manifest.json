@@ -108,7 +108,7 @@
     },
     {
       "path": "types/certificate_response.go",
-      "sha256": "84176b4e1fc2625df3b085cd790a00bbf1d2aeae022872985ed0dad0a0f78f21"
+      "sha256": "fecf90a3d212ccfed966ded074e8ab70bc2f448a7edea4f4319a6fa975964ebe"
     },
     {
       "path": "types/certificates_create_response201.go",
@@ -168,7 +168,7 @@
     },
     {
       "path": "types/domain_response.go",
-      "sha256": "33e4c0250739741e8b16839c23d5ddb325e2b8cdc55154f9b1dbfc28662da1c8"
+      "sha256": "8dd0d73d71a4bcfc15822c181b64e8c775392c09a38814476f845d199b163fbf"
     },
     {
       "path": "types/domain_verify_response.go",

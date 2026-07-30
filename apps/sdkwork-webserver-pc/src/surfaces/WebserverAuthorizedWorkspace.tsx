@@ -3,6 +3,7 @@ import { webserverModule as auditModule } from "@sdkwork/webserver-pc-admin-audi
 import { webserverModule as applicationsModule } from "@sdkwork/webserver-pc-admin-applications";
 import { webserverModule as certificatesModule } from "@sdkwork/webserver-pc-admin-certificates";
 import { webserverModule as diagnosticsModule } from "@sdkwork/webserver-pc-admin-diagnostics";
+import { webserverModule as domainsModule } from "@sdkwork/webserver-pc-admin-domains";
 import { webserverModule as nginxModule } from "@sdkwork/webserver-pc-admin-nginx";
 import { webserverModule as serversModule } from "@sdkwork/webserver-pc-admin-servers";
 import { hasWebserverAdminAccess, type WebserverPcModuleDefinition } from "@sdkwork/webserver-pc-commons";
@@ -17,7 +18,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import type { BootstrappedWebserverPcRuntime } from "../bootstrap/runtime.ts";
 
 const consoleModules = [sitesModule, configurationModule, deliveryModule, deploymentsModule] satisfies readonly WebserverPcModuleDefinition[];
-const adminModules = [applicationsModule, certificatesModule, nginxModule, serversModule, diagnosticsModule, auditModule] satisfies readonly WebserverPcModuleDefinition[];
+const adminModules = [applicationsModule, domainsModule, certificatesModule, nginxModule, serversModule, diagnosticsModule, auditModule] satisfies readonly WebserverPcModuleDefinition[];
 const LazyAdminSurface = lazy(() => import("./WebserverAdminSurface.tsx").then((module) => ({ default: module.WebserverAdminSurface })));
 
 export function WebserverAuthorizedWorkspace({ runtime }: { runtime: BootstrappedWebserverPcRuntime }) {

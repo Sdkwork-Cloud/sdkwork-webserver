@@ -56,6 +56,7 @@ const client = new SdkworkBackendClient({
 
 - `client.application` - application API
 - `client.applicationDomain` - application_domain API
+- `client.domain` - domain API
 - `client.applicationSourceVersion` - application_source_version API
 - `client.applicationDeployment` - application_deployment API
 - `client.certificate` - certificate API
@@ -92,6 +93,17 @@ const params = {
   page_size: 2,
 };
 const result = await client.applicationDomain.applications.domains.list(applicationId, params);
+```
+
+### domain
+
+```typescript
+// List tenant custom domain assets
+const params = {
+  page: 1,
+  page_size: 2,
+};
+const result = await client.domain.list(params);
 ```
 
 ### application_source_version

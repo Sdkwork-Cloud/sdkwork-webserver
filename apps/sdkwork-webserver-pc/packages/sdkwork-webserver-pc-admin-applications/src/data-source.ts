@@ -92,6 +92,66 @@ export function createWebserverAdminApplicationRegistry(
           { applicationSubmission: "update", requiresSelection: true, permission: "web.sites.write" },
         ),
         action(
+          "update-source",
+          "Update code",
+          { versionTag: "" },
+          (context) => storeApplicationSourceVersion(client, sourceStorage, context),
+          {
+            loadSourceInputDefaults: async (context) => {
+              const versions = await client.applicationSourceVersion.applications.sourceVersions.list(
+                selectedId(context),
+                { page: 1, pageSize: 1 },
+              );
+              const latest = versions.items[0];
+              return latest?.sourceType === "GIT" && latest.sourceRef?.trim()
+                ? { mode: "git", repository: latest.sourceRef }
+                : {};
+            },
+            permission: "web.sites.write",
+            requiredFields: ["versionTag"],
+            requiresSelection: true,
+            sourceInput: "archive-directory-or-git",
+          },
+        ),
+        action(
+          "publish",
+          "Publish application",
+          {
+            deployType: 1,
+            sourceVersionId: "",
+            environment: "production",
+            versionTag: "",
+          },
+          (context) => deployApplication(client, context),
+          {
+            requiresConfirmation: true,
+            requiresSelection: true,
+            fieldOptions: {
+              deployType: [1],
+              sourceVersionId: [],
+              environment: ["production", "staging", "test", "development"],
+            },
+            loadFieldOptions: async (context) => {
+              const versions = await client.applicationSourceVersion.applications.sourceVersions.list(
+                selectedId(context),
+                { page: 1, pageSize: 100 },
+              );
+              return {
+                sourceVersionId: versions.items
+                  .filter((version) => version.status === 1 && version.retained)
+                  .map((version) => ({
+                    label: `${version.versionTag} · ${version.sourceType}`,
+                    relatedValues: { versionTag: version.versionTag },
+                    value: version.id,
+                  })),
+              };
+            },
+            permission: "web.sites.write",
+            readOnlyFields: ["versionTag"],
+            requiredFields: ["sourceVersionId", "versionTag"],
+          },
+        ),
+        action(
           "activate",
           "Activate application",
           {},
@@ -223,6 +283,7 @@ export function createWebserverAdminApplicationRegistry(
                   .filter((version) => version.status === 1 && version.retained)
                   .map((version) => ({
                     label: `${version.versionTag} · ${version.sourceType}`,
+                    relatedValues: { versionTag: version.versionTag },
                     value: version.id,
                   })),
               };
@@ -422,7 +483,9 @@ async function deployApplication(
   client: WebserverAdminSdkClient,
   context: WebserverResourceActionContext,
 ): Promise<unknown> {
-  const applicationId = requiredApplicationId(context.scopeId);
+  const applicationId = context.scopeId?.trim()
+    ? requiredApplicationId(context.scopeId)
+    : selectedId(context);
   const idempotency = idempotencyParams(context);
   const request = deploymentRequest(
     context,
@@ -447,7 +510,9 @@ async function storeApplicationSourceVersion(
   sourceStorage: ApplicationSourceStorage,
   context: WebserverResourceActionContext,
 ): Promise<unknown> {
-  const applicationId = requiredApplicationId(context.scopeId);
+  const applicationId = context.scopeId?.trim()
+    ? requiredApplicationId(context.scopeId)
+    : selectedId(context);
   const idempotency = idempotencyParams(context);
   if (context.sourceInputMode === "git") {
     context.onProgress?.(8);

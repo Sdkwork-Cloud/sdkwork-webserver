@@ -5,11 +5,14 @@ from typing import TYPE_CHECKING, Optional, List, Dict, Any
 
 @dataclass
 class DomainResponse:
-    id: Optional[str] = None
-    hostname: Optional[str] = None
-    is_primary: Optional[bool] = None
-    is_verified: Optional[bool] = None
-    ssl_enabled: Optional[bool] = None
+    id: str
+    hostname: str
+    certificate_count: str
+    is_primary: bool
+    is_verified: bool
+    ssl_enabled: bool
+    status: int
+    created_at: str
+    application_id: Optional[str] = None
+    application_name: Optional[str] = None
     ssl_provider: Optional[str] = None
-    status: Optional[int] = None
-    created_at: Optional[str] = None

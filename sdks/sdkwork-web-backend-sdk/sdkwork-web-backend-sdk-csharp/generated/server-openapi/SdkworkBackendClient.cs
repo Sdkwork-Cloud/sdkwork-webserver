@@ -11,6 +11,7 @@ namespace SDKWork.Web.BackendSdk
 
         public ApplicationApi Application { get; }
         public ApplicationDomainApi ApplicationDomain { get; }
+        public DomainApi Domain { get; }
         public ApplicationSourceVersionApi ApplicationSourceVersion { get; }
         public ApplicationDeploymentApi ApplicationDeployment { get; }
         public CertificateApi Certificate { get; }
@@ -25,6 +26,7 @@ namespace SDKWork.Web.BackendSdk
             _httpClient = new SdkHttpClient(baseUrl);
             Application = new ApplicationApi(_httpClient);
             ApplicationDomain = new ApplicationDomainApi(_httpClient);
+            Domain = new DomainApi(_httpClient);
             ApplicationSourceVersion = new ApplicationSourceVersionApi(_httpClient);
             ApplicationDeployment = new ApplicationDeploymentApi(_httpClient);
             Certificate = new CertificateApi(_httpClient);
@@ -40,6 +42,7 @@ namespace SDKWork.Web.BackendSdk
             _httpClient = new SdkHttpClient(config);
             Application = new ApplicationApi(_httpClient);
             ApplicationDomain = new ApplicationDomainApi(_httpClient);
+            Domain = new DomainApi(_httpClient);
             ApplicationSourceVersion = new ApplicationSourceVersionApi(_httpClient);
             ApplicationDeployment = new ApplicationDeploymentApi(_httpClient);
             Certificate = new CertificateApi(_httpClient);

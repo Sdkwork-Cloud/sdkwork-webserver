@@ -4,6 +4,9 @@ package com.sdkwork.web.backend.sdk.model;
 public class ApplicationDomainResponse {
     private String id;
     private String hostname;
+    private String applicationId;
+    private String applicationName;
+    private String certificateCount;
     private Boolean isPrimary;
     private Boolean isVerified;
     private Boolean sslEnabled;
@@ -25,6 +28,30 @@ public class ApplicationDomainResponse {
 
     public void setHostname(String hostname) {
         this.hostname = hostname;
+    }
+
+    public String getApplicationId() {
+        return this.applicationId;
+    }
+
+    public void setApplicationId(String applicationId) {
+        this.applicationId = applicationId;
+    }
+
+    public String getApplicationName() {
+        return this.applicationName;
+    }
+
+    public void setApplicationName(String applicationName) {
+        this.applicationName = applicationName;
+    }
+
+    public String getCertificateCount() {
+        return this.certificateCount;
+    }
+
+    public void setCertificateCount(String certificateCount) {
+        this.certificateCount = certificateCount;
     }
 
     public Boolean getIsPrimary() {

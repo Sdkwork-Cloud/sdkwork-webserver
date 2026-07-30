@@ -92,7 +92,7 @@
     },
     {
       "path": "src/main/java/com/sdkwork/web/app/sdk/model/CertificateResponse.java",
-      "sha256": "7c8e2f0a2494e3e6938281c9bc40717d4e84acf5edc1885d5045e520160b95e0"
+      "sha256": "8c3255ff2b8b17585dabf6e36c6dc1aaa407aeb7ff1f15ecd99591addd4b3574"
     },
     {
       "path": "src/main/java/com/sdkwork/web/app/sdk/model/CertificatesCreateResponse201.java",
@@ -144,7 +144,7 @@
     },
     {
       "path": "src/main/java/com/sdkwork/web/app/sdk/model/DomainResponse.java",
-      "sha256": "6a66ddead184d66928e2973bb734dc15d6af4313a7a7c206e88a49904edbd6e3"
+      "sha256": "4ec4a4638aee4213bd66c9a686b966300f7023375a476ad30bd8150f3d01431d"
     },
     {
       "path": "src/main/java/com/sdkwork/web/app/sdk/model/DomainVerifyResponse.java",

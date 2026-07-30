@@ -1,6 +1,7 @@
 import { createWebserverAdminApplicationRegistry } from "@sdkwork/webserver-pc-admin-applications";
 import { createWebserverAdminCertificateRegistry } from "@sdkwork/webserver-pc-admin-certificates";
 import { createWebserverAdminRegistry, type WebserverAdminSdkClient } from "@sdkwork/webserver-pc-admin-core";
+import { createWebserverAdminDomainRegistry } from "@sdkwork/webserver-pc-admin-domains";
 import type { ApplicationMediaStorage, ApplicationSourceStorage } from "@sdkwork/webserver-pc-commons";
 import { describe, expect, it, vi } from "vitest";
 
@@ -315,6 +316,126 @@ describe("admin certificate capability", () => {
       idempotencyKey: "invalid-self-signed-renewal",
     })).rejects.toThrow("unavailable for self-signed certificates");
     expect(create).not.toHaveBeenCalled();
+  });
+
+  it("loads domain choices with hostname and application labels", async () => {
+    const listDomains = vi.fn().mockResolvedValue({
+      items: [
+        { id: "domain-1", hostname: "api.example.test", applicationName: "Public API" },
+        { id: "domain-2", hostname: "ready.example.test" },
+      ],
+      pageInfo: { page: 1, pageSize: 100, hasMore: false },
+    });
+    const client = {
+      certificate: { create: vi.fn() },
+      domain: { list: listDomains },
+    } as unknown as WebserverAdminSdkClient;
+    const registry = createWebserverAdminCertificateRegistry(client);
+    const issue = registry["managed-certificates"]?.actions.find((candidate) => candidate.id === "create");
+    if (!issue?.loadFieldOptions) throw new Error("certificate domain selector is unavailable");
+
+    const options = await issue.loadFieldOptions({ body: issue.bodyTemplate });
+    expect(options.domainId).toEqual([
+      { label: "api.example.test - Public API", value: "domain-1" },
+      { label: "ready.example.test - Unbound", value: "domain-2" },
+    ]);
+    expect(listDomains).toHaveBeenCalledWith({ page: 1, pageSize: 100 });
+  });
+});
+
+describe("admin domain capability", () => {
+  it("manages detached assets, explicit application bindings, and repeatable certificate issue", async () => {
+    const listDomains = vi.fn().mockResolvedValue({
+      items: [{ id: "domain-1", hostname: "api.example.test", certificateCount: "0" }],
+      pageInfo: { page: 1, pageSize: 20, hasMore: false },
+    });
+    const createDomain = vi.fn().mockResolvedValue({ id: "domain-1" });
+    const verifyDomain = vi.fn().mockResolvedValue({ verified: true });
+    const bindDomain = vi.fn().mockResolvedValue({ id: "domain-1", applicationId: "app-1" });
+    const unbindDomain = vi.fn().mockResolvedValue(undefined);
+    const deleteDomain = vi.fn().mockResolvedValue(undefined);
+    const issueCertificate = vi.fn().mockResolvedValue({ id: "certificate-1" });
+    const listApplications = vi.fn().mockResolvedValue({
+      items: [{ id: "app-1", name: "Public API", applicationType: "API" }],
+      pageInfo: { page: 1, pageSize: 100, hasMore: false },
+    });
+    const client = {
+      application: { list: listApplications },
+      certificate: { create: issueCertificate },
+      domain: {
+        list: listDomains,
+        create: createDomain,
+        verify: verifyDomain,
+        delete: deleteDomain,
+        applicationBinding: { update: bindDomain, delete: unbindDomain },
+      },
+    } as unknown as WebserverAdminSdkClient;
+    const registry = createWebserverAdminDomainRegistry(client);
+    const source = registry["managed-domains"];
+    if (!source) throw new Error("managed domain source is unavailable");
+
+    await source.load({ page: 1, pageSize: 20 });
+    expect(listDomains).toHaveBeenCalledWith({ page: 1, pageSize: 20 });
+
+    const create = source.actions.find((candidate) => candidate.id === "create");
+    if (!create?.loadFieldOptions) throw new Error("managed domain create action is unavailable");
+    expect(await create.loadFieldOptions({ body: create.bodyTemplate })).toEqual({
+      applicationId: [
+        { label: "Unbound", value: "" },
+        { label: "Public API - API", value: "app-1" },
+      ],
+    });
+    await create.execute({
+      body: { ...create.bodyTemplate, hostname: "Ready.Example.Test" },
+      idempotencyKey: "domain-create-1",
+    });
+    expect(createDomain).toHaveBeenCalledWith({
+      hostname: "ready.example.test",
+      applicationId: undefined,
+      isPrimary: false,
+      sslEnabled: true,
+      sslProvider: "letsencrypt",
+    }, { idempotencyKey: "domain-create-1" });
+
+    const verify = source.actions.find((candidate) => candidate.id === "verify");
+    await verify?.execute({ body: {}, idempotencyKey: "domain-verify-1", selectedItem: { id: "domain-1" } });
+    expect(verifyDomain).toHaveBeenCalledWith("domain-1", { idempotencyKey: "domain-verify-1" });
+    expect(verify?.availableWhen?.({ body: {}, selectedItem: { isVerified: true } })).toBe(false);
+
+    const bind = source.actions.find((candidate) => candidate.id === "bind");
+    await bind?.execute({
+      body: { applicationId: "app-1", isPrimary: true },
+      idempotencyKey: "domain-bind-1",
+      selectedItem: { id: "domain-1" },
+    });
+    expect(bindDomain).toHaveBeenCalledWith(
+      "domain-1",
+      { applicationId: "app-1", isPrimary: true },
+      { idempotencyKey: "domain-bind-1" },
+    );
+    expect(bind?.availableWhen?.({ body: {}, selectedItem: { applicationId: "app-1" } })).toBe(false);
+
+    const unbind = source.actions.find((candidate) => candidate.id === "unbind");
+    await unbind?.execute({ body: {}, idempotencyKey: "domain-unbind-1", selectedItem: { id: "domain-1", applicationId: "app-1" } });
+    expect(unbindDomain).toHaveBeenCalledWith("domain-1", { idempotencyKey: "domain-unbind-1" });
+    expect(unbind?.requiresConfirmation).toBe(true);
+
+    const issue = source.actions.find((candidate) => candidate.id === "issue-certificate");
+    await issue?.execute({
+      body: { certType: 1, autoRenew: true },
+      idempotencyKey: "domain-certificate-1",
+      selectedItem: { id: "domain-1" },
+    });
+    expect(issueCertificate).toHaveBeenCalledWith(
+      { domainId: "domain-1", certType: 1, autoRenew: true },
+      { idempotencyKey: "domain-certificate-1" },
+    );
+
+    const remove = source.actions.find((candidate) => candidate.id === "delete");
+    expect(remove?.availableWhen?.({ body: {}, selectedItem: { certificateCount: "1" } })).toBe(false);
+    expect(remove?.availableWhen?.({ body: {}, selectedItem: { certificateCount: "0" } })).toBe(true);
+    await remove?.execute({ body: {}, idempotencyKey: "domain-delete-1", selectedItem: { id: "domain-1" } });
+    expect(deleteDomain).toHaveBeenCalledWith("domain-1", { idempotencyKey: "domain-delete-1" });
   });
 });
 

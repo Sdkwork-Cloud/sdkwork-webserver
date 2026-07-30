@@ -36,7 +36,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "939fa1369082a1f2dac6e3a4cc5a6620efb6a20cb80ec3bd0f9bfe8cbf323c23"
+      "sha256": "6af12c17bf36d4076e71daa9ff3e5cc99444079160b88e5fdd62878efcde86ee"
     },
     {
       "path": "sdkwork-sdk.json",
@@ -72,7 +72,7 @@
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/api/Api.kt",
-      "sha256": "9348963e14e7c1985f4bdb93fa4f32c545a446192c7d127a16c3e921323dd4e8"
+      "sha256": "efe5d45674181d9cbfeac042a7da43634c1eb224688539bf34dfeb4d13ea22d0"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/api/ApiPaths.kt",
@@ -107,6 +107,10 @@
       "sha256": "e8602a2f5a854755236e9d50482d255396d3505b25608984a4cc1ac127953a41"
     },
     {
+      "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/api/DomainApi.kt",
+      "sha256": "8c10532e619daaf7f29a96ae908eea4303a16c7175213b95a4825ea2552d4db9"
+    },
+    {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/api/NginxApi.kt",
       "sha256": "d260bc247da653b790b1341330275c4d5ab22209eca141aa74ce75ef3136b719"
     },
@@ -120,7 +124,7 @@
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationDomainResponse.kt",
-      "sha256": "433d54b01808053bf83e0509155e075f913ccc36a6e7e449b1c06ae09d7244d3"
+      "sha256": "d4a58fb69e42e77b446f166cb4a6b7dfa84daa4bbadb140c0326565c00ca620f"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationDomainVerifyResponse.kt",
@@ -224,7 +228,7 @@
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/CertificateResponse.kt",
-      "sha256": "ff8f3982a3555535c2995e530efa2d625ed2d7dc49b2775ea6c929b52ed79c28"
+      "sha256": "8d8d48a812aa8f0eaa52a85a3abfda0584f05bf88587eb7102004ab0db25f4c1"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/CertificatesCreateResponse201.kt",
@@ -291,6 +295,10 @@
       "sha256": "74674ce2f72c770cd4878c9a70579286f214929b13f37cd3c187d81ba96832c8"
     },
     {
+      "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/CreateManagedDomainRequest.kt",
+      "sha256": "682e487eba407e1a1e2ac3dccbe7d9079a91b3ca3e0e6063238c415638389dd3"
+    },
+    {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/CreateNginxConfigRequest.kt",
       "sha256": "504313f3cc5497c4b357c1d11b3ee8c8e8bfd4d16b077b7d1ee5b144c77f9d74"
     },
@@ -301,6 +309,22 @@
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/CreateServerResponse.kt",
       "sha256": "b661c14d2c62d3fcf3823106363d9e39d8226d626fc20617069221c94879c193"
+    },
+    {
+      "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/DomainsApplicationBindingUpdateResponse.kt",
+      "sha256": "5020f1f741d654b04faf281e5d13c2ef3fdde951f541e852cd411c297a5b7993"
+    },
+    {
+      "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/DomainsCreateResponse201.kt",
+      "sha256": "49e5a5b7346a8ea5e196d6c6b06d5196e0c8c412948e73444f44b59fe4b92ab4"
+    },
+    {
+      "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/DomainsListResponse.kt",
+      "sha256": "9ce1623ea53e75ca99cc151ce436f8f6a62d3586e0d5809d5a501dbbb9af56e7"
+    },
+    {
+      "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/DomainsVerifyResponse.kt",
+      "sha256": "120961e3dc3c7b6228269fd725cfd612885c5f4fd778089d63e24857d576cce6"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/FieldError.kt",
@@ -372,7 +396,7 @@
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/SdkworkBackendClient.kt",
-      "sha256": "afbb39f80c1ea5dfd64185c1dcd96786fb4edbd1853ac378d98de3fea1f01ede"
+      "sha256": "5d818106a1c854648ab40b9ebaec06bd087451f8ba91ec73c3f895a4088c8eaa"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/SdkWorkCommandData.kt",
@@ -425,6 +449,10 @@
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/UpdateCertificateRequest.kt",
       "sha256": "65ef8421eb2d115a1a4ae7946b2b3397cba45770a194df4b6d5c198525bf7c60"
+    },
+    {
+      "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/UpdateDomainApplicationBindingRequest.kt",
+      "sha256": "355f86cad0f126db027723802bf0ec38fdd062fd935fdb991b002ee316efa983"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/UpdateNginxConfigRequest.kt",

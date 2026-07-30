@@ -84,7 +84,7 @@
     },
     {
       "path": "lib/sdkwork/app_sdk/models/certificate_response.rb",
-      "sha256": "6666cc36755ef3e1923f08dbae72e66d112fce12f1e23201bbb567876ec17c2f"
+      "sha256": "54b937857a1e700b1f83853544541cfefd45821464c4efae4d259089d3824ff1"
     },
     {
       "path": "lib/sdkwork/app_sdk/models/certificates_create_response201.rb",
@@ -136,7 +136,7 @@
     },
     {
       "path": "lib/sdkwork/app_sdk/models/domain_response.rb",
-      "sha256": "851810cc875a3e396c9c1d975031c30f52c04a50d38e426fafaa0df9aa6d8671"
+      "sha256": "134360a6edfdf404f9e1db3de092a5c261b676343759044eae5ed46690420d14"
     },
     {
       "path": "lib/sdkwork/app_sdk/models/domain_verify_response.rb",

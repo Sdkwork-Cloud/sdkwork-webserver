@@ -5,6 +5,7 @@ public class CertificateResponse {
     private String id;
     private String certName;
     private String domain;
+    private String domainId;
     private Integer certType;
     private String issuer;
     private String fingerprint;
@@ -37,6 +38,14 @@ public class CertificateResponse {
 
     public void setDomain(String domain) {
         this.domain = domain;
+    }
+
+    public String getDomainId() {
+        return this.domainId;
+    }
+
+    public void setDomainId(String domainId) {
+        this.domainId = domainId;
     }
 
     public Integer getCertType() {

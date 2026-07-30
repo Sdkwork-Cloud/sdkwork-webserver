@@ -10,6 +10,12 @@ final class DomainResponse
 
     public ?string $hostname = null;
 
+    public ?string $applicationId = null;
+
+    public ?string $applicationName = null;
+
+    public ?string $certificateCount = null;
+
     public ?bool $isPrimary = null;
 
     public ?bool $isVerified = null;
@@ -29,6 +35,15 @@ final class DomainResponse
             : null;
         $this->hostname = array_key_exists('hostname', $data)
             ? $data['hostname']
+            : null;
+        $this->applicationId = array_key_exists('applicationId', $data)
+            ? $data['applicationId']
+            : null;
+        $this->applicationName = array_key_exists('applicationName', $data)
+            ? $data['applicationName']
+            : null;
+        $this->certificateCount = array_key_exists('certificateCount', $data)
+            ? $data['certificateCount']
             : null;
         $this->isPrimary = array_key_exists('isPrimary', $data)
             ? $data['isPrimary']
@@ -60,6 +75,9 @@ final class DomainResponse
         return [
             'id' => $this->id,
             'hostname' => $this->hostname,
+            'applicationId' => $this->applicationId,
+            'applicationName' => $this->applicationName,
+            'certificateCount' => $this->certificateCount,
             'isPrimary' => $this->isPrimary,
             'isVerified' => $this->isVerified,
             'sslEnabled' => $this->sslEnabled,

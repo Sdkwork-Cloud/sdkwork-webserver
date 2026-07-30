@@ -9,26 +9,10 @@
     "protocol": "http",
     "packageName": "com.sdkwork:sdkwork-web-backend-sdk"
   },
-  "changeFingerprint": "b9480853cb8300927a3ba70fd5d90b52dadad18cde438c97824d6b19d19850ed",
+  "changeFingerprint": "5fbc1c03082928837a437c807f5d2869f326cb0f6672364913f08af383c02ed4",
   "changes": {
-    "createdGeneratedFiles": [
-      "src/main/java/com/sdkwork/web/backend/sdk/api/ApplicationSourceVersionApi.java",
-      "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationSourceVersionConfigSnapshot.java",
-      "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationSourceVersionResponse.java",
-      "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsSourceVersionsCreateResponse201.java",
-      "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsSourceVersionsImportGitResponse201.java",
-      "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsSourceVersionsListResponse.java",
-      "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsSourceVersionsRetrieveResponse.java",
-      "src/main/java/com/sdkwork/web/backend/sdk/model/CreateApplicationSourceVersionRequest.java",
-      "src/main/java/com/sdkwork/web/backend/sdk/model/ImportApplicationGitSourceVersionRequest.java"
-    ],
-    "updatedGeneratedFiles": [
-      "README.md",
-      "src/main/java/com/sdkwork/web/backend/sdk/api/package-info.java",
-      "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationDeploymentResponse.java",
-      "src/main/java/com/sdkwork/web/backend/sdk/model/CreateApplicationDeploymentRequest.java",
-      "src/main/java/com/sdkwork/web/backend/sdk/SdkworkBackendClient.java"
-    ],
+    "createdGeneratedFiles": [],
+    "updatedGeneratedFiles": [],
     "unchangedGeneratedFiles": [
       "bin/publish-core.mjs",
       "bin/publish.ps1",
@@ -36,16 +20,20 @@
       "CHANGELOG.md",
       "LICENSE",
       "pom.xml",
+      "README.md",
       "sdkwork-sdk.json",
       "src/main/java/com/sdkwork/web/backend/sdk/api/AgentApi.java",
       "src/main/java/com/sdkwork/web/backend/sdk/api/ApiPaths.java",
       "src/main/java/com/sdkwork/web/backend/sdk/api/ApplicationApi.java",
       "src/main/java/com/sdkwork/web/backend/sdk/api/ApplicationDeploymentApi.java",
       "src/main/java/com/sdkwork/web/backend/sdk/api/ApplicationDomainApi.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/api/ApplicationSourceVersionApi.java",
       "src/main/java/com/sdkwork/web/backend/sdk/api/AuditApi.java",
       "src/main/java/com/sdkwork/web/backend/sdk/api/CertificateApi.java",
       "src/main/java/com/sdkwork/web/backend/sdk/api/CertificateDistributionApi.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/api/DomainApi.java",
       "src/main/java/com/sdkwork/web/backend/sdk/api/NginxApi.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/api/package-info.java",
       "src/main/java/com/sdkwork/web/backend/sdk/api/ServerApi.java",
       "src/main/java/com/sdkwork/web/backend/sdk/http/HttpClient.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/AgentCertificateBundle.java",
@@ -53,6 +41,7 @@
       "src/main/java/com/sdkwork/web/backend/sdk/model/AgentHeartbeatResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/AgentNginxConfigBundle.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/AgentSyncResponse.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationDeploymentResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationDomainResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationDomainVerifyResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationResponse.java",
@@ -65,8 +54,14 @@
       "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsDomainsListResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsDomainsVerifyResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsListResponse.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationSourceVersionConfigSnapshot.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationSourceVersionResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsPauseResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsRetrieveResponse.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsSourceVersionsCreateResponse201.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsSourceVersionsImportGitResponse201.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsSourceVersionsListResponse.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsSourceVersionsRetrieveResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationStoreListing.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsUpdateResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/AuditLogPage.java",
@@ -85,14 +80,22 @@
       "src/main/java/com/sdkwork/web/backend/sdk/model/ConfigsRetrieveResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/ConfigsUpdateResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/ConfigsValidateResponse.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/model/CreateApplicationDeploymentRequest.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/CreateApplicationDomainRequest.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/CreateApplicationRequest.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/model/CreateApplicationSourceVersionRequest.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/CreateCertificateRequest.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/model/CreateManagedDomainRequest.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/CreateNginxConfigRequest.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/CreateServerRequest.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/CreateServerResponse.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/model/DomainsApplicationBindingUpdateResponse.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/model/DomainsCreateResponse201.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/model/DomainsListResponse.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/model/DomainsVerifyResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/FieldError.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/HeartbeatResponse.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/model/ImportApplicationGitSourceVersionRequest.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/MediaChecksum.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/MediaResource.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/NginxConfigPage.java",
@@ -119,7 +122,9 @@
       "src/main/java/com/sdkwork/web/backend/sdk/model/StatusRetrieveResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/UpdateApplicationRequest.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/UpdateCertificateRequest.java",
-      "src/main/java/com/sdkwork/web/backend/sdk/model/UpdateNginxConfigRequest.java"
+      "src/main/java/com/sdkwork/web/backend/sdk/model/UpdateDomainApplicationBindingRequest.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/model/UpdateNginxConfigRequest.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/SdkworkBackendClient.java"
     ],
     "deletedGeneratedFiles": [],
     "scaffoldedFiles": [],
@@ -130,79 +135,26 @@
   },
   "impact": {
     "schemaVersion": 1,
-    "areas": [
-      "api-surface",
-      "models",
-      "documentation"
-    ],
-    "details": [
-      {
-        "area": "api-surface",
-        "paths": [
-          "src/main/java/com/sdkwork/web/backend/sdk/api/ApplicationSourceVersionApi.java",
-          "src/main/java/com/sdkwork/web/backend/sdk/api/package-info.java",
-          "src/main/java/com/sdkwork/web/backend/sdk/SdkworkBackendClient.java"
-        ]
-      },
-      {
-        "area": "models",
-        "paths": [
-          "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationDeploymentResponse.java",
-          "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationSourceVersionConfigSnapshot.java",
-          "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationSourceVersionResponse.java",
-          "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsSourceVersionsCreateResponse201.java",
-          "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsSourceVersionsImportGitResponse201.java",
-          "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsSourceVersionsListResponse.java",
-          "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsSourceVersionsRetrieveResponse.java",
-          "src/main/java/com/sdkwork/web/backend/sdk/model/CreateApplicationDeploymentRequest.java",
-          "src/main/java/com/sdkwork/web/backend/sdk/model/CreateApplicationSourceVersionRequest.java",
-          "src/main/java/com/sdkwork/web/backend/sdk/model/ImportApplicationGitSourceVersionRequest.java"
-        ]
-      },
-      {
-        "area": "documentation",
-        "paths": [
-          "README.md"
-        ]
-      }
-    ],
-    "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, models, documentation. Verification is required."
+    "areas": [],
+    "details": [],
+    "requiresVerification": false,
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
   },
   "verificationPlan": {
-    "shouldRun": true,
-    "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, models, documentation. Verification is required. Run the required verification commands now against the generated SDK output.",
-    "steps": [
-      {
-        "id": "check",
-        "title": "Unified package check",
-        "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, documentation.",
-        "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-java\\generated\\server-openapi",
-        "command": "node",
-        "args": [
-          "./bin/publish-core.mjs",
-          "--language",
-          "java",
-          "--project-dir",
-          ".",
-          "--action",
-          "check"
-        ],
-        "displayCommand": "node ./bin/publish-core.mjs --language java --project-dir . --action check"
-      }
-    ]
+    "shouldRun": false,
+    "runPhase": "skip",
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
+    "steps": []
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "medium",
-    "nextAction": "verify",
+    "riskLevel": "low",
+    "nextAction": "skip",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
-    "summary": "Changes have been applied. Run the required verification plan now.",
+    "summary": "No actionable changes were detected. No apply or verification step is required.",
     "reasons": [
-      "verification-required"
+      "no-actionable-changes"
     ]
   },
   "preservedLegacyFiles": false

@@ -104,7 +104,7 @@
     },
     {
       "path": "sdkwork_web_app_sdk/models/certificate_response.py",
-      "sha256": "2b0244a034ac2aa98059948e1b1f189712a25ab7ed62b75acdd4c12386e81010"
+      "sha256": "51689a8b83e4ada2c95e4bf9df8851f3d5df93d32ac7bf8e485fdb13a7526838"
     },
     {
       "path": "sdkwork_web_app_sdk/models/certificates_create_response201.py",
@@ -156,7 +156,7 @@
     },
     {
       "path": "sdkwork_web_app_sdk/models/domain_response.py",
-      "sha256": "953e14435d7c56c43f0ff912621db18f33b19386f902cd773b8403bfb9a1ec8a"
+      "sha256": "58eadd404fa7d10da7ffccfd5b51aedada8b3165a03eb6354b7f800500b9edea"
     },
     {
       "path": "sdkwork_web_app_sdk/models/domain_verify_response.py",

@@ -172,6 +172,12 @@ pub struct UpdateSiteRequest {
 pub struct DomainResponse {
     pub id: String,
     pub hostname: String,
+    #[serde(rename = "applicationId", skip_serializing_if = "Option::is_none")]
+    pub application_id: Option<String>,
+    #[serde(rename = "applicationName", skip_serializing_if = "Option::is_none")]
+    pub application_name: Option<String>,
+    #[serde(rename = "certificateCount", with = "sdkwork_utils_rust::serde_int64")]
+    pub certificate_count: i64,
     #[serde(rename = "isPrimary")]
     pub is_primary: bool,
     #[serde(rename = "isVerified")]
@@ -202,6 +208,29 @@ pub struct CreateDomainRequest {
     pub ssl_enabled: bool,
     #[serde(rename = "sslProvider", default)]
     pub ssl_provider: Option<String>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct CreateManagedDomainRequest {
+    pub hostname: String,
+    #[serde(rename = "applicationId", default)]
+    pub application_id: Option<String>,
+    #[serde(rename = "isPrimary", default)]
+    pub is_primary: bool,
+    #[serde(rename = "sslEnabled", default = "default_true")]
+    pub ssl_enabled: bool,
+    #[serde(rename = "sslProvider", default)]
+    pub ssl_provider: Option<String>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct UpdateDomainApplicationBindingRequest {
+    #[serde(rename = "applicationId")]
+    pub application_id: String,
+    #[serde(rename = "isPrimary", default)]
+    pub is_primary: bool,
 }
 
 fn default_true() -> bool {
@@ -463,6 +492,8 @@ pub struct CertificateResponse {
     pub cert_name: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub domain: Option<String>,
+    #[serde(rename = "domainId", skip_serializing_if = "Option::is_none")]
+    pub domain_id: Option<String>,
     #[serde(rename = "certType", skip_serializing_if = "Option::is_none")]
     pub cert_type: Option<i32>,
     #[serde(skip_serializing_if = "Option::is_none")]

@@ -24,9 +24,32 @@ use std::sync::Arc;
 
 use crate::framework_observability::{WebFrameworkAuditEmitter, WebFrameworkSecurityEventEmitter};
 
-#[derive(Clone, Copy, Debug, Default)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+enum ApiAssemblyProfile {
+    #[default]
+    Standalone,
+    CloudGateway,
+}
+
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 #[non_exhaustive]
-pub struct ApiAssemblyContext;
+pub struct ApiAssemblyContext {
+    profile: ApiAssemblyProfile,
+}
+
+impl ApiAssemblyContext {
+    /// Selects the Web Server service-to-service surface for the platform cloud gateway.
+    /// Standalone Site, certificate, Nginx, and server management routes remain excluded.
+    pub const fn cloud_gateway() -> Self {
+        Self {
+            profile: ApiAssemblyProfile::CloudGateway,
+        }
+    }
+
+    const fn includes_standalone_control_plane(self) -> bool {
+        matches!(self.profile, ApiAssemblyProfile::Standalone)
+    }
+}
 
 #[derive(Debug, thiserror::Error)]
 pub enum ApiAssemblyError {
@@ -73,7 +96,7 @@ impl ReadinessCheck for WebServiceReadinessCheck {
 }
 
 pub async fn assemble_business_routes(
-    _context: ApiAssemblyContext,
+    context: ApiAssemblyContext,
 ) -> Result<ApiAssembly, ApiAssemblyError> {
     let runtime = bootstrap_web_runtime_from_env()
         .await
@@ -83,13 +106,17 @@ pub async fn assemble_business_routes(
         Arc::new(WebFrameworkAuditEmitter::new(service.clone()));
     let security_event_emitter: Arc<dyn SecurityEventEmitter> =
         Arc::new(WebFrameworkSecurityEventEmitter::new(service.clone()));
-    let mut routes = Vec::new();
-    routes.extend_from_slice(app_route_manifest().routes());
-    routes.extend_from_slice(backend_route_manifest().routes());
-    routes.extend_from_slice(internal_route_manifest().routes());
-    let route_manifest = HttpRouteManifest::from_owned_routes(routes);
-    let mut domain_context_injectors = web_app_domain_context_injectors();
-    domain_context_injectors.extend(web_backend_domain_context_injectors());
+    let route_manifest = selected_route_manifest(context);
+    let mut router = Router::new();
+    let mut domain_context_injectors = Vec::new();
+    if context.includes_standalone_control_plane() {
+        router = router
+            .merge(mount_app(service.clone()))
+            .merge(mount_backend(service.clone()));
+        domain_context_injectors.extend(web_app_domain_context_injectors());
+        domain_context_injectors.extend(web_backend_domain_context_injectors());
+    }
+    router = router.merge(mount_internal(service.clone()));
     domain_context_injectors.extend(web_internal_domain_context_injectors());
     let permission_catalog = permission_catalog(route_manifest.routes());
     let openapi = sdkwork_web_contract::build_openapi_document(
@@ -97,11 +124,7 @@ pub async fn assemble_business_routes(
         route_manifest.routes(),
     );
     Ok(ApiAssembly {
-        router: Router::new()
-            .merge(mount_app(service.clone()))
-            .merge(mount_backend(service.clone()))
-            .merge(mount_internal(service.clone()))
-            .layer(Extension(service.clone())),
+        router: router.layer(Extension(service.clone())),
         route_manifest,
         openapi,
         permission_catalog,
@@ -140,4 +163,48 @@ fn permission_catalog(routes: &[HttpRoute]) -> Vec<&'static str> {
         }
     }
     permissions.into_iter().collect()
+}
+
+fn selected_route_manifest(context: ApiAssemblyContext) -> HttpRouteManifest {
+    let mut routes = Vec::new();
+    if context.includes_standalone_control_plane() {
+        routes.extend_from_slice(app_route_manifest().routes());
+        routes.extend_from_slice(backend_route_manifest().routes());
+    }
+    routes.extend_from_slice(internal_route_manifest().routes());
+    HttpRouteManifest::from_owned_routes(routes)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{selected_route_manifest, ApiAssemblyContext};
+
+    #[test]
+    fn cloud_gateway_profile_exposes_only_web_internal_routes() {
+        let manifest = selected_route_manifest(ApiAssemblyContext::cloud_gateway());
+
+        assert!(!manifest.routes().is_empty());
+        assert!(manifest
+            .routes()
+            .iter()
+            .all(|route| route.path.starts_with("/internal/v3/api/web/")));
+    }
+
+    #[test]
+    fn standalone_profile_retains_control_plane_routes() {
+        let manifest = selected_route_manifest(ApiAssemblyContext::default());
+
+        assert!(manifest
+            .routes()
+            .iter()
+            .any(|route| route.path.starts_with("/app/v3/api/sites")));
+        assert!(manifest
+            .routes()
+            .iter()
+            .any(|route| route.path.starts_with("/backend/v3/api/nginx")));
+        assert!(manifest
+            .routes()
+            .iter()
+            .any(|route| route.path.starts_with("/internal/v3/api/web/")));
+    }
 }

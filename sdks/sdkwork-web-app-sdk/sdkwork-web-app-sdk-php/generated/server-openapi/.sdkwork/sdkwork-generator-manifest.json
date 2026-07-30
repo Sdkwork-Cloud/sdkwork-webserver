@@ -88,7 +88,7 @@
     },
     {
       "path": "src/Models/CertificateResponse.php",
-      "sha256": "088f670a2b03360e5619a27ad90b35204e394f95b3d3d3a332fa9c2f4c52d3f4"
+      "sha256": "078cd6cd35bf8d6a5211b147d9544d13b17afadc966430206c10e92ba55dff34"
     },
     {
       "path": "src/Models/CertificatesCreateResponse201.php",
@@ -140,7 +140,7 @@
     },
     {
       "path": "src/Models/DomainResponse.php",
-      "sha256": "a0cc234ab9f625aba451196a4ef832c1ec957ec9df2269fa83a69f481d000f43"
+      "sha256": "704f34d7d3f3f5d3b48a2fa1ff8b66734bfc0da6b92675789a8391f59c8230ce"
     },
     {
       "path": "src/Models/DomainVerifyResponse.php",

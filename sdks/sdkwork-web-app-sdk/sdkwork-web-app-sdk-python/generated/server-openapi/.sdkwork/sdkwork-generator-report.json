@@ -12,51 +12,23 @@
   "mode": "apply",
   "hasChanges": true,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "c116fd85bd80e50e2ca82598d8c38f688c724c16d7ef09e65c2b676f74fdf3f7",
+  "changeFingerprint": "b7fde2d9b17d03251a2ea05860c34e0eb58f0fcc6088f5b391ce3b096c7d4280",
   "changeImpact": {
     "schemaVersion": 1,
     "areas": [
-      "api-surface",
-      "models",
-      "documentation"
+      "models"
     ],
     "details": [
       {
-        "area": "api-surface",
-        "paths": [
-          "sdkwork_web_app_sdk/api/__init__.py",
-          "sdkwork_web_app_sdk/api/site.py",
-          "sdkwork_web_app_sdk/api/source_version.py",
-          "sdkwork_web_app_sdk/client.py",
-          "sdkwork_web_app_sdk/models/__init__.py"
-        ]
-      },
-      {
         "area": "models",
         "paths": [
-          "sdkwork_web_app_sdk/models/__init__.py",
-          "sdkwork_web_app_sdk/models/create_deployment_request.py",
-          "sdkwork_web_app_sdk/models/create_source_version_request.py",
-          "sdkwork_web_app_sdk/models/deployment_response.py",
-          "sdkwork_web_app_sdk/models/import_git_source_version_request.py",
-          "sdkwork_web_app_sdk/models/sites_source_versions_create_response201.py",
-          "sdkwork_web_app_sdk/models/sites_source_versions_import_git_response201.py",
-          "sdkwork_web_app_sdk/models/sites_source_versions_list_response.py",
-          "sdkwork_web_app_sdk/models/sites_source_versions_retrieve_response.py",
-          "sdkwork_web_app_sdk/models/source_version_config_snapshot.py",
-          "sdkwork_web_app_sdk/models/source_version_page.py",
-          "sdkwork_web_app_sdk/models/source_version_response.py"
-        ]
-      },
-      {
-        "area": "documentation",
-        "paths": [
-          "README.md"
+          "sdkwork_web_app_sdk/models/certificate_response.py",
+          "sdkwork_web_app_sdk/models/domain_response.py"
         ]
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, models, documentation. Verification is required."
+    "summary": "Detected impact areas: models. Verification is required."
   },
   "executionDecision": {
     "schemaVersion": 1,
@@ -77,7 +49,7 @@
         "id": "verify-check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, documentation.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-python\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -96,13 +68,13 @@
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, models, documentation. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, documentation.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-python\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -141,33 +113,17 @@
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 17,
+    "writtenFiles": 2,
     "skippedScaffoldFiles": 1,
-    "skippedUnchangedGeneratedFiles": 68,
+    "skippedUnchangedGeneratedFiles": 83,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "c116fd85bd80e50e2ca82598d8c38f688c724c16d7ef09e65c2b676f74fdf3f7",
+    "changeFingerprint": "b7fde2d9b17d03251a2ea05860c34e0eb58f0fcc6088f5b391ce3b096c7d4280",
     "changes": {
-      "createdGeneratedFiles": [
-        "sdkwork_web_app_sdk/api/source_version.py",
-        "sdkwork_web_app_sdk/models/create_source_version_request.py",
-        "sdkwork_web_app_sdk/models/import_git_source_version_request.py",
-        "sdkwork_web_app_sdk/models/sites_source_versions_create_response201.py",
-        "sdkwork_web_app_sdk/models/sites_source_versions_import_git_response201.py",
-        "sdkwork_web_app_sdk/models/sites_source_versions_list_response.py",
-        "sdkwork_web_app_sdk/models/sites_source_versions_retrieve_response.py",
-        "sdkwork_web_app_sdk/models/source_version_config_snapshot.py",
-        "sdkwork_web_app_sdk/models/source_version_page.py",
-        "sdkwork_web_app_sdk/models/source_version_response.py"
-      ],
+      "createdGeneratedFiles": [],
       "updatedGeneratedFiles": [
-        "README.md",
-        "sdkwork_web_app_sdk/api/__init__.py",
-        "sdkwork_web_app_sdk/api/site.py",
-        "sdkwork_web_app_sdk/client.py",
-        "sdkwork_web_app_sdk/models/__init__.py",
-        "sdkwork_web_app_sdk/models/create_deployment_request.py",
-        "sdkwork_web_app_sdk/models/deployment_response.py"
+        "sdkwork_web_app_sdk/models/certificate_response.py",
+        "sdkwork_web_app_sdk/models/domain_response.py"
       ],
       "unchangedGeneratedFiles": [
         "bin/publish-core.mjs",
@@ -177,33 +133,41 @@
         "LICENSE",
         "MANIFEST.in",
         "pyproject.toml",
+        "README.md",
         "requirements.txt",
         "sdkwork_web_app_sdk/__init__.py",
+        "sdkwork_web_app_sdk/api/__init__.py",
         "sdkwork_web_app_sdk/api/certificate.py",
         "sdkwork_web_app_sdk/api/deployment.py",
         "sdkwork_web_app_sdk/api/domain.py",
         "sdkwork_web_app_sdk/api/env_variable.py",
         "sdkwork_web_app_sdk/api/monitor.py",
+        "sdkwork_web_app_sdk/api/site.py",
+        "sdkwork_web_app_sdk/api/source_version.py",
+        "sdkwork_web_app_sdk/client.py",
         "sdkwork_web_app_sdk/http_client.py",
+        "sdkwork_web_app_sdk/models/__init__.py",
         "sdkwork_web_app_sdk/models/application_store_listing.py",
         "sdkwork_web_app_sdk/models/certificate_page.py",
-        "sdkwork_web_app_sdk/models/certificate_response.py",
         "sdkwork_web_app_sdk/models/certificates_create_response201.py",
         "sdkwork_web_app_sdk/models/certificates_list_response.py",
         "sdkwork_web_app_sdk/models/create_certificate_request.py",
+        "sdkwork_web_app_sdk/models/create_deployment_request.py",
         "sdkwork_web_app_sdk/models/create_domain_request.py",
         "sdkwork_web_app_sdk/models/create_env_variable_request.py",
         "sdkwork_web_app_sdk/models/create_health_check_request.py",
         "sdkwork_web_app_sdk/models/create_site_request.py",
+        "sdkwork_web_app_sdk/models/create_source_version_request.py",
         "sdkwork_web_app_sdk/models/deployment_page.py",
+        "sdkwork_web_app_sdk/models/deployment_response.py",
         "sdkwork_web_app_sdk/models/domain_page.py",
-        "sdkwork_web_app_sdk/models/domain_response.py",
         "sdkwork_web_app_sdk/models/domain_verify_response.py",
         "sdkwork_web_app_sdk/models/env_variable_page.py",
         "sdkwork_web_app_sdk/models/env_variable_response.py",
         "sdkwork_web_app_sdk/models/field_error.py",
         "sdkwork_web_app_sdk/models/health_check_page.py",
         "sdkwork_web_app_sdk/models/health_check_response.py",
+        "sdkwork_web_app_sdk/models/import_git_source_version_request.py",
         "sdkwork_web_app_sdk/models/media_checksum.py",
         "sdkwork_web_app_sdk/models/media_resource.py",
         "sdkwork_web_app_sdk/models/page_info.py",
@@ -234,7 +198,14 @@
         "sdkwork_web_app_sdk/models/sites_list_response.py",
         "sdkwork_web_app_sdk/models/sites_pause_response.py",
         "sdkwork_web_app_sdk/models/sites_retrieve_response.py",
+        "sdkwork_web_app_sdk/models/sites_source_versions_create_response201.py",
+        "sdkwork_web_app_sdk/models/sites_source_versions_import_git_response201.py",
+        "sdkwork_web_app_sdk/models/sites_source_versions_list_response.py",
+        "sdkwork_web_app_sdk/models/sites_source_versions_retrieve_response.py",
         "sdkwork_web_app_sdk/models/sites_update_response.py",
+        "sdkwork_web_app_sdk/models/source_version_config_snapshot.py",
+        "sdkwork_web_app_sdk/models/source_version_page.py",
+        "sdkwork_web_app_sdk/models/source_version_response.py",
         "sdkwork_web_app_sdk/models/update_site_request.py",
         "sdkwork-sdk.json",
         "setup.py"
@@ -249,58 +220,30 @@
     "impact": {
       "schemaVersion": 1,
       "areas": [
-        "api-surface",
-        "models",
-        "documentation"
+        "models"
       ],
       "details": [
         {
-          "area": "api-surface",
-          "paths": [
-            "sdkwork_web_app_sdk/api/__init__.py",
-            "sdkwork_web_app_sdk/api/site.py",
-            "sdkwork_web_app_sdk/api/source_version.py",
-            "sdkwork_web_app_sdk/client.py",
-            "sdkwork_web_app_sdk/models/__init__.py"
-          ]
-        },
-        {
           "area": "models",
           "paths": [
-            "sdkwork_web_app_sdk/models/__init__.py",
-            "sdkwork_web_app_sdk/models/create_deployment_request.py",
-            "sdkwork_web_app_sdk/models/create_source_version_request.py",
-            "sdkwork_web_app_sdk/models/deployment_response.py",
-            "sdkwork_web_app_sdk/models/import_git_source_version_request.py",
-            "sdkwork_web_app_sdk/models/sites_source_versions_create_response201.py",
-            "sdkwork_web_app_sdk/models/sites_source_versions_import_git_response201.py",
-            "sdkwork_web_app_sdk/models/sites_source_versions_list_response.py",
-            "sdkwork_web_app_sdk/models/sites_source_versions_retrieve_response.py",
-            "sdkwork_web_app_sdk/models/source_version_config_snapshot.py",
-            "sdkwork_web_app_sdk/models/source_version_page.py",
-            "sdkwork_web_app_sdk/models/source_version_response.py"
-          ]
-        },
-        {
-          "area": "documentation",
-          "paths": [
-            "README.md"
+            "sdkwork_web_app_sdk/models/certificate_response.py",
+            "sdkwork_web_app_sdk/models/domain_response.py"
           ]
         }
       ],
       "requiresVerification": true,
-      "summary": "Detected impact areas: api-surface, models, documentation. Verification is required."
+      "summary": "Detected impact areas: models. Verification is required."
     },
     "verificationPlan": {
       "shouldRun": true,
       "runPhase": "now",
-      "summary": "Detected impact areas: api-surface, models, documentation. Verification is required. Run the required verification commands now against the generated SDK output.",
+      "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
       "steps": [
         {
           "id": "check",
           "title": "Unified package check",
           "required": true,
-          "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, documentation.",
+          "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
           "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-python\\generated\\server-openapi",
           "command": "node",
           "args": [

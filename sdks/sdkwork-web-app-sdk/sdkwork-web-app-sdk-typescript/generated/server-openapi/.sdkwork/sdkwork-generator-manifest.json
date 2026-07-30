@@ -120,7 +120,7 @@
     },
     {
       "path": "src/types/certificate-response.ts",
-      "sha256": "8b34caee2378a219cb32b3f7179e64f5d8d9f2281ac32cfea7bcd55925997058"
+      "sha256": "967365ff575d820be80dcda48b56faa34c0db899c56040707fe68acb875c519a"
     },
     {
       "path": "src/types/certificates-create-response201.ts",
@@ -176,7 +176,7 @@
     },
     {
       "path": "src/types/domain-response.ts",
-      "sha256": "a4e0814a93bde62bb7b2ba886d23598f0ce7d3f38c08a8ad27aabad6a088a3bd"
+      "sha256": "b38daa02e974688a4ef892016baf1d086e8f6832bd506ff77e30e53aebc558f4"
     },
     {
       "path": "src/types/domain-verify-response.ts",

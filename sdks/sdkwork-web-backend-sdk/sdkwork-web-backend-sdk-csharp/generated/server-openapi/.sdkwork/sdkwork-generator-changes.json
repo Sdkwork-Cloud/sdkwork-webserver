@@ -9,35 +9,22 @@
     "protocol": "http",
     "packageName": "SDKWork.Web.BackendSdk"
   },
-  "changeFingerprint": "a6b41fa85c496a6ddd44aa2222dc341056b0e9b613def4ff3fc458a7edb72f43",
+  "changeFingerprint": "6313d4eb95c93dadf0149f61021e270e2553bec9f06f3be4094e307acc0abe2f",
   "changes": {
-    "createdGeneratedFiles": [
-      "Api/ApplicationSourceVersionApi.cs",
-      "Models/ApplicationSourceVersionConfigSnapshot.cs",
-      "Models/ApplicationSourceVersionResponse.cs",
-      "Models/ApplicationsSourceVersionsCreateResponse201.cs",
-      "Models/ApplicationsSourceVersionsImportGitResponse201.cs",
-      "Models/ApplicationsSourceVersionsListResponse.cs",
-      "Models/ApplicationsSourceVersionsRetrieveResponse.cs",
-      "Models/CreateApplicationSourceVersionRequest.cs",
-      "Models/ImportApplicationGitSourceVersionRequest.cs"
-    ],
-    "updatedGeneratedFiles": [
-      "Api/Api.cs",
-      "Models/ApplicationDeploymentResponse.cs",
-      "Models/CreateApplicationDeploymentRequest.cs",
-      "README.md",
-      "SdkworkBackendClient.cs"
-    ],
+    "createdGeneratedFiles": [],
+    "updatedGeneratedFiles": [],
     "unchangedGeneratedFiles": [
       "Api/AgentApi.cs",
+      "Api/Api.cs",
       "Api/ApiPaths.cs",
       "Api/ApplicationApi.cs",
       "Api/ApplicationDeploymentApi.cs",
       "Api/ApplicationDomainApi.cs",
+      "Api/ApplicationSourceVersionApi.cs",
       "Api/AuditApi.cs",
       "Api/CertificateApi.cs",
       "Api/CertificateDistributionApi.cs",
+      "Api/DomainApi.cs",
       "Api/NginxApi.cs",
       "Api/ServerApi.cs",
       "bin/publish-core.mjs",
@@ -51,6 +38,7 @@
       "Models/AgentHeartbeatResponse.cs",
       "Models/AgentNginxConfigBundle.cs",
       "Models/AgentSyncResponse.cs",
+      "Models/ApplicationDeploymentResponse.cs",
       "Models/ApplicationDomainResponse.cs",
       "Models/ApplicationDomainVerifyResponse.cs",
       "Models/ApplicationResponse.cs",
@@ -63,8 +51,14 @@
       "Models/ApplicationsDomainsListResponse.cs",
       "Models/ApplicationsDomainsVerifyResponse.cs",
       "Models/ApplicationsListResponse.cs",
+      "Models/ApplicationSourceVersionConfigSnapshot.cs",
+      "Models/ApplicationSourceVersionResponse.cs",
       "Models/ApplicationsPauseResponse.cs",
       "Models/ApplicationsRetrieveResponse.cs",
+      "Models/ApplicationsSourceVersionsCreateResponse201.cs",
+      "Models/ApplicationsSourceVersionsImportGitResponse201.cs",
+      "Models/ApplicationsSourceVersionsListResponse.cs",
+      "Models/ApplicationsSourceVersionsRetrieveResponse.cs",
       "Models/ApplicationStoreListing.cs",
       "Models/ApplicationsUpdateResponse.cs",
       "Models/AuditLogPage.cs",
@@ -83,14 +77,22 @@
       "Models/ConfigsRetrieveResponse.cs",
       "Models/ConfigsUpdateResponse.cs",
       "Models/ConfigsValidateResponse.cs",
+      "Models/CreateApplicationDeploymentRequest.cs",
       "Models/CreateApplicationDomainRequest.cs",
       "Models/CreateApplicationRequest.cs",
+      "Models/CreateApplicationSourceVersionRequest.cs",
       "Models/CreateCertificateRequest.cs",
+      "Models/CreateManagedDomainRequest.cs",
       "Models/CreateNginxConfigRequest.cs",
       "Models/CreateServerRequest.cs",
       "Models/CreateServerResponse.cs",
+      "Models/DomainsApplicationBindingUpdateResponse.cs",
+      "Models/DomainsCreateResponse201.cs",
+      "Models/DomainsListResponse.cs",
+      "Models/DomainsVerifyResponse.cs",
       "Models/FieldError.cs",
       "Models/HeartbeatResponse.cs",
+      "Models/ImportApplicationGitSourceVersionRequest.cs",
       "Models/MediaChecksum.cs",
       "Models/MediaResource.cs",
       "Models/NginxConfigPage.cs",
@@ -117,9 +119,12 @@
       "Models/StatusRetrieveResponse.cs",
       "Models/UpdateApplicationRequest.cs",
       "Models/UpdateCertificateRequest.cs",
+      "Models/UpdateDomainApplicationBindingRequest.cs",
       "Models/UpdateNginxConfigRequest.cs",
+      "README.md",
       "sdkwork-sdk.json",
-      "SDKWork.Web.BackendSdk.csproj"
+      "SDKWork.Web.BackendSdk.csproj",
+      "SdkworkBackendClient.cs"
     ],
     "deletedGeneratedFiles": [],
     "scaffoldedFiles": [],
@@ -130,79 +135,26 @@
   },
   "impact": {
     "schemaVersion": 1,
-    "areas": [
-      "api-surface",
-      "models",
-      "documentation"
-    ],
-    "details": [
-      {
-        "area": "api-surface",
-        "paths": [
-          "Api/Api.cs",
-          "Api/ApplicationSourceVersionApi.cs",
-          "SdkworkBackendClient.cs"
-        ]
-      },
-      {
-        "area": "models",
-        "paths": [
-          "Models/ApplicationDeploymentResponse.cs",
-          "Models/ApplicationSourceVersionConfigSnapshot.cs",
-          "Models/ApplicationSourceVersionResponse.cs",
-          "Models/ApplicationsSourceVersionsCreateResponse201.cs",
-          "Models/ApplicationsSourceVersionsImportGitResponse201.cs",
-          "Models/ApplicationsSourceVersionsListResponse.cs",
-          "Models/ApplicationsSourceVersionsRetrieveResponse.cs",
-          "Models/CreateApplicationDeploymentRequest.cs",
-          "Models/CreateApplicationSourceVersionRequest.cs",
-          "Models/ImportApplicationGitSourceVersionRequest.cs"
-        ]
-      },
-      {
-        "area": "documentation",
-        "paths": [
-          "README.md"
-        ]
-      }
-    ],
-    "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, models, documentation. Verification is required."
+    "areas": [],
+    "details": [],
+    "requiresVerification": false,
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
   },
   "verificationPlan": {
-    "shouldRun": true,
-    "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, models, documentation. Verification is required. Run the required verification commands now against the generated SDK output.",
-    "steps": [
-      {
-        "id": "check",
-        "title": "Unified package check",
-        "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, documentation.",
-        "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-csharp\\generated\\server-openapi",
-        "command": "node",
-        "args": [
-          "./bin/publish-core.mjs",
-          "--language",
-          "csharp",
-          "--project-dir",
-          ".",
-          "--action",
-          "check"
-        ],
-        "displayCommand": "node ./bin/publish-core.mjs --language csharp --project-dir . --action check"
-      }
-    ]
+    "shouldRun": false,
+    "runPhase": "skip",
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
+    "steps": []
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "medium",
-    "nextAction": "verify",
+    "riskLevel": "low",
+    "nextAction": "skip",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
-    "summary": "Changes have been applied. Run the required verification plan now.",
+    "summary": "No actionable changes were detected. No apply or verification step is required.",
     "reasons": [
-      "verification-required"
+      "no-actionable-changes"
     ]
   },
   "preservedLegacyFiles": false

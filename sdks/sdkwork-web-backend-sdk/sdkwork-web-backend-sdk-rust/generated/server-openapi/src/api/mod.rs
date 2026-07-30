@@ -4,6 +4,8 @@ pub mod application;
 pub use application::ApplicationApi;
 pub mod application_domain;
 pub use application_domain::ApplicationDomainApi;
+pub mod domain;
+pub use domain::DomainApi;
 pub mod application_source_version;
 pub use application_source_version::ApplicationSourceVersionApi;
 pub mod application_deployment;

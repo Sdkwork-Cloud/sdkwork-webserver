@@ -10,6 +10,10 @@ pub struct CertificateResponse {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub domain: Option<String>,
 
+    #[serde(rename = "domainId")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub domain_id: Option<String>,
+
     #[serde(rename = "certType")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub cert_type: Option<i64>,

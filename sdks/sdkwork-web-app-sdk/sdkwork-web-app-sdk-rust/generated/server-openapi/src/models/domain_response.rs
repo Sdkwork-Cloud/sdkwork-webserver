@@ -2,32 +2,36 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct DomainResponse {
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub id: Option<String>,
+    pub id: String,
 
+    pub hostname: String,
+
+    #[serde(rename = "applicationId")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub hostname: Option<String>,
+    pub application_id: Option<String>,
+
+    #[serde(rename = "applicationName")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub application_name: Option<String>,
+
+    #[serde(rename = "certificateCount")]
+    pub certificate_count: String,
 
     #[serde(rename = "isPrimary")]
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub is_primary: Option<bool>,
+    pub is_primary: bool,
 
     #[serde(rename = "isVerified")]
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub is_verified: Option<bool>,
+    pub is_verified: bool,
 
     #[serde(rename = "sslEnabled")]
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub ssl_enabled: Option<bool>,
+    pub ssl_enabled: bool,
 
     #[serde(rename = "sslProvider")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub ssl_provider: Option<String>,
 
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub status: Option<i64>,
+    pub status: i64,
 
     #[serde(rename = "createdAt")]
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub created_at: Option<String>,
+    pub created_at: String,
 }

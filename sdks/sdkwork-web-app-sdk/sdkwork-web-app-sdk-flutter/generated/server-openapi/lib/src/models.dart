@@ -564,36 +564,93 @@ class CreateDomainRequest {
 }
 
 class DomainResponse {
-  final String? id;
-  final String? hostname;
-  final bool? isPrimary;
-  final bool? isVerified;
-  final bool? sslEnabled;
+  final String id;
+  final String hostname;
+  final String? applicationId;
+  final String? applicationName;
+  final String certificateCount;
+  final bool isPrimary;
+  final bool isVerified;
+  final bool sslEnabled;
   final String? sslProvider;
-  final int? status;
-  final String? createdAt;
+  final int status;
+  final String createdAt;
 
   DomainResponse({
-    this.id,
-    this.hostname,
-    this.isPrimary,
-    this.isVerified,
-    this.sslEnabled,
+    required this.id,
+    required this.hostname,
+    this.applicationId,
+    this.applicationName,
+    required this.certificateCount,
+    required this.isPrimary,
+    required this.isVerified,
+    required this.sslEnabled,
     this.sslProvider,
-    this.status,
-    this.createdAt
+    required this.status,
+    required this.createdAt
   });
 
   factory DomainResponse.fromJson(Map<String, dynamic> json) {
     return DomainResponse(
-      id: json['id']?.toString(),
-      hostname: json['hostname']?.toString(),
-      isPrimary: json['isPrimary'] is bool ? json['isPrimary'] : null,
-      isVerified: json['isVerified'] is bool ? json['isVerified'] : null,
-      sslEnabled: json['sslEnabled'] is bool ? json['sslEnabled'] : null,
+      id: (() {
+        final value = json['id']?.toString();
+        if (value == null) {
+          throw FormatException('DomainResponse.id is required');
+        }
+        return value;
+      })(),
+      hostname: (() {
+        final value = json['hostname']?.toString();
+        if (value == null) {
+          throw FormatException('DomainResponse.hostname is required');
+        }
+        return value;
+      })(),
+      applicationId: json['applicationId']?.toString(),
+      applicationName: json['applicationName']?.toString(),
+      certificateCount: (() {
+        final value = json['certificateCount']?.toString();
+        if (value == null) {
+          throw FormatException('DomainResponse.certificateCount is required');
+        }
+        return value;
+      })(),
+      isPrimary: (() {
+        final value = json['isPrimary'];
+        if (value is! bool) {
+          throw FormatException('DomainResponse.isPrimary is required');
+        }
+        return value;
+      })(),
+      isVerified: (() {
+        final value = json['isVerified'];
+        if (value is! bool) {
+          throw FormatException('DomainResponse.isVerified is required');
+        }
+        return value;
+      })(),
+      sslEnabled: (() {
+        final value = json['sslEnabled'];
+        if (value is! bool) {
+          throw FormatException('DomainResponse.sslEnabled is required');
+        }
+        return value;
+      })(),
       sslProvider: json['sslProvider']?.toString(),
-      status: json['status'] is int ? json['status'] : null,
-      createdAt: json['createdAt']?.toString()
+      status: (() {
+        final value = json['status'];
+        if (value is! int) {
+          throw FormatException('DomainResponse.status is required');
+        }
+        return value;
+      })(),
+      createdAt: (() {
+        final value = json['createdAt']?.toString();
+        if (value == null) {
+          throw FormatException('DomainResponse.createdAt is required');
+        }
+        return value;
+      })()
     );
   }
 
@@ -601,6 +658,9 @@ class DomainResponse {
     return <String, dynamic>{
       'id': id,
       'hostname': hostname,
+      'applicationId': applicationId,
+      'applicationName': applicationName,
+      'certificateCount': certificateCount,
       'isPrimary': isPrimary,
       'isVerified': isVerified,
       'sslEnabled': sslEnabled,
@@ -1396,6 +1456,7 @@ class CertificateResponse {
   final String id;
   final String certName;
   final String? domain;
+  final String? domainId;
   final int? certType;
   final String? issuer;
   final String? fingerprint;
@@ -1410,6 +1471,7 @@ class CertificateResponse {
     required this.id,
     required this.certName,
     this.domain,
+    this.domainId,
     this.certType,
     this.issuer,
     this.fingerprint,
@@ -1438,6 +1500,7 @@ class CertificateResponse {
         return value;
       })(),
       domain: json['domain']?.toString(),
+      domainId: json['domainId']?.toString(),
       certType: json['certType'] is int ? json['certType'] : null,
       issuer: json['issuer']?.toString(),
       fingerprint: json['fingerprint']?.toString(),
@@ -1467,6 +1530,7 @@ class CertificateResponse {
       'id': id,
       'certName': certName,
       'domain': domain,
+      'domainId': domainId,
       'certType': certType,
       'issuer': issuer,
       'fingerprint': fingerprint,

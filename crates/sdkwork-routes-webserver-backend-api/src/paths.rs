@@ -9,6 +9,11 @@ pub const APPLICATION_DOMAIN: &str =
     "/backend/v3/api/applications/{applicationId}/domains/{domainId}";
 pub const APPLICATION_DOMAIN_VERIFY: &str =
     "/backend/v3/api/applications/{applicationId}/domains/{domainId}/verify";
+pub const DOMAINS: &str = "/backend/v3/api/domains";
+pub const DOMAIN: &str = "/backend/v3/api/domains/{domainId}";
+pub const DOMAIN_VERIFY: &str = "/backend/v3/api/domains/{domainId}/verify";
+pub const DOMAIN_APPLICATION_BINDING: &str =
+    "/backend/v3/api/domains/{domainId}/application_binding";
 pub const APPLICATION_SOURCE_VERSIONS: &str =
     "/backend/v3/api/applications/{applicationId}/source_versions";
 pub const APPLICATION_SOURCE_VERSION_IMPORT_GIT: &str =

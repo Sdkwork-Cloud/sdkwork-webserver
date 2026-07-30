@@ -10,108 +10,37 @@
   },
   "status": "ok",
   "mode": "apply",
-  "hasChanges": true,
+  "hasChanges": false,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "61076caab64cc353c82512a9f93a1140d69eb156c4e0a2edab5754e5ebc4200f",
+  "changeFingerprint": "be87ec3ccfe3c166540dfdfd153a9afc946b330c2d19c7f144407d2c56dd6c39",
   "changeImpact": {
     "schemaVersion": 1,
-    "areas": [
-      "api-surface",
-      "models",
-      "documentation",
-      "unknown"
-    ],
-    "details": [
-      {
-        "area": "api-surface",
-        "paths": [
-          "Sources/API/API.swift",
-          "Sources/API/ApplicationSourceVersionApi.swift"
-        ]
-      },
-      {
-        "area": "models",
-        "paths": [
-          "Sources/Models.swift"
-        ]
-      },
-      {
-        "area": "documentation",
-        "paths": [
-          "README.md"
-        ]
-      },
-      {
-        "area": "unknown",
-        "paths": [
-          "Sources/SdkworkBackendClient.swift"
-        ]
-      }
-    ],
-    "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, models, documentation, unknown. Verification is required."
+    "areas": [],
+    "details": [],
+    "requiresVerification": false,
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "high",
-    "nextAction": "verify",
+    "riskLevel": "low",
+    "nextAction": "skip",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
-    "summary": "Changes have been applied. Run the required verification plan now.",
+    "summary": "No actionable changes were detected. No apply or verification step is required.",
     "reasons": [
-      "manual-review-required",
-      "unknown-impact",
-      "verification-required"
+      "no-actionable-changes"
     ]
   },
   "executionHandoff": {
     "schemaVersion": 1,
-    "summary": "Run the required verification commands now.",
-    "steps": [
-      {
-        "id": "verify-check",
-        "title": "Unified package check",
-        "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, documentation, unknown.",
-        "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-swift\\generated\\server-openapi",
-        "command": "node",
-        "args": [
-          "./bin/publish-core.mjs",
-          "--language",
-          "swift",
-          "--project-dir",
-          ".",
-          "--action",
-          "check"
-        ],
-        "displayCommand": "node ./bin/publish-core.mjs --language swift --project-dir . --action check"
-      }
-    ]
+    "summary": "No further commands are required.",
+    "steps": []
   },
   "verificationPlan": {
-    "shouldRun": true,
-    "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, models, documentation, unknown. Verification is required. Run the required verification commands now against the generated SDK output.",
-    "steps": [
-      {
-        "id": "check",
-        "title": "Unified package check",
-        "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, documentation, unknown.",
-        "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-swift\\generated\\server-openapi",
-        "command": "node",
-        "args": [
-          "./bin/publish-core.mjs",
-          "--language",
-          "swift",
-          "--project-dir",
-          ".",
-          "--action",
-          "check"
-        ],
-        "displayCommand": "node ./bin/publish-core.mjs --language swift --project-dir . --action check"
-      }
-    ]
+    "shouldRun": false,
+    "runPhase": "skip",
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
+    "steps": []
   },
   "sdk": {
     "name": "sdkwork-web-backend-sdk",
@@ -127,31 +56,24 @@
     "localVersions": []
   },
   "stats": {
-    "totalFiles": 24,
-    "models": 82,
-    "apis": 10,
+    "totalFiles": 25,
+    "models": 88,
+    "apis": 11,
     "types": 0
   },
   "warnings": [],
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 5,
+    "writtenFiles": 0,
     "skippedScaffoldFiles": 1,
-    "skippedUnchangedGeneratedFiles": 18,
+    "skippedUnchangedGeneratedFiles": 24,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "61076caab64cc353c82512a9f93a1140d69eb156c4e0a2edab5754e5ebc4200f",
+    "changeFingerprint": "be87ec3ccfe3c166540dfdfd153a9afc946b330c2d19c7f144407d2c56dd6c39",
     "changes": {
-      "createdGeneratedFiles": [
-        "Sources/API/ApplicationSourceVersionApi.swift"
-      ],
-      "updatedGeneratedFiles": [
-        "README.md",
-        "Sources/API/API.swift",
-        "Sources/Models.swift",
-        "Sources/SdkworkBackendClient.swift"
-      ],
+      "createdGeneratedFiles": [],
+      "updatedGeneratedFiles": [],
       "unchangedGeneratedFiles": [
         "bin/publish-core.mjs",
         "bin/publish.ps1",
@@ -159,18 +81,24 @@
         "CHANGELOG.md",
         "LICENSE",
         "Package.swift",
+        "README.md",
         "sdkwork-sdk.json",
         "Sources/API/AgentApi.swift",
+        "Sources/API/API.swift",
         "Sources/API/ApiPaths.swift",
         "Sources/API/ApplicationApi.swift",
         "Sources/API/ApplicationDeploymentApi.swift",
         "Sources/API/ApplicationDomainApi.swift",
+        "Sources/API/ApplicationSourceVersionApi.swift",
         "Sources/API/AuditApi.swift",
         "Sources/API/CertificateApi.swift",
         "Sources/API/CertificateDistributionApi.swift",
+        "Sources/API/DomainApi.swift",
         "Sources/API/NginxApi.swift",
         "Sources/API/ServerApi.swift",
-        "Sources/HTTP/HttpClient.swift"
+        "Sources/HTTP/HttpClient.swift",
+        "Sources/Models.swift",
+        "Sources/SdkworkBackendClient.swift"
       ],
       "deletedGeneratedFiles": [],
       "scaffoldedFiles": [],
@@ -181,78 +109,26 @@
     },
     "impact": {
       "schemaVersion": 1,
-      "areas": [
-        "api-surface",
-        "models",
-        "documentation",
-        "unknown"
-      ],
-      "details": [
-        {
-          "area": "api-surface",
-          "paths": [
-            "Sources/API/API.swift",
-            "Sources/API/ApplicationSourceVersionApi.swift"
-          ]
-        },
-        {
-          "area": "models",
-          "paths": [
-            "Sources/Models.swift"
-          ]
-        },
-        {
-          "area": "documentation",
-          "paths": [
-            "README.md"
-          ]
-        },
-        {
-          "area": "unknown",
-          "paths": [
-            "Sources/SdkworkBackendClient.swift"
-          ]
-        }
-      ],
-      "requiresVerification": true,
-      "summary": "Detected impact areas: api-surface, models, documentation, unknown. Verification is required."
+      "areas": [],
+      "details": [],
+      "requiresVerification": false,
+      "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
     },
     "verificationPlan": {
-      "shouldRun": true,
-      "runPhase": "now",
-      "summary": "Detected impact areas: api-surface, models, documentation, unknown. Verification is required. Run the required verification commands now against the generated SDK output.",
-      "steps": [
-        {
-          "id": "check",
-          "title": "Unified package check",
-          "required": true,
-          "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, documentation, unknown.",
-          "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-swift\\generated\\server-openapi",
-          "command": "node",
-          "args": [
-            "./bin/publish-core.mjs",
-            "--language",
-            "swift",
-            "--project-dir",
-            ".",
-            "--action",
-            "check"
-          ],
-          "displayCommand": "node ./bin/publish-core.mjs --language swift --project-dir . --action check"
-        }
-      ]
+      "shouldRun": false,
+      "runPhase": "skip",
+      "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
+      "steps": []
     },
     "executionDecision": {
       "schemaVersion": 1,
-      "riskLevel": "high",
-      "nextAction": "verify",
+      "riskLevel": "low",
+      "nextAction": "skip",
       "requiresManualReview": false,
       "applyRequiresExpectedFingerprint": false,
-      "summary": "Changes have been applied. Run the required verification plan now.",
+      "summary": "No actionable changes were detected. No apply or verification step is required.",
       "reasons": [
-        "manual-review-required",
-        "unknown-impact",
-        "verification-required"
+        "no-actionable-changes"
       ]
     },
     "backedUpFiles": [],

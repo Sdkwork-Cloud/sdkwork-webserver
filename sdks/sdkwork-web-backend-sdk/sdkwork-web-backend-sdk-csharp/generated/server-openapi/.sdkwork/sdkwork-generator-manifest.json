@@ -16,7 +16,7 @@
     },
     {
       "path": "Api/Api.cs",
-      "sha256": "19a450f81d395828c38dd50bf29b754d14a49a08832166604423f007a8148016"
+      "sha256": "e0b80cc901c5d6d3ae4df5a2260a1d0eb293e96c6f84470170c39a77de39d08d"
     },
     {
       "path": "Api/ApiPaths.cs",
@@ -49,6 +49,10 @@
     {
       "path": "Api/CertificateDistributionApi.cs",
       "sha256": "dcf442987f6e33df9f69bcc34737faab895ed0d3ca8ac0c972addf7e7fc2d7af"
+    },
+    {
+      "path": "Api/DomainApi.cs",
+      "sha256": "c6db912086a74390b65bbd713e5d0acfb9d06f3a9489f9bb18bfc544d47fe68a"
     },
     {
       "path": "Api/NginxApi.cs",
@@ -108,7 +112,7 @@
     },
     {
       "path": "Models/ApplicationDomainResponse.cs",
-      "sha256": "6408c406268d29ea743736f16b0a3fafb922a51abafce6449948cb1b375c5b6e"
+      "sha256": "c4319673c4c19392aec02f098a28cd5ee1e61859f3ca08e515f9838b9cd9cc73"
     },
     {
       "path": "Models/ApplicationDomainVerifyResponse.cs",
@@ -212,7 +216,7 @@
     },
     {
       "path": "Models/CertificateResponse.cs",
-      "sha256": "00f4e64e5d704f4f8af8ee27e38b1bf6fb59398211985498a7554858e759753b"
+      "sha256": "d1321460d77617ea46ab0cd2cefaa6e605b6627a9c62a0356d6ad36830db10be"
     },
     {
       "path": "Models/CertificatesCreateResponse201.cs",
@@ -279,6 +283,10 @@
       "sha256": "e036dd5cc3d75be78f160ce583f2a0c711c101256e5007c9878dea2618476bdd"
     },
     {
+      "path": "Models/CreateManagedDomainRequest.cs",
+      "sha256": "13ac0910714a2ed87de541bfce992f721c558165e5f2d210cf3e8d7d3be90209"
+    },
+    {
       "path": "Models/CreateNginxConfigRequest.cs",
       "sha256": "dbd0b61cac2e6e621e04f78e781ac1f078c50b80ab589ab98fc03dd0e4f9890b"
     },
@@ -289,6 +297,22 @@
     {
       "path": "Models/CreateServerResponse.cs",
       "sha256": "a624e33d27a480e21a334e2bfbba8961b210bc6f1f4732cf1cf55f02fc2f838e"
+    },
+    {
+      "path": "Models/DomainsApplicationBindingUpdateResponse.cs",
+      "sha256": "0fa101902b23400317488c4b1793db2befa3a5d777f727e175ccb4f4551c898b"
+    },
+    {
+      "path": "Models/DomainsCreateResponse201.cs",
+      "sha256": "0ab19905983e30fc1c1679390f429a313e8a4540ce45bd1a5a6fac7d4b55b88f"
+    },
+    {
+      "path": "Models/DomainsListResponse.cs",
+      "sha256": "6733dff915d5ea4ed4bc12f63d9956993cf1a21d71a54a5a7bf1521549cbae8c"
+    },
+    {
+      "path": "Models/DomainsVerifyResponse.cs",
+      "sha256": "ec0593298bbf75152aaf104d7d24b8a4ae0812216f0c9204a2c46a3f1064f88b"
     },
     {
       "path": "Models/FieldError.cs",
@@ -407,12 +431,16 @@
       "sha256": "c15a880fae2c96a4b6a28fc973a19b980d476a04b2b22a13769d6f6cf3e5b0a8"
     },
     {
+      "path": "Models/UpdateDomainApplicationBindingRequest.cs",
+      "sha256": "a84982c9b448f05e30e2f9e43f454d6f704b8f7880131fdb155998eaddf1bd0c"
+    },
+    {
       "path": "Models/UpdateNginxConfigRequest.cs",
       "sha256": "55a2e065ee60932c92a2587cbac766aebf1ab480e3d2fa91acbd01bb39d6a9ad"
     },
     {
       "path": "README.md",
-      "sha256": "46d4988e161d4709f707a3cf40ca337ce26e550a5f5c4ab35f2a6587849937f1"
+      "sha256": "12e96508671118c2dd3f7653cb4a5fa52a44cfa70b819aaba52b29101f858085"
     },
     {
       "path": "sdkwork-sdk.json",
@@ -424,7 +452,7 @@
     },
     {
       "path": "SdkworkBackendClient.cs",
-      "sha256": "75bdf50ef9ff2b0a920e5600559db7b38584fc57d9ded908fe0de11dd5f98a31"
+      "sha256": "e162a081d26815ea944522a3218ecad4948f29f3255433d44c12f4ce84cbacf5"
     }
   ],
   "scaffoldFiles": [

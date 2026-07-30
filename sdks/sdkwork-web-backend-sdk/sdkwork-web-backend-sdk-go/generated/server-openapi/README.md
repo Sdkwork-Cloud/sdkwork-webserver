@@ -57,6 +57,7 @@ client.SetHeader("X-Custom-Header", "value")
 
 - `client.Application` - application API
 - `client.ApplicationDomain` - application_domain API
+- `client.Domain` - domain API
 - `client.ApplicationSourceVersion` - application_source_version API
 - `client.ApplicationDeployment` - application_deployment API
 - `client.Certificate` - certificate API
@@ -97,6 +98,21 @@ params := map[string]interface{}{
     "page_size": 2,
 }
 result, err := client.ApplicationDomain.ApplicationsDomainsList(applicationId, params)
+if err != nil {
+    panic(err)
+}
+fmt.Println(result)
+```
+
+### domain
+
+```go
+// List tenant custom domain assets
+params := map[string]interface{}{
+    "page": 1,
+    "page_size": 2,
+}
+result, err := client.Domain.DomainsList(params)
 if err != nil {
     panic(err)
 }

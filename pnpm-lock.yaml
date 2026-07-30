@@ -635,6 +635,9 @@ importers:
       '@sdkwork/webserver-pc-admin-diagnostics':
         specifier: workspace:*
         version: link:packages/sdkwork-webserver-pc-admin-diagnostics
+      '@sdkwork/webserver-pc-admin-domains':
+        specifier: workspace:*
+        version: link:packages/sdkwork-webserver-pc-admin-domains
       '@sdkwork/webserver-pc-admin-nginx':
         specifier: workspace:*
         version: link:packages/sdkwork-webserver-pc-admin-nginx
@@ -765,6 +768,15 @@ importers:
 
   apps/sdkwork-webserver-pc/packages/sdkwork-webserver-pc-admin-diagnostics:
     dependencies:
+      '@sdkwork/webserver-pc-commons':
+        specifier: workspace:*
+        version: link:../sdkwork-webserver-pc-commons
+
+  apps/sdkwork-webserver-pc/packages/sdkwork-webserver-pc-admin-domains:
+    dependencies:
+      '@sdkwork/webserver-pc-admin-core':
+        specifier: workspace:*
+        version: link:../sdkwork-webserver-pc-admin-core
       '@sdkwork/webserver-pc-commons':
         specifier: workspace:*
         version: link:../sdkwork-webserver-pc-commons

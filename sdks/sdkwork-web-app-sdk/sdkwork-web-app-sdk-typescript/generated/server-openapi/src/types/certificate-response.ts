@@ -2,6 +2,7 @@ export interface CertificateResponse {
   id: string;
   certName: string;
   domain?: string;
+  domainId?: string;
   certType?: number;
   issuer?: string;
   fingerprint?: string;

@@ -2,6 +2,7 @@ import 'package:sdkwork_common_flutter/sdkwork_common_flutter.dart';
 import 'src/http/client.dart';
 import 'src/api/application.dart';
 import 'src/api/application_domain.dart';
+import 'src/api/domain.dart';
 import 'src/api/application_source_version.dart';
 import 'src/api/application_deployment.dart';
 import 'src/api/certificate.dart';
@@ -16,6 +17,7 @@ class SdkworkBackendClient {
 
   late final ApplicationApi application;
   late final ApplicationDomainApi applicationDomain;
+  late final DomainApi domain;
   late final ApplicationSourceVersionApi applicationSourceVersion;
   late final ApplicationDeploymentApi applicationDeployment;
   late final CertificateApi certificate;
@@ -30,6 +32,7 @@ class SdkworkBackendClient {
   }) : _httpClient = HttpClient(config: config) {
     application = ApplicationApi(_httpClient);
     applicationDomain = ApplicationDomainApi(_httpClient);
+    domain = DomainApi(_httpClient);
     applicationSourceVersion = ApplicationSourceVersionApi(_httpClient);
     applicationDeployment = ApplicationDeploymentApi(_httpClient);
     certificate = CertificateApi(_httpClient);

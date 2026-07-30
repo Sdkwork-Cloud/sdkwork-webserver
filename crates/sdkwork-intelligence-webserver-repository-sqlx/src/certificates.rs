@@ -29,9 +29,11 @@ impl WebRepository {
             sqlx::query(
                 "SELECT COUNT(*) AS total
                  FROM web_certificate c
-                 INNER JOIN web_site s ON s.id = c.site_id
-                 WHERE c.tenant_id = $1 AND s.deleted_at IS NULL
-                   AND ($2 IS NULL OR (s.data_scope = 3 AND s.user_id = $2))
+                 LEFT JOIN web_site s ON s.id = c.site_id
+                 WHERE c.tenant_id = $1
+                   AND ($2 IS NULL OR (
+                        s.deleted_at IS NULL AND s.data_scope = 3 AND s.user_id = $2
+                   ))
                    AND ($3 IS NULL OR s.uuid = $3)",
             )
             .bind(tenant_id)
@@ -45,16 +47,19 @@ impl WebRepository {
             .map_err(|error| store_error("map web_certificate count", error))?;
 
         let rows = sqlx::query(
-            "SELECT c.uuid, c.cert_name, d.hostname AS domain, c.cert_type, c.issuer,
+            "SELECT c.uuid, c.cert_name, d.hostname AS domain, d.uuid AS domain_id,
+                    c.cert_type, c.issuer,
                     c.fingerprint, CAST(c.not_before AS TEXT) AS not_before,
                     CAST(c.not_after AS TEXT) AS not_after,
                     c.auto_renew, c.renewal_status, c.status,
                     CAST(c.created_at AS TEXT) AS created_at
              FROM web_certificate c
              LEFT JOIN web_domain d ON d.id = c.domain_id
-             INNER JOIN web_site s ON s.id = c.site_id
-             WHERE c.tenant_id = $1 AND s.deleted_at IS NULL
-               AND ($2 IS NULL OR (s.data_scope = 3 AND s.user_id = $2))
+             LEFT JOIN web_site s ON s.id = c.site_id
+             WHERE c.tenant_id = $1
+               AND ($2 IS NULL OR (
+                    s.deleted_at IS NULL AND s.data_scope = 3 AND s.user_id = $2
+               ))
                AND ($3 IS NULL OR s.uuid = $3)
              ORDER BY c.created_at DESC, c.id DESC LIMIT $4 OFFSET $5",
         )
@@ -311,9 +316,8 @@ impl WebRepository {
                     CAST(c.not_after AS TEXT) AS not_after, d.hostname
              FROM web_certificate c
              INNER JOIN web_domain d ON d.id = c.domain_id
-             INNER JOIN web_site s ON s.id = d.site_id
              WHERE c.tenant_id = $1 AND c.uuid = $2 AND c.status = 1
-               AND d.deleted_at IS NULL AND s.deleted_at IS NULL",
+               AND d.deleted_at IS NULL",
         )
         .bind(tenant_id)
         .bind(certificate_uuid)
@@ -522,7 +526,8 @@ impl WebRepository {
         certificate_uuid: &str,
     ) -> WebServiceResult<CertificateResponse> {
         let row = sqlx::query(
-            "SELECT c.uuid, c.cert_name, d.hostname AS domain, c.cert_type, c.issuer,
+            "SELECT c.uuid, c.cert_name, d.hostname AS domain, d.uuid AS domain_id,
+                    c.cert_type, c.issuer,
                     c.fingerprint, CAST(c.not_before AS TEXT) AS not_before,
                     CAST(c.not_after AS TEXT) AS not_after, c.auto_renew,
                     c.renewal_status, c.status, CAST(c.created_at AS TEXT) AS created_at
@@ -565,6 +570,7 @@ fn map_certificate_row(row: &EngineRow) -> Result<CertificateResponse, sqlx::Err
         id: row.try_get("uuid")?,
         cert_name: row.try_get("cert_name")?,
         domain: row.try_get("domain")?,
+        domain_id: row.try_get("domain_id")?,
         cert_type: row.try_get("cert_type")?,
         issuer: row.try_get("issuer")?,
         fingerprint: row.try_get("fingerprint")?,

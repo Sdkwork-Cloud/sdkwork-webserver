@@ -6,6 +6,17 @@ pub struct ApplicationDomainResponse {
 
     pub hostname: String,
 
+    #[serde(rename = "applicationId")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub application_id: Option<String>,
+
+    #[serde(rename = "applicationName")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub application_name: Option<String>,
+
+    #[serde(rename = "certificateCount")]
+    pub certificate_count: String,
+
     #[serde(rename = "isPrimary")]
     pub is_primary: bool,
 

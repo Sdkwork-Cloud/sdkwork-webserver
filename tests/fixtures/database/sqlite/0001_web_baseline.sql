@@ -50,7 +50,7 @@ CREATE TABLE web_domain (
     uuid            TEXT         NOT NULL,
     tenant_id       INTEGER      NOT NULL DEFAULT 0,
     organization_id INTEGER      NOT NULL DEFAULT 0,
-    site_id         INTEGER      NOT NULL,
+    site_id         INTEGER,
     hostname        TEXT         NOT NULL,
     is_primary      INTEGER      NOT NULL DEFAULT 0,
     is_verified     INTEGER      NOT NULL DEFAULT 0,
@@ -65,6 +65,7 @@ CREATE TABLE web_domain (
     version         INTEGER      NOT NULL DEFAULT 0,
     deleted_at      TEXT,
     PRIMARY KEY (id),
+    CONSTRAINT chk_web_domain_primary_binding CHECK (site_id IS NOT NULL OR is_primary = 0),
     CONSTRAINT fk_web_domain_site FOREIGN KEY (site_id) REFERENCES web_site(id)
 );
 

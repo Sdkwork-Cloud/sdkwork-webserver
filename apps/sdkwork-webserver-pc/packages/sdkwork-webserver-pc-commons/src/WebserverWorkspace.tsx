@@ -14,6 +14,7 @@ import {
   Image,
   ImagePlus,
   Images,
+  Link,
   LoaderCircle,
   LockKeyhole,
   Pause,
@@ -27,6 +28,7 @@ import {
   Settings2,
   Shield,
   Trash2,
+  Unlink,
   Upload,
   WandSparkles,
   X,
@@ -218,6 +220,16 @@ function ResourcePage({
     ) ?? [],
     [permissionScope, source],
   );
+  const applicationRowActions = useMemo(
+    () => isApplicationResource(entry.resource)
+      ? visibleActions.filter((candidate) => isApplicationRowAction(candidate))
+      : [],
+    [entry.resource, visibleActions],
+  );
+  const commandActions = useMemo(
+    () => visibleActions.filter((candidate) => !applicationRowActions.includes(candidate)),
+    [applicationRowActions, visibleActions],
+  );
 
   function persistScope(value: string): void {
     setScopeId(value);
@@ -354,7 +366,7 @@ function ResourcePage({
               ) : null}
             </div>
             <div className="actions">
-              {visibleActions.map((candidate) => (
+              {commandActions.map((candidate) => (
                 <button
                   className={candidate.dangerous
                     ? "danger-button"
@@ -482,11 +494,14 @@ function ResourcePage({
                     <span>{t("table.empty")}</span>
                   </div>
                 ) : (
-                  <table>
+                  <table className={applicationRowActions.length > 0 ? "resource-table has-row-actions" : "resource-table"}>
                     <thead>
                       <tr>
                         <th aria-label={t("table.select")} />
                         {columns.map((column) => <th key={column}>{fieldLabel(column, locale)}</th>)}
+                        {applicationRowActions.length > 0 ? (
+                          <th className="row-actions-column">{t("table.actions")}</th>
+                        ) : null}
                       </tr>
                     </thead>
                     <tbody>
@@ -507,6 +522,36 @@ function ResourcePage({
                           {columns.map((column) => (
                             <td key={column}>{displayValue(item[column], column, entry.resource, locale)}</td>
                           ))}
+                          {applicationRowActions.length > 0 ? (
+                            <td className="row-actions-cell">
+                              <div className="row-actions">
+                                {applicationRowActions.map((candidate) => {
+                                  const label = actionText(t, entry.resource, candidate);
+                                  const rowLabel = t("table.rowAction", {
+                                    action: label,
+                                    name: recordLabel(item, index),
+                                  });
+                                  return (
+                                    <button
+                                      aria-label={rowLabel}
+                                      className={`row-action-button${candidate.dangerous ? " row-action-button-danger" : ""}`}
+                                      disabled={busy || !actionAvailable(candidate, item, scopeId)}
+                                      key={candidate.id}
+                                      onClick={(event) => {
+                                        event.stopPropagation();
+                                        setSelected(item);
+                                        setAction(candidate);
+                                      }}
+                                      title={rowLabel}
+                                      type="button"
+                                    >
+                                      <ActionIcon action={candidate} />
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </td>
+                          ) : null}
                         </tr>
                       ))}
                     </tbody>
@@ -567,17 +612,32 @@ function ResourcePage({
 
 function ActionIcon({ action }: { action: WebserverResourceAction }) {
   const iconProps = { "aria-hidden": true, size: 15 } as const;
+  if (action.id === "update-source") return <Upload {...iconProps} />;
   if (action.id.includes("rollback")) return <RotateCcw {...iconProps} />;
   if (action.id.includes("delete")) return <Trash2 {...iconProps} />;
   if (action.id.includes("pause")) return <Pause {...iconProps} />;
   if (action.id.includes("activate")) return <Play {...iconProps} />;
   if (action.id.includes("verify")) return <BadgeCheck {...iconProps} />;
-  if (action.id.includes("deploy")) return <Rocket {...iconProps} />;
+  if (action.id === "bind") return <Link {...iconProps} />;
+  if (action.id === "unbind") return <Unlink {...iconProps} />;
+  if (action.id.includes("certificate")) return <Shield {...iconProps} />;
+  if (action.id.includes("deploy") || action.id.includes("publish")) return <Rocket {...iconProps} />;
   if (action.id.includes("reload") || action.id.includes("renew")) return <RefreshCw {...iconProps} />;
   if (action.id.includes("update")) return <Pencil {...iconProps} />;
   if (action.id.includes("create")) return <Plus {...iconProps} />;
   if (action.id.includes("diagnostic")) return <Activity {...iconProps} />;
   return <Settings2 {...iconProps} />;
+}
+
+function isApplicationResource(resource: WebserverResourceKey): boolean {
+  return resource === "applications" || resource === "sites";
+}
+
+function isApplicationRowAction(action: WebserverResourceAction): boolean {
+  return action.id === "update"
+    || action.id === "update-source"
+    || action.id === "publish"
+    || action.id === "delete";
 }
 
 function ActionDialog({
@@ -631,6 +691,9 @@ function ActionDialog({
   const confirmationRequired = Boolean(action.dangerous || action.requiresConfirmation);
   const sourceInputRequired = Boolean(action.sourceInput);
   const applicationCreationWizard = action.applicationSubmission === "create";
+  const applicationEditDrawer = action.applicationSubmission === "update";
+  const sourceUpdateAction = action.id === "update-source";
+  const applicationDrawer = applicationCreationWizard || applicationEditDrawer;
   const [applicationStep, setApplicationStep] = useState<ApplicationWizardStep>(0);
   const [furthestApplicationStep, setFurthestApplicationStep] = useState<ApplicationWizardStep>(0);
   const applicationIdentityFields = ["name", "description", "applicationType", "siteType"] as const;
@@ -665,17 +728,24 @@ function ActionDialog({
   const sourceInputError = (): WebserverMessageKey | undefined => {
     if (!sourceInputRequired) return undefined;
     if (sourceInputMode === "git") {
-      if (!sourceRepository.trim()) return "dialog.applicationGitRepositoryRequired";
+      if (!sourceRepository.trim()) {
+        return applicationCreationWizard
+          ? "dialog.applicationGitRepositoryRequired"
+          : "dialog.gitRepositoryRequired";
+      }
       if (!isValidApplicationGitRepositoryUrl(sourceRepository)) {
         return "dialog.applicationGitRepositoryInvalid";
       }
       return undefined;
     }
-    return files.length === 0 ? "dialog.applicationSourceRequired" : undefined;
+    if (files.length > 0) return undefined;
+    return applicationCreationWizard
+      ? "dialog.applicationSourceRequired"
+      : "dialog.sourceRequired";
   };
 
   const renderFields = (fields?: readonly string[], className?: string) => {
-    const names = fields ?? Object.keys(body);
+    const names = (fields ?? Object.keys(body)).filter((name) => applicationCreationWizard || name in body);
     return (
       <div className={`form-grid${className ? ` ${className}` : ""}`}>
         {names.map((name) => (
@@ -683,8 +753,13 @@ function ActionDialog({
             key={name}
             locale={locale}
             name={name}
-            onChange={(next) => setBody((current) => ({ ...current, [name]: next }))}
+            onChange={(next, relatedValues) => setBody((current) => ({
+              ...current,
+              [name]: next,
+              ...relatedValues,
+            }))}
             options={fieldOptions[name]}
+            readOnly={action.readOnlyFields?.includes(name)}
             required={applicationCreationWizard && applicationRequiredFields.includes(name)}
             value={body[name]}
           />
@@ -773,6 +848,12 @@ function ActionDialog({
   }, [applicationCreationWizard, applicationStep]);
 
   useEffect(() => {
+    if (!applicationDrawer) return undefined;
+    document.body.classList.add("application-drawer-open");
+    return () => document.body.classList.remove("application-drawer-open");
+  }, [applicationDrawer]);
+
+  useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key !== "Escape" || busy) return;
       event.preventDefault();
@@ -798,7 +879,9 @@ function ActionDialog({
           const next = { ...current };
           for (const [name, options] of Object.entries(mergedOptions)) {
             if ((next[name] === "" || next[name] === undefined) && options.length > 0) {
-              next[name] = optionValue(options[0]);
+              const firstOption = options[0];
+              next[name] = optionValue(firstOption);
+              Object.assign(next, optionRelatedValues(firstOption));
             }
           }
           return next;
@@ -810,6 +893,25 @@ function ActionDialog({
       .finally(() => {
         if (active) setOptionsBusy(false);
       });
+    return () => {
+      active = false;
+    };
+  }, [action, scopeId, selected]);
+
+  useEffect(() => {
+    if (!action.loadSourceInputDefaults) return undefined;
+    let active = true;
+    void action.loadSourceInputDefaults({
+      body: initialActionBody(action, selected),
+      scopeId,
+      selectedItem: selected,
+    }).then((defaults) => {
+      if (!active) return;
+      if (defaults.mode) setSourceInputMode(defaults.mode);
+      if (defaults.repository) setSourceRepository(defaults.repository);
+    }).catch(() => {
+      // Loading a previous Git source is an optional convenience; manual source selection remains available.
+    });
     return () => {
       active = false;
     };
@@ -865,7 +967,7 @@ function ActionDialog({
 
   return (
     <div
-      className="dialog-backdrop"
+      className={`dialog-backdrop${applicationDrawer ? " application-creation-drawer-backdrop" : ""}`}
       onMouseDown={(event) => {
         if (!busy && event.currentTarget === event.target) onClose();
       }}
@@ -874,7 +976,14 @@ function ActionDialog({
       <form
         aria-labelledby="action-title"
         aria-modal="true"
-        className={`dialog${action.applicationSubmission ? " application-submission-dialog" : ""}${applicationCreationWizard ? " application-creation-dialog" : ""}`}
+        className={`dialog${action.applicationSubmission ? " application-submission-dialog" : ""}${applicationDrawer ? " application-creation-dialog application-creation-drawer" : ""}${sourceUpdateAction ? " source-update-dialog" : ""}`}
+        data-testid={applicationCreationWizard
+          ? "application-creation-drawer"
+          : applicationEditDrawer
+            ? "application-edit-drawer"
+            : sourceUpdateAction
+              ? "application-source-update-dialog"
+              : undefined}
         onKeyDown={trapDialogFocus}
         onSubmit={(event) => void submit(event)}
         ref={dialogRef}
@@ -1057,19 +1166,67 @@ function ActionDialog({
             </div>
           </div>
         ) : null}
-        {!result && !applicationCreationWizard ? <div className="form-grid">
+        {!result && applicationEditDrawer ? (
+          <div className="application-edit-drawer-content">
+            <div className="application-edit-drawer-scroll">
+              <section className="application-step-pane application-basics-step" aria-labelledby="application-edit-basics-title">
+                <div className="application-step-heading">
+                  <div>
+                    <h3 id="application-edit-basics-title">{t("dialog.applicationBasics")}</h3>
+                  </div>
+                  <AppWindow aria-hidden="true" size={19} />
+                </div>
+                {renderFields(applicationIdentityFields, "application-identity-fields")}
+              </section>
+              <section className="application-step-pane application-media-step" aria-labelledby="application-edit-media-title">
+                <div className="application-step-heading">
+                  <div>
+                    <h3 id="application-edit-media-title">{t("dialog.applicationMedia")}</h3>
+                  </div>
+                  <Images aria-hidden="true" size={19} />
+                </div>
+                <ApplicationSubmissionFields
+                  compact
+                  disabled={busy}
+                  error={mediaError}
+                  existing={existingStoreListing}
+                  locale={locale}
+                  onChange={setApplicationSubmission}
+                  onError={setMediaError}
+                  submission={applicationSubmission}
+                />
+                <div className="application-listing-subsection">
+                  <div className="application-step-heading application-subsection-heading">
+                    <h4>{t("dialog.applicationListing")}</h4>
+                    <Pencil aria-hidden="true" size={16} />
+                  </div>
+                  {renderFields(applicationListingFields, "application-listing-fields")}
+                </div>
+              </section>
+            </div>
+            <div className="application-wizard-status" aria-live="polite">
+              {error ? <div className="error-banner" role="alert">{error}</div> : null}
+            </div>
+          </div>
+        ) : null}
+        {!result && !applicationDrawer ? <div className="form-grid">
           {Object.entries(body).map(([name, value]) => (
             <Field
               key={name}
               locale={locale}
               name={name}
-              onChange={(next) => setBody((current) => ({ ...current, [name]: next }))}
+              onChange={(next, relatedValues) => setBody((current) => ({
+                ...current,
+                [name]: next,
+                ...relatedValues,
+              }))}
               options={fieldOptions[name]}
+              readOnly={action.readOnlyFields?.includes(name)}
               value={value}
             />
           ))}
         </div> : null}
-        {!result && !applicationCreationWizard && action.applicationSubmission ? (
+        {!result && !applicationDrawer && action.applicationSubmission ? (
           <ApplicationSubmissionFields
             disabled={busy}
             error={mediaError}
@@ -1091,7 +1248,7 @@ function ActionDialog({
             />
           </label>
         ) : null}
-        {!result && !applicationCreationWizard && action.sourceInput ? (
+        {!result && !applicationDrawer && action.sourceInput ? (
           <ApplicationSourcePicker
             busy={busy}
             files={files}
@@ -1103,7 +1260,7 @@ function ActionDialog({
             repository={sourceRepository}
           />
         ) : null}
-        {!result && !applicationCreationWizard && busy && (action.requiresFile || action.sourceInput) ? (
+        {!result && !applicationDrawer && busy && (action.requiresFile || action.sourceInput) ? (
           <div className="upload-progress" role="status">
             <div>
               <span>{t("dialog.uploadProgress")}</span>
@@ -1122,7 +1279,7 @@ function ActionDialog({
             {t("dialog.confirmRisk")}
           </label>
         ) : null}
-        {!applicationCreationWizard && error ? <div className="error-banner" role="alert">{error}</div> : null}
+        {!applicationDrawer && error ? <div className="error-banner" role="alert">{error}</div> : null}
         {result ? (
           <footer>
             <button className="command-button" onClick={onClose} type="button">{t("dialog.close")}</button>
@@ -1169,6 +1326,21 @@ function ActionDialog({
               )}
             </div>
           </footer>
+        ) : applicationEditDrawer ? (
+          <footer className="application-edit-drawer-footer">
+            <button className="secondary-button" disabled={busy} onClick={onClose} type="button">{t("dialog.cancel")}</button>
+            <button
+              className="command-button"
+              disabled={busy
+                || optionsBusy
+                || !applicationSubmissionReady(applicationSubmission, mediaError)
+                || hasMissingRequiredFields(body, action.requiredFields)
+                || hasUnavailableOptions(body, fieldOptions)}
+              type="submit"
+            >
+              {busy ? t("dialog.submitting") : t("dialog.confirm")}
+            </button>
+          </footer>
         ) : <footer>
           <button className="secondary-button" disabled={busy} onClick={onClose} type="button">{t("dialog.cancel")}</button>
           <button
@@ -1183,7 +1355,13 @@ function ActionDialog({
               || hasUnavailableOptions(body, fieldOptions)}
             type="submit"
           >
-            {busy ? t("dialog.submitting") : t("dialog.confirm")}
+            {busy ? t("dialog.submitting") : sourceUpdateAction ? (
+              sourceInputMode === "git" ? (
+                <><RefreshCw aria-hidden="true" size={16} />{t("dialog.refreshGitRepository")}</>
+              ) : (
+                <><Upload aria-hidden="true" size={16} />{t("dialog.uploadNewCode")}</>
+              )
+            ) : t("dialog.confirm")}
           </button>
         </footer>}
       </form>
@@ -2033,20 +2211,22 @@ function Field({
   name,
   onChange,
   options,
+  readOnly = false,
   required = false,
   value,
 }: {
   locale: WebserverLocale;
   name: string;
-  onChange(value: unknown): void;
+  onChange(value: unknown, relatedValues?: Readonly<Record<string, number | string>>): void;
   options?: readonly WebserverResourceFieldOptionValue[];
+  readOnly?: boolean;
   required?: boolean;
   value: unknown;
 }) {
   if (typeof value === "boolean") {
     return (
       <label className="checkbox-field" data-field={name}>
-        <input aria-label={fieldLabel(name, locale)} checked={value} onChange={(event) => onChange(event.target.checked)} type="checkbox" />
+        <input aria-label={fieldLabel(name, locale)} checked={value} disabled={readOnly} onChange={(event) => onChange(event.target.checked)} type="checkbox" />
         <span>{fieldLabel(name, locale)}</span>
       </label>
     );
@@ -2061,11 +2241,12 @@ function Field({
         <select
           aria-label={fieldLabel(name, locale)}
           aria-required={required}
-          disabled={options.length === 0}
-          onChange={(event) => onChange(
-            optionValue(options.find((option) => String(optionValue(option)) === event.target.value)
-              ?? event.target.value),
-          )}
+          onChange={(event) => {
+            const selectedOption = options.find((option) => String(optionValue(option)) === event.target.value)
+              ?? event.target.value;
+            onChange(optionValue(selectedOption), optionRelatedValues(selectedOption));
+          }}
+          disabled={readOnly || options.length === 0}
           value={String(value ?? "")}
         >
           {options.length === 0 ? <option value="">-</option> : null}
@@ -2085,7 +2266,7 @@ function Field({
           {fieldLabel(name, locale)}
           {required ? <small aria-hidden="true" className="field-required" data-label={locale === "zh-CN" ? "必填" : "Required"} /> : null}
         </span>
-        <input aria-label={fieldLabel(name, locale)} aria-required={required} onChange={(event) => onChange(Number(event.target.value))} type="number" value={value} />
+        <input aria-label={fieldLabel(name, locale)} aria-required={required} onChange={(event) => onChange(Number(event.target.value))} readOnly={readOnly} type="number" value={value} />
       </label>
     );
   }
@@ -2112,6 +2293,7 @@ function Field({
           aria-label={fieldLabel(name, locale)}
           aria-required={required}
           onChange={(event) => updateText(event.target.value)}
+          readOnly={readOnly}
           rows={name === "description" ? 2 : 4}
           value={text}
         />
@@ -2121,6 +2303,7 @@ function Field({
           aria-required={required}
           autoComplete="off"
           onChange={(event) => updateText(event.target.value)}
+          readOnly={readOnly}
           type={name.toLowerCase().endsWith("url") ? "url" : sensitive(name) ? "password" : "text"}
           value={text}
         />
@@ -2202,6 +2385,13 @@ function recordKey(item: Record<string, unknown>, index: number): string {
   );
 }
 
+function recordLabel(item: Record<string, unknown>, index: number): string {
+  const value = item.name ?? item.slug ?? item.id ?? item.siteId;
+  return typeof value === "string" || typeof value === "number"
+    ? String(value)
+    : String(index + 1);
+}
+
 function displayValue(value: unknown, column: string, resource: WebserverResourceKey, locale: WebserverLocale): ReactNode {
   if (value === null || value === undefined) return "-";
   if ((resource === "sites" || resource === "applications") && column === "status") {
@@ -2264,6 +2454,8 @@ function fieldLabel(value: string, locale: WebserverLocale): string {
     "en-US": {
       action: "Action",
       agentToken: "Node credential",
+      applicationId: "Application",
+      applicationName: "Application",
       applicationType: "Application type",
       appConfigPath: "Application manifest path",
       artifactDriveUri: "Package",
@@ -2272,6 +2464,7 @@ function fieldLabel(value: string, locale: WebserverLocale): string {
       autoRenew: "Automatic renewal",
       certName: "Certificate name",
       certType: "Certificate type",
+      certificateCount: "Certificates",
       checkInterval: "Check interval (seconds)",
       checkType: "Check type",
       checkUrl: "Check URL",
@@ -2347,6 +2540,8 @@ function fieldLabel(value: string, locale: WebserverLocale): string {
     "zh-CN": {
       action: "操作动作",
       agentToken: "节点凭据",
+      applicationId: "应用",
+      applicationName: "应用",
       applicationType: "应用类型",
       appConfigPath: "应用清单路径",
       artifactDriveUri: "发布包",
@@ -2355,6 +2550,7 @@ function fieldLabel(value: string, locale: WebserverLocale): string {
       autoRenew: "自动续期",
       certName: "证书名称",
       certType: "证书类型",
+      certificateCount: "证书数量",
       checkInterval: "检查间隔（秒）",
       checkType: "检查方式",
       checkUrl: "检查地址",
@@ -2460,6 +2656,12 @@ function actionAvailable(
 
 function optionValue(option: WebserverResourceFieldOptionValue): number | string {
   return typeof option === "object" ? option.value : option;
+}
+
+function optionRelatedValues(
+  option: WebserverResourceFieldOptionValue,
+): Readonly<Record<string, number | string>> | undefined {
+  return typeof option === "object" ? option.relatedValues : undefined;
 }
 
 function optionLabel(option: WebserverResourceFieldOptionValue, name: string, locale: WebserverLocale): string {
@@ -2603,6 +2805,7 @@ function resourceColumns(
     applications: ["id", "name", "applicationType", "siteType", "status", "updatedAt", "createdAt"],
     domains: ["id", "hostname", "isPrimary", "isVerified", "sslEnabled", "sslProvider", "status", "createdAt"],
     "application-domains": ["id", "hostname", "isPrimary", "isVerified", "sslEnabled", "sslProvider", "status", "createdAt"],
+    "managed-domains": ["hostname", "applicationName", "isVerified", "certificateCount", "isPrimary", "sslEnabled", "status", "createdAt"],
     certificates: ["id", "domain", "certName", "issuer", "status", "renewalStatus", "notAfter", "autoRenew"],
     "managed-certificates": ["id", "domain", "certName", "issuer", "status", "renewalStatus", "notAfter", "autoRenew"],
     "certificate-distribution": ["serverName", "host", "desiredSyncVersion", "appliedSyncVersion", "status", "lastHeartbeatAt"],

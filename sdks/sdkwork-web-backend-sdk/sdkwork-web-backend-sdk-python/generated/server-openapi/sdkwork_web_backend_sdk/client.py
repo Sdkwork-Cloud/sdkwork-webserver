@@ -1,6 +1,7 @@
 from .http_client import HttpClient, SdkConfig
 from .api.application import ApplicationApi
 from .api.application_domain import ApplicationDomainApi
+from .api.domain import DomainApi
 from .api.application_source_version import ApplicationSourceVersionApi
 from .api.application_deployment import ApplicationDeploymentApi
 from .api.certificate import CertificateApi
@@ -18,6 +19,7 @@ class SdkworkBackendClient:
         self._client = HttpClient(config)
         self.application: ApplicationApi
         self.application_domain: ApplicationDomainApi
+        self.domain: DomainApi
         self.application_source_version: ApplicationSourceVersionApi
         self.application_deployment: ApplicationDeploymentApi
         self.certificate: CertificateApi
@@ -30,6 +32,7 @@ class SdkworkBackendClient:
         # Initialize API modules
         self.application = ApplicationApi(self._client)
         self.application_domain = ApplicationDomainApi(self._client)
+        self.domain = DomainApi(self._client)
         self.application_source_version = ApplicationSourceVersionApi(self._client)
         self.application_deployment = ApplicationDeploymentApi(self._client)
         self.certificate = CertificateApi(self._client)

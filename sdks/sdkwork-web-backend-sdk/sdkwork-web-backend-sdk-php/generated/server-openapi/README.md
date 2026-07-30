@@ -52,6 +52,7 @@ $client->setHeader('X-Custom-Header', 'value');
 
 - `$client->application` - application API
 - `$client->applicationDomain` - application_domain API
+- `$client->domain` - domain API
 - `$client->applicationSourceVersion` - application_source_version API
 - `$client->applicationDeployment` - application_deployment API
 - `$client->certificate` - certificate API
@@ -83,6 +84,17 @@ var_dump($result);
 $applicationId = '1';
 $params = ['page' => 1, 'page_size' => 2];
 $result = $client->applicationDomain->applicationsDomainsList($applicationId, $params);
+var_dump($result);
+```
+
+### domain
+
+```php
+<?php
+
+// List tenant custom domain assets
+$params = ['page' => 1, 'page_size' => 2];
+$result = $client->domain->domainsList($params);
 var_dump($result);
 ```
 

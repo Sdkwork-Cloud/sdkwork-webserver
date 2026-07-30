@@ -10,146 +10,37 @@
   },
   "status": "ok",
   "mode": "apply",
-  "hasChanges": true,
+  "hasChanges": false,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "2e2827868788e8fdc7aa1c12bfa478b987db143ccac7f0fc8f65819613364ae7",
+  "changeFingerprint": "72bb5e59b0d49dbd384e4a78604bef3b6cc1d7a9e23c272fa2b486f3d175e618",
   "changeImpact": {
     "schemaVersion": 1,
-    "areas": [
-      "api-surface",
-      "models",
-      "documentation"
-    ],
-    "details": [
-      {
-        "area": "api-surface",
-        "paths": [
-          "src/api/application-source-version.ts",
-          "src/api/index.ts",
-          "src/sdk.ts"
-        ]
-      },
-      {
-        "area": "models",
-        "paths": [
-          "src/types/application-deployment-response.ts",
-          "src/types/application-source-version-config-snapshot.ts",
-          "src/types/application-source-version-response.ts",
-          "src/types/applications-source-versions-create-response201.ts",
-          "src/types/applications-source-versions-import-git-response201.ts",
-          "src/types/applications-source-versions-list-response.ts",
-          "src/types/applications-source-versions-retrieve-response.ts",
-          "src/types/create-application-deployment-request.ts",
-          "src/types/create-application-source-version-request.ts",
-          "src/types/import-application-git-source-version-request.ts",
-          "src/types/index.ts"
-        ]
-      },
-      {
-        "area": "documentation",
-        "paths": [
-          "README.md"
-        ]
-      }
-    ],
-    "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, models, documentation. Verification is required."
+    "areas": [],
+    "details": [],
+    "requiresVerification": false,
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "medium",
-    "nextAction": "verify",
+    "riskLevel": "low",
+    "nextAction": "skip",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
-    "summary": "Changes have been applied. Run the required verification plan now.",
+    "summary": "No actionable changes were detected. No apply or verification step is required.",
     "reasons": [
-      "verification-required"
+      "no-actionable-changes"
     ]
   },
   "executionHandoff": {
     "schemaVersion": 1,
-    "summary": "Run the required verification commands now.",
-    "steps": [
-      {
-        "id": "verify-check",
-        "title": "Unified package check",
-        "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, documentation.",
-        "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-typescript\\generated\\server-openapi",
-        "command": "node",
-        "args": [
-          "./bin/publish-core.mjs",
-          "--language",
-          "typescript",
-          "--project-dir",
-          ".",
-          "--action",
-          "check"
-        ],
-        "displayCommand": "node ./bin/publish-core.mjs --language typescript --project-dir . --action check"
-      },
-      {
-        "id": "verify-build",
-        "title": "Unified package build",
-        "required": true,
-        "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: api-surface, models, documentation.",
-        "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-typescript\\generated\\server-openapi",
-        "command": "node",
-        "args": [
-          "./bin/publish-core.mjs",
-          "--language",
-          "typescript",
-          "--project-dir",
-          ".",
-          "--action",
-          "build"
-        ],
-        "displayCommand": "node ./bin/publish-core.mjs --language typescript --project-dir . --action build"
-      }
-    ]
+    "summary": "No further commands are required.",
+    "steps": []
   },
   "verificationPlan": {
-    "shouldRun": true,
-    "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, models, documentation. Verification is required. Run the required verification commands now against the generated SDK output.",
-    "steps": [
-      {
-        "id": "check",
-        "title": "Unified package check",
-        "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, documentation.",
-        "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-typescript\\generated\\server-openapi",
-        "command": "node",
-        "args": [
-          "./bin/publish-core.mjs",
-          "--language",
-          "typescript",
-          "--project-dir",
-          ".",
-          "--action",
-          "check"
-        ],
-        "displayCommand": "node ./bin/publish-core.mjs --language typescript --project-dir . --action check"
-      },
-      {
-        "id": "build",
-        "title": "Unified package build",
-        "required": true,
-        "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: api-surface, models, documentation.",
-        "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-typescript\\generated\\server-openapi",
-        "command": "node",
-        "args": [
-          "./bin/publish-core.mjs",
-          "--language",
-          "typescript",
-          "--project-dir",
-          ".",
-          "--action",
-          "build"
-        ],
-        "displayCommand": "node ./bin/publish-core.mjs --language typescript --project-dir . --action build"
-      }
-    ]
+    "shouldRun": false,
+    "runPhase": "skip",
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
+    "steps": []
   },
   "sdk": {
     "name": "sdkwork-web-backend-sdk",
@@ -165,41 +56,24 @@
     "localVersions": []
   },
   "stats": {
-    "totalFiles": 116,
-    "models": 83,
-    "apis": 10,
-    "types": 85
+    "totalFiles": 123,
+    "models": 89,
+    "apis": 11,
+    "types": 91
   },
   "warnings": [],
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 15,
+    "writtenFiles": 0,
     "skippedScaffoldFiles": 2,
-    "skippedUnchangedGeneratedFiles": 99,
+    "skippedUnchangedGeneratedFiles": 121,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "2e2827868788e8fdc7aa1c12bfa478b987db143ccac7f0fc8f65819613364ae7",
+    "changeFingerprint": "72bb5e59b0d49dbd384e4a78604bef3b6cc1d7a9e23c272fa2b486f3d175e618",
     "changes": {
-      "createdGeneratedFiles": [
-        "src/api/application-source-version.ts",
-        "src/types/application-source-version-config-snapshot.ts",
-        "src/types/application-source-version-response.ts",
-        "src/types/applications-source-versions-create-response201.ts",
-        "src/types/applications-source-versions-import-git-response201.ts",
-        "src/types/applications-source-versions-list-response.ts",
-        "src/types/applications-source-versions-retrieve-response.ts",
-        "src/types/create-application-source-version-request.ts",
-        "src/types/import-application-git-source-version-request.ts"
-      ],
-      "updatedGeneratedFiles": [
-        "README.md",
-        "src/api/index.ts",
-        "src/sdk.ts",
-        "src/types/application-deployment-response.ts",
-        "src/types/create-application-deployment-request.ts",
-        "src/types/index.ts"
-      ],
+      "createdGeneratedFiles": [],
+      "updatedGeneratedFiles": [],
       "unchangedGeneratedFiles": [
         "bin/publish-core.mjs",
         "bin/publish.ps1",
@@ -209,15 +83,19 @@
         "CHANGELOG.md",
         "LICENSE",
         "package.json",
+        "README.md",
         "sdkwork-sdk.json",
         "src/api/agent.ts",
         "src/api/application-deployment.ts",
         "src/api/application-domain.ts",
+        "src/api/application-source-version.ts",
         "src/api/application.ts",
         "src/api/audit.ts",
         "src/api/base.ts",
         "src/api/certificate-distribution.ts",
         "src/api/certificate.ts",
+        "src/api/domain.ts",
+        "src/api/index.ts",
         "src/api/nginx.ts",
         "src/api/paths.ts",
         "src/api/server.ts",
@@ -225,14 +103,18 @@
         "src/http/client.ts",
         "src/http/index.ts",
         "src/index.ts",
+        "src/sdk.ts",
         "src/types/agent-certificate-bundle.ts",
         "src/types/agent-heartbeat-request.ts",
         "src/types/agent-heartbeat-response.ts",
         "src/types/agent-nginx-config-bundle.ts",
         "src/types/agent-sync-response.ts",
+        "src/types/application-deployment-response.ts",
         "src/types/application-domain-response.ts",
         "src/types/application-domain-verify-response.ts",
         "src/types/application-response.ts",
+        "src/types/application-source-version-config-snapshot.ts",
+        "src/types/application-source-version-response.ts",
         "src/types/application-store-listing.ts",
         "src/types/applications-activate-response.ts",
         "src/types/applications-create-response201.ts",
@@ -245,6 +127,10 @@
         "src/types/applications-list-response.ts",
         "src/types/applications-pause-response.ts",
         "src/types/applications-retrieve-response.ts",
+        "src/types/applications-source-versions-create-response201.ts",
+        "src/types/applications-source-versions-import-git-response201.ts",
+        "src/types/applications-source-versions-list-response.ts",
+        "src/types/applications-source-versions-retrieve-response.ts",
         "src/types/applications-update-response.ts",
         "src/types/audit-log-page.ts",
         "src/types/audit-log-response.ts",
@@ -263,14 +149,23 @@
         "src/types/configs-retrieve-response.ts",
         "src/types/configs-update-response.ts",
         "src/types/configs-validate-response.ts",
+        "src/types/create-application-deployment-request.ts",
         "src/types/create-application-domain-request.ts",
         "src/types/create-application-request.ts",
+        "src/types/create-application-source-version-request.ts",
         "src/types/create-certificate-request.ts",
+        "src/types/create-managed-domain-request.ts",
         "src/types/create-nginx-config-request.ts",
         "src/types/create-server-request.ts",
         "src/types/create-server-response.ts",
+        "src/types/domains-application-binding-update-response.ts",
+        "src/types/domains-create-response201.ts",
+        "src/types/domains-list-response.ts",
+        "src/types/domains-verify-response.ts",
         "src/types/field-error.ts",
         "src/types/heartbeat-response.ts",
+        "src/types/import-application-git-source-version-request.ts",
+        "src/types/index.ts",
         "src/types/media-checksum.ts",
         "src/types/media-resource.ts",
         "src/types/nginx-config-page.ts",
@@ -298,6 +193,7 @@
         "src/types/status-retrieve-response.ts",
         "src/types/update-application-request.ts",
         "src/types/update-certificate-request.ts",
+        "src/types/update-domain-application-binding-request.ts",
         "src/types/update-nginx-config-request.ts",
         "tsconfig.json"
       ],
@@ -311,98 +207,26 @@
     },
     "impact": {
       "schemaVersion": 1,
-      "areas": [
-        "api-surface",
-        "models",
-        "documentation"
-      ],
-      "details": [
-        {
-          "area": "api-surface",
-          "paths": [
-            "src/api/application-source-version.ts",
-            "src/api/index.ts",
-            "src/sdk.ts"
-          ]
-        },
-        {
-          "area": "models",
-          "paths": [
-            "src/types/application-deployment-response.ts",
-            "src/types/application-source-version-config-snapshot.ts",
-            "src/types/application-source-version-response.ts",
-            "src/types/applications-source-versions-create-response201.ts",
-            "src/types/applications-source-versions-import-git-response201.ts",
-            "src/types/applications-source-versions-list-response.ts",
-            "src/types/applications-source-versions-retrieve-response.ts",
-            "src/types/create-application-deployment-request.ts",
-            "src/types/create-application-source-version-request.ts",
-            "src/types/import-application-git-source-version-request.ts",
-            "src/types/index.ts"
-          ]
-        },
-        {
-          "area": "documentation",
-          "paths": [
-            "README.md"
-          ]
-        }
-      ],
-      "requiresVerification": true,
-      "summary": "Detected impact areas: api-surface, models, documentation. Verification is required."
+      "areas": [],
+      "details": [],
+      "requiresVerification": false,
+      "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
     },
     "verificationPlan": {
-      "shouldRun": true,
-      "runPhase": "now",
-      "summary": "Detected impact areas: api-surface, models, documentation. Verification is required. Run the required verification commands now against the generated SDK output.",
-      "steps": [
-        {
-          "id": "check",
-          "title": "Unified package check",
-          "required": true,
-          "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, documentation.",
-          "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-typescript\\generated\\server-openapi",
-          "command": "node",
-          "args": [
-            "./bin/publish-core.mjs",
-            "--language",
-            "typescript",
-            "--project-dir",
-            ".",
-            "--action",
-            "check"
-          ],
-          "displayCommand": "node ./bin/publish-core.mjs --language typescript --project-dir . --action check"
-        },
-        {
-          "id": "build",
-          "title": "Unified package build",
-          "required": true,
-          "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: api-surface, models, documentation.",
-          "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-typescript\\generated\\server-openapi",
-          "command": "node",
-          "args": [
-            "./bin/publish-core.mjs",
-            "--language",
-            "typescript",
-            "--project-dir",
-            ".",
-            "--action",
-            "build"
-          ],
-          "displayCommand": "node ./bin/publish-core.mjs --language typescript --project-dir . --action build"
-        }
-      ]
+      "shouldRun": false,
+      "runPhase": "skip",
+      "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
+      "steps": []
     },
     "executionDecision": {
       "schemaVersion": 1,
-      "riskLevel": "medium",
-      "nextAction": "verify",
+      "riskLevel": "low",
+      "nextAction": "skip",
       "requiresManualReview": false,
       "applyRequiresExpectedFingerprint": false,
-      "summary": "Changes have been applied. Run the required verification plan now.",
+      "summary": "No actionable changes were detected. No apply or verification step is required.",
       "reasons": [
-        "verification-required"
+        "no-actionable-changes"
       ]
     },
     "backedUpFiles": [],

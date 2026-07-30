@@ -6,10 +6,10 @@ use axum::{
 };
 use sdkwork_webserver_contract::{
     CreateCertificateRequest, CreateDeploymentRequest, CreateDomainRequest,
-    CreateNginxConfigRequest, CreateServerRequest, CreateSiteRequest, CreateSourceVersionRequest,
-    ImportGitSourceVersionRequest, ListNginxConfigsQuery, ListSitesQuery,
-    UpdateCertificateRequest, UpdateNginxConfigRequest, UpdateSiteRequest, WebBackendApi,
-    WebBackendRequestContext,
+    CreateManagedDomainRequest, CreateNginxConfigRequest, CreateServerRequest, CreateSiteRequest,
+    CreateSourceVersionRequest, ImportGitSourceVersionRequest, ListNginxConfigsQuery,
+    ListSitesQuery, UpdateCertificateRequest, UpdateDomainApplicationBindingRequest,
+    UpdateNginxConfigRequest, UpdateSiteRequest, WebBackendApi, WebBackendRequestContext,
 };
 use serde::Deserialize;
 use std::sync::Arc;
@@ -58,6 +58,17 @@ pub fn build_router_with_shared_backend_api(api: Arc<dyn WebBackendApi>) -> Rout
         .route(
             paths::APPLICATION_DOMAIN_VERIFY,
             post(verify_application_domain),
+        )
+        .route(
+            paths::DOMAINS,
+            get(list_managed_domains).post(create_managed_domain),
+        )
+        .route(paths::DOMAIN, axum::routing::delete(delete_managed_domain))
+        .route(paths::DOMAIN_VERIFY, post(verify_managed_domain))
+        .route(
+            paths::DOMAIN_APPLICATION_BINDING,
+            axum::routing::put(update_domain_application_binding)
+                .delete(delete_domain_application_binding),
         )
         .route(
             paths::APPLICATION_SOURCE_VERSIONS,
@@ -283,6 +294,78 @@ async fn delete_application_domain(
     )
 }
 
+async fn list_managed_domains(
+    State(state): State<BackendState>,
+    context: Option<Extension<WebBackendRequestContext>>,
+    Query(query): Query<PageQuery>,
+) -> Result<Response, WebApiError> {
+    let context = require_backend_context(context)?;
+    ok_domain_page(
+        state
+            .api
+            .list_managed_domains(&context, query.page, query.page_size)
+            .await,
+        query.page,
+        query.page_size,
+    )
+}
+
+async fn create_managed_domain(
+    State(state): State<BackendState>,
+    context: Option<Extension<WebBackendRequestContext>>,
+    Json(request): Json<CreateManagedDomainRequest>,
+) -> Result<Response, WebApiError> {
+    let context = require_backend_context(context)?;
+    created_resource(state.api.create_managed_domain(&context, &request).await)
+}
+
+async fn delete_managed_domain(
+    State(state): State<BackendState>,
+    context: Option<Extension<WebBackendRequestContext>>,
+    Path(domain_id): Path<String>,
+) -> Result<Response, WebApiError> {
+    let context = require_backend_context(context)?;
+    no_content(state.api.delete_managed_domain(&context, &domain_id).await)
+}
+
+async fn verify_managed_domain(
+    State(state): State<BackendState>,
+    context: Option<Extension<WebBackendRequestContext>>,
+    Path(domain_id): Path<String>,
+) -> Result<Response, WebApiError> {
+    let context = require_backend_context(context)?;
+    ok_resource(state.api.verify_managed_domain(&context, &domain_id).await)
+}
+
+async fn update_domain_application_binding(
+    State(state): State<BackendState>,
+    context: Option<Extension<WebBackendRequestContext>>,
+    Path(domain_id): Path<String>,
+    Json(request): Json<UpdateDomainApplicationBindingRequest>,
+) -> Result<Response, WebApiError> {
+    let context = require_backend_context(context)?;
+    ok_resource(
+        state
+            .api
+            .update_domain_application_binding(&context, &domain_id, &request)
+            .await,
+    )
+}
+
+async fn delete_domain_application_binding(
+    State(state): State<BackendState>,
+    context: Option<Extension<WebBackendRequestContext>>,
+    Path(domain_id): Path<String>,
+) -> Result<Response, WebApiError> {
+    let context = require_backend_context(context)?;
+    no_content(
+        state
+            .api
+            .delete_domain_application_binding(&context, &domain_id)
+            .await,
+    )
+}
+
 async fn list_application_source_versions(
     State(state): State<BackendState>,
     context: Option<Extension<WebBackendRequestContext>>,
@@ -342,11 +425,7 @@ async fn retrieve_application_source_version(
     ok_resource(
         state
             .api
-            .retrieve_application_source_version(
-                &context,
-                &application_id,
-                &source_version_id,
-            )
+            .retrieve_application_source_version(&context, &application_id, &source_version_id)
             .await,
     )
 }

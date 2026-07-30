@@ -45,6 +45,7 @@ client.set_header("X-Custom-Header", "value");
 
 - `client.application()` - application API
 - `client.application_domain()` - application_domain API
+- `client.domain()` - domain API
 - `client.application_source_version()` - application_source_version API
 - `client.application_deployment()` - application_deployment API
 - `client.certificate()` - certificate API
@@ -82,6 +83,18 @@ let mut query = HashMap::new();
 query.insert("page".to_string(), serde_json::json!(1));
 query.insert("page_size".to_string(), serde_json::json!(2));
 let result = client.application_domain().applications_domains_list(application_id, Some(&query)).await?;
+println!("{result:?}");
+```
+
+### domain
+
+```rust
+use std::collections::HashMap;
+// List tenant custom domain assets
+let mut query = HashMap::new();
+query.insert("page".to_string(), serde_json::json!(1));
+query.insert("page_size".to_string(), serde_json::json!(2));
+let result = client.domain().domains_list(Some(&query)).await?;
 println!("{result:?}");
 ```
 

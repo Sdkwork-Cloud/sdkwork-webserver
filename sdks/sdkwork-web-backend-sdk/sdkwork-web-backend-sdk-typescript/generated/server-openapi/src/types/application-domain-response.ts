@@ -1,6 +1,9 @@
 export interface ApplicationDomainResponse {
   id: string;
   hostname: string;
+  applicationId?: string;
+  applicationName?: string;
+  certificateCount: string;
   isPrimary: boolean;
   isVerified: boolean;
   sslEnabled: boolean;

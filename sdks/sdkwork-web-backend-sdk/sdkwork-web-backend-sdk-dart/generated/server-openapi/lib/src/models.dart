@@ -503,9 +503,72 @@ class CreateApplicationDomainRequest {
   }
 }
 
+class CreateManagedDomainRequest {
+  final String? hostname;
+  final String? applicationId;
+  final bool? isPrimary;
+  final bool? sslEnabled;
+  final String? sslProvider;
+
+  CreateManagedDomainRequest({
+    this.hostname,
+    this.applicationId,
+    this.isPrimary,
+    this.sslEnabled,
+    this.sslProvider
+  });
+
+  factory CreateManagedDomainRequest.fromJson(Map<String, dynamic> json) {
+    return CreateManagedDomainRequest(
+      hostname: json['hostname']?.toString(),
+      applicationId: json['applicationId']?.toString(),
+      isPrimary: json['isPrimary'] is bool ? json['isPrimary'] : null,
+      sslEnabled: json['sslEnabled'] is bool ? json['sslEnabled'] : null,
+      sslProvider: json['sslProvider']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'hostname': hostname,
+      'applicationId': applicationId,
+      'isPrimary': isPrimary,
+      'sslEnabled': sslEnabled,
+      'sslProvider': sslProvider,
+    };
+  }
+}
+
+class UpdateDomainApplicationBindingRequest {
+  final String? applicationId;
+  final bool? isPrimary;
+
+  UpdateDomainApplicationBindingRequest({
+    this.applicationId,
+    this.isPrimary
+  });
+
+  factory UpdateDomainApplicationBindingRequest.fromJson(Map<String, dynamic> json) {
+    return UpdateDomainApplicationBindingRequest(
+      applicationId: json['applicationId']?.toString(),
+      isPrimary: json['isPrimary'] is bool ? json['isPrimary'] : null
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'applicationId': applicationId,
+      'isPrimary': isPrimary,
+    };
+  }
+}
+
 class ApplicationDomainResponse {
   final String? id;
   final String? hostname;
+  final String? applicationId;
+  final String? applicationName;
+  final String? certificateCount;
   final bool? isPrimary;
   final bool? isVerified;
   final bool? sslEnabled;
@@ -516,6 +579,9 @@ class ApplicationDomainResponse {
   ApplicationDomainResponse({
     this.id,
     this.hostname,
+    this.applicationId,
+    this.applicationName,
+    this.certificateCount,
     this.isPrimary,
     this.isVerified,
     this.sslEnabled,
@@ -528,6 +594,9 @@ class ApplicationDomainResponse {
     return ApplicationDomainResponse(
       id: json['id']?.toString(),
       hostname: json['hostname']?.toString(),
+      applicationId: json['applicationId']?.toString(),
+      applicationName: json['applicationName']?.toString(),
+      certificateCount: json['certificateCount']?.toString(),
       isPrimary: json['isPrimary'] is bool ? json['isPrimary'] : null,
       isVerified: json['isVerified'] is bool ? json['isVerified'] : null,
       sslEnabled: json['sslEnabled'] is bool ? json['sslEnabled'] : null,
@@ -541,6 +610,9 @@ class ApplicationDomainResponse {
     return <String, dynamic>{
       'id': id,
       'hostname': hostname,
+      'applicationId': applicationId,
+      'applicationName': applicationName,
+      'certificateCount': certificateCount,
       'isPrimary': isPrimary,
       'isVerified': isVerified,
       'sslEnabled': sslEnabled,
@@ -945,6 +1017,7 @@ class CertificateResponse {
   final String? id;
   final String? certName;
   final String? domain;
+  final String? domainId;
   final int? certType;
   final String? issuer;
   final String? fingerprint;
@@ -959,6 +1032,7 @@ class CertificateResponse {
     this.id,
     this.certName,
     this.domain,
+    this.domainId,
     this.certType,
     this.issuer,
     this.fingerprint,
@@ -975,6 +1049,7 @@ class CertificateResponse {
       id: json['id']?.toString(),
       certName: json['certName']?.toString(),
       domain: json['domain']?.toString(),
+      domainId: json['domainId']?.toString(),
       certType: json['certType'] is int ? json['certType'] : null,
       issuer: json['issuer']?.toString(),
       fingerprint: json['fingerprint']?.toString(),
@@ -992,6 +1067,7 @@ class CertificateResponse {
       'id': id,
       'certName': certName,
       'domain': domain,
+      'domainId': domainId,
       'certType': certType,
       'issuer': issuer,
       'fingerprint': fingerprint,
@@ -2235,6 +2311,118 @@ class ApplicationsDomainsVerifyResponse {
 
   factory ApplicationsDomainsVerifyResponse.fromJson(Map<String, dynamic> json) {
     return ApplicationsDomainsVerifyResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class DomainsListResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  DomainsListResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory DomainsListResponse.fromJson(Map<String, dynamic> json) {
+    return DomainsListResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class DomainsCreateResponse201 {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  DomainsCreateResponse201({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory DomainsCreateResponse201.fromJson(Map<String, dynamic> json) {
+    return DomainsCreateResponse201(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class DomainsVerifyResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  DomainsVerifyResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory DomainsVerifyResponse.fromJson(Map<String, dynamic> json) {
+    return DomainsVerifyResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class DomainsApplicationBindingUpdateResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  DomainsApplicationBindingUpdateResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory DomainsApplicationBindingUpdateResponse.fromJson(Map<String, dynamic> json) {
+    return DomainsApplicationBindingUpdateResponse(
       code: json['code'] is int ? json['code'] : null,
       data: _sdkworkAsMap(json['data']),
       traceId: json['traceId']?.toString()

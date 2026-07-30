@@ -94,6 +94,142 @@ describe("console workspace access", () => {
 });
 
 describe("console release controls", () => {
+  it("stores directory updates for the selected application and refreshes Git without a browser package", async () => {
+    const prepare = vi.fn(async ({ files, mode }) => ({
+      archive: files[0],
+      archiveHash: "a".repeat(64),
+      inputMode: mode,
+      sourceFileCount: files.length,
+      uncompressedSize: files.reduce((total: number, file: File) => total + file.size, 0),
+    }));
+    const store = vi.fn().mockResolvedValue({
+      archiveDriveUri: "drive://spaces/releases/nodes/source-directory-1",
+      archiveHash: "a".repeat(64),
+      archiveSize: "12",
+      extractedCount: "2",
+      configSnapshot: {},
+    });
+    const createSourceVersion = vi.fn().mockResolvedValue({ id: "source-directory-1", status: 1 });
+    const importGit = vi.fn().mockResolvedValue({ id: "source-git-2", status: 1 });
+    const listSourceVersions = vi.fn().mockResolvedValue({
+      items: [{
+        id: "source-git-1",
+        sourceRef: "https://github.com/sdkwork/customer-portal.git",
+        sourceType: "GIT",
+        versionTag: "v1.4.0",
+      }],
+      pageInfo: { page: 1, pageSize: 1, hasMore: false },
+    });
+    const sourceStorage: ApplicationSourceStorage = { prepare, store };
+    const registry = createWebserverConsoleRegistry({
+      drive: {},
+      web: {
+        sourceVersion: {
+          sites: { sourceVersions: { create: createSourceVersion, importGit, list: listSourceVersions } },
+        },
+      },
+    } as unknown as WebserverConsoleSdkClients, sourceStorage, testMediaStorage());
+    const updateSource = registry.sites?.actions.find((action) => action.id === "update-source");
+    if (!updateSource?.loadSourceInputDefaults) throw new Error("update source action is unavailable");
+    const selectedItem = { id: "site-1", name: "Customer portal" };
+
+    expect(await updateSource.loadSourceInputDefaults({ body: {}, selectedItem })).toEqual({
+      mode: "git",
+      repository: "https://github.com/sdkwork/customer-portal.git",
+    });
+    expect(listSourceVersions).toHaveBeenCalledWith("site-1", { page: 1, pageSize: 1 });
+
+    const files = [new File(["index"], "index.html"), new File(["script"], "app.js")];
+    await updateSource.execute({
+      body: { versionTag: "v1.5.0" },
+      files,
+      idempotencyKey: "update-directory-v1-5-0",
+      selectedItem,
+      sourceInputMode: "directory",
+    });
+    expect(prepare).toHaveBeenCalledWith(expect.objectContaining({ files, mode: "directory" }));
+    expect(store).toHaveBeenCalledWith(expect.objectContaining({ applicationId: "site-1" }));
+    expect(createSourceVersion).toHaveBeenCalledWith("site-1", expect.objectContaining({
+      sourceType: "DIRECTORY",
+      versionTag: "v1.5.0",
+    }), { idempotencyKey: "update-directory-v1-5-0" });
+
+    await updateSource.execute({
+      body: { versionTag: "v1.6.0" },
+      idempotencyKey: "refresh-git-v1-6-0",
+      selectedItem,
+      sourceInputMode: "git",
+      sourceRepository: "https://github.com/sdkwork/customer-portal.git",
+    });
+    expect(importGit).toHaveBeenCalledWith("site-1", {
+      repositoryUrl: "https://github.com/sdkwork/customer-portal.git",
+      versionTag: "v1.6.0",
+    }, { idempotencyKey: "refresh-git-v1-6-0" });
+    expect(prepare).toHaveBeenCalledTimes(1);
+    expect(store).toHaveBeenCalledTimes(1);
+  });
+
+  it("targets the selected application for row publishing and deletion", async () => {
+    const createDeployment = vi.fn().mockResolvedValue({ id: "deployment-1", status: 0 });
+    const deleteSite = vi.fn().mockResolvedValue(undefined);
+    const listSourceVersions = vi.fn().mockResolvedValue({
+      items: [{
+        id: "source-version-3",
+        retained: true,
+        sourceType: "GIT",
+        status: 1,
+        versionTag: "v3.0.0",
+      }],
+      pageInfo: { page: 1, pageSize: 100, hasMore: false },
+    });
+    const registry = createWebserverConsoleRegistry({
+      drive: {},
+      web: {
+        deployment: { sites: { deployments: { create: createDeployment } } },
+        site: { delete: deleteSite },
+        sourceVersion: { sites: { sourceVersions: { list: listSourceVersions } } },
+      },
+    } as unknown as WebserverConsoleSdkClients);
+    const publish = registry.sites?.actions.find((action) => action.id === "publish");
+    const deleteAction = registry.sites?.actions.find((action) => action.id === "delete");
+    if (!publish?.loadFieldOptions || !deleteAction) throw new Error("application row actions are unavailable");
+
+    const options = await publish.loadFieldOptions({
+      body: publish.bodyTemplate,
+      selectedItem: { id: "site-1", name: "Portal", status: 2 },
+    });
+    expect(listSourceVersions).toHaveBeenCalledWith("site-1", { page: 1, pageSize: 100 });
+    expect(options.sourceVersionId).toEqual([{
+      label: "v3.0.0 · GIT",
+      relatedValues: { versionTag: "v3.0.0" },
+      value: "source-version-3",
+    }]);
+
+    await publish.execute({
+      body: {
+        deployType: 1,
+        environment: "production",
+        sourceVersionId: "source-version-3",
+        versionTag: "v3.0.0",
+      },
+      idempotencyKey: "publish-site-1",
+      selectedItem: { id: "site-1", name: "Portal", status: 2 },
+    });
+    expect(createDeployment).toHaveBeenCalledWith("site-1", {
+      deployType: 1,
+      environment: "production",
+      sourceVersionId: "source-version-3",
+      versionTag: "v3.0.0",
+    }, { idempotencyKey: "publish-site-1" });
+
+    await deleteAction.execute({
+      body: {},
+      selectedItem: { id: "site-1", name: "Portal", status: 2 },
+    });
+    expect(deleteSite).toHaveBeenCalledWith("site-1");
+    expect(deleteAction.availableWhen?.({ body: {}, selectedItem: { id: "site-1", status: 1 } })).toBe(false);
+  });
+
   it("uses App Store field shapes and enforces the shared description limits", async () => {
     const registry: WebserverResourceRegistry = {
       sites: {

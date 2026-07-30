@@ -202,6 +202,9 @@ public struct CreateDomainRequest: Codable {
 public struct DomainResponse: Codable {
     public let id: String?
     public let hostname: String?
+    public let applicationId: String?
+    public let applicationName: String?
+    public let certificateCount: String?
     public let isPrimary: Bool?
     public let isVerified: Bool?
     public let sslEnabled: Bool?
@@ -210,9 +213,12 @@ public struct DomainResponse: Codable {
     public let createdAt: String?
 
 
-    public init(id: String? = nil, hostname: String? = nil, isPrimary: Bool? = nil, isVerified: Bool? = nil, sslEnabled: Bool? = nil, sslProvider: String? = nil, status: Int? = nil, createdAt: String? = nil) {
+    public init(id: String? = nil, hostname: String? = nil, applicationId: String? = nil, applicationName: String? = nil, certificateCount: String? = nil, isPrimary: Bool? = nil, isVerified: Bool? = nil, sslEnabled: Bool? = nil, sslProvider: String? = nil, status: Int? = nil, createdAt: String? = nil) {
         self.id = id
         self.hostname = hostname
+        self.applicationId = applicationId
+        self.applicationName = applicationName
+        self.certificateCount = certificateCount
         self.isPrimary = isPrimary
         self.isVerified = isVerified
         self.sslEnabled = sslEnabled
@@ -478,6 +484,7 @@ public struct CertificateResponse: Codable {
     public let id: String?
     public let certName: String?
     public let domain: String?
+    public let domainId: String?
     public let certType: Int?
     public let issuer: String?
     public let fingerprint: String?
@@ -489,10 +496,11 @@ public struct CertificateResponse: Codable {
     public let createdAt: String?
 
 
-    public init(id: String? = nil, certName: String? = nil, domain: String? = nil, certType: Int? = nil, issuer: String? = nil, fingerprint: String? = nil, notBefore: String? = nil, notAfter: String? = nil, autoRenew: Bool? = nil, renewalStatus: Int? = nil, status: Int? = nil, createdAt: String? = nil) {
+    public init(id: String? = nil, certName: String? = nil, domain: String? = nil, domainId: String? = nil, certType: Int? = nil, issuer: String? = nil, fingerprint: String? = nil, notBefore: String? = nil, notAfter: String? = nil, autoRenew: Bool? = nil, renewalStatus: Int? = nil, status: Int? = nil, createdAt: String? = nil) {
         self.id = id
         self.certName = certName
         self.domain = domain
+        self.domainId = domainId
         self.certType = certType
         self.issuer = issuer
         self.fingerprint = fingerprint

@@ -4,6 +4,7 @@ data class CertificateResponse(
     val id: String? = null,
     val certName: String? = null,
     val domain: String? = null,
+    val domainId: String? = null,
     val certType: Int? = null,
     val issuer: String? = null,
     val fingerprint: String? = null,

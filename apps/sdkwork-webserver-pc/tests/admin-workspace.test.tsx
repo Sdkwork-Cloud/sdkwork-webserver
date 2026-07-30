@@ -26,6 +26,10 @@ describe("admin workspace application controls", () => {
     const createButton = await screen.findByRole("button", { name: "Create application" });
     fireEvent.click(createButton);
 
+    const drawer = screen.getByTestId("application-creation-drawer");
+    expect(drawer.classList.contains("application-creation-drawer")).toBe(true);
+    expect(drawer.parentElement?.classList.contains("application-creation-drawer-backdrop")).toBe(true);
+    expect(document.body.classList.contains("application-drawer-open")).toBe(true);
     const applicationType = screen.getByLabelText("Application type");
     const siteType = screen.getByLabelText("Runtime type");
     expect(applicationType.tagName).toBe("SELECT");
@@ -405,9 +409,20 @@ describe("admin workspace application controls", () => {
     fireEvent.click(createButton);
     expect(document.activeElement).toBe(screen.getByLabelText("Application name"));
 
+    const drawer = screen.getByTestId("application-creation-drawer");
+    const closeButton = screen.getByRole("button", { name: "Close" });
+    const continueButton = screen.getByRole("button", { name: "Continue" });
+    continueButton.focus();
+    fireEvent.keyDown(drawer, { key: "Tab" });
+    expect(document.activeElement).toBe(closeButton);
+    closeButton.focus();
+    fireEvent.keyDown(drawer, { key: "Tab", shiftKey: true });
+    expect(document.activeElement).toBe(continueButton);
+
     fireEvent.keyDown(document, { key: "Escape" });
 
     expect(screen.queryByRole("dialog")).toBeNull();
+    expect(document.body.classList.contains("application-drawer-open")).toBe(false);
     await waitFor(() => expect(document.activeElement).toBe(createButton));
   });
 
@@ -420,8 +435,14 @@ describe("admin workspace application controls", () => {
     renderWorkspace("/admin/applications", registry);
 
     fireEvent.click(await screen.findByText("Public API"));
-    fireEvent.click(screen.getByRole("button", { name: "Update" }));
+    fireEvent.click(screen.getByRole("button", { name: "Edit Public API" }));
 
+    const drawer = screen.getByTestId("application-edit-drawer");
+    expect(drawer.classList.contains("application-creation-drawer")).toBe(true);
+    expect(drawer.parentElement?.classList.contains("application-creation-drawer-backdrop")).toBe(true);
+    expect(document.body.classList.contains("application-drawer-open")).toBe(true);
+    expect(screen.getByRole("heading", { name: "Application basics" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Store listing details" })).toBeTruthy();
     expect((screen.getByLabelText("Application name") as HTMLInputElement).value).toBe("Public API");
     expect((screen.getByLabelText("Description") as HTMLTextAreaElement).value).toBe("Current description");
     fireEvent.change(screen.getByLabelText("Application name"), { target: { value: "Public API v2" } });
@@ -434,6 +455,139 @@ describe("admin workspace application controls", () => {
         description: "Current description",
         storeListing: expect.objectContaining({ icon: expect.any(Object) }),
       }),
+      { idempotencyKey: expect.any(String) },
+    ));
+  });
+
+  it("uploads a new immutable source version from an independent row dialog", async () => {
+    const createSourceVersion = vi.fn().mockResolvedValue({ id: "source-version-2", status: 1 });
+    const sourceStorage = testSourceStorage();
+    const registry = createWebserverAdminApplicationRegistry(client({
+      applicationItems: [{ id: "app-1", name: "Public API", status: 2 }],
+      createSourceVersion,
+    }), sourceStorage, testMediaStorage());
+    renderWorkspace("/admin/applications", registry);
+
+    fireEvent.click(await screen.findByRole("button", { name: "Update code Public API" }));
+
+    const dialog = screen.getByTestId("application-source-update-dialog");
+    expect(dialog.classList.contains("application-creation-drawer")).toBe(false);
+    expect(dialog.parentElement?.classList.contains("application-creation-drawer-backdrop")).toBe(false);
+    fireEvent.change(screen.getByLabelText("Version"), { target: { value: "v2.0.0" } });
+    const archive = new File(["source-v2"], "source-v2.zip", { type: "application/zip" });
+    fireEvent.change(screen.getByTestId("application-source-input"), {
+      target: { files: [archive] },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Upload new code" }));
+
+    await waitFor(() => expect(createSourceVersion).toHaveBeenCalledWith(
+      "app-1",
+      expect.objectContaining({
+        artifactDriveUri: "drive://spaces/space-1/nodes/node-1",
+        sourceType: "ARCHIVE",
+        versionTag: "v2.0.0",
+      }),
+      { idempotencyKey: expect.any(String) },
+    ));
+    expect(sourceStorage.prepare).toHaveBeenCalledWith(expect.objectContaining({
+      files: [archive],
+      mode: "archive",
+    }));
+    expect(sourceStorage.store).toHaveBeenCalledWith(expect.objectContaining({ applicationId: "app-1" }));
+  });
+
+  it("prefills the latest Git source and refreshes it as a new version", async () => {
+    const importGitSourceVersion = vi.fn().mockResolvedValue({ id: "source-version-3", status: 1 });
+    const registry = createWebserverAdminApplicationRegistry(client({
+      applicationItems: [{ id: "app-1", name: "Public API", status: 2 }],
+      importGitSourceVersion,
+      sourceVersionItems: [{
+        id: "source-version-2",
+        sourceRef: "https://github.com/sdkwork/public-api.git",
+        sourceType: "GIT",
+        versionTag: "v2.0.0",
+      }],
+    }), testSourceStorage(), testMediaStorage());
+    renderWorkspace("/admin/applications", registry);
+
+    fireEvent.click(await screen.findByRole("button", { name: "Update code Public API" }));
+
+    const repository = await screen.findByLabelText("HTTPS Git repository") as HTMLInputElement;
+    await waitFor(() => expect(repository.value).toBe("https://github.com/sdkwork/public-api.git"));
+    fireEvent.change(screen.getByLabelText("Version"), { target: { value: "v2.1.0" } });
+    fireEvent.click(screen.getByRole("button", { name: "Refresh repository" }));
+
+    await waitFor(() => expect(importGitSourceVersion).toHaveBeenCalledWith(
+      "app-1",
+      {
+        repositoryUrl: "https://github.com/sdkwork/public-api.git",
+        versionTag: "v2.1.0",
+      },
+      { idempotencyKey: expect.any(String) },
+    ));
+  });
+
+  it("publishes a retained source version from the application row and synchronizes its version tag", async () => {
+    const createDeployment = vi.fn().mockResolvedValue({ id: "deployment-1", status: 0 });
+    const registry = createWebserverAdminApplicationRegistry(client({
+      applicationItems: [{ id: "app-1", name: "Public API", status: 2 }],
+      createDeployment,
+      sourceVersionItems: [{
+        id: "source-version-2",
+        retained: true,
+        sourceType: "ARCHIVE",
+        status: 1,
+        versionTag: "v2.4.0",
+      }],
+    }), testSourceStorage(), testMediaStorage());
+    renderWorkspace("/admin/applications", registry);
+
+    expect(await screen.findByRole("columnheader", { name: "Actions" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Edit Public API" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Update code Public API" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Delete Public API" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Publish Public API" }));
+
+    expect(await screen.findByRole("option", { name: "v2.4.0 · ARCHIVE" })).toBeTruthy();
+    const version = screen.getByLabelText("Version") as HTMLInputElement;
+    expect(version.value).toBe("v2.4.0");
+    expect(version.readOnly).toBe(true);
+    fireEvent.click(screen.getByText("I understand the impact and want to continue."));
+    fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
+
+    await waitFor(() => expect(createDeployment).toHaveBeenCalledWith(
+      "app-1",
+      {
+        deployType: 1,
+        environment: "production",
+        sourceVersionId: "source-version-2",
+        versionTag: "v2.4.0",
+      },
+      { idempotencyKey: expect.any(String) },
+    ));
+  });
+
+  it("confirms deletion from the application row and disables deletion while running", async () => {
+    const deleteApplication = vi.fn().mockResolvedValue(undefined);
+    const registry = createWebserverAdminApplicationRegistry(client({
+      applicationItems: [
+        { id: "app-stopped", name: "Stopped app", status: 2 },
+        { id: "app-running", name: "Running app", status: 1 },
+      ],
+      deleteApplication,
+    }), testSourceStorage(), testMediaStorage());
+    renderWorkspace("/admin/applications", registry);
+
+    const runningDelete = await screen.findByRole("button", { name: "Delete Running app" });
+    expect((runningDelete as HTMLButtonElement).disabled).toBe(true);
+    fireEvent.click(screen.getByRole("button", { name: "Delete Stopped app" }));
+    const confirm = screen.getByRole("button", { name: "Confirm" });
+    expect((confirm as HTMLButtonElement).disabled).toBe(true);
+    fireEvent.click(screen.getByText("I understand the impact and want to continue."));
+    fireEvent.click(confirm);
+
+    await waitFor(() => expect(deleteApplication).toHaveBeenCalledWith(
+      "app-stopped",
       { idempotencyKey: expect.any(String) },
     ));
   });
@@ -493,6 +647,7 @@ function client(overrides: {
   create?: ReturnType<typeof vi.fn>;
   createDeployment?: ReturnType<typeof vi.fn>;
   createSourceVersion?: ReturnType<typeof vi.fn>;
+  deleteApplication?: ReturnType<typeof vi.fn>;
   deploymentItems?: Record<string, unknown>[];
   importGitSourceVersion?: ReturnType<typeof vi.fn>;
   listDomains?: ReturnType<typeof vi.fn>;
@@ -508,7 +663,7 @@ function client(overrides: {
       update: overrides.update ?? vi.fn(),
       activate: vi.fn(),
       pause: overrides.pause ?? vi.fn(),
-      delete: vi.fn(),
+      delete: overrides.deleteApplication ?? vi.fn(),
     },
     applicationDomain: {
       applications: {
