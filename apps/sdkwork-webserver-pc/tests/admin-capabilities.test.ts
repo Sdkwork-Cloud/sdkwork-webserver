@@ -17,6 +17,8 @@ describe("admin application capability", () => {
     const verifyDomain = vi.fn().mockResolvedValue({ verified: true });
     const deleteDomain = vi.fn().mockResolvedValue(undefined);
     const listDeployments = vi.fn().mockResolvedValue({ items: [], pageInfo: { page: 1, pageSize: 20, hasMore: false } });
+    const listSourceVersions = vi.fn().mockResolvedValue({ items: [], pageInfo: { page: 1, pageSize: 20, hasMore: false } });
+    const createSourceVersion = vi.fn().mockResolvedValue({ id: "source-version-1", status: 1 });
     const createDeployment = vi.fn().mockResolvedValue({ id: "deployment-1" });
     const rollbackDeployment = vi.fn().mockResolvedValue({ id: "rollback-1", status: 0 });
     const client = {
@@ -30,6 +32,7 @@ describe("admin application capability", () => {
       },
       applicationDomain: { applications: { domains: { list: listDomains, create: createDomain, verify: verifyDomain, delete: deleteDomain } } },
       applicationDeployment: { applications: { deployments: { list: listDeployments, create: createDeployment, rollback: rollbackDeployment } } },
+      applicationSourceVersion: { applications: { sourceVersions: { list: listSourceVersions, create: createSourceVersion, importGit: vi.fn() } } },
     } as unknown as WebserverAdminSdkClient;
 
     const sourceStorage = testSourceStorage();
@@ -37,7 +40,18 @@ describe("admin application capability", () => {
     const registry = createWebserverAdminApplicationRegistry(client, sourceStorage, testMediaStorage());
     await registry.applications?.load({ page: 1, pageSize: 20, search: "api" });
     await registry.applications?.actions[0]?.execute({
-      body: { name: "API", applicationType: "API", siteType: 6, environment: "production", versionTag: "v1.0.0" },
+      body: {
+        name: "API",
+        applicationType: "API",
+        siteType: 6,
+        environment: "production",
+        versionTag: "v1.0.0",
+        sourceVersionRetentionLimit: 5,
+        appConfigPath: "sdkwork.app.config.json",
+        deploymentConfigPath: "etc/sdkwork.deployment.config.json",
+        publicRoot: "dist",
+        spaFallback: "index.html",
+      },
       applicationSubmission: defaultApplicationSubmission(),
       files: [sourceArchive],
       idempotencyKey: "application-create-1",
@@ -46,6 +60,11 @@ describe("admin application capability", () => {
     expect(listApplications).toHaveBeenCalledWith({ page: 1, pageSize: 20, keyword: "api" });
     expect(createApplication).toHaveBeenCalledWith(expect.objectContaining({ name: "API", applicationType: "API", siteType: 6 }), { idempotencyKey: "application-create-1" });
     expect(sourceStorage.store).toHaveBeenCalledWith(expect.objectContaining({ applicationId: "app-1" }));
+    expect(createSourceVersion).toHaveBeenCalledWith("app-1", expect.objectContaining({
+      artifactDriveUri: "drive://spaces/releases/nodes/node-1",
+      sourceType: "ARCHIVE",
+      versionTag: "v1.0.0",
+    }), { idempotencyKey: "application-create-1" });
     createDeployment.mockClear();
 
     const applicationActions = registry.applications?.actions ?? [];
@@ -75,32 +94,29 @@ describe("admin application capability", () => {
     const deploymentBody = {
       deployType: 1,
       environment: "production",
+      sourceVersionId: "source-version-1",
       versionTag: "v1.1.0",
     };
     await registry["application-deployments"]?.actions[0]?.execute({
       scopeId: "app-1",
       body: deploymentBody,
-      files: [sourceArchive],
-      sourceInputMode: "archive",
       idempotencyKey: "deployment-create-1",
     });
     await registry["application-deployments"]?.actions.find((candidate) => candidate.id === "rollback")?.execute({ scopeId: "app-1", body: {}, idempotencyKey: "deployment-rollback-1", selectedItem: { id: "deployment-1", status: 2 } });
     expect(createDeployment).toHaveBeenCalledWith("app-1", {
       ...deploymentBody,
-      artifactDriveUri: "drive://spaces/releases/nodes/node-1",
-      artifactSize: "6",
-      artifactHash: "a".repeat(64),
-      commitHash: undefined,
-      sourceRef: undefined,
     }, { idempotencyKey: "deployment-create-1" });
     expect(rollbackDeployment).toHaveBeenCalledWith("app-1", "deployment-1", { idempotencyKey: "deployment-rollback-1" });
     expect(registry["application-deployments"]?.actions.find((candidate) => candidate.id === "rollback")?.availableWhen?.({ body: {}, selectedItem: { status: 3 } })).toBe(false);
   });
 
-  it("creates and redeploys Git-backed applications without storing a source package", async () => {
+  it("imports Git source versions before publishing without storing a browser package", async () => {
     const prepare = vi.fn();
     const store = vi.fn();
     const createDeployment = vi.fn().mockResolvedValue({ id: "deployment-1" });
+    const importGit = vi.fn()
+      .mockResolvedValueOnce({ id: "source-git-1", status: 1 })
+      .mockResolvedValueOnce({ id: "source-git-2", status: 1 });
     const sourceStorage: ApplicationSourceStorage = { prepare, store };
     const client = {
       application: {
@@ -110,13 +126,19 @@ describe("admin application capability", () => {
       applicationDeployment: {
         applications: { deployments: { create: createDeployment } },
       },
+      applicationSourceVersion: {
+        applications: { sourceVersions: { importGit } },
+      },
     } as unknown as WebserverAdminSdkClient;
     const registry = createWebserverAdminApplicationRegistry(client, sourceStorage, testMediaStorage());
     const create = registry.applications?.actions.find((candidate) => candidate.id === "create");
+    const saveSource = registry["application-source-versions"]?.actions.find(
+      (candidate) => candidate.id === "create",
+    );
     const deploy = registry["application-deployments"]?.actions.find(
       (candidate) => candidate.id === "deploy",
     );
-    if (!create || !deploy) throw new Error("Git deployment actions are unavailable");
+    if (!create || !saveSource || !deploy) throw new Error("Git source version actions are unavailable");
 
     expect(create.sourceInput).toBe("archive-directory-or-git");
     await create.execute({
@@ -127,40 +149,52 @@ describe("admin application capability", () => {
         siteType: 1,
         environment: "production",
         versionTag: "v1.0.0",
+        sourceVersionRetentionLimit: 5,
+        appConfigPath: "sdkwork.app.config.json",
+        deploymentConfigPath: "etc/sdkwork.deployment.config.json",
+        publicRoot: "dist",
+        spaFallback: "index.html",
       },
       idempotencyKey: "git-application-create-1",
       sourceInputMode: "git",
       sourceRepository: "  https://github.com/sdkwork/example.git  ",
     });
+    expect(importGit).toHaveBeenLastCalledWith("app-1", {
+      repositoryUrl: "https://github.com/sdkwork/example.git",
+      versionTag: "v1.0.0",
+    }, { idempotencyKey: "git-application-create-1" });
     expect(createDeployment).toHaveBeenLastCalledWith("app-1", {
-      commitHash: undefined,
-      deployType: 2,
+      deployType: 1,
       environment: "production",
-      sourceRef: "https://github.com/sdkwork/example.git",
+      sourceVersionId: "source-git-1",
       versionTag: "v1.0.0",
     }, { idempotencyKey: "git-application-create-1" });
 
-    await deploy.execute({
-      body: { deployType: 1, environment: "staging", versionTag: "v1.1.0" },
+    await saveSource.execute({
+      body: { versionTag: "v1.1.0" },
       idempotencyKey: "git-application-deploy-1",
       scopeId: "app-1",
       sourceInputMode: "git",
       sourceRepository: "https://git.example.test/team/portal.git",
     });
+    await deploy.execute({
+      body: { deployType: 1, sourceVersionId: "source-git-2", environment: "staging", versionTag: "v1.1.0" },
+      idempotencyKey: "git-application-release-1",
+      scopeId: "app-1",
+    });
     expect(createDeployment).toHaveBeenLastCalledWith("app-1", {
-      commitHash: undefined,
-      deployType: 2,
+      deployType: 1,
       environment: "staging",
-      sourceRef: "https://git.example.test/team/portal.git",
+      sourceVersionId: "source-git-2",
       versionTag: "v1.1.0",
-    }, { idempotencyKey: "git-application-deploy-1" });
+    }, { idempotencyKey: "git-application-release-1" });
     expect(prepare).not.toHaveBeenCalled();
     expect(store).not.toHaveBeenCalled();
   });
 
   it.each([
-    [{ deployType: 0, environment: "production", versionTag: "v1.1.0" }, "Deployment method is invalid"],
-    [{ deployType: 1, environment: "qa", versionTag: "v1.1.0" }, "Deployment environment is invalid"],
+    [{ deployType: 0, sourceVersionId: "source-version-1", environment: "production", versionTag: "v1.1.0" }, "Deployment method is invalid"],
+    [{ deployType: 1, sourceVersionId: "source-version-1", environment: "qa", versionTag: "v1.1.0" }, "Deployment environment is invalid"],
   ])("rejects invalid deployment metadata before admin source processing", async (body, message) => {
     const prepare = vi.fn();
     const store = vi.fn();
@@ -202,6 +236,12 @@ function testSourceStorage(): ApplicationSourceStorage {
       archiveHash: "a".repeat(64),
       archiveSize: "6",
       extractedCount: "1",
+      configSnapshot: {
+        appConfigDetected: true,
+        appConfigPath: "sdkwork.app.config.json",
+        deploymentConfigDetected: true,
+        deploymentConfigPath: "etc/sdkwork.deployment.config.json",
+      },
     }),
   };
 }

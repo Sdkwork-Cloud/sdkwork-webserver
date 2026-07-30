@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "kind": "sdkwork.component.spec",
+  "component": {
+    "name": "sdkwork-webserver-source-provider",
+    "displayName": "SDKWork Web Server Source Provider",
+    "version": "0.1.0",
+    "type": "rust-crate",
+    "root": "sdkwork-web-server/crates/sdkwork-webserver-source-provider",
+    "domain": "platform",
+    "capability": "webserver-application-source",
+    "surface": "backend-service",
+    "languages": ["rust"],
+    "generated": false,
+    "status": "active",
+    "manifests": ["Cargo.toml", "specs/README.md", "specs/component.spec.json"]
+  },
+  "canonicalSpecs": [
+    {"file": "COMPONENT_SPEC.md", "path": "../../../sdkwork-specs/COMPONENT_SPEC.md", "purpose": "Component identity and port contracts."},
+    {"file": "CODE_STYLE_SPEC.md", "path": "../../../sdkwork-specs/CODE_STYLE_SPEC.md", "purpose": "Authored provider boundaries."},
+    {"file": "NAMING_SPEC.md", "path": "../../../sdkwork-specs/NAMING_SPEC.md", "purpose": "Provider naming."},
+    {"file": "RUST_CODE_SPEC.md", "path": "../../../sdkwork-specs/RUST_CODE_SPEC.md", "purpose": "Rust provider structure and async process rules."},
+    {"file": "DRIVE_SPEC.md", "path": "../../../sdkwork-specs/DRIVE_SPEC.md", "purpose": "Server-side Drive Uploader ownership."},
+    {"file": "CONFIG_SPEC.md", "path": "../../../sdkwork-specs/CONFIG_SPEC.md", "purpose": "Typed runtime configuration."},
+    {"file": "SECURITY_SPEC.md", "path": "../../../sdkwork-specs/SECURITY_SPEC.md", "purpose": "SSRF, credential, tenant, and bounded-content rules."},
+    {"file": "TEST_SPEC.md", "path": "../../../sdkwork-specs/TEST_SPEC.md", "purpose": "Provider security and contract verification."}
+  ],
+  "contracts": {
+    "layerRole": "backend-provider",
+    "publicExports": ["crate-root"],
+    "providedPorts": [
+      {"name": "applicationSourceImporter", "export": "crate-root"}
+    ],
+    "requiredPorts": [
+      {"name": "applicationSourceImporterPort", "export": "crate-root", "provider": "sdkwork-intelligence-webserver-service"},
+      {"name": "driveUploaderService", "export": "crate-root", "provider": "sdkwork-drive-uploader-service"},
+      {"name": "driveObjectStoreRuntime", "export": "crate-root", "provider": "sdkwork-drive-object-runtime"},
+      {"name": "driveWorkspaceDatabase", "export": "crate-root", "provider": "sdkwork-drive-workspace-service"}
+    ],
+    "runtimeEntrypoints": [],
+    "routeManifest": null,
+    "sdkClients": [],
+    "sdkDependencies": [],
+    "permissionComposition": {},
+    "dependencyApiExports": [],
+    "dependencyApiSurfaces": [],
+    "events": [],
+    "configKeys": [
+      "SDKWORK_WEB_GIT_ALLOWED_HOSTS",
+      "SDKWORK_CLAW_DATABASE_*",
+      "SDKWORK_DATABASE_URL"
+    ]
+  },
+  "verification": {
+    "commands": ["cargo test -p sdkwork-webserver-source-provider"]
+  }
+}

@@ -5,8 +5,7 @@ use sdkwork_webserver_contract::{
     ApplicationStoreListing, CreateCertificateRequest, CreateDeploymentRequest,
     CreateDomainRequest, CreateEnvVariableRequest, CreateHealthCheckRequest, CreateSiteRequest,
     CreateSourceVersionRequest, ImportGitSourceVersionRequest, ListSitesQuery, MediaResource,
-    UpdateSiteRequest, WebAppApi, WebAppRequestContext,
-    WebAppResourceScope, WebServiceResult,
+    UpdateSiteRequest, WebAppApi, WebAppRequestContext, WebAppResourceScope, WebServiceResult,
 };
 use std::collections::HashSet;
 
@@ -218,7 +217,8 @@ impl WebService {
             ));
         }
         if request.source_version_id.is_some() {
-            if artifact_count != 0 || request.source_ref.is_some() || request.commit_hash.is_some() {
+            if artifact_count != 0 || request.source_ref.is_some() || request.commit_hash.is_some()
+            {
                 return Err(sdkwork_webserver_contract::WebServiceError::validation(
                     "sourceVersionId cannot be combined with source or artifact fields",
                 ));
@@ -266,7 +266,9 @@ impl WebService {
         Ok(())
     }
 
-    fn validate_source_version_request(request: &CreateSourceVersionRequest) -> WebServiceResult<()> {
+    fn validate_source_version_request(
+        request: &CreateSourceVersionRequest,
+    ) -> WebServiceResult<()> {
         validate_required_text("versionTag", &request.version_tag, 100)?;
         if !matches!(request.source_type.as_str(), "ARCHIVE" | "DIRECTORY") {
             return Err(sdkwork_webserver_contract::WebServiceError::validation(
@@ -287,9 +289,11 @@ impl WebService {
         validate_sha256("artifactHash", &request.artifact_hash)
     }
 
-    fn source_version_retention_limit(runtime_config: Option<&serde_json::Value>) -> WebServiceResult<i32> {
-        let Some(value) = runtime_config
-            .and_then(|config| config.get("sourceVersionRetentionLimit"))
+    fn source_version_retention_limit(
+        runtime_config: Option<&serde_json::Value>,
+    ) -> WebServiceResult<i32> {
+        let Some(value) =
+            runtime_config.and_then(|config| config.get("sourceVersionRetentionLimit"))
         else {
             return Ok(DEFAULT_SOURCE_VERSION_RETENTION_LIMIT);
         };
@@ -1107,10 +1111,14 @@ impl WebAppApi for WebService {
                 .await?;
             if source_version.status != 1 || !source_version.retained {
                 return Err(sdkwork_webserver_contract::WebServiceError::conflict(
-                    "source version is not ready or its Drive artifact has been pruned",
+                    "source version is not ready or is outside the retained release window",
                 ));
             }
-            request.deploy_type = if source_version.source_type == "GIT" { 2 } else { 1 };
+            request.deploy_type = if source_version.source_type == "GIT" {
+                2
+            } else {
+                1
+            };
             request.version_tag = request
                 .version_tag
                 .or_else(|| Some(source_version.version_tag.clone()));

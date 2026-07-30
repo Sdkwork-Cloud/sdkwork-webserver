@@ -152,6 +152,42 @@ CREATE INDEX idx_web_certificate_renewal
     ON web_certificate (renewal_status, not_after)
     WHERE auto_renew = true AND status = 1;
 
+CREATE TABLE web_source_version (
+    id              BIGINT       NOT NULL,
+    uuid            TEXT         NOT NULL,
+    tenant_id       INTEGER      NOT NULL DEFAULT 0,
+    organization_id INTEGER      NOT NULL DEFAULT 0,
+    user_id         INTEGER,
+    site_id         INTEGER      NOT NULL,
+    version_tag     TEXT         NOT NULL,
+    source_type     TEXT         NOT NULL,
+    source_ref      TEXT,
+    commit_hash     TEXT,
+    artifact_path   TEXT         NOT NULL,
+    artifact_size   INTEGER      NOT NULL,
+    artifact_hash   TEXT         NOT NULL,
+    config_snapshot TEXT         NOT NULL DEFAULT '{}',
+    status          INTEGER      NOT NULL DEFAULT 1,
+    pruned_at       TEXT,
+    pruned_by       INTEGER,
+    metadata        TEXT         NOT NULL DEFAULT '{}',
+    created_at      TEXT         NOT NULL,
+    updated_at      TEXT         NOT NULL,
+    version         INTEGER      NOT NULL DEFAULT 0,
+    PRIMARY KEY (id),
+    CONSTRAINT uk_web_source_version_uuid UNIQUE (uuid),
+    CONSTRAINT uk_web_source_version_site_tag UNIQUE (tenant_id, site_id, version_tag),
+    CONSTRAINT chk_web_source_version_type CHECK (source_type IN ('ARCHIVE', 'DIRECTORY', 'GIT')),
+    CONSTRAINT chk_web_source_version_status CHECK (status IN (0, 1, 2, 3)),
+    CONSTRAINT fk_web_source_version_site FOREIGN KEY (site_id) REFERENCES web_site(id)
+);
+
+CREATE INDEX idx_web_source_version_site_created
+    ON web_source_version (site_id, created_at DESC);
+
+CREATE INDEX idx_web_source_version_retention
+    ON web_source_version (tenant_id, site_id, status, created_at DESC);
+
 CREATE TABLE web_deployment (
     id              BIGINT       NOT NULL,
     uuid            TEXT         NOT NULL,
@@ -159,6 +195,7 @@ CREATE TABLE web_deployment (
     organization_id INTEGER      NOT NULL DEFAULT 0,
     user_id         INTEGER,
     site_id         INTEGER      NOT NULL,
+    source_version_id INTEGER,
     deploy_type     INTEGER      NOT NULL DEFAULT 1,
     version_tag     TEXT,
     commit_hash     TEXT,
@@ -181,7 +218,8 @@ CREATE TABLE web_deployment (
     updated_at      TEXT         NOT NULL,
     version         INTEGER      NOT NULL DEFAULT 0,
     PRIMARY KEY (id),
-    CONSTRAINT fk_web_deployment_site FOREIGN KEY (site_id) REFERENCES web_site(id)
+    CONSTRAINT fk_web_deployment_site FOREIGN KEY (site_id) REFERENCES web_site(id),
+    CONSTRAINT fk_web_deployment_source_version FOREIGN KEY (source_version_id) REFERENCES web_source_version(id)
 );
 
 CREATE UNIQUE INDEX uk_web_deployment_uuid
@@ -192,6 +230,9 @@ CREATE UNIQUE INDEX uk_web_deployment_idempotency
 
 CREATE INDEX idx_web_deployment_site_created
     ON web_deployment (site_id, created_at DESC);
+
+CREATE INDEX idx_web_deployment_source_version
+    ON web_deployment (source_version_id);
 
 CREATE INDEX idx_web_deployment_tenant_status
     ON web_deployment (tenant_id, status, created_at DESC);

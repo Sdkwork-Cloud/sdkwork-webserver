@@ -840,7 +840,7 @@ html[data-sdk-color-mode="dark"] .webserver-auth-page {
 .application-creation-dialog .form-grid label {
   min-height: 42px;
   display: grid;
-  grid-template-columns: minmax(118px, .24fr) minmax(0, 1fr) auto;
+  grid-template-columns: minmax(168px, .28fr) minmax(0, 1fr) auto;
   align-items: center;
   gap: 12px;
   margin: 0;
@@ -851,11 +851,12 @@ html[data-sdk-color-mode="dark"] .webserver-auth-page {
 .application-creation-dialog .field-label-row {
   min-width: 0;
   justify-content: flex-start;
-  overflow: hidden;
+  overflow: visible;
   color: var(--sdk-color-text-secondary);
   font-size: 12px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height: 1.3;
+  text-overflow: clip;
+  white-space: normal;
 }
 .application-creation-dialog .field-required { flex: 0 0 auto; }
 .application-creation-dialog .field-required::after { content: "*"; }
@@ -1384,6 +1385,28 @@ html[data-sdk-color-mode="dark"] .webserver-auth-page {
   .application-wizard-stage::-webkit-scrollbar { display: none; }
   .application-wizard-stage-content { padding-right: 0; overflow: visible; }
   .application-step-pane { height: auto; }
+  .application-creation-dialog .form-grid label:not(.checkbox-field) {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto auto;
+    gap: 4px 10px;
+    padding-block: 7px;
+  }
+  .application-creation-dialog .form-grid label:not(.checkbox-field) .field-label-row {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .application-creation-dialog .form-grid label:not(.checkbox-field) input:not([type="checkbox"]),
+  .application-creation-dialog .form-grid label:not(.checkbox-field) select,
+  .application-creation-dialog .form-grid label:not(.checkbox-field) textarea {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+  .application-creation-dialog .form-grid label:not(.checkbox-field) .field-character-limit {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: center;
+    margin-bottom: 0;
+  }
   .application-identity-fields,
   .application-listing-fields,
   .application-release-layout { grid-template-columns: 1fr; }

@@ -159,7 +159,9 @@ impl ApplicationSourceImporter for GitDriveSourceImporter {
             move || package_repository(&repository_root)
         })
         .await
-        .map_err(|error| WebServiceError::Internal(format!("Git packaging task failed: {error}")))??;
+        .map_err(|error| {
+            WebServiceError::Internal(format!("Git packaging task failed: {error}"))
+        })??;
         let artifact_hash = sha256_hex(&package.archive);
         let artifact_size = package.archive.len() as i64;
         let artifact_drive_uri = self
@@ -194,9 +196,9 @@ async fn validate_repository_target(repository_url: &str) -> WebServiceResult<()
             "repositoryUrl must use HTTPS port 443 without credentials, query, or fragment",
         ));
     }
-    let host = url.host().ok_or_else(|| {
-        WebServiceError::validation("repositoryUrl must include a public host")
-    })?;
+    let host = url
+        .host()
+        .ok_or_else(|| WebServiceError::validation("repositoryUrl must include a public host"))?;
     let host_name = url.host_str().unwrap_or_default().to_ascii_lowercase();
     if let Some(allowed_hosts) = configured_allowed_hosts() {
         if !allowed_hosts.iter().any(|allowed| allowed == &host_name) {
@@ -220,7 +222,9 @@ async fn validate_repository_target(repository_url: &str) -> WebServiceResult<()
             let addresses = timeout(GIT_TIMEOUT, lookup_host((domain, 443)))
                 .await
                 .map_err(|_| WebServiceError::validation("repositoryUrl DNS lookup timed out"))?
-                .map_err(|_| WebServiceError::validation("repositoryUrl host could not be resolved"))?
+                .map_err(|_| {
+                    WebServiceError::validation("repositoryUrl host could not be resolved")
+                })?
                 .map(|address| address.ip())
                 .collect::<Vec<_>>();
             if addresses.is_empty() || addresses.iter().copied().any(is_forbidden_ip) {
@@ -289,8 +293,9 @@ async fn resolve_commit_hash(repository_root: &Path) -> WebServiceResult<String>
     .await
     .map_err(|_| WebServiceError::Internal("resolve Git commit timed out".to_string()))?
     .map_err(|error| WebServiceError::Internal(format!("resolve Git commit failed: {error}")))?;
-    let hash = String::from_utf8(output.stdout)
-        .map_err(|_| WebServiceError::Internal("Git returned a non-UTF8 commit hash".to_string()))?;
+    let hash = String::from_utf8(output.stdout).map_err(|_| {
+        WebServiceError::Internal("Git returned a non-UTF8 commit hash".to_string())
+    })?;
     let hash = hash.trim().to_ascii_lowercase();
     if !output.status.success()
         || hash.len() != 40
@@ -337,9 +342,9 @@ fn package_repository(repository_root: &Path) -> WebServiceResult<PackagedReposi
         .last_modified_time(fixed_time)
         .unix_permissions(0o644);
     for (path, absolute) in files {
-        writer
-            .start_file(path, options)
-            .map_err(|error| WebServiceError::Internal(format!("create source ZIP failed: {error}")))?;
+        writer.start_file(path, options).map_err(|error| {
+            WebServiceError::Internal(format!("create source ZIP failed: {error}"))
+        })?;
         let content = std::fs::read(absolute).map_err(internal_io("read Git source file"))?;
         writer
             .write_all(&content)
@@ -368,11 +373,13 @@ fn collect_repository_files(
 ) -> WebServiceResult<()> {
     for entry in std::fs::read_dir(directory).map_err(internal_io("read Git source directory"))? {
         let entry = entry.map_err(internal_io("read Git source entry"))?;
-        let file_type = entry.file_type().map_err(internal_io("inspect Git source entry"))?;
+        let file_type = entry
+            .file_type()
+            .map_err(internal_io("inspect Git source entry"))?;
         let absolute = entry.path();
-        let relative = absolute
-            .strip_prefix(repository_root)
-            .map_err(|_| WebServiceError::Internal("Git source path escaped its root".to_string()))?;
+        let relative = absolute.strip_prefix(repository_root).map_err(|_| {
+            WebServiceError::Internal("Git source path escaped its root".to_string())
+        })?;
         let normalized = normalize_source_path(relative)?;
         if normalized.split('/').any(|segment| segment == ".git") {
             continue;
@@ -417,12 +424,20 @@ fn collect_repository_files(
 }
 
 fn normalize_source_path(path: &Path) -> WebServiceResult<String> {
-    let normalized = path
-        .components()
-        .map(|component| component.as_os_str().to_str())
-        .collect::<Option<Vec<_>>>()
-        .ok_or_else(|| WebServiceError::validation("Git source paths must use UTF-8"))?
-        .join("/");
+    let mut segments = Vec::new();
+    for component in path.components() {
+        let std::path::Component::Normal(segment) = component else {
+            return Err(WebServiceError::validation(
+                "Git source contains an unsafe or excessively deep path",
+            ));
+        };
+        segments.push(
+            segment
+                .to_str()
+                .ok_or_else(|| WebServiceError::validation("Git source paths must use UTF-8"))?,
+        );
+    }
+    let normalized = segments.join("/");
     let depth = normalized.split('/').count();
     if normalized.is_empty()
         || normalized.len() > MAX_PATH_BYTES
@@ -500,58 +515,13 @@ fn sha256_hex(content: &[u8]) -> String {
     digest.iter().map(|byte| format!("{byte:02x}")).collect()
 }
 
-fn map_drive_error(
-    error: sdkwork_drive_workspace_service::DriveServiceError,
-) -> WebServiceError {
+fn map_drive_error(error: sdkwork_drive_workspace_service::DriveServiceError) -> WebServiceError {
     WebServiceError::Internal(format!("store Git source in Drive failed: {error:?}"))
 }
 
-fn internal_io(
-    context: &'static str,
-) -> impl FnOnce(std::io::Error) -> WebServiceError {
+fn internal_io(context: &'static str) -> impl FnOnce(std::io::Error) -> WebServiceError {
     move |error| WebServiceError::Internal(format!("{context} failed: {error}"))
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn private_and_documentation_addresses_are_rejected() {
-        for address in [
-            "127.0.0.1",
-            "10.0.0.1",
-            "100.64.0.1",
-            "169.254.1.1",
-            "192.0.2.1",
-            "198.51.100.1",
-            "203.0.113.1",
-            "::1",
-            "fc00::1",
-            "fe80::1",
-            "2001:db8::1",
-        ] {
-            assert!(is_forbidden_ip(address.parse().unwrap()), "{address}");
-        }
-        assert!(!is_forbidden_ip("8.8.8.8".parse().unwrap()));
-        assert!(!is_forbidden_ip("2606:4700:4700::1111".parse().unwrap()));
-    }
-
-    #[test]
-    fn repository_packaging_is_deterministic_and_detects_standard_configuration() {
-        let root = TempDir::new().unwrap();
-        std::fs::create_dir_all(root.path().join("etc")).unwrap();
-        std::fs::write(root.path().join("index.html"), "hello").unwrap();
-        std::fs::write(root.path().join("sdkwork.app.config.json"), "{}").unwrap();
-        std::fs::write(
-            root.path().join("etc/sdkwork.deployment.config.json"),
-            "{}",
-        )
-        .unwrap();
-        let first = package_repository(root.path()).unwrap();
-        let second = package_repository(root.path()).unwrap();
-        assert_eq!(first.archive, second.archive);
-        assert!(first.config_snapshot.app_config_detected);
-        assert!(first.config_snapshot.deployment_config_detected);
-    }
-}
+mod tests;

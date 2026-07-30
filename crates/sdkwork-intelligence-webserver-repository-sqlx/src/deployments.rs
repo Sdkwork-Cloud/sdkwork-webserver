@@ -27,6 +27,16 @@ struct DeploymentIdempotencyLookup<'a> {
     idempotency_key: &'a str,
 }
 
+struct SourceVersionDeploymentSnapshot {
+    internal_id: i64,
+    version_tag: String,
+    commit_hash: Option<String>,
+    source_ref: Option<String>,
+    artifact_drive_uri: String,
+    artifact_size: i64,
+    artifact_hash: String,
+}
+
 impl WebRepository {
     pub(super) async fn list_deployments_repo(
         &self,
@@ -163,14 +173,11 @@ impl WebRepository {
             .map(str::trim)
             .filter(|value| !value.is_empty())
             .unwrap_or("production");
-        let version_tag = normalized_optional(request.version_tag.as_deref());
-        let commit_hash = normalized_optional(request.commit_hash.as_deref());
-        let source_ref = normalized_optional(request.source_ref.as_deref());
-        let artifact_drive_uri = normalized_optional(request.artifact_drive_uri.as_deref());
-        let artifact_hash = normalized_optional(request.artifact_hash.as_deref());
-        let source_version_internal_id = if let Some(source_version_id) = request.source_version_id.as_deref() {
+        let source_version = if let Some(source_version_id) = request.source_version_id.as_deref() {
             let row = sqlx::query(
-                "SELECT id FROM web_source_version
+                "SELECT id, version_tag, commit_hash, source_ref, artifact_path,
+                        artifact_size, artifact_hash, status
+                 FROM web_source_version
                  WHERE tenant_id = $1 AND site_id = $2 AND uuid = $3",
             )
             .bind(tenant_id)
@@ -180,12 +187,69 @@ impl WebRepository {
             .await
             .map_err(|error| store_error("resolve deployment source version", error))?
             .ok_or_else(|| WebServiceError::not_found("source version not found"))?;
-            Some(row.try_get("id").map_err(|error| {
-                store_error("map deployment source version id", error)
-            })?)
+            let status: i32 = row
+                .try_get("status")
+                .map_err(|error| store_error("map deployment source version status", error))?;
+            if status != 1 {
+                return Err(WebServiceError::conflict(
+                    "source version is not ready or is outside the retained release window",
+                ));
+            }
+            Some(SourceVersionDeploymentSnapshot {
+                internal_id: row
+                    .try_get("id")
+                    .map_err(|error| store_error("map deployment source version id", error))?,
+                version_tag: row
+                    .try_get("version_tag")
+                    .map_err(|error| store_error("map deployment source version tag", error))?,
+                commit_hash: row.try_get("commit_hash").map_err(|error| {
+                    store_error("map deployment source version commit hash", error)
+                })?,
+                source_ref: row.try_get("source_ref").map_err(|error| {
+                    store_error("map deployment source version source ref", error)
+                })?,
+                artifact_drive_uri: row.try_get("artifact_path").map_err(|error| {
+                    store_error("map deployment source version artifact path", error)
+                })?,
+                artifact_size: row.try_get("artifact_size").map_err(|error| {
+                    store_error("map deployment source version artifact size", error)
+                })?,
+                artifact_hash: row.try_get("artifact_hash").map_err(|error| {
+                    store_error("map deployment source version artifact hash", error)
+                })?,
+            })
         } else {
             None
         };
+        let source_version_internal_id = source_version
+            .as_ref()
+            .map(|source_version| source_version.internal_id);
+        let version_tag = normalized_optional(request.version_tag.as_deref()).or_else(|| {
+            source_version
+                .as_ref()
+                .map(|source_version| source_version.version_tag.as_str())
+        });
+        let commit_hash = source_version.as_ref().map_or_else(
+            || normalized_optional(request.commit_hash.as_deref()),
+            |source_version| source_version.commit_hash.as_deref(),
+        );
+        let source_ref = source_version.as_ref().map_or_else(
+            || normalized_optional(request.source_ref.as_deref()),
+            |source_version| source_version.source_ref.as_deref(),
+        );
+        let artifact_drive_uri = source_version.as_ref().map_or_else(
+            || normalized_optional(request.artifact_drive_uri.as_deref()),
+            |source_version| Some(source_version.artifact_drive_uri.as_str()),
+        );
+        let artifact_size = source_version
+            .as_ref()
+            .map_or(request.artifact_size, |source_version| {
+                Some(source_version.artifact_size)
+            });
+        let artifact_hash = source_version.as_ref().map_or_else(
+            || normalized_optional(request.artifact_hash.as_deref()),
+            |source_version| Some(source_version.artifact_hash.as_str()),
+        );
 
         // 幂等性：如果客户端提供了非空 idempotency_key，
         // 先查找是否已存在相同 (tenant_id, idempotency_key) 的 deployment。
@@ -209,7 +273,7 @@ impl WebRepository {
             commit_hash,
             source_ref,
             artifact_drive_uri,
-            artifact_size: request.artifact_size,
+            artifact_size,
             artifact_hash,
             rollback_from_internal_id: None,
             idempotency_key: key,
@@ -252,7 +316,7 @@ impl WebRepository {
             .bind(commit_hash)
             .bind(source_ref)
             .bind(artifact_drive_uri)
-            .bind(request.artifact_size)
+            .bind(artifact_size)
             .bind(artifact_hash)
             .bind(idempotency_key)
             .bind(&now)
@@ -485,7 +549,7 @@ impl WebRepository {
             .map_err(|error| store_error("rollback web_deployment source version status", error))?;
         if source_version_internal_id.is_some() && source_version_status != Some(1) {
             return Err(WebServiceError::conflict(
-                "the source version artifact has been pruned and cannot be rolled back",
+                "the source version is outside the retained release window and cannot be rolled back",
             ));
         }
         let idempotency_key_hash = deployment_idempotency_key_hash(

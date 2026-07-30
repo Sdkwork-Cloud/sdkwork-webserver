@@ -14,9 +14,10 @@ use sdkwork_webserver_contract::{
     AgentHeartbeatRequest, ApplicationStoreListing, CertificateIssueUpdate,
     CreateCertificateRequest, CreateDeploymentRequest, CreateDomainRequest,
     CreateEnvVariableRequest, CreateHealthCheckRequest, CreateNginxConfigRequest,
-    CreateServerRequest, CreateSiteRequest, ListNginxConfigsQuery, ListSitesQuery, MediaResource,
-    RuntimeObservationState, UpdateNginxConfigRequest, UpdateSiteRequest, WebAppRequestContext,
-    WebAppResourceScope, WebServiceErrorKind, WebsiteRuntimeSetSnapshot,
+    CreateServerRequest, CreateSiteRequest, CreateSourceVersionRequest, ListNginxConfigsQuery,
+    ListSitesQuery, MediaResource, RuntimeObservationState, SourceVersionConfigSnapshot,
+    UpdateNginxConfigRequest, UpdateSiteRequest, WebAppRequestContext, WebAppResourceScope,
+    WebServiceErrorKind, WebsiteRuntimeSetSnapshot,
 };
 use sdkwork_webserver_core::website_runtime::website_runtime_set_snapshot_sha256;
 use sdkwork_webserver_database_host::bootstrap_web_database;
@@ -531,6 +532,7 @@ async fn verify_repository_contract(context: &TestContext) {
     assert!(deep_page.items.is_empty());
     assert_eq!(deep_page.page_size, 100);
 
+    verify_source_version_contract(context, &sites[0].id, &sites[1].id, &tenant_b_site.id).await;
     verify_deployment_idempotency(context, &sites[0].id, &sites[1].id).await;
     verify_rollback_atomicity(context, &sites[0].id).await;
     verify_bounded_config_collections(context, &sites[2].id, &sites[3].id).await;
@@ -1721,6 +1723,7 @@ async fn verify_deployment_idempotency(
     let repository = context.repository.as_ref();
     let request = CreateDeploymentRequest {
         deploy_type: 1,
+        source_version_id: None,
         environment: Some("production".to_owned()),
         version_tag: Some("v1.2.3".to_owned()),
         commit_hash: Some("0123456789abcdef".to_owned()),
@@ -1807,6 +1810,191 @@ async fn verify_deployment_idempotency(
     );
 }
 
+async fn verify_source_version_contract(
+    context: &TestContext,
+    site_id: &str,
+    other_site_id: &str,
+    other_tenant_site_id: &str,
+) {
+    let repository = context.repository.as_ref();
+    let first_request = test_source_version_request(0);
+    let first = repository
+        .create_source_version(TENANT_A, site_id, Some(91), 5, &first_request)
+        .await
+        .expect("create first source version");
+    assert_eq!(first.status, 1);
+    assert!(first.retained);
+    assert_eq!(
+        first.config_snapshot.app_config_path,
+        first_request.config_snapshot.app_config_path
+    );
+    assert_eq!(
+        first.config_snapshot.deployment_config_path,
+        first_request.config_snapshot.deployment_config_path
+    );
+    assert!(first.config_snapshot.app_config_detected);
+    assert!(first.config_snapshot.deployment_config_detected);
+
+    repository
+        .retrieve_source_version(TENANT_A, other_site_id, &first.id)
+        .await
+        .expect_err("another site must not retrieve a source version");
+    repository
+        .retrieve_source_version(TENANT_B, other_tenant_site_id, &first.id)
+        .await
+        .expect_err("another tenant must not retrieve a source version");
+    repository
+        .create_source_version(TENANT_B, site_id, Some(91), 5, &first_request)
+        .await
+        .expect_err("another tenant must not create a source version for the site");
+
+    repository
+        .create_source_version(TENANT_A, other_site_id, Some(91), 5, &first_request)
+        .await
+        .expect("the same version tag is valid on another site");
+    repository
+        .create_source_version(TENANT_B, other_tenant_site_id, Some(91), 5, &first_request)
+        .await
+        .expect("the same version tag is valid in another tenant");
+    let duplicate = repository
+        .create_source_version(TENANT_A, site_id, Some(91), 5, &first_request)
+        .await
+        .expect_err("a version tag must be unique within one application");
+    assert_eq!(duplicate.kind(), WebServiceErrorKind::Conflict);
+
+    let mut created = vec![first];
+    for index in 1..7 {
+        created.push(
+            repository
+                .create_source_version(
+                    TENANT_A,
+                    site_id,
+                    Some(91),
+                    5,
+                    &test_source_version_request(index),
+                )
+                .await
+                .expect("create retained source version"),
+        );
+    }
+    let page = repository
+        .list_source_versions(TENANT_A, site_id, 1, i32::MAX)
+        .await
+        .expect("list retained and pruned source versions");
+    assert_eq!(page.total, 7);
+    assert_eq!(page.page_size, 100);
+    assert_eq!(page.items.iter().filter(|item| item.retained).count(), 5);
+    assert!(page.items[..5]
+        .iter()
+        .all(|item| item.status == 1 && item.retained));
+    assert!(page.items[5..]
+        .iter()
+        .all(|item| item.status == 3 && !item.retained));
+
+    let selected = created.last().expect("latest source version");
+    let deployment = repository
+        .create_deployment(
+            TENANT_A,
+            site_id,
+            Some(91),
+            &CreateDeploymentRequest {
+                deploy_type: 1,
+                source_version_id: Some(selected.id.clone()),
+                environment: Some("production".to_owned()),
+                version_tag: Some("release-v6".to_owned()),
+                commit_hash: Some("caller-must-not-override".to_owned()),
+                source_ref: Some("caller/must-not-override".to_owned()),
+                artifact_drive_uri: Some("drive://spaces/untrusted/nodes/untrusted".to_owned()),
+                artifact_size: Some(1),
+                artifact_hash: Some("f".repeat(64)),
+                idempotency_key: None,
+            },
+        )
+        .await
+        .expect("create deployment from retained source version");
+    assert_eq!(
+        deployment.source_version_id.as_deref(),
+        Some(selected.id.as_str())
+    );
+    assert_eq!(deployment.version_tag.as_deref(), Some("release-v6"));
+    assert_eq!(deployment.commit_hash, selected.commit_hash);
+    assert_eq!(deployment.source_ref, selected.source_ref);
+    assert_eq!(
+        deployment.artifact_drive_uri.as_deref(),
+        Some(selected.artifact_drive_uri.as_str())
+    );
+    assert_eq!(deployment.artifact_size, Some(selected.artifact_size));
+    assert_eq!(
+        deployment.artifact_hash.as_deref(),
+        Some(selected.artifact_hash.as_str())
+    );
+
+    for (tenant_id, target_site_id) in [(TENANT_A, other_site_id), (TENANT_B, other_tenant_site_id)]
+    {
+        let error = repository
+            .create_deployment(
+                tenant_id,
+                target_site_id,
+                Some(91),
+                &CreateDeploymentRequest {
+                    source_version_id: Some(selected.id.clone()),
+                    ..CreateDeploymentRequest::default()
+                },
+            )
+            .await
+            .expect_err("a deployment must not use another application source version");
+        assert_eq!(error.kind(), WebServiceErrorKind::NotFound);
+    }
+
+    sqlx::query("UPDATE web_deployment SET status = 2 WHERE tenant_id = $1 AND uuid = $2")
+        .bind(TENANT_A)
+        .bind(&deployment.id)
+        .execute(&context.pool)
+        .await
+        .expect("mark source-version deployment successful");
+    for index in 7..12 {
+        repository
+            .create_source_version(
+                TENANT_A,
+                site_id,
+                Some(91),
+                5,
+                &test_source_version_request(index),
+            )
+            .await
+            .expect("advance source-version retention window");
+    }
+    let pruned = repository
+        .retrieve_source_version(TENANT_A, site_id, &selected.id)
+        .await
+        .expect("retrieve pruned source version");
+    assert_eq!(pruned.status, 3);
+    assert!(!pruned.retained);
+    let rollback_error = repository
+        .rollback_deployment(TENANT_A, site_id, &deployment.id, Some(91), None)
+        .await
+        .expect_err("a successful deployment cannot restore a pruned source version");
+    assert_eq!(rollback_error.kind(), WebServiceErrorKind::Conflict);
+}
+
+fn test_source_version_request(index: usize) -> CreateSourceVersionRequest {
+    CreateSourceVersionRequest {
+        version_tag: format!("source-v{index}"),
+        source_type: "ARCHIVE".to_owned(),
+        source_ref: Some(format!("release/source-v{index}")),
+        commit_hash: Some(format!("{index:040x}")),
+        artifact_drive_uri: format!("drive://spaces/source-versions/nodes/node-{index}"),
+        artifact_size: 1024 + index as i64,
+        artifact_hash: format!("{index:064x}"),
+        config_snapshot: SourceVersionConfigSnapshot {
+            app_config_path: "sdkwork.app.config.json".to_owned(),
+            deployment_config_path: "etc/sdkwork.deployment.config.json".to_owned(),
+            app_config_detected: true,
+            deployment_config_detected: true,
+        },
+    }
+}
+
 async fn verify_rollback_atomicity(context: &TestContext, site_id: &str) {
     let source = context
         .repository
@@ -1816,6 +2004,7 @@ async fn verify_rollback_atomicity(context: &TestContext, site_id: &str) {
             Some(91),
             &CreateDeploymentRequest {
                 deploy_type: 1,
+                source_version_id: None,
                 environment: Some("production".to_owned()),
                 version_tag: Some("rollback-source".to_owned()),
                 commit_hash: None,

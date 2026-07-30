@@ -8,6 +8,7 @@ See `ARCHITECTURE_DECISION_SPEC.md`.
 
 ## Accepted
 
+- [ADR-20260730 Drive-Backed Application Source Versions](ADR-20260730-drive-backed-application-source-versions.md)
 - [ADR-20260728 Idempotency Contract Closure](ADR-20260728-idempotency-contract-closure.md)
 
 ## Proposed

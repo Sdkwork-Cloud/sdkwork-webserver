@@ -5,6 +5,10 @@ canon:
   prd: docs/product/prd/PRD.md
   techArchitecture: docs/architecture/tech/TECH_ARCHITECTURE.md
 entries:
+  - id: ADR-20260730-drive-backed-application-source-versions
+    path: docs/architecture/decisions/ADR-20260730-drive-backed-application-source-versions.md
+    kind: adr
+    status: accepted
   - id: REQ-2026-0065
     path: docs/product/requirements/REQ-2026-0065-standalone-browser-same-origin-delivery.md
     kind: req
