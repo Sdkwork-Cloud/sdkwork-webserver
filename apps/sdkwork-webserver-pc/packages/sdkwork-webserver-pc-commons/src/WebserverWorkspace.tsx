@@ -2393,6 +2393,24 @@ function recordLabel(item: Record<string, unknown>, index: number): string {
 }
 
 function displayValue(value: unknown, column: string, resource: WebserverResourceKey, locale: WebserverLocale): ReactNode {
+  if (
+    resource === "managed-domains"
+    && column === "applicationName"
+    && (value === null || value === undefined || (typeof value === "string" && !value.trim()))
+  ) {
+    return <span className="status-badge status-pending">{translateWebserver(locale, "value.domainBinding.unbound")}</span>;
+  }
+  if (
+    (resource === "domains" || resource === "application-domains" || resource === "managed-domains")
+    && column === "isVerified"
+    && typeof value === "boolean"
+  ) {
+    const label = translateWebserver(
+      locale,
+      value ? "value.domainVerification.verified" : "value.domainVerification.unverified",
+    );
+    return <span className={`status-badge ${value ? "status-success" : "status-pending"}`}>{label}</span>;
+  }
   if (value === null || value === undefined) return "-";
   if ((resource === "sites" || resource === "applications") && column === "status") {
     return <span className={`status-badge application-status-${String(value).toLowerCase()}`}>{applicationStatus(value, locale)}</span>;

@@ -2,6 +2,7 @@
 
 import { createWebserverAdminApplicationRegistry, webserverModule as applicationsModule } from "@sdkwork/webserver-pc-admin-applications";
 import type { WebserverAdminSdkClient } from "@sdkwork/webserver-pc-admin-core";
+import { createWebserverAdminDomainRegistry, webserverModule as domainsModule } from "@sdkwork/webserver-pc-admin-domains";
 import { WebserverWorkspace, type ApplicationMediaStorage, type ApplicationSourceStorage } from "@sdkwork/webserver-pc-commons";
 import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
@@ -302,6 +303,33 @@ describe("admin workspace application controls", () => {
     const scopeInput = await screen.findByRole("combobox", { name: "Application" });
     expect((scopeInput as HTMLSelectElement).value).toBe("app-1");
     await waitFor(() => expect(listDomains).toHaveBeenCalledWith("app-1", { page: 1, pageSize: 20 }));
+  });
+
+  it("distinguishes domain binding and verification states", async () => {
+    const registry = createWebserverAdminDomainRegistry(client({
+      managedDomainItems: [
+        {
+          id: "domain-unbound",
+          hostname: "unbound.example.test",
+          applicationName: null,
+          isVerified: false,
+          certificateCount: 0,
+        },
+        {
+          id: "domain-bound",
+          hostname: "verified.example.test",
+          applicationName: "Public API",
+          isVerified: true,
+          certificateCount: 2,
+        },
+      ],
+    }));
+    renderDomainWorkspace(registry);
+
+    await screen.findByText("unbound.example.test");
+    expect(screen.getByText("Unbound").classList.contains("status-pending")).toBe(true);
+    expect(screen.getByText("Unverified").classList.contains("status-pending")).toBe(true);
+    expect(screen.getByText("Verified").classList.contains("status-success")).toBe(true);
   });
 
   it("prevents duplicate submissions and locks dismissal while application creation is running", async () => {
@@ -651,6 +679,7 @@ function client(overrides: {
   deploymentItems?: Record<string, unknown>[];
   importGitSourceVersion?: ReturnType<typeof vi.fn>;
   listDomains?: ReturnType<typeof vi.fn>;
+  managedDomainItems?: Record<string, unknown>[];
   sourceVersionItems?: Record<string, unknown>[];
   pause?: ReturnType<typeof vi.fn>;
   rollback?: ReturnType<typeof vi.fn>;
@@ -698,6 +727,12 @@ function client(overrides: {
           retrieve: vi.fn(),
         },
       },
+    },
+    domain: {
+      list: vi.fn().mockResolvedValue({
+        items: overrides.managedDomainItems ?? [],
+        pageInfo: { page: 1, pageSize: 20, hasMore: false },
+      }),
     },
   } as unknown as WebserverAdminSdkClient;
 }
@@ -760,6 +795,29 @@ function renderWorkspace(
               locale="en-US"
               modules={[applicationsModule]}
               permissionScope={permissionScope}
+              registry={registry}
+              surface="backend-admin"
+            />
+          }
+        />
+      </Routes>
+    </MemoryRouter>,
+  );
+}
+
+function renderDomainWorkspace(
+  registry: ReturnType<typeof createWebserverAdminDomainRegistry>,
+): void {
+  render(
+    <MemoryRouter initialEntries={["/admin/managed-domains"]}>
+      <Routes>
+        <Route
+          path="/admin/*"
+          element={
+            <WebserverWorkspace
+              locale="en-US"
+              modules={[domainsModule]}
+              permissionScope={["*"]}
               registry={registry}
               surface="backend-admin"
             />
