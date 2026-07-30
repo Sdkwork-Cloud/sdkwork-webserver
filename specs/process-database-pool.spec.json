@@ -13,9 +13,9 @@
       "poolOwner": "crates/sdkwork-webserver-database-host/src/lib.rs",
       "driver": "sdkwork_database_sqlx::DatabasePool",
       "poolCount": 1,
-      "databaseUrlEnv": "SDKWORK_WEB_DATABASE_URL or SDKWORK_CLAW_DATABASE_*",
-      "schemaEnv": "SDKWORK_WEB_DATABASE_SCHEMA or SDKWORK_CLAW_DATABASE_SCHEMA",
-      "maxConnectionsEnv": "SDKWORK_WEB_DATABASE_MAX_CONNECTIONS or SDKWORK_CLAW_DATABASE_MAX_CONNECTIONS",
+      "databaseUrlEnv": "SDKWORK_DATABASE_URL",
+      "schemaEnv": "SDKWORK_DATABASE_SCHEMA",
+      "maxConnectionsEnv": "SDKWORK_DATABASE_MAX_CONNECTIONS",
       "temporaryDriverPoolCountEnv": "SDKWORK_DATABASE_TEMPORARY_DRIVER_POOL_COUNT",
       "productionSourceRoots": [
         "crates/sdkwork-api-web-server-standalone-gateway/src",
@@ -54,7 +54,7 @@
           "driver": "sqlx::AnyPool",
           "owner": "sdkwork-drive maintainers",
           "removalMilestone": "Migrate Drive PostgreSQL App API repositories to sqlx::PgPool before the next Web Server production release",
-          "combinedConnectionBudget": "SDKWORK_CLAW_DATABASE_MAX_CONNECTIONS",
+          "combinedConnectionBudget": "SDKWORK_DATABASE_MAX_CONNECTIONS",
           "adr": "docs/architecture/decisions/ADR-20260728-embedded-standalone-dependency-assemblies.md",
           "evidence": [
             "../sdkwork-drive/crates/sdkwork-drive-workspace-service/src/infrastructure/sql/installer.rs"
@@ -68,9 +68,9 @@
       "poolOwner": "crates/sdkwork-webserver-database-host/src/lib.rs",
       "driver": "sdkwork_database_sqlx::DatabasePool",
       "poolCount": 1,
-      "databaseUrlEnv": "SDKWORK_WEB_DATABASE_URL or SDKWORK_CLAW_DATABASE_*",
-      "schemaEnv": "SDKWORK_WEB_DATABASE_SCHEMA or SDKWORK_CLAW_DATABASE_SCHEMA",
-      "maxConnectionsEnv": "SDKWORK_WEB_DATABASE_MAX_CONNECTIONS or SDKWORK_CLAW_DATABASE_MAX_CONNECTIONS",
+      "databaseUrlEnv": "SDKWORK_DATABASE_URL",
+      "schemaEnv": "SDKWORK_DATABASE_SCHEMA",
+      "maxConnectionsEnv": "SDKWORK_DATABASE_MAX_CONNECTIONS",
       "productionSourceRoots": [
         "crates/sdkwork-webserver-certificate-worker/src",
         "crates/sdkwork-intelligence-webserver-repository-sqlx/src",

@@ -27,4 +27,20 @@ export const loadProfile = runtime.loadProfile;
 export const mergeRuntimeEnv = runtime.mergeRuntimeEnv;
 export const resolveIamDevEnv = runtime.resolveIamDevEnv;
 
+export function canonicalizeWorkspaceDatabaseEnv(env) {
+  return Object.fromEntries(Object.entries(env).filter(([key]) => {
+    const retiredPrefixedKey = key.startsWith('SDKWORK_')
+      && !key.startsWith('SDKWORK_DATABASE_')
+      && key.includes('_DATABASE_');
+    const retiredAlias = [
+      'DATABASE_URL',
+      'DATABASE_PROVIDER',
+      'DATABASE_SSLMODE',
+      'SDKWORK_DATABASE_PROVIDER',
+      'SDKWORK_DATABASE_SSLMODE',
+    ].includes(key);
+    return !retiredPrefixedKey && !retiredAlias;
+  }));
+}
+
 export { runtime, spec };

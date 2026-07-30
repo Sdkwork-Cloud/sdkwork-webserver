@@ -44,7 +44,7 @@
     "dependencyApiSurfaces": [],
     "events": [],
     "configKeys": [
-      "SDKWORK_WEB_DATABASE_URL",
+      "SDKWORK_DATABASE_URL",
       "SDKWORK_WEB_SNOWFLAKE_NODE_ID",
       "SDKWORK_WEB_SECRET_ENCRYPTION_KEY"
     ]

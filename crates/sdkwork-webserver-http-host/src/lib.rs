@@ -134,8 +134,8 @@ pub async fn web_auth_mode_from_env() -> WebAuthMode {
         return WebAuthMode::DevInline;
     }
 
-    let iam_database_explicitly_configured = std::env::var("SDKWORK_IAM_DATABASE_URL")
-        .or_else(|_| std::env::var("SDKWORK_IAM_DATABASE_ENGINE"))
+    let iam_database_explicitly_configured = std::env::var("SDKWORK_DATABASE_URL")
+        .or_else(|_| std::env::var("SDKWORK_DATABASE_ENGINE"))
         .is_ok();
 
     if web_is_production_like_environment() && !iam_database_explicitly_configured {

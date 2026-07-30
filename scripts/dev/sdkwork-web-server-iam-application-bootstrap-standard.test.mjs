@@ -89,7 +89,7 @@ test('standalone profile governs the temporary Drive database driver exception',
       owner: 'sdkwork-drive maintainers',
       removalMilestone:
         'Migrate Drive PostgreSQL App API repositories to sqlx::PgPool before the next Web Server production release',
-      combinedConnectionBudget: 'SDKWORK_CLAW_DATABASE_MAX_CONNECTIONS',
+      combinedConnectionBudget: 'SDKWORK_DATABASE_MAX_CONNECTIONS',
       adr: 'docs/architecture/decisions/ADR-20260728-embedded-standalone-dependency-assemblies.md',
       evidence: [
         '../sdkwork-drive/crates/sdkwork-drive-workspace-service/src/infrastructure/sql/installer.rs',

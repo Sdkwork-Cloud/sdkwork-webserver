@@ -145,7 +145,7 @@ pub async fn assemble_api_router(
 }
 
 pub async fn migrate_database_from_env() -> Result<(), ApiAssemblyError> {
-    std::env::set_var("SDKWORK_WEB_DATABASE_AUTO_MIGRATE", "true");
+    std::env::set_var("SDKWORK_DATABASE_AUTO_MIGRATE", "true");
     sdkwork_webserver_database_host::bootstrap_web_database_from_env()
         .await
         .map(|_| ())

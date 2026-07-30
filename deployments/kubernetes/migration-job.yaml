@@ -39,7 +39,7 @@ spec:
               value: cloud
             - name: SDKWORK_WEB_PROFILE_ID
               value: cloud.production
-            - name: SDKWORK_WEB_DATABASE_URL
+            - name: SDKWORK_DATABASE_URL
               valueFrom:
                 secretKeyRef:
                   name: sdkwork-web-server-runtime

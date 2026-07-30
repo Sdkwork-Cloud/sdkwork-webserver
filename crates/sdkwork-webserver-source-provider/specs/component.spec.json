@@ -47,7 +47,6 @@
     "events": [],
     "configKeys": [
       "SDKWORK_WEB_GIT_ALLOWED_HOSTS",
-      "SDKWORK_CLAW_DATABASE_*",
       "SDKWORK_DATABASE_URL"
     ]
   },

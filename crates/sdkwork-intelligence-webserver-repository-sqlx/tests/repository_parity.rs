@@ -258,7 +258,7 @@ async fn prepare_database(
             "refusing to run repository parity against a non-empty PostgreSQL schema"
         );
         let _auto_migrate =
-            EnvironmentVariableGuard::set("SDKWORK_WEB_DATABASE_AUTO_MIGRATE", "true");
+            EnvironmentVariableGuard::set("SDKWORK_DATABASE_AUTO_MIGRATE", "true");
         bootstrap_web_database(lifecycle_pool.clone())
             .await
             .expect("initialize PostgreSQL Web database lifecycle");

@@ -21,7 +21,7 @@ The Web Server PC consumed the IAM and Drive App SDKs. Its standalone runtime co
 - Standalone release packages include IAM `database/` and `iam/registry`/module assets under `share/sdkwork/iam`, Drive database assets under `share/sdkwork/drive`, and bind both owner roots explicitly. Installed startup must not use sibling repository paths or compile-time source paths.
 - The Web Server lock file pins the newly introduced Drive/AWS dependency graph to the versions already verified by the Drive owner repository and compatible with Rust 1.92.
 - IAM reuses the canonical installed `sdkwork_database_sqlx::DatabasePool`. Drive's PostgreSQL App API repositories still expose `sqlx::AnyPool`, so the standalone profile declares one temporary, identity-checked compatibility driver exception owned by `sdkwork-drive maintainers`.
-- `SDKWORK_DATABASE_TEMPORARY_ANY_POOL_EXCEPTION=true` and `SDKWORK_DATABASE_TEMPORARY_DRIVER_POOL_COUNT=1` must be present before the canonical pool is created. The configured `SDKWORK_CLAW_DATABASE_MAX_CONNECTIONS` value is the combined process budget; the current development budget of 10 is split by the database framework into 5 canonical and 5 compatibility connections. The exception cannot enlarge the process budget and is not single-driver pool compliance.
+- `SDKWORK_DATABASE_TEMPORARY_ANY_POOL_EXCEPTION=true` and `SDKWORK_DATABASE_TEMPORARY_DRIVER_POOL_COUNT=1` must be present before the canonical pool is created. The configured `SDKWORK_DATABASE_MAX_CONNECTIONS` value is the combined process budget; the current development budget of 10 is split by the database framework into 5 canonical and 5 compatibility connections. The exception cannot enlarge the process budget and is not single-driver pool compliance.
 
 ## Alternatives
 

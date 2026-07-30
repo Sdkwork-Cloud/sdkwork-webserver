@@ -7,6 +7,7 @@ import process from 'node:process';
 
 import { ensureTrackedBuildSources } from './lib/build-source-integrity.mjs';
 import {
+  canonicalizeWorkspaceDatabaseEnv,
   IAM_APPLICATION_BOOTSTRAP_ENV,
   REPO_ROOT,
   VALID_DEPLOYMENT_PROFILES,
@@ -96,9 +97,9 @@ function createSqliteEnv() {
   mkdirSync(runtimeDirectory, { recursive: true });
   const databasePath = path.join(runtimeDirectory, 'webserver.sqlite').split(path.sep).join('/');
   return {
-    SDKWORK_WEB_DATABASE_ENGINE: 'sqlite',
-    SDKWORK_WEB_DATABASE_MAX_CONNECTIONS: '1',
-    SDKWORK_WEB_DATABASE_URL: `sqlite:///${databasePath}?mode=rwc`,
+    SDKWORK_DATABASE_ENGINE: 'sqlite',
+    SDKWORK_DATABASE_MAX_CONNECTIONS: '1',
+    SDKWORK_DATABASE_URL: `sqlite:///${databasePath}?mode=rwc`,
   };
 }
 
@@ -106,9 +107,9 @@ function buildRuntimeEnv(settings) {
   const profileId = `${settings.deploymentProfile}.${settings.environment}`;
   const profileEnv = loadProfile(profileId);
   const baseEnv = mergeRuntimeEnv(process.env, profileEnv);
-  const iamEnv = resolveIamDevEnv(baseEnv, {
-    postgresEnvFile: settings.devEnvFile,
-  });
+  const iamEnv = canonicalizeWorkspaceDatabaseEnv(
+    resolveIamDevEnv(baseEnv, { postgresEnvFile: settings.devEnvFile }),
+  );
   const databaseEnv = settings.database === 'sqlite' ? createSqliteEnv() : {};
   const databaseSource = settings.database === 'postgres'
     ? path.relative(REPO_ROOT, path.resolve(REPO_ROOT, settings.devEnvFile))
@@ -123,10 +124,8 @@ function buildRuntimeEnv(settings) {
       ...IAM_APPLICATION_BOOTSTRAP_ENV,
       SDKWORK_DEPLOYMENT_PROFILE: settings.deploymentProfile,
       SDKWORK_ENVIRONMENT: settings.environment,
-      SDKWORK_IAM_DATABASE_AUTO_MIGRATE:
-        iamEnv.SDKWORK_IAM_DATABASE_AUTO_MIGRATE ?? autoMigrate,
-      SDKWORK_WEB_DATABASE_AUTO_MIGRATE:
-        iamEnv.SDKWORK_WEB_DATABASE_AUTO_MIGRATE ?? autoMigrate,
+      SDKWORK_DATABASE_AUTO_MIGRATE:
+        iamEnv.SDKWORK_DATABASE_AUTO_MIGRATE ?? autoMigrate,
       SDKWORK_WEB_DEPLOYMENT_PROFILE: settings.deploymentProfile,
       SDKWORK_WEB_ENVIRONMENT: settings.environment,
       SDKWORK_WEB_RUNTIME_TARGET: 'server',

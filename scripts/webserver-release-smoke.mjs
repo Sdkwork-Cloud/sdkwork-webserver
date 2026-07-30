@@ -20,6 +20,7 @@ import { fileURLToPath } from 'node:url';
 import { extract as extractTar } from 'tar';
 
 import {
+  canonicalizeWorkspaceDatabaseEnv,
   IAM_APPLICATION_BOOTSTRAP_ENV,
   resolveIamDevEnv,
 } from './lib/webserver-topology.mjs';
@@ -330,9 +331,9 @@ function assertUnauthenticatedOwnerRoute(response, expected, label) {
 function standaloneManagementEnv(packageRoot, port) {
   const iamRoot = path.join(packageRoot, ...STANDALONE_IAM_ROOT.split('/'));
   const driveRoot = path.join(packageRoot, ...STANDALONE_DRIVE_ROOT.split('/'));
-  const databaseEnv = resolveIamDevEnv(process.env, {
-    postgresEnvFile: '.env.postgres',
-  });
+  const databaseEnv = canonicalizeWorkspaceDatabaseEnv(
+    resolveIamDevEnv(process.env, { postgresEnvFile: '.env.postgres' }),
+  );
   return {
     ...databaseEnv,
     ...IAM_APPLICATION_BOOTSTRAP_ENV,
@@ -355,8 +356,7 @@ function standaloneManagementEnv(packageRoot, port) {
     SDKWORK_WEB_APPLICATION_APP_HTTP_URL: `http://127.0.0.1:${port}`,
     SDKWORK_WEB_APPLICATION_BACKEND_HTTP_URL: `http://127.0.0.1:${port}`,
     SDKWORK_WEB_PC_STATIC_ROOT: STANDALONE_PC_ROOT,
-    SDKWORK_WEB_DATABASE_AUTO_MIGRATE: 'true',
-    SDKWORK_IAM_DATABASE_AUTO_MIGRATE: 'true',
+    SDKWORK_DATABASE_AUTO_MIGRATE: 'true',
     SDKWORK_DATABASE_TEMPORARY_ANY_POOL_EXCEPTION: 'true',
     SDKWORK_DATABASE_TEMPORARY_DRIVER_POOL_COUNT: '1',
     SDKWORK_WEB_SECRET_ENCRYPTION_KEY:
