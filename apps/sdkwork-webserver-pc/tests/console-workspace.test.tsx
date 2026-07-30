@@ -125,7 +125,7 @@ describe("console release controls", () => {
       drive: {},
       web: {
         sourceVersion: {
-          sites: { sourceVersions: { create: createSourceVersion, importGit, list: listSourceVersions } },
+          sites: { sourceVersions: { create: createSourceVersion, gitImport: { create: importGit }, list: listSourceVersions } },
         },
       },
     } as unknown as WebserverConsoleSdkClients, sourceStorage, testMediaStorage());
@@ -353,7 +353,7 @@ describe("console release controls", () => {
           create: vi.fn().mockResolvedValue({ id: "site-1", name: "Git portal" }),
           update: vi.fn().mockResolvedValue({ id: "site-1" }),
         },
-        sourceVersion: { sites: { sourceVersions: { importGit } } },
+        sourceVersion: { sites: { sourceVersions: { gitImport: { create: importGit } } } },
         deployment: { sites: { deployments: { create: createDeployment } } },
       },
     } as unknown as WebserverConsoleSdkClients, sourceStorage, testMediaStorage());

@@ -31,7 +31,7 @@ class SourceVersionApi(private val client: HttpClient) {
     }
 
     /** 从公共 Git 仓库导入应用源码版本 */
-    suspend fun sitesSourceVersionsImportGit(siteId: String, body: ImportGitSourceVersionRequest, idempotencyKey: String): SitesSourceVersionsImportGitResponse201? {
+    suspend fun sitesSourceVersionsGitImportCreate(siteId: String, body: ImportGitSourceVersionRequest, idempotencyKey: String): SitesSourceVersionsGitImportCreateResponse201? {
         val requestHeaders = buildRequestHeaders(
             mapOf(
                 "Idempotency-Key" to HeaderParameterSpec(idempotencyKey, "simple", false, null),
@@ -39,7 +39,7 @@ class SourceVersionApi(private val client: HttpClient) {
             emptyMap()
         )
         val raw = client.post(ApiPaths.appPath("/sites/${serializePathParameter(siteId, PathParameterSpec("siteId", "simple", false))}/source_versions/git_import"), body, null, requestHeaders, "application/json")
-        return client.convertValue(raw, object : TypeReference<SitesSourceVersionsImportGitResponse201>() {})
+        return client.convertValue(raw, object : TypeReference<SitesSourceVersionsGitImportCreateResponse201>() {})
     }
 
     /** 获取应用源码版本详情 */

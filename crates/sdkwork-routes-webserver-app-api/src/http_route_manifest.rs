@@ -106,7 +106,7 @@ const HTTP_ROUTES: &[HttpRoute] = &[
         HttpMethod::Post,
         "/app/v3/api/sites/{siteId}/source_versions/git_import",
         "sourceVersion",
-        "sites.sourceVersions.importGit",
+        "sites.sourceVersions.gitImport.create",
     )
     .with_required_permission("web.sites.write")
     .with_idempotent(true)

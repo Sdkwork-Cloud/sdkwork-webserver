@@ -9,10 +9,14 @@
     "protocol": "http",
     "packageName": "com.sdkwork:sdkwork-web-backend-sdk"
   },
-  "changeFingerprint": "1966133d99a7414740188cf019d1765490e0e9835ec494a56c378cdeacbd1445",
+  "changeFingerprint": "b4bfa00cf3f156e629d5141b3c9483fe2db5dc3ce07cc311a1a93757e8dacba4",
   "changes": {
-    "createdGeneratedFiles": [],
-    "updatedGeneratedFiles": [],
+    "createdGeneratedFiles": [
+      "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationsSourceVersionsGitImportCreateResponse201.kt"
+    ],
+    "updatedGeneratedFiles": [
+      "src/main/kotlin/com/sdkwork/web/backend/sdk/api/ApplicationSourceVersionApi.kt"
+    ],
     "unchangedGeneratedFiles": [
       "bin/publish-core.mjs",
       "bin/publish.ps1",
@@ -34,7 +38,6 @@
       "src/main/kotlin/com/sdkwork/web/backend/sdk/api/ApplicationApi.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/api/ApplicationDeploymentApi.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/api/ApplicationDomainApi.kt",
-      "src/main/kotlin/com/sdkwork/web/backend/sdk/api/ApplicationSourceVersionApi.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/api/AuditApi.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/api/CertificateApi.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/api/CertificateDistributionApi.kt",
@@ -59,7 +62,6 @@
       "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationsPauseResponse.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationsRetrieveResponse.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationsSourceVersionsCreateResponse201.kt",
-      "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationsSourceVersionsImportGitResponse201.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationsSourceVersionsListResponse.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationsSourceVersionsRetrieveResponse.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationStoreListing.kt",
@@ -127,7 +129,9 @@
       "src/main/kotlin/com/sdkwork/web/backend/sdk/UpdateDomainApplicationBindingRequest.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/UpdateNginxConfigRequest.kt"
     ],
-    "deletedGeneratedFiles": [],
+    "deletedGeneratedFiles": [
+      "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationsSourceVersionsImportGitResponse201.kt"
+    ],
     "scaffoldedFiles": [],
     "preservedScaffoldFiles": [
       "custom/README.md"
@@ -136,26 +140,65 @@
   },
   "impact": {
     "schemaVersion": 1,
-    "areas": [],
-    "details": [],
-    "requiresVerification": false,
-    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
+    "areas": [
+      "api-surface",
+      "unknown"
+    ],
+    "details": [
+      {
+        "area": "api-surface",
+        "paths": [
+          "src/main/kotlin/com/sdkwork/web/backend/sdk/api/ApplicationSourceVersionApi.kt"
+        ]
+      },
+      {
+        "area": "unknown",
+        "paths": [
+          "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationsSourceVersionsGitImportCreateResponse201.kt",
+          "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationsSourceVersionsImportGitResponse201.kt"
+        ]
+      }
+    ],
+    "requiresVerification": true,
+    "summary": "Detected impact areas: api-surface, unknown. Verification is required."
   },
   "verificationPlan": {
-    "shouldRun": false,
-    "runPhase": "skip",
-    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
-    "steps": []
+    "shouldRun": true,
+    "runPhase": "now",
+    "summary": "Detected impact areas: api-surface, unknown. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "steps": [
+      {
+        "id": "check",
+        "title": "Unified package check",
+        "required": true,
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, unknown.",
+        "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-kotlin\\generated\\server-openapi",
+        "command": "node",
+        "args": [
+          "./bin/publish-core.mjs",
+          "--language",
+          "kotlin",
+          "--project-dir",
+          ".",
+          "--action",
+          "check"
+        ],
+        "displayCommand": "node ./bin/publish-core.mjs --language kotlin --project-dir . --action check"
+      }
+    ]
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "low",
-    "nextAction": "skip",
+    "riskLevel": "high",
+    "nextAction": "verify",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
-    "summary": "No actionable changes were detected. No apply or verification step is required.",
+    "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
-      "no-actionable-changes"
+      "deleted-generated-files",
+      "manual-review-required",
+      "unknown-impact",
+      "verification-required"
     ]
   },
   "preservedLegacyFiles": false

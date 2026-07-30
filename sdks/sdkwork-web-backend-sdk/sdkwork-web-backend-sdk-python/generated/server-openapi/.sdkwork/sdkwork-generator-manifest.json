@@ -68,7 +68,7 @@
     },
     {
       "path": "sdkwork_web_backend_sdk/api/application_source_version.py",
-      "sha256": "a85c1f192e5473a83901a9a72c100ba81b714e7bc2afb6d45806c6d864cd6b17"
+      "sha256": "9eba337d71f1add98e66c451820857ba9a42cc1abae0dfc77fb34fe3503813ff"
     },
     {
       "path": "sdkwork_web_backend_sdk/api/application.py",
@@ -108,7 +108,7 @@
     },
     {
       "path": "sdkwork_web_backend_sdk/models/__init__.py",
-      "sha256": "d8b2731a88a71c79882ea81f2e0436675271aaf29e731a0a1370188892c64b6a"
+      "sha256": "806e46f9aa265e706efd0b43084d766fc9a23a6b5bf61c54d106e5556a1a5c4b"
     },
     {
       "path": "sdkwork_web_backend_sdk/models/agent_certificate_bundle.py",
@@ -207,8 +207,8 @@
       "sha256": "0773c0b64e8e5e9b3134a9ea16621925f92328e2fe36663ebebb1c7ac10fc975"
     },
     {
-      "path": "sdkwork_web_backend_sdk/models/applications_source_versions_import_git_response201.py",
-      "sha256": "0eb036142adf0b884038b87e0b988fd1e0d59dfde36b94fd802a23c4e3612aea"
+      "path": "sdkwork_web_backend_sdk/models/applications_source_versions_git_import_create_response201.py",
+      "sha256": "49458cff6a229203c64f30648795cb494657ab835e6ce570ed0e4ed47e6c8af3"
     },
     {
       "path": "sdkwork_web_backend_sdk/models/applications_source_versions_list_response.py",

@@ -76,7 +76,7 @@
     },
     {
       "path": "src/main/java/com/sdkwork/web/app/sdk/api/SourceVersionApi.java",
-      "sha256": "4df7347c12812dcec129a586217762f5e1420b1be3fe305d0fb4efeebf6c3aa6"
+      "sha256": "defdcae447f345ea48958988d9c751254109d8d55f5e6273ab9cd413de1e9c02"
     },
     {
       "path": "src/main/java/com/sdkwork/web/app/sdk/http/HttpClient.java",
@@ -299,8 +299,8 @@
       "sha256": "42883aa9d8a862746d3803508a33ed2f4b8d292e3bbb86a64c5c7eb94f7c5b09"
     },
     {
-      "path": "src/main/java/com/sdkwork/web/app/sdk/model/SitesSourceVersionsImportGitResponse201.java",
-      "sha256": "352cf65903f1d433950ad3b18f92a0742c0882e3aeb31cfaff04788ad27cdcb8"
+      "path": "src/main/java/com/sdkwork/web/app/sdk/model/SitesSourceVersionsGitImportCreateResponse201.java",
+      "sha256": "06bfcc45266fdb13b60a1db5d0a3d4e644d6468e69202ae650f634329e34d1c1"
     },
     {
       "path": "src/main/java/com/sdkwork/web/app/sdk/model/SitesSourceVersionsListResponse.java",

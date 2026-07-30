@@ -850,7 +850,7 @@ public struct SitesSourceVersionsCreateResponse201: Codable {
     }
 }
 
-public struct SitesSourceVersionsImportGitResponse201: Codable {
+public struct SitesSourceVersionsGitImportCreateResponse201: Codable {
     public let code: Int?
     public let data: Any?
     public let traceId: String?

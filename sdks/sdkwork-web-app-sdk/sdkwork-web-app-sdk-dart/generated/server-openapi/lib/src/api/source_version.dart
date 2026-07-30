@@ -41,7 +41,7 @@ class SourceVersionApi {
   }
 
   /// 从公共 Git 仓库导入应用源码版本
-  Future<SitesSourceVersionsImportGitResponse201?> sitesSourceVersionsImportGit(String siteId, ImportGitSourceVersionRequest body, String idempotencyKey) async {
+  Future<SitesSourceVersionsGitImportCreateResponse201?> sitesSourceVersionsGitImportCreate(String siteId, ImportGitSourceVersionRequest body, String idempotencyKey) async {
     final requestHeaders = buildRequestHeaders(
       <String, HeaderParameterSpec>{
         'Idempotency-Key': HeaderParameterSpec(idempotencyKey, 'simple', false, null),
@@ -52,7 +52,7 @@ class SourceVersionApi {
     final response = await _client.post(ApiPaths.appPath('/sites/${serializePathParameter(siteId, const PathParameterSpec('siteId', 'simple', false))}/source_versions/git_import'), body: payload, headers: requestHeaders, contentType: 'application/json');
     return (() {
       final map = sdkworkResponseAsMap(response);
-      return map == null ? null : SitesSourceVersionsImportGitResponse201.fromJson(map);
+      return map == null ? null : SitesSourceVersionsGitImportCreateResponse201.fromJson(map);
     })();
   }
 

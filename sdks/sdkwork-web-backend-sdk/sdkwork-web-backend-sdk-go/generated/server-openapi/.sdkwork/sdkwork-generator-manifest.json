@@ -24,7 +24,7 @@
     },
     {
       "path": "api/application_source_version.go",
-      "sha256": "d255fbb2d85b421912bbf93383324de9895ac7dfb51ebd56cce72f32d8e3fe2f"
+      "sha256": "2571f0a18bdeb1c394aa56e4973dd02f3648cc76c7a5a705b09ea1422bff06de"
     },
     {
       "path": "api/application.go",
@@ -211,8 +211,8 @@
       "sha256": "b26659f938840017a721d46d44aef5704af1058bdf406c7390b329cd5aa20f30"
     },
     {
-      "path": "types/applications_source_versions_import_git_response201.go",
-      "sha256": "cbdc7f36c917dc4fed49c6e1441b7bbb96e18f8f07866f19533f1391534a65bd"
+      "path": "types/applications_source_versions_git_import_create_response201.go",
+      "sha256": "11c5643635b6b94341628471098b4f28bad84e65fa2bfd168d454bf0578a2a78"
     },
     {
       "path": "types/applications_source_versions_list_response.go",

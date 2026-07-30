@@ -9,12 +9,14 @@
     "protocol": "http",
     "packageName": "sdkwork-web-app-sdk"
   },
-  "changeFingerprint": "d0cc148a8c0a2ed67b9f4ddba90adecbb45ecd1d885b3a59c1671664af2f45be",
+  "changeFingerprint": "7270b02d0eeaf8123a40e7b6f710400ca4b0c413a5a80ad0ee7db1dbf93a60e8",
   "changes": {
-    "createdGeneratedFiles": [],
+    "createdGeneratedFiles": [
+      "src/models/sites_source_versions_git_import_create_response201.rs"
+    ],
     "updatedGeneratedFiles": [
-      "src/models/certificate_response.rs",
-      "src/models/domain_response.rs"
+      "src/api/source_version.rs",
+      "src/models/mod.rs"
     ],
     "unchangedGeneratedFiles": [
       "bin/publish-core.mjs",
@@ -34,13 +36,13 @@
       "src/api/monitor.rs",
       "src/api/paths.rs",
       "src/api/site.rs",
-      "src/api/source_version.rs",
       "src/client.rs",
       "src/http/client.rs",
       "src/http/mod.rs",
       "src/lib.rs",
       "src/models/application_store_listing.rs",
       "src/models/certificate_page.rs",
+      "src/models/certificate_response.rs",
       "src/models/certificates_create_response201.rs",
       "src/models/certificates_list_response.rs",
       "src/models/common.rs",
@@ -54,6 +56,7 @@
       "src/models/deployment_page.rs",
       "src/models/deployment_response.rs",
       "src/models/domain_page.rs",
+      "src/models/domain_response.rs",
       "src/models/domain_verify_response.rs",
       "src/models/env_variable_page.rs",
       "src/models/env_variable_response.rs",
@@ -63,7 +66,6 @@
       "src/models/import_git_source_version_request.rs",
       "src/models/media_checksum.rs",
       "src/models/media_resource.rs",
-      "src/models/mod.rs",
       "src/models/page_info.rs",
       "src/models/problem_detail.rs",
       "src/models/sdk_work_api_response.rs",
@@ -93,7 +95,6 @@
       "src/models/sites_pause_response.rs",
       "src/models/sites_retrieve_response.rs",
       "src/models/sites_source_versions_create_response201.rs",
-      "src/models/sites_source_versions_import_git_response201.rs",
       "src/models/sites_source_versions_list_response.rs",
       "src/models/sites_source_versions_retrieve_response.rs",
       "src/models/sites_update_response.rs",
@@ -102,7 +103,9 @@
       "src/models/source_version_response.rs",
       "src/models/update_site_request.rs"
     ],
-    "deletedGeneratedFiles": [],
+    "deletedGeneratedFiles": [
+      "src/models/sites_source_versions_import_git_response201.rs"
+    ],
     "scaffoldedFiles": [],
     "preservedScaffoldFiles": [
       "custom/README.md"
@@ -112,30 +115,38 @@
   "impact": {
     "schemaVersion": 1,
     "areas": [
+      "api-surface",
       "models"
     ],
     "details": [
       {
+        "area": "api-surface",
+        "paths": [
+          "src/api/source_version.rs"
+        ]
+      },
+      {
         "area": "models",
         "paths": [
-          "src/models/certificate_response.rs",
-          "src/models/domain_response.rs"
+          "src/models/mod.rs",
+          "src/models/sites_source_versions_git_import_create_response201.rs",
+          "src/models/sites_source_versions_import_git_response201.rs"
         ]
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: models. Verification is required."
+    "summary": "Detected impact areas: api-surface, models. Verification is required."
   },
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-rust\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -153,7 +164,7 @@
         "id": "build",
         "title": "Unified package build",
         "required": true,
-        "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: models.",
+        "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: api-surface, models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-rust\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -171,12 +182,14 @@
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "medium",
+    "riskLevel": "high",
     "nextAction": "verify",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
     "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
+      "deleted-generated-files",
+      "manual-review-required",
       "verification-required"
     ]
   },

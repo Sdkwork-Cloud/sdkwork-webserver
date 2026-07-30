@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
-pub struct SitesSourceVersionsImportGitResponse201 {
+pub struct ApplicationsSourceVersionsGitImportCreateResponse201 {
     pub code: i64,
 
     pub data: serde_json::Value,

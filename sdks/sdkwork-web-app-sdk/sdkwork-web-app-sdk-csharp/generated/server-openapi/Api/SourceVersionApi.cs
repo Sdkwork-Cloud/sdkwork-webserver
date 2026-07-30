@@ -46,7 +46,7 @@ namespace SDKWork.Web.AppSdk.Api
         /// <summary>
         /// 从公共 Git 仓库导入应用源码版本
         /// </summary>
-        public async Task<SDKWork.Web.AppSdk.Models.SitesSourceVersionsImportGitResponse201?> SitesSourceVersionsImportGitAsync(string siteId, SDKWork.Web.AppSdk.Models.ImportGitSourceVersionRequest body, string idempotencyKey)
+        public async Task<SDKWork.Web.AppSdk.Models.SitesSourceVersionsGitImportCreateResponse201?> SitesSourceVersionsGitImportCreateAsync(string siteId, SDKWork.Web.AppSdk.Models.ImportGitSourceVersionRequest body, string idempotencyKey)
         {
             var requestHeaders = BuildRequestHeaders(
                 new Dictionary<string, HeaderParameterSpec>
@@ -55,7 +55,7 @@ namespace SDKWork.Web.AppSdk.Api
                 },
                 new Dictionary<string, HeaderParameterSpec>()
             );
-            return await _client.PostAsync<SDKWork.Web.AppSdk.Models.SitesSourceVersionsImportGitResponse201>(ApiPaths.AppPath($"/sites/{SerializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false))}/source_versions/git_import"), body, null, requestHeaders, "application/json");
+            return await _client.PostAsync<SDKWork.Web.AppSdk.Models.SitesSourceVersionsGitImportCreateResponse201>(ApiPaths.AppPath($"/sites/{SerializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false))}/source_versions/git_import"), body, null, requestHeaders, "application/json");
         }
 
         /// <summary>

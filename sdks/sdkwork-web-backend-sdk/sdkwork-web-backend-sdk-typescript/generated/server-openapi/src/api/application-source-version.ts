@@ -4,6 +4,30 @@ import type { ApiRequestOptions, HttpClient } from '../http/client';
 import type { ApplicationSourceVersionResponse, CreateApplicationSourceVersionRequest, ImportApplicationGitSourceVersionRequest, PageInfo } from '../types';
 
 
+export interface ApplicationSourceVersionApplicationsSourceVersionsGitImportCreateParams {
+  idempotencyKey: string;
+}
+
+export class ApplicationSourceVersionApplicationsSourceVersionsGitImportApi {
+  private client: HttpClient;
+
+  constructor(client: HttpClient) {
+    this.client = client;
+  }
+
+
+/** Import an immutable application source version from a public Git repository */
+  async create(applicationId: string, body: ImportApplicationGitSourceVersionRequest, params: ApplicationSourceVersionApplicationsSourceVersionsGitImportCreateParams, requestOptions?: ApiRequestOptions): Promise<ApplicationSourceVersionResponse> {
+    const requestHeaders = buildRequestHeaders(
+      {
+        'Idempotency-Key': { value: params.idempotencyKey, style: 'simple', explode: false },
+      },
+      {}
+    );
+    return this.client.request<ApplicationSourceVersionResponse>(backendApiPath(`/applications/${serializePathParameter(applicationId, { name: 'applicationId', style: 'simple', explode: false })}/source_versions/git_import`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, body, headers: requestHeaders, contentType: 'application/json', sdkworkUnwrapKind: 'item' });
+  }
+}
+
 export interface ApplicationSourceVersionApplicationsSourceVersionsListParams {
   page?: number;
   pageSize?: number;
@@ -13,15 +37,13 @@ export interface ApplicationSourceVersionApplicationsSourceVersionsCreateParams 
   idempotencyKey: string;
 }
 
-export interface ApplicationSourceVersionApplicationsSourceVersionsImportGitParams {
-  idempotencyKey: string;
-}
-
 export class ApplicationSourceVersionApplicationsSourceVersionsApi {
   private client: HttpClient;
+  public readonly gitImport: ApplicationSourceVersionApplicationsSourceVersionsGitImportApi;
 
   constructor(client: HttpClient) {
     this.client = client;
+    this.gitImport = new ApplicationSourceVersionApplicationsSourceVersionsGitImportApi(client);
   }
 
 
@@ -43,17 +65,6 @@ export class ApplicationSourceVersionApplicationsSourceVersionsApi {
       {}
     );
     return this.client.request<ApplicationSourceVersionResponse>(backendApiPath(`/applications/${serializePathParameter(applicationId, { name: 'applicationId', style: 'simple', explode: false })}/source_versions`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, body, headers: requestHeaders, contentType: 'application/json', sdkworkUnwrapKind: 'item' });
-  }
-
-/** Import an immutable application source version from a public Git repository */
-  async importGit(applicationId: string, body: ImportApplicationGitSourceVersionRequest, params: ApplicationSourceVersionApplicationsSourceVersionsImportGitParams, requestOptions?: ApiRequestOptions): Promise<ApplicationSourceVersionResponse> {
-    const requestHeaders = buildRequestHeaders(
-      {
-        'Idempotency-Key': { value: params.idempotencyKey, style: 'simple', explode: false },
-      },
-      {}
-    );
-    return this.client.request<ApplicationSourceVersionResponse>(backendApiPath(`/applications/${serializePathParameter(applicationId, { name: 'applicationId', style: 'simple', explode: false })}/source_versions/git_import`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, body, headers: requestHeaders, contentType: 'application/json', sdkworkUnwrapKind: 'item' });
   }
 
 /** Retrieve an application source version */

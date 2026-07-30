@@ -56,7 +56,7 @@
     },
     {
       "path": "src/api/application_source_version.rs",
-      "sha256": "bc02f13110e93d634e45ac562d3a6c61097df7816effc61eb7156429080b065c"
+      "sha256": "4f83872553bf1d84f44d3a0d9016f8c5100e35981f0dc3f2f4cdbbb762566365"
     },
     {
       "path": "src/api/application.rs",
@@ -211,8 +211,8 @@
       "sha256": "03fcbb4054b2dc21b239552b34d1f999e3aae90dfd3b7e731bd55417a1e3f190"
     },
     {
-      "path": "src/models/applications_source_versions_import_git_response201.rs",
-      "sha256": "5a2be4f7391b2fdffbbd8c1fa92fbee87eacebef60520121c9ee8f21dec337e8"
+      "path": "src/models/applications_source_versions_git_import_create_response201.rs",
+      "sha256": "9c89e2670e5dba7b57a8833daa077c89d75f883e54d78e02f6e716a0a4e368dd"
     },
     {
       "path": "src/models/applications_source_versions_list_response.rs",
@@ -368,7 +368,7 @@
     },
     {
       "path": "src/models/mod.rs",
-      "sha256": "2a4970699fb86a79cc98583b41d57aa1f3ab7f7bbead3df23d2cb7513c41ec35"
+      "sha256": "fc14121e3b0d01ea15d4f1c724c22d227e93a9bcfbf312b036303804ab9287d6"
     },
     {
       "path": "src/models/nginx_config_page.rs",

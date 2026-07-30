@@ -36,7 +36,7 @@
     },
     {
       "path": "Api/ApplicationSourceVersionApi.cs",
-      "sha256": "65d17f5f2be5cc3a45197ae9a7cc77c5c4070c7737ab7ba584605122511da4ce"
+      "sha256": "b97c186881c091d4c2e8d573f0f1058ad51a31bb85e6c4fd763fbcf67b3f40b3"
     },
     {
       "path": "Api/AuditApi.cs",
@@ -179,8 +179,8 @@
       "sha256": "158c512396b1ba8c82465021f5e6382530a21293102ea0bb0a7755b944ba6c4a"
     },
     {
-      "path": "Models/ApplicationsSourceVersionsImportGitResponse201.cs",
-      "sha256": "42011c4bd36ce1d6fc8dedd7ca68a570d03718fb8e8e3d312a77165d83adb755"
+      "path": "Models/ApplicationsSourceVersionsGitImportCreateResponse201.cs",
+      "sha256": "b20f7d8b9d52db1ead18cdaded58a74e8336e927338fef7db837ed2a9588d880"
     },
     {
       "path": "Models/ApplicationsSourceVersionsListResponse.cs",

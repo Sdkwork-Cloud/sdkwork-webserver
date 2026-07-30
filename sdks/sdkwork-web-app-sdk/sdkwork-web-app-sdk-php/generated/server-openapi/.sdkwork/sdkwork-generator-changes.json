@@ -9,12 +9,13 @@
     "protocol": "http",
     "packageName": "sdkwork/web-app-sdk"
   },
-  "changeFingerprint": "fc21b42c856661eb7d1a441571fef6cefba32fb08cef38eac6ab2cc7c9c3a289",
+  "changeFingerprint": "2fb3f1dbaa8de05a64e3d6a12cca3ac67025a9ace8881f1c0386f08e49f4d9cf",
   "changes": {
-    "createdGeneratedFiles": [],
+    "createdGeneratedFiles": [
+      "src/Models/SitesSourceVersionsGitImportCreateResponse201.php"
+    ],
     "updatedGeneratedFiles": [
-      "src/Models/CertificateResponse.php",
-      "src/Models/DomainResponse.php"
+      "src/Api/SourceVersion.php"
     ],
     "unchangedGeneratedFiles": [
       "bin/publish-core.mjs",
@@ -32,10 +33,10 @@
       "src/Api/EnvVariable.php",
       "src/Api/Monitor.php",
       "src/Api/Site.php",
-      "src/Api/SourceVersion.php",
       "src/Http/HttpClient.php",
       "src/Models/ApplicationStoreListing.php",
       "src/Models/CertificatePage.php",
+      "src/Models/CertificateResponse.php",
       "src/Models/CertificatesCreateResponse201.php",
       "src/Models/CertificatesListResponse.php",
       "src/Models/CreateCertificateRequest.php",
@@ -48,6 +49,7 @@
       "src/Models/DeploymentPage.php",
       "src/Models/DeploymentResponse.php",
       "src/Models/DomainPage.php",
+      "src/Models/DomainResponse.php",
       "src/Models/DomainVerifyResponse.php",
       "src/Models/EnvVariablePage.php",
       "src/Models/EnvVariableResponse.php",
@@ -86,7 +88,6 @@
       "src/Models/SitesPauseResponse.php",
       "src/Models/SitesRetrieveResponse.php",
       "src/Models/SitesSourceVersionsCreateResponse201.php",
-      "src/Models/SitesSourceVersionsImportGitResponse201.php",
       "src/Models/SitesSourceVersionsListResponse.php",
       "src/Models/SitesSourceVersionsRetrieveResponse.php",
       "src/Models/SitesUpdateResponse.php",
@@ -97,7 +98,9 @@
       "src/SdkConfig.php",
       "src/SdkworkAppClient.php"
     ],
-    "deletedGeneratedFiles": [],
+    "deletedGeneratedFiles": [
+      "src/Models/SitesSourceVersionsImportGitResponse201.php"
+    ],
     "scaffoldedFiles": [],
     "preservedScaffoldFiles": [
       "custom/README.md"
@@ -107,30 +110,37 @@
   "impact": {
     "schemaVersion": 1,
     "areas": [
+      "api-surface",
       "models"
     ],
     "details": [
       {
+        "area": "api-surface",
+        "paths": [
+          "src/Api/SourceVersion.php"
+        ]
+      },
+      {
         "area": "models",
         "paths": [
-          "src/Models/CertificateResponse.php",
-          "src/Models/DomainResponse.php"
+          "src/Models/SitesSourceVersionsGitImportCreateResponse201.php",
+          "src/Models/SitesSourceVersionsImportGitResponse201.php"
         ]
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: models. Verification is required."
+    "summary": "Detected impact areas: api-surface, models. Verification is required."
   },
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-php\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -148,12 +158,14 @@
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "medium",
+    "riskLevel": "high",
     "nextAction": "verify",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
     "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
+      "deleted-generated-files",
+      "manual-review-required",
       "verification-required"
     ]
   },

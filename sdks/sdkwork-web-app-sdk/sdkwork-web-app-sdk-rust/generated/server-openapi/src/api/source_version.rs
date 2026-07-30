@@ -39,7 +39,7 @@ impl SourceVersionApi {
     }
 
     /// 从公共 Git 仓库导入应用源码版本
-    pub async fn sites_source_versions_import_git(&self, site_id: &str, body: &ImportGitSourceVersionRequest, idempotency_key: &str) -> Result<SourceVersionResponse, SdkworkError> {
+    pub async fn sites_source_versions_git_import_create(&self, site_id: &str, body: &ImportGitSourceVersionRequest, idempotency_key: &str) -> Result<SourceVersionResponse, SdkworkError> {
         let path = app_path(&format!("/sites/{}/source_versions/git_import", serialize_path_parameter(site_id, PathParameterSpec::new("siteId", "simple", false))));
         let headers = build_request_headers(
             &[

@@ -3,11 +3,11 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Optional, List, Dict, Any
 
 if TYPE_CHECKING:
-    from .source_version_response import SourceVersionResponse
+    from .application_source_version_response import ApplicationSourceVersionResponse
 
 
 @dataclass
-class SitesSourceVersionsImportGitResponse201:
+class ApplicationsSourceVersionsGitImportCreateResponse201:
     code: int
     data: Any
     trace_id: str

@@ -76,7 +76,7 @@
     },
     {
       "path": "lib/src/api/source_version.dart",
-      "sha256": "5b514620173274660346ca45934cd57075fa62bda2accfd30acaa9f5e6f228bb"
+      "sha256": "a618b002f0fb12d328eee4ecd7854db1a7a3918f269f853b3af964ed618e1d3f"
     },
     {
       "path": "lib/src/http/client.dart",
@@ -88,7 +88,7 @@
     },
     {
       "path": "lib/src/models.dart",
-      "sha256": "fdfe96c3b1e34156a948a65da6cb22478328e0221cf77b60c5e1b14836852b58"
+      "sha256": "4ad229a19387d1d14b520e8ec18635f2fac7c1f2dc204900ddd2e5990fc86c94"
     },
     {
       "path": "LICENSE",

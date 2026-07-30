@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace SDKWork.Web.AppSdk.Models
 {
-    public class SitesSourceVersionsImportGitResponse201
+    public class SitesSourceVersionsGitImportCreateResponse201
     {
         public int Code { get; set; }
         public object Data { get; set; }

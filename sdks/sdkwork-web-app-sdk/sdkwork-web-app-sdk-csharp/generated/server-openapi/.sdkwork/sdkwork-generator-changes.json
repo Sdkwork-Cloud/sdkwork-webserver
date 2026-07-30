@@ -9,12 +9,13 @@
     "protocol": "http",
     "packageName": "SDKWork.Web.AppSdk"
   },
-  "changeFingerprint": "a58f26ae2130a639ca92a5011cb344b3e3bf263332e8eb74c5771eb43a45f42d",
+  "changeFingerprint": "fd082f8e0361a27ab1e76cfbe32cfb7b2ec71ae8ec7c8a4129e37ffa179ade94",
   "changes": {
-    "createdGeneratedFiles": [],
+    "createdGeneratedFiles": [
+      "Models/SitesSourceVersionsGitImportCreateResponse201.cs"
+    ],
     "updatedGeneratedFiles": [
-      "Models/CertificateResponse.cs",
-      "Models/DomainResponse.cs"
+      "Api/SourceVersionApi.cs"
     ],
     "unchangedGeneratedFiles": [
       "Api/Api.cs",
@@ -25,7 +26,6 @@
       "Api/EnvVariableApi.cs",
       "Api/MonitorApi.cs",
       "Api/SiteApi.cs",
-      "Api/SourceVersionApi.cs",
       "bin/publish-core.mjs",
       "bin/publish.ps1",
       "bin/publish.sh",
@@ -34,6 +34,7 @@
       "LICENSE",
       "Models/ApplicationStoreListing.cs",
       "Models/CertificatePage.cs",
+      "Models/CertificateResponse.cs",
       "Models/CertificatesCreateResponse201.cs",
       "Models/CertificatesListResponse.cs",
       "Models/CreateCertificateRequest.cs",
@@ -46,6 +47,7 @@
       "Models/DeploymentPage.cs",
       "Models/DeploymentResponse.cs",
       "Models/DomainPage.cs",
+      "Models/DomainResponse.cs",
       "Models/DomainVerifyResponse.cs",
       "Models/EnvVariablePage.cs",
       "Models/EnvVariableResponse.cs",
@@ -84,7 +86,6 @@
       "Models/SitesPauseResponse.cs",
       "Models/SitesRetrieveResponse.cs",
       "Models/SitesSourceVersionsCreateResponse201.cs",
-      "Models/SitesSourceVersionsImportGitResponse201.cs",
       "Models/SitesSourceVersionsListResponse.cs",
       "Models/SitesSourceVersionsRetrieveResponse.cs",
       "Models/SitesUpdateResponse.cs",
@@ -97,7 +98,9 @@
       "SDKWork.Web.AppSdk.csproj",
       "SdkworkAppClient.cs"
     ],
-    "deletedGeneratedFiles": [],
+    "deletedGeneratedFiles": [
+      "Models/SitesSourceVersionsImportGitResponse201.cs"
+    ],
     "scaffoldedFiles": [],
     "preservedScaffoldFiles": [
       "custom/README.md"
@@ -107,30 +110,37 @@
   "impact": {
     "schemaVersion": 1,
     "areas": [
+      "api-surface",
       "models"
     ],
     "details": [
       {
+        "area": "api-surface",
+        "paths": [
+          "Api/SourceVersionApi.cs"
+        ]
+      },
+      {
         "area": "models",
         "paths": [
-          "Models/CertificateResponse.cs",
-          "Models/DomainResponse.cs"
+          "Models/SitesSourceVersionsGitImportCreateResponse201.cs",
+          "Models/SitesSourceVersionsImportGitResponse201.cs"
         ]
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: models. Verification is required."
+    "summary": "Detected impact areas: api-surface, models. Verification is required."
   },
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-csharp\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -148,12 +158,14 @@
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "medium",
+    "riskLevel": "high",
     "nextAction": "verify",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
     "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
+      "deleted-generated-files",
+      "manual-review-required",
       "verification-required"
     ]
   },

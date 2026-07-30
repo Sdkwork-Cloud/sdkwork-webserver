@@ -1413,7 +1413,7 @@
         }
       ],
       "post": {
-        "operationId": "applications.sourceVersions.importGit",
+        "operationId": "applications.sourceVersions.gitImport.create",
         "summary": "Import an immutable application source version from a public Git repository",
         "tags": [
           "applicationSourceVersion"

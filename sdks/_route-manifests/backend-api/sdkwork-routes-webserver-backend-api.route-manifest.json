@@ -512,7 +512,7 @@
     {
       "method": "POST",
       "path": "/backend/v3/api/applications/{applicationId}/source_versions/git_import",
-      "operationId": "applications.sourceVersions.importGit",
+      "operationId": "applications.sourceVersions.gitImport.create",
       "tags": [
         "applicationSourceVersion"
       ],

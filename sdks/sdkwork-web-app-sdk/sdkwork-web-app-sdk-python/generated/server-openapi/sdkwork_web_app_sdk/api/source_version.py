@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional
 from ..http_client import HttpClient
-from ..models import CreateSourceVersionRequest, ImportGitSourceVersionRequest, SitesSourceVersionsCreateResponse201, SitesSourceVersionsImportGitResponse201, SitesSourceVersionsListResponse, SitesSourceVersionsRetrieveResponse
+from ..models import CreateSourceVersionRequest, ImportGitSourceVersionRequest, SitesSourceVersionsCreateResponse201, SitesSourceVersionsGitImportCreateResponse201, SitesSourceVersionsListResponse, SitesSourceVersionsRetrieveResponse
 
 def _append_query_string(path: str, raw_query_string: str) -> str:
     query = raw_query_string.lstrip('?')
@@ -258,6 +258,7 @@ class SourceVersionSitesSourceVersionsApi:
 
     def __init__(self, client: HttpClient):
         self._client = client
+        self.git_import = SourceVersionSitesSourceVersionsGitImportApi(client)
 
 
     def list(self, site_id: str, page: Optional[int] = None, page_size: Optional[int] = None) -> SitesSourceVersionsListResponse:
@@ -278,7 +279,18 @@ class SourceVersionSitesSourceVersionsApi:
         )
         return self._client.post(f"/app/v3/api/sites/{serialize_path_parameter(site_id, {'name': 'siteId', 'style': 'simple', 'explode': False})}/source_versions", json=body, headers=request_headers)
 
-    def import_git(self, site_id: str, body: ImportGitSourceVersionRequest, idempotency_key: str) -> SitesSourceVersionsImportGitResponse201:
+    def retrieve(self, site_id: str, source_version_id: str) -> SitesSourceVersionsRetrieveResponse:
+        """获取应用源码版本详情"""
+        return self._client.get(f"/app/v3/api/sites/{serialize_path_parameter(site_id, {'name': 'siteId', 'style': 'simple', 'explode': False})}/source_versions/{serialize_path_parameter(source_version_id, {'name': 'sourceVersionId', 'style': 'simple', 'explode': False})}")
+
+class SourceVersionSitesSourceVersionsGitImportApi:
+    """source_version source_version.sites.source_versions.git_import API client."""
+
+    def __init__(self, client: HttpClient):
+        self._client = client
+
+
+    def create(self, site_id: str, body: ImportGitSourceVersionRequest, idempotency_key: str) -> SitesSourceVersionsGitImportCreateResponse201:
         """从公共 Git 仓库导入应用源码版本"""
         request_headers = build_request_headers(
             {
@@ -287,7 +299,3 @@ class SourceVersionSitesSourceVersionsApi:
             {}
         )
         return self._client.post(f"/app/v3/api/sites/{serialize_path_parameter(site_id, {'name': 'siteId', 'style': 'simple', 'explode': False})}/source_versions/git_import", json=body, headers=request_headers)
-
-    def retrieve(self, site_id: str, source_version_id: str) -> SitesSourceVersionsRetrieveResponse:
-        """获取应用源码版本详情"""
-        return self._client.get(f"/app/v3/api/sites/{serialize_path_parameter(site_id, {'name': 'siteId', 'style': 'simple', 'explode': False})}/source_versions/{serialize_path_parameter(source_version_id, {'name': 'sourceVersionId', 'style': 'simple', 'explode': False})}")

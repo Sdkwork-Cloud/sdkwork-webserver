@@ -31,7 +31,7 @@ class ApplicationSourceVersionApi(private val client: HttpClient) {
     }
 
     /** Import an immutable application source version from a public Git repository */
-    suspend fun applicationsSourceVersionsImportGit(applicationId: String, body: ImportApplicationGitSourceVersionRequest, idempotencyKey: String): ApplicationsSourceVersionsImportGitResponse201? {
+    suspend fun applicationsSourceVersionsGitImportCreate(applicationId: String, body: ImportApplicationGitSourceVersionRequest, idempotencyKey: String): ApplicationsSourceVersionsGitImportCreateResponse201? {
         val requestHeaders = buildRequestHeaders(
             mapOf(
                 "Idempotency-Key" to HeaderParameterSpec(idempotencyKey, "simple", false, null),
@@ -39,7 +39,7 @@ class ApplicationSourceVersionApi(private val client: HttpClient) {
             emptyMap()
         )
         val raw = client.post(ApiPaths.backendPath("/applications/${serializePathParameter(applicationId, PathParameterSpec("applicationId", "simple", false))}/source_versions/git_import"), body, null, requestHeaders, "application/json")
-        return client.convertValue(raw, object : TypeReference<ApplicationsSourceVersionsImportGitResponse201>() {})
+        return client.convertValue(raw, object : TypeReference<ApplicationsSourceVersionsGitImportCreateResponse201>() {})
     }
 
     /** Retrieve an application source version */

@@ -64,7 +64,7 @@
     },
     {
       "path": "src/api/application-source-version.ts",
-      "sha256": "0d1e1715059c5bdc0430ff80039a395711f7d675971c674f0216f4871de42904"
+      "sha256": "5908b6b13f990fe7497ebf07cb6a9932743b10a4a4781ae7bce125d6b395a5e2"
     },
     {
       "path": "src/api/application.ts",
@@ -223,8 +223,8 @@
       "sha256": "eec182846b7bfb31d3b8c14f354ed02f4c4a4c01d52c68e18bc4a8c70a12a953"
     },
     {
-      "path": "src/types/applications-source-versions-import-git-response201.ts",
-      "sha256": "87a9cce27fb2527a04e86a3e52fe01b4901a6c26d13aa5f58ef4d2e480cbb88a"
+      "path": "src/types/applications-source-versions-git-import-create-response201.ts",
+      "sha256": "3b65cce458793366b5aec21ac3f9dfda9c36cc9617e752a58272b8adc8af9ea4"
     },
     {
       "path": "src/types/applications-source-versions-list-response.ts",
@@ -372,7 +372,7 @@
     },
     {
       "path": "src/types/index.ts",
-      "sha256": "23ade5394c7611169c0a83485d88339a6b7562f2046ab73c86933548a691f105"
+      "sha256": "e26f89cb1d06602a8e994e089558b0574b3bbdb294ce7fd215c1b36b90095007"
     },
     {
       "path": "src/types/media-checksum.ts",

@@ -44,7 +44,7 @@
     },
     {
       "path": "Api/SourceVersionApi.cs",
-      "sha256": "9b8d71c08f3e82b31de3c57e1d8c6d14c9d75287ae0475bd8fd739430c994ddd"
+      "sha256": "3ce16e1c46a625432e34f08625d1347211622f1d94b376848b9f39c296973ebb"
     },
     {
       "path": "bin/publish-core.mjs",
@@ -287,8 +287,8 @@
       "sha256": "4528035e4511f775b9112786b0e660f3f8b6ec3035228ee550f26f4d72d3e11c"
     },
     {
-      "path": "Models/SitesSourceVersionsImportGitResponse201.cs",
-      "sha256": "16015fb19eb718c7f4ad9912aa6abed6351ccfcac5c73cdebc0585c6e65d69c0"
+      "path": "Models/SitesSourceVersionsGitImportCreateResponse201.cs",
+      "sha256": "22f503f19c842131fb42dbe3f79b6cce910591a2739f1771c3281e4fd3121d7e"
     },
     {
       "path": "Models/SitesSourceVersionsListResponse.cs",

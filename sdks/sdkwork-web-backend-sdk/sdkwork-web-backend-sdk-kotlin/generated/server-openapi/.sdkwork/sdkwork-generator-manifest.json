@@ -92,7 +92,7 @@
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/api/ApplicationSourceVersionApi.kt",
-      "sha256": "2c9460f629a8665fc664979ffd9b6d84ff3672dcfac9c0c8411fbbae39cf6aa6"
+      "sha256": "ff80fc40b01a10c16e7888da564296ca82a245e8785dabab47be49f1a36e357e"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/api/AuditApi.kt",
@@ -191,8 +191,8 @@
       "sha256": "c587f7fb0fce1c7d8e9167131e4f38276b80c30e66029cd7bdf2b5fd130e8807"
     },
     {
-      "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationsSourceVersionsImportGitResponse201.kt",
-      "sha256": "a934d045c76b40c14d56116997309e409af4e31b668a21492581685b17518f21"
+      "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationsSourceVersionsGitImportCreateResponse201.kt",
+      "sha256": "b8d012053cb2f9a1b6edd65c63b7be4c98c303358cddea67f65b2ef58cbd6507"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationsSourceVersionsListResponse.kt",

@@ -46,7 +46,7 @@ namespace SDKWork.Web.BackendSdk.Api
         /// <summary>
         /// Import an immutable application source version from a public Git repository
         /// </summary>
-        public async Task<SDKWork.Web.BackendSdk.Models.ApplicationsSourceVersionsImportGitResponse201?> ApplicationsSourceVersionsImportGitAsync(string applicationId, SDKWork.Web.BackendSdk.Models.ImportApplicationGitSourceVersionRequest body, string idempotencyKey)
+        public async Task<SDKWork.Web.BackendSdk.Models.ApplicationsSourceVersionsGitImportCreateResponse201?> ApplicationsSourceVersionsGitImportCreateAsync(string applicationId, SDKWork.Web.BackendSdk.Models.ImportApplicationGitSourceVersionRequest body, string idempotencyKey)
         {
             var requestHeaders = BuildRequestHeaders(
                 new Dictionary<string, HeaderParameterSpec>
@@ -55,7 +55,7 @@ namespace SDKWork.Web.BackendSdk.Api
                 },
                 new Dictionary<string, HeaderParameterSpec>()
             );
-            return await _client.PostAsync<SDKWork.Web.BackendSdk.Models.ApplicationsSourceVersionsImportGitResponse201>(ApiPaths.BackendPath($"/applications/{SerializePathParameter(applicationId, new PathParameterSpec("applicationId", "simple", false))}/source_versions/git_import"), body, null, requestHeaders, "application/json");
+            return await _client.PostAsync<SDKWork.Web.BackendSdk.Models.ApplicationsSourceVersionsGitImportCreateResponse201>(ApiPaths.BackendPath($"/applications/{SerializePathParameter(applicationId, new PathParameterSpec("applicationId", "simple", false))}/source_versions/git_import"), body, null, requestHeaders, "application/json");
         }
 
         /// <summary>

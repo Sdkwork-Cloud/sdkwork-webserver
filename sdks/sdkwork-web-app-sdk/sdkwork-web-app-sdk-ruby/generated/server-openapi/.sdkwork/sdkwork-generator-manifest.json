@@ -32,7 +32,7 @@
     },
     {
       "path": "lib/sdkwork/app_sdk.rb",
-      "sha256": "3556b67a1d71c780af220eefd1fa6e59b00adc6a5957d4b423f96ce7642a9875"
+      "sha256": "29317bb8e92965641cba5b7253d32d80b25e3573a2255a4187770de07a5e6783"
     },
     {
       "path": "lib/sdkwork/app_sdk/api/base_api.rb",
@@ -64,7 +64,7 @@
     },
     {
       "path": "lib/sdkwork/app_sdk/api/source_version.rb",
-      "sha256": "fee333f2cb3ad2dbd47e9fefb43e7954652bf49840605b127b9d68532efa4d43"
+      "sha256": "cd2130c20504ac7abe94140263993e813110d1440cb7f665d69c5c323c003c78"
     },
     {
       "path": "lib/sdkwork/app_sdk/client.rb",
@@ -291,8 +291,8 @@
       "sha256": "14e863c9b43a3e427991a18e11fabcee256a5d3e2b7c7b4526b2c215411d30f3"
     },
     {
-      "path": "lib/sdkwork/app_sdk/models/sites_source_versions_import_git_response201.rb",
-      "sha256": "5059c6e571a859ac5dfa4b81921dbec1f1e4df50b718d569d9aac992a3863e63"
+      "path": "lib/sdkwork/app_sdk/models/sites_source_versions_git_import_create_response201.rb",
+      "sha256": "1e54b16afce5ca90ff0e0a49c7f015f389a72f9c0fd46c6c74d9393ed90fdef1"
     },
     {
       "path": "lib/sdkwork/app_sdk/models/sites_source_versions_list_response.rb",

@@ -41,7 +41,7 @@ class ApplicationSourceVersionApi {
   }
 
   /// Import an immutable application source version from a public Git repository
-  Future<ApplicationsSourceVersionsImportGitResponse201?> applicationsSourceVersionsImportGit(String applicationId, ImportApplicationGitSourceVersionRequest body, String idempotencyKey) async {
+  Future<ApplicationsSourceVersionsGitImportCreateResponse201?> applicationsSourceVersionsGitImportCreate(String applicationId, ImportApplicationGitSourceVersionRequest body, String idempotencyKey) async {
     final requestHeaders = buildRequestHeaders(
       <String, HeaderParameterSpec>{
         'Idempotency-Key': HeaderParameterSpec(idempotencyKey, 'simple', false, null),
@@ -52,7 +52,7 @@ class ApplicationSourceVersionApi {
     final response = await _client.post(ApiPaths.backendPath('/applications/${serializePathParameter(applicationId, const PathParameterSpec('applicationId', 'simple', false))}/source_versions/git_import'), body: payload, headers: requestHeaders, contentType: 'application/json');
     return (() {
       final map = sdkworkResponseAsMap(response);
-      return map == null ? null : ApplicationsSourceVersionsImportGitResponse201.fromJson(map);
+      return map == null ? null : ApplicationsSourceVersionsGitImportCreateResponse201.fromJson(map);
     })();
   }
 

@@ -2661,37 +2661,37 @@ class SitesSourceVersionsCreateResponse201 {
   }
 }
 
-class SitesSourceVersionsImportGitResponse201 {
+class SitesSourceVersionsGitImportCreateResponse201 {
   final int code;
   final dynamic data;
   final String traceId;
 
-  SitesSourceVersionsImportGitResponse201({
+  SitesSourceVersionsGitImportCreateResponse201({
     required this.code,
     required this.data,
     required this.traceId
   });
 
-  factory SitesSourceVersionsImportGitResponse201.fromJson(Map<String, dynamic> json) {
-    return SitesSourceVersionsImportGitResponse201(
+  factory SitesSourceVersionsGitImportCreateResponse201.fromJson(Map<String, dynamic> json) {
+    return SitesSourceVersionsGitImportCreateResponse201(
       code: (() {
         final value = json['code'];
         if (value is! int) {
-          throw FormatException('SitesSourceVersionsImportGitResponse201.code is required');
+          throw FormatException('SitesSourceVersionsGitImportCreateResponse201.code is required');
         }
         return value;
       })(),
       data: (() {
         final map = _sdkworkAsMap(json['data']);
         if (map == null) {
-          throw FormatException('SitesSourceVersionsImportGitResponse201.data is required');
+          throw FormatException('SitesSourceVersionsGitImportCreateResponse201.data is required');
         }
         return map;
       })(),
       traceId: (() {
         final value = json['traceId']?.toString();
         if (value == null) {
-          throw FormatException('SitesSourceVersionsImportGitResponse201.traceId is required');
+          throw FormatException('SitesSourceVersionsGitImportCreateResponse201.traceId is required');
         }
         return value;
       })()

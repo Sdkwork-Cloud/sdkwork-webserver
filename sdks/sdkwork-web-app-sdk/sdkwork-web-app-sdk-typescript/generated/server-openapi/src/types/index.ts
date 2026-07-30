@@ -50,7 +50,7 @@ export type { SitesDomainsRetrieveResponse } from './sites-domains-retrieve-resp
 export type { SitesDomainsVerifyResponse } from './sites-domains-verify-response';
 export type { SitesSourceVersionsListResponse } from './sites-source-versions-list-response';
 export type { SitesSourceVersionsCreateResponse201 } from './sites-source-versions-create-response201';
-export type { SitesSourceVersionsImportGitResponse201 } from './sites-source-versions-import-git-response201';
+export type { SitesSourceVersionsGitImportCreateResponse201 } from './sites-source-versions-git-import-create-response201';
 export type { SitesSourceVersionsRetrieveResponse } from './sites-source-versions-retrieve-response';
 export type { SitesDeploymentsListResponse } from './sites-deployments-list-response';
 export type { SitesDeploymentsCreateResponse201 } from './sites-deployments-create-response201';

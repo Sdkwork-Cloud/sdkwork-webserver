@@ -417,7 +417,7 @@ async function createApplicationWithInitialVersion(
     }
   } else {
     try {
-      const sourceVersion = await client.applicationSourceVersion.applications.sourceVersions.importGit(
+      const sourceVersion = await client.applicationSourceVersion.applications.sourceVersions.gitImport.create(
         applicationId,
         {
           repositoryUrl: normalizeApplicationGitRepositoryUrl(context.sourceRepository),
@@ -516,7 +516,7 @@ async function storeApplicationSourceVersion(
   const idempotency = idempotencyParams(context);
   if (context.sourceInputMode === "git") {
     context.onProgress?.(8);
-    const sourceVersion = await client.applicationSourceVersion.applications.sourceVersions.importGit(
+    const sourceVersion = await client.applicationSourceVersion.applications.sourceVersions.gitImport.create(
       applicationId,
       {
         repositoryUrl: normalizeApplicationGitRepositoryUrl(context.sourceRepository),

@@ -1,6 +1,6 @@
 import type { ApplicationSourceVersionResponse } from './application-source-version-response';
 
-export interface ApplicationsSourceVersionsImportGitResponse201 {
+export interface ApplicationsSourceVersionsGitImportCreateResponse201 {
   code: 0;
   data: unknown & { item: ApplicationSourceVersionResponse; };
   /** Server-owned request correlation id. */

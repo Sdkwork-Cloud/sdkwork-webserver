@@ -34,13 +34,13 @@ public class ApplicationSourceVersionApi {
     }
 
     /** Import an immutable application source version from a public Git repository */
-    public ApplicationsSourceVersionsImportGitResponse201 applicationsSourceVersionsImportGit(String applicationId, ImportApplicationGitSourceVersionRequest body, String idempotencyKey) throws Exception {
+    public ApplicationsSourceVersionsGitImportCreateResponse201 applicationsSourceVersionsGitImportCreate(String applicationId, ImportApplicationGitSourceVersionRequest body, String idempotencyKey) throws Exception {
         Map<String, String> requestHeaders = buildRequestHeaders(
                 Map.of("Idempotency-Key", new HeaderParameterSpec(idempotencyKey, "simple", false, null)),
                 Map.of()
         );
         Object raw = client.post(ApiPaths.backendPath("/applications/" + serializePathParameter(applicationId, new PathParameterSpec("applicationId", "simple", false)) + "/source_versions/git_import"), body, null, requestHeaders, "application/json");
-        return client.convertValue(raw, new TypeReference<ApplicationsSourceVersionsImportGitResponse201>() {});
+        return client.convertValue(raw, new TypeReference<ApplicationsSourceVersionsGitImportCreateResponse201>() {});
     }
 
     /** Retrieve an application source version */

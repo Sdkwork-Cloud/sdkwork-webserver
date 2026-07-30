@@ -34,13 +34,13 @@ public class SourceVersionApi {
     }
 
     /** 从公共 Git 仓库导入应用源码版本 */
-    public SitesSourceVersionsImportGitResponse201 sitesSourceVersionsImportGit(String siteId, ImportGitSourceVersionRequest body, String idempotencyKey) throws Exception {
+    public SitesSourceVersionsGitImportCreateResponse201 sitesSourceVersionsGitImportCreate(String siteId, ImportGitSourceVersionRequest body, String idempotencyKey) throws Exception {
         Map<String, String> requestHeaders = buildRequestHeaders(
                 Map.of("Idempotency-Key", new HeaderParameterSpec(idempotencyKey, "simple", false, null)),
                 Map.of()
         );
         Object raw = client.post(ApiPaths.appPath("/sites/" + serializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false)) + "/source_versions/git_import"), body, null, requestHeaders, "application/json");
-        return client.convertValue(raw, new TypeReference<SitesSourceVersionsImportGitResponse201>() {});
+        return client.convertValue(raw, new TypeReference<SitesSourceVersionsGitImportCreateResponse201>() {});
     }
 
     /** 获取应用源码版本详情 */

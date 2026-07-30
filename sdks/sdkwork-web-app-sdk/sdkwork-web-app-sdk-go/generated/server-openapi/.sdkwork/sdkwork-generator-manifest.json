@@ -48,7 +48,7 @@
     },
     {
       "path": "api/source_version.go",
-      "sha256": "2fbd749cb53355ca72c305e5870cfe060b49817c746dff6650544dee5a72cc2d"
+      "sha256": "557347c9f3be0cb3fca43d09999ebfa377e3024b45c61349af1165d168e03086"
     },
     {
       "path": "bin/publish-core.mjs",
@@ -327,8 +327,8 @@
       "sha256": "e4a6bbc9426c51c3203747c5fdc89f093149dd914379e4517eaae8deb7960998"
     },
     {
-      "path": "types/sites_source_versions_import_git_response201.go",
-      "sha256": "fcaf8bb1afbdc35c6becee58e9b278d4622415c45b82ad06aeb7b7f9388af779"
+      "path": "types/sites_source_versions_git_import_create_response201.go",
+      "sha256": "68ce4e248f880cdbc30604f9f8fb92a11d1efdffb3e972a05fd6b9aa6c4f7784"
     },
     {
       "path": "types/sites_source_versions_list_response.go",

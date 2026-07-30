@@ -1,7 +1,7 @@
 module Sdkwork
-  module AppSdk
+  module BackendSdk
     module Models
-      class SitesSourceVersionsImportGitResponse201
+      class ApplicationsSourceVersionsGitImportCreateResponse201
               attr_accessor :code, :data, :trace_id
 
               def initialize(attributes = {})

@@ -3508,37 +3508,37 @@ class ApplicationsSourceVersionsCreateResponse201 {
   }
 }
 
-class ApplicationsSourceVersionsImportGitResponse201 {
+class ApplicationsSourceVersionsGitImportCreateResponse201 {
   final int code;
   final dynamic data;
   final String traceId;
 
-  ApplicationsSourceVersionsImportGitResponse201({
+  ApplicationsSourceVersionsGitImportCreateResponse201({
     required this.code,
     required this.data,
     required this.traceId
   });
 
-  factory ApplicationsSourceVersionsImportGitResponse201.fromJson(Map<String, dynamic> json) {
-    return ApplicationsSourceVersionsImportGitResponse201(
+  factory ApplicationsSourceVersionsGitImportCreateResponse201.fromJson(Map<String, dynamic> json) {
+    return ApplicationsSourceVersionsGitImportCreateResponse201(
       code: (() {
         final value = json['code'];
         if (value is! int) {
-          throw FormatException('ApplicationsSourceVersionsImportGitResponse201.code is required');
+          throw FormatException('ApplicationsSourceVersionsGitImportCreateResponse201.code is required');
         }
         return value;
       })(),
       data: (() {
         final map = _sdkworkAsMap(json['data']);
         if (map == null) {
-          throw FormatException('ApplicationsSourceVersionsImportGitResponse201.data is required');
+          throw FormatException('ApplicationsSourceVersionsGitImportCreateResponse201.data is required');
         }
         return map;
       })(),
       traceId: (() {
         final value = json['traceId']?.toString();
         if (value == null) {
-          throw FormatException('ApplicationsSourceVersionsImportGitResponse201.traceId is required');
+          throw FormatException('ApplicationsSourceVersionsGitImportCreateResponse201.traceId is required');
         }
         return value;
       })()

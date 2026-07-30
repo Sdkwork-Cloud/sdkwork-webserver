@@ -1107,7 +1107,7 @@ public struct ApplicationsSourceVersionsCreateResponse201: Codable {
     }
 }
 
-public struct ApplicationsSourceVersionsImportGitResponse201: Codable {
+public struct ApplicationsSourceVersionsGitImportCreateResponse201: Codable {
     public let code: Int?
     public let data: Any?
     public let traceId: String?

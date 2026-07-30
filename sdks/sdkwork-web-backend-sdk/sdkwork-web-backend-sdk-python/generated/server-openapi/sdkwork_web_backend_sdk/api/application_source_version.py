@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional
 from ..http_client import HttpClient
-from ..models import ApplicationsSourceVersionsCreateResponse201, ApplicationsSourceVersionsImportGitResponse201, ApplicationsSourceVersionsListResponse, ApplicationsSourceVersionsRetrieveResponse, CreateApplicationSourceVersionRequest, ImportApplicationGitSourceVersionRequest
+from ..models import ApplicationsSourceVersionsCreateResponse201, ApplicationsSourceVersionsGitImportCreateResponse201, ApplicationsSourceVersionsListResponse, ApplicationsSourceVersionsRetrieveResponse, CreateApplicationSourceVersionRequest, ImportApplicationGitSourceVersionRequest
 
 def _append_query_string(path: str, raw_query_string: str) -> str:
     query = raw_query_string.lstrip('?')
@@ -258,6 +258,7 @@ class ApplicationSourceVersionApplicationsSourceVersionsApi:
 
     def __init__(self, client: HttpClient):
         self._client = client
+        self.git_import = ApplicationSourceVersionApplicationsSourceVersionsGitImportApi(client)
 
 
     def list(self, application_id: str, page: Optional[int] = None, page_size: Optional[int] = None) -> ApplicationsSourceVersionsListResponse:
@@ -278,7 +279,18 @@ class ApplicationSourceVersionApplicationsSourceVersionsApi:
         )
         return self._client.post(f"/backend/v3/api/applications/{serialize_path_parameter(application_id, {'name': 'applicationId', 'style': 'simple', 'explode': False})}/source_versions", json=body, headers=request_headers)
 
-    def import_git(self, application_id: str, body: ImportApplicationGitSourceVersionRequest, idempotency_key: str) -> ApplicationsSourceVersionsImportGitResponse201:
+    def retrieve(self, application_id: str, source_version_id: str) -> ApplicationsSourceVersionsRetrieveResponse:
+        """Retrieve an application source version"""
+        return self._client.get(f"/backend/v3/api/applications/{serialize_path_parameter(application_id, {'name': 'applicationId', 'style': 'simple', 'explode': False})}/source_versions/{serialize_path_parameter(source_version_id, {'name': 'sourceVersionId', 'style': 'simple', 'explode': False})}")
+
+class ApplicationSourceVersionApplicationsSourceVersionsGitImportApi:
+    """application_source_version application_source_version.applications.source_versions.git_import API client."""
+
+    def __init__(self, client: HttpClient):
+        self._client = client
+
+
+    def create(self, application_id: str, body: ImportApplicationGitSourceVersionRequest, idempotency_key: str) -> ApplicationsSourceVersionsGitImportCreateResponse201:
         """Import an immutable application source version from a public Git repository"""
         request_headers = build_request_headers(
             {
@@ -287,7 +299,3 @@ class ApplicationSourceVersionApplicationsSourceVersionsApi:
             {}
         )
         return self._client.post(f"/backend/v3/api/applications/{serialize_path_parameter(application_id, {'name': 'applicationId', 'style': 'simple', 'explode': False})}/source_versions/git_import", json=body, headers=request_headers)
-
-    def retrieve(self, application_id: str, source_version_id: str) -> ApplicationsSourceVersionsRetrieveResponse:
-        """Retrieve an application source version"""
-        return self._client.get(f"/backend/v3/api/applications/{serialize_path_parameter(application_id, {'name': 'applicationId', 'style': 'simple', 'explode': False})}/source_versions/{serialize_path_parameter(source_version_id, {'name': 'sourceVersionId', 'style': 'simple', 'explode': False})}")

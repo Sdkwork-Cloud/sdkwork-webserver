@@ -7,7 +7,7 @@ namespace SDKWork\Web\AppSdk\Api;
 use SDKWork\Web\AppSdk\Models\CreateSourceVersionRequest;
 use SDKWork\Web\AppSdk\Models\ImportGitSourceVersionRequest;
 use SDKWork\Web\AppSdk\Models\SitesSourceVersionsCreateResponse201;
-use SDKWork\Web\AppSdk\Models\SitesSourceVersionsImportGitResponse201;
+use SDKWork\Web\AppSdk\Models\SitesSourceVersionsGitImportCreateResponse201;
 use SDKWork\Web\AppSdk\Models\SitesSourceVersionsListResponse;
 use SDKWork\Web\AppSdk\Models\SitesSourceVersionsRetrieveResponse;
 
@@ -45,7 +45,7 @@ final class SourceVersionApi extends BaseApi
     }
 
     /** 从公共 Git 仓库导入应用源码版本 */
-    public function sitesSourceVersionsImportGit(string $siteId, array|ImportGitSourceVersionRequest $body, string $idempotencyKey): ?SitesSourceVersionsImportGitResponse201
+    public function sitesSourceVersionsGitImportCreate(string $siteId, array|ImportGitSourceVersionRequest $body, string $idempotencyKey): ?SitesSourceVersionsGitImportCreateResponse201
     {
         $path = $this->interpolatePath('/app/v3/api/sites/{siteId}/source_versions/git_import', ['siteId' => $this->serializePathParameter($siteId, new PathParameterSpec('siteId', 'simple', false))]);
         $payload = $body instanceof ImportGitSourceVersionRequest ? $body->toArray() : $body;
@@ -59,7 +59,7 @@ final class SourceVersionApi extends BaseApi
             'headers' => $requestHeaders,
             'json' => $payload,
         ]);
-        return is_array($result) ? SitesSourceVersionsImportGitResponse201::fromArray($result) : null;
+        return is_array($result) ? SitesSourceVersionsGitImportCreateResponse201::fromArray($result) : null;
     }
 
     /** 获取应用源码版本详情 */

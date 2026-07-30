@@ -60,7 +60,7 @@
     },
     {
       "path": "src/Api/ApplicationSourceVersion.php",
-      "sha256": "f02f676092a5ee7539b16d8f065955904cb6f4fddc629d9b65558aa1bf4c13d5"
+      "sha256": "4d8f05ceab70ddc37bd079736ce9d020af27d35f1622df39a31fc6989a94fa4d"
     },
     {
       "path": "src/Api/Audit.php",
@@ -187,8 +187,8 @@
       "sha256": "c090fe4411aafde93bf247102ccdd9ec4f8e8a9705ea9508757f842929f7d5a6"
     },
     {
-      "path": "src/Models/ApplicationsSourceVersionsImportGitResponse201.php",
-      "sha256": "ddd4e4b131b18799faa1ffc6aa659be1605d6cbac46b3a46edc5f8faa1d1a13e"
+      "path": "src/Models/ApplicationsSourceVersionsGitImportCreateResponse201.php",
+      "sha256": "0b9dcbd917e502471525836cea547e562e38c4e8259d6e018fe80b8c48c8dcc5"
     },
     {
       "path": "src/Models/ApplicationsSourceVersionsListResponse.php",

@@ -46,17 +46,17 @@ func (a *ApplicationSourceVersionApi) ApplicationsSourceVersionsCreate(applicati
 }
 
 // Import an immutable application source version from a public Git repository
-func (a *ApplicationSourceVersionApi) ApplicationsSourceVersionsImportGit(applicationId string, body sdktypes.ImportApplicationGitSourceVersionRequest, idempotencyKey string) (sdktypes.ApplicationsSourceVersionsImportGitResponse201, error) {
+func (a *ApplicationSourceVersionApi) ApplicationsSourceVersionsGitImportCreate(applicationId string, body sdktypes.ImportApplicationGitSourceVersionRequest, idempotencyKey string) (sdktypes.ApplicationsSourceVersionsGitImportCreateResponse201, error) {
     headers := BuildRequestHeaders(
         map[string]ParameterSpec{"Idempotency-Key": ParameterSpec{Value: idempotencyKey, Style: "simple", Explode: false},},
         map[string]ParameterSpec{},
     )
     raw, err := a.client.Post(BackendApiPath(fmt.Sprintf("/applications/%s/source_versions/git_import", SerializePathParameter(applicationId, PathParameterSpec{Name: "applicationId", Style: "simple", Explode: false}))), body, nil, headers, "application/json")
     if err != nil {
-        var zero sdktypes.ApplicationsSourceVersionsImportGitResponse201
+        var zero sdktypes.ApplicationsSourceVersionsGitImportCreateResponse201
         return zero, err
     }
-    return decodeResult[sdktypes.ApplicationsSourceVersionsImportGitResponse201](raw)
+    return decodeResult[sdktypes.ApplicationsSourceVersionsGitImportCreateResponse201](raw)
 }
 
 // Retrieve an application source version

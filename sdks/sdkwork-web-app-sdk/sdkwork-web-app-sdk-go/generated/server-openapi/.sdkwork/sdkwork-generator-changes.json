@@ -9,12 +9,13 @@
     "protocol": "http",
     "packageName": "github.com/sdkwork/sdkwork-web-app-sdk"
   },
-  "changeFingerprint": "1b1d7f893f13b4abfa9b64a7b3f48fcfd1ab25f5e01339ca46d2a6961dc7ee30",
+  "changeFingerprint": "d1883ce26be66259d546f217d4abf3750feb24627d822e07a3377ddb74a25fce",
   "changes": {
-    "createdGeneratedFiles": [],
+    "createdGeneratedFiles": [
+      "types/sites_source_versions_git_import_create_response201.go"
+    ],
     "updatedGeneratedFiles": [
-      "types/certificate_response.go",
-      "types/domain_response.go"
+      "api/source_version.go"
     ],
     "unchangedGeneratedFiles": [
       "api/base.go",
@@ -26,7 +27,6 @@
       "api/monitor.go",
       "api/paths.go",
       "api/site.go",
-      "api/source_version.go",
       "bin/publish-core.mjs",
       "bin/publish.ps1",
       "bin/publish.sh",
@@ -41,6 +41,7 @@
       "sdkwork-sdk.json",
       "types/application_store_listing.go",
       "types/certificate_page.go",
+      "types/certificate_response.go",
       "types/certificates_create_response201.go",
       "types/certificates_list_response.go",
       "types/common.go",
@@ -55,6 +56,7 @@
       "types/deployment_response.go",
       "types/doc.go",
       "types/domain_page.go",
+      "types/domain_response.go",
       "types/domain_verify_response.go",
       "types/env_variable_page.go",
       "types/env_variable_response.go",
@@ -94,7 +96,6 @@
       "types/sites_pause_response.go",
       "types/sites_retrieve_response.go",
       "types/sites_source_versions_create_response201.go",
-      "types/sites_source_versions_import_git_response201.go",
       "types/sites_source_versions_list_response.go",
       "types/sites_source_versions_retrieve_response.go",
       "types/sites_update_response.go",
@@ -103,7 +104,9 @@
       "types/source_version_response.go",
       "types/update_site_request.go"
     ],
-    "deletedGeneratedFiles": [],
+    "deletedGeneratedFiles": [
+      "types/sites_source_versions_import_git_response201.go"
+    ],
     "scaffoldedFiles": [],
     "preservedScaffoldFiles": [
       "custom/README.md"
@@ -113,30 +116,37 @@
   "impact": {
     "schemaVersion": 1,
     "areas": [
+      "api-surface",
       "models"
     ],
     "details": [
       {
+        "area": "api-surface",
+        "paths": [
+          "api/source_version.go"
+        ]
+      },
+      {
         "area": "models",
         "paths": [
-          "types/certificate_response.go",
-          "types/domain_response.go"
+          "types/sites_source_versions_git_import_create_response201.go",
+          "types/sites_source_versions_import_git_response201.go"
         ]
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: models. Verification is required."
+    "summary": "Detected impact areas: api-surface, models. Verification is required."
   },
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-go\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -154,12 +164,14 @@
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "medium",
+    "riskLevel": "high",
     "nextAction": "verify",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
     "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
+      "deleted-generated-files",
+      "manual-review-required",
       "verification-required"
     ]
   },

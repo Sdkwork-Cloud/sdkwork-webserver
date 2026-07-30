@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace SDKWork\Web\BackendSdk\Api;
 
 use SDKWork\Web\BackendSdk\Models\ApplicationsSourceVersionsCreateResponse201;
-use SDKWork\Web\BackendSdk\Models\ApplicationsSourceVersionsImportGitResponse201;
+use SDKWork\Web\BackendSdk\Models\ApplicationsSourceVersionsGitImportCreateResponse201;
 use SDKWork\Web\BackendSdk\Models\ApplicationsSourceVersionsListResponse;
 use SDKWork\Web\BackendSdk\Models\ApplicationsSourceVersionsRetrieveResponse;
 use SDKWork\Web\BackendSdk\Models\CreateApplicationSourceVersionRequest;
@@ -45,7 +45,7 @@ final class ApplicationSourceVersionApi extends BaseApi
     }
 
     /** Import an immutable application source version from a public Git repository */
-    public function applicationsSourceVersionsImportGit(string $applicationId, array|ImportApplicationGitSourceVersionRequest $body, string $idempotencyKey): ?ApplicationsSourceVersionsImportGitResponse201
+    public function applicationsSourceVersionsGitImportCreate(string $applicationId, array|ImportApplicationGitSourceVersionRequest $body, string $idempotencyKey): ?ApplicationsSourceVersionsGitImportCreateResponse201
     {
         $path = $this->interpolatePath('/backend/v3/api/applications/{applicationId}/source_versions/git_import', ['applicationId' => $this->serializePathParameter($applicationId, new PathParameterSpec('applicationId', 'simple', false))]);
         $payload = $body instanceof ImportApplicationGitSourceVersionRequest ? $body->toArray() : $body;
@@ -59,7 +59,7 @@ final class ApplicationSourceVersionApi extends BaseApi
             'headers' => $requestHeaders,
             'json' => $payload,
         ]);
-        return is_array($result) ? ApplicationsSourceVersionsImportGitResponse201::fromArray($result) : null;
+        return is_array($result) ? ApplicationsSourceVersionsGitImportCreateResponse201::fromArray($result) : null;
     }
 
     /** Retrieve an application source version */

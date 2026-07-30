@@ -28,14 +28,14 @@ public class SourceVersionApi {
     }
 
     /// 从公共 Git 仓库导入应用源码版本
-    public func sitesSourceVersionsImportGit(siteId: String, body: ImportGitSourceVersionRequest, idempotencyKey: String) async throws -> SitesSourceVersionsImportGitResponse201? {
+    public func sitesSourceVersionsGitImportCreate(siteId: String, body: ImportGitSourceVersionRequest, idempotencyKey: String) async throws -> SitesSourceVersionsGitImportCreateResponse201? {
         let requestHeaders = buildRequestHeaders(
             [
                 "Idempotency-Key": HeaderParameterSpec(value: idempotencyKey, style: "simple", explode: false, contentType: nil),
             ],
             [:]
         )
-        return try await client.post(ApiPaths.appPath("/sites/\(serializePathParameter(siteId, PathParameterSpec(name: "siteId", style: "simple", explode: false)))/source_versions/git_import"), body: body, params: nil, headers: requestHeaders, contentType: "application/json", responseType: SitesSourceVersionsImportGitResponse201.self)
+        return try await client.post(ApiPaths.appPath("/sites/\(serializePathParameter(siteId, PathParameterSpec(name: "siteId", style: "simple", explode: false)))/source_versions/git_import"), body: body, params: nil, headers: requestHeaders, contentType: "application/json", responseType: SitesSourceVersionsGitImportCreateResponse201.self)
     }
 
     /// 获取应用源码版本详情

@@ -28,14 +28,14 @@ public class ApplicationSourceVersionApi {
     }
 
     /// Import an immutable application source version from a public Git repository
-    public func applicationsSourceVersionsImportGit(applicationId: String, body: ImportApplicationGitSourceVersionRequest, idempotencyKey: String) async throws -> ApplicationsSourceVersionsImportGitResponse201? {
+    public func applicationsSourceVersionsGitImportCreate(applicationId: String, body: ImportApplicationGitSourceVersionRequest, idempotencyKey: String) async throws -> ApplicationsSourceVersionsGitImportCreateResponse201? {
         let requestHeaders = buildRequestHeaders(
             [
                 "Idempotency-Key": HeaderParameterSpec(value: idempotencyKey, style: "simple", explode: false, contentType: nil),
             ],
             [:]
         )
-        return try await client.post(ApiPaths.backendPath("/applications/\(serializePathParameter(applicationId, PathParameterSpec(name: "applicationId", style: "simple", explode: false)))/source_versions/git_import"), body: body, params: nil, headers: requestHeaders, contentType: "application/json", responseType: ApplicationsSourceVersionsImportGitResponse201.self)
+        return try await client.post(ApiPaths.backendPath("/applications/\(serializePathParameter(applicationId, PathParameterSpec(name: "applicationId", style: "simple", explode: false)))/source_versions/git_import"), body: body, params: nil, headers: requestHeaders, contentType: "application/json", responseType: ApplicationsSourceVersionsGitImportCreateResponse201.self)
     }
 
     /// Retrieve an application source version

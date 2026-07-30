@@ -382,7 +382,7 @@
     {
       "method": "POST",
       "path": "/app/v3/api/sites/{siteId}/source_versions/git_import",
-      "operationId": "sites.sourceVersions.importGit",
+      "operationId": "sites.sourceVersions.gitImport.create",
       "tags": [
         "sourceVersion"
       ],

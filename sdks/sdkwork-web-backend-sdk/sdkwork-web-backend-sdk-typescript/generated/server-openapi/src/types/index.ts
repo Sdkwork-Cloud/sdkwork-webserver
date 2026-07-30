@@ -65,7 +65,7 @@ export type { DomainsVerifyResponse } from './domains-verify-response';
 export type { DomainsApplicationBindingUpdateResponse } from './domains-application-binding-update-response';
 export type { ApplicationsSourceVersionsListResponse } from './applications-source-versions-list-response';
 export type { ApplicationsSourceVersionsCreateResponse201 } from './applications-source-versions-create-response201';
-export type { ApplicationsSourceVersionsImportGitResponse201 } from './applications-source-versions-import-git-response201';
+export type { ApplicationsSourceVersionsGitImportCreateResponse201 } from './applications-source-versions-git-import-create-response201';
 export type { ApplicationsSourceVersionsRetrieveResponse } from './applications-source-versions-retrieve-response';
 export type { ApplicationsDeploymentsListResponse } from './applications-deployments-list-response';
 export type { ApplicationsDeploymentsCreateResponse201 } from './applications-deployments-create-response201';

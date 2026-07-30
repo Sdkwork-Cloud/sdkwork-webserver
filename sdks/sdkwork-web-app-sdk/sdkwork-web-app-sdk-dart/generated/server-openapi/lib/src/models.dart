@@ -1965,19 +1965,19 @@ class SitesSourceVersionsCreateResponse201 {
   }
 }
 
-class SitesSourceVersionsImportGitResponse201 {
+class SitesSourceVersionsGitImportCreateResponse201 {
   final int? code;
   final dynamic data;
   final String? traceId;
 
-  SitesSourceVersionsImportGitResponse201({
+  SitesSourceVersionsGitImportCreateResponse201({
     this.code,
     this.data,
     this.traceId
   });
 
-  factory SitesSourceVersionsImportGitResponse201.fromJson(Map<String, dynamic> json) {
-    return SitesSourceVersionsImportGitResponse201(
+  factory SitesSourceVersionsGitImportCreateResponse201.fromJson(Map<String, dynamic> json) {
+    return SitesSourceVersionsGitImportCreateResponse201(
       code: json['code'] is int ? json['code'] : null,
       data: _sdkworkAsMap(json['data']),
       traceId: json['traceId']?.toString()

@@ -1235,7 +1235,7 @@
         }
       ],
       "post": {
-        "operationId": "sites.sourceVersions.importGit",
+        "operationId": "sites.sourceVersions.gitImport.create",
         "summary": "从公共 Git 仓库导入应用源码版本",
         "tags": [
           "sourceVersion"

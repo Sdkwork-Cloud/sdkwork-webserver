@@ -72,7 +72,7 @@
     },
     {
       "path": "src/Api/SourceVersion.php",
-      "sha256": "3e45efb724744d683a2ca03e5c9551850b36ea4424bad57074fc5498c4da7718"
+      "sha256": "ed0a7032e65adbeb00235b4cdfd07d0aa9d2417ce7eb835ec2dbd182865fc47b"
     },
     {
       "path": "src/Http/HttpClient.php",
@@ -295,8 +295,8 @@
       "sha256": "69ff1735c82ee87d53c15d84bd180b6adf853abc76d185ddb2d2576714fea113"
     },
     {
-      "path": "src/Models/SitesSourceVersionsImportGitResponse201.php",
-      "sha256": "74d5248fc7cbe57f3081ff0d751f726c42957301cced25a311dd7583c0f1e838"
+      "path": "src/Models/SitesSourceVersionsGitImportCreateResponse201.php",
+      "sha256": "2bdd3e9b9e357b5db2605a96f4c4989304bf82aa01e3051899516db99c3e541f"
     },
     {
       "path": "src/Models/SitesSourceVersionsListResponse.php",

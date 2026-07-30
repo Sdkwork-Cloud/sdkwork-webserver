@@ -1,7 +1,7 @@
 package types
 
 
-type SitesSourceVersionsImportGitResponse201 struct {
+type ApplicationsSourceVersionsGitImportCreateResponse201 struct {
 	Code int `json:"code"`
 	Data interface{} `json:"data"`
 	TraceId string `json:"traceId"`

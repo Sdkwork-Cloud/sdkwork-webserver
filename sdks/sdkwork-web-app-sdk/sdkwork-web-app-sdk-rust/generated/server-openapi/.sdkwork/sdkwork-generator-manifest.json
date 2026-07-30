@@ -80,7 +80,7 @@
     },
     {
       "path": "src/api/source_version.rs",
-      "sha256": "06e5c6eb994432f25319b59fbac277cb966652e7255c29b001eb747b6b951f1b"
+      "sha256": "44e7ea48466577d846627ac28ca02877c82ed51b926bf5db31834f4268dea9a0"
     },
     {
       "path": "src/client.rs",
@@ -204,7 +204,7 @@
     },
     {
       "path": "src/models/mod.rs",
-      "sha256": "81f00e9703c0af0d98605ec1e1f3ad1c0def3b91cee25a6f28cfca116d43fac9"
+      "sha256": "1043bd9fb932e042b03043bd55ef7b6015c24c8401f9bc3a130eff0ff24a6908"
     },
     {
       "path": "src/models/page_info.rs",
@@ -323,8 +323,8 @@
       "sha256": "706d8733ec9544ce8379b8f374769df6b610772d83f54485df9ed956c6892b77"
     },
     {
-      "path": "src/models/sites_source_versions_import_git_response201.rs",
-      "sha256": "1e0a606d93b91b7bc57c7965873a9f329906cb3ff800dde6bd4b43512d238b52"
+      "path": "src/models/sites_source_versions_git_import_create_response201.rs",
+      "sha256": "cfabb13f4f5e07298fb1b5889a3190134f6044fa576397bab5d3c45c78ce6255"
     },
     {
       "path": "src/models/sites_source_versions_list_response.rs",

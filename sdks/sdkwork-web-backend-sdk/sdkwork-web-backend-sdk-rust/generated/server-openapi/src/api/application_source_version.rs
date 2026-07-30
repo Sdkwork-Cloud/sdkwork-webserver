@@ -39,7 +39,7 @@ impl ApplicationSourceVersionApi {
     }
 
     /// Import an immutable application source version from a public Git repository
-    pub async fn applications_source_versions_import_git(&self, application_id: &str, body: &ImportApplicationGitSourceVersionRequest, idempotency_key: &str) -> Result<ApplicationSourceVersionResponse, SdkworkError> {
+    pub async fn applications_source_versions_git_import_create(&self, application_id: &str, body: &ImportApplicationGitSourceVersionRequest, idempotency_key: &str) -> Result<ApplicationSourceVersionResponse, SdkworkError> {
         let path = backend_path(&format!("/applications/{}/source_versions/git_import", serialize_path_parameter(application_id, PathParameterSpec::new("applicationId", "simple", false))));
         let headers = build_request_headers(
             &[

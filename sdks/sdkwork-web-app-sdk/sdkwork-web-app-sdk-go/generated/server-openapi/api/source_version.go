@@ -46,17 +46,17 @@ func (a *SourceVersionApi) SitesSourceVersionsCreate(siteId string, body sdktype
 }
 
 // 从公共 Git 仓库导入应用源码版本
-func (a *SourceVersionApi) SitesSourceVersionsImportGit(siteId string, body sdktypes.ImportGitSourceVersionRequest, idempotencyKey string) (sdktypes.SitesSourceVersionsImportGitResponse201, error) {
+func (a *SourceVersionApi) SitesSourceVersionsGitImportCreate(siteId string, body sdktypes.ImportGitSourceVersionRequest, idempotencyKey string) (sdktypes.SitesSourceVersionsGitImportCreateResponse201, error) {
     headers := BuildRequestHeaders(
         map[string]ParameterSpec{"Idempotency-Key": ParameterSpec{Value: idempotencyKey, Style: "simple", Explode: false},},
         map[string]ParameterSpec{},
     )
     raw, err := a.client.Post(AppApiPath(fmt.Sprintf("/sites/%s/source_versions/git_import", SerializePathParameter(siteId, PathParameterSpec{Name: "siteId", Style: "simple", Explode: false}))), body, nil, headers, "application/json")
     if err != nil {
-        var zero sdktypes.SitesSourceVersionsImportGitResponse201
+        var zero sdktypes.SitesSourceVersionsGitImportCreateResponse201
         return zero, err
     }
-    return decodeResult[sdktypes.SitesSourceVersionsImportGitResponse201](raw)
+    return decodeResult[sdktypes.SitesSourceVersionsGitImportCreateResponse201](raw)
 }
 
 // 获取应用源码版本详情

@@ -4,6 +4,30 @@ import type { ApiRequestOptions, HttpClient } from '../http/client';
 import type { CreateSourceVersionRequest, ImportGitSourceVersionRequest, PageInfo, SourceVersionResponse } from '../types';
 
 
+export interface SourceVersionSitesSourceVersionsGitImportCreateParams {
+  idempotencyKey: string;
+}
+
+export class SourceVersionSitesSourceVersionsGitImportApi {
+  private client: HttpClient;
+
+  constructor(client: HttpClient) {
+    this.client = client;
+  }
+
+
+/** 从公共 Git 仓库导入应用源码版本 */
+  async create(siteId: string, body: ImportGitSourceVersionRequest, params: SourceVersionSitesSourceVersionsGitImportCreateParams, requestOptions?: ApiRequestOptions): Promise<SourceVersionResponse> {
+    const requestHeaders = buildRequestHeaders(
+      {
+        'Idempotency-Key': { value: params.idempotencyKey, style: 'simple', explode: false },
+      },
+      {}
+    );
+    return this.client.request<SourceVersionResponse>(appApiPath(`/sites/${serializePathParameter(siteId, { name: 'siteId', style: 'simple', explode: false })}/source_versions/git_import`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, body, headers: requestHeaders, contentType: 'application/json', sdkworkUnwrapKind: 'item' });
+  }
+}
+
 export interface SourceVersionSitesSourceVersionsListParams {
   page?: number;
   pageSize?: number;
@@ -13,15 +37,13 @@ export interface SourceVersionSitesSourceVersionsCreateParams {
   idempotencyKey: string;
 }
 
-export interface SourceVersionSitesSourceVersionsImportGitParams {
-  idempotencyKey: string;
-}
-
 export class SourceVersionSitesSourceVersionsApi {
   private client: HttpClient;
+  public readonly gitImport: SourceVersionSitesSourceVersionsGitImportApi;
 
   constructor(client: HttpClient) {
     this.client = client;
+    this.gitImport = new SourceVersionSitesSourceVersionsGitImportApi(client);
   }
 
 
@@ -43,17 +65,6 @@ export class SourceVersionSitesSourceVersionsApi {
       {}
     );
     return this.client.request<SourceVersionResponse>(appApiPath(`/sites/${serializePathParameter(siteId, { name: 'siteId', style: 'simple', explode: false })}/source_versions`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, body, headers: requestHeaders, contentType: 'application/json', sdkworkUnwrapKind: 'item' });
-  }
-
-/** 从公共 Git 仓库导入应用源码版本 */
-  async importGit(siteId: string, body: ImportGitSourceVersionRequest, params: SourceVersionSitesSourceVersionsImportGitParams, requestOptions?: ApiRequestOptions): Promise<SourceVersionResponse> {
-    const requestHeaders = buildRequestHeaders(
-      {
-        'Idempotency-Key': { value: params.idempotencyKey, style: 'simple', explode: false },
-      },
-      {}
-    );
-    return this.client.request<SourceVersionResponse>(appApiPath(`/sites/${serializePathParameter(siteId, { name: 'siteId', style: 'simple', explode: false })}/source_versions/git_import`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, body, headers: requestHeaders, contentType: 'application/json', sdkworkUnwrapKind: 'item' });
   }
 
 /** 获取应用源码版本详情 */

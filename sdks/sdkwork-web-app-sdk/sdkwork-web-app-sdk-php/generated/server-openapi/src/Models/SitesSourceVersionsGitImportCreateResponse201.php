@@ -6,7 +6,7 @@ namespace SDKWork\Web\AppSdk\Models;
 
 use SDKWork\Web\AppSdk\Models\SourceVersionResponse;
 
-final class SitesSourceVersionsImportGitResponse201
+final class SitesSourceVersionsGitImportCreateResponse201
 {
     public ?int $code = null;
 

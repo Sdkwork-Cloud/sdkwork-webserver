@@ -1,6 +1,6 @@
 require_relative 'base_api'
 require_relative '../models/applications_source_versions_create_response201'
-require_relative '../models/applications_source_versions_import_git_response201'
+require_relative '../models/applications_source_versions_git_import_create_response201'
 require_relative '../models/applications_source_versions_list_response'
 require_relative '../models/applications_source_versions_retrieve_response'
 require_relative '../models/create_application_source_version_request'
@@ -42,7 +42,7 @@ module Sdkwork
           end
 
           # Import an immutable application source version from a public Git repository
-          def applications_source_versions_import_git(application_id, idempotency_key, body: nil)
+          def applications_source_versions_git_import_create(application_id, idempotency_key, body: nil)
             path = interpolate_path('/backend/v3/api/applications/{applicationId}/source_versions/git_import', applicationId: serialize_path_parameter(application_id, PathParameterSpec.new('applicationId', 'simple', false)))
             payload = body.respond_to?(:to_hash) ? body.to_hash : body
             request_headers = build_request_headers(
@@ -55,7 +55,7 @@ module Sdkwork
             options[:headers] = request_headers unless request_headers.empty?
             options[:json] = payload unless payload.nil?
             result = @client.request('POST', path, **options)
-            result.is_a?(Hash) ? Models::ApplicationsSourceVersionsImportGitResponse201.from_hash(result) : nil
+            result.is_a?(Hash) ? Models::ApplicationsSourceVersionsGitImportCreateResponse201.from_hash(result) : nil
           end
 
           # Retrieve an application source version

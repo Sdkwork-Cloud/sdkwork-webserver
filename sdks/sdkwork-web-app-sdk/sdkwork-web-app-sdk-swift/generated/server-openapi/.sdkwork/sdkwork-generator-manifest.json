@@ -76,7 +76,7 @@
     },
     {
       "path": "Sources/API/SourceVersionApi.swift",
-      "sha256": "2d265071af29a90b9fec9d42a13aad9b29b47020f4b2c5409ab2be9933073fa6"
+      "sha256": "646768f12b2f7870230e268dd27c65d44012367990ec7b80ce7e844d2f8716f6"
     },
     {
       "path": "Sources/HTTP/HttpClient.swift",
@@ -84,7 +84,7 @@
     },
     {
       "path": "Sources/Models.swift",
-      "sha256": "e04369e65caaf4bf786b9e3cb1531b2e2b795a460d82031a9f97652b865694f6"
+      "sha256": "bfbdb09d9f0e9718a0cb96428118d706faf91ea801f671314235b121ffd16c23"
     },
     {
       "path": "Sources/SdkworkAppClient.swift",

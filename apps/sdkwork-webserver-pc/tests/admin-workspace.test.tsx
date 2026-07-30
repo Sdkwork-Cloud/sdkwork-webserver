@@ -692,7 +692,9 @@ function client(overrides: {
             pageInfo: { page: 1, pageSize: 20, hasMore: false },
           }),
           create: overrides.createSourceVersion ?? vi.fn().mockResolvedValue({ id: "source-version-1", status: 1 }),
-          importGit: overrides.importGitSourceVersion ?? vi.fn().mockResolvedValue({ id: "source-version-1", status: 1 }),
+          gitImport: {
+            create: overrides.importGitSourceVersion ?? vi.fn().mockResolvedValue({ id: "source-version-1", status: 1 }),
+          },
           retrieve: vi.fn(),
         },
       },

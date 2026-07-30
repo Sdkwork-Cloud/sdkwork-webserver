@@ -33,7 +33,7 @@ describe("admin application capability", () => {
       },
       applicationDomain: { applications: { domains: { list: listDomains, create: createDomain, verify: verifyDomain, delete: deleteDomain } } },
       applicationDeployment: { applications: { deployments: { list: listDeployments, create: createDeployment, rollback: rollbackDeployment } } },
-      applicationSourceVersion: { applications: { sourceVersions: { list: listSourceVersions, create: createSourceVersion, importGit: vi.fn() } } },
+      applicationSourceVersion: { applications: { sourceVersions: { list: listSourceVersions, create: createSourceVersion, gitImport: { create: vi.fn() } } } },
     } as unknown as WebserverAdminSdkClient;
 
     const sourceStorage = testSourceStorage();
@@ -128,7 +128,7 @@ describe("admin application capability", () => {
         applications: { deployments: { create: createDeployment } },
       },
       applicationSourceVersion: {
-        applications: { sourceVersions: { importGit } },
+        applications: { sourceVersions: { gitImport: { create: importGit } } },
       },
     } as unknown as WebserverAdminSdkClient;
     const registry = createWebserverAdminApplicationRegistry(client, sourceStorage, testMediaStorage());

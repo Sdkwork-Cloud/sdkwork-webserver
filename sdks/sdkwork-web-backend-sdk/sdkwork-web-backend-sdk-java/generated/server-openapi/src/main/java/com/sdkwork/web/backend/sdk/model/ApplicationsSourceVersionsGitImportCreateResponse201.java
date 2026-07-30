@@ -1,7 +1,7 @@
-package com.sdkwork.web.app.sdk.model;
+package com.sdkwork.web.backend.sdk.model;
 
 
-public class SitesSourceVersionsImportGitResponse201 {
+public class ApplicationsSourceVersionsGitImportCreateResponse201 {
     private Integer code;
     private Object data;
     private String traceId;

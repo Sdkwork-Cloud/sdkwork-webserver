@@ -2494,19 +2494,19 @@ class ApplicationsSourceVersionsCreateResponse201 {
   }
 }
 
-class ApplicationsSourceVersionsImportGitResponse201 {
+class ApplicationsSourceVersionsGitImportCreateResponse201 {
   final int? code;
   final dynamic data;
   final String? traceId;
 
-  ApplicationsSourceVersionsImportGitResponse201({
+  ApplicationsSourceVersionsGitImportCreateResponse201({
     this.code,
     this.data,
     this.traceId
   });
 
-  factory ApplicationsSourceVersionsImportGitResponse201.fromJson(Map<String, dynamic> json) {
-    return ApplicationsSourceVersionsImportGitResponse201(
+  factory ApplicationsSourceVersionsGitImportCreateResponse201.fromJson(Map<String, dynamic> json) {
+    return ApplicationsSourceVersionsGitImportCreateResponse201(
       code: json['code'] is int ? json['code'] : null,
       data: _sdkworkAsMap(json['data']),
       traceId: json['traceId']?.toString()
