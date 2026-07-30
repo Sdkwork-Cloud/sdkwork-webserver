@@ -819,6 +819,31 @@ async fn verify_public_repository_surface(context: &TestContext, site_id: &str) 
         detached_certificate.domain_id.as_deref(),
         Some(detached_domain.id.as_str())
     );
+    let replacement_certificate = repository
+        .create_certificate(
+            TENANT_A,
+            None,
+            &CreateCertificateRequest {
+                domain_id: detached_domain.id.clone(),
+                cert_type: 3,
+                auto_renew: false,
+            },
+        )
+        .await
+        .expect("create a second certificate for the detached domain");
+    assert_ne!(replacement_certificate.id, detached_certificate.id);
+    assert_eq!(
+        repository
+            .list_managed_domains(TENANT_A, 1, 20)
+            .await
+            .expect("refresh tenant managed domains")
+            .items
+            .into_iter()
+            .find(|item| item.id == detached_domain.id)
+            .expect("find detached managed domain")
+            .certificate_count,
+        2
+    );
     assert!(repository
         .list_certificates(TENANT_A, None, None, 1, 20)
         .await
@@ -846,6 +871,7 @@ async fn verify_public_repository_surface(context: &TestContext, site_id: &str) 
         .await
         .expect("bind detached domain to application");
     assert_eq!(bound_domain.application_id.as_deref(), Some(site_id));
+    assert_eq!(bound_domain.certificate_count, 2);
     let projected_site_id: Option<i64> = sqlx::query_scalar(
         "SELECT site_id FROM web_certificate WHERE tenant_id = $1 AND uuid = $2",
     )
@@ -855,6 +881,15 @@ async fn verify_public_repository_surface(context: &TestContext, site_id: &str) 
     .await
     .expect("read bound certificate application projection");
     assert!(projected_site_id.is_some());
+    let replacement_projected_site_id: Option<i64> = sqlx::query_scalar(
+        "SELECT site_id FROM web_certificate WHERE tenant_id = $1 AND uuid = $2",
+    )
+    .bind(TENANT_A)
+    .bind(&replacement_certificate.id)
+    .fetch_one(&context.pool)
+    .await
+    .expect("read second bound certificate application projection");
+    assert!(replacement_projected_site_id.is_some());
 
     let unbound_domain = repository
         .unbind_managed_domain(TENANT_A, &detached_domain.id)
@@ -870,6 +905,23 @@ async fn verify_public_repository_surface(context: &TestContext, site_id: &str) 
     .await
     .expect("read unbound certificate application projection");
     assert!(projected_site_id.is_none());
+    let replacement_projected_site_id: Option<i64> = sqlx::query_scalar(
+        "SELECT site_id FROM web_certificate WHERE tenant_id = $1 AND uuid = $2",
+    )
+    .bind(TENANT_A)
+    .bind(&replacement_certificate.id)
+    .fetch_one(&context.pool)
+    .await
+    .expect("read second unbound certificate application projection");
+    assert!(replacement_projected_site_id.is_none());
+    assert_eq!(
+        repository
+            .delete_domain(TENANT_A, site_id, &detached_domain.id)
+            .await
+            .expect_err("application scope must not mutate an unbound domain")
+            .kind(),
+        WebServiceErrorKind::NotFound
+    );
     assert_eq!(
         repository
             .delete_managed_domain(TENANT_A, &detached_domain.id)
@@ -1079,7 +1131,7 @@ async fn verify_public_repository_surface(context: &TestContext, site_id: &str) 
             .await
             .expect("list certificate timestamp projections")
             .total,
-        2
+        3
     );
     assert_eq!(
         repository
@@ -1131,7 +1183,7 @@ async fn verify_public_repository_surface(context: &TestContext, site_id: &str) 
             .await
             .expect("automatic renewal update preserves canonical row")
             .total,
-        2
+        3
     );
     assert!(repository
         .list_certificates_due_for_renewal(3650, "2020-01-01T00:00:00Z", 20)

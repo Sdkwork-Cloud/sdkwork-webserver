@@ -482,11 +482,9 @@ impl WebRepository {
         let current_site_id: Option<i64> = row
             .try_get("site_id")
             .map_err(|error| store_error("map web_domain binding", error))?;
-        if let (Some(expected), Some(current)) = (expected_site_internal_id, current_site_id) {
-            if expected != current {
-                return Err(WebServiceError::conflict(
-                    "domain is bound to another application",
-                ));
+        if let Some(expected) = expected_site_internal_id {
+            if current_site_id != Some(expected) {
+                return Err(WebServiceError::not_found("domain not found"));
             }
         }
 
