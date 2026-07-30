@@ -832,6 +832,31 @@ async fn verify_public_repository_surface(context: &TestContext, site_id: &str) 
         .await
         .expect("create a second certificate for the detached domain");
     assert_ne!(replacement_certificate.id, detached_certificate.id);
+    repository
+        .finalize_certificate(
+            TENANT_A,
+            &detached_certificate.id,
+            &CertificateIssueUpdate {
+                cert_name: "detached.example.test".to_string(),
+                cert_type: 3,
+                issuer: "SDKWork Detached Test CA".to_string(),
+                subject: "CN=detached.example.test".to_string(),
+                san_list: "detached.example.test".to_string(),
+                fingerprint: "sha256:detached-repository-parity".to_string(),
+                cert_path: "/test/detached-fullchain.pem".to_string(),
+                key_path: "/test/detached-privkey.pem".to_string(),
+                chain_path: Some("/test/detached-chain.pem".to_string()),
+                not_before: "2026-01-01T00:00:00Z".to_string(),
+                not_after: "2027-01-01T00:00:00Z".to_string(),
+                auto_renew: false,
+                cert_pem: "test-detached-fullchain-pem".to_string(),
+                chain_pem: Some("test-detached-chain-pem".to_string()),
+                encrypted_private_key: "test-detached-encrypted-private-key".to_string(),
+            },
+            None,
+        )
+        .await
+        .expect("activate a certificate while its domain is detached");
     assert_eq!(
         repository
             .list_managed_domains(TENANT_A, 1, 20)
@@ -1348,7 +1373,11 @@ async fn verify_public_repository_surface(context: &TestContext, site_id: &str) 
         .await
         .expect("build agent sync JSON projections");
     assert_eq!(sync.nginx_configs.len(), 1);
-    assert_eq!(sync.certificates.len(), 1);
+    assert_eq!(
+        sync.certificates.len(),
+        1,
+        "an active certificate for a detached domain must not enter node sync"
+    );
     assert_eq!(encrypted_keys, vec!["test-encrypted-private-key"]);
     let pending_distribution = repository
         .list_certificate_distribution(TENANT_A, 1, 20)
