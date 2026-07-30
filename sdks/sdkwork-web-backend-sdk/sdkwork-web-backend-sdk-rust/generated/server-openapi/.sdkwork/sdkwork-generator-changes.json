@@ -9,13 +9,22 @@
     "protocol": "http",
     "packageName": "sdkwork-web-backend-sdk"
   },
-  "changeFingerprint": "1e9e35e54550530bca470359699452ef1f43807a2c57c5158517662051807d68",
+  "changeFingerprint": "358afba582fe73cd129374df84eda85c8595f12259604a698547e9d2db25616e",
   "changes": {
     "createdGeneratedFiles": [
-      "src/models/applications_source_versions_git_import_create_response201.rs"
+      "src/models/create_root_domain_hostname_request.rs",
+      "src/models/create_root_domain_request.rs",
+      "src/models/domain_deployment_response.rs",
+      "src/models/root_domain_response.rs",
+      "src/models/root_domains_create_response201.rs",
+      "src/models/root_domains_list_response.rs",
+      "src/models/root_domains_retrieve_response.rs",
+      "src/models/root_domains_subdomains_create_response201.rs",
+      "src/models/root_domains_subdomains_list_response.rs"
     ],
     "updatedGeneratedFiles": [
-      "src/api/application_source_version.rs",
+      "src/api/domain.rs",
+      "src/models/application_domain_response.rs",
       "src/models/mod.rs"
     ],
     "unchangedGeneratedFiles": [
@@ -30,12 +39,12 @@
       "src/api/agent.rs",
       "src/api/application_deployment.rs",
       "src/api/application_domain.rs",
+      "src/api/application_source_version.rs",
       "src/api/application.rs",
       "src/api/audit.rs",
       "src/api/base.rs",
       "src/api/certificate_distribution.rs",
       "src/api/certificate.rs",
-      "src/api/domain.rs",
       "src/api/mod.rs",
       "src/api/nginx.rs",
       "src/api/paths.rs",
@@ -50,7 +59,6 @@
       "src/models/agent_nginx_config_bundle.rs",
       "src/models/agent_sync_response.rs",
       "src/models/application_deployment_response.rs",
-      "src/models/application_domain_response.rs",
       "src/models/application_domain_verify_response.rs",
       "src/models/application_response.rs",
       "src/models/application_source_version_config_snapshot.rs",
@@ -68,6 +76,7 @@
       "src/models/applications_pause_response.rs",
       "src/models/applications_retrieve_response.rs",
       "src/models/applications_source_versions_create_response201.rs",
+      "src/models/applications_source_versions_git_import_create_response201.rs",
       "src/models/applications_source_versions_list_response.rs",
       "src/models/applications_source_versions_retrieve_response.rs",
       "src/models/applications_update_response.rs",
@@ -133,9 +142,7 @@
       "src/models/update_domain_application_binding_request.rs",
       "src/models/update_nginx_config_request.rs"
     ],
-    "deletedGeneratedFiles": [
-      "src/models/applications_source_versions_import_git_response201.rs"
-    ],
+    "deletedGeneratedFiles": [],
     "scaffoldedFiles": [],
     "preservedScaffoldFiles": [
       "custom/README.md"
@@ -152,15 +159,23 @@
       {
         "area": "api-surface",
         "paths": [
-          "src/api/application_source_version.rs"
+          "src/api/domain.rs"
         ]
       },
       {
         "area": "models",
         "paths": [
-          "src/models/applications_source_versions_git_import_create_response201.rs",
-          "src/models/applications_source_versions_import_git_response201.rs",
-          "src/models/mod.rs"
+          "src/models/application_domain_response.rs",
+          "src/models/create_root_domain_hostname_request.rs",
+          "src/models/create_root_domain_request.rs",
+          "src/models/domain_deployment_response.rs",
+          "src/models/mod.rs",
+          "src/models/root_domain_response.rs",
+          "src/models/root_domains_create_response201.rs",
+          "src/models/root_domains_list_response.rs",
+          "src/models/root_domains_retrieve_response.rs",
+          "src/models/root_domains_subdomains_create_response201.rs",
+          "src/models/root_domains_subdomains_list_response.rs"
         ]
       }
     ],
@@ -212,14 +227,12 @@
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "high",
+    "riskLevel": "medium",
     "nextAction": "verify",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
     "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
-      "deleted-generated-files",
-      "manual-review-required",
       "verification-required"
     ]
   },

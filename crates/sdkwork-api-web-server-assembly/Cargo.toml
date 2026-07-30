@@ -10,18 +10,18 @@ name = "sdkwork_api_web_server_assembly"
 path = "src/lib.rs"
 
 [dependencies]
-async-trait.workspace = true
 axum.workspace = true
+tokio.workspace = true
+sdkwork-web-bootstrap.workspace = true
+async-trait.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
-tokio.workspace = true
 sdkwork-intelligence-webserver-repository-sqlx.workspace = true
 sdkwork-intelligence-webserver-service.workspace = true
 sdkwork-webserver-contract.workspace = true
 sdkwork-webserver-database-host.workspace = true
+sdkwork-web-contract.workspace = true
+sdkwork-web-core.workspace = true
 sdkwork-routes-webserver-app-api.workspace = true
 sdkwork-routes-webserver-backend-api.workspace = true
 sdkwork-routes-webserver-internal-api.workspace = true
-sdkwork-web-bootstrap.workspace = true
-sdkwork-web-contract.workspace = true
-sdkwork-web-core.workspace = true

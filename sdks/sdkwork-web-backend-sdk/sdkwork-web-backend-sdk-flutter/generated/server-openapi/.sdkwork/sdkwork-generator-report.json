@@ -12,7 +12,7 @@
   "mode": "apply",
   "hasChanges": true,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "04b6ce7a528b32d1eceddc2dac14045109279cdb4b1584bc27cc1e3b7070fa7a",
+  "changeFingerprint": "4298ff0740fa169a2a29dd88c804184e254ab57d14c7aea5656c0c985b9535ad",
   "changeImpact": {
     "schemaVersion": 1,
     "areas": [
@@ -23,7 +23,7 @@
       {
         "area": "api-surface",
         "paths": [
-          "lib/src/api/application_source_version.dart"
+          "lib/src/api/domain.dart"
         ]
       },
       {
@@ -111,7 +111,7 @@
   },
   "stats": {
     "totalFiles": 28,
-    "models": 88,
+    "models": 97,
     "apis": 11,
     "types": 1
   },
@@ -124,11 +124,11 @@
     "skippedUnchangedGeneratedFiles": 25,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "04b6ce7a528b32d1eceddc2dac14045109279cdb4b1584bc27cc1e3b7070fa7a",
+    "changeFingerprint": "4298ff0740fa169a2a29dd88c804184e254ab57d14c7aea5656c0c985b9535ad",
     "changes": {
       "createdGeneratedFiles": [],
       "updatedGeneratedFiles": [
-        "lib/src/api/application_source_version.dart",
+        "lib/src/api/domain.dart",
         "lib/src/models.dart"
       ],
       "unchangedGeneratedFiles": [
@@ -142,11 +142,11 @@
         "lib/src/api/api.dart",
         "lib/src/api/application_deployment.dart",
         "lib/src/api/application_domain.dart",
+        "lib/src/api/application_source_version.dart",
         "lib/src/api/application.dart",
         "lib/src/api/audit.dart",
         "lib/src/api/certificate_distribution.dart",
         "lib/src/api/certificate.dart",
-        "lib/src/api/domain.dart",
         "lib/src/api/nginx.dart",
         "lib/src/api/paths.dart",
         "lib/src/api/response_helpers.dart",
@@ -175,7 +175,7 @@
         {
           "area": "api-surface",
           "paths": [
-            "lib/src/api/application_source_version.dart"
+            "lib/src/api/domain.dart"
           ]
         },
         {

@@ -8,14 +8,16 @@ use sdkwork_webserver_contract::{
     CertificateRenewalCandidate, CertificateResponse, CreateCertificateRequest,
     CreateDeploymentRequest, CreateDomainRequest, CreateEnvVariableRequest,
     CreateHealthCheckRequest, CreateManagedDomainRequest, CreateNginxConfigRequest,
-    CreateServerRequest, CreateServerResponse, CreateSiteRequest, CreateSourceVersionRequest,
-    DeploymentPage, DeploymentResponse, DomainPage, DomainResponse, DomainVerifyResponse,
-    EnvVariablePage, EnvVariableResponse, HealthCheckPage, HealthCheckResponse,
-    ListNginxConfigsQuery, ListSitesQuery, NginxConfigPage, NginxConfigResponse,
-    NginxReloadResponse, NginxStatusResponse, NginxValidateResponse, RuntimeAssignment,
-    RuntimeAssignmentDelivery, RuntimeObservation, RuntimeObservationState, ServerPage, SitePage,
-    SiteResponse, SourceVersionPage, SourceVersionResponse, UpdateDomainApplicationBindingRequest,
-    UpdateNginxConfigRequest, UpdateSiteRequest,
+    CreateRootDomainHostnameRequest, CreateRootDomainRequest, CreateServerRequest,
+    CreateServerResponse, CreateSiteRequest, CreateSourceVersionRequest, DeploymentPage,
+    DeploymentResponse, DomainPage, DomainResponse, DomainVerifyResponse, EnvVariablePage,
+    EnvVariableResponse, HealthCheckPage, HealthCheckResponse, ListNginxConfigsQuery,
+    ListRootDomainsQuery, ListSitesQuery, NginxConfigPage, NginxConfigResponse,
+    NginxReloadResponse, NginxStatusResponse, NginxValidateResponse, RootDomainPage,
+    RootDomainResponse, RuntimeAssignment, RuntimeAssignmentDelivery, RuntimeObservation,
+    RuntimeObservationState, ServerPage, SitePage, SiteResponse, SourceVersionPage,
+    SourceVersionResponse, UpdateDomainApplicationBindingRequest, UpdateNginxConfigRequest,
+    UpdateSiteRequest,
 };
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -149,6 +151,45 @@ pub trait WebRepositoryPort: Send + Sync {
         site_id: &str,
         domain_id: &str,
     ) -> WebServiceResult<DomainVerifyResponse>;
+
+    async fn list_root_domains(
+        &self,
+        tenant_id: i64,
+        query: &ListRootDomainsQuery,
+    ) -> WebServiceResult<RootDomainPage>;
+
+    async fn create_root_domain(
+        &self,
+        tenant_id: i64,
+        request: &CreateRootDomainRequest,
+    ) -> WebServiceResult<RootDomainResponse>;
+
+    async fn retrieve_root_domain(
+        &self,
+        tenant_id: i64,
+        root_domain_id: &str,
+    ) -> WebServiceResult<RootDomainResponse>;
+
+    async fn delete_root_domain(
+        &self,
+        tenant_id: i64,
+        root_domain_id: &str,
+    ) -> WebServiceResult<()>;
+
+    async fn list_root_domain_hostnames(
+        &self,
+        tenant_id: i64,
+        root_domain_id: &str,
+        page: i32,
+        page_size: i32,
+    ) -> WebServiceResult<DomainPage>;
+
+    async fn create_root_domain_hostname(
+        &self,
+        tenant_id: i64,
+        root_domain_id: &str,
+        request: &CreateRootDomainHostnameRequest,
+    ) -> WebServiceResult<DomainResponse>;
 
     async fn list_managed_domains(
         &self,

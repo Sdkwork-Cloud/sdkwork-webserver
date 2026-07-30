@@ -83,7 +83,7 @@ Each immutable target owns one shared atomic active-request counter. Selection c
 - Real verified TLS/ALPN H2 tests hold five concurrent upstream Streams and observe `primary, secondary, primary, primary, secondary` at weights 2:1 while each target owns exactly one physical connection. This proves Stream activity is independent from aggregate/target socket permits.
 - Real WebSocket tests keep the primary tunnel open, route the next tunnel to the secondary, close the primary, and route the following tunnel back to primary. The activity lease is owned by the supervised tunnel task through close and shutdown; non-`101` responses continue through the existing streaming Body owner.
 - The complete standalone gateway suite passes 174 tests. Target and full-workspace strict Clippy pass. `pnpm.cmd verify`, `cargo fmt --all -- --check`, and `git diff --check` pass.
-- SDKWork pagination, API operation-pattern, response-envelope, app-SDK consumer-import, application-layering, Rust backend-composition, and route-collision validators pass. SQLite lifecycle coverage passes; PostgreSQL lifecycle remains ignored because `SDKWORK_WEB_POSTGRES_TEST_DATABASE_URL` is unavailable and is not claimed by this requirement.
+- SDKWork pagination, API operation-pattern, response-envelope, app-SDK consumer-import, application-layering, Rust backend-composition, and route-collision validators pass. SQLite lifecycle coverage passes; PostgreSQL lifecycle remains ignored because `SDKWORK_DATABASE_TEST_POSTGRES_URL` is unavailable and is not claimed by this requirement.
 
 ## Accepted Boundary
 

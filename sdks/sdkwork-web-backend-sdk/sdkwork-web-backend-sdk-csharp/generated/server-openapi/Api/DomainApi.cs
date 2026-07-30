@@ -16,6 +16,87 @@ namespace SDKWork.Web.BackendSdk.Api
         }
 
         /// <summary>
+        /// List tenant root-domain Zones
+        /// </summary>
+        public async Task<SDKWork.Web.BackendSdk.Models.RootDomainsListResponse?> RootDomainsListAsync(int? page = null, int? pageSize = null, int? status = null, string? keyword = null)
+        {
+            var queryString = BuildQueryString(new[]
+            {
+                new QueryParameterSpec("page", page, "form", true, false, null),
+                new QueryParameterSpec("page_size", pageSize, "form", true, false, null),
+                new QueryParameterSpec("status", status, "form", true, false, null),
+                new QueryParameterSpec("keyword", keyword, "form", true, false, null),
+            });
+            return await _client.GetAsync<SDKWork.Web.BackendSdk.Models.RootDomainsListResponse>(ApiPaths.AppendQueryString(ApiPaths.BackendPath("/root_domains"), queryString));
+        }
+
+        /// <summary>
+        /// Define a tenant root-domain Zone
+        /// </summary>
+        public async Task<SDKWork.Web.BackendSdk.Models.RootDomainsCreateResponse201?> RootDomainsCreateAsync(SDKWork.Web.BackendSdk.Models.CreateRootDomainRequest body, string idempotencyKey)
+        {
+            var requestHeaders = BuildRequestHeaders(
+                new Dictionary<string, HeaderParameterSpec>
+                {
+                    ["Idempotency-Key"] = new HeaderParameterSpec(idempotencyKey, "simple", false, null),
+                },
+                new Dictionary<string, HeaderParameterSpec>()
+            );
+            return await _client.PostAsync<SDKWork.Web.BackendSdk.Models.RootDomainsCreateResponse201>(ApiPaths.BackendPath("/root_domains"), body, null, requestHeaders, "application/json");
+        }
+
+        /// <summary>
+        /// Retrieve a tenant root-domain Zone
+        /// </summary>
+        public async Task<SDKWork.Web.BackendSdk.Models.RootDomainsRetrieveResponse?> RootDomainsRetrieveAsync(string rootDomainId)
+        {
+            return await _client.GetAsync<SDKWork.Web.BackendSdk.Models.RootDomainsRetrieveResponse>(ApiPaths.BackendPath($"/root_domains/{SerializePathParameter(rootDomainId, new PathParameterSpec("rootDomainId", "simple", false))}"));
+        }
+
+        /// <summary>
+        /// Delete an empty tenant root-domain Zone
+        /// </summary>
+        public async Task RootDomainsDeleteAsync(string rootDomainId, string idempotencyKey)
+        {
+            var requestHeaders = BuildRequestHeaders(
+                new Dictionary<string, HeaderParameterSpec>
+                {
+                    ["Idempotency-Key"] = new HeaderParameterSpec(idempotencyKey, "simple", false, null),
+                },
+                new Dictionary<string, HeaderParameterSpec>()
+            );
+            await _client.DeleteAsync<object>(ApiPaths.BackendPath($"/root_domains/{SerializePathParameter(rootDomainId, new PathParameterSpec("rootDomainId", "simple", false))}"), null, requestHeaders);
+        }
+
+        /// <summary>
+        /// List publishable hostnames in a root-domain Zone
+        /// </summary>
+        public async Task<SDKWork.Web.BackendSdk.Models.RootDomainsSubdomainsListResponse?> RootDomainsSubdomainsListAsync(string rootDomainId, int? page = null, int? pageSize = null)
+        {
+            var queryString = BuildQueryString(new[]
+            {
+                new QueryParameterSpec("page", page, "form", true, false, null),
+                new QueryParameterSpec("page_size", pageSize, "form", true, false, null),
+            });
+            return await _client.GetAsync<SDKWork.Web.BackendSdk.Models.RootDomainsSubdomainsListResponse>(ApiPaths.AppendQueryString(ApiPaths.BackendPath($"/root_domains/{SerializePathParameter(rootDomainId, new PathParameterSpec("rootDomainId", "simple", false))}/subdomains"), queryString));
+        }
+
+        /// <summary>
+        /// Add a publishable hostname to a root-domain Zone
+        /// </summary>
+        public async Task<SDKWork.Web.BackendSdk.Models.RootDomainsSubdomainsCreateResponse201?> RootDomainsSubdomainsCreateAsync(string rootDomainId, SDKWork.Web.BackendSdk.Models.CreateRootDomainHostnameRequest body, string idempotencyKey)
+        {
+            var requestHeaders = BuildRequestHeaders(
+                new Dictionary<string, HeaderParameterSpec>
+                {
+                    ["Idempotency-Key"] = new HeaderParameterSpec(idempotencyKey, "simple", false, null),
+                },
+                new Dictionary<string, HeaderParameterSpec>()
+            );
+            return await _client.PostAsync<SDKWork.Web.BackendSdk.Models.RootDomainsSubdomainsCreateResponse201>(ApiPaths.BackendPath($"/root_domains/{SerializePathParameter(rootDomainId, new PathParameterSpec("rootDomainId", "simple", false))}/subdomains"), body, null, requestHeaders, "application/json");
+        }
+
+        /// <summary>
         /// List tenant custom domain assets
         /// </summary>
         public async Task<SDKWork.Web.BackendSdk.Models.DomainsListResponse?> DomainsListAsync(int? page = null, int? pageSize = null)

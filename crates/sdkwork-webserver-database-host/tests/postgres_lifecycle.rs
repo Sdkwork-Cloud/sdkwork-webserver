@@ -6,7 +6,7 @@ use sdkwork_database_lifecycle::LifecycleOrchestrator;
 use sdkwork_database_spi::{DefaultDatabaseModule, LocaleTag, SeedProfile};
 use sdkwork_database_sqlx::create_pool_from_config;
 
-const POSTGRES_TEST_URL_ENV: &str = "SDKWORK_WEB_POSTGRES_TEST_DATABASE_URL";
+const POSTGRES_TEST_URL_ENV: &str = "SDKWORK_DATABASE_TEST_POSTGRES_URL";
 
 fn application_root() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))

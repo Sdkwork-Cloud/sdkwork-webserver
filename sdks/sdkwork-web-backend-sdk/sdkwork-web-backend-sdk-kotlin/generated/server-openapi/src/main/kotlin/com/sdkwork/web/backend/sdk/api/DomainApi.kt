@@ -8,6 +8,69 @@ import com.sdkwork.web.backend.sdk.http.HttpClient
 
 class DomainApi(private val client: HttpClient) {
 
+    /** List tenant root-domain Zones */
+    suspend fun rootDomainsList(page: Int? = null, pageSize: Int? = null, status: Int? = null, keyword: String? = null): RootDomainsListResponse? {
+        val query = buildQueryString(listOf(
+            QueryParameterSpec("page", page, "form", true, false, null),
+            QueryParameterSpec("page_size", pageSize, "form", true, false, null),
+            QueryParameterSpec("status", status, "form", true, false, null),
+            QueryParameterSpec("keyword", keyword, "form", true, false, null)
+        ))
+        val raw = client.get(ApiPaths.appendQueryString(ApiPaths.backendPath("/root_domains"), query))
+        return client.convertValue(raw, object : TypeReference<RootDomainsListResponse>() {})
+    }
+
+    /** Define a tenant root-domain Zone */
+    suspend fun rootDomainsCreate(body: CreateRootDomainRequest, idempotencyKey: String): RootDomainsCreateResponse201? {
+        val requestHeaders = buildRequestHeaders(
+            mapOf(
+                "Idempotency-Key" to HeaderParameterSpec(idempotencyKey, "simple", false, null),
+            ),
+            emptyMap()
+        )
+        val raw = client.post(ApiPaths.backendPath("/root_domains"), body, null, requestHeaders, "application/json")
+        return client.convertValue(raw, object : TypeReference<RootDomainsCreateResponse201>() {})
+    }
+
+    /** Retrieve a tenant root-domain Zone */
+    suspend fun rootDomainsRetrieve(rootDomainId: String): RootDomainsRetrieveResponse? {
+        val raw = client.get(ApiPaths.backendPath("/root_domains/${serializePathParameter(rootDomainId, PathParameterSpec("rootDomainId", "simple", false))}"))
+        return client.convertValue(raw, object : TypeReference<RootDomainsRetrieveResponse>() {})
+    }
+
+    /** Delete an empty tenant root-domain Zone */
+    suspend fun rootDomainsDelete(rootDomainId: String, idempotencyKey: String): Unit {
+        val requestHeaders = buildRequestHeaders(
+            mapOf(
+                "Idempotency-Key" to HeaderParameterSpec(idempotencyKey, "simple", false, null),
+            ),
+            emptyMap()
+        )
+        client.delete(ApiPaths.backendPath("/root_domains/${serializePathParameter(rootDomainId, PathParameterSpec("rootDomainId", "simple", false))}"), null, requestHeaders)
+    }
+
+    /** List publishable hostnames in a root-domain Zone */
+    suspend fun rootDomainsSubdomainsList(rootDomainId: String, page: Int? = null, pageSize: Int? = null): RootDomainsSubdomainsListResponse? {
+        val query = buildQueryString(listOf(
+            QueryParameterSpec("page", page, "form", true, false, null),
+            QueryParameterSpec("page_size", pageSize, "form", true, false, null)
+        ))
+        val raw = client.get(ApiPaths.appendQueryString(ApiPaths.backendPath("/root_domains/${serializePathParameter(rootDomainId, PathParameterSpec("rootDomainId", "simple", false))}/subdomains"), query))
+        return client.convertValue(raw, object : TypeReference<RootDomainsSubdomainsListResponse>() {})
+    }
+
+    /** Add a publishable hostname to a root-domain Zone */
+    suspend fun rootDomainsSubdomainsCreate(rootDomainId: String, body: CreateRootDomainHostnameRequest, idempotencyKey: String): RootDomainsSubdomainsCreateResponse201? {
+        val requestHeaders = buildRequestHeaders(
+            mapOf(
+                "Idempotency-Key" to HeaderParameterSpec(idempotencyKey, "simple", false, null),
+            ),
+            emptyMap()
+        )
+        val raw = client.post(ApiPaths.backendPath("/root_domains/${serializePathParameter(rootDomainId, PathParameterSpec("rootDomainId", "simple", false))}/subdomains"), body, null, requestHeaders, "application/json")
+        return client.convertValue(raw, object : TypeReference<RootDomainsSubdomainsCreateResponse201>() {})
+    }
+
     /** List tenant custom domain assets */
     suspend fun domainsList(page: Int? = null, pageSize: Int? = null): DomainsListResponse? {
         val query = buildQueryString(listOf(

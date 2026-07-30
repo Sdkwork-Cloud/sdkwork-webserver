@@ -45,5 +45,5 @@ ad hoc DDL from HTTP handlers or repositories.
 ```powershell
 pnpm db:validate
 pnpm db:test:sqlite
-$env:SDKWORK_WEB_POSTGRES_TEST_DATABASE_URL='<disposable-url>'; pnpm db:test:postgres
+$env:SDKWORK_DATABASE_TEST_POSTGRES_URL='<disposable-url>'; pnpm db:test:postgres
 ```

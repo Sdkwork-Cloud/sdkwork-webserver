@@ -11,8 +11,8 @@
   "status": "ok",
   "mode": "apply",
   "hasChanges": true,
-  "hasDestructiveChanges": true,
-  "changeFingerprint": "2af762d8d6186b914df47438df7fbb8b354fb6313023f305baab70701502427e",
+  "hasDestructiveChanges": false,
+  "changeFingerprint": "ff9cd87acbf3117774102df84007a471db51bd19512adb30ecabdf809b69bde4",
   "changeImpact": {
     "schemaVersion": 1,
     "areas": [
@@ -23,15 +23,24 @@
       {
         "area": "api-surface",
         "paths": [
-          "src/api/application-source-version.ts"
+          "src/api/domain.ts"
         ]
       },
       {
         "area": "models",
         "paths": [
-          "src/types/applications-source-versions-git-import-create-response201.ts",
-          "src/types/applications-source-versions-import-git-response201.ts",
-          "src/types/index.ts"
+          "src/types/application-domain-response.ts",
+          "src/types/create-root-domain-hostname-request.ts",
+          "src/types/create-root-domain-request.ts",
+          "src/types/domain-deployment-response.ts",
+          "src/types/index.ts",
+          "src/types/int64-string.ts",
+          "src/types/root-domain-response.ts",
+          "src/types/root-domains-create-response201.ts",
+          "src/types/root-domains-list-response.ts",
+          "src/types/root-domains-retrieve-response.ts",
+          "src/types/root-domains-subdomains-create-response201.ts",
+          "src/types/root-domains-subdomains-list-response.ts"
         ]
       }
     ],
@@ -40,14 +49,12 @@
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "high",
+    "riskLevel": "medium",
     "nextAction": "verify",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
     "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
-      "deleted-generated-files",
-      "manual-review-required",
       "verification-required"
     ]
   },
@@ -150,27 +157,37 @@
     "localVersions": []
   },
   "stats": {
-    "totalFiles": 123,
-    "models": 89,
+    "totalFiles": 133,
+    "models": 99,
     "apis": 11,
-    "types": 91
+    "types": 101
   },
   "warnings": [],
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 3,
+    "writtenFiles": 13,
     "skippedScaffoldFiles": 2,
     "skippedUnchangedGeneratedFiles": 118,
-    "deletedGeneratedFiles": 1,
+    "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "2af762d8d6186b914df47438df7fbb8b354fb6313023f305baab70701502427e",
+    "changeFingerprint": "ff9cd87acbf3117774102df84007a471db51bd19512adb30ecabdf809b69bde4",
     "changes": {
       "createdGeneratedFiles": [
-        "src/types/applications-source-versions-git-import-create-response201.ts"
+        "src/types/create-root-domain-hostname-request.ts",
+        "src/types/create-root-domain-request.ts",
+        "src/types/domain-deployment-response.ts",
+        "src/types/int64-string.ts",
+        "src/types/root-domain-response.ts",
+        "src/types/root-domains-create-response201.ts",
+        "src/types/root-domains-list-response.ts",
+        "src/types/root-domains-retrieve-response.ts",
+        "src/types/root-domains-subdomains-create-response201.ts",
+        "src/types/root-domains-subdomains-list-response.ts"
       ],
       "updatedGeneratedFiles": [
-        "src/api/application-source-version.ts",
+        "src/api/domain.ts",
+        "src/types/application-domain-response.ts",
         "src/types/index.ts"
       ],
       "unchangedGeneratedFiles": [
@@ -187,12 +204,12 @@
         "src/api/agent.ts",
         "src/api/application-deployment.ts",
         "src/api/application-domain.ts",
+        "src/api/application-source-version.ts",
         "src/api/application.ts",
         "src/api/audit.ts",
         "src/api/base.ts",
         "src/api/certificate-distribution.ts",
         "src/api/certificate.ts",
-        "src/api/domain.ts",
         "src/api/index.ts",
         "src/api/nginx.ts",
         "src/api/paths.ts",
@@ -208,7 +225,6 @@
         "src/types/agent-nginx-config-bundle.ts",
         "src/types/agent-sync-response.ts",
         "src/types/application-deployment-response.ts",
-        "src/types/application-domain-response.ts",
         "src/types/application-domain-verify-response.ts",
         "src/types/application-response.ts",
         "src/types/application-source-version-config-snapshot.ts",
@@ -226,6 +242,7 @@
         "src/types/applications-pause-response.ts",
         "src/types/applications-retrieve-response.ts",
         "src/types/applications-source-versions-create-response201.ts",
+        "src/types/applications-source-versions-git-import-create-response201.ts",
         "src/types/applications-source-versions-list-response.ts",
         "src/types/applications-source-versions-retrieve-response.ts",
         "src/types/applications-update-response.ts",
@@ -293,9 +310,7 @@
         "src/types/update-nginx-config-request.ts",
         "tsconfig.json"
       ],
-      "deletedGeneratedFiles": [
-        "src/types/applications-source-versions-import-git-response201.ts"
-      ],
+      "deletedGeneratedFiles": [],
       "scaffoldedFiles": [],
       "preservedScaffoldFiles": [
         "custom/build-runtime.mjs",
@@ -313,15 +328,24 @@
         {
           "area": "api-surface",
           "paths": [
-            "src/api/application-source-version.ts"
+            "src/api/domain.ts"
           ]
         },
         {
           "area": "models",
           "paths": [
-            "src/types/applications-source-versions-git-import-create-response201.ts",
-            "src/types/applications-source-versions-import-git-response201.ts",
-            "src/types/index.ts"
+            "src/types/application-domain-response.ts",
+            "src/types/create-root-domain-hostname-request.ts",
+            "src/types/create-root-domain-request.ts",
+            "src/types/domain-deployment-response.ts",
+            "src/types/index.ts",
+            "src/types/int64-string.ts",
+            "src/types/root-domain-response.ts",
+            "src/types/root-domains-create-response201.ts",
+            "src/types/root-domains-list-response.ts",
+            "src/types/root-domains-retrieve-response.ts",
+            "src/types/root-domains-subdomains-create-response201.ts",
+            "src/types/root-domains-subdomains-list-response.ts"
           ]
         }
       ],
@@ -373,14 +397,12 @@
     },
     "executionDecision": {
       "schemaVersion": 1,
-      "riskLevel": "high",
+      "riskLevel": "medium",
       "nextAction": "verify",
       "requiresManualReview": false,
       "applyRequiresExpectedFingerprint": false,
       "summary": "Changes have been applied. Run the required verification plan now.",
       "reasons": [
-        "deleted-generated-files",
-        "manual-review-required",
         "verification-required"
       ]
     },

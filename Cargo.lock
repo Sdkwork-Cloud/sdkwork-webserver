@@ -3663,6 +3663,7 @@ name = "sdkwork-api-iam-assembly"
 version = "0.1.0"
 dependencies = [
  "axum",
+ "sdkwork-database-sqlx",
  "sdkwork-iam-database-host",
  "sdkwork-iam-embedded-application-bootstrap",
  "sdkwork-iam-web-adapter",
@@ -4587,6 +4588,7 @@ dependencies = [
  "async-trait",
  "axum",
  "http 1.4.2",
+ "sdkwork-database-sqlx",
  "sdkwork-web-axum",
  "sdkwork-web-contract",
  "sdkwork-web-core",

@@ -164,6 +164,8 @@ export const webserverWorkspaceZhCn = {
   "resource.application-domains.description": "绑定并验证应用的公网访问域名",
   "resource.application-deployments.label": "应用发布",
   "resource.application-deployments.description": "发布不可变应用版本并查看还原历史",
+  "resource.root-domains.label": "域名管理",
+  "resource.root-domains.description": "根域名 Zone 与可发布主机名",
   "resource.managed-domains.label": "自定义域名",
   "resource.managed-domains.description": "先录入域名，再关联应用并签发证书",
   "resource.managed-certificates.label": "证书管理",

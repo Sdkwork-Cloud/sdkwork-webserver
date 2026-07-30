@@ -227,6 +227,78 @@ public struct CreateManagedDomainRequest: Codable {
     }
 }
 
+public struct CreateRootDomainRequest: Codable {
+    public let hostname: String?
+
+
+    public init(hostname: String? = nil) {
+        self.hostname = hostname
+    }
+}
+
+public struct CreateRootDomainHostnameRequest: Codable {
+    public let recordName: String?
+    public let applicationId: String?
+    public let isPrimary: Bool?
+    public let sslEnabled: Bool?
+    public let sslProvider: String?
+
+
+    public init(recordName: String? = nil, applicationId: String? = nil, isPrimary: Bool? = nil, sslEnabled: Bool? = nil, sslProvider: String? = nil) {
+        self.recordName = recordName
+        self.applicationId = applicationId
+        self.isPrimary = isPrimary
+        self.sslEnabled = sslEnabled
+        self.sslProvider = sslProvider
+    }
+}
+
+public struct RootDomainResponse: Codable {
+    public let id: String?
+    public let hostname: String?
+    public let status: Int?
+    public let subdomainCount: String?
+    public let boundSubdomainCount: String?
+    public let verifiedSubdomainCount: String?
+    public let httpsSubdomainCount: String?
+    public let activeDeploymentCount: String?
+    public let createdAt: String?
+    public let updatedAt: String?
+
+
+    public init(id: String? = nil, hostname: String? = nil, status: Int? = nil, subdomainCount: String? = nil, boundSubdomainCount: String? = nil, verifiedSubdomainCount: String? = nil, httpsSubdomainCount: String? = nil, activeDeploymentCount: String? = nil, createdAt: String? = nil, updatedAt: String? = nil) {
+        self.id = id
+        self.hostname = hostname
+        self.status = status
+        self.subdomainCount = subdomainCount
+        self.boundSubdomainCount = boundSubdomainCount
+        self.verifiedSubdomainCount = verifiedSubdomainCount
+        self.httpsSubdomainCount = httpsSubdomainCount
+        self.activeDeploymentCount = activeDeploymentCount
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
+    }
+}
+
+public struct DomainDeploymentResponse: Codable {
+    public let id: String?
+    public let status: Int?
+    public let environment: String?
+    public let versionTag: String?
+    public let completedAt: String?
+    public let createdAt: String?
+
+
+    public init(id: String? = nil, status: Int? = nil, environment: String? = nil, versionTag: String? = nil, completedAt: String? = nil, createdAt: String? = nil) {
+        self.id = id
+        self.status = status
+        self.environment = environment
+        self.versionTag = versionTag
+        self.completedAt = completedAt
+        self.createdAt = createdAt
+    }
+}
+
 public struct UpdateDomainApplicationBindingRequest: Codable {
     public let applicationId: String?
     public let isPrimary: Bool?
@@ -241,6 +313,8 @@ public struct UpdateDomainApplicationBindingRequest: Codable {
 public struct ApplicationDomainResponse: Codable {
     public let id: String?
     public let hostname: String?
+    public let rootDomainId: String?
+    public let recordName: String?
     public let applicationId: String?
     public let applicationName: String?
     public let certificateCount: String?
@@ -249,12 +323,16 @@ public struct ApplicationDomainResponse: Codable {
     public let sslEnabled: Bool?
     public let sslProvider: String?
     public let status: Int?
+    public let latestDeployment: DomainDeploymentResponse?
     public let createdAt: String?
+    public let updatedAt: String?
 
 
-    public init(id: String? = nil, hostname: String? = nil, applicationId: String? = nil, applicationName: String? = nil, certificateCount: String? = nil, isPrimary: Bool? = nil, isVerified: Bool? = nil, sslEnabled: Bool? = nil, sslProvider: String? = nil, status: Int? = nil, createdAt: String? = nil) {
+    public init(id: String? = nil, hostname: String? = nil, rootDomainId: String? = nil, recordName: String? = nil, applicationId: String? = nil, applicationName: String? = nil, certificateCount: String? = nil, isPrimary: Bool? = nil, isVerified: Bool? = nil, sslEnabled: Bool? = nil, sslProvider: String? = nil, status: Int? = nil, latestDeployment: DomainDeploymentResponse? = nil, createdAt: String? = nil, updatedAt: String? = nil) {
         self.id = id
         self.hostname = hostname
+        self.rootDomainId = rootDomainId
+        self.recordName = recordName
         self.applicationId = applicationId
         self.applicationName = applicationName
         self.certificateCount = certificateCount
@@ -263,7 +341,9 @@ public struct ApplicationDomainResponse: Codable {
         self.sslEnabled = sslEnabled
         self.sslProvider = sslProvider
         self.status = status
+        self.latestDeployment = latestDeployment
         self.createdAt = createdAt
+        self.updatedAt = updatedAt
     }
 }
 
@@ -1017,6 +1097,71 @@ public struct ApplicationsDomainsCreateResponse201: Codable {
 }
 
 public struct ApplicationsDomainsVerifyResponse: Codable {
+    public let code: Int?
+    public let data: Any?
+    public let traceId: String?
+
+
+    public init(code: Int? = nil, data: Any? = nil, traceId: String? = nil) {
+        self.code = code
+        self.data = data
+        self.traceId = traceId
+    }
+}
+
+public struct RootDomainsListResponse: Codable {
+    public let code: Int?
+    public let data: Any?
+    public let traceId: String?
+
+
+    public init(code: Int? = nil, data: Any? = nil, traceId: String? = nil) {
+        self.code = code
+        self.data = data
+        self.traceId = traceId
+    }
+}
+
+public struct RootDomainsCreateResponse201: Codable {
+    public let code: Int?
+    public let data: Any?
+    public let traceId: String?
+
+
+    public init(code: Int? = nil, data: Any? = nil, traceId: String? = nil) {
+        self.code = code
+        self.data = data
+        self.traceId = traceId
+    }
+}
+
+public struct RootDomainsRetrieveResponse: Codable {
+    public let code: Int?
+    public let data: Any?
+    public let traceId: String?
+
+
+    public init(code: Int? = nil, data: Any? = nil, traceId: String? = nil) {
+        self.code = code
+        self.data = data
+        self.traceId = traceId
+    }
+}
+
+public struct RootDomainsSubdomainsListResponse: Codable {
+    public let code: Int?
+    public let data: Any?
+    public let traceId: String?
+
+
+    public init(code: Int? = nil, data: Any? = nil, traceId: String? = nil) {
+        self.code = code
+        self.data = data
+        self.traceId = traceId
+    }
+}
+
+public struct RootDomainsSubdomainsCreateResponse201: Codable {
     public let code: Int?
     public let data: Any?
     public let traceId: String?

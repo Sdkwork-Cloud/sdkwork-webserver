@@ -799,6 +799,483 @@
         "x-sdkwork-route-auth": "dual-token"
       }
     },
+    "/backend/v3/api/root_domains": {
+      "get": {
+        "operationId": "rootDomains.list",
+        "summary": "List tenant root-domain Zones",
+        "tags": [
+          "domain"
+        ],
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-api-surface": "backend-api",
+        "x-sdkwork-api-authority": "sdkwork-web.backend",
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-permission": "web.sites.read",
+        "x-sdkwork-owner": "sdkwork-web-server",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PageParam"
+          },
+          {
+            "$ref": "#/components/parameters/PageSizeParam"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 253
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tenant root-domain Zones returned successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SdkWorkApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "required": [
+                            "items",
+                            "pageInfo"
+                          ],
+                          "properties": {
+                            "items": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "#/components/schemas/RootDomainResponse"
+                              }
+                            },
+                            "pageInfo": {
+                              "$ref": "#/components/schemas/PageInfo"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "x-sdkwork-route-auth": "dual-token"
+      },
+      "post": {
+        "operationId": "rootDomains.create",
+        "summary": "Define a tenant root-domain Zone",
+        "tags": [
+          "domain"
+        ],
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-api-surface": "backend-api",
+        "x-sdkwork-api-authority": "sdkwork-web.backend",
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-permission": "web.sites.write",
+        "x-sdkwork-idempotent": true,
+        "x-sdkwork-owner": "sdkwork-web-server",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRootDomainRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Tenant root-domain Zone defined successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SdkWorkApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "required": [
+                            "item"
+                          ],
+                          "properties": {
+                            "item": {
+                              "$ref": "#/components/schemas/RootDomainResponse"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Resource conflict.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request validation failed.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        },
+        "x-sdkwork-route-auth": "dual-token"
+      }
+    },
+    "/backend/v3/api/root_domains/{rootDomainId}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/RootDomainIdParam"
+        }
+      ],
+      "get": {
+        "operationId": "rootDomains.retrieve",
+        "summary": "Retrieve a tenant root-domain Zone",
+        "tags": [
+          "domain"
+        ],
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-api-surface": "backend-api",
+        "x-sdkwork-api-authority": "sdkwork-web.backend",
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-permission": "web.sites.read",
+        "x-sdkwork-owner": "sdkwork-web-server",
+        "responses": {
+          "200": {
+            "description": "Tenant root-domain Zone returned successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SdkWorkApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "required": [
+                            "item"
+                          ],
+                          "properties": {
+                            "item": {
+                              "$ref": "#/components/schemas/RootDomainResponse"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        },
+        "x-sdkwork-route-auth": "dual-token"
+      },
+      "delete": {
+        "operationId": "rootDomains.delete",
+        "summary": "Delete an empty tenant root-domain Zone",
+        "tags": [
+          "domain"
+        ],
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-api-surface": "backend-api",
+        "x-sdkwork-api-authority": "sdkwork-web.backend",
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-permission": "web.sites.write",
+        "x-sdkwork-idempotent": true,
+        "x-sdkwork-rate-limit-tier": "auth-critical",
+        "x-sdkwork-owner": "sdkwork-web-server",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Tenant root-domain Zone deleted successfully."
+          },
+          "404": {
+            "description": "Resource not found.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Resource conflict.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        },
+        "x-sdkwork-route-auth": "dual-token"
+      }
+    },
+    "/backend/v3/api/root_domains/{rootDomainId}/subdomains": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/RootDomainIdParam"
+        }
+      ],
+      "get": {
+        "operationId": "rootDomains.subdomains.list",
+        "summary": "List publishable hostnames in a root-domain Zone",
+        "tags": [
+          "domain"
+        ],
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-api-surface": "backend-api",
+        "x-sdkwork-api-authority": "sdkwork-web.backend",
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-permission": "web.sites.read",
+        "x-sdkwork-owner": "sdkwork-web-server",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PageParam"
+          },
+          {
+            "$ref": "#/components/parameters/PageSizeParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Root-domain hostnames returned successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SdkWorkApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "required": [
+                            "items",
+                            "pageInfo"
+                          ],
+                          "properties": {
+                            "items": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "#/components/schemas/ApplicationDomainResponse"
+                              }
+                            },
+                            "pageInfo": {
+                              "$ref": "#/components/schemas/PageInfo"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        },
+        "x-sdkwork-route-auth": "dual-token"
+      },
+      "post": {
+        "operationId": "rootDomains.subdomains.create",
+        "summary": "Add a publishable hostname to a root-domain Zone",
+        "tags": [
+          "domain"
+        ],
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-api-surface": "backend-api",
+        "x-sdkwork-api-authority": "sdkwork-web.backend",
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-permission": "web.sites.write",
+        "x-sdkwork-idempotent": true,
+        "x-sdkwork-owner": "sdkwork-web-server",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRootDomainHostnameRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Root-domain hostname added successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SdkWorkApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "required": [
+                            "item"
+                          ],
+                          "properties": {
+                            "item": {
+                              "$ref": "#/components/schemas/ApplicationDomainResponse"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Resource conflict.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request validation failed.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        },
+        "x-sdkwork-route-auth": "dual-token"
+      }
+    },
     "/backend/v3/api/domains": {
       "get": {
         "operationId": "domains.list",
@@ -3216,6 +3693,15 @@
           "format": "uuid"
         }
       },
+      "RootDomainIdParam": {
+        "name": "rootDomainId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
       "DeploymentIdParam": {
         "name": "deploymentId",
         "in": "path",
@@ -3264,6 +3750,13 @@
       }
     },
     "schemas": {
+      "Int64String": {
+        "type": "string",
+        "format": "int64",
+        "pattern": "^[0-9]+$",
+        "x-sdkwork-int64-string": true,
+        "x-sdkwork-rust-type": "i64"
+      },
       "ProblemDetail": {
         "type": "object",
         "additionalProperties": true,
@@ -3729,6 +4222,143 @@
           }
         }
       },
+      "CreateRootDomainRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "hostname"
+        ],
+        "properties": {
+          "hostname": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 253
+          }
+        }
+      },
+      "CreateRootDomainHostnameRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "recordName"
+        ],
+        "properties": {
+          "recordName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 253,
+            "description": "Relative hostname such as @, www, or api.internal."
+          },
+          "applicationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "isPrimary": {
+            "type": "boolean",
+            "default": false
+          },
+          "sslEnabled": {
+            "type": "boolean",
+            "default": true
+          },
+          "sslProvider": {
+            "type": "string",
+            "enum": [
+              "letsencrypt",
+              "custom",
+              "none"
+            ]
+          }
+        }
+      },
+      "RootDomainResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "hostname",
+          "status",
+          "subdomainCount",
+          "boundSubdomainCount",
+          "verifiedSubdomainCount",
+          "httpsSubdomainCount",
+          "activeDeploymentCount",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "hostname": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2
+          },
+          "subdomainCount": {
+            "$ref": "#/components/schemas/Int64String"
+          },
+          "boundSubdomainCount": {
+            "$ref": "#/components/schemas/Int64String"
+          },
+          "verifiedSubdomainCount": {
+            "$ref": "#/components/schemas/Int64String"
+          },
+          "httpsSubdomainCount": {
+            "$ref": "#/components/schemas/Int64String"
+          },
+          "activeDeploymentCount": {
+            "$ref": "#/components/schemas/Int64String"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DomainDeploymentResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "status",
+          "environment",
+          "createdAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 6
+          },
+          "environment": {
+            "type": "string"
+          },
+          "versionTag": {
+            "type": "string"
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "UpdateDomainApplicationBindingRequest": {
         "type": "object",
         "additionalProperties": false,
@@ -3767,6 +4397,13 @@
           "hostname": {
             "type": "string"
           },
+          "rootDomainId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "recordName": {
+            "type": "string"
+          },
           "applicationId": {
             "type": "string",
             "format": "uuid"
@@ -3796,7 +4433,14 @@
           "status": {
             "type": "integer"
           },
+          "latestDeployment": {
+            "$ref": "#/components/schemas/DomainDeploymentResponse"
+          },
           "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
             "type": "string",
             "format": "date-time"
           }

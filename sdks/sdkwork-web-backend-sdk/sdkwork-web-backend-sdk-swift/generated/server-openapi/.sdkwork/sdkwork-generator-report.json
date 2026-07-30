@@ -12,7 +12,7 @@
   "mode": "apply",
   "hasChanges": true,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "a3e6a10e7da28953df5fcbf2e70c0c98dba681f15765d5dd7ca49ccacfc7ea4c",
+  "changeFingerprint": "9101a84834c331ba73971e39336a517405b769c13b3853250e0da1ec9faeb00c",
   "changeImpact": {
     "schemaVersion": 1,
     "areas": [
@@ -23,7 +23,7 @@
       {
         "area": "api-surface",
         "paths": [
-          "Sources/API/ApplicationSourceVersionApi.swift"
+          "Sources/API/DomainApi.swift"
         ]
       },
       {
@@ -111,7 +111,7 @@
   },
   "stats": {
     "totalFiles": 25,
-    "models": 88,
+    "models": 97,
     "apis": 11,
     "types": 0
   },
@@ -124,11 +124,11 @@
     "skippedUnchangedGeneratedFiles": 22,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "a3e6a10e7da28953df5fcbf2e70c0c98dba681f15765d5dd7ca49ccacfc7ea4c",
+    "changeFingerprint": "9101a84834c331ba73971e39336a517405b769c13b3853250e0da1ec9faeb00c",
     "changes": {
       "createdGeneratedFiles": [],
       "updatedGeneratedFiles": [
-        "Sources/API/ApplicationSourceVersionApi.swift",
+        "Sources/API/DomainApi.swift",
         "Sources/Models.swift"
       ],
       "unchangedGeneratedFiles": [
@@ -146,10 +146,10 @@
         "Sources/API/ApplicationApi.swift",
         "Sources/API/ApplicationDeploymentApi.swift",
         "Sources/API/ApplicationDomainApi.swift",
+        "Sources/API/ApplicationSourceVersionApi.swift",
         "Sources/API/AuditApi.swift",
         "Sources/API/CertificateApi.swift",
         "Sources/API/CertificateDistributionApi.swift",
-        "Sources/API/DomainApi.swift",
         "Sources/API/NginxApi.swift",
         "Sources/API/ServerApi.swift",
         "Sources/HTTP/HttpClient.swift",
@@ -172,7 +172,7 @@
         {
           "area": "api-surface",
           "paths": [
-            "Sources/API/ApplicationSourceVersionApi.swift"
+            "Sources/API/DomainApi.swift"
           ]
         },
         {

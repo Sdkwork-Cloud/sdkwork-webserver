@@ -42,7 +42,7 @@ pnpm run db:seed
 pnpm run db:status
 pnpm run db:drift:check
 pnpm run db:test:sqlite
-SDKWORK_WEB_POSTGRES_TEST_DATABASE_URL=<disposable-url> pnpm run db:test:postgres
+SDKWORK_DATABASE_TEST_POSTGRES_URL=<disposable-url> pnpm run db:test:postgres
 pnpm run test:database:recovery
 pnpm run test:postgres:ha
 ```

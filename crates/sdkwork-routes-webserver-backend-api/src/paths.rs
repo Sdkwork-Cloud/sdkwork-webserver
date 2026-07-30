@@ -9,6 +9,9 @@ pub const APPLICATION_DOMAIN: &str =
     "/backend/v3/api/applications/{applicationId}/domains/{domainId}";
 pub const APPLICATION_DOMAIN_VERIFY: &str =
     "/backend/v3/api/applications/{applicationId}/domains/{domainId}/verify";
+pub const ROOT_DOMAINS: &str = "/backend/v3/api/root_domains";
+pub const ROOT_DOMAIN: &str = "/backend/v3/api/root_domains/{rootDomainId}";
+pub const ROOT_DOMAIN_SUBDOMAINS: &str = "/backend/v3/api/root_domains/{rootDomainId}/subdomains";
 pub const DOMAINS: &str = "/backend/v3/api/domains";
 pub const DOMAIN: &str = "/backend/v3/api/domains/{domainId}";
 pub const DOMAIN_VERIFY: &str = "/backend/v3/api/domains/{domainId}/verify";

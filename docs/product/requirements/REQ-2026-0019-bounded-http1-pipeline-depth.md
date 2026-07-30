@@ -80,4 +80,4 @@ SDKWork deliberately rejects excess pending depth at the configured request-coun
 
 ## Acceptance
 
-Accepted on 2026-07-16 for the declared HTTP/1 pending-head scope. PostgreSQL lifecycle execution remains ignored without `SDKWORK_WEB_POSTGRES_TEST_DATABASE_URL`; the unrelated existing `agent.sync` operation-pattern violation remains a repository-level commercial blocker. This acceptance does not establish adaptive memory-pressure admission, full HTTP/1 differential/fuzz conformance, proxy early-response request lifecycle, or commercial runtime-core acceptance.
+Accepted on 2026-07-16 for the declared HTTP/1 pending-head scope. PostgreSQL lifecycle execution remains ignored without `SDKWORK_DATABASE_TEST_POSTGRES_URL`; the unrelated existing `agent.sync` operation-pattern violation remains a repository-level commercial blocker. This acceptance does not establish adaptive memory-pressure admission, full HTTP/1 differential/fuzz conformance, proxy early-response request lifecycle, or commercial runtime-core acceptance.

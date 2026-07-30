@@ -3,12 +3,12 @@
 use async_trait::async_trait;
 use sdkwork_webserver_contract::{
     CreateCertificateRequest, CreateDeploymentRequest, CreateDomainRequest,
-    CreateManagedDomainRequest, CreateNginxConfigRequest, CreateServerRequest, CreateSiteRequest,
-    CreateSourceVersionRequest, ImportGitSourceVersionRequest, ListNginxConfigsQuery,
-    ListSitesQuery, UpdateCertificateRequest, UpdateDomainApplicationBindingRequest,
-    UpdateNginxConfigRequest, UpdateSiteRequest, WebAppApi, WebAppRequestContext,
-    WebAppResourceScope, WebBackendApi, WebBackendRequestContext, WebServiceError,
-    WebServiceResult,
+    CreateManagedDomainRequest, CreateNginxConfigRequest, CreateRootDomainHostnameRequest,
+    CreateRootDomainRequest, CreateServerRequest, CreateSiteRequest, CreateSourceVersionRequest,
+    ImportGitSourceVersionRequest, ListNginxConfigsQuery, ListRootDomainsQuery, ListSitesQuery,
+    UpdateCertificateRequest, UpdateDomainApplicationBindingRequest, UpdateNginxConfigRequest,
+    UpdateSiteRequest, WebAppApi, WebAppRequestContext, WebAppResourceScope, WebBackendApi,
+    WebBackendRequestContext, WebServiceError, WebServiceResult,
 };
 
 use crate::{AuditLogWrite, WebService};
@@ -88,6 +88,58 @@ impl WebService {
                 "failed to persist backend business audit"
             );
         }
+    }
+
+    fn normalize_root_domain_request(
+        request: &CreateRootDomainRequest,
+    ) -> WebServiceResult<CreateRootDomainRequest> {
+        let hostname = request.hostname.trim().to_ascii_lowercase();
+        Self::validate_domain_request(&CreateDomainRequest {
+            hostname: hostname.clone(),
+            is_primary: false,
+            ssl_enabled: false,
+            ssl_provider: None,
+        })?;
+        if hostname.split('.').count() < 2 {
+            return Err(WebServiceError::validation(
+                "root domain must contain at least two DNS labels",
+            ));
+        }
+        Ok(CreateRootDomainRequest { hostname })
+    }
+
+    fn normalize_root_domain_hostname_request(
+        request: &CreateRootDomainHostnameRequest,
+    ) -> WebServiceResult<CreateRootDomainHostnameRequest> {
+        let record_name = request.record_name.trim().to_ascii_lowercase();
+        if record_name != "@" {
+            Self::validate_domain_request(&CreateDomainRequest {
+                hostname: record_name.clone(),
+                is_primary: request.is_primary,
+                ssl_enabled: request.ssl_enabled,
+                ssl_provider: request.ssl_provider.clone(),
+            })?;
+        } else if request
+            .ssl_provider
+            .as_deref()
+            .is_some_and(|provider| !matches!(provider, "letsencrypt" | "custom" | "none"))
+        {
+            return Err(WebServiceError::validation(
+                "sslProvider must be letsencrypt, custom, or none",
+            ));
+        }
+        if request.application_id.is_none() && request.is_primary {
+            return Err(WebServiceError::validation(
+                "an unbound hostname cannot be primary",
+            ));
+        }
+        Ok(CreateRootDomainHostnameRequest {
+            record_name,
+            application_id: request.application_id.clone(),
+            is_primary: request.is_primary,
+            ssl_enabled: request.ssl_enabled,
+            ssl_provider: request.ssl_provider.clone(),
+        })
     }
 }
 
@@ -196,6 +248,109 @@ impl WebBackendApi for WebService {
     ) -> WebServiceResult<()> {
         let app_context = Self::backend_app_context(context)?;
         WebAppApi::delete_domain(self, &app_context, application_id, domain_id).await
+    }
+
+    async fn list_root_domains(
+        &self,
+        context: &WebBackendRequestContext,
+        query: &ListRootDomainsQuery,
+    ) -> WebServiceResult<sdkwork_webserver_contract::RootDomainPage> {
+        if query
+            .status
+            .is_some_and(|status| !(0..=2).contains(&status))
+        {
+            return Err(WebServiceError::validation(
+                "status must be between 0 and 2",
+            ));
+        }
+        let tenant_id = Self::require_backend_tenant(context)?;
+        self.repository.list_root_domains(tenant_id, query).await
+    }
+
+    async fn create_root_domain(
+        &self,
+        context: &WebBackendRequestContext,
+        request: &CreateRootDomainRequest,
+    ) -> WebServiceResult<sdkwork_webserver_contract::RootDomainResponse> {
+        let tenant_id = Self::require_backend_tenant(context)?;
+        let request = Self::normalize_root_domain_request(request)?;
+        let root_domain = self
+            .repository
+            .create_root_domain(tenant_id, &request)
+            .await?;
+        self.audit_backend_action(
+            context,
+            "root_domains.create",
+            "root_domain",
+            &root_domain.id,
+        )
+        .await;
+        Ok(root_domain)
+    }
+
+    async fn retrieve_root_domain(
+        &self,
+        context: &WebBackendRequestContext,
+        root_domain_id: &str,
+    ) -> WebServiceResult<sdkwork_webserver_contract::RootDomainResponse> {
+        let tenant_id = Self::require_backend_tenant(context)?;
+        self.repository
+            .retrieve_root_domain(tenant_id, root_domain_id)
+            .await
+    }
+
+    async fn delete_root_domain(
+        &self,
+        context: &WebBackendRequestContext,
+        root_domain_id: &str,
+    ) -> WebServiceResult<()> {
+        let tenant_id = Self::require_backend_tenant(context)?;
+        self.repository
+            .delete_root_domain(tenant_id, root_domain_id)
+            .await?;
+        self.audit_backend_action(
+            context,
+            "root_domains.delete",
+            "root_domain",
+            root_domain_id,
+        )
+        .await;
+        Ok(())
+    }
+
+    async fn list_root_domain_hostnames(
+        &self,
+        context: &WebBackendRequestContext,
+        root_domain_id: &str,
+        page: i32,
+        page_size: i32,
+    ) -> WebServiceResult<sdkwork_webserver_contract::DomainPage> {
+        let tenant_id = Self::require_backend_tenant(context)?;
+        self.repository
+            .list_root_domain_hostnames(tenant_id, root_domain_id, page, page_size)
+            .await
+    }
+
+    async fn create_root_domain_hostname(
+        &self,
+        context: &WebBackendRequestContext,
+        root_domain_id: &str,
+        request: &CreateRootDomainHostnameRequest,
+    ) -> WebServiceResult<sdkwork_webserver_contract::DomainResponse> {
+        let tenant_id = Self::require_backend_tenant(context)?;
+        let request = Self::normalize_root_domain_hostname_request(request)?;
+        let domain = self
+            .repository
+            .create_root_domain_hostname(tenant_id, root_domain_id, &request)
+            .await?;
+        self.audit_backend_action(
+            context,
+            "root_domains.hostnames.create",
+            "domain",
+            &domain.id,
+        )
+        .await;
+        Ok(domain)
     }
 
     async fn list_managed_domains(

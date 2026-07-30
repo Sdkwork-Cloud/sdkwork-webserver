@@ -4,11 +4,17 @@ declare(strict_types=1);
 
 namespace SDKWork\Web\BackendSdk\Models;
 
+use SDKWork\Web\BackendSdk\Models\DomainDeploymentResponse;
+
 final class ApplicationDomainResponse
 {
     public ?string $id = null;
 
     public ?string $hostname = null;
+
+    public ?string $rootDomainId = null;
+
+    public ?string $recordName = null;
 
     public ?string $applicationId = null;
 
@@ -26,7 +32,11 @@ final class ApplicationDomainResponse
 
     public ?int $status = null;
 
+    public ?DomainDeploymentResponse $latestDeployment = null;
+
     public ?string $createdAt = null;
+
+    public ?string $updatedAt = null;
 
     public function __construct(array $data = [])
     {
@@ -35,6 +45,12 @@ final class ApplicationDomainResponse
             : null;
         $this->hostname = array_key_exists('hostname', $data)
             ? $data['hostname']
+            : null;
+        $this->rootDomainId = array_key_exists('rootDomainId', $data)
+            ? $data['rootDomainId']
+            : null;
+        $this->recordName = array_key_exists('recordName', $data)
+            ? $data['recordName']
             : null;
         $this->applicationId = array_key_exists('applicationId', $data)
             ? $data['applicationId']
@@ -60,8 +76,14 @@ final class ApplicationDomainResponse
         $this->status = array_key_exists('status', $data)
             ? $data['status']
             : null;
+        $this->latestDeployment = array_key_exists('latestDeployment', $data)
+            ? is_array($data['latestDeployment']) ? DomainDeploymentResponse::fromArray($data['latestDeployment']) : null
+            : null;
         $this->createdAt = array_key_exists('createdAt', $data)
             ? $data['createdAt']
+            : null;
+        $this->updatedAt = array_key_exists('updatedAt', $data)
+            ? $data['updatedAt']
             : null;
     }
 
@@ -75,6 +97,8 @@ final class ApplicationDomainResponse
         return [
             'id' => $this->id,
             'hostname' => $this->hostname,
+            'rootDomainId' => $this->rootDomainId,
+            'recordName' => $this->recordName,
             'applicationId' => $this->applicationId,
             'applicationName' => $this->applicationName,
             'certificateCount' => $this->certificateCount,
@@ -83,7 +107,9 @@ final class ApplicationDomainResponse
             'sslEnabled' => $this->sslEnabled,
             'sslProvider' => $this->sslProvider,
             'status' => $this->status,
+            'latestDeployment' => $this->latestDeployment instanceof DomainDeploymentResponse ? $this->latestDeployment->toArray() : $this->latestDeployment,
             'createdAt' => $this->createdAt,
+            'updatedAt' => $this->updatedAt,
         ];
     }
 }

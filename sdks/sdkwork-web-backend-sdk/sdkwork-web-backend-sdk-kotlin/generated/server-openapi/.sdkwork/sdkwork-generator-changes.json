@@ -9,13 +9,22 @@
     "protocol": "http",
     "packageName": "com.sdkwork:sdkwork-web-backend-sdk"
   },
-  "changeFingerprint": "b4bfa00cf3f156e629d5141b3c9483fe2db5dc3ce07cc311a1a93757e8dacba4",
+  "changeFingerprint": "77721c78bc4693f54649c9313f04136c7d54394bee876c4a6c8b1ade29314455",
   "changes": {
     "createdGeneratedFiles": [
-      "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationsSourceVersionsGitImportCreateResponse201.kt"
+      "src/main/kotlin/com/sdkwork/web/backend/sdk/CreateRootDomainHostnameRequest.kt",
+      "src/main/kotlin/com/sdkwork/web/backend/sdk/CreateRootDomainRequest.kt",
+      "src/main/kotlin/com/sdkwork/web/backend/sdk/DomainDeploymentResponse.kt",
+      "src/main/kotlin/com/sdkwork/web/backend/sdk/RootDomainResponse.kt",
+      "src/main/kotlin/com/sdkwork/web/backend/sdk/RootDomainsCreateResponse201.kt",
+      "src/main/kotlin/com/sdkwork/web/backend/sdk/RootDomainsListResponse.kt",
+      "src/main/kotlin/com/sdkwork/web/backend/sdk/RootDomainsRetrieveResponse.kt",
+      "src/main/kotlin/com/sdkwork/web/backend/sdk/RootDomainsSubdomainsCreateResponse201.kt",
+      "src/main/kotlin/com/sdkwork/web/backend/sdk/RootDomainsSubdomainsListResponse.kt"
     ],
     "updatedGeneratedFiles": [
-      "src/main/kotlin/com/sdkwork/web/backend/sdk/api/ApplicationSourceVersionApi.kt"
+      "src/main/kotlin/com/sdkwork/web/backend/sdk/api/DomainApi.kt",
+      "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationDomainResponse.kt"
     ],
     "unchangedGeneratedFiles": [
       "bin/publish-core.mjs",
@@ -38,14 +47,13 @@
       "src/main/kotlin/com/sdkwork/web/backend/sdk/api/ApplicationApi.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/api/ApplicationDeploymentApi.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/api/ApplicationDomainApi.kt",
+      "src/main/kotlin/com/sdkwork/web/backend/sdk/api/ApplicationSourceVersionApi.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/api/AuditApi.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/api/CertificateApi.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/api/CertificateDistributionApi.kt",
-      "src/main/kotlin/com/sdkwork/web/backend/sdk/api/DomainApi.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/api/NginxApi.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/api/ServerApi.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationDeploymentResponse.kt",
-      "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationDomainResponse.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationDomainVerifyResponse.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationResponse.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationsActivateResponse.kt",
@@ -62,6 +70,7 @@
       "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationsPauseResponse.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationsRetrieveResponse.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationsSourceVersionsCreateResponse201.kt",
+      "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationsSourceVersionsGitImportCreateResponse201.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationsSourceVersionsListResponse.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationsSourceVersionsRetrieveResponse.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationStoreListing.kt",
@@ -129,9 +138,7 @@
       "src/main/kotlin/com/sdkwork/web/backend/sdk/UpdateDomainApplicationBindingRequest.kt",
       "src/main/kotlin/com/sdkwork/web/backend/sdk/UpdateNginxConfigRequest.kt"
     ],
-    "deletedGeneratedFiles": [
-      "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationsSourceVersionsImportGitResponse201.kt"
-    ],
+    "deletedGeneratedFiles": [],
     "scaffoldedFiles": [],
     "preservedScaffoldFiles": [
       "custom/README.md"
@@ -148,14 +155,22 @@
       {
         "area": "api-surface",
         "paths": [
-          "src/main/kotlin/com/sdkwork/web/backend/sdk/api/ApplicationSourceVersionApi.kt"
+          "src/main/kotlin/com/sdkwork/web/backend/sdk/api/DomainApi.kt"
         ]
       },
       {
         "area": "unknown",
         "paths": [
-          "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationsSourceVersionsGitImportCreateResponse201.kt",
-          "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationsSourceVersionsImportGitResponse201.kt"
+          "src/main/kotlin/com/sdkwork/web/backend/sdk/ApplicationDomainResponse.kt",
+          "src/main/kotlin/com/sdkwork/web/backend/sdk/CreateRootDomainHostnameRequest.kt",
+          "src/main/kotlin/com/sdkwork/web/backend/sdk/CreateRootDomainRequest.kt",
+          "src/main/kotlin/com/sdkwork/web/backend/sdk/DomainDeploymentResponse.kt",
+          "src/main/kotlin/com/sdkwork/web/backend/sdk/RootDomainResponse.kt",
+          "src/main/kotlin/com/sdkwork/web/backend/sdk/RootDomainsCreateResponse201.kt",
+          "src/main/kotlin/com/sdkwork/web/backend/sdk/RootDomainsListResponse.kt",
+          "src/main/kotlin/com/sdkwork/web/backend/sdk/RootDomainsRetrieveResponse.kt",
+          "src/main/kotlin/com/sdkwork/web/backend/sdk/RootDomainsSubdomainsCreateResponse201.kt",
+          "src/main/kotlin/com/sdkwork/web/backend/sdk/RootDomainsSubdomainsListResponse.kt"
         ]
       }
     ],
@@ -195,7 +210,6 @@
     "applyRequiresExpectedFingerprint": false,
     "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
-      "deleted-generated-files",
       "manual-review-required",
       "unknown-impact",
       "verification-required"

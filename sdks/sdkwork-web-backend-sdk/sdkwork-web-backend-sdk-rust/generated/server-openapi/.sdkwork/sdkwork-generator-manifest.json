@@ -80,7 +80,7 @@
     },
     {
       "path": "src/api/domain.rs",
-      "sha256": "8684b82e1450f2b5a9e02b80379ae0ff81aaba80956da73464b8c0eae87c7866"
+      "sha256": "5db89885a67a9511b1c1e71f78b93edffc2e703d10620c6bce8a2ff9b8c50cb7"
     },
     {
       "path": "src/api/mod.rs",
@@ -140,7 +140,7 @@
     },
     {
       "path": "src/models/application_domain_response.rs",
-      "sha256": "6d50512aae3741f41cd5a287ff91afdb71a063f6b6cb56955b43efda24476c10"
+      "sha256": "4e4dbdd1da9fb358da9a1e4dc00e285ff9e7fad5b35060d2d7002428c74d7dff"
     },
     {
       "path": "src/models/application_domain_verify_response.rs",
@@ -323,12 +323,24 @@
       "sha256": "74fa25a35cd54dc0a14bf71111c53a395e094ebadf4bc995f81139f8e27a1bc2"
     },
     {
+      "path": "src/models/create_root_domain_hostname_request.rs",
+      "sha256": "b2fd94ec9b68eccef7d00e667a202d78161132772118b1e67769ae789adcb405"
+    },
+    {
+      "path": "src/models/create_root_domain_request.rs",
+      "sha256": "284056a1f1e853f3e5ca8eb8232147cf9e741fecd4d88696ebb5bcb511b8f570"
+    },
+    {
       "path": "src/models/create_server_request.rs",
       "sha256": "53090e53517f6bdeab3e58c2517f27348e166670c00a4921f875cf79d86a928a"
     },
     {
       "path": "src/models/create_server_response.rs",
       "sha256": "b007e328c6030e0c7b62b7c6755d8a2c829acfa86204ae0fafb27cabd94b58d4"
+    },
+    {
+      "path": "src/models/domain_deployment_response.rs",
+      "sha256": "d494fb6518299e01cd316b6278bad6ffa4f1ca565a664bec64e4a701a2eef4b8"
     },
     {
       "path": "src/models/domains_application_binding_update_response.rs",
@@ -368,7 +380,7 @@
     },
     {
       "path": "src/models/mod.rs",
-      "sha256": "fc14121e3b0d01ea15d4f1c724c22d227e93a9bcfbf312b036303804ab9287d6"
+      "sha256": "c169b56924e9834f99c3ddbf637835d25eb42254492cc39427bf4f3e8cf41d9f"
     },
     {
       "path": "src/models/nginx_config_page.rs",
@@ -409,6 +421,30 @@
     {
       "path": "src/models/retrieve_response.rs",
       "sha256": "53d31ca3aa934dc31eb3b4a9b1277364cda8ee5c921e4fd88420cd8c783b314f"
+    },
+    {
+      "path": "src/models/root_domain_response.rs",
+      "sha256": "8a25404ec67993cf0eac31957fac8e7c5d84a817dde7eb0f2aa46e944e01fe95"
+    },
+    {
+      "path": "src/models/root_domains_create_response201.rs",
+      "sha256": "00d1c3fff3305469985fc965e7eb47aa313c022277771e3a7b8c856a68b4c393"
+    },
+    {
+      "path": "src/models/root_domains_list_response.rs",
+      "sha256": "187733601a55de84c8eb051c4f12516aea41a1b52eb690efcb0593d978fd19af"
+    },
+    {
+      "path": "src/models/root_domains_retrieve_response.rs",
+      "sha256": "48082f412119535e29c08edcbfbafeeb9050133461ca3057246dd72beb1ca7ca"
+    },
+    {
+      "path": "src/models/root_domains_subdomains_create_response201.rs",
+      "sha256": "275fe41354385157fd7fb38e028ff65b028ae53762d0ac460e2b4ce2cb478aa6"
+    },
+    {
+      "path": "src/models/root_domains_subdomains_list_response.rs",
+      "sha256": "ad7cc6f7f3ca23275076caf25839169459062551974123fa5c78d377c7fb93d3"
     },
     {
       "path": "src/models/sdk_work_api_response.rs",

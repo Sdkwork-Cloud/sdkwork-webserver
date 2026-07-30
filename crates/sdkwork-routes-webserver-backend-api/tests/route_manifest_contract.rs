@@ -139,3 +139,53 @@ fn domain_asset_routes_keep_authorization_and_runtime_change_contracts() {
         assert_eq!(route.rate_limit_tier, rate_limit_tier);
     }
 }
+
+#[test]
+fn root_domain_zone_routes_keep_authorization_and_navigation_contracts() {
+    let expected = [
+        (HttpMethod::Get, "rootDomains.list", "web.sites.read", false),
+        (
+            HttpMethod::Post,
+            "rootDomains.create",
+            "web.sites.write",
+            true,
+        ),
+        (
+            HttpMethod::Get,
+            "rootDomains.retrieve",
+            "web.sites.read",
+            false,
+        ),
+        (
+            HttpMethod::Delete,
+            "rootDomains.delete",
+            "web.sites.write",
+            true,
+        ),
+        (
+            HttpMethod::Get,
+            "rootDomains.subdomains.list",
+            "web.sites.read",
+            false,
+        ),
+        (
+            HttpMethod::Post,
+            "rootDomains.subdomains.create",
+            "web.sites.write",
+            true,
+        ),
+    ];
+    let manifest = backend_route_manifest();
+
+    for (method, operation_id, permission, idempotent) in expected {
+        let route = manifest
+            .routes()
+            .iter()
+            .find(|route| route.operation_id == operation_id)
+            .unwrap_or_else(|| panic!("missing route manifest entry for {operation_id}"));
+        assert_eq!(route.method, method, "method mismatch for {operation_id}");
+        assert_eq!(route.auth, RouteAuth::DualToken);
+        assert_eq!(route.required_permission, Some(permission));
+        assert_eq!(route.idempotent, idempotent);
+    }
+}

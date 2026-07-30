@@ -1,8 +1,7 @@
 use super::{EngineRow, WebRepository};
 use sdkwork_webserver_contract::{
     CreateDomainRequest, CreateManagedDomainRequest, DomainPage, DomainResponse,
-    DomainVerifyResponse, UpdateDomainApplicationBindingRequest, WebServiceError,
-    WebServiceResult,
+    DomainVerifyResponse, UpdateDomainApplicationBindingRequest, WebServiceError, WebServiceResult,
 };
 use sqlx::Row;
 
@@ -157,9 +156,9 @@ impl WebRepository {
             ));
         }
         let site_internal_id = match application_id {
-            Some(application_id) => Some(
-                resolve_site_internal_id(&self.pool, tenant_id, application_id).await?,
-            ),
+            Some(application_id) => {
+                Some(resolve_site_internal_id(&self.pool, tenant_id, application_id).await?)
+            }
             None => None,
         };
         let id = next_id(self.id_generator())?;
@@ -444,7 +443,8 @@ impl WebRepository {
         tx.commit()
             .await
             .map_err(|error| store_error("commit bind web_domain transaction", error))?;
-        self.retrieve_managed_domain_repo(tenant_id, domain_id).await
+        self.retrieve_managed_domain_repo(tenant_id, domain_id)
+            .await
     }
 
     pub(super) async fn unbind_managed_domain_repo(
@@ -454,9 +454,9 @@ impl WebRepository {
         expected_application_id: Option<&str>,
     ) -> WebServiceResult<DomainResponse> {
         let expected_site_internal_id = match expected_application_id {
-            Some(application_id) => Some(
-                resolve_site_internal_id(&self.pool, tenant_id, application_id).await?,
-            ),
+            Some(application_id) => {
+                Some(resolve_site_internal_id(&self.pool, tenant_id, application_id).await?)
+            }
             None => None,
         };
         let now = now_rfc3339();
@@ -520,7 +520,8 @@ impl WebRepository {
         tx.commit()
             .await
             .map_err(|error| store_error("commit unbind web_domain transaction", error))?;
-        self.retrieve_managed_domain_repo(tenant_id, domain_id).await
+        self.retrieve_managed_domain_repo(tenant_id, domain_id)
+            .await
     }
 
     pub(super) async fn verify_domain_repo(
@@ -605,6 +606,14 @@ fn map_domain_row(row: &EngineRow) -> Result<DomainResponse, sqlx::Error> {
     Ok(DomainResponse {
         id: row.try_get("uuid")?,
         hostname: row.try_get("hostname")?,
+        root_domain_id: row
+            .try_get::<Option<String>, _>("root_domain_id")
+            .ok()
+            .flatten(),
+        record_name: row
+            .try_get::<Option<String>, _>("record_name")
+            .ok()
+            .flatten(),
         application_id: row.try_get("application_id")?,
         application_name: row.try_get("application_name")?,
         certificate_count: row.try_get("certificate_count")?,
@@ -613,6 +622,8 @@ fn map_domain_row(row: &EngineRow) -> Result<DomainResponse, sqlx::Error> {
         ssl_enabled: bool_from_row(row, "ssl_enabled")?,
         ssl_provider: row.try_get("ssl_provider")?,
         status: row.try_get("status")?,
+        latest_deployment: None,
         created_at: instant_from_row(row, "created_at")?,
+        updated_at: instant_from_row(row, "updated_at").ok(),
     })
 }

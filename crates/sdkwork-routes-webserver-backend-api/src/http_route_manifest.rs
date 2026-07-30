@@ -94,6 +94,52 @@ const HTTP_ROUTES: &[HttpRoute] = &[
     .with_idempotent(true),
     HttpRoute::dual_token(
         HttpMethod::Get,
+        "/backend/v3/api/root_domains",
+        "domain",
+        "rootDomains.list",
+    )
+    .with_required_permission("web.sites.read"),
+    HttpRoute::dual_token(
+        HttpMethod::Post,
+        "/backend/v3/api/root_domains",
+        "domain",
+        "rootDomains.create",
+    )
+    .with_required_permission("web.sites.write")
+    .with_idempotent(true),
+    HttpRoute::dual_token(
+        HttpMethod::Get,
+        "/backend/v3/api/root_domains/{rootDomainId}",
+        "domain",
+        "rootDomains.retrieve",
+    )
+    .with_required_permission("web.sites.read"),
+    HttpRoute::dual_token(
+        HttpMethod::Delete,
+        "/backend/v3/api/root_domains/{rootDomainId}",
+        "domain",
+        "rootDomains.delete",
+    )
+    .with_required_permission("web.sites.write")
+    .with_idempotent(true)
+    .with_rate_limit_tier(RateLimitTier::AuthCritical),
+    HttpRoute::dual_token(
+        HttpMethod::Get,
+        "/backend/v3/api/root_domains/{rootDomainId}/subdomains",
+        "domain",
+        "rootDomains.subdomains.list",
+    )
+    .with_required_permission("web.sites.read"),
+    HttpRoute::dual_token(
+        HttpMethod::Post,
+        "/backend/v3/api/root_domains/{rootDomainId}/subdomains",
+        "domain",
+        "rootDomains.subdomains.create",
+    )
+    .with_required_permission("web.sites.write")
+    .with_idempotent(true),
+    HttpRoute::dual_token(
+        HttpMethod::Get,
         "/backend/v3/api/domains",
         "domain",
         "domains.list",

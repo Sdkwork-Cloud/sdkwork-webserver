@@ -9,13 +9,22 @@
     "protocol": "http",
     "packageName": "sdkwork/web-backend-sdk"
   },
-  "changeFingerprint": "0268f7aaaf97c1c00c9edf69ba349f621b900b1dc478a1b78a06c45346e8422b",
+  "changeFingerprint": "2e92b36c8e25f7160a89e509f18aee36c146a7f766fdb9676a1b7f044ebef738",
   "changes": {
     "createdGeneratedFiles": [
-      "src/Models/ApplicationsSourceVersionsGitImportCreateResponse201.php"
+      "src/Models/CreateRootDomainHostnameRequest.php",
+      "src/Models/CreateRootDomainRequest.php",
+      "src/Models/DomainDeploymentResponse.php",
+      "src/Models/RootDomainResponse.php",
+      "src/Models/RootDomainsCreateResponse201.php",
+      "src/Models/RootDomainsListResponse.php",
+      "src/Models/RootDomainsRetrieveResponse.php",
+      "src/Models/RootDomainsSubdomainsCreateResponse201.php",
+      "src/Models/RootDomainsSubdomainsListResponse.php"
     ],
     "updatedGeneratedFiles": [
-      "src/Api/ApplicationSourceVersion.php"
+      "src/Api/Domain.php",
+      "src/Models/ApplicationDomainResponse.php"
     ],
     "unchangedGeneratedFiles": [
       "bin/publish-core.mjs",
@@ -30,11 +39,11 @@
       "src/Api/Application.php",
       "src/Api/ApplicationDeployment.php",
       "src/Api/ApplicationDomain.php",
+      "src/Api/ApplicationSourceVersion.php",
       "src/Api/Audit.php",
       "src/Api/BaseApi.php",
       "src/Api/Certificate.php",
       "src/Api/CertificateDistribution.php",
-      "src/Api/Domain.php",
       "src/Api/Nginx.php",
       "src/Api/Server.php",
       "src/Http/HttpClient.php",
@@ -44,7 +53,6 @@
       "src/Models/AgentNginxConfigBundle.php",
       "src/Models/AgentSyncResponse.php",
       "src/Models/ApplicationDeploymentResponse.php",
-      "src/Models/ApplicationDomainResponse.php",
       "src/Models/ApplicationDomainVerifyResponse.php",
       "src/Models/ApplicationResponse.php",
       "src/Models/ApplicationsActivateResponse.php",
@@ -61,6 +69,7 @@
       "src/Models/ApplicationsPauseResponse.php",
       "src/Models/ApplicationsRetrieveResponse.php",
       "src/Models/ApplicationsSourceVersionsCreateResponse201.php",
+      "src/Models/ApplicationsSourceVersionsGitImportCreateResponse201.php",
       "src/Models/ApplicationsSourceVersionsListResponse.php",
       "src/Models/ApplicationsSourceVersionsRetrieveResponse.php",
       "src/Models/ApplicationStoreListing.php",
@@ -128,9 +137,7 @@
       "src/SdkConfig.php",
       "src/SdkworkBackendClient.php"
     ],
-    "deletedGeneratedFiles": [
-      "src/Models/ApplicationsSourceVersionsImportGitResponse201.php"
-    ],
+    "deletedGeneratedFiles": [],
     "scaffoldedFiles": [],
     "preservedScaffoldFiles": [
       "custom/README.md"
@@ -147,14 +154,22 @@
       {
         "area": "api-surface",
         "paths": [
-          "src/Api/ApplicationSourceVersion.php"
+          "src/Api/Domain.php"
         ]
       },
       {
         "area": "models",
         "paths": [
-          "src/Models/ApplicationsSourceVersionsGitImportCreateResponse201.php",
-          "src/Models/ApplicationsSourceVersionsImportGitResponse201.php"
+          "src/Models/ApplicationDomainResponse.php",
+          "src/Models/CreateRootDomainHostnameRequest.php",
+          "src/Models/CreateRootDomainRequest.php",
+          "src/Models/DomainDeploymentResponse.php",
+          "src/Models/RootDomainResponse.php",
+          "src/Models/RootDomainsCreateResponse201.php",
+          "src/Models/RootDomainsListResponse.php",
+          "src/Models/RootDomainsRetrieveResponse.php",
+          "src/Models/RootDomainsSubdomainsCreateResponse201.php",
+          "src/Models/RootDomainsSubdomainsListResponse.php"
         ]
       }
     ],
@@ -188,14 +203,12 @@
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "high",
+    "riskLevel": "medium",
     "nextAction": "verify",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
     "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
-      "deleted-generated-files",
-      "manual-review-required",
       "verification-required"
     ]
   },

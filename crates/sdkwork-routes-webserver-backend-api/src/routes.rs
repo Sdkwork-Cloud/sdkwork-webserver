@@ -6,10 +6,11 @@ use axum::{
 };
 use sdkwork_webserver_contract::{
     CreateCertificateRequest, CreateDeploymentRequest, CreateDomainRequest,
-    CreateManagedDomainRequest, CreateNginxConfigRequest, CreateServerRequest, CreateSiteRequest,
-    CreateSourceVersionRequest, ImportGitSourceVersionRequest, ListNginxConfigsQuery,
-    ListSitesQuery, UpdateCertificateRequest, UpdateDomainApplicationBindingRequest,
-    UpdateNginxConfigRequest, UpdateSiteRequest, WebBackendApi, WebBackendRequestContext,
+    CreateManagedDomainRequest, CreateNginxConfigRequest, CreateRootDomainHostnameRequest,
+    CreateRootDomainRequest, CreateServerRequest, CreateSiteRequest, CreateSourceVersionRequest,
+    ImportGitSourceVersionRequest, ListNginxConfigsQuery, ListRootDomainsQuery, ListSitesQuery,
+    UpdateCertificateRequest, UpdateDomainApplicationBindingRequest, UpdateNginxConfigRequest,
+    UpdateSiteRequest, WebBackendApi, WebBackendRequestContext,
 };
 use serde::Deserialize;
 use std::sync::Arc;
@@ -18,7 +19,7 @@ use crate::{agent_routes, auth::require_backend_context, paths};
 use sdkwork_routes_webserver_common::{
     created_resource, no_content, ok_audit_log_page, ok_certificate_distribution_page,
     ok_certificate_page, ok_deployment_page, ok_domain_page, ok_nginx_config_page, ok_resource,
-    ok_server_page, ok_site_page, ok_source_version_page, WebApiError,
+    ok_root_domain_page, ok_server_page, ok_site_page, ok_source_version_page, WebApiError,
 };
 
 #[derive(Clone)]
@@ -58,6 +59,18 @@ pub fn build_router_with_shared_backend_api(api: Arc<dyn WebBackendApi>) -> Rout
         .route(
             paths::APPLICATION_DOMAIN_VERIFY,
             post(verify_application_domain),
+        )
+        .route(
+            paths::ROOT_DOMAINS,
+            get(list_root_domains).post(create_root_domain),
+        )
+        .route(
+            paths::ROOT_DOMAIN,
+            get(retrieve_root_domain).delete(delete_root_domain),
+        )
+        .route(
+            paths::ROOT_DOMAIN_SUBDOMAINS,
+            get(list_root_domain_subdomains).post(create_root_domain_subdomain),
         )
         .route(
             paths::DOMAINS,
@@ -290,6 +303,88 @@ async fn delete_application_domain(
         state
             .api
             .delete_application_domain(&context, &application_id, &domain_id)
+            .await,
+    )
+}
+
+async fn list_root_domains(
+    State(state): State<BackendState>,
+    context: Option<Extension<WebBackendRequestContext>>,
+    Query(query): Query<ListRootDomainsQuery>,
+) -> Result<Response, WebApiError> {
+    let context = require_backend_context(context)?;
+    ok_root_domain_page(
+        state.api.list_root_domains(&context, &query).await,
+        query.page,
+        query.page_size,
+    )
+}
+
+async fn create_root_domain(
+    State(state): State<BackendState>,
+    context: Option<Extension<WebBackendRequestContext>>,
+    Json(request): Json<CreateRootDomainRequest>,
+) -> Result<Response, WebApiError> {
+    let context = require_backend_context(context)?;
+    created_resource(state.api.create_root_domain(&context, &request).await)
+}
+
+async fn retrieve_root_domain(
+    State(state): State<BackendState>,
+    context: Option<Extension<WebBackendRequestContext>>,
+    Path(root_domain_id): Path<String>,
+) -> Result<Response, WebApiError> {
+    let context = require_backend_context(context)?;
+    ok_resource(
+        state
+            .api
+            .retrieve_root_domain(&context, &root_domain_id)
+            .await,
+    )
+}
+
+async fn delete_root_domain(
+    State(state): State<BackendState>,
+    context: Option<Extension<WebBackendRequestContext>>,
+    Path(root_domain_id): Path<String>,
+) -> Result<Response, WebApiError> {
+    let context = require_backend_context(context)?;
+    no_content(
+        state
+            .api
+            .delete_root_domain(&context, &root_domain_id)
+            .await,
+    )
+}
+
+async fn list_root_domain_subdomains(
+    State(state): State<BackendState>,
+    context: Option<Extension<WebBackendRequestContext>>,
+    Path(root_domain_id): Path<String>,
+    Query(query): Query<PageQuery>,
+) -> Result<Response, WebApiError> {
+    let context = require_backend_context(context)?;
+    ok_domain_page(
+        state
+            .api
+            .list_root_domain_hostnames(&context, &root_domain_id, query.page, query.page_size)
+            .await,
+        query.page,
+        query.page_size,
+    )
+}
+
+async fn create_root_domain_subdomain(
+    State(state): State<BackendState>,
+    context: Option<Extension<WebBackendRequestContext>>,
+    Path(root_domain_id): Path<String>,
+    Json(request): Json<CreateRootDomainHostnameRequest>,
+) -> Result<Response, WebApiError> {
+    let context = require_backend_context(context)?;
+    created_resource(
+        state
+            .api
+            .create_root_domain_hostname(&context, &root_domain_id, &request)
             .await,
     )
 }

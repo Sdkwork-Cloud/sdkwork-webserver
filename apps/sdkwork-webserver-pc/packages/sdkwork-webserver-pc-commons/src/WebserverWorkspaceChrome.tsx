@@ -140,6 +140,7 @@ function ResourceIcon({ resource }: { resource: WebserverResourceKey }): ReactNo
       return <Settings2 {...iconProps} />;
     case "domains":
     case "application-domains":
+    case "root-domains":
       return <Globe2 {...iconProps} />;
     case "certificates":
     case "managed-certificates":

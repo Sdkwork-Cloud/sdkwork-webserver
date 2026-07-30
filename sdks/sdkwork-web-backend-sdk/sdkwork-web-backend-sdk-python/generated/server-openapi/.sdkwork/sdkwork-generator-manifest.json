@@ -88,7 +88,7 @@
     },
     {
       "path": "sdkwork_web_backend_sdk/api/domain.py",
-      "sha256": "a34a4d2f00069b9bf4a846ee770f7963e8bb2a439623111b46d86ff20010c179"
+      "sha256": "9e800d4468c6a1b884be0e7b6638a1b061b104100f529b0a3627b8db7b630ff8"
     },
     {
       "path": "sdkwork_web_backend_sdk/api/nginx.py",
@@ -108,7 +108,7 @@
     },
     {
       "path": "sdkwork_web_backend_sdk/models/__init__.py",
-      "sha256": "806e46f9aa265e706efd0b43084d766fc9a23a6b5bf61c54d106e5556a1a5c4b"
+      "sha256": "eea1bac7b0eb5cf88fb3727aedeeba3541c776e6d4c34f0fe95b1fecc78816df"
     },
     {
       "path": "sdkwork_web_backend_sdk/models/agent_certificate_bundle.py",
@@ -136,7 +136,7 @@
     },
     {
       "path": "sdkwork_web_backend_sdk/models/application_domain_response.py",
-      "sha256": "f268d56f53829878e42de673a94d0ce3961ecf7c676befc4343671dbdf42d846"
+      "sha256": "08b1d1eee557eb7099c2916f31e3a1287e9f28a8266efed9610164f8920a1509"
     },
     {
       "path": "sdkwork_web_backend_sdk/models/application_domain_verify_response.py",
@@ -315,12 +315,24 @@
       "sha256": "12b1f48a1c81453110f8a12abe521b08416d16a5b516000150104fa3914d7745"
     },
     {
+      "path": "sdkwork_web_backend_sdk/models/create_root_domain_hostname_request.py",
+      "sha256": "1c41c38d842a9a0fae379fdca6515c7e637590c427d0e87a126357c4771020d1"
+    },
+    {
+      "path": "sdkwork_web_backend_sdk/models/create_root_domain_request.py",
+      "sha256": "ded91a13f86fe2816fe79c83997d6d7d1f2503bfc5bf6c681183e3b65012e8a6"
+    },
+    {
       "path": "sdkwork_web_backend_sdk/models/create_server_request.py",
       "sha256": "375515467daf1cd2b758eea18ec238765be8b6aff795b295681b0fca26007fd7"
     },
     {
       "path": "sdkwork_web_backend_sdk/models/create_server_response.py",
       "sha256": "b09668d404de5f6d62ac75100fa6cc430e102654deb57587937f3f052aa51614"
+    },
+    {
+      "path": "sdkwork_web_backend_sdk/models/domain_deployment_response.py",
+      "sha256": "eb9bda5b45d53e52dedb3c5eb66723cb7f57eaf30b30101ff32f18a2a5e49305"
     },
     {
       "path": "sdkwork_web_backend_sdk/models/domains_application_binding_update_response.py",
@@ -397,6 +409,30 @@
     {
       "path": "sdkwork_web_backend_sdk/models/retrieve_response.py",
       "sha256": "eca6ebb17d49a62b190dc01eef027bf4a80030fbeaa40e28cb761a6174341d44"
+    },
+    {
+      "path": "sdkwork_web_backend_sdk/models/root_domain_response.py",
+      "sha256": "17dd50724e296f787016d773278355507049ebe69c7c8edefb0ac8319a5edc80"
+    },
+    {
+      "path": "sdkwork_web_backend_sdk/models/root_domains_create_response201.py",
+      "sha256": "298bad53fb0ce75ad12ca299a593b1a8c1da17b6984cc49db818e8d3b61de0be"
+    },
+    {
+      "path": "sdkwork_web_backend_sdk/models/root_domains_list_response.py",
+      "sha256": "c34feb6ad95e32e90d4532e97299da864041c3728949a653d714ce448c89fc14"
+    },
+    {
+      "path": "sdkwork_web_backend_sdk/models/root_domains_retrieve_response.py",
+      "sha256": "4137b6bbc74430b689f20f675397e890d8c4366bf7dca2edd95969b7e4de1a63"
+    },
+    {
+      "path": "sdkwork_web_backend_sdk/models/root_domains_subdomains_create_response201.py",
+      "sha256": "61d26b1e9be87ef361acecdea88aacfe729a326e7b8d45035415b7d2d58bc885"
+    },
+    {
+      "path": "sdkwork_web_backend_sdk/models/root_domains_subdomains_list_response.py",
+      "sha256": "81c09b0b5a16adbc8d2655015d98770751ae8dde38409be2d5105b990e305f92"
     },
     {
       "path": "sdkwork_web_backend_sdk/models/sdk_work_api_response.py",

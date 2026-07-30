@@ -808,6 +808,10 @@ function renderWorkspace(
 function renderDomainWorkspace(
   registry: ReturnType<typeof createWebserverAdminDomainRegistry>,
 ): void {
+  const managedDomainsModule = {
+    ...domainsModule,
+    entries: [{ ...domainsModule.entries[0], resource: "managed-domains" }],
+  } as const;
   render(
     <MemoryRouter initialEntries={["/admin/managed-domains"]}>
       <Routes>
@@ -816,7 +820,7 @@ function renderDomainWorkspace(
           element={
             <WebserverWorkspace
               locale="en-US"
-              modules={[domainsModule]}
+              modules={[managedDomainsModule]}
               permissionScope={["*"]}
               registry={registry}
               surface="backend-admin"

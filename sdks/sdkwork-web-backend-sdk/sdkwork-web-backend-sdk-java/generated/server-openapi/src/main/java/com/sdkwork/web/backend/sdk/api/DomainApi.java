@@ -13,6 +13,64 @@ public class DomainApi {
         this.client = client;
     }
 
+    /** List tenant root-domain Zones */
+    public RootDomainsListResponse rootDomainsList(Integer page, Integer pageSize, Integer status, String keyword) throws Exception {
+        String query = buildQueryString(List.of(
+            new QueryParameterSpec("page", page, "form", true, false, null),
+            new QueryParameterSpec("page_size", pageSize, "form", true, false, null),
+            new QueryParameterSpec("status", status, "form", true, false, null),
+            new QueryParameterSpec("keyword", keyword, "form", true, false, null)
+        ));
+        Object raw = client.get(ApiPaths.appendQueryString(ApiPaths.backendPath("/root_domains"), query));
+        return client.convertValue(raw, new TypeReference<RootDomainsListResponse>() {});
+    }
+
+    /** Define a tenant root-domain Zone */
+    public RootDomainsCreateResponse201 rootDomainsCreate(CreateRootDomainRequest body, String idempotencyKey) throws Exception {
+        Map<String, String> requestHeaders = buildRequestHeaders(
+                Map.of("Idempotency-Key", new HeaderParameterSpec(idempotencyKey, "simple", false, null)),
+                Map.of()
+        );
+        Object raw = client.post(ApiPaths.backendPath("/root_domains"), body, null, requestHeaders, "application/json");
+        return client.convertValue(raw, new TypeReference<RootDomainsCreateResponse201>() {});
+    }
+
+    /** Retrieve a tenant root-domain Zone */
+    public RootDomainsRetrieveResponse rootDomainsRetrieve(String rootDomainId) throws Exception {
+        Object raw = client.get(ApiPaths.backendPath("/root_domains/" + serializePathParameter(rootDomainId, new PathParameterSpec("rootDomainId", "simple", false)) + ""));
+        return client.convertValue(raw, new TypeReference<RootDomainsRetrieveResponse>() {});
+    }
+
+    /** Delete an empty tenant root-domain Zone */
+    public Void rootDomainsDelete(String rootDomainId, String idempotencyKey) throws Exception {
+        Map<String, String> requestHeaders = buildRequestHeaders(
+                Map.of("Idempotency-Key", new HeaderParameterSpec(idempotencyKey, "simple", false, null)),
+                Map.of()
+        );
+        client.delete(ApiPaths.backendPath("/root_domains/" + serializePathParameter(rootDomainId, new PathParameterSpec("rootDomainId", "simple", false)) + ""), null, requestHeaders);
+        return null;
+    }
+
+    /** List publishable hostnames in a root-domain Zone */
+    public RootDomainsSubdomainsListResponse rootDomainsSubdomainsList(String rootDomainId, Integer page, Integer pageSize) throws Exception {
+        String query = buildQueryString(List.of(
+            new QueryParameterSpec("page", page, "form", true, false, null),
+            new QueryParameterSpec("page_size", pageSize, "form", true, false, null)
+        ));
+        Object raw = client.get(ApiPaths.appendQueryString(ApiPaths.backendPath("/root_domains/" + serializePathParameter(rootDomainId, new PathParameterSpec("rootDomainId", "simple", false)) + "/subdomains"), query));
+        return client.convertValue(raw, new TypeReference<RootDomainsSubdomainsListResponse>() {});
+    }
+
+    /** Add a publishable hostname to a root-domain Zone */
+    public RootDomainsSubdomainsCreateResponse201 rootDomainsSubdomainsCreate(String rootDomainId, CreateRootDomainHostnameRequest body, String idempotencyKey) throws Exception {
+        Map<String, String> requestHeaders = buildRequestHeaders(
+                Map.of("Idempotency-Key", new HeaderParameterSpec(idempotencyKey, "simple", false, null)),
+                Map.of()
+        );
+        Object raw = client.post(ApiPaths.backendPath("/root_domains/" + serializePathParameter(rootDomainId, new PathParameterSpec("rootDomainId", "simple", false)) + "/subdomains"), body, null, requestHeaders, "application/json");
+        return client.convertValue(raw, new TypeReference<RootDomainsSubdomainsCreateResponse201>() {});
+    }
+
     /** List tenant custom domain assets */
     public DomainsListResponse domainsList(Integer page, Integer pageSize) throws Exception {
         String query = buildQueryString(List.of(

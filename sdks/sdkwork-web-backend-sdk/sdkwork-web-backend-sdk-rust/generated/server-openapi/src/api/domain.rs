@@ -4,7 +4,7 @@ use crate::api::base::{RequestHeaders};
 use crate::api::paths::backend_path;
 use crate::api::paths::append_query_string;
 use crate::http::{SdkworkError, SdkworkHttpClient};
-use crate::models::{ApplicationDomainResponse, ApplicationDomainVerifyResponse, CreateManagedDomainRequest, UpdateDomainApplicationBindingRequest};
+use crate::models::{ApplicationDomainResponse, ApplicationDomainVerifyResponse, CreateManagedDomainRequest, CreateRootDomainHostnameRequest, CreateRootDomainRequest, RootDomainResponse, UpdateDomainApplicationBindingRequest};
 
 #[derive(Clone)]
 pub struct DomainApi {
@@ -14,6 +14,70 @@ pub struct DomainApi {
 impl DomainApi {
     pub fn new(client: Arc<SdkworkHttpClient>) -> Self {
         Self { client }
+    }
+
+    /// List tenant root-domain Zones
+    pub async fn root_domains_list(&self, page: Option<i64>, page_size: Option<i64>, status: Option<i64>, keyword: Option<&str>) -> Result<serde_json::Value, SdkworkError> {
+        let query = build_query_string(&[
+            QueryParameterSpec::new("page", page, "form", true, false, None),
+            QueryParameterSpec::new("page_size", page_size, "form", true, false, None),
+            QueryParameterSpec::new("status", status, "form", true, false, None),
+            QueryParameterSpec::new("keyword", keyword, "form", true, false, None),
+        ]);
+        let path = append_query_string(backend_path(&"/root_domains".to_string()), &query);
+        self.client.get(&path, None, None).await
+    }
+
+    /// Define a tenant root-domain Zone
+    pub async fn root_domains_create(&self, body: &CreateRootDomainRequest, idempotency_key: &str) -> Result<RootDomainResponse, SdkworkError> {
+        let path = backend_path(&"/root_domains".to_string());
+        let headers = build_request_headers(
+            &[
+                ("Idempotency-Key", HeaderParameterSpec::new(idempotency_key, "simple", false, None)),
+            ],
+            &[],
+        );
+        self.client.post(&path, Some(body), None, headers.as_ref(), Some("application/json")).await
+    }
+
+    /// Retrieve a tenant root-domain Zone
+    pub async fn root_domains_retrieve(&self, root_domain_id: &str) -> Result<RootDomainResponse, SdkworkError> {
+        let path = backend_path(&format!("/root_domains/{}", serialize_path_parameter(root_domain_id, PathParameterSpec::new("rootDomainId", "simple", false))));
+        self.client.get(&path, None, None).await
+    }
+
+    /// Delete an empty tenant root-domain Zone
+    pub async fn root_domains_delete(&self, root_domain_id: &str, idempotency_key: &str) -> Result<(), SdkworkError> {
+        let path = backend_path(&format!("/root_domains/{}", serialize_path_parameter(root_domain_id, PathParameterSpec::new("rootDomainId", "simple", false))));
+        let headers = build_request_headers(
+            &[
+                ("Idempotency-Key", HeaderParameterSpec::new(idempotency_key, "simple", false, None)),
+            ],
+            &[],
+        );
+        self.client.delete(&path, None, headers.as_ref()).await
+    }
+
+    /// List publishable hostnames in a root-domain Zone
+    pub async fn root_domains_subdomains_list(&self, root_domain_id: &str, page: Option<i64>, page_size: Option<i64>) -> Result<serde_json::Value, SdkworkError> {
+        let query = build_query_string(&[
+            QueryParameterSpec::new("page", page, "form", true, false, None),
+            QueryParameterSpec::new("page_size", page_size, "form", true, false, None),
+        ]);
+        let path = append_query_string(backend_path(&format!("/root_domains/{}/subdomains", serialize_path_parameter(root_domain_id, PathParameterSpec::new("rootDomainId", "simple", false)))), &query);
+        self.client.get(&path, None, None).await
+    }
+
+    /// Add a publishable hostname to a root-domain Zone
+    pub async fn root_domains_subdomains_create(&self, root_domain_id: &str, body: &CreateRootDomainHostnameRequest, idempotency_key: &str) -> Result<ApplicationDomainResponse, SdkworkError> {
+        let path = backend_path(&format!("/root_domains/{}/subdomains", serialize_path_parameter(root_domain_id, PathParameterSpec::new("rootDomainId", "simple", false))));
+        let headers = build_request_headers(
+            &[
+                ("Idempotency-Key", HeaderParameterSpec::new(idempotency_key, "simple", false, None)),
+            ],
+            &[],
+        );
+        self.client.post(&path, Some(body), None, headers.as_ref(), Some("application/json")).await
     }
 
     /// List tenant custom domain assets

@@ -83,4 +83,4 @@ SDKWork with a 1,000 ms interval emits PING in the same idle condition. With a 3
 
 ## Acceptance
 
-Accepted on 2026-07-16 for proactive H2 peer-failure detection through PING/ACK timeout. PostgreSQL lifecycle execution remains ignored without `SDKWORK_WEB_POSTGRES_TEST_DATABASE_URL`; the unrelated existing `agent.sync` operation-pattern violation remains a repository-level commercial blocker. Responsive-but-idle maximum lifetime, 100,000-connection timer/RSS evidence, full H2 differential/fuzz conformance, and commercial runtime-core acceptance remain separate gates.
+Accepted on 2026-07-16 for proactive H2 peer-failure detection through PING/ACK timeout. PostgreSQL lifecycle execution remains ignored without `SDKWORK_DATABASE_TEST_POSTGRES_URL`; the unrelated existing `agent.sync` operation-pattern violation remains a repository-level commercial blocker. Responsive-but-idle maximum lifetime, 100,000-connection timer/RSS evidence, full H2 differential/fuzz conformance, and commercial runtime-core acceptance remain separate gates.

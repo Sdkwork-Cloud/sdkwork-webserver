@@ -1,10 +1,20 @@
 use serde::{Deserialize, Serialize};
 
+use crate::models::{DomainDeploymentResponse};
+
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct ApplicationDomainResponse {
     pub id: String,
 
     pub hostname: String,
+
+    #[serde(rename = "rootDomainId")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub root_domain_id: Option<String>,
+
+    #[serde(rename = "recordName")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub record_name: Option<String>,
 
     #[serde(rename = "applicationId")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -32,6 +42,14 @@ pub struct ApplicationDomainResponse {
 
     pub status: i64,
 
+    #[serde(rename = "latestDeployment")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub latest_deployment: Option<DomainDeploymentResponse>,
+
     #[serde(rename = "createdAt")]
     pub created_at: String,
+
+    #[serde(rename = "updatedAt")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub updated_at: Option<String>,
 }

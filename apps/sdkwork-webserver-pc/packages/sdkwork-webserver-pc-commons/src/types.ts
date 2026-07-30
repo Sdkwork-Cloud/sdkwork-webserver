@@ -28,6 +28,7 @@ export type WebserverResourceKey =
   | "application-source-versions"
   | "application-domains"
   | "application-deployments"
+  | "root-domains"
   | "managed-domains"
   | "managed-certificates"
   | "certificate-distribution"

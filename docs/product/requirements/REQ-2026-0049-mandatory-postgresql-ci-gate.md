@@ -23,7 +23,7 @@ users:
 acceptance_criteria:
   - The root exposes test:postgres:required and it invokes a deterministic Node runner rather than an optional ignored cargo command.
   - The runner uses postgres 16.9 alpine pinned by sha256 manifest digest, one uniquely named --rm container, loopback-only random host-port publication, and a maximum 60-second readiness wait.
-  - The runner passes one non-secret disposable URL through SDKWORK_WEB_POSTGRES_TEST_DATABASE_URL and never logs production credentials.
+  - The runner passes one non-secret disposable URL through SDKWORK_DATABASE_TEST_POSTGRES_URL and never logs production credentials.
   - PostgreSQL lifecycle/seed/drift runs first, public schema is reset fail-closed, and Repository parity then runs against an empty schema.
   - Both cargo invocations select the exact ignored test and include --ignored --exact so neither suite can silently remain skipped.
   - Child commands have finite timeouts, captured Docker diagnostics are capped at 64 KiB, and finally cleanup force-removes the container.

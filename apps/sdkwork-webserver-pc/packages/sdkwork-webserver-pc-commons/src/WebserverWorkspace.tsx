@@ -89,6 +89,7 @@ export interface WebserverWorkspaceProps {
   permissionScope: readonly string[];
   portalHref?: string;
   registry: WebserverResourceRegistry;
+  resourceRenderers?: Partial<Record<WebserverResourceKey, ReactNode>>;
   surface: "app-console" | "backend-admin";
   userLabel?: string;
 }
@@ -103,6 +104,7 @@ export function WebserverWorkspace({
   permissionScope,
   portalHref,
   registry,
+  resourceRenderers,
   surface,
   userLabel,
 }: WebserverWorkspaceProps) {
@@ -146,8 +148,8 @@ export function WebserverWorkspace({
             {entries.map((entry) => (
               <Route
                 key={entry.resource}
-                path={`/${entry.resource}`}
-                element={(
+                path={`/${entry.resource}/*`}
+                element={resourceRenderers?.[entry.resource] ?? (
                   <ResourcePage
                     entry={entry}
                     locale={locale}

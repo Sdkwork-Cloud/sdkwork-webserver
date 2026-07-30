@@ -5,13 +5,13 @@ use sdkwork_drive_uploader_service::service::{
     DriveUploaderService, PrepareUploaderUploadCommand, SqlUploaderStore, UploadBytesCommand,
     UploaderActor, UploaderRetention, UploaderTarget,
 };
-use sdkwork_drive_workspace_service::infrastructure::sql::connect_any_database_and_install_schema;
+use sdkwork_drive_workspace_service::infrastructure::sql::connect_postgres_database_and_install_schema;
 use sdkwork_intelligence_webserver_service::{
     ApplicationSourceImporter, GitSourceImportRequest, ImportedApplicationSource,
 };
 use sdkwork_webserver_contract::{SourceVersionConfigSnapshot, WebServiceError, WebServiceResult};
 use sha2::{Digest, Sha256};
-use sqlx::AnyPool;
+use sqlx::PgPool;
 use std::io::{Cursor, Write};
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 use std::path::{Path, PathBuf};
@@ -34,7 +34,7 @@ const MAX_PATH_DEPTH: usize = 32;
 const GIT_TIMEOUT: Duration = Duration::from_secs(60);
 
 pub struct GitDriveSourceImporter {
-    pool: AnyPool,
+    pool: PgPool,
     uploader: DriveUploaderService<SqlUploaderStore>,
     object_runtime: DriveObjectStoreRuntime,
 }
@@ -43,7 +43,7 @@ impl GitDriveSourceImporter {
     pub async fn from_env() -> Result<Self, String> {
         let config = DatabaseConfig::from_env()
             .map_err(|error| format!("resolve Drive database config failed: {error}"))?;
-        let pool = connect_any_database_and_install_schema(&config)
+        let pool = connect_postgres_database_and_install_schema(&config)
             .await
             .map_err(|error| format!("initialize Drive source importer failed: {error}"))?;
         Ok(Self {

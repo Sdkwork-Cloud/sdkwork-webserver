@@ -50,6 +50,16 @@ pub struct ListSitesQuery {
     pub keyword: Option<String>,
 }
 
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+pub struct ListRootDomainsQuery {
+    #[serde(default = "crate::dto::default_page")]
+    pub page: i32,
+    #[serde(default = "crate::dto::default_page_size")]
+    pub page_size: i32,
+    pub status: Option<i32>,
+    pub keyword: Option<String>,
+}
+
 #[async_trait]
 pub trait WebAppApi: Send + Sync {
     async fn list_sites(
@@ -321,6 +331,45 @@ pub trait WebBackendApi: Send + Sync {
         application_id: &str,
         domain_id: &str,
     ) -> WebServiceResult<()>;
+
+    async fn list_root_domains(
+        &self,
+        context: &WebBackendRequestContext,
+        query: &ListRootDomainsQuery,
+    ) -> WebServiceResult<RootDomainPage>;
+
+    async fn create_root_domain(
+        &self,
+        context: &WebBackendRequestContext,
+        request: &CreateRootDomainRequest,
+    ) -> WebServiceResult<RootDomainResponse>;
+
+    async fn retrieve_root_domain(
+        &self,
+        context: &WebBackendRequestContext,
+        root_domain_id: &str,
+    ) -> WebServiceResult<RootDomainResponse>;
+
+    async fn delete_root_domain(
+        &self,
+        context: &WebBackendRequestContext,
+        root_domain_id: &str,
+    ) -> WebServiceResult<()>;
+
+    async fn list_root_domain_hostnames(
+        &self,
+        context: &WebBackendRequestContext,
+        root_domain_id: &str,
+        page: i32,
+        page_size: i32,
+    ) -> WebServiceResult<DomainPage>;
+
+    async fn create_root_domain_hostname(
+        &self,
+        context: &WebBackendRequestContext,
+        root_domain_id: &str,
+        request: &CreateRootDomainHostnameRequest,
+    ) -> WebServiceResult<DomainResponse>;
 
     async fn list_managed_domains(
         &self,

@@ -539,6 +539,158 @@ class CreateManagedDomainRequest {
   }
 }
 
+class CreateRootDomainRequest {
+  final String? hostname;
+
+  CreateRootDomainRequest({
+    this.hostname
+  });
+
+  factory CreateRootDomainRequest.fromJson(Map<String, dynamic> json) {
+    return CreateRootDomainRequest(
+      hostname: json['hostname']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'hostname': hostname,
+    };
+  }
+}
+
+class CreateRootDomainHostnameRequest {
+  final String? recordName;
+  final String? applicationId;
+  final bool? isPrimary;
+  final bool? sslEnabled;
+  final String? sslProvider;
+
+  CreateRootDomainHostnameRequest({
+    this.recordName,
+    this.applicationId,
+    this.isPrimary,
+    this.sslEnabled,
+    this.sslProvider
+  });
+
+  factory CreateRootDomainHostnameRequest.fromJson(Map<String, dynamic> json) {
+    return CreateRootDomainHostnameRequest(
+      recordName: json['recordName']?.toString(),
+      applicationId: json['applicationId']?.toString(),
+      isPrimary: json['isPrimary'] is bool ? json['isPrimary'] : null,
+      sslEnabled: json['sslEnabled'] is bool ? json['sslEnabled'] : null,
+      sslProvider: json['sslProvider']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'recordName': recordName,
+      'applicationId': applicationId,
+      'isPrimary': isPrimary,
+      'sslEnabled': sslEnabled,
+      'sslProvider': sslProvider,
+    };
+  }
+}
+
+class RootDomainResponse {
+  final String? id;
+  final String? hostname;
+  final int? status;
+  final String? subdomainCount;
+  final String? boundSubdomainCount;
+  final String? verifiedSubdomainCount;
+  final String? httpsSubdomainCount;
+  final String? activeDeploymentCount;
+  final String? createdAt;
+  final String? updatedAt;
+
+  RootDomainResponse({
+    this.id,
+    this.hostname,
+    this.status,
+    this.subdomainCount,
+    this.boundSubdomainCount,
+    this.verifiedSubdomainCount,
+    this.httpsSubdomainCount,
+    this.activeDeploymentCount,
+    this.createdAt,
+    this.updatedAt
+  });
+
+  factory RootDomainResponse.fromJson(Map<String, dynamic> json) {
+    return RootDomainResponse(
+      id: json['id']?.toString(),
+      hostname: json['hostname']?.toString(),
+      status: json['status'] is int ? json['status'] : null,
+      subdomainCount: json['subdomainCount']?.toString(),
+      boundSubdomainCount: json['boundSubdomainCount']?.toString(),
+      verifiedSubdomainCount: json['verifiedSubdomainCount']?.toString(),
+      httpsSubdomainCount: json['httpsSubdomainCount']?.toString(),
+      activeDeploymentCount: json['activeDeploymentCount']?.toString(),
+      createdAt: json['createdAt']?.toString(),
+      updatedAt: json['updatedAt']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'id': id,
+      'hostname': hostname,
+      'status': status,
+      'subdomainCount': subdomainCount,
+      'boundSubdomainCount': boundSubdomainCount,
+      'verifiedSubdomainCount': verifiedSubdomainCount,
+      'httpsSubdomainCount': httpsSubdomainCount,
+      'activeDeploymentCount': activeDeploymentCount,
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
+    };
+  }
+}
+
+class DomainDeploymentResponse {
+  final String? id;
+  final int? status;
+  final String? environment;
+  final String? versionTag;
+  final String? completedAt;
+  final String? createdAt;
+
+  DomainDeploymentResponse({
+    this.id,
+    this.status,
+    this.environment,
+    this.versionTag,
+    this.completedAt,
+    this.createdAt
+  });
+
+  factory DomainDeploymentResponse.fromJson(Map<String, dynamic> json) {
+    return DomainDeploymentResponse(
+      id: json['id']?.toString(),
+      status: json['status'] is int ? json['status'] : null,
+      environment: json['environment']?.toString(),
+      versionTag: json['versionTag']?.toString(),
+      completedAt: json['completedAt']?.toString(),
+      createdAt: json['createdAt']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'id': id,
+      'status': status,
+      'environment': environment,
+      'versionTag': versionTag,
+      'completedAt': completedAt,
+      'createdAt': createdAt,
+    };
+  }
+}
+
 class UpdateDomainApplicationBindingRequest {
   final String? applicationId;
   final bool? isPrimary;
@@ -566,6 +718,8 @@ class UpdateDomainApplicationBindingRequest {
 class ApplicationDomainResponse {
   final String? id;
   final String? hostname;
+  final String? rootDomainId;
+  final String? recordName;
   final String? applicationId;
   final String? applicationName;
   final String? certificateCount;
@@ -574,11 +728,15 @@ class ApplicationDomainResponse {
   final bool? sslEnabled;
   final String? sslProvider;
   final int? status;
+  final DomainDeploymentResponse? latestDeployment;
   final String? createdAt;
+  final String? updatedAt;
 
   ApplicationDomainResponse({
     this.id,
     this.hostname,
+    this.rootDomainId,
+    this.recordName,
     this.applicationId,
     this.applicationName,
     this.certificateCount,
@@ -587,13 +745,17 @@ class ApplicationDomainResponse {
     this.sslEnabled,
     this.sslProvider,
     this.status,
-    this.createdAt
+    this.latestDeployment,
+    this.createdAt,
+    this.updatedAt
   });
 
   factory ApplicationDomainResponse.fromJson(Map<String, dynamic> json) {
     return ApplicationDomainResponse(
       id: json['id']?.toString(),
       hostname: json['hostname']?.toString(),
+      rootDomainId: json['rootDomainId']?.toString(),
+      recordName: json['recordName']?.toString(),
       applicationId: json['applicationId']?.toString(),
       applicationName: json['applicationName']?.toString(),
       certificateCount: json['certificateCount']?.toString(),
@@ -602,7 +764,12 @@ class ApplicationDomainResponse {
       sslEnabled: json['sslEnabled'] is bool ? json['sslEnabled'] : null,
       sslProvider: json['sslProvider']?.toString(),
       status: json['status'] is int ? json['status'] : null,
-      createdAt: json['createdAt']?.toString()
+      latestDeployment: (() {
+        final map = _sdkworkAsMap(json['latestDeployment']);
+        return map == null ? null : DomainDeploymentResponse.fromJson(map);
+      })(),
+      createdAt: json['createdAt']?.toString(),
+      updatedAt: json['updatedAt']?.toString()
     );
   }
 
@@ -610,6 +777,8 @@ class ApplicationDomainResponse {
     return <String, dynamic>{
       'id': id,
       'hostname': hostname,
+      'rootDomainId': rootDomainId,
+      'recordName': recordName,
       'applicationId': applicationId,
       'applicationName': applicationName,
       'certificateCount': certificateCount,
@@ -618,7 +787,9 @@ class ApplicationDomainResponse {
       'sslEnabled': sslEnabled,
       'sslProvider': sslProvider,
       'status': status,
+      'latestDeployment': latestDeployment?.toJson(),
       'createdAt': createdAt,
+      'updatedAt': updatedAt,
     };
   }
 }
@@ -2311,6 +2482,146 @@ class ApplicationsDomainsVerifyResponse {
 
   factory ApplicationsDomainsVerifyResponse.fromJson(Map<String, dynamic> json) {
     return ApplicationsDomainsVerifyResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class RootDomainsListResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  RootDomainsListResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory RootDomainsListResponse.fromJson(Map<String, dynamic> json) {
+    return RootDomainsListResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class RootDomainsCreateResponse201 {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  RootDomainsCreateResponse201({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory RootDomainsCreateResponse201.fromJson(Map<String, dynamic> json) {
+    return RootDomainsCreateResponse201(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class RootDomainsRetrieveResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  RootDomainsRetrieveResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory RootDomainsRetrieveResponse.fromJson(Map<String, dynamic> json) {
+    return RootDomainsRetrieveResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class RootDomainsSubdomainsListResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  RootDomainsSubdomainsListResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory RootDomainsSubdomainsListResponse.fromJson(Map<String, dynamic> json) {
+    return RootDomainsSubdomainsListResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class RootDomainsSubdomainsCreateResponse201 {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  RootDomainsSubdomainsCreateResponse201({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory RootDomainsSubdomainsCreateResponse201.fromJson(Map<String, dynamic> json) {
+    return RootDomainsSubdomainsCreateResponse201(
       code: json['code'] is int ? json['code'] : null,
       data: _sdkworkAsMap(json['data']),
       traceId: json['traceId']?.toString()

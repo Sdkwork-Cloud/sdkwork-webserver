@@ -2,7 +2,7 @@ schema_version: 1
 kind: sdkwork.database.schema
 database_role: authoritative-server
 module_id: web
-contract_version: 1.3.0
+contract_version: 1.4.0
 owner_team: web-platform
 compliance_level: L2
 engines:
@@ -51,6 +51,30 @@ tables:
       - { name: idx_web_site_user_updated, columns: [tenant_id, user_id, updated_at] }
       - { name: idx_web_site_slug, columns: [tenant_id, slug] }
 
+  - name: web_root_domain
+    lifecycle_status: active
+    owner: web-platform
+    columns:
+      id: { type: int64, required: true }
+      uuid: { type: string, required: true }
+      tenant_id: { type: int64, required: true }
+      organization_id: { type: int64, required: true }
+      hostname: { type: string, required: true }
+      status: { type: enum_int32, required: true }
+      metadata: { type: json, required: true }
+      created_at: { type: instant, required: true }
+      updated_at: { type: instant, required: true }
+      version: { type: int64, required: true }
+      deleted_at: { type: instant, required: false }
+    constraints:
+      - { name: web_root_domain_pkey, type: primary_key, columns: [id] }
+      - { name: uk_web_root_domain_uuid, type: unique, columns: [uuid] }
+      - { name: chk_web_root_domain_status, type: check }
+    indexes:
+      - { name: uk_web_root_domain_uuid, columns: [uuid], unique: true }
+      - { name: uk_web_root_domain_tenant_hostname, columns: [tenant_id, hostname], unique: true, predicate: "deleted_at IS NULL" }
+      - { name: idx_web_root_domain_tenant_updated, columns: [tenant_id, updated_at, id] }
+
   - name: web_domain
     lifecycle_status: active
     owner: web-platform
@@ -59,6 +83,7 @@ tables:
       uuid: { type: string, required: true }
       tenant_id: { type: int64, required: true }
       organization_id: { type: int64, required: true }
+      root_domain_id: { type: int64, required: false }
       site_id: { type: int64, required: false }
       hostname: { type: string, required: true }
       is_primary: { type: bool, required: true }
@@ -85,11 +110,17 @@ tables:
         columns: [site_id]
         references_table: web_site
         references_columns: [id]
+      - name: fk_web_domain_root_domain
+        type: foreign_key
+        columns: [root_domain_id]
+        references_table: web_root_domain
+        references_columns: [id]
     indexes:
       - { name: uk_web_domain_uuid, columns: [uuid], unique: true }
       - { name: uk_web_domain_hostname, columns: [hostname], unique: true }
       - { name: idx_web_domain_site, columns: [site_id] }
       - { name: idx_web_domain_tenant_status, columns: [tenant_id, status] }
+      - { name: idx_web_domain_root_updated, columns: [tenant_id, root_domain_id, updated_at, id] }
 
   - name: web_nginx_config
     lifecycle_status: active

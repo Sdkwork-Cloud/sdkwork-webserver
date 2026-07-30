@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional
 from ..http_client import HttpClient
-from ..models import CreateManagedDomainRequest, DomainsApplicationBindingUpdateResponse, DomainsCreateResponse201, DomainsListResponse, DomainsVerifyResponse, UpdateDomainApplicationBindingRequest
+from ..models import CreateManagedDomainRequest, CreateRootDomainHostnameRequest, CreateRootDomainRequest, DomainsApplicationBindingUpdateResponse, DomainsCreateResponse201, DomainsListResponse, DomainsVerifyResponse, RootDomainsCreateResponse201, RootDomainsListResponse, RootDomainsRetrieveResponse, RootDomainsSubdomainsCreateResponse201, RootDomainsSubdomainsListResponse, UpdateDomainApplicationBindingRequest
 
 def _append_query_string(path: str, raw_query_string: str) -> str:
     query = raw_query_string.lstrip('?')
@@ -238,10 +238,11 @@ def serialize_header_primitive(value: Any) -> str:
 
 
 class DomainApi:
-    """domain domains API client."""
+    """domain domain API client."""
 
     def __init__(self, client: HttpClient):
         self._client = client
+        self.root_domains = DomainRootDomainsApi(client)
         self.application_binding = DomainApplicationBindingApi(client)
 
 
@@ -282,6 +283,73 @@ class DomainApi:
             {}
         )
         return self._client.post(f"/backend/v3/api/domains/{serialize_path_parameter(domain_id, {'name': 'domainId', 'style': 'simple', 'explode': False})}/verify", headers=request_headers)
+
+class DomainRootDomainsApi:
+    """domain domain.root_domains API client."""
+
+    def __init__(self, client: HttpClient):
+        self._client = client
+        self.subdomains = DomainRootDomainsSubdomainsApi(client)
+
+
+    def list(self, page: Optional[int] = None, page_size: Optional[int] = None, status: Optional[int] = None, keyword: Optional[str] = None) -> RootDomainsListResponse:
+        """List tenant root-domain Zones"""
+        query = build_query_string([
+            {'name': 'page', 'value': page, 'style': 'form', 'explode': True, 'allow_reserved': False},
+            {'name': 'page_size', 'value': page_size, 'style': 'form', 'explode': True, 'allow_reserved': False},
+            {'name': 'status', 'value': status, 'style': 'form', 'explode': True, 'allow_reserved': False},
+            {'name': 'keyword', 'value': keyword, 'style': 'form', 'explode': True, 'allow_reserved': False},
+        ])
+        return self._client.get(_append_query_string(f"/backend/v3/api/root_domains", query))
+
+    def create(self, body: CreateRootDomainRequest, idempotency_key: str) -> RootDomainsCreateResponse201:
+        """Define a tenant root-domain Zone"""
+        request_headers = build_request_headers(
+            {
+                'Idempotency-Key': {'value': idempotency_key, 'style': 'simple', 'explode': False},
+            },
+            {}
+        )
+        return self._client.post(f"/backend/v3/api/root_domains", json=body, headers=request_headers)
+
+    def retrieve(self, root_domain_id: str) -> RootDomainsRetrieveResponse:
+        """Retrieve a tenant root-domain Zone"""
+        return self._client.get(f"/backend/v3/api/root_domains/{serialize_path_parameter(root_domain_id, {'name': 'rootDomainId', 'style': 'simple', 'explode': False})}")
+
+    def delete(self, root_domain_id: str, idempotency_key: str) -> None:
+        """Delete an empty tenant root-domain Zone"""
+        request_headers = build_request_headers(
+            {
+                'Idempotency-Key': {'value': idempotency_key, 'style': 'simple', 'explode': False},
+            },
+            {}
+        )
+        return self._client.delete(f"/backend/v3/api/root_domains/{serialize_path_parameter(root_domain_id, {'name': 'rootDomainId', 'style': 'simple', 'explode': False})}", headers=request_headers)
+
+class DomainRootDomainsSubdomainsApi:
+    """domain domain.root_domains.subdomains API client."""
+
+    def __init__(self, client: HttpClient):
+        self._client = client
+
+
+    def list(self, root_domain_id: str, page: Optional[int] = None, page_size: Optional[int] = None) -> RootDomainsSubdomainsListResponse:
+        """List publishable hostnames in a root-domain Zone"""
+        query = build_query_string([
+            {'name': 'page', 'value': page, 'style': 'form', 'explode': True, 'allow_reserved': False},
+            {'name': 'page_size', 'value': page_size, 'style': 'form', 'explode': True, 'allow_reserved': False},
+        ])
+        return self._client.get(_append_query_string(f"/backend/v3/api/root_domains/{serialize_path_parameter(root_domain_id, {'name': 'rootDomainId', 'style': 'simple', 'explode': False})}/subdomains", query))
+
+    def create(self, root_domain_id: str, body: CreateRootDomainHostnameRequest, idempotency_key: str) -> RootDomainsSubdomainsCreateResponse201:
+        """Add a publishable hostname to a root-domain Zone"""
+        request_headers = build_request_headers(
+            {
+                'Idempotency-Key': {'value': idempotency_key, 'style': 'simple', 'explode': False},
+            },
+            {}
+        )
+        return self._client.post(f"/backend/v3/api/root_domains/{serialize_path_parameter(root_domain_id, {'name': 'rootDomainId', 'style': 'simple', 'explode': False})}/subdomains", json=body, headers=request_headers)
 
 class DomainApplicationBindingApi:
     """domain domains.application_binding API client."""

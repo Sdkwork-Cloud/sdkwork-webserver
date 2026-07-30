@@ -88,7 +88,7 @@
     },
     {
       "path": "src/api/domain.ts",
-      "sha256": "e159b11da0b59c40b1b0607b2d046e6d8036042c694c308d7d72d0796f534c45"
+      "sha256": "13390eb65c188bdd132487764cbc2ea329e99462ef362638328c32c2800d80eb"
     },
     {
       "path": "src/api/index.ts",
@@ -152,7 +152,7 @@
     },
     {
       "path": "src/types/application-domain-response.ts",
-      "sha256": "efc864f195f40f94866954cd22188bc98bbade0b7462804c9d2b7c96a65d7ad0"
+      "sha256": "3dba8ad3545b870d5a0c6cd6954761e7c5d9ded1b0cdf18a35df087c13295182"
     },
     {
       "path": "src/types/application-domain-verify-response.ts",
@@ -335,12 +335,24 @@
       "sha256": "2862108c7f78927f7ff4204a653eaed5b6fee7a49e8b041858503235fa98bcd8"
     },
     {
+      "path": "src/types/create-root-domain-hostname-request.ts",
+      "sha256": "12e4c7211af236c35ec45c4250c5fe08fc0db02515b6056f1cbf884caca7e731"
+    },
+    {
+      "path": "src/types/create-root-domain-request.ts",
+      "sha256": "177d5a7b3f308a02ddc75d8359205e244cd27a85266a94545346cb5edab96fa3"
+    },
+    {
       "path": "src/types/create-server-request.ts",
       "sha256": "dc0cbde2cd7eaefc15583548ce850ade8e5d512b4fee8030ab514275cce78cc9"
     },
     {
       "path": "src/types/create-server-response.ts",
       "sha256": "285646b7d4e3b5c5f7eb67a4af5cad3f872f556abd2f9984d40c1e361021faac"
+    },
+    {
+      "path": "src/types/domain-deployment-response.ts",
+      "sha256": "d8b281af4ee4799911323fc22e0bd58dd0d927b75fc73811afd6c702392a4984"
     },
     {
       "path": "src/types/domains-application-binding-update-response.ts",
@@ -372,7 +384,11 @@
     },
     {
       "path": "src/types/index.ts",
-      "sha256": "e26f89cb1d06602a8e994e089558b0574b3bbdb294ce7fd215c1b36b90095007"
+      "sha256": "042487f85e93a7e18ffc7360955d3278e31a17c6423346535a7a39778ef573a6"
+    },
+    {
+      "path": "src/types/int64-string.ts",
+      "sha256": "b5515c01c9562a7aa6276f377702e24f9ab58de44056ad3d0c31f3689821f029"
     },
     {
       "path": "src/types/media-checksum.ts",
@@ -421,6 +437,30 @@
     {
       "path": "src/types/retrieve-response.ts",
       "sha256": "91906d71eed8368926183a11bcc172e33d4272d059ef4879decf6759e37e8a17"
+    },
+    {
+      "path": "src/types/root-domain-response.ts",
+      "sha256": "aebc5376804b5fe8c54572fc1a3f7eac61535ad3497b144eaf6dbc4991cdbaf2"
+    },
+    {
+      "path": "src/types/root-domains-create-response201.ts",
+      "sha256": "bdf2f6087b8c9c68fe24751bf24c12cf85b62083c869fa4210f8c702c4464050"
+    },
+    {
+      "path": "src/types/root-domains-list-response.ts",
+      "sha256": "b86f453ea28e2380404df005470e59352d4ccc3caa4106f4b7c76b2dc8f749b5"
+    },
+    {
+      "path": "src/types/root-domains-retrieve-response.ts",
+      "sha256": "1a00da1b7895761e9a94afda504aff2a6b4ef142a846a9cb15b4deb13d583e97"
+    },
+    {
+      "path": "src/types/root-domains-subdomains-create-response201.ts",
+      "sha256": "c909d4fe89f8ea70a794dbdb6c0d8feac2ec85057960c0918de68a99faa83e62"
+    },
+    {
+      "path": "src/types/root-domains-subdomains-list-response.ts",
+      "sha256": "f07931dff58d572fbb70ee3c65a63498de8afe5c14bf462a2de4a01b828b9de7"
     },
     {
       "path": "src/types/sdk-work-api-response.ts",

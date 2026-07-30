@@ -9,25 +9,35 @@
     "protocol": "http",
     "packageName": "github.com/sdkwork/sdkwork-web-backend-sdk"
   },
-  "changeFingerprint": "60bced6c0edc09d783208151458179c7d9791449b5460f5abaab4b71dc02a52d",
+  "changeFingerprint": "332109333444b9830c1a63576467db87ef35fb75cf0a2f0c9a01d40002e46766",
   "changes": {
     "createdGeneratedFiles": [
-      "types/applications_source_versions_git_import_create_response201.go"
+      "types/create_root_domain_hostname_request.go",
+      "types/create_root_domain_request.go",
+      "types/domain_deployment_response.go",
+      "types/int64string.go",
+      "types/root_domain_response.go",
+      "types/root_domains_create_response201.go",
+      "types/root_domains_list_response.go",
+      "types/root_domains_retrieve_response.go",
+      "types/root_domains_subdomains_create_response201.go",
+      "types/root_domains_subdomains_list_response.go"
     ],
     "updatedGeneratedFiles": [
-      "api/application_source_version.go"
+      "api/domain.go",
+      "types/application_domain_response.go"
     ],
     "unchangedGeneratedFiles": [
       "api/agent.go",
       "api/application_deployment.go",
       "api/application_domain.go",
+      "api/application_source_version.go",
       "api/application.go",
       "api/audit.go",
       "api/base.go",
       "api/certificate_distribution.go",
       "api/certificate.go",
       "api/doc.go",
-      "api/domain.go",
       "api/nginx.go",
       "api/paths.go",
       "api/server.go",
@@ -49,7 +59,6 @@
       "types/agent_nginx_config_bundle.go",
       "types/agent_sync_response.go",
       "types/application_deployment_response.go",
-      "types/application_domain_response.go",
       "types/application_domain_verify_response.go",
       "types/application_response.go",
       "types/application_source_version_config_snapshot.go",
@@ -67,6 +76,7 @@
       "types/applications_pause_response.go",
       "types/applications_retrieve_response.go",
       "types/applications_source_versions_create_response201.go",
+      "types/applications_source_versions_git_import_create_response201.go",
       "types/applications_source_versions_list_response.go",
       "types/applications_source_versions_retrieve_response.go",
       "types/applications_update_response.go",
@@ -134,9 +144,7 @@
       "types/update_domain_application_binding_request.go",
       "types/update_nginx_config_request.go"
     ],
-    "deletedGeneratedFiles": [
-      "types/applications_source_versions_import_git_response201.go"
-    ],
+    "deletedGeneratedFiles": [],
     "scaffoldedFiles": [],
     "preservedScaffoldFiles": [
       "custom/README.md"
@@ -153,14 +161,23 @@
       {
         "area": "api-surface",
         "paths": [
-          "api/application_source_version.go"
+          "api/domain.go"
         ]
       },
       {
         "area": "models",
         "paths": [
-          "types/applications_source_versions_git_import_create_response201.go",
-          "types/applications_source_versions_import_git_response201.go"
+          "types/application_domain_response.go",
+          "types/create_root_domain_hostname_request.go",
+          "types/create_root_domain_request.go",
+          "types/domain_deployment_response.go",
+          "types/int64string.go",
+          "types/root_domain_response.go",
+          "types/root_domains_create_response201.go",
+          "types/root_domains_list_response.go",
+          "types/root_domains_retrieve_response.go",
+          "types/root_domains_subdomains_create_response201.go",
+          "types/root_domains_subdomains_list_response.go"
         ]
       }
     ],
@@ -194,14 +211,12 @@
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "high",
+    "riskLevel": "medium",
     "nextAction": "verify",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
     "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
-      "deleted-generated-files",
-      "manual-review-required",
       "verification-required"
     ]
   },

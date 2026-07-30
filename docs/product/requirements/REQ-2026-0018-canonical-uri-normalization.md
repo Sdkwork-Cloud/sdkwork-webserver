@@ -79,5 +79,5 @@ The loopback fixture at `tests/nginx/uri-normalization/nginx.conf` returned `$ur
 - Real raw-H1 route/static/rewrite-proxy tests, TLS/H2 canonical route tests, and URL re-encoding tests pass.
 - Gateway evidence passes 30 unit tests, 37 data-plane integration tests, and 3 raw HTTP/1 connection tests. Core evidence passes 4 unit tests and 26 configuration integration tests.
 - Full workspace tests, strict workspace Clippy, formatting, `pnpm verify`, configuration validation, pagination, response-envelope, SDK consumer-import, documentation, and diff checks pass.
-- PostgreSQL lifecycle execution remains ignored without `SDKWORK_WEB_POSTGRES_TEST_DATABASE_URL`; the unrelated existing `agent.sync` operation-pattern violation also remains a repository-level commercial blocker.
+- PostgreSQL lifecycle execution remains ignored without `SDKWORK_DATABASE_TEST_POSTGRES_URL`; the unrelated existing `agent.sync` operation-pattern violation also remains a repository-level commercial blocker.
 - Acceptance remains pending human review of the proposed ADR and its compatibility/security differences.

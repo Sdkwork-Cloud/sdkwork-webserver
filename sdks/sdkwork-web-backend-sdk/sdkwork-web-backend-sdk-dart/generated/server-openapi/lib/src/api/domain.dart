@@ -11,6 +11,86 @@ class DomainApi {
 
   DomainApi(this._client);
 
+  /// List tenant root-domain Zones
+  Future<RootDomainsListResponse?> rootDomainsList([int? page, int? pageSize, int? status, String? keyword]) async {
+    final query = buildQueryString([
+      QueryParameterSpec('page', page, 'form', true, false, null),
+      QueryParameterSpec('page_size', pageSize, 'form', true, false, null),
+      QueryParameterSpec('status', status, 'form', true, false, null),
+      QueryParameterSpec('keyword', keyword, 'form', true, false, null)
+    ]);
+    final response = await _client.get(ApiPaths.appendQueryString(ApiPaths.backendPath('/root_domains'), query));
+    return (() {
+      final map = sdkworkResponseAsMap(response);
+      return map == null ? null : RootDomainsListResponse.fromJson(map);
+    })();
+  }
+
+  /// Define a tenant root-domain Zone
+  Future<RootDomainsCreateResponse201?> rootDomainsCreate(CreateRootDomainRequest body, String idempotencyKey) async {
+    final requestHeaders = buildRequestHeaders(
+      <String, HeaderParameterSpec>{
+        'Idempotency-Key': HeaderParameterSpec(idempotencyKey, 'simple', false, null),
+      },
+      <String, HeaderParameterSpec>{},
+    );
+    final payload = body.toJson();
+    final response = await _client.post(ApiPaths.backendPath('/root_domains'), body: payload, headers: requestHeaders, contentType: 'application/json');
+    return (() {
+      final map = sdkworkResponseAsMap(response);
+      return map == null ? null : RootDomainsCreateResponse201.fromJson(map);
+    })();
+  }
+
+  /// Retrieve a tenant root-domain Zone
+  Future<RootDomainsRetrieveResponse?> rootDomainsRetrieve(String rootDomainId) async {
+    final response = await _client.get(ApiPaths.backendPath('/root_domains/${serializePathParameter(rootDomainId, const PathParameterSpec('rootDomainId', 'simple', false))}'));
+    return (() {
+      final map = sdkworkResponseAsMap(response);
+      return map == null ? null : RootDomainsRetrieveResponse.fromJson(map);
+    })();
+  }
+
+  /// Delete an empty tenant root-domain Zone
+  Future<void> rootDomainsDelete(String rootDomainId, String idempotencyKey) async {
+    final requestHeaders = buildRequestHeaders(
+      <String, HeaderParameterSpec>{
+        'Idempotency-Key': HeaderParameterSpec(idempotencyKey, 'simple', false, null),
+      },
+      <String, HeaderParameterSpec>{},
+    );
+    await _client.delete(ApiPaths.backendPath('/root_domains/${serializePathParameter(rootDomainId, const PathParameterSpec('rootDomainId', 'simple', false))}'), headers: requestHeaders);
+  }
+
+  /// List publishable hostnames in a root-domain Zone
+  Future<RootDomainsSubdomainsListResponse?> rootDomainsSubdomainsList(String rootDomainId, [int? page, int? pageSize]) async {
+    final query = buildQueryString([
+      QueryParameterSpec('page', page, 'form', true, false, null),
+      QueryParameterSpec('page_size', pageSize, 'form', true, false, null)
+    ]);
+    final response = await _client.get(ApiPaths.appendQueryString(ApiPaths.backendPath('/root_domains/${serializePathParameter(rootDomainId, const PathParameterSpec('rootDomainId', 'simple', false))}/subdomains'), query));
+    return (() {
+      final map = sdkworkResponseAsMap(response);
+      return map == null ? null : RootDomainsSubdomainsListResponse.fromJson(map);
+    })();
+  }
+
+  /// Add a publishable hostname to a root-domain Zone
+  Future<RootDomainsSubdomainsCreateResponse201?> rootDomainsSubdomainsCreate(String rootDomainId, CreateRootDomainHostnameRequest body, String idempotencyKey) async {
+    final requestHeaders = buildRequestHeaders(
+      <String, HeaderParameterSpec>{
+        'Idempotency-Key': HeaderParameterSpec(idempotencyKey, 'simple', false, null),
+      },
+      <String, HeaderParameterSpec>{},
+    );
+    final payload = body.toJson();
+    final response = await _client.post(ApiPaths.backendPath('/root_domains/${serializePathParameter(rootDomainId, const PathParameterSpec('rootDomainId', 'simple', false))}/subdomains'), body: payload, headers: requestHeaders, contentType: 'application/json');
+    return (() {
+      final map = sdkworkResponseAsMap(response);
+      return map == null ? null : RootDomainsSubdomainsCreateResponse201.fromJson(map);
+    })();
+  }
+
   /// List tenant custom domain assets
   Future<DomainsListResponse?> domainsList([int? page, int? pageSize]) async {
     final query = buildQueryString([

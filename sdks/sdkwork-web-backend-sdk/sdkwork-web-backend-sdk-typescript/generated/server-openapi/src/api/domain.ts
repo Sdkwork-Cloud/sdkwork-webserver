@@ -1,7 +1,7 @@
 import { backendApiPath } from './paths';
 import type { ApiRequestOptions, HttpClient } from '../http/client';
 
-import type { ApplicationDomainResponse, ApplicationDomainVerifyResponse, CreateManagedDomainRequest, PageInfo, UpdateDomainApplicationBindingRequest } from '../types';
+import type { ApplicationDomainResponse, ApplicationDomainVerifyResponse, CreateManagedDomainRequest, CreateRootDomainHostnameRequest, CreateRootDomainRequest, PageInfo, RootDomainResponse, UpdateDomainApplicationBindingRequest } from '../types';
 
 
 export interface DomainApplicationBindingUpdateParams {
@@ -43,6 +43,108 @@ export class DomainApplicationBindingApi {
   }
 }
 
+export interface DomainRootDomainsSubdomainsListParams {
+  page?: number;
+  pageSize?: number;
+}
+
+export interface DomainRootDomainsSubdomainsCreateParams {
+  idempotencyKey: string;
+}
+
+export class DomainRootDomainsSubdomainsApi {
+  private client: HttpClient;
+
+  constructor(client: HttpClient) {
+    this.client = client;
+  }
+
+
+/** List publishable hostnames in a root-domain Zone */
+  async list(rootDomainId: string, params?: DomainRootDomainsSubdomainsListParams, requestOptions?: ApiRequestOptions): Promise<{ items: ApplicationDomainResponse[]; pageInfo: PageInfo; }> {
+    const query = buildQueryString([
+      { name: 'page', value: params?.page, style: 'form', explode: true, allowReserved: false },
+      { name: 'page_size', value: params?.pageSize, style: 'form', explode: true, allowReserved: false },
+    ]);
+    return this.client.request<{ items: ApplicationDomainResponse[]; pageInfo: PageInfo; }>(appendQueryString(backendApiPath(`/root_domains/${serializePathParameter(rootDomainId, { name: 'rootDomainId', style: 'simple', explode: false })}/subdomains`), query), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any, sdkworkUnwrapKind: 'page' });
+  }
+
+/** Add a publishable hostname to a root-domain Zone */
+  async create(rootDomainId: string, body: CreateRootDomainHostnameRequest, params: DomainRootDomainsSubdomainsCreateParams, requestOptions?: ApiRequestOptions): Promise<ApplicationDomainResponse> {
+    const requestHeaders = buildRequestHeaders(
+      {
+        'Idempotency-Key': { value: params.idempotencyKey, style: 'simple', explode: false },
+      },
+      {}
+    );
+    return this.client.request<ApplicationDomainResponse>(backendApiPath(`/root_domains/${serializePathParameter(rootDomainId, { name: 'rootDomainId', style: 'simple', explode: false })}/subdomains`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, body, headers: requestHeaders, contentType: 'application/json', sdkworkUnwrapKind: 'item' });
+  }
+}
+
+export interface DomainRootDomainsListParams {
+  page?: number;
+  pageSize?: number;
+  status?: number;
+  keyword?: string;
+}
+
+export interface DomainRootDomainsCreateParams {
+  idempotencyKey: string;
+}
+
+export interface DomainRootDomainsDeleteParams {
+  idempotencyKey: string;
+}
+
+export class DomainRootDomainsApi {
+  private client: HttpClient;
+  public readonly subdomains: DomainRootDomainsSubdomainsApi;
+
+  constructor(client: HttpClient) {
+    this.client = client;
+    this.subdomains = new DomainRootDomainsSubdomainsApi(client);
+  }
+
+
+/** List tenant root-domain Zones */
+  async list(params?: DomainRootDomainsListParams, requestOptions?: ApiRequestOptions): Promise<{ items: RootDomainResponse[]; pageInfo: PageInfo; }> {
+    const query = buildQueryString([
+      { name: 'page', value: params?.page, style: 'form', explode: true, allowReserved: false },
+      { name: 'page_size', value: params?.pageSize, style: 'form', explode: true, allowReserved: false },
+      { name: 'status', value: params?.status, style: 'form', explode: true, allowReserved: false },
+      { name: 'keyword', value: params?.keyword, style: 'form', explode: true, allowReserved: false },
+    ]);
+    return this.client.request<{ items: RootDomainResponse[]; pageInfo: PageInfo; }>(appendQueryString(backendApiPath(`/root_domains`), query), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any, sdkworkUnwrapKind: 'page' });
+  }
+
+/** Define a tenant root-domain Zone */
+  async create(body: CreateRootDomainRequest, params: DomainRootDomainsCreateParams, requestOptions?: ApiRequestOptions): Promise<RootDomainResponse> {
+    const requestHeaders = buildRequestHeaders(
+      {
+        'Idempotency-Key': { value: params.idempotencyKey, style: 'simple', explode: false },
+      },
+      {}
+    );
+    return this.client.request<RootDomainResponse>(backendApiPath(`/root_domains`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, body, headers: requestHeaders, contentType: 'application/json', sdkworkUnwrapKind: 'item' });
+  }
+
+/** Retrieve a tenant root-domain Zone */
+  async retrieve(rootDomainId: string, requestOptions?: ApiRequestOptions): Promise<RootDomainResponse> {
+    return this.client.request<RootDomainResponse>(backendApiPath(`/root_domains/${serializePathParameter(rootDomainId, { name: 'rootDomainId', style: 'simple', explode: false })}`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any, sdkworkUnwrapKind: 'item' });
+  }
+
+/** Delete an empty tenant root-domain Zone */
+  async delete(rootDomainId: string, params: DomainRootDomainsDeleteParams, requestOptions?: ApiRequestOptions): Promise<void> {
+    const requestHeaders = buildRequestHeaders(
+      {
+        'Idempotency-Key': { value: params.idempotencyKey, style: 'simple', explode: false },
+      },
+      {}
+    );
+    return this.client.request<void>(backendApiPath(`/root_domains/${serializePathParameter(rootDomainId, { name: 'rootDomainId', style: 'simple', explode: false })}`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'DELETE' as any, headers: requestHeaders });
+  }
+}
+
 export interface DomainListParams {
   page?: number;
   pageSize?: number;
@@ -62,10 +164,12 @@ export interface DomainVerifyParams {
 
 export class DomainApi {
   private client: HttpClient;
+  public readonly rootDomains: DomainRootDomainsApi;
   public readonly applicationBinding: DomainApplicationBindingApi;
 
   constructor(client: HttpClient) {
     this.client = client;
+    this.rootDomains = new DomainRootDomainsApi(client);
     this.applicationBinding = new DomainApplicationBindingApi(client);
   }
 

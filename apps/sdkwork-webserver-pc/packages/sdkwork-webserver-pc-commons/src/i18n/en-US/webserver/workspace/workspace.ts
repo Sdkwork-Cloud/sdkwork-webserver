@@ -164,6 +164,8 @@ export const webserverWorkspaceEnUs = {
   "resource.application-domains.description": "Bind and verify public application domains",
   "resource.application-deployments.label": "Application deployments",
   "resource.application-deployments.description": "Deploy immutable versions and inspect restore history",
+  "resource.root-domains.label": "Domain management",
+  "resource.root-domains.description": "Root-domain Zones and publishable hostnames",
   "resource.managed-domains.label": "Custom domains",
   "resource.managed-domains.description": "Register domains first, then bind applications and issue certificates",
   "resource.managed-certificates.label": "Certificates",

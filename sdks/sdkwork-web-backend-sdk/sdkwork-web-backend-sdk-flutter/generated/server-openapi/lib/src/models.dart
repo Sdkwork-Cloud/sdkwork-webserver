@@ -695,6 +695,254 @@ class CreateManagedDomainRequest {
   }
 }
 
+class CreateRootDomainRequest {
+  final String hostname;
+
+  CreateRootDomainRequest({
+    required this.hostname
+  });
+
+  factory CreateRootDomainRequest.fromJson(Map<String, dynamic> json) {
+    return CreateRootDomainRequest(
+      hostname: (() {
+        final value = json['hostname']?.toString();
+        if (value == null) {
+          throw FormatException('CreateRootDomainRequest.hostname is required');
+        }
+        return value;
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'hostname': hostname,
+    };
+  }
+}
+
+class CreateRootDomainHostnameRequest {
+  final String recordName;
+  final String? applicationId;
+  final bool? isPrimary;
+  final bool? sslEnabled;
+  final String? sslProvider;
+
+  CreateRootDomainHostnameRequest({
+    required this.recordName,
+    this.applicationId,
+    this.isPrimary,
+    this.sslEnabled,
+    this.sslProvider
+  });
+
+  factory CreateRootDomainHostnameRequest.fromJson(Map<String, dynamic> json) {
+    return CreateRootDomainHostnameRequest(
+      recordName: (() {
+        final value = json['recordName']?.toString();
+        if (value == null) {
+          throw FormatException('CreateRootDomainHostnameRequest.recordName is required');
+        }
+        return value;
+      })(),
+      applicationId: json['applicationId']?.toString(),
+      isPrimary: json['isPrimary'] is bool ? json['isPrimary'] : null,
+      sslEnabled: json['sslEnabled'] is bool ? json['sslEnabled'] : null,
+      sslProvider: json['sslProvider']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'recordName': recordName,
+      'applicationId': applicationId,
+      'isPrimary': isPrimary,
+      'sslEnabled': sslEnabled,
+      'sslProvider': sslProvider,
+    };
+  }
+}
+
+class RootDomainResponse {
+  final String id;
+  final String hostname;
+  final int status;
+  final String subdomainCount;
+  final String boundSubdomainCount;
+  final String verifiedSubdomainCount;
+  final String httpsSubdomainCount;
+  final String activeDeploymentCount;
+  final String createdAt;
+  final String updatedAt;
+
+  RootDomainResponse({
+    required this.id,
+    required this.hostname,
+    required this.status,
+    required this.subdomainCount,
+    required this.boundSubdomainCount,
+    required this.verifiedSubdomainCount,
+    required this.httpsSubdomainCount,
+    required this.activeDeploymentCount,
+    required this.createdAt,
+    required this.updatedAt
+  });
+
+  factory RootDomainResponse.fromJson(Map<String, dynamic> json) {
+    return RootDomainResponse(
+      id: (() {
+        final value = json['id']?.toString();
+        if (value == null) {
+          throw FormatException('RootDomainResponse.id is required');
+        }
+        return value;
+      })(),
+      hostname: (() {
+        final value = json['hostname']?.toString();
+        if (value == null) {
+          throw FormatException('RootDomainResponse.hostname is required');
+        }
+        return value;
+      })(),
+      status: (() {
+        final value = json['status'];
+        if (value is! int) {
+          throw FormatException('RootDomainResponse.status is required');
+        }
+        return value;
+      })(),
+      subdomainCount: (() {
+        final value = json['subdomainCount']?.toString();
+        if (value == null) {
+          throw FormatException('RootDomainResponse.subdomainCount is required');
+        }
+        return value;
+      })(),
+      boundSubdomainCount: (() {
+        final value = json['boundSubdomainCount']?.toString();
+        if (value == null) {
+          throw FormatException('RootDomainResponse.boundSubdomainCount is required');
+        }
+        return value;
+      })(),
+      verifiedSubdomainCount: (() {
+        final value = json['verifiedSubdomainCount']?.toString();
+        if (value == null) {
+          throw FormatException('RootDomainResponse.verifiedSubdomainCount is required');
+        }
+        return value;
+      })(),
+      httpsSubdomainCount: (() {
+        final value = json['httpsSubdomainCount']?.toString();
+        if (value == null) {
+          throw FormatException('RootDomainResponse.httpsSubdomainCount is required');
+        }
+        return value;
+      })(),
+      activeDeploymentCount: (() {
+        final value = json['activeDeploymentCount']?.toString();
+        if (value == null) {
+          throw FormatException('RootDomainResponse.activeDeploymentCount is required');
+        }
+        return value;
+      })(),
+      createdAt: (() {
+        final value = json['createdAt']?.toString();
+        if (value == null) {
+          throw FormatException('RootDomainResponse.createdAt is required');
+        }
+        return value;
+      })(),
+      updatedAt: (() {
+        final value = json['updatedAt']?.toString();
+        if (value == null) {
+          throw FormatException('RootDomainResponse.updatedAt is required');
+        }
+        return value;
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'id': id,
+      'hostname': hostname,
+      'status': status,
+      'subdomainCount': subdomainCount,
+      'boundSubdomainCount': boundSubdomainCount,
+      'verifiedSubdomainCount': verifiedSubdomainCount,
+      'httpsSubdomainCount': httpsSubdomainCount,
+      'activeDeploymentCount': activeDeploymentCount,
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
+    };
+  }
+}
+
+class DomainDeploymentResponse {
+  final String id;
+  final int status;
+  final String environment;
+  final String? versionTag;
+  final String? completedAt;
+  final String createdAt;
+
+  DomainDeploymentResponse({
+    required this.id,
+    required this.status,
+    required this.environment,
+    this.versionTag,
+    this.completedAt,
+    required this.createdAt
+  });
+
+  factory DomainDeploymentResponse.fromJson(Map<String, dynamic> json) {
+    return DomainDeploymentResponse(
+      id: (() {
+        final value = json['id']?.toString();
+        if (value == null) {
+          throw FormatException('DomainDeploymentResponse.id is required');
+        }
+        return value;
+      })(),
+      status: (() {
+        final value = json['status'];
+        if (value is! int) {
+          throw FormatException('DomainDeploymentResponse.status is required');
+        }
+        return value;
+      })(),
+      environment: (() {
+        final value = json['environment']?.toString();
+        if (value == null) {
+          throw FormatException('DomainDeploymentResponse.environment is required');
+        }
+        return value;
+      })(),
+      versionTag: json['versionTag']?.toString(),
+      completedAt: json['completedAt']?.toString(),
+      createdAt: (() {
+        final value = json['createdAt']?.toString();
+        if (value == null) {
+          throw FormatException('DomainDeploymentResponse.createdAt is required');
+        }
+        return value;
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'id': id,
+      'status': status,
+      'environment': environment,
+      'versionTag': versionTag,
+      'completedAt': completedAt,
+      'createdAt': createdAt,
+    };
+  }
+}
+
 class UpdateDomainApplicationBindingRequest {
   final String applicationId;
   final bool? isPrimary;
@@ -728,6 +976,8 @@ class UpdateDomainApplicationBindingRequest {
 class ApplicationDomainResponse {
   final String id;
   final String hostname;
+  final String? rootDomainId;
+  final String? recordName;
   final String? applicationId;
   final String? applicationName;
   final String certificateCount;
@@ -736,11 +986,15 @@ class ApplicationDomainResponse {
   final bool sslEnabled;
   final String? sslProvider;
   final int status;
+  final DomainDeploymentResponse? latestDeployment;
   final String createdAt;
+  final String? updatedAt;
 
   ApplicationDomainResponse({
     required this.id,
     required this.hostname,
+    this.rootDomainId,
+    this.recordName,
     this.applicationId,
     this.applicationName,
     required this.certificateCount,
@@ -749,7 +1003,9 @@ class ApplicationDomainResponse {
     required this.sslEnabled,
     this.sslProvider,
     required this.status,
-    required this.createdAt
+    this.latestDeployment,
+    required this.createdAt,
+    this.updatedAt
   });
 
   factory ApplicationDomainResponse.fromJson(Map<String, dynamic> json) {
@@ -768,6 +1024,8 @@ class ApplicationDomainResponse {
         }
         return value;
       })(),
+      rootDomainId: json['rootDomainId']?.toString(),
+      recordName: json['recordName']?.toString(),
       applicationId: json['applicationId']?.toString(),
       applicationName: json['applicationName']?.toString(),
       certificateCount: (() {
@@ -806,13 +1064,18 @@ class ApplicationDomainResponse {
         }
         return value;
       })(),
+      latestDeployment: (() {
+        final map = _sdkworkAsMap(json['latestDeployment']);
+        return map == null ? null : DomainDeploymentResponse.fromJson(map);
+      })(),
       createdAt: (() {
         final value = json['createdAt']?.toString();
         if (value == null) {
           throw FormatException('ApplicationDomainResponse.createdAt is required');
         }
         return value;
-      })()
+      })(),
+      updatedAt: json['updatedAt']?.toString()
     );
   }
 
@@ -820,6 +1083,8 @@ class ApplicationDomainResponse {
     return <String, dynamic>{
       'id': id,
       'hostname': hostname,
+      'rootDomainId': rootDomainId,
+      'recordName': recordName,
       'applicationId': applicationId,
       'applicationName': applicationName,
       'certificateCount': certificateCount,
@@ -828,7 +1093,9 @@ class ApplicationDomainResponse {
       'sslEnabled': sslEnabled,
       'sslProvider': sslProvider,
       'status': status,
+      'latestDeployment': latestDeployment?.toJson(),
       'createdAt': createdAt,
+      'updatedAt': updatedAt,
     };
   }
 }
@@ -3217,6 +3484,236 @@ class ApplicationsDomainsVerifyResponse {
         final value = json['traceId']?.toString();
         if (value == null) {
           throw FormatException('ApplicationsDomainsVerifyResponse.traceId is required');
+        }
+        return value;
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class RootDomainsListResponse {
+  final int code;
+  final dynamic data;
+  final String traceId;
+
+  RootDomainsListResponse({
+    required this.code,
+    required this.data,
+    required this.traceId
+  });
+
+  factory RootDomainsListResponse.fromJson(Map<String, dynamic> json) {
+    return RootDomainsListResponse(
+      code: (() {
+        final value = json['code'];
+        if (value is! int) {
+          throw FormatException('RootDomainsListResponse.code is required');
+        }
+        return value;
+      })(),
+      data: (() {
+        final map = _sdkworkAsMap(json['data']);
+        if (map == null) {
+          throw FormatException('RootDomainsListResponse.data is required');
+        }
+        return map;
+      })(),
+      traceId: (() {
+        final value = json['traceId']?.toString();
+        if (value == null) {
+          throw FormatException('RootDomainsListResponse.traceId is required');
+        }
+        return value;
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class RootDomainsCreateResponse201 {
+  final int code;
+  final dynamic data;
+  final String traceId;
+
+  RootDomainsCreateResponse201({
+    required this.code,
+    required this.data,
+    required this.traceId
+  });
+
+  factory RootDomainsCreateResponse201.fromJson(Map<String, dynamic> json) {
+    return RootDomainsCreateResponse201(
+      code: (() {
+        final value = json['code'];
+        if (value is! int) {
+          throw FormatException('RootDomainsCreateResponse201.code is required');
+        }
+        return value;
+      })(),
+      data: (() {
+        final map = _sdkworkAsMap(json['data']);
+        if (map == null) {
+          throw FormatException('RootDomainsCreateResponse201.data is required');
+        }
+        return map;
+      })(),
+      traceId: (() {
+        final value = json['traceId']?.toString();
+        if (value == null) {
+          throw FormatException('RootDomainsCreateResponse201.traceId is required');
+        }
+        return value;
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class RootDomainsRetrieveResponse {
+  final int code;
+  final dynamic data;
+  final String traceId;
+
+  RootDomainsRetrieveResponse({
+    required this.code,
+    required this.data,
+    required this.traceId
+  });
+
+  factory RootDomainsRetrieveResponse.fromJson(Map<String, dynamic> json) {
+    return RootDomainsRetrieveResponse(
+      code: (() {
+        final value = json['code'];
+        if (value is! int) {
+          throw FormatException('RootDomainsRetrieveResponse.code is required');
+        }
+        return value;
+      })(),
+      data: (() {
+        final map = _sdkworkAsMap(json['data']);
+        if (map == null) {
+          throw FormatException('RootDomainsRetrieveResponse.data is required');
+        }
+        return map;
+      })(),
+      traceId: (() {
+        final value = json['traceId']?.toString();
+        if (value == null) {
+          throw FormatException('RootDomainsRetrieveResponse.traceId is required');
+        }
+        return value;
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class RootDomainsSubdomainsListResponse {
+  final int code;
+  final dynamic data;
+  final String traceId;
+
+  RootDomainsSubdomainsListResponse({
+    required this.code,
+    required this.data,
+    required this.traceId
+  });
+
+  factory RootDomainsSubdomainsListResponse.fromJson(Map<String, dynamic> json) {
+    return RootDomainsSubdomainsListResponse(
+      code: (() {
+        final value = json['code'];
+        if (value is! int) {
+          throw FormatException('RootDomainsSubdomainsListResponse.code is required');
+        }
+        return value;
+      })(),
+      data: (() {
+        final map = _sdkworkAsMap(json['data']);
+        if (map == null) {
+          throw FormatException('RootDomainsSubdomainsListResponse.data is required');
+        }
+        return map;
+      })(),
+      traceId: (() {
+        final value = json['traceId']?.toString();
+        if (value == null) {
+          throw FormatException('RootDomainsSubdomainsListResponse.traceId is required');
+        }
+        return value;
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class RootDomainsSubdomainsCreateResponse201 {
+  final int code;
+  final dynamic data;
+  final String traceId;
+
+  RootDomainsSubdomainsCreateResponse201({
+    required this.code,
+    required this.data,
+    required this.traceId
+  });
+
+  factory RootDomainsSubdomainsCreateResponse201.fromJson(Map<String, dynamic> json) {
+    return RootDomainsSubdomainsCreateResponse201(
+      code: (() {
+        final value = json['code'];
+        if (value is! int) {
+          throw FormatException('RootDomainsSubdomainsCreateResponse201.code is required');
+        }
+        return value;
+      })(),
+      data: (() {
+        final map = _sdkworkAsMap(json['data']);
+        if (map == null) {
+          throw FormatException('RootDomainsSubdomainsCreateResponse201.data is required');
+        }
+        return map;
+      })(),
+      traceId: (() {
+        final value = json['traceId']?.toString();
+        if (value == null) {
+          throw FormatException('RootDomainsSubdomainsCreateResponse201.traceId is required');
         }
         return value;
       })()

@@ -11,8 +11,8 @@
   "status": "ok",
   "mode": "apply",
   "hasChanges": true,
-  "hasDestructiveChanges": true,
-  "changeFingerprint": "0017a13911e141e277d1c6033566399c9c0a1122da08a77722bc8f1cf114eacc",
+  "hasDestructiveChanges": false,
+  "changeFingerprint": "31afc436ebfecf90452501569311fc286be687149045042f0f200d4a6dbd6297",
   "changeImpact": {
     "schemaVersion": 1,
     "areas": [
@@ -23,7 +23,7 @@
       {
         "area": "api-surface",
         "paths": [
-          "sdkwork_web_backend_sdk/api/application_source_version.py",
+          "sdkwork_web_backend_sdk/api/domain.py",
           "sdkwork_web_backend_sdk/models/__init__.py"
         ]
       },
@@ -31,8 +31,16 @@
         "area": "models",
         "paths": [
           "sdkwork_web_backend_sdk/models/__init__.py",
-          "sdkwork_web_backend_sdk/models/applications_source_versions_git_import_create_response201.py",
-          "sdkwork_web_backend_sdk/models/applications_source_versions_import_git_response201.py"
+          "sdkwork_web_backend_sdk/models/application_domain_response.py",
+          "sdkwork_web_backend_sdk/models/create_root_domain_hostname_request.py",
+          "sdkwork_web_backend_sdk/models/create_root_domain_request.py",
+          "sdkwork_web_backend_sdk/models/domain_deployment_response.py",
+          "sdkwork_web_backend_sdk/models/root_domain_response.py",
+          "sdkwork_web_backend_sdk/models/root_domains_create_response201.py",
+          "sdkwork_web_backend_sdk/models/root_domains_list_response.py",
+          "sdkwork_web_backend_sdk/models/root_domains_retrieve_response.py",
+          "sdkwork_web_backend_sdk/models/root_domains_subdomains_create_response201.py",
+          "sdkwork_web_backend_sdk/models/root_domains_subdomains_list_response.py"
         ]
       }
     ],
@@ -41,14 +49,12 @@
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "high",
+    "riskLevel": "medium",
     "nextAction": "verify",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
     "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
-      "deleted-generated-files",
-      "manual-review-required",
       "verification-required"
     ]
   },
@@ -115,28 +121,37 @@
     "localVersions": []
   },
   "stats": {
-    "totalFiles": 116,
-    "models": 88,
+    "totalFiles": 125,
+    "models": 97,
     "apis": 11,
-    "types": 89
+    "types": 98
   },
   "warnings": [],
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 3,
+    "writtenFiles": 12,
     "skippedScaffoldFiles": 1,
     "skippedUnchangedGeneratedFiles": 112,
-    "deletedGeneratedFiles": 1,
+    "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "0017a13911e141e277d1c6033566399c9c0a1122da08a77722bc8f1cf114eacc",
+    "changeFingerprint": "31afc436ebfecf90452501569311fc286be687149045042f0f200d4a6dbd6297",
     "changes": {
       "createdGeneratedFiles": [
-        "sdkwork_web_backend_sdk/models/applications_source_versions_git_import_create_response201.py"
+        "sdkwork_web_backend_sdk/models/create_root_domain_hostname_request.py",
+        "sdkwork_web_backend_sdk/models/create_root_domain_request.py",
+        "sdkwork_web_backend_sdk/models/domain_deployment_response.py",
+        "sdkwork_web_backend_sdk/models/root_domain_response.py",
+        "sdkwork_web_backend_sdk/models/root_domains_create_response201.py",
+        "sdkwork_web_backend_sdk/models/root_domains_list_response.py",
+        "sdkwork_web_backend_sdk/models/root_domains_retrieve_response.py",
+        "sdkwork_web_backend_sdk/models/root_domains_subdomains_create_response201.py",
+        "sdkwork_web_backend_sdk/models/root_domains_subdomains_list_response.py"
       ],
       "updatedGeneratedFiles": [
-        "sdkwork_web_backend_sdk/api/application_source_version.py",
-        "sdkwork_web_backend_sdk/models/__init__.py"
+        "sdkwork_web_backend_sdk/api/domain.py",
+        "sdkwork_web_backend_sdk/models/__init__.py",
+        "sdkwork_web_backend_sdk/models/application_domain_response.py"
       ],
       "unchangedGeneratedFiles": [
         "bin/publish-core.mjs",
@@ -153,11 +168,11 @@
         "sdkwork_web_backend_sdk/api/agent.py",
         "sdkwork_web_backend_sdk/api/application_deployment.py",
         "sdkwork_web_backend_sdk/api/application_domain.py",
+        "sdkwork_web_backend_sdk/api/application_source_version.py",
         "sdkwork_web_backend_sdk/api/application.py",
         "sdkwork_web_backend_sdk/api/audit.py",
         "sdkwork_web_backend_sdk/api/certificate_distribution.py",
         "sdkwork_web_backend_sdk/api/certificate.py",
-        "sdkwork_web_backend_sdk/api/domain.py",
         "sdkwork_web_backend_sdk/api/nginx.py",
         "sdkwork_web_backend_sdk/api/server.py",
         "sdkwork_web_backend_sdk/client.py",
@@ -168,7 +183,6 @@
         "sdkwork_web_backend_sdk/models/agent_nginx_config_bundle.py",
         "sdkwork_web_backend_sdk/models/agent_sync_response.py",
         "sdkwork_web_backend_sdk/models/application_deployment_response.py",
-        "sdkwork_web_backend_sdk/models/application_domain_response.py",
         "sdkwork_web_backend_sdk/models/application_domain_verify_response.py",
         "sdkwork_web_backend_sdk/models/application_response.py",
         "sdkwork_web_backend_sdk/models/application_source_version_config_snapshot.py",
@@ -186,6 +200,7 @@
         "sdkwork_web_backend_sdk/models/applications_pause_response.py",
         "sdkwork_web_backend_sdk/models/applications_retrieve_response.py",
         "sdkwork_web_backend_sdk/models/applications_source_versions_create_response201.py",
+        "sdkwork_web_backend_sdk/models/applications_source_versions_git_import_create_response201.py",
         "sdkwork_web_backend_sdk/models/applications_source_versions_list_response.py",
         "sdkwork_web_backend_sdk/models/applications_source_versions_retrieve_response.py",
         "sdkwork_web_backend_sdk/models/applications_update_response.py",
@@ -252,9 +267,7 @@
         "sdkwork-sdk.json",
         "setup.py"
       ],
-      "deletedGeneratedFiles": [
-        "sdkwork_web_backend_sdk/models/applications_source_versions_import_git_response201.py"
-      ],
+      "deletedGeneratedFiles": [],
       "scaffoldedFiles": [],
       "preservedScaffoldFiles": [
         "custom/README.md"
@@ -271,7 +284,7 @@
         {
           "area": "api-surface",
           "paths": [
-            "sdkwork_web_backend_sdk/api/application_source_version.py",
+            "sdkwork_web_backend_sdk/api/domain.py",
             "sdkwork_web_backend_sdk/models/__init__.py"
           ]
         },
@@ -279,8 +292,16 @@
           "area": "models",
           "paths": [
             "sdkwork_web_backend_sdk/models/__init__.py",
-            "sdkwork_web_backend_sdk/models/applications_source_versions_git_import_create_response201.py",
-            "sdkwork_web_backend_sdk/models/applications_source_versions_import_git_response201.py"
+            "sdkwork_web_backend_sdk/models/application_domain_response.py",
+            "sdkwork_web_backend_sdk/models/create_root_domain_hostname_request.py",
+            "sdkwork_web_backend_sdk/models/create_root_domain_request.py",
+            "sdkwork_web_backend_sdk/models/domain_deployment_response.py",
+            "sdkwork_web_backend_sdk/models/root_domain_response.py",
+            "sdkwork_web_backend_sdk/models/root_domains_create_response201.py",
+            "sdkwork_web_backend_sdk/models/root_domains_list_response.py",
+            "sdkwork_web_backend_sdk/models/root_domains_retrieve_response.py",
+            "sdkwork_web_backend_sdk/models/root_domains_subdomains_create_response201.py",
+            "sdkwork_web_backend_sdk/models/root_domains_subdomains_list_response.py"
           ]
         }
       ],
@@ -314,14 +335,12 @@
     },
     "executionDecision": {
       "schemaVersion": 1,
-      "riskLevel": "high",
+      "riskLevel": "medium",
       "nextAction": "verify",
       "requiresManualReview": false,
       "applyRequiresExpectedFingerprint": false,
       "summary": "Changes have been applied. Run the required verification plan now.",
       "reasons": [
-        "deleted-generated-files",
-        "manual-review-required",
         "verification-required"
       ]
     },

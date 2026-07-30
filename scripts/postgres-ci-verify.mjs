@@ -228,7 +228,7 @@ export function runPostgresCi(plan = createPostgresCiPlan()) {
       + '?sslmode=disable&application_name=sdkwork_web_ci';
     const testEnv = {
       ...process.env,
-      SDKWORK_WEB_POSTGRES_TEST_DATABASE_URL: databaseUrl,
+      SDKWORK_DATABASE_TEST_POSTGRES_URL: databaseUrl,
     };
 
     console.log('[sdkwork-web-postgres-ci] verifying PostgreSQL lifecycle, seed, and drift');

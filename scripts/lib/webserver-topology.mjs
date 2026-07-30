@@ -28,7 +28,7 @@ export const mergeRuntimeEnv = runtime.mergeRuntimeEnv;
 export const resolveIamDevEnv = runtime.resolveIamDevEnv;
 
 export function canonicalizeWorkspaceDatabaseEnv(env) {
-  return Object.fromEntries(Object.entries(env).filter(([key]) => {
+  const retiredKeys = Object.keys(env).filter((key) => {
     const retiredPrefixedKey = key.startsWith('SDKWORK_')
       && !key.startsWith('SDKWORK_DATABASE_')
       && key.includes('_DATABASE_');
@@ -37,10 +37,16 @@ export function canonicalizeWorkspaceDatabaseEnv(env) {
       'DATABASE_PROVIDER',
       'DATABASE_SSLMODE',
       'SDKWORK_DATABASE_PROVIDER',
-      'SDKWORK_DATABASE_SSLMODE',
+      'SDKWORK_DATABASE_SSLMODE', // sdkwork-retired-database-key-rejection
     ].includes(key);
-    return !retiredPrefixedKey && !retiredAlias;
-  }));
+    return retiredPrefixedKey || retiredAlias;
+  });
+  if (retiredKeys.length > 0) {
+    throw new Error(
+      `retired database keys are not supported: ${retiredKeys.join(', ')}; use SDKWORK_DATABASE_*`,
+    );
+  }
+  return { ...env };
 }
 
 export { runtime, spec };

@@ -169,9 +169,26 @@ pub struct UpdateSiteRequest {
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
+pub struct DomainDeploymentResponse {
+    pub id: String,
+    pub status: i32,
+    pub environment: String,
+    #[serde(rename = "versionTag", skip_serializing_if = "Option::is_none")]
+    pub version_tag: Option<String>,
+    #[serde(rename = "completedAt", skip_serializing_if = "Option::is_none")]
+    pub completed_at: Option<String>,
+    #[serde(rename = "createdAt")]
+    pub created_at: String,
+}
+
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct DomainResponse {
     pub id: String,
     pub hostname: String,
+    #[serde(rename = "rootDomainId", skip_serializing_if = "Option::is_none")]
+    pub root_domain_id: Option<String>,
+    #[serde(rename = "recordName", skip_serializing_if = "Option::is_none")]
+    pub record_name: Option<String>,
     #[serde(rename = "applicationId", skip_serializing_if = "Option::is_none")]
     pub application_id: Option<String>,
     #[serde(rename = "applicationName", skip_serializing_if = "Option::is_none")]
@@ -187,8 +204,12 @@ pub struct DomainResponse {
     #[serde(rename = "sslProvider", skip_serializing_if = "Option::is_none")]
     pub ssl_provider: Option<String>,
     pub status: i32,
+    #[serde(rename = "latestDeployment", skip_serializing_if = "Option::is_none")]
+    pub latest_deployment: Option<DomainDeploymentResponse>,
     #[serde(rename = "createdAt")]
     pub created_at: String,
+    #[serde(rename = "updatedAt", skip_serializing_if = "Option::is_none")]
+    pub updated_at: Option<String>,
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
@@ -196,6 +217,67 @@ pub struct DomainPage {
     pub items: Vec<DomainResponse>,
     #[serde(with = "sdkwork_utils_rust::serde_int64")]
     pub total: i64,
+}
+
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+pub struct RootDomainResponse {
+    pub id: String,
+    pub hostname: String,
+    pub status: i32,
+    #[serde(rename = "subdomainCount", with = "sdkwork_utils_rust::serde_int64")]
+    pub subdomain_count: i64,
+    #[serde(
+        rename = "boundSubdomainCount",
+        with = "sdkwork_utils_rust::serde_int64"
+    )]
+    pub bound_subdomain_count: i64,
+    #[serde(
+        rename = "verifiedSubdomainCount",
+        with = "sdkwork_utils_rust::serde_int64"
+    )]
+    pub verified_subdomain_count: i64,
+    #[serde(
+        rename = "httpsSubdomainCount",
+        with = "sdkwork_utils_rust::serde_int64"
+    )]
+    pub https_subdomain_count: i64,
+    #[serde(
+        rename = "activeDeploymentCount",
+        with = "sdkwork_utils_rust::serde_int64"
+    )]
+    pub active_deployment_count: i64,
+    #[serde(rename = "createdAt")]
+    pub created_at: String,
+    #[serde(rename = "updatedAt")]
+    pub updated_at: String,
+}
+
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+pub struct RootDomainPage {
+    pub items: Vec<RootDomainResponse>,
+    #[serde(with = "sdkwork_utils_rust::serde_int64")]
+    pub total: i64,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct CreateRootDomainRequest {
+    pub hostname: String,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct CreateRootDomainHostnameRequest {
+    #[serde(rename = "recordName")]
+    pub record_name: String,
+    #[serde(rename = "applicationId", default)]
+    pub application_id: Option<String>,
+    #[serde(rename = "isPrimary", default)]
+    pub is_primary: bool,
+    #[serde(rename = "sslEnabled", default = "default_true")]
+    pub ssl_enabled: bool,
+    #[serde(rename = "sslProvider", default)]
+    pub ssl_provider: Option<String>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

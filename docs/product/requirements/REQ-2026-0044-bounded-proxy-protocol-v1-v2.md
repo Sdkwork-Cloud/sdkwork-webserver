@@ -82,7 +82,7 @@ The wire parser follows HAProxy PROXY protocol v1/v2 framing and the common Ngin
 - `cargo clippy --workspace --all-targets -- -D warnings`, `cargo fmt --all -- --check`, and isolated-target `pnpm.cmd verify` pass. The latter covers all workspace Rust tests, contract tests, API materialization, repository checks, topology, SQLite lifecycle, and cloud gateway validation without additional generated diff.
 - Source-config, agent/workflow, repository docs, apps index, pagination, API operation/envelope, application layering, Rust backend composition, strict component-port, route-collision, SDK consumer import, identity naming, database framework, and `verify-repo` validators pass. Production gateway CORS now fails closed with exact `https://web.sdkwork.com`, derived from the canonical cloud public-host topology.
 - The standalone CLI validates `etc/examples/sdkwork.webserver.config.json` as revision `3c599aba9a77de1120a92146293181c1a4d07a2c214b9063ad72b9ba29f18486`, with one listener, one virtual host, three routes, three resources, and one upstream.
-- SQLite fresh baseline, repeated initialization, repeated seed, and drift lifecycle pass. PostgreSQL code compiles, but execution remains unverified because `SDKWORK_WEB_POSTGRES_TEST_DATABASE_URL` is absent; no PostgreSQL lifecycle, transaction, pagination, or commercial parity claim is made.
+- SQLite fresh baseline, repeated initialization, repeated seed, and drift lifecycle pass. PostgreSQL code compiles, but execution remains unverified because `SDKWORK_DATABASE_TEST_POSTGRES_URL` is absent; no PostgreSQL lifecycle, transaction, pagination, or commercial parity claim is made.
 
 ## Remaining Boundary
 

@@ -80,7 +80,7 @@
     },
     {
       "path": "src/Api/Domain.php",
-      "sha256": "8296085a696397fad6a69ae736215d9f8d790b07ebc3d6780d165e9e4e6a5d19"
+      "sha256": "8340fac697cad5221403723ee1f1852941f71857daf9f4b3573a5d2104cc2194"
     },
     {
       "path": "src/Api/Nginx.php",
@@ -120,7 +120,7 @@
     },
     {
       "path": "src/Models/ApplicationDomainResponse.php",
-      "sha256": "54949ad21d8e5bca35fea64dee16aa1e7f9574d339b8c18f85f4dd6542d12592"
+      "sha256": "d2f028813fa51024f001aa0451770ecffcc86b1fd81ef913ac5b67587560e33e"
     },
     {
       "path": "src/Models/ApplicationDomainVerifyResponse.php",
@@ -299,12 +299,24 @@
       "sha256": "ea488edf740f212bcc18747e5d7cec49479ade7808b54aa99a33d691ba82c2e9"
     },
     {
+      "path": "src/Models/CreateRootDomainHostnameRequest.php",
+      "sha256": "ceb01c7fdd7b566eba3fd313bb497507caca4c4ec7472af653be278df25dccfb"
+    },
+    {
+      "path": "src/Models/CreateRootDomainRequest.php",
+      "sha256": "0db4b3da2c9b88082483dc78d140ad6c84712b4d300720b12d6e354e6f0ca2e1"
+    },
+    {
       "path": "src/Models/CreateServerRequest.php",
       "sha256": "a81aa10c01972b1c966604d4bfdc18f42a20cb26ac3f2b1e93c672479656289a"
     },
     {
       "path": "src/Models/CreateServerResponse.php",
       "sha256": "37157ce18f5c4f0742e43f3072738f9eb0a13fbd370d291e164d8dafa93679a1"
+    },
+    {
+      "path": "src/Models/DomainDeploymentResponse.php",
+      "sha256": "62c1ba01ffc6bfe5deb53464afabeb774b3e3e8c19d87a65c4b3e60915ede2c5"
     },
     {
       "path": "src/Models/DomainsApplicationBindingUpdateResponse.php",
@@ -381,6 +393,30 @@
     {
       "path": "src/Models/RetrieveResponse.php",
       "sha256": "3d33ae0063f18e226798abe078105020504b6d52d437c27462c7623aa0bc5e6c"
+    },
+    {
+      "path": "src/Models/RootDomainResponse.php",
+      "sha256": "06fbbc07fa804b3c52e3bc47ebb0b1ba05dfd256fe053cc69c1f83c45a4f2c47"
+    },
+    {
+      "path": "src/Models/RootDomainsCreateResponse201.php",
+      "sha256": "ad694c22d0e57d513db9fa7fe778f6ef1d2a7915b7db9a823ed0e18b3b628fa9"
+    },
+    {
+      "path": "src/Models/RootDomainsListResponse.php",
+      "sha256": "cb129cbc59eafe932255c70ceab067a91fadbf5ec5ed9850bec054b8b9e372a1"
+    },
+    {
+      "path": "src/Models/RootDomainsRetrieveResponse.php",
+      "sha256": "1e3d231fa97197a54d38f702db60a8b2fdb1160c894d4acfb7f053ddcdd947d8"
+    },
+    {
+      "path": "src/Models/RootDomainsSubdomainsCreateResponse201.php",
+      "sha256": "60d0342f8690164f55616810cde9eb03807cdec8b16ebd7967570a310b0eeb27"
+    },
+    {
+      "path": "src/Models/RootDomainsSubdomainsListResponse.php",
+      "sha256": "03a261c220c28e7e2d8954751e7565c70705d88036d5ad0c046972d07a268cfb"
     },
     {
       "path": "src/Models/SdkWorkApiResponse.php",

@@ -32,7 +32,7 @@
     },
     {
       "path": "lib/sdkwork/backend_sdk.rb",
-      "sha256": "a31f8bb67db141d9785807ffb3a8b29fd7db477959e0acd5573f4a5612e41d8e"
+      "sha256": "83c997b976da8c99571b1a72c8103aef7f5418a05b224e35cde488679d48e5b4"
     },
     {
       "path": "lib/sdkwork/backend_sdk/api/agent.rb",
@@ -72,7 +72,7 @@
     },
     {
       "path": "lib/sdkwork/backend_sdk/api/domain.rb",
-      "sha256": "642cedfc8d9f93f83ef10f8944bc39617b874c24e1db35db6cb3bf9ea245da90"
+      "sha256": "fc457e9154fe6dd0673501a8c376cbfa26da7f6754eee0d20304d00cea13024f"
     },
     {
       "path": "lib/sdkwork/backend_sdk/api/nginx.rb",
@@ -116,7 +116,7 @@
     },
     {
       "path": "lib/sdkwork/backend_sdk/models/application_domain_response.rb",
-      "sha256": "5f017f6905676791423405259fdf0a19e472af4e82a9c00eec571f26ea0d96be"
+      "sha256": "1fef5e1cac9b9b73848ec1d38befc80a66bf6ceaa36a456d046520d7891f973e"
     },
     {
       "path": "lib/sdkwork/backend_sdk/models/application_domain_verify_response.rb",
@@ -295,12 +295,24 @@
       "sha256": "115acd76e1074e1f1483efbdc380cc04c6e4df74eded9bd924c1f4d87f7bd651"
     },
     {
+      "path": "lib/sdkwork/backend_sdk/models/create_root_domain_hostname_request.rb",
+      "sha256": "fda6a30fce2ef2686ce51872a7f05c3e18365f1d525ac0b03baa994003df51f5"
+    },
+    {
+      "path": "lib/sdkwork/backend_sdk/models/create_root_domain_request.rb",
+      "sha256": "9b8e5f45e53c18d63f660a56232be6268283fcf43e5f3d045f76cfbfce36caf8"
+    },
+    {
       "path": "lib/sdkwork/backend_sdk/models/create_server_request.rb",
       "sha256": "7d6df3ba88cf38d7d1fa129ce14bdebe5f955ababd8a03ed35be555e260986f3"
     },
     {
       "path": "lib/sdkwork/backend_sdk/models/create_server_response.rb",
       "sha256": "02738174229f46870d2bbba753f213e0928c4507bfd6bb9065ac4767c9b1d3e8"
+    },
+    {
+      "path": "lib/sdkwork/backend_sdk/models/domain_deployment_response.rb",
+      "sha256": "4f407b4f4d9807955c29e642899c5a416e6277fcf12322bb17b13d1621c433f9"
     },
     {
       "path": "lib/sdkwork/backend_sdk/models/domains_application_binding_update_response.rb",
@@ -377,6 +389,30 @@
     {
       "path": "lib/sdkwork/backend_sdk/models/retrieve_response.rb",
       "sha256": "2e4d06b7ae7f614e28875af37693b00fcf553d58b3ec0150eb7b3d6667892d92"
+    },
+    {
+      "path": "lib/sdkwork/backend_sdk/models/root_domain_response.rb",
+      "sha256": "275a19c42fc607e8f2dde09489cccbb3297916f0332b6208ff81ee6db91a07d7"
+    },
+    {
+      "path": "lib/sdkwork/backend_sdk/models/root_domains_create_response201.rb",
+      "sha256": "2950f55bd7600b672a94acfd4671c9792ff2994bdf12a6a955bf3a0580b4666f"
+    },
+    {
+      "path": "lib/sdkwork/backend_sdk/models/root_domains_list_response.rb",
+      "sha256": "f4c0ac7f182e4a6213a0f06b842d72dc11b5c0f147a61a8efc39a9888f52619c"
+    },
+    {
+      "path": "lib/sdkwork/backend_sdk/models/root_domains_retrieve_response.rb",
+      "sha256": "cecff5b11345782ebb3c88ece0b8f5a2364176141ca60ce408d709c7d197deec"
+    },
+    {
+      "path": "lib/sdkwork/backend_sdk/models/root_domains_subdomains_create_response201.rb",
+      "sha256": "ec85e8684fbc197f08ed1e296380580bec31eb472914ece51bea0e0ade011cf2"
+    },
+    {
+      "path": "lib/sdkwork/backend_sdk/models/root_domains_subdomains_list_response.rb",
+      "sha256": "fe2868a18badae6ccd9f772b6856153298edee5d10e645aab9dca6245b793a78"
     },
     {
       "path": "lib/sdkwork/backend_sdk/models/sdk_work_api_response.rb",

@@ -14,8 +14,9 @@ use sdkwork_webserver_contract::{
     AgentHeartbeatRequest, ApplicationStoreListing, CertificateIssueUpdate,
     CreateCertificateRequest, CreateDeploymentRequest, CreateDomainRequest,
     CreateEnvVariableRequest, CreateHealthCheckRequest, CreateManagedDomainRequest,
-    CreateNginxConfigRequest, CreateServerRequest, CreateSiteRequest, CreateSourceVersionRequest,
-    ListNginxConfigsQuery, ListSitesQuery, MediaResource, RuntimeObservationState,
+    CreateNginxConfigRequest, CreateRootDomainHostnameRequest, CreateRootDomainRequest,
+    CreateServerRequest, CreateSiteRequest, CreateSourceVersionRequest, ListNginxConfigsQuery,
+    ListRootDomainsQuery, ListSitesQuery, MediaResource, RuntimeObservationState,
     SourceVersionConfigSnapshot, UpdateDomainApplicationBindingRequest, UpdateNginxConfigRequest,
     UpdateSiteRequest, WebAppRequestContext, WebAppResourceScope, WebServiceErrorKind,
     WebsiteRuntimeSetSnapshot,
@@ -26,7 +27,7 @@ use sdkwork_webserver_edge_runtime::{EdgeRuntime, EdgeRuntimeConfig};
 use sqlx::{AnyPool, Row};
 use tempfile::TempDir;
 
-const POSTGRES_TEST_URL_ENV: &str = "SDKWORK_WEB_POSTGRES_TEST_DATABASE_URL";
+const POSTGRES_TEST_URL_ENV: &str = "SDKWORK_DATABASE_TEST_POSTGRES_URL";
 const TENANT_A: i64 = 410_001;
 const TENANT_B: i64 = 410_002;
 
@@ -257,8 +258,7 @@ async fn prepare_database(
             existing_tables, 0,
             "refusing to run repository parity against a non-empty PostgreSQL schema"
         );
-        let _auto_migrate =
-            EnvironmentVariableGuard::set("SDKWORK_DATABASE_AUTO_MIGRATE", "true");
+        let _auto_migrate = EnvironmentVariableGuard::set("SDKWORK_DATABASE_AUTO_MIGRATE", "true");
         bootstrap_web_database(lifecycle_pool.clone())
             .await
             .expect("initialize PostgreSQL Web database lifecycle");
@@ -536,8 +536,171 @@ async fn verify_repository_contract(context: &TestContext) {
     verify_source_version_contract(context, &sites[0].id, &sites[1].id, &tenant_b_site.id).await;
     verify_deployment_idempotency(context, &sites[0].id, &sites[1].id).await;
     verify_rollback_atomicity(context, &sites[0].id).await;
+    verify_root_domain_zone_contract(context, &sites[0].id).await;
     verify_bounded_config_collections(context, &sites[2].id, &sites[3].id).await;
     verify_public_repository_surface(context, &sites[0].id).await;
+}
+
+async fn verify_root_domain_zone_contract(context: &TestContext, site_id: &str) {
+    let repository = &context.repository;
+    let root_domain = repository
+        .create_root_domain(
+            TENANT_A,
+            &CreateRootDomainRequest {
+                hostname: "zone-contract.example".to_string(),
+            },
+        )
+        .await
+        .expect("create root-domain Zone");
+    assert_eq!(root_domain.subdomain_count, 0);
+    assert!(repository
+        .retrieve_root_domain(TENANT_B, &root_domain.id)
+        .await
+        .is_err());
+
+    let duplicate = repository
+        .create_root_domain(
+            TENANT_A,
+            &CreateRootDomainRequest {
+                hostname: "zone-contract.example".to_string(),
+            },
+        )
+        .await
+        .expect_err("duplicate tenant root-domain Zone must conflict");
+    assert_eq!(duplicate.kind(), WebServiceErrorKind::Conflict);
+
+    let apex = repository
+        .create_root_domain_hostname(
+            TENANT_A,
+            &root_domain.id,
+            &CreateRootDomainHostnameRequest {
+                record_name: "@".to_string(),
+                application_id: Some(site_id.to_string()),
+                is_primary: true,
+                ssl_enabled: true,
+                ssl_provider: Some("letsencrypt".to_string()),
+            },
+        )
+        .await
+        .expect("create root-domain apex hostname");
+    assert_eq!(apex.hostname, "zone-contract.example");
+    assert_eq!(apex.record_name.as_deref(), Some("@"));
+    assert_eq!(
+        apex.root_domain_id.as_deref(),
+        Some(root_domain.id.as_str())
+    );
+
+    let www = repository
+        .create_root_domain_hostname(
+            TENANT_A,
+            &root_domain.id,
+            &CreateRootDomainHostnameRequest {
+                record_name: "www".to_string(),
+                application_id: None,
+                is_primary: false,
+                ssl_enabled: true,
+                ssl_provider: Some("letsencrypt".to_string()),
+            },
+        )
+        .await
+        .expect("create unbound root-domain hostname");
+    assert_eq!(www.hostname, "www.zone-contract.example");
+
+    repository
+        .verify_managed_domain(TENANT_A, &apex.id)
+        .await
+        .expect("verify root-domain apex hostname");
+    let deployment = repository
+        .create_deployment(
+            TENANT_A,
+            site_id,
+            Some(91),
+            &CreateDeploymentRequest {
+                deploy_type: 1,
+                environment: Some("production".to_string()),
+                version_tag: Some("zone-v1".to_string()),
+                idempotency_key: Some("zone-contract-deployment".to_string()),
+                ..Default::default()
+            },
+        )
+        .await
+        .expect("create root-domain projected deployment");
+    let deployment_time_sql = match context.engine {
+        TestEngine::Sqlite => {
+            "UPDATE web_deployment SET status = 2, completed_at = $1 WHERE tenant_id = $2 AND uuid = $3"
+        }
+        TestEngine::Postgres => {
+            "UPDATE web_deployment SET status = 2, completed_at = CAST($1 AS TIMESTAMPTZ) WHERE tenant_id = $2 AND uuid = $3"
+        }
+    };
+    sqlx::query(deployment_time_sql)
+        .bind("2026-07-30T12:00:00.000Z")
+        .bind(TENANT_A)
+        .bind(&deployment.id)
+        .execute(&context.pool)
+        .await
+        .expect("mark projected deployment successful");
+
+    let hostnames = repository
+        .list_root_domain_hostnames(TENANT_A, &root_domain.id, 1, 20)
+        .await
+        .expect("list root-domain hostnames");
+    assert_eq!(hostnames.total, 2);
+    let refreshed_apex = hostnames
+        .items
+        .iter()
+        .find(|item| item.id == apex.id)
+        .expect("find projected apex hostname");
+    assert!(refreshed_apex.is_verified);
+    assert_eq!(
+        refreshed_apex
+            .latest_deployment
+            .as_ref()
+            .map(|item| item.id.as_str()),
+        Some(deployment.id.as_str())
+    );
+
+    let page = repository
+        .list_root_domains(
+            TENANT_A,
+            &ListRootDomainsQuery {
+                page: 1,
+                page_size: 20,
+                status: Some(1),
+                keyword: Some("ZONE-CONTRACT".to_string()),
+            },
+        )
+        .await
+        .expect("filter root-domain Zones");
+    assert_eq!(page.total, 1);
+    assert_eq!(page.items[0].subdomain_count, 2);
+    assert_eq!(page.items[0].bound_subdomain_count, 1);
+    assert_eq!(page.items[0].verified_subdomain_count, 1);
+    assert_eq!(page.items[0].https_subdomain_count, 2);
+    assert_eq!(page.items[0].active_deployment_count, 1);
+
+    let non_empty_delete = repository
+        .delete_root_domain(TENANT_A, &root_domain.id)
+        .await
+        .expect_err("non-empty root-domain Zone must not be deleted");
+    assert_eq!(non_empty_delete.kind(), WebServiceErrorKind::Conflict);
+
+    repository
+        .unbind_managed_domain(TENANT_A, &apex.id)
+        .await
+        .expect("unbind root-domain apex hostname");
+    repository
+        .delete_managed_domain(TENANT_A, &apex.id)
+        .await
+        .expect("delete unbound root-domain apex hostname");
+    repository
+        .delete_managed_domain(TENANT_A, &www.id)
+        .await
+        .expect("delete unbound root-domain www hostname");
+    repository
+        .delete_root_domain(TENANT_A, &root_domain.id)
+        .await
+        .expect("delete empty root-domain Zone");
 }
 
 async fn verify_bounded_config_collections(

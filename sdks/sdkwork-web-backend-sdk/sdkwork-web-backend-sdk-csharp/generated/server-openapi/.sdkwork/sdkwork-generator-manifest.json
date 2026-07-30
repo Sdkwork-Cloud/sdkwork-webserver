@@ -52,7 +52,7 @@
     },
     {
       "path": "Api/DomainApi.cs",
-      "sha256": "c6db912086a74390b65bbd713e5d0acfb9d06f3a9489f9bb18bfc544d47fe68a"
+      "sha256": "98262decc50e18f13484ad4c010e5a49fba8a07923f5df62607bd6ecb62188fb"
     },
     {
       "path": "Api/NginxApi.cs",
@@ -112,7 +112,7 @@
     },
     {
       "path": "Models/ApplicationDomainResponse.cs",
-      "sha256": "c4319673c4c19392aec02f098a28cd5ee1e61859f3ca08e515f9838b9cd9cc73"
+      "sha256": "3618c36816c9a94feffcaeb10cda59468461695ea5f882c0c255f1f8896b49c6"
     },
     {
       "path": "Models/ApplicationDomainVerifyResponse.cs",
@@ -291,12 +291,24 @@
       "sha256": "dbd0b61cac2e6e621e04f78e781ac1f078c50b80ab589ab98fc03dd0e4f9890b"
     },
     {
+      "path": "Models/CreateRootDomainHostnameRequest.cs",
+      "sha256": "53e84c07532cfd6ec1f8defeda3bd41a76b3c00acb2c1650602af10d0dd765fb"
+    },
+    {
+      "path": "Models/CreateRootDomainRequest.cs",
+      "sha256": "2256f7dd78560f28418d6984197adc945a8af1c00795f5e7b49145f9c95549eb"
+    },
+    {
       "path": "Models/CreateServerRequest.cs",
       "sha256": "82899dfcf5c0abdc5dd6a016eaf1c220676ce014b09fba266808df2d38883671"
     },
     {
       "path": "Models/CreateServerResponse.cs",
       "sha256": "a624e33d27a480e21a334e2bfbba8961b210bc6f1f4732cf1cf55f02fc2f838e"
+    },
+    {
+      "path": "Models/DomainDeploymentResponse.cs",
+      "sha256": "2edfe68a4d93a3f97a6da7e551717709ebb98d91eb990b144d4a26146a45f416"
     },
     {
       "path": "Models/DomainsApplicationBindingUpdateResponse.cs",
@@ -373,6 +385,30 @@
     {
       "path": "Models/RetrieveResponse.cs",
       "sha256": "1ab97761a8910ffd120ab2136137ee0672a147341c8049c3dc95e05601db1e89"
+    },
+    {
+      "path": "Models/RootDomainResponse.cs",
+      "sha256": "480567260f8a01d834d751700a07a0f69c42321630f011c1f7315c4d5a3a1b12"
+    },
+    {
+      "path": "Models/RootDomainsCreateResponse201.cs",
+      "sha256": "0e604053e08cfc7192f2a489b0cee70b891cc19c4acfd9c3e232595d60a26fe8"
+    },
+    {
+      "path": "Models/RootDomainsListResponse.cs",
+      "sha256": "17e338b94eb4106c5e9f287dd9d45f93bd81aec9f1b9ffad2ff99323ae98b983"
+    },
+    {
+      "path": "Models/RootDomainsRetrieveResponse.cs",
+      "sha256": "5a12cb9fe249f732b580eab72ea035b67f80c03f8d641486bdcfcf8d10a96f61"
+    },
+    {
+      "path": "Models/RootDomainsSubdomainsCreateResponse201.cs",
+      "sha256": "257b99a2a0dba4291f7d241890e9e7874c6def9e4982130a36a208af6ad806e0"
+    },
+    {
+      "path": "Models/RootDomainsSubdomainsListResponse.cs",
+      "sha256": "6b8a3132a24cad6a763cd0b3239040071b2c66a08511b17b5787c0bfef8c212d"
     },
     {
       "path": "Models/SdkWorkApiResponse.cs",

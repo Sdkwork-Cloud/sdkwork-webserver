@@ -63,6 +63,34 @@ CREATE INDEX idx_web_site_user_updated
 CREATE INDEX idx_web_site_slug
     ON web_site (tenant_id, slug);
 
+CREATE TABLE web_root_domain (
+    id              BIGINT       NOT NULL,
+    uuid            VARCHAR(64)  NOT NULL,
+    tenant_id       BIGINT       NOT NULL DEFAULT 0,
+    organization_id BIGINT       NOT NULL DEFAULT 0,
+    hostname        VARCHAR(253) NOT NULL,
+    status          INTEGER      NOT NULL DEFAULT 1,
+    metadata        JSONB        NOT NULL DEFAULT '{}',
+    created_at      TIMESTAMPTZ  NOT NULL,
+    updated_at      TIMESTAMPTZ  NOT NULL,
+    version         BIGINT       NOT NULL DEFAULT 0,
+    deleted_at      TIMESTAMPTZ,
+    PRIMARY KEY (id),
+    CONSTRAINT uk_web_root_domain_uuid UNIQUE (uuid),
+    CONSTRAINT chk_web_root_domain_status CHECK (status BETWEEN 0 AND 2)
+);
+
+COMMENT ON TABLE web_root_domain IS 'Tenant-owned root-domain Zone';
+COMMENT ON COLUMN web_root_domain.hostname IS 'Explicit normalized root domain';
+COMMENT ON COLUMN web_root_domain.status IS 'Status: 0=pending, 1=active, 2=disabled';
+
+CREATE UNIQUE INDEX uk_web_root_domain_tenant_hostname
+    ON web_root_domain (tenant_id, hostname)
+    WHERE deleted_at IS NULL;
+
+CREATE INDEX idx_web_root_domain_tenant_updated
+    ON web_root_domain (tenant_id, updated_at DESC, id DESC);
+
 -- source: migrations/002_create_web_domain.sql
 -- Migration: 002_create_web_domain
 -- Description: Web domain registry table
@@ -74,6 +102,7 @@ CREATE TABLE web_domain (
     uuid            VARCHAR(64)  NOT NULL,
     tenant_id       BIGINT       NOT NULL DEFAULT 0,
     organization_id BIGINT       NOT NULL DEFAULT 0,
+    root_domain_id  BIGINT,
     site_id         BIGINT,
     hostname        VARCHAR(255) NOT NULL,
     is_primary      BOOLEAN      NOT NULL DEFAULT false,
@@ -92,6 +121,7 @@ CREATE TABLE web_domain (
     CONSTRAINT uk_web_domain_uuid UNIQUE (uuid),
     CONSTRAINT uk_web_domain_hostname UNIQUE (hostname),
     CONSTRAINT chk_web_domain_primary_binding CHECK (site_id IS NOT NULL OR is_primary = false),
+    CONSTRAINT fk_web_domain_root_domain FOREIGN KEY (root_domain_id) REFERENCES web_root_domain(id),
     CONSTRAINT fk_web_domain_site FOREIGN KEY (site_id) REFERENCES web_site(id)
 );
 
@@ -109,6 +139,9 @@ CREATE INDEX idx_web_domain_site
 
 CREATE INDEX idx_web_domain_tenant_status
     ON web_domain (tenant_id, status);
+
+CREATE INDEX idx_web_domain_root_updated
+    ON web_domain (tenant_id, root_domain_id, updated_at DESC, id DESC);
 
 -- source: migrations/003_create_web_nginx_config.sql
 -- Migration: 003_create_web_nginx_config

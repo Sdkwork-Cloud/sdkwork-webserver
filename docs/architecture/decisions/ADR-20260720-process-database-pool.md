@@ -29,4 +29,4 @@ cargo test -p sdkwork-webserver-database-host
 cargo test -p sdkwork-intelligence-webserver-repository-sqlx
 ```
 
-The PostgreSQL parity test requires `SDKWORK_WEB_POSTGRES_TEST_DATABASE_URL` pointing to an explicitly disposable empty database and remains a required CI release gate.
+The PostgreSQL parity test requires `SDKWORK_DATABASE_TEST_POSTGRES_URL` pointing to an explicitly disposable empty database and remains a required CI release gate.

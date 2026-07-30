@@ -53,7 +53,7 @@ rollback:
 verification:
   - pnpm db:validate
   - pnpm db:test:sqlite
-  - SDKWORK_WEB_POSTGRES_TEST_DATABASE_URL=<disposable-url> pnpm db:test:postgres
+  - SDKWORK_DATABASE_TEST_POSTGRES_URL=<disposable-url> pnpm db:test:postgres
   - pnpm test:postgres:required
 ```
 

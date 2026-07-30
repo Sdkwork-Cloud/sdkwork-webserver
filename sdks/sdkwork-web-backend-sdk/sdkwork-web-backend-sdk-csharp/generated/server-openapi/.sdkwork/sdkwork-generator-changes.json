@@ -9,13 +9,22 @@
     "protocol": "http",
     "packageName": "SDKWork.Web.BackendSdk"
   },
-  "changeFingerprint": "ff267cc5378312d78614c2a25a92ffa78fd4efebd8f89ad18a9709db788272e8",
+  "changeFingerprint": "bf63b054f13dfb4360abcd9d1190179bf5cbef8f8e232f5cf4535e510d6a2c8d",
   "changes": {
     "createdGeneratedFiles": [
-      "Models/ApplicationsSourceVersionsGitImportCreateResponse201.cs"
+      "Models/CreateRootDomainHostnameRequest.cs",
+      "Models/CreateRootDomainRequest.cs",
+      "Models/DomainDeploymentResponse.cs",
+      "Models/RootDomainResponse.cs",
+      "Models/RootDomainsCreateResponse201.cs",
+      "Models/RootDomainsListResponse.cs",
+      "Models/RootDomainsRetrieveResponse.cs",
+      "Models/RootDomainsSubdomainsCreateResponse201.cs",
+      "Models/RootDomainsSubdomainsListResponse.cs"
     ],
     "updatedGeneratedFiles": [
-      "Api/ApplicationSourceVersionApi.cs"
+      "Api/DomainApi.cs",
+      "Models/ApplicationDomainResponse.cs"
     ],
     "unchangedGeneratedFiles": [
       "Api/AgentApi.cs",
@@ -24,10 +33,10 @@
       "Api/ApplicationApi.cs",
       "Api/ApplicationDeploymentApi.cs",
       "Api/ApplicationDomainApi.cs",
+      "Api/ApplicationSourceVersionApi.cs",
       "Api/AuditApi.cs",
       "Api/CertificateApi.cs",
       "Api/CertificateDistributionApi.cs",
-      "Api/DomainApi.cs",
       "Api/NginxApi.cs",
       "Api/ServerApi.cs",
       "bin/publish-core.mjs",
@@ -42,7 +51,6 @@
       "Models/AgentNginxConfigBundle.cs",
       "Models/AgentSyncResponse.cs",
       "Models/ApplicationDeploymentResponse.cs",
-      "Models/ApplicationDomainResponse.cs",
       "Models/ApplicationDomainVerifyResponse.cs",
       "Models/ApplicationResponse.cs",
       "Models/ApplicationsActivateResponse.cs",
@@ -59,6 +67,7 @@
       "Models/ApplicationsPauseResponse.cs",
       "Models/ApplicationsRetrieveResponse.cs",
       "Models/ApplicationsSourceVersionsCreateResponse201.cs",
+      "Models/ApplicationsSourceVersionsGitImportCreateResponse201.cs",
       "Models/ApplicationsSourceVersionsListResponse.cs",
       "Models/ApplicationsSourceVersionsRetrieveResponse.cs",
       "Models/ApplicationStoreListing.cs",
@@ -128,9 +137,7 @@
       "SDKWork.Web.BackendSdk.csproj",
       "SdkworkBackendClient.cs"
     ],
-    "deletedGeneratedFiles": [
-      "Models/ApplicationsSourceVersionsImportGitResponse201.cs"
-    ],
+    "deletedGeneratedFiles": [],
     "scaffoldedFiles": [],
     "preservedScaffoldFiles": [
       "custom/README.md"
@@ -147,14 +154,22 @@
       {
         "area": "api-surface",
         "paths": [
-          "Api/ApplicationSourceVersionApi.cs"
+          "Api/DomainApi.cs"
         ]
       },
       {
         "area": "models",
         "paths": [
-          "Models/ApplicationsSourceVersionsGitImportCreateResponse201.cs",
-          "Models/ApplicationsSourceVersionsImportGitResponse201.cs"
+          "Models/ApplicationDomainResponse.cs",
+          "Models/CreateRootDomainHostnameRequest.cs",
+          "Models/CreateRootDomainRequest.cs",
+          "Models/DomainDeploymentResponse.cs",
+          "Models/RootDomainResponse.cs",
+          "Models/RootDomainsCreateResponse201.cs",
+          "Models/RootDomainsListResponse.cs",
+          "Models/RootDomainsRetrieveResponse.cs",
+          "Models/RootDomainsSubdomainsCreateResponse201.cs",
+          "Models/RootDomainsSubdomainsListResponse.cs"
         ]
       }
     ],
@@ -188,14 +203,12 @@
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "high",
+    "riskLevel": "medium",
     "nextAction": "verify",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
     "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
-      "deleted-generated-files",
-      "manual-review-required",
       "verification-required"
     ]
   },

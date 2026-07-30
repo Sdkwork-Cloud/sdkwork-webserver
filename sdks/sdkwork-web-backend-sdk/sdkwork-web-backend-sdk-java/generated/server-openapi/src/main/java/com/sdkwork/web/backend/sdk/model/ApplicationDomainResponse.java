@@ -4,6 +4,8 @@ package com.sdkwork.web.backend.sdk.model;
 public class ApplicationDomainResponse {
     private String id;
     private String hostname;
+    private String rootDomainId;
+    private String recordName;
     private String applicationId;
     private String applicationName;
     private String certificateCount;
@@ -12,7 +14,9 @@ public class ApplicationDomainResponse {
     private Boolean sslEnabled;
     private String sslProvider;
     private Integer status;
+    private DomainDeploymentResponse latestDeployment;
     private String createdAt;
+    private String updatedAt;
 
     public String getId() {
         return this.id;
@@ -28,6 +32,22 @@ public class ApplicationDomainResponse {
 
     public void setHostname(String hostname) {
         this.hostname = hostname;
+    }
+
+    public String getRootDomainId() {
+        return this.rootDomainId;
+    }
+
+    public void setRootDomainId(String rootDomainId) {
+        this.rootDomainId = rootDomainId;
+    }
+
+    public String getRecordName() {
+        return this.recordName;
+    }
+
+    public void setRecordName(String recordName) {
+        this.recordName = recordName;
     }
 
     public String getApplicationId() {
@@ -94,11 +114,27 @@ public class ApplicationDomainResponse {
         this.status = status;
     }
 
+    public DomainDeploymentResponse getLatestDeployment() {
+        return this.latestDeployment;
+    }
+
+    public void setLatestDeployment(DomainDeploymentResponse latestDeployment) {
+        this.latestDeployment = latestDeployment;
+    }
+
     public String getCreatedAt() {
         return this.createdAt;
     }
 
     public void setCreatedAt(String createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getUpdatedAt() {
+        return this.updatedAt;
+    }
+
+    public void setUpdatedAt(String updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }

@@ -11,8 +11,8 @@
   "status": "ok",
   "mode": "apply",
   "hasChanges": true,
-  "hasDestructiveChanges": true,
-  "changeFingerprint": "20185f7d0d589cdfcd78313589028d8b4142a28c890385e1bd83a05f1802f1f5",
+  "hasDestructiveChanges": false,
+  "changeFingerprint": "34e137ac3219038e54267520e14d2ba5e66b694a432f3fd4737370e9433f072b",
   "changeImpact": {
     "schemaVersion": 1,
     "areas": [
@@ -24,14 +24,22 @@
       {
         "area": "api-surface",
         "paths": [
-          "lib/sdkwork/backend_sdk/api/application_source_version.rb"
+          "lib/sdkwork/backend_sdk/api/domain.rb"
         ]
       },
       {
         "area": "models",
         "paths": [
-          "lib/sdkwork/backend_sdk/models/applications_source_versions_git_import_create_response201.rb",
-          "lib/sdkwork/backend_sdk/models/applications_source_versions_import_git_response201.rb"
+          "lib/sdkwork/backend_sdk/models/application_domain_response.rb",
+          "lib/sdkwork/backend_sdk/models/create_root_domain_hostname_request.rb",
+          "lib/sdkwork/backend_sdk/models/create_root_domain_request.rb",
+          "lib/sdkwork/backend_sdk/models/domain_deployment_response.rb",
+          "lib/sdkwork/backend_sdk/models/root_domain_response.rb",
+          "lib/sdkwork/backend_sdk/models/root_domains_create_response201.rb",
+          "lib/sdkwork/backend_sdk/models/root_domains_list_response.rb",
+          "lib/sdkwork/backend_sdk/models/root_domains_retrieve_response.rb",
+          "lib/sdkwork/backend_sdk/models/root_domains_subdomains_create_response201.rb",
+          "lib/sdkwork/backend_sdk/models/root_domains_subdomains_list_response.rb"
         ]
       },
       {
@@ -52,7 +60,6 @@
     "applyRequiresExpectedFingerprint": false,
     "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
-      "deleted-generated-files",
       "manual-review-required",
       "unknown-impact",
       "verification-required"
@@ -121,28 +128,37 @@
     "localVersions": []
   },
   "stats": {
-    "totalFiles": 115,
-    "models": 88,
+    "totalFiles": 124,
+    "models": 97,
     "apis": 11,
-    "types": 88
+    "types": 97
   },
   "warnings": [],
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 3,
+    "writtenFiles": 12,
     "skippedScaffoldFiles": 1,
     "skippedUnchangedGeneratedFiles": 111,
-    "deletedGeneratedFiles": 1,
+    "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "20185f7d0d589cdfcd78313589028d8b4142a28c890385e1bd83a05f1802f1f5",
+    "changeFingerprint": "34e137ac3219038e54267520e14d2ba5e66b694a432f3fd4737370e9433f072b",
     "changes": {
       "createdGeneratedFiles": [
-        "lib/sdkwork/backend_sdk/models/applications_source_versions_git_import_create_response201.rb"
+        "lib/sdkwork/backend_sdk/models/create_root_domain_hostname_request.rb",
+        "lib/sdkwork/backend_sdk/models/create_root_domain_request.rb",
+        "lib/sdkwork/backend_sdk/models/domain_deployment_response.rb",
+        "lib/sdkwork/backend_sdk/models/root_domain_response.rb",
+        "lib/sdkwork/backend_sdk/models/root_domains_create_response201.rb",
+        "lib/sdkwork/backend_sdk/models/root_domains_list_response.rb",
+        "lib/sdkwork/backend_sdk/models/root_domains_retrieve_response.rb",
+        "lib/sdkwork/backend_sdk/models/root_domains_subdomains_create_response201.rb",
+        "lib/sdkwork/backend_sdk/models/root_domains_subdomains_list_response.rb"
       ],
       "updatedGeneratedFiles": [
         "lib/sdkwork/backend_sdk.rb",
-        "lib/sdkwork/backend_sdk/api/application_source_version.rb"
+        "lib/sdkwork/backend_sdk/api/domain.rb",
+        "lib/sdkwork/backend_sdk/models/application_domain_response.rb"
       ],
       "unchangedGeneratedFiles": [
         "bin/publish-core.mjs",
@@ -153,12 +169,12 @@
         "lib/sdkwork/backend_sdk/api/agent.rb",
         "lib/sdkwork/backend_sdk/api/application_deployment.rb",
         "lib/sdkwork/backend_sdk/api/application_domain.rb",
+        "lib/sdkwork/backend_sdk/api/application_source_version.rb",
         "lib/sdkwork/backend_sdk/api/application.rb",
         "lib/sdkwork/backend_sdk/api/audit.rb",
         "lib/sdkwork/backend_sdk/api/base_api.rb",
         "lib/sdkwork/backend_sdk/api/certificate_distribution.rb",
         "lib/sdkwork/backend_sdk/api/certificate.rb",
-        "lib/sdkwork/backend_sdk/api/domain.rb",
         "lib/sdkwork/backend_sdk/api/nginx.rb",
         "lib/sdkwork/backend_sdk/api/server.rb",
         "lib/sdkwork/backend_sdk/client.rb",
@@ -169,7 +185,6 @@
         "lib/sdkwork/backend_sdk/models/agent_nginx_config_bundle.rb",
         "lib/sdkwork/backend_sdk/models/agent_sync_response.rb",
         "lib/sdkwork/backend_sdk/models/application_deployment_response.rb",
-        "lib/sdkwork/backend_sdk/models/application_domain_response.rb",
         "lib/sdkwork/backend_sdk/models/application_domain_verify_response.rb",
         "lib/sdkwork/backend_sdk/models/application_response.rb",
         "lib/sdkwork/backend_sdk/models/application_source_version_config_snapshot.rb",
@@ -187,6 +202,7 @@
         "lib/sdkwork/backend_sdk/models/applications_pause_response.rb",
         "lib/sdkwork/backend_sdk/models/applications_retrieve_response.rb",
         "lib/sdkwork/backend_sdk/models/applications_source_versions_create_response201.rb",
+        "lib/sdkwork/backend_sdk/models/applications_source_versions_git_import_create_response201.rb",
         "lib/sdkwork/backend_sdk/models/applications_source_versions_list_response.rb",
         "lib/sdkwork/backend_sdk/models/applications_source_versions_retrieve_response.rb",
         "lib/sdkwork/backend_sdk/models/applications_update_response.rb",
@@ -257,9 +273,7 @@
         "sdkwork-sdk.json",
         "sdkwork-web-backend-sdk.gemspec"
       ],
-      "deletedGeneratedFiles": [
-        "lib/sdkwork/backend_sdk/models/applications_source_versions_import_git_response201.rb"
-      ],
+      "deletedGeneratedFiles": [],
       "scaffoldedFiles": [],
       "preservedScaffoldFiles": [
         "custom/README.md"
@@ -277,14 +291,22 @@
         {
           "area": "api-surface",
           "paths": [
-            "lib/sdkwork/backend_sdk/api/application_source_version.rb"
+            "lib/sdkwork/backend_sdk/api/domain.rb"
           ]
         },
         {
           "area": "models",
           "paths": [
-            "lib/sdkwork/backend_sdk/models/applications_source_versions_git_import_create_response201.rb",
-            "lib/sdkwork/backend_sdk/models/applications_source_versions_import_git_response201.rb"
+            "lib/sdkwork/backend_sdk/models/application_domain_response.rb",
+            "lib/sdkwork/backend_sdk/models/create_root_domain_hostname_request.rb",
+            "lib/sdkwork/backend_sdk/models/create_root_domain_request.rb",
+            "lib/sdkwork/backend_sdk/models/domain_deployment_response.rb",
+            "lib/sdkwork/backend_sdk/models/root_domain_response.rb",
+            "lib/sdkwork/backend_sdk/models/root_domains_create_response201.rb",
+            "lib/sdkwork/backend_sdk/models/root_domains_list_response.rb",
+            "lib/sdkwork/backend_sdk/models/root_domains_retrieve_response.rb",
+            "lib/sdkwork/backend_sdk/models/root_domains_subdomains_create_response201.rb",
+            "lib/sdkwork/backend_sdk/models/root_domains_subdomains_list_response.rb"
           ]
         },
         {
@@ -330,7 +352,6 @@
       "applyRequiresExpectedFingerprint": false,
       "summary": "Changes have been applied. Run the required verification plan now.",
       "reasons": [
-        "deleted-generated-files",
         "manual-review-required",
         "unknown-impact",
         "verification-required"

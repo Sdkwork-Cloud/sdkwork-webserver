@@ -10,13 +10,15 @@ use sdkwork_webserver_contract::{
     CertificateDistributionPage, CertificateIssueUpdate, CertificatePage,
     CertificateRenewalCandidate, CertificateResponse, CreateCertificateRequest,
     CreateDeploymentRequest, CreateDomainRequest, CreateEnvVariableRequest,
-    CreateHealthCheckRequest, CreateNginxConfigRequest, CreateServerRequest, CreateServerResponse,
-    CreateManagedDomainRequest, CreateSiteRequest, DeploymentPage, DeploymentResponse, DomainPage,
-    DomainResponse, DomainVerifyResponse, EnvVariablePage, EnvVariableResponse, HealthCheckPage,
-    HealthCheckResponse, ListNginxConfigsQuery, ListSitesQuery, NginxConfigPage,
-    NginxConfigResponse, NginxReloadResponse, NginxStatusResponse, NginxValidateResponse,
-    RuntimeAssignment, RuntimeAssignmentDelivery, RuntimeObservation, ServerPage, SitePage,
-    SiteResponse, SourceVersionPage, SourceVersionResponse, CreateSourceVersionRequest,
+    CreateHealthCheckRequest, CreateManagedDomainRequest, CreateNginxConfigRequest,
+    CreateRootDomainHostnameRequest, CreateRootDomainRequest, CreateServerRequest,
+    CreateServerResponse, CreateSiteRequest, CreateSourceVersionRequest, DeploymentPage,
+    DeploymentResponse, DomainPage, DomainResponse, DomainVerifyResponse, EnvVariablePage,
+    EnvVariableResponse, HealthCheckPage, HealthCheckResponse, ListNginxConfigsQuery,
+    ListRootDomainsQuery, ListSitesQuery, NginxConfigPage, NginxConfigResponse,
+    NginxReloadResponse, NginxStatusResponse, NginxValidateResponse, RootDomainPage,
+    RootDomainResponse, RuntimeAssignment, RuntimeAssignmentDelivery, RuntimeObservation,
+    ServerPage, SitePage, SiteResponse, SourceVersionPage, SourceVersionResponse,
     UpdateDomainApplicationBindingRequest, UpdateNginxConfigRequest, UpdateSiteRequest,
 };
 use sdkwork_webserver_contract::{WebServiceError, WebServiceResult};
@@ -138,6 +140,61 @@ impl WebRepositoryPort for WebRepository {
         self.verify_domain_repo(tenant_id, site_id, domain_id).await
     }
 
+    async fn list_root_domains(
+        &self,
+        tenant_id: i64,
+        query: &ListRootDomainsQuery,
+    ) -> WebServiceResult<RootDomainPage> {
+        self.list_root_domains_repo(tenant_id, query).await
+    }
+
+    async fn create_root_domain(
+        &self,
+        tenant_id: i64,
+        request: &CreateRootDomainRequest,
+    ) -> WebServiceResult<RootDomainResponse> {
+        self.create_root_domain_repo(tenant_id, request).await
+    }
+
+    async fn retrieve_root_domain(
+        &self,
+        tenant_id: i64,
+        root_domain_id: &str,
+    ) -> WebServiceResult<RootDomainResponse> {
+        self.retrieve_root_domain_repo(tenant_id, root_domain_id)
+            .await
+    }
+
+    async fn delete_root_domain(
+        &self,
+        tenant_id: i64,
+        root_domain_id: &str,
+    ) -> WebServiceResult<()> {
+        self.delete_root_domain_repo(tenant_id, root_domain_id)
+            .await
+    }
+
+    async fn list_root_domain_hostnames(
+        &self,
+        tenant_id: i64,
+        root_domain_id: &str,
+        page: i32,
+        page_size: i32,
+    ) -> WebServiceResult<DomainPage> {
+        self.list_root_domain_hostnames_repo(tenant_id, root_domain_id, page, page_size)
+            .await
+    }
+
+    async fn create_root_domain_hostname(
+        &self,
+        tenant_id: i64,
+        root_domain_id: &str,
+        request: &CreateRootDomainHostnameRequest,
+    ) -> WebServiceResult<DomainResponse> {
+        self.create_root_domain_hostname_repo(tenant_id, root_domain_id, request)
+            .await
+    }
+
     async fn list_managed_domains(
         &self,
         tenant_id: i64,
@@ -156,11 +213,7 @@ impl WebRepositoryPort for WebRepository {
         self.create_managed_domain_repo(tenant_id, request).await
     }
 
-    async fn delete_managed_domain(
-        &self,
-        tenant_id: i64,
-        domain_id: &str,
-    ) -> WebServiceResult<()> {
+    async fn delete_managed_domain(&self, tenant_id: i64, domain_id: &str) -> WebServiceResult<()> {
         self.delete_managed_domain_repo(tenant_id, domain_id).await
     }
 
@@ -210,14 +263,8 @@ impl WebRepositoryPort for WebRepository {
         retention_limit: i32,
         request: &CreateSourceVersionRequest,
     ) -> WebServiceResult<SourceVersionResponse> {
-        self.create_source_version_repo(
-            tenant_id,
-            site_id,
-            actor_id,
-            retention_limit,
-            request,
-        )
-        .await
+        self.create_source_version_repo(tenant_id, site_id, actor_id, retention_limit, request)
+            .await
     }
 
     async fn retrieve_source_version(
@@ -336,13 +383,8 @@ impl WebRepositoryPort for WebRepository {
         update: &CertificateIssueUpdate,
         expected_renewal_version: Option<i64>,
     ) -> WebServiceResult<CertificateResponse> {
-        self.finalize_certificate_repo(
-            tenant_id,
-            certificate_id,
-            update,
-            expected_renewal_version,
-        )
-        .await
+        self.finalize_certificate_repo(tenant_id, certificate_id, update, expected_renewal_version)
+            .await
     }
 
     async fn fail_certificate(
@@ -361,12 +403,8 @@ impl WebRepositoryPort for WebRepository {
         claim_expired_before: &str,
         limit: i32,
     ) -> WebServiceResult<Vec<sdkwork_webserver_contract::CertificateRenewalCandidate>> {
-        self.list_certificates_due_for_renewal_repo(
-            renew_before_days,
-            claim_expired_before,
-            limit,
-        )
-        .await
+        self.list_certificates_due_for_renewal_repo(renew_before_days, claim_expired_before, limit)
+            .await
     }
 
     async fn claim_certificate_renewal(

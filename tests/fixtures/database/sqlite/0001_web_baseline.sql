@@ -45,11 +45,38 @@ CREATE INDEX idx_web_site_user_updated
 CREATE INDEX idx_web_site_slug
     ON web_site (tenant_id, slug);
 
+CREATE TABLE web_root_domain (
+    id              BIGINT       NOT NULL,
+    uuid            TEXT         NOT NULL,
+    tenant_id       INTEGER      NOT NULL DEFAULT 0,
+    organization_id INTEGER      NOT NULL DEFAULT 0,
+    hostname        TEXT         NOT NULL,
+    status          INTEGER      NOT NULL DEFAULT 1,
+    metadata        TEXT         NOT NULL DEFAULT '{}',
+    created_at      TEXT         NOT NULL,
+    updated_at      TEXT         NOT NULL,
+    version         INTEGER      NOT NULL DEFAULT 0,
+    deleted_at      TEXT,
+    PRIMARY KEY (id),
+    CONSTRAINT chk_web_root_domain_status CHECK (status BETWEEN 0 AND 2)
+);
+
+CREATE UNIQUE INDEX uk_web_root_domain_uuid
+    ON web_root_domain (uuid);
+
+CREATE UNIQUE INDEX uk_web_root_domain_tenant_hostname
+    ON web_root_domain (tenant_id, hostname)
+    WHERE deleted_at IS NULL;
+
+CREATE INDEX idx_web_root_domain_tenant_updated
+    ON web_root_domain (tenant_id, updated_at DESC, id DESC);
+
 CREATE TABLE web_domain (
     id              BIGINT       NOT NULL,
     uuid            TEXT         NOT NULL,
     tenant_id       INTEGER      NOT NULL DEFAULT 0,
     organization_id INTEGER      NOT NULL DEFAULT 0,
+    root_domain_id  INTEGER,
     site_id         INTEGER,
     hostname        TEXT         NOT NULL,
     is_primary      INTEGER      NOT NULL DEFAULT 0,
@@ -66,6 +93,7 @@ CREATE TABLE web_domain (
     deleted_at      TEXT,
     PRIMARY KEY (id),
     CONSTRAINT chk_web_domain_primary_binding CHECK (site_id IS NOT NULL OR is_primary = 0),
+    CONSTRAINT fk_web_domain_root_domain FOREIGN KEY (root_domain_id) REFERENCES web_root_domain(id),
     CONSTRAINT fk_web_domain_site FOREIGN KEY (site_id) REFERENCES web_site(id)
 );
 
@@ -80,6 +108,9 @@ CREATE INDEX idx_web_domain_site
 
 CREATE INDEX idx_web_domain_tenant_status
     ON web_domain (tenant_id, status);
+
+CREATE INDEX idx_web_domain_root_updated
+    ON web_domain (tenant_id, root_domain_id, updated_at DESC, id DESC);
 
 CREATE TABLE web_nginx_config (
     id              BIGINT       NOT NULL,

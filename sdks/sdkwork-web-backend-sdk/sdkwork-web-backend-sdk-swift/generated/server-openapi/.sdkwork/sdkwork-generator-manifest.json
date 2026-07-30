@@ -84,7 +84,7 @@
     },
     {
       "path": "Sources/API/DomainApi.swift",
-      "sha256": "142958d2fa2d7a4c68c85b87b9e6ea593f78d39ee78629c6f0e0162137ad83b2"
+      "sha256": "966dc4c5adeeadeb0177d59123df382d25ccd048b6612c0c54ac17df74c3af8b"
     },
     {
       "path": "Sources/API/NginxApi.swift",
@@ -100,7 +100,7 @@
     },
     {
       "path": "Sources/Models.swift",
-      "sha256": "7e5d339b25a2ab55450abe55ebf3e0a29e24de56e3b7818469b861234c3fdf52"
+      "sha256": "db32d9f309694f8b0f10d6e0cdffe8f87b80ccc0af69c8cd619d18ab4fbe9254"
     },
     {
       "path": "Sources/SdkworkBackendClient.swift",

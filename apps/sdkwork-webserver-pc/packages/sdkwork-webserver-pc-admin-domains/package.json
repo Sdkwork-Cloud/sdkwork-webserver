@@ -13,7 +13,10 @@
   },
   "dependencies": {
     "@sdkwork/webserver-pc-admin-core": "workspace:*",
-    "@sdkwork/webserver-pc-commons": "workspace:*"
+    "@sdkwork/webserver-pc-commons": "workspace:*",
+    "lucide-react": "catalog:",
+    "react": "catalog:",
+    "react-router-dom": "^7.15.0"
   },
   "sdkwork": {
     "applicationCode": "webserver",

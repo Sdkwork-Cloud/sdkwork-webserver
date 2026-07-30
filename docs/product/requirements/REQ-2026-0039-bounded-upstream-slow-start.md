@@ -78,7 +78,7 @@ Each immutable target stores optional duration milliseconds and one atomic monot
 - A real dual-origin round-robin test proves nominal 4:1 traffic, passive failure/ejection, half-open recovery, immediate discrete 1:1 slow-start traffic, and restored 4:1 distribution after the configured deadline. Existing primary/backup, active/passive health, retry, and fixed target selection tests remain green.
 - Watch tests prove invalid `slowStartMs` candidates retain the active weighted generation. Fresh generation construction is inactive and does not inherit recovery state; existing in-flight old-generation streaming and tunnel ownership remains unchanged.
 - The complete standalone gateway suite passes 178 tests. Full-workspace strict Clippy, `pnpm.cmd verify`, `cargo fmt --all -- --check`, and `git diff --check` pass.
-- SDKWork pagination, API operation-pattern, response-envelope, app-SDK consumer-import, application-layering, Rust backend-composition, and route-collision validators pass. SQLite lifecycle coverage passes; PostgreSQL remains ignored because `SDKWORK_WEB_POSTGRES_TEST_DATABASE_URL` is unavailable and is not claimed.
+- SDKWork pagination, API operation-pattern, response-envelope, app-SDK consumer-import, application-layering, Rust backend-composition, and route-collision validators pass. SQLite lifecycle coverage passes; PostgreSQL remains ignored because `SDKWORK_DATABASE_TEST_POSTGRES_URL` is unavailable and is not claimed.
 
 ## Accepted Boundary
 

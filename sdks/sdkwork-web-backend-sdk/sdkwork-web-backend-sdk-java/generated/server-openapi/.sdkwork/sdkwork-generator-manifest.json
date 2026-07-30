@@ -80,7 +80,7 @@
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/api/DomainApi.java",
-      "sha256": "73733b236a984de598d31fe923c209c76b186e86ad7cd190dade7a205d11bd9f"
+      "sha256": "4bf57cbdf637462c9ebf62bcd8604ffc1a3f138abe54fa1bdd3f9979e53b5e8c"
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/api/NginxApi.java",
@@ -124,7 +124,7 @@
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationDomainResponse.java",
-      "sha256": "4d194814a9070f304d5e9f15fdb9fb0a85544a200b869a5abecc4b917dc561e4"
+      "sha256": "a33c6e8d9e15716472c840cbc3757557d79fae15bb29e3120c26643e49fcda57"
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationDomainVerifyResponse.java",
@@ -303,12 +303,24 @@
       "sha256": "3b7c1b0566a0c8490551151fcefcea8c5f6d884a7cdfcd21d91edaa981cc6478"
     },
     {
+      "path": "src/main/java/com/sdkwork/web/backend/sdk/model/CreateRootDomainHostnameRequest.java",
+      "sha256": "e4bb3dd6e031266672e175d56aae1ae0d8ca823e45f7735f3e763141d71bacf0"
+    },
+    {
+      "path": "src/main/java/com/sdkwork/web/backend/sdk/model/CreateRootDomainRequest.java",
+      "sha256": "b8be6c0e548acc663de4b9bce8f0aaf729032e7af425f2930e15a07bc96652a1"
+    },
+    {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/model/CreateServerRequest.java",
       "sha256": "9da28abb733a335393b760b0740505e371cd46db54d1b4ab2309a63a7b200eaf"
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/model/CreateServerResponse.java",
       "sha256": "63a55d44a0bc9c1dda258f239c15e41d71ca70430309e15542b0e28755f1627c"
+    },
+    {
+      "path": "src/main/java/com/sdkwork/web/backend/sdk/model/DomainDeploymentResponse.java",
+      "sha256": "d2a05ccc718f206aac7bf2b407c819c71c83899833b97ea672e978c97a00175b"
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/model/DomainsApplicationBindingUpdateResponse.java",
@@ -385,6 +397,30 @@
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/model/RetrieveResponse.java",
       "sha256": "b48f4e3045aa2220f2a550a69507a4c8dada23968a77af760a7add1b9202d3ab"
+    },
+    {
+      "path": "src/main/java/com/sdkwork/web/backend/sdk/model/RootDomainResponse.java",
+      "sha256": "5a8f625bea450d4014d1dd2db5ab0c9df63202b273052ff9eb24093aaa5e5b25"
+    },
+    {
+      "path": "src/main/java/com/sdkwork/web/backend/sdk/model/RootDomainsCreateResponse201.java",
+      "sha256": "53085e811d5d5fff1a57b7381f98f6436ec070a6d1ac8d53876398b174d4fc13"
+    },
+    {
+      "path": "src/main/java/com/sdkwork/web/backend/sdk/model/RootDomainsListResponse.java",
+      "sha256": "15f7618f69531e68dbd6de4b264974a67f78f9703799f02054b997514de13ffa"
+    },
+    {
+      "path": "src/main/java/com/sdkwork/web/backend/sdk/model/RootDomainsRetrieveResponse.java",
+      "sha256": "29119c519f7da282dfb53d45dd871c39e0ae434515cd4fdb7fe316d7c93b215a"
+    },
+    {
+      "path": "src/main/java/com/sdkwork/web/backend/sdk/model/RootDomainsSubdomainsCreateResponse201.java",
+      "sha256": "38792c70adb362553fc451b95df46c1d7c32103779b31eebae1c5206c8491b26"
+    },
+    {
+      "path": "src/main/java/com/sdkwork/web/backend/sdk/model/RootDomainsSubdomainsListResponse.java",
+      "sha256": "ea83b7eb4ba173192096cc15e598b4a7774971f047a88712edd19900d7a4c953"
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/model/SdkWorkApiResponse.java",

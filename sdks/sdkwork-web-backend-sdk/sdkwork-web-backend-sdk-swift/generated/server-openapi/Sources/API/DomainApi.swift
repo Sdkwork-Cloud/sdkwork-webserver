@@ -7,6 +7,64 @@ public class DomainApi {
         self.client = client
     }
 
+    /// List tenant root-domain Zones
+    public func rootDomainsList(page: Int? = nil, pageSize: Int? = nil, status: Int? = nil, keyword: String? = nil) async throws -> RootDomainsListResponse? {
+        let query = buildQueryString([
+            QueryParameterSpec(name: "page", value: page, style: "form", explode: true, allowReserved: false, contentType: nil),
+            QueryParameterSpec(name: "page_size", value: pageSize, style: "form", explode: true, allowReserved: false, contentType: nil),
+            QueryParameterSpec(name: "status", value: status, style: "form", explode: true, allowReserved: false, contentType: nil),
+            QueryParameterSpec(name: "keyword", value: keyword, style: "form", explode: true, allowReserved: false, contentType: nil)
+        ])
+        return try await client.get(ApiPaths.appendQueryString(ApiPaths.backendPath("/root_domains"), query), responseType: RootDomainsListResponse.self)
+    }
+
+    /// Define a tenant root-domain Zone
+    public func rootDomainsCreate(body: CreateRootDomainRequest, idempotencyKey: String) async throws -> RootDomainsCreateResponse201? {
+        let requestHeaders = buildRequestHeaders(
+            [
+                "Idempotency-Key": HeaderParameterSpec(value: idempotencyKey, style: "simple", explode: false, contentType: nil),
+            ],
+            [:]
+        )
+        return try await client.post(ApiPaths.backendPath("/root_domains"), body: body, params: nil, headers: requestHeaders, contentType: "application/json", responseType: RootDomainsCreateResponse201.self)
+    }
+
+    /// Retrieve a tenant root-domain Zone
+    public func rootDomainsRetrieve(rootDomainId: String) async throws -> RootDomainsRetrieveResponse? {
+        return try await client.get(ApiPaths.backendPath("/root_domains/\(serializePathParameter(rootDomainId, PathParameterSpec(name: "rootDomainId", style: "simple", explode: false)))"), responseType: RootDomainsRetrieveResponse.self)
+    }
+
+    /// Delete an empty tenant root-domain Zone
+    public func rootDomainsDelete(rootDomainId: String, idempotencyKey: String) async throws -> Void {
+        let requestHeaders = buildRequestHeaders(
+            [
+                "Idempotency-Key": HeaderParameterSpec(value: idempotencyKey, style: "simple", explode: false, contentType: nil),
+            ],
+            [:]
+        )
+        _ = try await client.delete(ApiPaths.backendPath("/root_domains/\(serializePathParameter(rootDomainId, PathParameterSpec(name: "rootDomainId", style: "simple", explode: false)))"), params: nil, headers: requestHeaders)
+    }
+
+    /// List publishable hostnames in a root-domain Zone
+    public func rootDomainsSubdomainsList(rootDomainId: String, page: Int? = nil, pageSize: Int? = nil) async throws -> RootDomainsSubdomainsListResponse? {
+        let query = buildQueryString([
+            QueryParameterSpec(name: "page", value: page, style: "form", explode: true, allowReserved: false, contentType: nil),
+            QueryParameterSpec(name: "page_size", value: pageSize, style: "form", explode: true, allowReserved: false, contentType: nil)
+        ])
+        return try await client.get(ApiPaths.appendQueryString(ApiPaths.backendPath("/root_domains/\(serializePathParameter(rootDomainId, PathParameterSpec(name: "rootDomainId", style: "simple", explode: false)))/subdomains"), query), responseType: RootDomainsSubdomainsListResponse.self)
+    }
+
+    /// Add a publishable hostname to a root-domain Zone
+    public func rootDomainsSubdomainsCreate(rootDomainId: String, body: CreateRootDomainHostnameRequest, idempotencyKey: String) async throws -> RootDomainsSubdomainsCreateResponse201? {
+        let requestHeaders = buildRequestHeaders(
+            [
+                "Idempotency-Key": HeaderParameterSpec(value: idempotencyKey, style: "simple", explode: false, contentType: nil),
+            ],
+            [:]
+        )
+        return try await client.post(ApiPaths.backendPath("/root_domains/\(serializePathParameter(rootDomainId, PathParameterSpec(name: "rootDomainId", style: "simple", explode: false)))/subdomains"), body: body, params: nil, headers: requestHeaders, contentType: "application/json", responseType: RootDomainsSubdomainsCreateResponse201.self)
+    }
+
     /// List tenant custom domain assets
     public func domainsList(page: Int? = nil, pageSize: Int? = nil) async throws -> DomainsListResponse? {
         let query = buildQueryString([

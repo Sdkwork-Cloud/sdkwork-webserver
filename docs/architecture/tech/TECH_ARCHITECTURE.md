@@ -201,6 +201,7 @@ The request path does not call management services or repositories. Management r
 ## 8. Architecture Decision Index
 
 - [ADR-20260730 Detached Domain Assets And Certificate Bindings](../decisions/ADR-20260730-detached-domain-assets-and-certificate-bindings.md) - accepted tenant-owned domain assets, optional application binding, canonical one-to-many certificates, and fail-closed deployment activation.
+- [ADR-20260730 Root Domain Zones And Hostname Deployments](../decisions/ADR-20260730-root-domain-zones-and-hostname-deployments.md) - accepted explicit root-domain Zones, store-paginated hostname children, and derived application deployment visibility.
 - [ADR-20260730 Drive-Backed Application Source Versions](../decisions/ADR-20260730-drive-backed-application-source-versions.md) - accepted immutable Drive source catalog, five-version default retention, and release provenance through `sourceVersionId`.
 - [ADR-20260728 Idempotency Contract Closure](../decisions/ADR-20260728-idempotency-contract-closure.md) - accepted strict marker/Header/route/SDK parity, stable action keys, bounded runtime validation, and Header-owned durable deduplication.
 - [ADR-20260728 Standalone Browser Same-Origin Delivery](../decisions/ADR-20260728-standalone-browser-same-origin-delivery.md) - accepted topology-derived development proxy and production gateway-static delivery for one browser-visible origin.
