@@ -50,10 +50,10 @@ client.setHeader("X-Custom-Header", value: "value")
 
 - `client.application` - application API
 - `client.applicationDomain` - application_domain API
+- `client.certificate` - certificate API
 - `client.domain` - domain API
 - `client.applicationSourceVersion` - application_source_version API
 - `client.applicationDeployment` - application_deployment API
-- `client.certificate` - certificate API
 - `client.certificateDistribution` - certificate_distribution API
 - `client.nginx` - nginx API
 - `client.server` - server API
@@ -88,6 +88,19 @@ let params: [String: Any] = [
     "page_size": 2
 ]
 let result = try await client.applicationDomain.applicationsDomainsList(applicationId: applicationId, params: params)
+print(result)
+```
+
+### certificate
+
+```swift
+// List canonical certificates
+let params: [String: Any] = [
+    "page": 1,
+    "page_size": 2,
+    "domainId": "00000000-0000-0000-0000-000000000001"
+]
+let result = try await client.certificate.certificatesList(params: params)
 print(result)
 ```
 
@@ -127,18 +140,6 @@ let params: [String: Any] = [
     "status": 3
 ]
 let result = try await client.applicationDeployment.applicationsDeploymentsList(applicationId: applicationId, params: params)
-print(result)
-```
-
-### certificate
-
-```swift
-// List canonical certificates
-let params: [String: Any] = [
-    "page": 1,
-    "page_size": 2
-]
-let result = try await client.certificate.certificatesList(params: params)
 print(result)
 ```
 

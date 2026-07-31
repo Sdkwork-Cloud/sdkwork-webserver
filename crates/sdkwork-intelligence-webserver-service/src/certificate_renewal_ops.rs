@@ -76,8 +76,9 @@ impl WebService {
             .certificate_issuer
             .issue(
                 candidate.cert_type,
-                &candidate.hostname,
+                &candidate.hostnames,
                 &candidate.cert_name,
+                &candidate.key_algorithm,
             )
             .await;
 
@@ -125,83 +126,21 @@ impl WebService {
         expected_renewal_version: Option<i64>,
     ) -> WebServiceResult<CertificateResponse> {
         let initial_issue = audit_action == "certificates.issue";
-        let activation = match self
-            .edge_runtime
-            .activate_certificate_bundle_async(&material)
-            .await
-        {
-            Ok(activation) => activation,
-            Err(error) => {
-                tracing::error!(
-                    tenant_id,
-                    certificate_id,
-                    error = ?error,
-                    "certificate bundle activation failed"
-                );
-                self.record_certificate_operation_failure(
-                    tenant_id,
-                    certificate_id,
-                    initial_issue,
-                    expected_renewal_version,
-                    "certificate bundle activation failed",
-                )
-                .await;
-                return Err(WebServiceError::Internal(
-                    "certificate activation failed".to_string(),
-                ));
-            }
-        };
-
-        let encrypted_private_key = match self
-            .certificate_issuer
-            .encrypt_private_key(&material.private_key_pem)
-        {
-            Ok(encrypted) => encrypted,
-            Err(error) => {
-                tracing::error!(
-                    tenant_id,
-                    certificate_id,
-                    error = ?error,
-                    "certificate private-key encryption failed"
-                );
-                if let Err(rollback_error) = activation.rollback().await {
-                    tracing::error!(
-                        tenant_id,
-                        certificate_id,
-                        error = ?rollback_error,
-                        "critical: failed to compensate certificate activation after encryption failure"
-                    );
-                }
-                self.record_certificate_operation_failure(
-                    tenant_id,
-                    certificate_id,
-                    initial_issue,
-                    expected_renewal_version,
-                    "certificate private-key encryption failed",
-                )
-                .await;
-                return Err(WebServiceError::Internal(
-                    "certificate persistence failed".to_string(),
-                ));
-            }
-        };
-
         let update = CertificateIssueUpdate {
             cert_name: material.cert_name,
             cert_type: material.cert_type,
             issuer: material.issuer,
             subject: material.subject,
-            san_list: material.san_list,
-            fingerprint: material.fingerprint,
-            cert_path: material.cert_path,
-            key_path: material.key_path,
-            chain_path: material.chain_path,
+            serial_sha256: material.serial_sha256,
+            fingerprint_sha256: material.fingerprint_sha256,
+            spki_sha256: material.spki_sha256,
+            chain_sha256: material.chain_sha256,
+            key_algorithm: material.key_algorithm,
+            fullchain_pem: material.cert_pem,
+            private_key_pem: material.private_key_pem,
             not_before: material.not_before,
             not_after: material.not_after,
             auto_renew,
-            cert_pem: material.cert_pem.clone(),
-            chain_pem: material.chain_pem.clone(),
-            encrypted_private_key,
         };
 
         let response = match self
@@ -211,14 +150,6 @@ impl WebService {
         {
             Ok(response) => response,
             Err(error) => {
-                if let Err(rollback_error) = activation.rollback().await {
-                    tracing::error!(
-                        tenant_id,
-                        certificate_id,
-                        error = ?rollback_error,
-                        "critical: failed to compensate certificate activation after database failure"
-                    );
-                }
                 self.record_certificate_operation_failure(
                     tenant_id,
                     certificate_id,
@@ -230,15 +161,6 @@ impl WebService {
                 return Err(error);
             }
         };
-
-        if let Err(error) = activation.commit().await {
-            tracing::error!(
-                tenant_id,
-                certificate_id,
-                error = ?error,
-                "certificate activation committed but backup cleanup failed"
-            );
-        }
 
         if let Err(error) = self
             .repository
@@ -379,7 +301,8 @@ mod tests {
             certificate_id: "certificate-id".to_string(),
             cert_type,
             cert_name: "example.test".to_string(),
-            hostname: "example.test".to_string(),
+            hostnames: vec!["example.test".to_string()],
+            key_algorithm: "ECDSA".to_string(),
             auto_renew,
             not_after: "2027-01-01T00:00:00Z".to_string(),
         }

@@ -32,7 +32,7 @@
     },
     {
       "path": "lib/sdkwork/backend_sdk.rb",
-      "sha256": "83c997b976da8c99571b1a72c8103aef7f5418a05b224e35cde488679d48e5b4"
+      "sha256": "aad37d366736c1496c4c4f0663b201ca5175430adae9247c6d740a9b1b6446eb"
     },
     {
       "path": "lib/sdkwork/backend_sdk/api/agent.rb",
@@ -68,7 +68,7 @@
     },
     {
       "path": "lib/sdkwork/backend_sdk/api/certificate.rb",
-      "sha256": "5c74b99b73812305f01a82a77047b4678f791ac8af5f3d8a76bb030ac1a6b0e0"
+      "sha256": "67e8ec106a45102da348825b6932806fd1632e07147d88d89832709afd2db35e"
     },
     {
       "path": "lib/sdkwork/backend_sdk/api/domain.rb",
@@ -84,7 +84,7 @@
     },
     {
       "path": "lib/sdkwork/backend_sdk/client.rb",
-      "sha256": "0d5376e80cc2cd635e6e73c190244484297aaea0d1f1196a4acd19cdb632fcc9"
+      "sha256": "008b235d51849472bf24b87c941edf603bd75bb16cfe60d8638bd0d9b5b14929"
     },
     {
       "path": "lib/sdkwork/backend_sdk/http/client.rb",
@@ -92,11 +92,15 @@
     },
     {
       "path": "lib/sdkwork/backend_sdk/models/agent_certificate_bundle.rb",
-      "sha256": "a43d7a74daf09fbaae74e92d89502de913b32f7899d1257c0b6b8aaba4cb8c29"
+      "sha256": "2428f85659aa9cc9e5e1af2877378bdfefd08937b242e718e1ad07c27928022f"
+    },
+    {
+      "path": "lib/sdkwork/backend_sdk/models/agent_certificate_observation.rb",
+      "sha256": "6e849733212192a6212ec8e97a53e74ca08d1cb98956ca9a17ac7fb0c5b80f52"
     },
     {
       "path": "lib/sdkwork/backend_sdk/models/agent_heartbeat_request.rb",
-      "sha256": "c722e440eb83fb8cd3376b21c0bc0118c7eb41fe0ed803b21bb917aedae57c61"
+      "sha256": "1c4e189a0ade3550df4e824a9c5213bde296350076a9be3602389ea5a7c46270"
     },
     {
       "path": "lib/sdkwork/backend_sdk/models/agent_heartbeat_response.rb",
@@ -167,6 +171,14 @@
       "sha256": "7fa371f0aff52d4c135524c99d55c9da228c6e895f64f4e1eedf4c31b8c80965"
     },
     {
+      "path": "lib/sdkwork/backend_sdk/models/applications_domains_listener_certificate_bindings_create_response201.rb",
+      "sha256": "f80f65060a33ce55396c1ecf6f08677b8732e250bdee11a87f835894ca2cd7b3"
+    },
+    {
+      "path": "lib/sdkwork/backend_sdk/models/applications_domains_listener_certificate_bindings_list_response.rb",
+      "sha256": "4a75fd51ed62a1e5de1563d713cc723aaf92dbad251d5b568308adfe43c83218"
+    },
+    {
       "path": "lib/sdkwork/backend_sdk/models/applications_domains_verify_response.rb",
       "sha256": "0e6372a0a958aadf32e28c86807b5a5d303cd97591a1189379fecef1c2e0dd6d"
     },
@@ -219,8 +231,12 @@
       "sha256": "3d7bb1be94ac73eae08e39f46ac7128a0a5ff26014579a0d657d5ea12f5ba3e4"
     },
     {
+      "path": "lib/sdkwork/backend_sdk/models/certificate_identifier_response.rb",
+      "sha256": "ce1f8a68b1bbac71dd658722a1bdf30c045bb0cd3b348d12a4e8ea3709c0d524"
+    },
+    {
       "path": "lib/sdkwork/backend_sdk/models/certificate_response.rb",
-      "sha256": "25433a59f767e98f5bce583f3632a70a89b9728e981b0fc9446c04c602578a61"
+      "sha256": "c2e678d9410f8b9c1a9a8fe1580010009f1b72ebbd3ec36a2e484c4041cb6705"
     },
     {
       "path": "lib/sdkwork/backend_sdk/models/certificates_create_response201.rb",
@@ -284,7 +300,11 @@
     },
     {
       "path": "lib/sdkwork/backend_sdk/models/create_certificate_request.rb",
-      "sha256": "5f675f4b07b40cc19dce793e2f6146b2487e8b53e69277143dd5b496fe7f7a30"
+      "sha256": "317fe990a4da434f48f175f1b1a2c7ae467f536bec6fdeac80ea0205e9bf3601"
+    },
+    {
+      "path": "lib/sdkwork/backend_sdk/models/create_listener_certificate_binding_request.rb",
+      "sha256": "80bc62dda01b956c0c4382296b60183b463ae3a327b4d211e1192258bf056434"
     },
     {
       "path": "lib/sdkwork/backend_sdk/models/create_managed_domain_request.rb",
@@ -341,6 +361,14 @@
     {
       "path": "lib/sdkwork/backend_sdk/models/import_application_git_source_version_request.rb",
       "sha256": "5d3cb76f3da43208ab1ddedf64775c9ccfe277d11bdfc58347f2f9952c8daeff"
+    },
+    {
+      "path": "lib/sdkwork/backend_sdk/models/listener_certificate_binding_response.rb",
+      "sha256": "87332aef5ff7493f661e39c3588332b8a9c88c4e93cefe0ece4102417fdb4467"
+    },
+    {
+      "path": "lib/sdkwork/backend_sdk/models/listener_certificate_summary_response.rb",
+      "sha256": "cc91aaf076b6673f8674063c588b0663aeaf677fa3c92b6fd53ef6b4ed9e103a"
     },
     {
       "path": "lib/sdkwork/backend_sdk/models/media_checksum.rb",
@@ -492,7 +520,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "6c71521d9817cfbe16b768966150b3abf26965dd1b5b8944bcf6fa2be4555201"
+      "sha256": "10175eda0e448edc8b252fd1e187a78955256ce68a6440767c004e1458b344e0"
     },
     {
       "path": "sdkwork-sdk.json",

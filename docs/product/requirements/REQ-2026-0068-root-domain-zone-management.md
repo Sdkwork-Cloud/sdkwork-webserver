@@ -2,41 +2,51 @@
 
 ```yaml
 id: REQ-2026-0068
-title: Manage root domains as zones with paged hostname and deployment views
+title: Manage root-domain Zones and their hostname operations on dedicated pages
 owner: sdkwork-web-server
 status: in-progress
 source: user
-problem: Tenant domains are currently exposed as one flat hostname inventory. Operators need to define a root domain first, open a dedicated page for that root, and manage its apex and subdomain hostnames together with application, deployment, verification, and HTTPS state.
+problem: Operators need to define a root domain first, open a stable detail page, and operate its apex and subdomains together with routing, verification, certificates, and deployment visibility.
 goals:
-  - Make a root domain a first-class tenant-owned zone resource.
-  - Open every root domain on a stable backend-admin route.
-  - Page through apex and subdomain hostnames within one root domain.
-  - Bind each hostname to one application and expose the latest application deployment without duplicating deployment authority.
-  - Preserve the existing flat domain APIs as compatibility operations.
-  - Keep ownership verification, certificate issuance, and runtime activation fail closed.
+  - Make a root domain a first-class tenant-owned Zone.
+  - Open each Zone on a dedicated backend-admin route.
+  - Page apex and subdomain hostnames independently from the root list.
+  - Show application, deployment, verification, HTTPS, and certificate state without duplicating authority.
+  - Provide a professional, state-aware operation column.
 non_goals:
-  - Acting as an authoritative DNS provider or claiming A, AAAA, CNAME, MX, or TXT record propagation.
-  - Duplicating application deployment state on root-domain or hostname rows.
-  - Inferring root-domain ownership from public suffix heuristics in the browser.
+  - Acting as an authoritative DNS provider before provider write and observation contracts exist.
+  - Copying application deployment state onto root-domain or hostname rows.
+  - Inferring Zone ownership from browser-side public-suffix heuristics.
 users:
   - tenant Web Server administrators
   - application deployment operators
   - certificate operators
 acceptance_criteria:
-  - Backend administrators can page, search, create, retrieve, and delete root domains.
-  - Clicking a root domain opens `/admin/root-domains/{rootDomainId}`.
-  - The detail page pages through hostname records belonging to that root domain.
-  - `@` creates the apex hostname and labels such as `www` or `api` create normalized child hostnames.
-  - Hostname rows expose application binding, verification, HTTPS, certificates, and latest deployment state.
-  - Root-domain deletion is rejected while any hostname belongs to the root.
-  - Root-domain and hostname queries remain tenant-filtered and store-paginated.
-  - Existing detached-domain and application-domain operations remain compatible.
+  - Backend administrators can page, search, create, retrieve, and safely delete root domains.
+  - Clicking a root domain opens /admin/root-domains/{rootDomainId}.
+  - Every hostname has a required rootDomainId; @ creates the apex and normalized labels create children.
+  - The detail page independently pages hostname children at the repository boundary.
+  - Hostname rows expose application binding, latest application deployment, ownership verification, HTTPS readiness, certificate count, and update time.
+  - The operation column offers Verify, Bind application or Unbind application, Manage certificates, and Delete according to permissions and current state.
+  - Manage certificates supports inspection, repeated issuance, RSA/ECDSA selection, bind, unbind confirmation, priority, and default state.
+  - Unbound hostnames cannot create listener bindings; unverified hostnames cannot issue a certificate.
+  - Root deletion is disabled and rejected while hostname children exist.
+  - Hostname deletion is disabled and rejected while application or certificate references exist.
+  - Read responses are protected from stale pagination races and all user-facing copy is package-localized.
+  - Root-domain and hostname queries are tenant filtered, indexed, and store paginated.
+non_functional_requirements:
+  security: UI permission hints never replace backend authorization; destructive and runtime-affecting operations require confirmation and idempotency.
+  privacy: Domain and deployment views contain no secrets or private certificate material.
+  performance: Root and child lists use independent LIMIT-based repository pagination and indexed tenant/root predicates.
+  reliability: Latest deployment is a read projection from the bound application and never a second state machine.
 affected_surfaces:
   - database
   - api
   - sdk
   - backend
   - pc
+  - deployment
+  - tls
 trace:
   specs:
     - DATABASE_SPEC.md
@@ -45,6 +55,8 @@ trace:
     - WEB_BACKEND_SPEC.md
     - SDK_SPEC.md
     - BACKEND_UI_SPEC.md
+    - I18N_SPEC.md
+    - SECURITY_SPEC.md
     - TEST_SPEC.md
   components:
     - database
@@ -62,12 +74,18 @@ verification:
   - pnpm api:check
   - pnpm sdk:generate:check
   - node ../sdkwork-specs/tools/check-pagination.mjs --workspace .
+  - node ../sdkwork-specs/tools/check-i18n-standard.mjs --root apps/sdkwork-webserver-pc
   - pnpm --dir apps/sdkwork-webserver-pc check
 ```
 
 ## Product Decision
 
-A root domain is an explicitly defined Zone. A hostname is a publishable apex or subdomain asset
-inside that Zone. Hostnames retain the existing application binding, verification, certificate,
-and runtime semantics. The latest deployment shown beside a hostname is a read projection from its
-bound application's deployment history and never a second deployment state machine.
+A Zone owns hostnames. A site binding owns application routing. A certificate identifier owns SAN
+coverage. A listener certificate binding owns TLS selection intent. A deployment owns rollout
+history. The root-domain page composes these facts into one operational view without copying their
+mutable state.
+
+## Change Control
+
+- 2026-07-31: Made `rootDomainId` required, replaced direct application/certificate fields with
+  join-table projections, and added listener certificate and operation-column acceptance criteria.

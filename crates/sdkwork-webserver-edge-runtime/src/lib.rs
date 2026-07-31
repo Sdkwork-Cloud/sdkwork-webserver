@@ -1,16 +1,19 @@
 //! Edge node runtime: nginx site paths, certificate bundle materialization, reload.
 
+mod certificate_material;
 mod config;
 mod error;
 mod nginx;
 mod paths;
+mod tls_probe;
 
+pub use certificate_material::CertificateBundleMaterial;
 pub use config::EdgeRuntimeConfig;
 pub use error::{EdgeRuntimeError, EdgeRuntimeResult};
 pub use nginx::{deploy_nginx_config, reload_nginx, validate_nginx_config};
 pub use paths::{cert_bundle_paths, nginx_site_path};
+pub use tls_probe::verify_served_certificate;
 
-use sdkwork_webserver_acme_service::IssuedCertificateMaterial;
 use std::sync::Arc;
 use tokio::sync::{OwnedSemaphorePermit, Semaphore};
 
@@ -70,14 +73,14 @@ impl EdgeRuntime {
 
     pub fn write_certificate_bundle(
         &self,
-        material: &IssuedCertificateMaterial,
+        material: &CertificateBundleMaterial,
     ) -> Result<(), EdgeRuntimeError> {
         paths::write_certificate_bundle(&self.config.cert_live_root, material)
     }
 
     pub async fn write_certificate_bundle_async(
         &self,
-        material: &IssuedCertificateMaterial,
+        material: &CertificateBundleMaterial,
     ) -> Result<(), EdgeRuntimeError> {
         self.activate_certificate_bundle_async(material)
             .await?
@@ -87,7 +90,7 @@ impl EdgeRuntime {
 
     pub async fn activate_certificate_bundle_async(
         &self,
-        material: &IssuedCertificateMaterial,
+        material: &CertificateBundleMaterial,
     ) -> Result<PendingCertificateBundleActivation, EdgeRuntimeError> {
         let permit = self
             .certificate_activation_admission
@@ -125,13 +128,20 @@ impl EdgeRuntime {
     pub fn reload(&self) -> Result<(), EdgeRuntimeError> {
         reload_nginx(&self.config)
     }
+
+    pub fn verify_served_certificate(
+        &self,
+        hostname: &str,
+        fingerprint_sha256: &str,
+    ) -> Result<(), EdgeRuntimeError> {
+        verify_served_certificate(&self.config, hostname, fingerprint_sha256)
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use std::path::PathBuf;
 
-    use sdkwork_webserver_acme_service::IssuedCertificateMaterial;
     use tempfile::TempDir;
 
     use super::*;
@@ -147,27 +157,18 @@ mod tests {
             cert_live_root: root.path().join("certs"),
             site_family: "sdkwork".to_string(),
             nginx_command_timeout_ms: 10_000,
+            tls_verify_address: "127.0.0.1:443".parse().unwrap(),
+            tls_verify_timeout_ms: 5_000,
         });
         let permit = runtime
             .certificate_activation_admission
             .clone()
             .try_acquire_owned()
             .expect("permit");
-        let invalid = IssuedCertificateMaterial {
-            cert_name: "cert-id".to_string(),
-            cert_type: 3,
-            issuer: String::new(),
-            subject: String::new(),
-            san_list: String::new(),
-            fingerprint: String::new(),
-            cert_pem: "invalid".to_string(),
+        let invalid = CertificateBundleMaterial {
+            bundle_name: "cert-id".to_string(),
+            fullchain_pem: "invalid".to_string(),
             private_key_pem: "invalid".to_string(),
-            chain_pem: None,
-            not_before: String::new(),
-            not_after: String::new(),
-            cert_path: String::new(),
-            key_path: String::new(),
-            chain_path: None,
         };
         let error = runtime
             .write_certificate_bundle_async(&invalid)

@@ -52,7 +52,6 @@ impl<DB: Database> TypedWebRepository<DB> {
 }
 
 pub type PostgresWebRepository = TypedWebRepository<sqlx::Postgres>;
-pub type SqliteWebRepository = TypedWebRepository<sqlx::Sqlite>;
 
 macro_rules! repository_engine {
     ($module:ident, $database:ty, $pool:ty, $row:ty, $arguments:ty) => {
@@ -75,14 +74,20 @@ macro_rules! repository_engine {
             mod certificates {
                 include!("certificates.rs");
             }
+            mod certificate_secrets {
+                include!("certificate_secrets.rs");
+            }
+            mod certificate_activation {
+                include!("certificate_activation.rs");
+            }
+            mod certificate_bindings {
+                include!("certificate_bindings.rs");
+            }
             mod deployments {
                 include!("deployments.rs");
             }
             mod domains {
                 include!("domains.rs");
-            }
-            mod domains_lookup {
-                include!("domains_lookup.rs");
             }
             mod env_variables {
                 include!("env_variables.rs");
@@ -121,11 +126,4 @@ repository_engine!(
     sqlx::PgPool,
     sqlx::postgres::PgRow,
     sqlx::postgres::PgArguments
-);
-repository_engine!(
-    sqlite,
-    sqlx::Sqlite,
-    sqlx::SqlitePool,
-    sqlx::sqlite::SqliteRow,
-    sqlx::sqlite::SqliteArguments<'q>
 );

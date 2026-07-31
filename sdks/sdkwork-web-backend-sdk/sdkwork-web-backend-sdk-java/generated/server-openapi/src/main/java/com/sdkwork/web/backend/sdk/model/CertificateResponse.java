@@ -1,19 +1,20 @@
 package com.sdkwork.web.backend.sdk.model;
 
+import java.util.List;
 
 public class CertificateResponse {
     private String id;
     private String certName;
-    private String domain;
-    private String domainId;
+    private List<CertificateIdentifierResponse> identifiers;
     private Integer certType;
     private String issuer;
     private String fingerprint;
+    private String keyAlgorithm;
     private String notBefore;
     private String notAfter;
     private Boolean autoRenew;
-    private Integer renewalStatus;
-    private Integer status;
+    private String renewalStatus;
+    private String status;
     private String createdAt;
 
     public String getId() {
@@ -32,20 +33,12 @@ public class CertificateResponse {
         this.certName = certName;
     }
 
-    public String getDomain() {
-        return this.domain;
+    public List<CertificateIdentifierResponse> getIdentifiers() {
+        return this.identifiers;
     }
 
-    public void setDomain(String domain) {
-        this.domain = domain;
-    }
-
-    public String getDomainId() {
-        return this.domainId;
-    }
-
-    public void setDomainId(String domainId) {
-        this.domainId = domainId;
+    public void setIdentifiers(List<CertificateIdentifierResponse> identifiers) {
+        this.identifiers = identifiers;
     }
 
     public Integer getCertType() {
@@ -72,6 +65,14 @@ public class CertificateResponse {
         this.fingerprint = fingerprint;
     }
 
+    public String getKeyAlgorithm() {
+        return this.keyAlgorithm;
+    }
+
+    public void setKeyAlgorithm(String keyAlgorithm) {
+        this.keyAlgorithm = keyAlgorithm;
+    }
+
     public String getNotBefore() {
         return this.notBefore;
     }
@@ -96,19 +97,19 @@ public class CertificateResponse {
         this.autoRenew = autoRenew;
     }
 
-    public Integer getRenewalStatus() {
+    public String getRenewalStatus() {
         return this.renewalStatus;
     }
 
-    public void setRenewalStatus(Integer renewalStatus) {
+    public void setRenewalStatus(String renewalStatus) {
         this.renewalStatus = renewalStatus;
     }
 
-    public Integer getStatus() {
+    public String getStatus() {
         return this.status;
     }
 
-    public void setStatus(Integer status) {
+    public void setStatus(String status) {
         this.status = status;
     }
 

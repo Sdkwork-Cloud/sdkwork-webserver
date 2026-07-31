@@ -2,17 +2,17 @@ module Sdkwork
   module AppSdk
     module Models
       class CertificateResponse
-              attr_accessor :id, :cert_name, :domain, :domain_id, :cert_type, :issuer, :fingerprint, :not_before, :not_after, :auto_renew, :renewal_status, :status, :created_at
+              attr_accessor :id, :cert_name, :identifiers, :cert_type, :issuer, :fingerprint, :key_algorithm, :not_before, :not_after, :auto_renew, :renewal_status, :status, :created_at
 
               def initialize(attributes = {})
                 attributes = (attributes || {}).transform_keys(&:to_s)
                 @id = attributes['id']
                 @cert_name = attributes['certName']
-                @domain = attributes['domain']
-                @domain_id = attributes['domainId']
+                @identifiers = attributes['identifiers'].is_a?(Array) ? attributes['identifiers'].map { |item| item.is_a?(Hash) ? CertificateIdentifierResponse.from_hash(item) : item } : []
                 @cert_type = attributes['certType']
                 @issuer = attributes['issuer']
                 @fingerprint = attributes['fingerprint']
+                @key_algorithm = attributes['keyAlgorithm']
                 @not_before = attributes['notBefore']
                 @not_after = attributes['notAfter']
                 @auto_renew = attributes['autoRenew']
@@ -31,11 +31,11 @@ module Sdkwork
                 {
                   'id' => @id,
                   'certName' => @cert_name,
-                  'domain' => @domain,
-                  'domainId' => @domain_id,
+                  'identifiers' => @identifiers.is_a?(Array) ? @identifiers.map { |item| item.respond_to?(:to_hash) ? item.to_hash : item } : [],
                   'certType' => @cert_type,
                   'issuer' => @issuer,
                   'fingerprint' => @fingerprint,
+                  'keyAlgorithm' => @key_algorithm,
                   'notBefore' => @not_before,
                   'notAfter' => @not_after,
                   'autoRenew' => @auto_renew,

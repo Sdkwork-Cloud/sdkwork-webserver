@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace SDKWork\Web\BackendSdk\Models;
 
+use SDKWork\Web\BackendSdk\Models\AgentCertificateObservation;
+
 final class AgentHeartbeatRequest
 {
     public ?string $agentVersion = null;
@@ -15,6 +17,8 @@ final class AgentHeartbeatRequest
 
     /** Last successfully applied syncVersion reported by the edge agent. */
     public ?string $lastSyncVersion = null;
+
+    public array $certificateObservations = [];
 
     public function __construct(array $data = [])
     {
@@ -30,6 +34,11 @@ final class AgentHeartbeatRequest
         $this->lastSyncVersion = array_key_exists('lastSyncVersion', $data)
             ? $data['lastSyncVersion']
             : null;
+        $this->certificateObservations = array_key_exists('certificateObservations', $data)
+            ? is_array($data['certificateObservations'])
+                ? array_values(array_map(static fn($item) => is_array($item) ? AgentCertificateObservation::fromArray($item) : $item, $data['certificateObservations']))
+                : []
+            : [];
     }
 
     public static function fromArray(?array $data): ?self
@@ -44,6 +53,7 @@ final class AgentHeartbeatRequest
             'nginxEnabled' => $this->nginxEnabled,
             'activeConfigs' => $this->activeConfigs,
             'lastSyncVersion' => $this->lastSyncVersion,
+            'certificateObservations' => array_values(array_map(static fn($item) => $item instanceof AgentCertificateObservation ? $item->toArray() : $item, $this->certificateObservations)),
         ];
     }
 }

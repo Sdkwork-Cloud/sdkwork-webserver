@@ -8,8 +8,6 @@ pub enum AcmeServiceError {
     Validation(String),
     #[error("acme provider error: {0}")]
     Provider(String),
-    #[error("encryption error: {0}")]
-    Encryption(String),
     #[error("internal error: {0}")]
     Internal(String),
 }

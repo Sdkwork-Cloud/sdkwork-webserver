@@ -15,8 +15,8 @@ require 'sdkwork/app_sdk'
 
 config = Sdkwork::AppSdk::SdkConfig.new(base_url: 'http://localhost:3800')
 client = Sdkwork::AppSdk::SdkworkAppClient.new(config)
-params = { 'page' => 1, 'page_size' => 2, 'siteId' => '00000000-0000-0000-0000-000000000001' }
-result = client.certificate.certificates_list(params: params)
+params = { 'page' => 1, 'page_size' => 2, 'status' => 0, 'applicationType' => 'WEB', 'siteType' => 1, 'keyword' => 'keyword' }
+result = client.site.sites_list(params: params)
 
 
 puts result.inspect
@@ -44,10 +44,10 @@ client.set_header('X-Custom-Header', 'value')
 
 - `client.site` - site API
 - `client.domain` - domain API
+- `client.certificate` - certificate API
 - `client.source_version` - source_version API
 - `client.deployment` - deployment API
 - `client.env_variable` - env_variable API
-- `client.certificate` - certificate API
 - `client.monitor` - monitor API
 
 ## Usage Examples
@@ -68,6 +68,15 @@ puts result.inspect
 site_id = '1'
 params = { 'page' => 1, 'page_size' => 2 }
 result = client.domain.sites_domains_list(site_id, params: params)
+puts result.inspect
+```
+
+### certificate
+
+```ruby
+# 获取证书列表
+params = { 'page' => 1, 'page_size' => 2, 'siteId' => '00000000-0000-0000-0000-000000000001', 'domainId' => '00000000-0000-0000-0000-000000000001' }
+result = client.certificate.certificates_list(params: params)
 puts result.inspect
 ```
 
@@ -101,15 +110,6 @@ result = client.env_variable.sites_env_variables_list(site_id, params: params)
 puts result.inspect
 ```
 
-### certificate
-
-```ruby
-# 获取证书列表
-params = { 'page' => 1, 'page_size' => 2, 'siteId' => '00000000-0000-0000-0000-000000000001' }
-result = client.certificate.certificates_list(params: params)
-puts result.inspect
-```
-
 ### monitor
 
 ```ruby
@@ -123,8 +123,8 @@ puts result.inspect
 
 ```ruby
 begin
-  params = { 'page' => 1, 'page_size' => 2, 'siteId' => '00000000-0000-0000-0000-000000000001' }
-  client.certificate.certificates_list(params: params)
+  params = { 'page' => 1, 'page_size' => 2, 'status' => 0, 'applicationType' => 'WEB', 'siteType' => 1, 'keyword' => 'keyword' }
+  client.site.sites_list(params: params)
 rescue StandardError => e
   warn("Error: #{e.message}")
 end

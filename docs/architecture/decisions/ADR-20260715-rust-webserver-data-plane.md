@@ -17,7 +17,7 @@ The new data plane must coexist with existing management surfaces, preserve SDKW
 - `specs/sdkwork.webserver.config.schema.json` is the machine authority for authored `sdkwork.webserver.app` configuration. Rust Serde models mirror it and semantic validation rejects cross-reference, conflict, security, and resource-bound violations that JSON Schema cannot express.
 - `sdkwork-webserver-core` owns framework-independent configuration models, loading, canonicalization, semantic validation, host/path selection, and compiled immutable indexes. It does not bind sockets, execute HTTP, access databases, or own management APIs.
 - `sdkwork-api-web-server-standalone-gateway` owns standalone request-plane composition: HTTP/HTTPS listeners, static serving, reverse proxying, process operations, graceful shutdown, and integration with the existing management router.
-- The management plane and request data plane have distinct bootstrap paths. The data-plane-only path loads local configuration and does not initialize PostgreSQL or SQLite.
+- The management plane and request data plane have distinct bootstrap paths. The data-plane-only path loads local configuration and does not initialize PostgreSQL.
 - Axum/Hyper remain the HTTP service foundation. `axum-server` with Rustls owns HTTP/HTTPS listener integration and TLS handshakes. `tower-http` owns static file serving semantics. Reqwest with Rustls owns streaming upstream HTTP/HTTPS transport for the foundation slice.
 - Request and response bodies are streamed. Limits, deadlines, pools, connections, configuration size, and background work have finite defaults and hard maxima.
 - Application logical listeners compile under host policy into physical listeners. The first standalone slice accepts one app configuration and rejects conflicts rather than attempting unsafe merging.
@@ -51,4 +51,3 @@ The new data plane must coexist with existing management surfaces, preserve SDKW
 ## Supersedes / Superseded By
 
 This decision does not supersede the certificate or Nginx deployment ADRs. Those records must be revised or superseded separately when their implementation-complete claims conflict with the new HTTPS and truthfulness gates.
-

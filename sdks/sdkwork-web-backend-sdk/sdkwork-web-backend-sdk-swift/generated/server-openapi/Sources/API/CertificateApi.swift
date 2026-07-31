@@ -7,11 +7,43 @@ public class CertificateApi {
         self.client = client
     }
 
-    /// List canonical certificates
-    public func certificatesList(page: Int? = nil, pageSize: Int? = nil) async throws -> CertificatesListResponse? {
+    /// List certificates active on an application domain listener
+    public func applicationsDomainsListenerCertificateBindingsList(applicationId: String, domainId: String, page: Int? = nil, pageSize: Int? = nil) async throws -> ApplicationsDomainsListenerCertificateBindingsListResponse? {
         let query = buildQueryString([
             QueryParameterSpec(name: "page", value: page, style: "form", explode: true, allowReserved: false, contentType: nil),
             QueryParameterSpec(name: "page_size", value: pageSize, style: "form", explode: true, allowReserved: false, contentType: nil)
+        ])
+        return try await client.get(ApiPaths.appendQueryString(ApiPaths.backendPath("/applications/\(serializePathParameter(applicationId, PathParameterSpec(name: "applicationId", style: "simple", explode: false)))/domains/\(serializePathParameter(domainId, PathParameterSpec(name: "domainId", style: "simple", explode: false)))/listener_certificate_bindings"), query), responseType: ApplicationsDomainsListenerCertificateBindingsListResponse.self)
+    }
+
+    /// Bind a certificate version to an application domain listener
+    public func applicationsDomainsListenerCertificateBindingsCreate(applicationId: String, domainId: String, body: CreateListenerCertificateBindingRequest, idempotencyKey: String) async throws -> ApplicationsDomainsListenerCertificateBindingsCreateResponse201? {
+        let requestHeaders = buildRequestHeaders(
+            [
+                "Idempotency-Key": HeaderParameterSpec(value: idempotencyKey, style: "simple", explode: false, contentType: nil),
+            ],
+            [:]
+        )
+        return try await client.post(ApiPaths.backendPath("/applications/\(serializePathParameter(applicationId, PathParameterSpec(name: "applicationId", style: "simple", explode: false)))/domains/\(serializePathParameter(domainId, PathParameterSpec(name: "domainId", style: "simple", explode: false)))/listener_certificate_bindings"), body: body, params: nil, headers: requestHeaders, contentType: "application/json", responseType: ApplicationsDomainsListenerCertificateBindingsCreateResponse201.self)
+    }
+
+    /// Remove a certificate from an application domain listener
+    public func applicationsDomainsListenerCertificateBindingsDelete(applicationId: String, domainId: String, bindingId: String, idempotencyKey: String) async throws -> Void {
+        let requestHeaders = buildRequestHeaders(
+            [
+                "Idempotency-Key": HeaderParameterSpec(value: idempotencyKey, style: "simple", explode: false, contentType: nil),
+            ],
+            [:]
+        )
+        _ = try await client.delete(ApiPaths.backendPath("/applications/\(serializePathParameter(applicationId, PathParameterSpec(name: "applicationId", style: "simple", explode: false)))/domains/\(serializePathParameter(domainId, PathParameterSpec(name: "domainId", style: "simple", explode: false)))/listener_certificate_bindings/\(serializePathParameter(bindingId, PathParameterSpec(name: "bindingId", style: "simple", explode: false)))"), params: nil, headers: requestHeaders)
+    }
+
+    /// List canonical certificates
+    public func certificatesList(page: Int? = nil, pageSize: Int? = nil, domainId: String? = nil) async throws -> CertificatesListResponse? {
+        let query = buildQueryString([
+            QueryParameterSpec(name: "page", value: page, style: "form", explode: true, allowReserved: false, contentType: nil),
+            QueryParameterSpec(name: "page_size", value: pageSize, style: "form", explode: true, allowReserved: false, contentType: nil),
+            QueryParameterSpec(name: "domainId", value: domainId, style: "form", explode: true, allowReserved: false, contentType: nil)
         ])
         return try await client.get(ApiPaths.appendQueryString(ApiPaths.backendPath("/certificates"), query), responseType: CertificatesListResponse.self)
     }

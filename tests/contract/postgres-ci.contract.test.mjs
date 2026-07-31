@@ -8,7 +8,21 @@ import { fileURLToPath } from 'node:url';
 
 import { parse } from 'yaml';
 
+import { isPostgresReady } from '../../scripts/postgres-ci-verify.mjs';
+
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+
+test('PostgreSQL readiness ignores the temporary initialization server', () => {
+  assert.equal(isPostgresReady('database system is ready to accept connections', 0), false);
+  assert.equal(
+    isPostgresReady('PostgreSQL init process complete; ready for start up.', 0),
+    true,
+  );
+  assert.equal(
+    isPostgresReady('PostgreSQL init process complete; ready for start up.', 1),
+    false,
+  );
+});
 
 test('PostgreSQL CI runner is pinned, bounded, and executes both ignored suites', () => {
   const result = spawnSync(process.execPath, ['scripts/postgres-ci-verify.mjs', '--dry-run'], {

@@ -9,13 +9,11 @@
     "protocol": "http",
     "packageName": "com.sdkwork:sdkwork-web-app-sdk"
   },
-  "changeFingerprint": "6bf30ad0f9203ff9e609ac0db4d5d9c3a6d97fe8e8fdc4c88a411cce5f521f06",
+  "changeFingerprint": "f25b1e6755c35abf10ee3b97fc0b72d5d91f921fec54cefdc89465d76493aab3",
   "changes": {
-    "createdGeneratedFiles": [
-      "src/main/java/com/sdkwork/web/app/sdk/model/SitesSourceVersionsGitImportCreateResponse201.java"
-    ],
+    "createdGeneratedFiles": [],
     "updatedGeneratedFiles": [
-      "src/main/java/com/sdkwork/web/app/sdk/api/SourceVersionApi.java"
+      "src/main/java/com/sdkwork/web/app/sdk/model/ListenerCertificateBindingResponse.java"
     ],
     "unchangedGeneratedFiles": [
       "bin/publish-core.mjs",
@@ -34,8 +32,10 @@
       "src/main/java/com/sdkwork/web/app/sdk/api/MonitorApi.java",
       "src/main/java/com/sdkwork/web/app/sdk/api/package-info.java",
       "src/main/java/com/sdkwork/web/app/sdk/api/SiteApi.java",
+      "src/main/java/com/sdkwork/web/app/sdk/api/SourceVersionApi.java",
       "src/main/java/com/sdkwork/web/app/sdk/http/HttpClient.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/ApplicationStoreListing.java",
+      "src/main/java/com/sdkwork/web/app/sdk/model/CertificateIdentifierResponse.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/CertificatePage.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/CertificateResponse.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/CertificatesCreateResponse201.java",
@@ -45,6 +45,7 @@
       "src/main/java/com/sdkwork/web/app/sdk/model/CreateDomainRequest.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/CreateEnvVariableRequest.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/CreateHealthCheckRequest.java",
+      "src/main/java/com/sdkwork/web/app/sdk/model/CreateListenerCertificateBindingRequest.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/CreateSiteRequest.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/CreateSourceVersionRequest.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/DeploymentPage.java",
@@ -58,6 +59,7 @@
       "src/main/java/com/sdkwork/web/app/sdk/model/HealthCheckPage.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/HealthCheckResponse.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/ImportGitSourceVersionRequest.java",
+      "src/main/java/com/sdkwork/web/app/sdk/model/ListenerCertificateSummaryResponse.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/MediaChecksum.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/MediaResource.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/PageInfo.java",
@@ -78,6 +80,8 @@
       "src/main/java/com/sdkwork/web/app/sdk/model/SitesDeploymentsRetrieveResponse.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/SitesDeploymentsRollbackResponse.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/SitesDomainsCreateResponse201.java",
+      "src/main/java/com/sdkwork/web/app/sdk/model/SitesDomainsListenerCertificateBindingsCreateResponse201.java",
+      "src/main/java/com/sdkwork/web/app/sdk/model/SitesDomainsListenerCertificateBindingsListResponse.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/SitesDomainsListResponse.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/SitesDomainsRetrieveResponse.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/SitesDomainsVerifyResponse.java",
@@ -89,6 +93,7 @@
       "src/main/java/com/sdkwork/web/app/sdk/model/SitesPauseResponse.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/SitesRetrieveResponse.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/SitesSourceVersionsCreateResponse201.java",
+      "src/main/java/com/sdkwork/web/app/sdk/model/SitesSourceVersionsGitImportCreateResponse201.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/SitesSourceVersionsListResponse.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/SitesSourceVersionsRetrieveResponse.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/SitesUpdateResponse.java",
@@ -98,9 +103,7 @@
       "src/main/java/com/sdkwork/web/app/sdk/model/UpdateSiteRequest.java",
       "src/main/java/com/sdkwork/web/app/sdk/SdkworkAppClient.java"
     ],
-    "deletedGeneratedFiles": [
-      "src/main/java/com/sdkwork/web/app/sdk/model/SitesSourceVersionsImportGitResponse201.java"
-    ],
+    "deletedGeneratedFiles": [],
     "scaffoldedFiles": [],
     "preservedScaffoldFiles": [
       "custom/README.md"
@@ -110,37 +113,29 @@
   "impact": {
     "schemaVersion": 1,
     "areas": [
-      "api-surface",
       "models"
     ],
     "details": [
       {
-        "area": "api-surface",
-        "paths": [
-          "src/main/java/com/sdkwork/web/app/sdk/api/SourceVersionApi.java"
-        ]
-      },
-      {
         "area": "models",
         "paths": [
-          "src/main/java/com/sdkwork/web/app/sdk/model/SitesSourceVersionsGitImportCreateResponse201.java",
-          "src/main/java/com/sdkwork/web/app/sdk/model/SitesSourceVersionsImportGitResponse201.java"
+          "src/main/java/com/sdkwork/web/app/sdk/model/ListenerCertificateBindingResponse.java"
         ]
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, models. Verification is required."
+    "summary": "Detected impact areas: models. Verification is required."
   },
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-java\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -158,14 +153,12 @@
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "high",
+    "riskLevel": "medium",
     "nextAction": "verify",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
     "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
-      "deleted-generated-files",
-      "manual-review-required",
       "verification-required"
     ]
   },

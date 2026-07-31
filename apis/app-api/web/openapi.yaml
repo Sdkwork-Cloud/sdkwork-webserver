@@ -28,7 +28,7 @@ paths:
       x-sdkwork-request-context: WebRequestContext
       x-sdkwork-auth-mode: dual-token
       x-sdkwork-permission: web.sites.read
-      x-sdkwork-owner: sdkwork-web-server
+      x-sdkwork-owner: sdkwork-web
       parameters:
         - $ref: "#/components/parameters/PageParam"
         - $ref: "#/components/parameters/PageSizeParam"
@@ -109,7 +109,7 @@ paths:
       x-sdkwork-idempotent: true
       parameters:
         - $ref: "#/components/parameters/IdempotencyKey"
-      x-sdkwork-owner: sdkwork-web-server
+      x-sdkwork-owner: sdkwork-web
       requestBody:
         required: true
         content:
@@ -159,7 +159,7 @@ paths:
       x-sdkwork-request-context: WebRequestContext
       x-sdkwork-auth-mode: dual-token
       x-sdkwork-permission: web.sites.read
-      x-sdkwork-owner: sdkwork-web-server
+      x-sdkwork-owner: sdkwork-web
       responses:
         "200":
           description: 成功
@@ -196,7 +196,7 @@ paths:
       x-sdkwork-request-context: WebRequestContext
       x-sdkwork-auth-mode: dual-token
       x-sdkwork-permission: web.sites.write
-      x-sdkwork-owner: sdkwork-web-server
+      x-sdkwork-owner: sdkwork-web
       x-sdkwork-idempotent: true
       parameters:
         - $ref: "#/components/parameters/IdempotencyKey"
@@ -244,7 +244,7 @@ paths:
       x-sdkwork-request-context: WebRequestContext
       x-sdkwork-auth-mode: dual-token
       x-sdkwork-permission: web.sites.write
-      x-sdkwork-owner: sdkwork-web-server
+      x-sdkwork-owner: sdkwork-web
       responses:
         "204":
           description: 删除成功
@@ -268,7 +268,7 @@ paths:
       x-sdkwork-request-context: WebRequestContext
       x-sdkwork-auth-mode: dual-token
       x-sdkwork-permission: web.sites.write
-      x-sdkwork-owner: sdkwork-web-server
+      x-sdkwork-owner: sdkwork-web
       responses:
         "200":
           description: 激活成功
@@ -308,7 +308,7 @@ paths:
       x-sdkwork-request-context: WebRequestContext
       x-sdkwork-auth-mode: dual-token
       x-sdkwork-permission: web.sites.write
-      x-sdkwork-owner: sdkwork-web-server
+      x-sdkwork-owner: sdkwork-web
       responses:
         "200":
           description: 暂停成功
@@ -348,7 +348,7 @@ paths:
       x-sdkwork-request-context: WebRequestContext
       x-sdkwork-auth-mode: dual-token
       x-sdkwork-permission: web.sites.write
-      x-sdkwork-owner: sdkwork-web-server
+      x-sdkwork-owner: sdkwork-web
       parameters:
         - $ref: "#/components/parameters/PageParam"
         - $ref: "#/components/parameters/PageSizeParam"
@@ -395,7 +395,7 @@ paths:
       x-sdkwork-idempotent: true
       parameters:
         - $ref: "#/components/parameters/IdempotencyKey"
-      x-sdkwork-owner: sdkwork-web-server
+      x-sdkwork-owner: sdkwork-web
       requestBody:
         required: true
         content:
@@ -442,7 +442,7 @@ paths:
       x-sdkwork-request-context: WebRequestContext
       x-sdkwork-auth-mode: dual-token
       x-sdkwork-permission: web.sites.write
-      x-sdkwork-owner: sdkwork-web-server
+      x-sdkwork-owner: sdkwork-web
       responses:
         "200":
           description: 成功
@@ -477,7 +477,7 @@ paths:
       x-sdkwork-request-context: WebRequestContext
       x-sdkwork-auth-mode: dual-token
       x-sdkwork-permission: web.sites.write
-      x-sdkwork-owner: sdkwork-web-server
+      x-sdkwork-owner: sdkwork-web
       responses:
         "204":
           description: 删除成功
@@ -503,7 +503,7 @@ paths:
       x-sdkwork-idempotent: true
       parameters:
         - $ref: "#/components/parameters/IdempotencyKey"
-      x-sdkwork-owner: sdkwork-web-server
+      x-sdkwork-owner: sdkwork-web
       x-sdkwork-rate-limit-tier: auth-critical
       responses:
         "200":
@@ -528,6 +528,128 @@ paths:
           $ref: "#/components/responses/BadRequest"
         "404":
           $ref: "#/components/responses/NotFound"
+  /app/v3/api/sites/{siteId}/domains/{domainId}/listener_certificate_bindings:
+    parameters:
+      - $ref: "#/components/parameters/SiteIdParam"
+      - $ref: "#/components/parameters/DomainIdParam"
+    get:
+      operationId: sites.domains.listenerCertificateBindings.list
+      summary: List certificates active on the domain listener
+      description: Returns an offset-paginated P1 list ordered by default status, priority, and stable binding id.
+      tags:
+        - certificate
+      security:
+        - AuthToken: []
+          AccessToken: []
+      x-sdkwork-api-surface: app-api
+      x-sdkwork-api-authority: sdkwork-web.app
+      x-sdkwork-request-context: WebRequestContext
+      x-sdkwork-auth-mode: dual-token
+      x-sdkwork-permission: web.certificates.read
+      x-sdkwork-owner: sdkwork-web
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/PageSizeParam"
+      responses:
+        "200":
+          description: Listener certificate bindings returned successfully.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SdkWorkApiResponse"
+                  - type: object
+                    required: [data]
+                    properties:
+                      data:
+                        type: object
+                        additionalProperties: false
+                        required: [items, pageInfo]
+                        properties:
+                          items:
+                            type: array
+                            items:
+                              $ref: "#/components/schemas/ListenerCertificateBindingResponse"
+                          pageInfo:
+                            $ref: "#/components/schemas/PageInfo"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    post:
+      operationId: sites.domains.listenerCertificateBindings.create
+      summary: Bind a certificate version to the domain listener
+      tags:
+        - certificate
+      security:
+        - AuthToken: []
+          AccessToken: []
+      x-sdkwork-api-surface: app-api
+      x-sdkwork-api-authority: sdkwork-web.app
+      x-sdkwork-request-context: WebRequestContext
+      x-sdkwork-auth-mode: dual-token
+      x-sdkwork-permission: web.certificates.write
+      x-sdkwork-idempotent: true
+      x-sdkwork-rate-limit-tier: auth-critical
+      x-sdkwork-owner: sdkwork-web
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateListenerCertificateBindingRequest"
+      responses:
+        "201":
+          description: Certificate version bound to the listener successfully.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SdkWorkApiResponse"
+                  - type: object
+                    required: [data]
+                    properties:
+                      data:
+                        type: object
+                        additionalProperties: false
+                        required: [item]
+                        properties:
+                          item:
+                            $ref: "#/components/schemas/ListenerCertificateBindingResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /app/v3/api/sites/{siteId}/domains/{domainId}/listener_certificate_bindings/{bindingId}:
+    parameters:
+      - $ref: "#/components/parameters/SiteIdParam"
+      - $ref: "#/components/parameters/DomainIdParam"
+      - $ref: "#/components/parameters/ListenerCertificateBindingIdParam"
+    delete:
+      operationId: sites.domains.listenerCertificateBindings.delete
+      summary: Remove a certificate from the domain listener
+      tags:
+        - certificate
+      security:
+        - AuthToken: []
+          AccessToken: []
+      x-sdkwork-api-surface: app-api
+      x-sdkwork-api-authority: sdkwork-web.app
+      x-sdkwork-request-context: WebRequestContext
+      x-sdkwork-auth-mode: dual-token
+      x-sdkwork-permission: web.certificates.write
+      x-sdkwork-idempotent: true
+      x-sdkwork-rate-limit-tier: auth-critical
+      x-sdkwork-owner: sdkwork-web
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      responses:
+        "204":
+          description: Listener certificate binding removed successfully.
+        "404":
+          $ref: "#/components/responses/NotFound"
   /app/v3/api/sites/{siteId}/source_versions:
     parameters:
       - $ref: "#/components/parameters/SiteIdParam"
@@ -544,7 +666,7 @@ paths:
       x-sdkwork-request-context: WebRequestContext
       x-sdkwork-auth-mode: dual-token
       x-sdkwork-permission: web.sites.write
-      x-sdkwork-owner: sdkwork-web-server
+      x-sdkwork-owner: sdkwork-web
       parameters:
         - $ref: "#/components/parameters/PageParam"
         - $ref: "#/components/parameters/PageSizeParam"
@@ -585,7 +707,7 @@ paths:
       x-sdkwork-request-context: WebRequestContext
       x-sdkwork-auth-mode: dual-token
       x-sdkwork-permission: web.sites.write
-      x-sdkwork-owner: sdkwork-web-server
+      x-sdkwork-owner: sdkwork-web
       x-sdkwork-idempotent: true
       parameters:
         - $ref: "#/components/parameters/IdempotencyKey"
@@ -632,7 +754,7 @@ paths:
       x-sdkwork-request-context: WebRequestContext
       x-sdkwork-auth-mode: dual-token
       x-sdkwork-permission: web.sites.write
-      x-sdkwork-owner: sdkwork-web-server
+      x-sdkwork-owner: sdkwork-web
       x-sdkwork-rate-limit-tier: auth-critical
       x-sdkwork-idempotent: true
       parameters:
@@ -679,7 +801,7 @@ paths:
       x-sdkwork-request-context: WebRequestContext
       x-sdkwork-auth-mode: dual-token
       x-sdkwork-permission: web.sites.write
-      x-sdkwork-owner: sdkwork-web-server
+      x-sdkwork-owner: sdkwork-web
       responses:
         "200":
           description: 成功
@@ -715,7 +837,7 @@ paths:
       x-sdkwork-request-context: WebRequestContext
       x-sdkwork-auth-mode: dual-token
       x-sdkwork-permission: web.sites.write
-      x-sdkwork-owner: sdkwork-web-server
+      x-sdkwork-owner: sdkwork-web
       parameters:
         - $ref: "#/components/parameters/PageParam"
         - $ref: "#/components/parameters/PageSizeParam"
@@ -773,7 +895,7 @@ paths:
       x-sdkwork-idempotent: true
       parameters:
         - $ref: "#/components/parameters/IdempotencyKey"
-      x-sdkwork-owner: sdkwork-web-server
+      x-sdkwork-owner: sdkwork-web
       x-sdkwork-rate-limit-tier: auth-critical
       requestBody:
         required: true
@@ -821,7 +943,7 @@ paths:
       x-sdkwork-request-context: WebRequestContext
       x-sdkwork-auth-mode: dual-token
       x-sdkwork-permission: web.sites.write
-      x-sdkwork-owner: sdkwork-web-server
+      x-sdkwork-owner: sdkwork-web
       responses:
         "200":
           description: 成功
@@ -863,7 +985,7 @@ paths:
       x-sdkwork-idempotent: true
       parameters:
         - $ref: "#/components/parameters/IdempotencyKey"
-      x-sdkwork-owner: sdkwork-web-server
+      x-sdkwork-owner: sdkwork-web
       x-sdkwork-rate-limit-tier: auth-critical
       responses:
         "200":
@@ -903,7 +1025,7 @@ paths:
       x-sdkwork-request-context: WebRequestContext
       x-sdkwork-auth-mode: dual-token
       x-sdkwork-permission: web.sites.write
-      x-sdkwork-owner: sdkwork-web-server
+      x-sdkwork-owner: sdkwork-web
       parameters:
         - name: environment
           in: query
@@ -951,7 +1073,7 @@ paths:
       x-sdkwork-idempotent: true
       parameters:
         - $ref: "#/components/parameters/IdempotencyKey"
-      x-sdkwork-owner: sdkwork-web-server
+      x-sdkwork-owner: sdkwork-web
       requestBody:
         required: true
         content:
@@ -991,7 +1113,7 @@ paths:
       x-sdkwork-request-context: WebRequestContext
       x-sdkwork-auth-mode: dual-token
       x-sdkwork-permission: web.certificates.read
-      x-sdkwork-owner: sdkwork-web-server
+      x-sdkwork-owner: sdkwork-web
       parameters:
         - $ref: "#/components/parameters/PageParam"
         - $ref: "#/components/parameters/PageSizeParam"
@@ -999,6 +1121,13 @@ paths:
           in: query
           required: false
           description: Limit certificates to one application owned by the authenticated user.
+          schema:
+            type: string
+            format: uuid
+        - name: domainId
+          in: query
+          required: false
+          description: Limit certificates to those whose SAN identifiers cover this domain.
           schema:
             type: string
             format: uuid
@@ -1043,7 +1172,7 @@ paths:
       x-sdkwork-idempotent: true
       parameters:
         - $ref: "#/components/parameters/IdempotencyKey"
-      x-sdkwork-owner: sdkwork-web-server
+      x-sdkwork-owner: sdkwork-web
       x-sdkwork-rate-limit-tier: auth-critical
       requestBody:
         required: true
@@ -1087,7 +1216,7 @@ paths:
       x-sdkwork-request-context: WebRequestContext
       x-sdkwork-auth-mode: dual-token
       x-sdkwork-permission: web.sites.write
-      x-sdkwork-owner: sdkwork-web-server
+      x-sdkwork-owner: sdkwork-web
       responses:
         "200":
           description: 成功
@@ -1129,7 +1258,7 @@ paths:
       x-sdkwork-idempotent: true
       parameters:
         - $ref: "#/components/parameters/IdempotencyKey"
-      x-sdkwork-owner: sdkwork-web-server
+      x-sdkwork-owner: sdkwork-web
       requestBody:
         required: true
         content:
@@ -1202,6 +1331,13 @@ components:
         format: uuid
     DomainIdParam:
       name: domainId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    ListenerCertificateBindingIdParam:
+      name: bindingId
       in: path
       required: true
       schema:
@@ -1895,35 +2031,65 @@ components:
       type: object
       additionalProperties: false
       required:
-        - domainId
+        - domainIds
         - certType
       properties:
-        domainId:
-          type: string
-          format: uuid
+        domainIds:
+          type: array
+          minItems: 1
+          maxItems: 8
+          uniqueItems: true
+          description: Ordered exact or wildcard domain identifiers included in the certificate SAN extension.
+          items:
+            type: string
+            format: uuid
         certType:
           type: integer
           enum:
             - 1
             - 3
+        keyAlgorithm:
+          type: string
+          enum: [ECDSA, RSA]
+          default: ECDSA
         autoRenew:
           type: boolean
           default: true
+    CertificateIdentifierResponse:
+      type: object
+      additionalProperties: false
+      required: [domainId, hostname, identifierType, position]
+      properties:
+        domainId:
+          type: string
+          format: uuid
+        hostname:
+          type: string
+          minLength: 1
+          maxLength: 253
+        identifierType:
+          type: string
+          enum: [EXACT, WILDCARD]
+        position:
+          type: integer
+          minimum: 0
+          maximum: 7
     CertificateResponse:
       type: object
       additionalProperties: false
-      required: [id, certName, status, createdAt]
+      required: [id, certName, identifiers, keyAlgorithm, status, createdAt]
       properties:
         id:
           type: string
           format: uuid
         certName:
           type: string
-        domain:
-          type: string
-        domainId:
-          type: string
-          format: uuid
+        identifiers:
+          type: array
+          minItems: 1
+          maxItems: 8
+          items:
+            $ref: "#/components/schemas/CertificateIdentifierResponse"
         certType:
           type: integer
         issuer:
@@ -1931,6 +2097,9 @@ components:
         fingerprint:
           type: string
           pattern: '^[a-f0-9]{64}$'
+        keyAlgorithm:
+          type: string
+          enum: [ECDSA, RSA]
         notBefore:
           type: string
           format: date-time
@@ -1940,14 +2109,106 @@ components:
         autoRenew:
           type: boolean
         renewalStatus:
-          type: integer
-          description: 0=idle, 1=renewing, 2=pending, 3=failed
+          type: string
+          enum: [IDLE, RENEWING, PENDING, FAILED]
         status:
-          type: integer
-          description: 0=pending, 1=active, 2=expired, 3=revoked, 4=archived
+          type: string
+          enum: [PENDING, ISSUED, FAILED, EXPIRED, REVOKED, ARCHIVED]
         createdAt:
           type: string
           format: date-time
+    CreateListenerCertificateBindingRequest:
+      type: object
+      additionalProperties: false
+      required: [certificateId]
+      properties:
+        certificateId:
+          type: string
+          format: uuid
+        certificateVersionId:
+          type: string
+          format: uuid
+          description: Immutable certificate version. Omit to bind the certificate's current active version.
+        priority:
+          type: integer
+          minimum: 0
+          maximum: 10000
+          default: 100
+        isDefault:
+          type: boolean
+          default: false
+    ListenerCertificateBindingResponse:
+      type: object
+      additionalProperties: false
+      required: [id, siteId, domainId, certificateId, desiredCertificateVersionId, desiredCertificate, keyAlgorithm, priority, isDefault, status, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        siteId:
+          type: string
+          format: uuid
+        domainId:
+          type: string
+          format: uuid
+        certificateId:
+          type: string
+          format: uuid
+        desiredCertificateVersionId:
+          type: string
+          format: uuid
+        currentCertificateVersionId:
+          type: string
+          format: uuid
+        desiredCertificate:
+          $ref: "#/components/schemas/ListenerCertificateSummaryResponse"
+        currentCertificate:
+          $ref: "#/components/schemas/ListenerCertificateSummaryResponse"
+        keyAlgorithm:
+          type: string
+          enum: [ECDSA, RSA]
+        priority:
+          type: integer
+          minimum: 0
+          maximum: 10000
+        isDefault:
+          type: boolean
+        status:
+          type: string
+          enum: [PENDING, DEPLOYING, ACTIVE, PAUSED, FAILED, ARCHIVED]
+        activatedAt:
+          type: [string, 'null']
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    ListenerCertificateSummaryResponse:
+      type: object
+      additionalProperties: false
+      required: [certName, identifiers, status]
+      properties:
+        certName:
+          type: string
+        identifiers:
+          type: array
+          minItems: 1
+          maxItems: 8
+          items:
+            $ref: "#/components/schemas/CertificateIdentifierResponse"
+        issuer:
+          type: string
+        fingerprint:
+          type: string
+          pattern: '^[a-f0-9]{64}$'
+        notAfter:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [PENDING, ISSUED, FAILED, EXPIRED, REVOKED, ARCHIVED]
     CertificatePage:
       type: object
       properties:

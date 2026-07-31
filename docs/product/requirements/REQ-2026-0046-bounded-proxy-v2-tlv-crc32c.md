@@ -89,7 +89,7 @@ CRC32C is integrity checking, not authentication. The immediate TCP peer CIDR re
 - `cargo test -p sdkwork-api-web-server-standalone-gateway --test proxy_protocol` passes 3/3 real-socket integrations. The matrix covers default-ignore mismatch compatibility, valid/missing/wrong/duplicate/malformed CRC, truncated metadata/value, unknown TLVs, fragmented HTTP, TLS ALPN H2, PROXY/LOCAL, required policy, and retained active policy after a Watch candidate.
 - The complete standalone gateway suite passes 204 tests: 99 library tests and 105 integration tests across the broader HTTP/HTTPS/H2, WebSocket, DNS/TLS, health, capacity, retry, reload, and shutdown surfaces.
 - Strict Clippy passes independently for `sdkwork-webserver-core` and `sdkwork-api-web-server-standalone-gateway` with all targets and `-D warnings`. `cargo fmt --all -- --check` and `git diff --check` pass.
-- Isolated-target `pnpm.cmd verify` passes workspace Rust tests, contract tests, API materialization consistency, repository standards, topology, database framework validation, SQLite lifecycle, and cloud gateway validation. Its environment-gated PostgreSQL tests are ignored in this invocation; database parity evidence is owned by REQ-2026-0004 and is not claimed by this transport requirement.
+- Isolated-target, environment-independent `pnpm.cmd verify` checks passed workspace Rust tests, contract tests, API materialization consistency, repository standards, topology, database-framework, and cloud-gateway validation. PostgreSQL lifecycle was not executed or claimed by this transport requirement; REQ-2026-0004/0049 own that evidence.
 
 ## Remaining Boundary
 

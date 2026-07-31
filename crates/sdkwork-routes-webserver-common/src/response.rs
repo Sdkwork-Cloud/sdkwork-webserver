@@ -7,8 +7,8 @@ use sdkwork_utils_rust::{
 };
 use sdkwork_webserver_contract::{
     AuditLogPage, CertificateDistributionPage, CertificatePage, DeploymentPage, DomainPage,
-    EnvVariablePage, HealthCheckPage, NginxConfigPage, RootDomainPage, ServerPage, SitePage,
-    SourceVersionPage, WebServiceResult,
+    EnvVariablePage, HealthCheckPage, ListenerCertificateBindingPage, NginxConfigPage,
+    RootDomainPage, ServerPage, SitePage, SourceVersionPage, WebServiceResult,
 };
 use serde::Serialize;
 
@@ -172,6 +172,20 @@ pub fn ok_env_variable_page(
 
 pub fn ok_certificate_page(
     result: WebServiceResult<CertificatePage>,
+    page: i32,
+    page_size: i32,
+) -> Result<Response, WebApiError> {
+    match result {
+        Ok(page_data) => Ok(envelope(
+            StatusCode::OK,
+            build_page_data(page_data.items, page, page_size, page_data.total),
+        )),
+        Err(error) => Err(error.into()),
+    }
+}
+
+pub fn ok_listener_certificate_binding_page(
+    result: WebServiceResult<ListenerCertificateBindingPage>,
     page: i32,
     page_size: i32,
 ) -> Result<Response, WebApiError> {

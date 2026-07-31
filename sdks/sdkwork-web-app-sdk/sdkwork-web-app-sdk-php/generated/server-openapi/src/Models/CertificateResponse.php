@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace SDKWork\Web\AppSdk\Models;
 
+use SDKWork\Web\AppSdk\Models\CertificateIdentifierResponse;
+
 final class CertificateResponse
 {
     public ?string $id = null;
 
     public ?string $certName = null;
 
-    public ?string $domain = null;
-
-    public ?string $domainId = null;
+    public array $identifiers = [];
 
     public ?int $certType = null;
 
@@ -20,17 +20,17 @@ final class CertificateResponse
 
     public ?string $fingerprint = null;
 
+    public ?string $keyAlgorithm = null;
+
     public ?string $notBefore = null;
 
     public ?string $notAfter = null;
 
     public ?bool $autoRenew = null;
 
-    /** 0=idle, 1=renewing, 2=pending, 3=failed */
-    public ?int $renewalStatus = null;
+    public ?string $renewalStatus = null;
 
-    /** 0=pending, 1=active, 2=expired, 3=revoked, 4=archived */
-    public ?int $status = null;
+    public ?string $status = null;
 
     public ?string $createdAt = null;
 
@@ -42,12 +42,11 @@ final class CertificateResponse
         $this->certName = array_key_exists('certName', $data)
             ? $data['certName']
             : null;
-        $this->domain = array_key_exists('domain', $data)
-            ? $data['domain']
-            : null;
-        $this->domainId = array_key_exists('domainId', $data)
-            ? $data['domainId']
-            : null;
+        $this->identifiers = array_key_exists('identifiers', $data)
+            ? is_array($data['identifiers'])
+                ? array_values(array_map(static fn($item) => is_array($item) ? CertificateIdentifierResponse::fromArray($item) : $item, $data['identifiers']))
+                : []
+            : [];
         $this->certType = array_key_exists('certType', $data)
             ? $data['certType']
             : null;
@@ -56,6 +55,9 @@ final class CertificateResponse
             : null;
         $this->fingerprint = array_key_exists('fingerprint', $data)
             ? $data['fingerprint']
+            : null;
+        $this->keyAlgorithm = array_key_exists('keyAlgorithm', $data)
+            ? $data['keyAlgorithm']
             : null;
         $this->notBefore = array_key_exists('notBefore', $data)
             ? $data['notBefore']
@@ -87,11 +89,11 @@ final class CertificateResponse
         return [
             'id' => $this->id,
             'certName' => $this->certName,
-            'domain' => $this->domain,
-            'domainId' => $this->domainId,
+            'identifiers' => array_values(array_map(static fn($item) => $item instanceof CertificateIdentifierResponse ? $item->toArray() : $item, $this->identifiers)),
             'certType' => $this->certType,
             'issuer' => $this->issuer,
             'fingerprint' => $this->fingerprint,
+            'keyAlgorithm' => $this->keyAlgorithm,
             'notBefore' => $this->notBefore,
             'notAfter' => $this->notAfter,
             'autoRenew' => $this->autoRenew,

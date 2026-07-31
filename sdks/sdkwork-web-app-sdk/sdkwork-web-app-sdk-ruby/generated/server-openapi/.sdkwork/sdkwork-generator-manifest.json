@@ -32,7 +32,7 @@
     },
     {
       "path": "lib/sdkwork/app_sdk.rb",
-      "sha256": "29317bb8e92965641cba5b7253d32d80b25e3573a2255a4187770de07a5e6783"
+      "sha256": "a3e63c949d075def4a6e37cec2cab7e1d42df421443b39e66d9d000159144f28"
     },
     {
       "path": "lib/sdkwork/app_sdk/api/base_api.rb",
@@ -40,7 +40,7 @@
     },
     {
       "path": "lib/sdkwork/app_sdk/api/certificate.rb",
-      "sha256": "76c1568962fc5aaf610fb8fca78ce0779584412e12d25a28fc6a7c9b36f27b1d"
+      "sha256": "aa2976049d7a901bbce0d447616a5169af2e488e1084352e1c99cd9f3bfe54f5"
     },
     {
       "path": "lib/sdkwork/app_sdk/api/deployment.rb",
@@ -68,7 +68,7 @@
     },
     {
       "path": "lib/sdkwork/app_sdk/client.rb",
-      "sha256": "20890d1ca8eeace373b32cb75198c39b81ad979aafd77abc4a429c8cd7b32055"
+      "sha256": "3c406e31cdd4c57cf4ac0d4d18faab92f765e89f8dc2824ae12b19dc77bc5c0d"
     },
     {
       "path": "lib/sdkwork/app_sdk/http/client.rb",
@@ -79,12 +79,16 @@
       "sha256": "705ef9bb6bf6b54ab05aab3b275a9d750cb4a6af17173aff13b08cd0760cf52f"
     },
     {
+      "path": "lib/sdkwork/app_sdk/models/certificate_identifier_response.rb",
+      "sha256": "a3295629aaab17110c2f42274c24d77442190762226cb6baa5bdf964e99d5b54"
+    },
+    {
       "path": "lib/sdkwork/app_sdk/models/certificate_page.rb",
       "sha256": "9730deb3b0e979f61fcbe529cff44afa8190992a998187578311f48074bd9cf8"
     },
     {
       "path": "lib/sdkwork/app_sdk/models/certificate_response.rb",
-      "sha256": "54b937857a1e700b1f83853544541cfefd45821464c4efae4d259089d3824ff1"
+      "sha256": "9e64f1b2c0219b148b95bde53d3ff33120c97e886caac78fe5bc8e1813416bd3"
     },
     {
       "path": "lib/sdkwork/app_sdk/models/certificates_create_response201.rb",
@@ -96,7 +100,7 @@
     },
     {
       "path": "lib/sdkwork/app_sdk/models/create_certificate_request.rb",
-      "sha256": "0fd1fd7acec66703de8f230bdb2c5d989231664294e72e5eb30dd68568a6b70c"
+      "sha256": "aef01d58d472d22fb99c9cd46aa240d2db014780e221dd5f826ddae26aa3d20a"
     },
     {
       "path": "lib/sdkwork/app_sdk/models/create_deployment_request.rb",
@@ -113,6 +117,10 @@
     {
       "path": "lib/sdkwork/app_sdk/models/create_health_check_request.rb",
       "sha256": "267f1babdc66718ab60c488f43d2d8febf74d26266fde65e2ad96375f4c0a00d"
+    },
+    {
+      "path": "lib/sdkwork/app_sdk/models/create_listener_certificate_binding_request.rb",
+      "sha256": "824333c0ee17add52dd3758faa9ce74660db3c932a9da415a6ea0a2516b8b3f6"
     },
     {
       "path": "lib/sdkwork/app_sdk/models/create_site_request.rb",
@@ -165,6 +173,14 @@
     {
       "path": "lib/sdkwork/app_sdk/models/import_git_source_version_request.rb",
       "sha256": "29cc9c555a4804a43d05785d40459266fb9334b6b1ce23a7c8508ae262ff2d18"
+    },
+    {
+      "path": "lib/sdkwork/app_sdk/models/listener_certificate_binding_response.rb",
+      "sha256": "de0ac16acfb9cd4b0af61008ac5b19208d4fe2cb1c2c8dd92b318df5d050822f"
+    },
+    {
+      "path": "lib/sdkwork/app_sdk/models/listener_certificate_summary_response.rb",
+      "sha256": "8c252a4b79d80f1b2d8ed68bf1dca40267c8ace7a4f2fcec86cc1349bdfe6f6a"
     },
     {
       "path": "lib/sdkwork/app_sdk/models/media_checksum.rb",
@@ -249,6 +265,14 @@
     {
       "path": "lib/sdkwork/app_sdk/models/sites_domains_list_response.rb",
       "sha256": "3a3772aec4260bdec7118c8ffd96c097842cac9ed96143247acf1afafffc0403"
+    },
+    {
+      "path": "lib/sdkwork/app_sdk/models/sites_domains_listener_certificate_bindings_create_response201.rb",
+      "sha256": "bd2d48641877844334e2d33367094cbe1cd50c3cb0d3f6a3ba26e2a1d027d704"
+    },
+    {
+      "path": "lib/sdkwork/app_sdk/models/sites_domains_listener_certificate_bindings_list_response.rb",
+      "sha256": "36e2dd40b5de3eecaa86e5718804bb20db907b5bd961b6f68886a26dfed41cae"
     },
     {
       "path": "lib/sdkwork/app_sdk/models/sites_domains_retrieve_response.rb",
@@ -336,7 +360,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "20fbf8be2d0bd02aa12862efa98b7a2de37cbb9485dfa808fd2337a2c40e9778"
+      "sha256": "e35e141633fb37fa279cfc7898a42499571dc95251aa80154dc8584adeb04d1a"
     },
     {
       "path": "sdkwork-sdk.json",

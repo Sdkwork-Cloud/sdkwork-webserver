@@ -13,5 +13,4 @@ sdkwork-database-sqlx.workspace = true
 
 [dev-dependencies]
 sqlx.workspace = true
-tempfile.workspace = true
 tokio.workspace = true

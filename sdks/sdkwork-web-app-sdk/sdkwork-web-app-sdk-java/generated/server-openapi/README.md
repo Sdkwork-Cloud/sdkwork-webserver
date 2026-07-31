@@ -41,6 +41,7 @@ client.setAccessToken("your-access-token");
         params.put("page", 1);
         params.put("page_size", 2);
         params.put("siteId", "00000000-0000-0000-0000-000000000001");
+        params.put("domainId", "00000000-0000-0000-0000-000000000001");
         CertificatesListResponse result = client.getCertificate().certificatesList(params);
         System.out.println(result);
     }
@@ -69,10 +70,10 @@ client.getHttpClient().setHeader("X-Custom-Header", "value");
 
 - `client.getSite()` - site API
 - `client.getDomain()` - domain API
+- `client.getCertificate()` - certificate API
 - `client.getSourceVersion()` - source_version API
 - `client.getDeployment()` - deployment API
 - `client.getEnvVariable()` - env_variable API
-- `client.getCertificate()` - certificate API
 - `client.getMonitor()` - monitor API
 
 ## Usage Examples
@@ -101,6 +102,19 @@ Map<String, Object> params = new LinkedHashMap<>();
 params.put("page", 1);
 params.put("page_size", 2);
 SitesDomainsListResponse result = client.getDomain().sitesDomainsList(siteId, params);
+System.out.println(result);
+```
+
+### certificate
+
+```java
+// 获取证书列表
+Map<String, Object> params = new LinkedHashMap<>();
+params.put("page", 1);
+params.put("page_size", 2);
+params.put("siteId", "00000000-0000-0000-0000-000000000001");
+params.put("domainId", "00000000-0000-0000-0000-000000000001");
+CertificatesListResponse result = client.getCertificate().certificatesList(params);
 System.out.println(result);
 ```
 
@@ -140,18 +154,6 @@ SitesEnvVariablesListResponse result = client.getEnvVariable().sitesEnvVariables
 System.out.println(result);
 ```
 
-### certificate
-
-```java
-// 获取证书列表
-Map<String, Object> params = new LinkedHashMap<>();
-params.put("page", 1);
-params.put("page_size", 2);
-params.put("siteId", "00000000-0000-0000-0000-000000000001");
-CertificatesListResponse result = client.getCertificate().certificatesList(params);
-System.out.println(result);
-```
-
 ### monitor
 
 ```java
@@ -169,6 +171,7 @@ try {
     params.put("page", 1);
     params.put("page_size", 2);
     params.put("siteId", "00000000-0000-0000-0000-000000000001");
+    params.put("domainId", "00000000-0000-0000-0000-000000000001");
     CertificatesListResponse result = client.getCertificate().certificatesList(params);
     System.out.println(result);
 } catch (Exception e) {

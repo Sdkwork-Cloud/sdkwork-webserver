@@ -1,17 +1,17 @@
+import type { CertificateIdentifierResponse } from './certificate-identifier-response';
+
 export interface CertificateResponse {
   id: string;
   certName: string;
-  domain?: string;
-  domainId?: string;
+  identifiers: CertificateIdentifierResponse[];
   certType?: number;
   issuer?: string;
   fingerprint?: string;
+  keyAlgorithm: 'ECDSA' | 'RSA';
   notBefore?: string;
   notAfter?: string;
   autoRenew?: boolean;
-  /** 0=idle, 1=renewing, 2=pending, 3=failed */
-  renewalStatus?: number;
-  /** 0=pending, 1=active, 2=expired, 3=revoked, 4=archived */
-  status: number;
+  renewalStatus?: 'IDLE' | 'RENEWING' | 'PENDING' | 'FAILED';
+  status: 'PENDING' | 'ISSUED' | 'FAILED' | 'EXPIRED' | 'REVOKED' | 'ARCHIVED';
   createdAt: string;
 }

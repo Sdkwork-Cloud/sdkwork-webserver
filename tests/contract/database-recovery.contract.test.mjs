@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
-test('database recovery drill is dual-engine, real, pinned, and bounded', () => {
+test('database recovery drill is PostgreSQL-native, real, pinned, and bounded', () => {
   const result = spawnSync(process.execPath, ['scripts/database-recovery-verify.mjs', '--dry-run'], {
     cwd: REPO_ROOT,
     encoding: 'utf8',
@@ -28,10 +28,7 @@ test('database recovery drill is dual-engine, real, pinned, and bounded', () => 
     containerCpus: 1,
     containerPids: 256,
   });
-  assert.ok(
-    plan.sqliteTest.includes('sqlite_consistent_backup_restores_integrity_and_tenant_data'),
-  );
-  assert.ok(plan.sqliteTest.includes('--exact'));
+  assert.equal(plan.sqliteTest, undefined);
   assert.ok(plan.postgres.dump.includes('pg_dump'));
   assert.ok(plan.postgres.dump.includes('--format=custom'));
   assert.ok(plan.postgres.dump.includes('--username=sdkwork_recovery'));

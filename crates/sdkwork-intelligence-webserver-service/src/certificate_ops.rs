@@ -20,13 +20,14 @@ impl WebService {
         }
         let owner_id = Self::owner_filter(context)?;
 
-        let (certificate_id, hostname) = self
+        let (certificate_id, hostnames) = self
             .repository
             .insert_certificate_pending(
                 tenant_id,
                 owner_id,
-                &request.domain_id,
+                &request.domain_ids,
                 request.cert_type,
+                &request.key_algorithm,
                 request.auto_renew,
             )
             .await?;
@@ -35,7 +36,12 @@ impl WebService {
 
         let issue_result = self
             .certificate_issuer
-            .issue(request.cert_type, &hostname, &cert_name)
+            .issue(
+                request.cert_type,
+                &hostnames,
+                &cert_name,
+                &request.key_algorithm,
+            )
             .await;
 
         let material = match issue_result {

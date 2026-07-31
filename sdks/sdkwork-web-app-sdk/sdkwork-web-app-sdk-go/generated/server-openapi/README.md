@@ -31,6 +31,7 @@ client.SetAccessToken("your-access-token")
         "page": 1,
         "page_size": 2,
         "siteId": "siteId",
+        "domainId": "domainId",
     }
     result, err := client.Certificate.CertificatesList(params)
     if err != nil {
@@ -62,10 +63,10 @@ client.SetHeader("X-Custom-Header", "value")
 
 - `client.Site` - site API
 - `client.Domain` - domain API
+- `client.Certificate` - certificate API
 - `client.SourceVersion` - source_version API
 - `client.Deployment` - deployment API
 - `client.EnvVariable` - env_variable API
-- `client.Certificate` - certificate API
 - `client.Monitor` - monitor API
 
 ## Usage Examples
@@ -99,6 +100,23 @@ params := map[string]interface{}{
     "page_size": 2,
 }
 result, err := client.Domain.SitesDomainsList(siteId, params)
+if err != nil {
+    panic(err)
+}
+fmt.Println(result)
+```
+
+### certificate
+
+```go
+// 获取证书列表
+params := map[string]interface{}{
+    "page": 1,
+    "page_size": 2,
+    "siteId": "siteId",
+    "domainId": "domainId",
+}
+result, err := client.Certificate.CertificatesList(params)
 if err != nil {
     panic(err)
 }
@@ -153,22 +171,6 @@ if err != nil {
 fmt.Println(result)
 ```
 
-### certificate
-
-```go
-// 获取证书列表
-params := map[string]interface{}{
-    "page": 1,
-    "page_size": 2,
-    "siteId": "siteId",
-}
-result, err := client.Certificate.CertificatesList(params)
-if err != nil {
-    panic(err)
-}
-fmt.Println(result)
-```
-
 ### monitor
 
 ```go
@@ -188,6 +190,7 @@ params := map[string]interface{}{
     "page": 1,
     "page_size": 2,
     "siteId": "siteId",
+    "domainId": "domainId",
 }
 _, err := client.Certificate.CertificatesList(params)
 if err != nil {

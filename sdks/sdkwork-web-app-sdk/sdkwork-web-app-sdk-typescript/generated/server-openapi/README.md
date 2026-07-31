@@ -31,6 +31,7 @@ const params = {
   page: 1,
   page_size: 2,
   siteId: 'siteId',
+  domainId: 'domainId',
 };
 const result = await client.certificate.list(params);
 ```
@@ -61,10 +62,10 @@ const client = new SdkworkAppClient({
 
 - `client.site` - site API
 - `client.domain` - domain API
+- `client.certificate` - certificate API
 - `client.sourceVersion` - source_version API
 - `client.deployment` - deployment API
 - `client.envVariable` - env_variable API
-- `client.certificate` - certificate API
 - `client.monitor` - monitor API
 
 ## Usage Examples
@@ -94,6 +95,19 @@ const params = {
   page_size: 2,
 };
 const result = await client.domain.sites.domains.list(siteId, params);
+```
+
+### certificate
+
+```typescript
+// 获取证书列表
+const params = {
+  page: 1,
+  page_size: 2,
+  siteId: 'siteId',
+  domainId: 'domainId',
+};
+const result = await client.certificate.list(params);
 ```
 
 ### source_version
@@ -132,18 +146,6 @@ const params = {
 const result = await client.envVariable.sites.envVariables.list(siteId, params);
 ```
 
-### certificate
-
-```typescript
-// 获取证书列表
-const params = {
-  page: 1,
-  page_size: 2,
-  siteId: 'siteId',
-};
-const result = await client.certificate.list(params);
-```
-
 ### monitor
 
 ```typescript
@@ -162,6 +164,7 @@ try {
     page: 1,
     page_size: 2,
     siteId: 'siteId',
+    domainId: 'domainId',
   };
   const result = await client.certificate.list(params);
 } catch (error) {

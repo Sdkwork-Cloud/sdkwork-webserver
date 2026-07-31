@@ -11,6 +11,8 @@ use sdkwork_webserver_contract::{
     CertificateRenewalCandidate, CertificateResponse, CreateCertificateRequest,
     CreateDeploymentRequest, CreateDomainRequest, CreateEnvVariableRequest,
     CreateHealthCheckRequest, CreateManagedDomainRequest, CreateNginxConfigRequest,
+    CreateListenerCertificateBindingRequest, ListenerCertificateBindingPage,
+    ListenerCertificateBindingResponse,
     CreateRootDomainHostnameRequest, CreateRootDomainRequest, CreateServerRequest,
     CreateServerResponse, CreateSiteRequest, CreateSourceVersionRequest, DeploymentPage,
     DeploymentResponse, DomainPage, DomainResponse, DomainVerifyResponse, EnvVariablePage,
@@ -347,10 +349,11 @@ impl WebRepositoryPort for WebRepository {
         tenant_id: i64,
         owner_id: Option<i64>,
         site_id: Option<&str>,
+        domain_id: Option<&str>,
         page: i32,
         page_size: i32,
     ) -> WebServiceResult<CertificatePage> {
-        self.list_certificates_repo(tenant_id, owner_id, site_id, page, page_size)
+        self.list_certificates_repo(tenant_id, owner_id, site_id, domain_id, page, page_size)
             .await
     }
 
@@ -364,16 +367,64 @@ impl WebRepositoryPort for WebRepository {
             .await
     }
 
+    async fn list_listener_certificate_bindings(
+        &self,
+        tenant_id: i64,
+        site_id: &str,
+        domain_id: &str,
+        page: i32,
+        page_size: i32,
+    ) -> WebServiceResult<ListenerCertificateBindingPage> {
+        self.list_listener_certificate_bindings_repo(
+            tenant_id,
+            site_id,
+            domain_id,
+            page,
+            page_size,
+        )
+        .await
+    }
+
+    async fn bind_listener_certificate(
+        &self,
+        tenant_id: i64,
+        site_id: &str,
+        domain_id: &str,
+        request: &CreateListenerCertificateBindingRequest,
+    ) -> WebServiceResult<ListenerCertificateBindingResponse> {
+        self.bind_listener_certificate_repo(tenant_id, site_id, domain_id, request)
+            .await
+    }
+
+    async fn unbind_listener_certificate(
+        &self,
+        tenant_id: i64,
+        site_id: &str,
+        domain_id: &str,
+        binding_id: &str,
+    ) -> WebServiceResult<()> {
+        self.unbind_listener_certificate_repo(tenant_id, site_id, domain_id, binding_id)
+            .await
+    }
+
     async fn insert_certificate_pending(
         &self,
         tenant_id: i64,
         owner_id: Option<i64>,
-        domain_id: &str,
+        domain_ids: &[String],
         cert_type: i32,
+        key_algorithm: &str,
         auto_renew: bool,
-    ) -> WebServiceResult<(String, String)> {
-        self.insert_certificate_pending_repo(tenant_id, owner_id, domain_id, cert_type, auto_renew)
-            .await
+    ) -> WebServiceResult<(String, Vec<String>)> {
+        self.insert_certificate_pending_repo(
+            tenant_id,
+            owner_id,
+            domain_ids,
+            cert_type,
+            key_algorithm,
+            auto_renew,
+        )
+        .await
     }
 
     async fn finalize_certificate(
@@ -659,7 +710,7 @@ impl WebRepositoryPort for WebRepository {
         server_id: &str,
         tenant_id: i64,
         if_sync_version: Option<&str>,
-    ) -> WebServiceResult<(AgentSyncResponse, Vec<String>)> {
+    ) -> WebServiceResult<AgentSyncResponse> {
         let agent = AuthenticatedAgent {
             server_uuid: server_id.to_string(),
             tenant_id,

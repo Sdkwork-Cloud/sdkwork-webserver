@@ -40,7 +40,7 @@
         "x-sdkwork-request-context": "WebRequestContext",
         "x-sdkwork-auth-mode": "dual-token",
         "x-sdkwork-permission": "web.sites.read",
-        "x-sdkwork-owner": "sdkwork-web-server",
+        "x-sdkwork-owner": "sdkwork-web",
         "parameters": [
           {
             "$ref": "#/components/parameters/PageParam"
@@ -150,7 +150,7 @@
             "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
-        "x-sdkwork-owner": "sdkwork-web-server",
+        "x-sdkwork-owner": "sdkwork-web",
         "requestBody": {
           "required": true,
           "content": {
@@ -219,7 +219,7 @@
         "x-sdkwork-request-context": "WebRequestContext",
         "x-sdkwork-auth-mode": "dual-token",
         "x-sdkwork-permission": "web.sites.read",
-        "x-sdkwork-owner": "sdkwork-web-server",
+        "x-sdkwork-owner": "sdkwork-web",
         "responses": {
           "200": {
             "description": "Managed application returned successfully.",
@@ -287,7 +287,7 @@
             "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
-        "x-sdkwork-owner": "sdkwork-web-server",
+        "x-sdkwork-owner": "sdkwork-web",
         "requestBody": {
           "required": true,
           "content": {
@@ -366,7 +366,7 @@
           }
         ],
         "x-sdkwork-rate-limit-tier": "auth-critical",
-        "x-sdkwork-owner": "sdkwork-web-server",
+        "x-sdkwork-owner": "sdkwork-web",
         "responses": {
           "204": {
             "description": "Managed application deleted successfully."
@@ -415,7 +415,7 @@
           }
         ],
         "x-sdkwork-rate-limit-tier": "auth-critical",
-        "x-sdkwork-owner": "sdkwork-web-server",
+        "x-sdkwork-owner": "sdkwork-web",
         "responses": {
           "200": {
             "description": "Managed application activated successfully.",
@@ -491,7 +491,7 @@
           }
         ],
         "x-sdkwork-rate-limit-tier": "auth-critical",
-        "x-sdkwork-owner": "sdkwork-web-server",
+        "x-sdkwork-owner": "sdkwork-web",
         "responses": {
           "200": {
             "description": "Managed application paused successfully.",
@@ -560,7 +560,7 @@
         "x-sdkwork-request-context": "WebRequestContext",
         "x-sdkwork-auth-mode": "dual-token",
         "x-sdkwork-permission": "web.sites.read",
-        "x-sdkwork-owner": "sdkwork-web-server",
+        "x-sdkwork-owner": "sdkwork-web",
         "parameters": [
           {
             "$ref": "#/components/parameters/PageParam"
@@ -633,7 +633,7 @@
             "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
-        "x-sdkwork-owner": "sdkwork-web-server",
+        "x-sdkwork-owner": "sdkwork-web",
         "requestBody": {
           "required": true,
           "content": {
@@ -712,7 +712,7 @@
           }
         ],
         "x-sdkwork-rate-limit-tier": "auth-critical",
-        "x-sdkwork-owner": "sdkwork-web-server",
+        "x-sdkwork-owner": "sdkwork-web",
         "responses": {
           "204": {
             "description": "Application domain unbound successfully."
@@ -763,7 +763,7 @@
             "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
-        "x-sdkwork-owner": "sdkwork-web-server",
+        "x-sdkwork-owner": "sdkwork-web",
         "responses": {
           "200": {
             "description": "Application domain verification result returned successfully.",
@@ -799,6 +799,256 @@
         "x-sdkwork-route-auth": "dual-token"
       }
     },
+    "/backend/v3/api/applications/{applicationId}/domains/{domainId}/listener_certificate_bindings": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ApplicationIdParam"
+        },
+        {
+          "$ref": "#/components/parameters/DomainIdParam"
+        }
+      ],
+      "get": {
+        "operationId": "applications.domains.listenerCertificateBindings.list",
+        "summary": "List certificates active on an application domain listener",
+        "description": "Returns an offset-paginated P1 list ordered by default status, priority, and stable binding id.",
+        "tags": [
+          "certificate"
+        ],
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-api-surface": "backend-api",
+        "x-sdkwork-api-authority": "sdkwork-web.backend",
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-permission": "web.certificates.read",
+        "x-sdkwork-owner": "sdkwork-web",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PageParam"
+          },
+          {
+            "$ref": "#/components/parameters/PageSizeParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Listener certificate bindings returned successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SdkWorkApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "required": [
+                        "data"
+                      ],
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "items",
+                            "pageInfo"
+                          ],
+                          "properties": {
+                            "items": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "#/components/schemas/ListenerCertificateBindingResponse"
+                              }
+                            },
+                            "pageInfo": {
+                              "$ref": "#/components/schemas/PageInfo"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        },
+        "x-sdkwork-route-auth": "dual-token"
+      },
+      "post": {
+        "operationId": "applications.domains.listenerCertificateBindings.create",
+        "summary": "Bind a certificate version to an application domain listener",
+        "tags": [
+          "certificate"
+        ],
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-api-surface": "backend-api",
+        "x-sdkwork-api-authority": "sdkwork-web.backend",
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-permission": "web.certificates.write",
+        "x-sdkwork-idempotent": true,
+        "x-sdkwork-rate-limit-tier": "auth-critical",
+        "x-sdkwork-owner": "sdkwork-web",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateListenerCertificateBindingRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Certificate version bound to the listener successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SdkWorkApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "required": [
+                        "data"
+                      ],
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "item"
+                          ],
+                          "properties": {
+                            "item": {
+                              "$ref": "#/components/schemas/ListenerCertificateBindingResponse"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request parameters.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Resource conflict.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        },
+        "x-sdkwork-route-auth": "dual-token"
+      }
+    },
+    "/backend/v3/api/applications/{applicationId}/domains/{domainId}/listener_certificate_bindings/{bindingId}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ApplicationIdParam"
+        },
+        {
+          "$ref": "#/components/parameters/DomainIdParam"
+        },
+        {
+          "$ref": "#/components/parameters/ListenerCertificateBindingIdParam"
+        }
+      ],
+      "delete": {
+        "operationId": "applications.domains.listenerCertificateBindings.delete",
+        "summary": "Remove a certificate from an application domain listener",
+        "tags": [
+          "certificate"
+        ],
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-api-surface": "backend-api",
+        "x-sdkwork-api-authority": "sdkwork-web.backend",
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-permission": "web.certificates.write",
+        "x-sdkwork-idempotent": true,
+        "x-sdkwork-rate-limit-tier": "auth-critical",
+        "x-sdkwork-owner": "sdkwork-web",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Listener certificate binding removed successfully."
+          },
+          "404": {
+            "description": "Resource not found.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        },
+        "x-sdkwork-route-auth": "dual-token"
+      }
+    },
     "/backend/v3/api/root_domains": {
       "get": {
         "operationId": "rootDomains.list",
@@ -817,7 +1067,7 @@
         "x-sdkwork-request-context": "WebRequestContext",
         "x-sdkwork-auth-mode": "dual-token",
         "x-sdkwork-permission": "web.sites.read",
-        "x-sdkwork-owner": "sdkwork-web-server",
+        "x-sdkwork-owner": "sdkwork-web",
         "parameters": [
           {
             "$ref": "#/components/parameters/PageParam"
@@ -902,7 +1152,7 @@
         "x-sdkwork-auth-mode": "dual-token",
         "x-sdkwork-permission": "web.sites.write",
         "x-sdkwork-idempotent": true,
-        "x-sdkwork-owner": "sdkwork-web-server",
+        "x-sdkwork-owner": "sdkwork-web",
         "parameters": [
           {
             "$ref": "#/components/parameters/IdempotencyKey"
@@ -996,7 +1246,7 @@
         "x-sdkwork-request-context": "WebRequestContext",
         "x-sdkwork-auth-mode": "dual-token",
         "x-sdkwork-permission": "web.sites.read",
-        "x-sdkwork-owner": "sdkwork-web-server",
+        "x-sdkwork-owner": "sdkwork-web",
         "responses": {
           "200": {
             "description": "Tenant root-domain Zone returned successfully.",
@@ -1060,7 +1310,7 @@
         "x-sdkwork-permission": "web.sites.write",
         "x-sdkwork-idempotent": true,
         "x-sdkwork-rate-limit-tier": "auth-critical",
-        "x-sdkwork-owner": "sdkwork-web-server",
+        "x-sdkwork-owner": "sdkwork-web",
         "parameters": [
           {
             "$ref": "#/components/parameters/IdempotencyKey"
@@ -1117,7 +1367,7 @@
         "x-sdkwork-request-context": "WebRequestContext",
         "x-sdkwork-auth-mode": "dual-token",
         "x-sdkwork-permission": "web.sites.read",
-        "x-sdkwork-owner": "sdkwork-web-server",
+        "x-sdkwork-owner": "sdkwork-web",
         "parameters": [
           {
             "$ref": "#/components/parameters/PageParam"
@@ -1195,7 +1445,7 @@
         "x-sdkwork-auth-mode": "dual-token",
         "x-sdkwork-permission": "web.sites.write",
         "x-sdkwork-idempotent": true,
-        "x-sdkwork-owner": "sdkwork-web-server",
+        "x-sdkwork-owner": "sdkwork-web",
         "parameters": [
           {
             "$ref": "#/components/parameters/IdempotencyKey"
@@ -1294,7 +1544,7 @@
         "x-sdkwork-request-context": "WebRequestContext",
         "x-sdkwork-auth-mode": "dual-token",
         "x-sdkwork-permission": "web.sites.read",
-        "x-sdkwork-owner": "sdkwork-web-server",
+        "x-sdkwork-owner": "sdkwork-web",
         "parameters": [
           {
             "$ref": "#/components/parameters/PageParam"
@@ -1362,7 +1612,7 @@
         "x-sdkwork-auth-mode": "dual-token",
         "x-sdkwork-permission": "web.sites.write",
         "x-sdkwork-idempotent": true,
-        "x-sdkwork-owner": "sdkwork-web-server",
+        "x-sdkwork-owner": "sdkwork-web",
         "parameters": [
           {
             "$ref": "#/components/parameters/IdempotencyKey"
@@ -1458,7 +1708,7 @@
         "x-sdkwork-permission": "web.sites.write",
         "x-sdkwork-idempotent": true,
         "x-sdkwork-rate-limit-tier": "auth-critical",
-        "x-sdkwork-owner": "sdkwork-web-server",
+        "x-sdkwork-owner": "sdkwork-web",
         "parameters": [
           {
             "$ref": "#/components/parameters/IdempotencyKey"
@@ -1516,7 +1766,7 @@
         "x-sdkwork-auth-mode": "dual-token",
         "x-sdkwork-permission": "web.sites.write",
         "x-sdkwork-idempotent": true,
-        "x-sdkwork-owner": "sdkwork-web-server",
+        "x-sdkwork-owner": "sdkwork-web",
         "parameters": [
           {
             "$ref": "#/components/parameters/IdempotencyKey"
@@ -1592,7 +1842,7 @@
         "x-sdkwork-permission": "web.sites.write",
         "x-sdkwork-idempotent": true,
         "x-sdkwork-rate-limit-tier": "auth-critical",
-        "x-sdkwork-owner": "sdkwork-web-server",
+        "x-sdkwork-owner": "sdkwork-web",
         "parameters": [
           {
             "$ref": "#/components/parameters/IdempotencyKey"
@@ -1691,7 +1941,7 @@
         "x-sdkwork-permission": "web.sites.write",
         "x-sdkwork-idempotent": true,
         "x-sdkwork-rate-limit-tier": "auth-critical",
-        "x-sdkwork-owner": "sdkwork-web-server",
+        "x-sdkwork-owner": "sdkwork-web",
         "parameters": [
           {
             "$ref": "#/components/parameters/IdempotencyKey"
@@ -1738,7 +1988,7 @@
         "x-sdkwork-request-context": "WebRequestContext",
         "x-sdkwork-auth-mode": "dual-token",
         "x-sdkwork-permission": "web.sites.read",
-        "x-sdkwork-owner": "sdkwork-web-server",
+        "x-sdkwork-owner": "sdkwork-web",
         "parameters": [
           {
             "$ref": "#/components/parameters/PageParam"
@@ -1809,7 +2059,7 @@
         "x-sdkwork-auth-mode": "dual-token",
         "x-sdkwork-permission": "web.sites.write",
         "x-sdkwork-idempotent": true,
-        "x-sdkwork-owner": "sdkwork-web-server",
+        "x-sdkwork-owner": "sdkwork-web",
         "parameters": [
           {
             "$ref": "#/components/parameters/IdempotencyKey"
@@ -1908,7 +2158,7 @@
         "x-sdkwork-permission": "web.sites.write",
         "x-sdkwork-idempotent": true,
         "x-sdkwork-rate-limit-tier": "auth-critical",
-        "x-sdkwork-owner": "sdkwork-web-server",
+        "x-sdkwork-owner": "sdkwork-web",
         "parameters": [
           {
             "$ref": "#/components/parameters/IdempotencyKey"
@@ -1998,7 +2248,7 @@
         "x-sdkwork-request-context": "WebRequestContext",
         "x-sdkwork-auth-mode": "dual-token",
         "x-sdkwork-permission": "web.sites.read",
-        "x-sdkwork-owner": "sdkwork-web-server",
+        "x-sdkwork-owner": "sdkwork-web",
         "responses": {
           "200": {
             "description": "Application source version returned successfully.",
@@ -2070,7 +2320,7 @@
         "x-sdkwork-request-context": "WebRequestContext",
         "x-sdkwork-auth-mode": "dual-token",
         "x-sdkwork-permission": "web.sites.read",
-        "x-sdkwork-owner": "sdkwork-web-server",
+        "x-sdkwork-owner": "sdkwork-web",
         "parameters": [
           {
             "$ref": "#/components/parameters/PageParam"
@@ -2153,7 +2403,7 @@
           }
         ],
         "x-sdkwork-rate-limit-tier": "auth-critical",
-        "x-sdkwork-owner": "sdkwork-web-server",
+        "x-sdkwork-owner": "sdkwork-web",
         "requestBody": {
           "required": true,
           "content": {
@@ -2232,7 +2482,7 @@
           }
         ],
         "x-sdkwork-rate-limit-tier": "auth-critical",
-        "x-sdkwork-owner": "sdkwork-web-server",
+        "x-sdkwork-owner": "sdkwork-web",
         "responses": {
           "200": {
             "description": "Application restore command created; deployment proceeds asynchronously.",
@@ -2296,13 +2546,23 @@
         "x-sdkwork-request-context": "WebRequestContext",
         "x-sdkwork-auth-mode": "dual-token",
         "x-sdkwork-permission": "web.certificates.read",
-        "x-sdkwork-owner": "sdkwork-web-server",
+        "x-sdkwork-owner": "sdkwork-web",
         "parameters": [
           {
             "$ref": "#/components/parameters/PageParam"
           },
           {
             "$ref": "#/components/parameters/PageSizeParam"
+          },
+          {
+            "name": "domainId",
+            "in": "query",
+            "required": false,
+            "description": "Limit certificates to those whose SAN identifiers cover this domain.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "responses": {
@@ -2370,7 +2630,7 @@
           }
         ],
         "x-sdkwork-rate-limit-tier": "auth-critical",
-        "x-sdkwork-owner": "sdkwork-web-server",
+        "x-sdkwork-owner": "sdkwork-web",
         "requestBody": {
           "required": true,
           "content": {
@@ -2445,7 +2705,7 @@
             "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
-        "x-sdkwork-owner": "sdkwork-web-server",
+        "x-sdkwork-owner": "sdkwork-web",
         "requestBody": {
           "required": true,
           "content": {
@@ -2521,7 +2781,7 @@
           }
         ],
         "x-sdkwork-rate-limit-tier": "auth-critical",
-        "x-sdkwork-owner": "sdkwork-web-server",
+        "x-sdkwork-owner": "sdkwork-web",
         "responses": {
           "200": {
             "description": "Canonical certificate renewed successfully.",
@@ -2575,7 +2835,7 @@
         "x-sdkwork-request-context": "WebRequestContext",
         "x-sdkwork-auth-mode": "dual-token",
         "x-sdkwork-permission": "web.certificates.read",
-        "x-sdkwork-owner": "sdkwork-web-server",
+        "x-sdkwork-owner": "sdkwork-web",
         "parameters": [
           {
             "$ref": "#/components/parameters/PageParam"
@@ -2644,7 +2904,7 @@
         "x-sdkwork-request-context": "WebRequestContext",
         "x-sdkwork-auth-mode": "dual-token",
         "x-sdkwork-permission": "web.nginx.write",
-        "x-sdkwork-owner": "sdkwork-web-server",
+        "x-sdkwork-owner": "sdkwork-web",
         "parameters": [
           {
             "$ref": "#/components/parameters/PageParam"
@@ -2749,7 +3009,7 @@
             "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
-        "x-sdkwork-owner": "sdkwork-web-server",
+        "x-sdkwork-owner": "sdkwork-web",
         "requestBody": {
           "required": true,
           "content": {
@@ -2827,7 +3087,7 @@
         "x-sdkwork-request-context": "WebRequestContext",
         "x-sdkwork-auth-mode": "dual-token",
         "x-sdkwork-permission": "web.nginx.write",
-        "x-sdkwork-owner": "sdkwork-web-server",
+        "x-sdkwork-owner": "sdkwork-web",
         "responses": {
           "200": {
             "description": "Nginx configuration returned successfully.",
@@ -2898,7 +3158,7 @@
             "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
-        "x-sdkwork-owner": "sdkwork-web-server",
+        "x-sdkwork-owner": "sdkwork-web",
         "requestBody": {
           "required": true,
           "content": {
@@ -2986,7 +3246,7 @@
         "x-sdkwork-request-context": "WebRequestContext",
         "x-sdkwork-auth-mode": "dual-token",
         "x-sdkwork-permission": "web.nginx.write",
-        "x-sdkwork-owner": "sdkwork-web-server",
+        "x-sdkwork-owner": "sdkwork-web",
         "responses": {
           "200": {
             "description": "Nginx configuration validation result.",
@@ -3060,7 +3320,7 @@
             "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
-        "x-sdkwork-owner": "sdkwork-web-server",
+        "x-sdkwork-owner": "sdkwork-web",
         "x-sdkwork-rate-limit-tier": "auth-critical",
         "responses": {
           "200": {
@@ -3134,7 +3394,7 @@
             "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
-        "x-sdkwork-owner": "sdkwork-web-server",
+        "x-sdkwork-owner": "sdkwork-web",
         "responses": {
           "200": {
             "description": "Nginx reload result.",
@@ -3191,7 +3451,7 @@
         "x-sdkwork-request-context": "WebRequestContext",
         "x-sdkwork-auth-mode": "dual-token",
         "x-sdkwork-permission": "web.nginx.write",
-        "x-sdkwork-owner": "sdkwork-web-server",
+        "x-sdkwork-owner": "sdkwork-web",
         "responses": {
           "200": {
             "description": "Nginx status returned successfully.",
@@ -3248,7 +3508,7 @@
         "x-sdkwork-request-context": "WebRequestContext",
         "x-sdkwork-auth-mode": "dual-token",
         "x-sdkwork-permission": "web.servers.read",
-        "x-sdkwork-owner": "sdkwork-web-server",
+        "x-sdkwork-owner": "sdkwork-web",
         "parameters": [
           {
             "$ref": "#/components/parameters/PageParam"
@@ -3325,7 +3585,7 @@
             "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
-        "x-sdkwork-owner": "sdkwork-web-server",
+        "x-sdkwork-owner": "sdkwork-web",
         "x-sdkwork-rate-limit-tier": "auth-critical",
         "requestBody": {
           "required": true,
@@ -3393,7 +3653,7 @@
         "x-sdkwork-request-context": "WebRequestContext",
         "x-sdkwork-auth-mode": "api-key",
         "x-sdkwork-route-auth": "agent-token",
-        "x-sdkwork-owner": "sdkwork-web-server",
+        "x-sdkwork-owner": "sdkwork-web",
         "x-sdkwork-rate-limit-tier": "auth-critical",
         "requestBody": {
           "required": true,
@@ -3471,7 +3731,7 @@
         "x-sdkwork-request-context": "WebRequestContext",
         "x-sdkwork-auth-mode": "api-key",
         "x-sdkwork-route-auth": "agent-token",
-        "x-sdkwork-owner": "sdkwork-web-server",
+        "x-sdkwork-owner": "sdkwork-web",
         "x-sdkwork-rate-limit-tier": "auth-critical",
         "parameters": [
           {
@@ -3549,7 +3809,7 @@
         "x-sdkwork-request-context": "WebRequestContext",
         "x-sdkwork-auth-mode": "dual-token",
         "x-sdkwork-permission": "web.auditLogs.read",
-        "x-sdkwork-owner": "sdkwork-web-server",
+        "x-sdkwork-owner": "sdkwork-web",
         "parameters": [
           {
             "$ref": "#/components/parameters/PageParam"
@@ -3722,6 +3982,15 @@
       },
       "CertificateIdParam": {
         "name": "certificateId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "ListenerCertificateBindingIdParam": {
+        "name": "bindingId",
         "in": "path",
         "required": true,
         "schema": {
@@ -4807,13 +5076,20 @@
         "type": "object",
         "additionalProperties": false,
         "required": [
-          "domainId",
+          "domainIds",
           "certType"
         ],
         "properties": {
-          "domainId": {
-            "type": "string",
-            "format": "uuid"
+          "domainIds": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 8,
+            "uniqueItems": true,
+            "description": "Ordered exact or wildcard domain identifiers included in the certificate SAN extension.",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
           },
           "certType": {
             "type": "integer",
@@ -4823,9 +5099,50 @@
             ],
             "description": "1=Let's Encrypt, 3=self-signed. Custom import is a separate future workflow."
           },
+          "keyAlgorithm": {
+            "type": "string",
+            "enum": [
+              "ECDSA",
+              "RSA"
+            ],
+            "default": "ECDSA"
+          },
           "autoRenew": {
             "type": "boolean",
             "default": true
+          }
+        }
+      },
+      "CertificateIdentifierResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "domainId",
+          "hostname",
+          "identifierType",
+          "position"
+        ],
+        "properties": {
+          "domainId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "hostname": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 253
+          },
+          "identifierType": {
+            "type": "string",
+            "enum": [
+              "EXACT",
+              "WILDCARD"
+            ]
+          },
+          "position": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 7
           }
         }
       },
@@ -4847,6 +5164,8 @@
         "required": [
           "id",
           "certName",
+          "identifiers",
+          "keyAlgorithm",
           "status",
           "createdAt"
         ],
@@ -4858,12 +5177,13 @@
           "certName": {
             "type": "string"
           },
-          "domain": {
-            "type": "string"
-          },
-          "domainId": {
-            "type": "string",
-            "format": "uuid"
+          "identifiers": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 8,
+            "items": {
+              "$ref": "#/components/schemas/CertificateIdentifierResponse"
+            }
           },
           "certType": {
             "type": "integer"
@@ -4874,6 +5194,13 @@
           "fingerprint": {
             "type": "string",
             "pattern": "^[a-f0-9]{64}$"
+          },
+          "keyAlgorithm": {
+            "type": "string",
+            "enum": [
+              "ECDSA",
+              "RSA"
+            ]
           },
           "notBefore": {
             "type": "string",
@@ -4887,16 +5214,191 @@
             "type": "boolean"
           },
           "renewalStatus": {
-            "type": "integer",
-            "description": "0=idle, 1=renewing, 2=pending, 3=failed"
+            "type": "string",
+            "enum": [
+              "IDLE",
+              "RENEWING",
+              "PENDING",
+              "FAILED"
+            ]
           },
           "status": {
-            "type": "integer",
-            "description": "0=pending, 1=active, 2=expired, 3=revoked, 4=archived"
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "ISSUED",
+              "FAILED",
+              "EXPIRED",
+              "REVOKED",
+              "ARCHIVED"
+            ]
           },
           "createdAt": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "CreateListenerCertificateBindingRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "certificateId"
+        ],
+        "properties": {
+          "certificateId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "certificateVersionId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Immutable certificate version. Omit to bind the certificate's current active version."
+          },
+          "priority": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000,
+            "default": 100
+          },
+          "isDefault": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      },
+      "ListenerCertificateBindingResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "siteId",
+          "domainId",
+          "certificateId",
+          "desiredCertificateVersionId",
+          "desiredCertificate",
+          "keyAlgorithm",
+          "priority",
+          "isDefault",
+          "status",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "siteId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "domainId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "certificateId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "desiredCertificateVersionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "currentCertificateVersionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "desiredCertificate": {
+            "$ref": "#/components/schemas/ListenerCertificateSummaryResponse"
+          },
+          "currentCertificate": {
+            "$ref": "#/components/schemas/ListenerCertificateSummaryResponse"
+          },
+          "keyAlgorithm": {
+            "type": "string",
+            "enum": [
+              "ECDSA",
+              "RSA"
+            ]
+          },
+          "priority": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000
+          },
+          "isDefault": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "DEPLOYING",
+              "ACTIVE",
+              "PAUSED",
+              "FAILED",
+              "ARCHIVED"
+            ]
+          },
+          "activatedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ListenerCertificateSummaryResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "certName",
+          "identifiers",
+          "status"
+        ],
+        "properties": {
+          "certName": {
+            "type": "string"
+          },
+          "identifiers": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 8,
+            "items": {
+              "$ref": "#/components/schemas/CertificateIdentifierResponse"
+            }
+          },
+          "issuer": {
+            "type": "string"
+          },
+          "fingerprint": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "notAfter": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "ISSUED",
+              "FAILED",
+              "EXPIRED",
+              "REVOKED",
+              "ARCHIVED"
+            ]
           }
         }
       },
@@ -4934,7 +5436,8 @@
             "enum": [
               "SYNCED",
               "PENDING",
-              "OFFLINE"
+              "OFFLINE",
+              "UNASSIGNED"
             ]
           },
           "lastHeartbeatAt": {
@@ -5220,6 +5723,56 @@
             "type": "string",
             "pattern": "^sv1:[a-f0-9]{64}$",
             "description": "Last successfully applied syncVersion reported by the edge agent."
+          },
+          "certificateObservations": {
+            "type": "array",
+            "maxItems": 2048,
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/AgentCertificateObservation"
+            }
+          }
+        }
+      },
+      "AgentCertificateObservation": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "certificateId",
+          "fingerprint",
+          "syncVersion",
+          "state",
+          "observedAt"
+        ],
+        "properties": {
+          "certificateId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fingerprint": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "syncVersion": {
+            "type": "string",
+            "pattern": "^sv1:[a-f0-9]{64}$"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "STAGED",
+              "ACTIVE",
+              "SERVED",
+              "FAILED"
+            ]
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "failureCode": {
+            "type": "string",
+            "pattern": "^[A-Z0-9][A-Z0-9_.-]{0,63}$"
           }
         }
       },
@@ -5325,6 +5878,7 @@
           "certificateId",
           "certName",
           "fingerprint",
+          "hostnames",
           "fullchainPem",
           "privkeyPem"
         ],
@@ -5341,6 +5895,17 @@
           "fingerprint": {
             "type": "string",
             "pattern": "^[a-f0-9]{64}$"
+          },
+          "hostnames": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 128,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 253
+            }
           },
           "fullchainPem": {
             "type": "string",

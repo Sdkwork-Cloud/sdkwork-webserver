@@ -4,10 +4,10 @@ import com.sdkwork.common.core.SdkConfig
 import com.sdkwork.web.backend.sdk.http.HttpClient
 import com.sdkwork.web.backend.sdk.api.ApplicationApi
 import com.sdkwork.web.backend.sdk.api.ApplicationDomainApi
+import com.sdkwork.web.backend.sdk.api.CertificateApi
 import com.sdkwork.web.backend.sdk.api.DomainApi
 import com.sdkwork.web.backend.sdk.api.ApplicationSourceVersionApi
 import com.sdkwork.web.backend.sdk.api.ApplicationDeploymentApi
-import com.sdkwork.web.backend.sdk.api.CertificateApi
 import com.sdkwork.web.backend.sdk.api.CertificateDistributionApi
 import com.sdkwork.web.backend.sdk.api.NginxApi
 import com.sdkwork.web.backend.sdk.api.ServerApi
@@ -19,10 +19,10 @@ open class SdkworkBackendClient {
 
     lateinit var application: ApplicationApi
     lateinit var applicationDomain: ApplicationDomainApi
+    lateinit var certificate: CertificateApi
     lateinit var domain: DomainApi
     lateinit var applicationSourceVersion: ApplicationSourceVersionApi
     lateinit var applicationDeployment: ApplicationDeploymentApi
-    lateinit var certificate: CertificateApi
     lateinit var certificateDistribution: CertificateDistributionApi
     lateinit var nginx: NginxApi
     lateinit var server: ServerApi
@@ -33,10 +33,10 @@ open class SdkworkBackendClient {
         this.httpClient = HttpClient(baseUrl)
         application = ApplicationApi(httpClient)
         applicationDomain = ApplicationDomainApi(httpClient)
+        certificate = CertificateApi(httpClient)
         domain = DomainApi(httpClient)
         applicationSourceVersion = ApplicationSourceVersionApi(httpClient)
         applicationDeployment = ApplicationDeploymentApi(httpClient)
-        certificate = CertificateApi(httpClient)
         certificateDistribution = CertificateDistributionApi(httpClient)
         nginx = NginxApi(httpClient)
         server = ServerApi(httpClient)
@@ -48,10 +48,10 @@ open class SdkworkBackendClient {
         this.httpClient = HttpClient(config)
         application = ApplicationApi(httpClient)
         applicationDomain = ApplicationDomainApi(httpClient)
+        certificate = CertificateApi(httpClient)
         domain = DomainApi(httpClient)
         applicationSourceVersion = ApplicationSourceVersionApi(httpClient)
         applicationDeployment = ApplicationDeploymentApi(httpClient)
-        certificate = CertificateApi(httpClient)
         certificateDistribution = CertificateDistributionApi(httpClient)
         nginx = NginxApi(httpClient)
         server = ServerApi(httpClient)

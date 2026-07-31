@@ -4,22 +4,73 @@ declare(strict_types=1);
 
 namespace SDKWork\Web\BackendSdk\Api;
 
+use SDKWork\Web\BackendSdk\Models\ApplicationsDomainsListenerCertificateBindingsCreateResponse201;
+use SDKWork\Web\BackendSdk\Models\ApplicationsDomainsListenerCertificateBindingsListResponse;
 use SDKWork\Web\BackendSdk\Models\CertificatesCreateResponse201;
 use SDKWork\Web\BackendSdk\Models\CertificatesListResponse;
 use SDKWork\Web\BackendSdk\Models\CertificatesRenewResponse;
 use SDKWork\Web\BackendSdk\Models\CertificatesUpdateResponse;
 use SDKWork\Web\BackendSdk\Models\CreateCertificateRequest;
+use SDKWork\Web\BackendSdk\Models\CreateListenerCertificateBindingRequest;
 use SDKWork\Web\BackendSdk\Models\UpdateCertificateRequest;
 
 final class CertificateApi extends BaseApi
 {
+    /** List certificates active on an application domain listener */
+    public function applicationsDomainsListenerCertificateBindingsList(string $applicationId, string $domainId, ?int $page = null, ?int $pageSize = null): ?ApplicationsDomainsListenerCertificateBindingsListResponse
+    {
+        $path = $this->interpolatePath('/backend/v3/api/applications/{applicationId}/domains/{domainId}/listener_certificate_bindings', ['applicationId' => $this->serializePathParameter($applicationId, new PathParameterSpec('applicationId', 'simple', false)), 'domainId' => $this->serializePathParameter($domainId, new PathParameterSpec('domainId', 'simple', false))]);
+        $query = $this->buildQueryString([
+            new QueryParameterSpec('page', $page, 'form', true, false, null),
+            new QueryParameterSpec('page_size', $pageSize, 'form', true, false, null),
+        ]);
+        $path = $this->appendQueryString($path, $query);
+        $result = $this->client->request('GET', $path, []);
+        return is_array($result) ? ApplicationsDomainsListenerCertificateBindingsListResponse::fromArray($result) : null;
+    }
+
+    /** Bind a certificate version to an application domain listener */
+    public function applicationsDomainsListenerCertificateBindingsCreate(string $applicationId, string $domainId, array|CreateListenerCertificateBindingRequest $body, string $idempotencyKey): ?ApplicationsDomainsListenerCertificateBindingsCreateResponse201
+    {
+        $path = $this->interpolatePath('/backend/v3/api/applications/{applicationId}/domains/{domainId}/listener_certificate_bindings', ['applicationId' => $this->serializePathParameter($applicationId, new PathParameterSpec('applicationId', 'simple', false)), 'domainId' => $this->serializePathParameter($domainId, new PathParameterSpec('domainId', 'simple', false))]);
+        $payload = $body instanceof CreateListenerCertificateBindingRequest ? $body->toArray() : $body;
+        $requestHeaders = $this->buildRequestHeaders(
+            [
+                'Idempotency-Key' => new HeaderParameterSpec($idempotencyKey, 'simple', false, null),
+            ],
+            []
+        );
+        $result = $this->client->request('POST', $path, [
+            'headers' => $requestHeaders,
+            'json' => $payload,
+        ]);
+        return is_array($result) ? ApplicationsDomainsListenerCertificateBindingsCreateResponse201::fromArray($result) : null;
+    }
+
+    /** Remove a certificate from an application domain listener */
+    public function applicationsDomainsListenerCertificateBindingsDelete(string $applicationId, string $domainId, string $bindingId, string $idempotencyKey): mixed
+    {
+        $path = $this->interpolatePath('/backend/v3/api/applications/{applicationId}/domains/{domainId}/listener_certificate_bindings/{bindingId}', ['applicationId' => $this->serializePathParameter($applicationId, new PathParameterSpec('applicationId', 'simple', false)), 'domainId' => $this->serializePathParameter($domainId, new PathParameterSpec('domainId', 'simple', false)), 'bindingId' => $this->serializePathParameter($bindingId, new PathParameterSpec('bindingId', 'simple', false))]);
+        $requestHeaders = $this->buildRequestHeaders(
+            [
+                'Idempotency-Key' => new HeaderParameterSpec($idempotencyKey, 'simple', false, null),
+            ],
+            []
+        );
+        $result = $this->client->request('DELETE', $path, [
+            'headers' => $requestHeaders,
+        ]);
+        return $result;
+    }
+
     /** List canonical certificates */
-    public function certificatesList(?int $page = null, ?int $pageSize = null): ?CertificatesListResponse
+    public function certificatesList(?int $page = null, ?int $pageSize = null, ?string $domainId = null): ?CertificatesListResponse
     {
         $path = '/backend/v3/api/certificates';
         $query = $this->buildQueryString([
             new QueryParameterSpec('page', $page, 'form', true, false, null),
             new QueryParameterSpec('page_size', $pageSize, 'form', true, false, null),
+            new QueryParameterSpec('domainId', $domainId, 'form', true, false, null),
         ]);
         $path = $this->appendQueryString($path, $query);
         $result = $this->client->request('GET', $path, []);

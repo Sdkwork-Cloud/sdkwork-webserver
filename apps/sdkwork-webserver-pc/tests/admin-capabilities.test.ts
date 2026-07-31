@@ -292,13 +292,13 @@ describe("admin certificate capability", () => {
 
     const registry = createWebserverAdminCertificateRegistry(client);
     await registry["managed-certificates"]?.load({ page: 2, pageSize: 20 });
-    await registry["managed-certificates"]?.actions[0]?.execute({ body: { domainId: "domain-1", certType: 1, autoRenew: true }, idempotencyKey: "certificate-create-1" });
+    await registry["managed-certificates"]?.actions[0]?.execute({ body: { domainIds: ["domain-1", "domain-2"], certType: 1, keyAlgorithm: "RSA", autoRenew: true }, idempotencyKey: "certificate-create-1" });
     await registry["managed-certificates"]?.actions[1]?.execute({ body: { autoRenew: false }, idempotencyKey: "certificate-update-1", selectedItem: { id: "certificate-1" } });
     await registry["managed-certificates"]?.actions[2]?.execute({ body: {}, idempotencyKey: "certificate-renew-1", selectedItem: { id: "certificate-1" } });
     await registry["certificate-distribution"]?.load({ page: 1, pageSize: 20 });
 
     expect(list).toHaveBeenCalledWith({ page: 2, pageSize: 20 });
-    expect(create).toHaveBeenCalledWith({ domainId: "domain-1", certType: 1, autoRenew: true }, { idempotencyKey: "certificate-create-1" });
+    expect(create).toHaveBeenCalledWith({ domainIds: ["domain-1", "domain-2"], certType: 1, keyAlgorithm: "RSA", autoRenew: true }, { idempotencyKey: "certificate-create-1" });
     expect(update).toHaveBeenCalledWith("certificate-1", { autoRenew: false }, { idempotencyKey: "certificate-update-1" });
     expect(renew).toHaveBeenCalledWith("certificate-1", { idempotencyKey: "certificate-renew-1" });
     expect(listDistribution).toHaveBeenCalledWith({ page: 1, pageSize: 20 });
@@ -312,7 +312,7 @@ describe("admin certificate capability", () => {
     if (!issue) throw new Error("certificate issue action is unavailable");
 
     await expect(issue.execute({
-      body: { domainId: "domain-1", certType: 3, autoRenew: true },
+      body: { domainIds: ["domain-1"], certType: 3, keyAlgorithm: "ECDSA", autoRenew: true },
       idempotencyKey: "invalid-self-signed-renewal",
     })).rejects.toThrow("unavailable for self-signed certificates");
     expect(create).not.toHaveBeenCalled();
@@ -335,10 +335,11 @@ describe("admin certificate capability", () => {
     if (!issue?.loadFieldOptions) throw new Error("certificate domain selector is unavailable");
 
     const options = await issue.loadFieldOptions({ body: issue.bodyTemplate });
-    expect(options.domainId).toEqual([
+    expect(options.domainIds).toEqual([
       { label: "api.example.test - Public API", value: "domain-1" },
       { label: "ready.example.test - Unbound", value: "domain-2" },
     ]);
+    expect(issue.multipleFields).toEqual(["domainIds"]);
     expect(listDomains).toHaveBeenCalledWith({ page: 1, pageSize: 100 });
   });
 });
@@ -422,12 +423,12 @@ describe("admin domain capability", () => {
 
     const issue = source.actions.find((candidate) => candidate.id === "issue-certificate");
     await issue?.execute({
-      body: { certType: 1, autoRenew: true },
+      body: { certType: 1, keyAlgorithm: "ECDSA", autoRenew: true },
       idempotencyKey: "domain-certificate-1",
       selectedItem: { id: "domain-1" },
     });
     expect(issueCertificate).toHaveBeenCalledWith(
-      { domainId: "domain-1", certType: 1, autoRenew: true },
+      { domainIds: ["domain-1"], certType: 1, keyAlgorithm: "ECDSA", autoRenew: true },
       { idempotencyKey: "domain-certificate-1" },
     );
 

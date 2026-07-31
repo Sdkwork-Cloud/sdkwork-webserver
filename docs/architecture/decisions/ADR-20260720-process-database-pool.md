@@ -1,32 +1,42 @@
 # ADR-20260720 Process Database Pool Ownership
 
-Status: Accepted
+Status: accepted
+Owner: sdkwork-web-server
+Date: 2026-07-20
+Updated: 2026-07-31
+Requirement: REQ-2026-0004
+Specs: DATABASE_SPEC.md, DATABASE_FRAMEWORK_SPEC.md, RUST_CODE_SPEC.md
+
+## Context
+
+Lifecycle, readiness, repositories, and shutdown must share one bounded authoritative database
+pool. Secondary pools and driver-erased bridges make connection budgets and transaction behavior
+unobservable.
 
 ## Decision
 
-Every Web Server process enables the `sdkwork-database` process-shared pool guard before database bootstrap. `sdkwork-webserver-database-host` creates and owns one typed `DatabasePool` per process and performs lifecycle initialization against that pool.
+Every Web Server process enables the `sdkwork-database` process-shared pool guard before database
+bootstrap. `sdkwork-webserver-database-host` creates and owns one PostgreSQL `DatabasePool` and
+performs lifecycle initialization against it. `PostgresWebRepository` consumes the exact installed
+`sqlx::PgPool` through `WebRepositoryPort`.
 
-The repository consumes the exact installed pool returned by the database host. A single authored repository implementation is compiled for both concrete SQLx drivers:
-
-- `PostgresWebRepository` consumes `sqlx::PgPool`.
-- `SqliteWebRepository` consumes `sqlx::SqlitePool`.
-
-Runtime selection matches the framework `DatabasePool` variant and injects the corresponding repository through `WebRepositoryPort`. No route, service, worker, or repository code constructs a secondary low-level pool.
+No route, service, worker, or repository constructs a secondary low-level pool. Alternative
+engines and `sqlx::AnyPool` are not Web authoritative-server profiles.
 
 ## Consequences
 
-- Lifecycle, readiness, repository work, and graceful shutdown share one bounded connection budget.
-- PostgreSQL and SQLite keep one business implementation while retaining compile-time driver typing.
-- SQL differences remain explicit through `DatabaseEngine` expression helpers and dual-engine parity tests.
-- `sqlx::AnyPool`, temporary driver exceptions, and temporary pool-count environment variables are prohibited in production source and configuration.
+- Lifecycle, readiness, repository work, and graceful shutdown share one connection budget.
+- PostgreSQL types, constraints, isolation, and query plans are tested directly.
+- Runtime engine branching and dual-engine expression helpers are removed from the Web product.
 
 ## Verification
 
 ```powershell
 node ../sdkwork-specs/tools/check-process-shared-database-pool.mjs --root .
 pnpm db:validate
-cargo test -p sdkwork-webserver-database-host
-cargo test -p sdkwork-intelligence-webserver-repository-sqlx
+pnpm test:postgres:required
 ```
 
-The PostgreSQL parity test requires `SDKWORK_DATABASE_TEST_POSTGRES_URL` pointing to an explicitly disposable empty database and remains a required CI release gate.
+## Supersedes / Superseded By
+
+This record replaces its prelaunch dual-driver text while retaining the stable ADR identifier.

@@ -52,10 +52,10 @@ $client->setHeader('X-Custom-Header', 'value');
 
 - `$client->application` - application API
 - `$client->applicationDomain` - application_domain API
+- `$client->certificate` - certificate API
 - `$client->domain` - domain API
 - `$client->applicationSourceVersion` - application_source_version API
 - `$client->applicationDeployment` - application_deployment API
-- `$client->certificate` - certificate API
 - `$client->certificateDistribution` - certificate_distribution API
 - `$client->nginx` - nginx API
 - `$client->server` - server API
@@ -84,6 +84,17 @@ var_dump($result);
 $applicationId = '1';
 $params = ['page' => 1, 'page_size' => 2];
 $result = $client->applicationDomain->applicationsDomainsList($applicationId, $params);
+var_dump($result);
+```
+
+### certificate
+
+```php
+<?php
+
+// List canonical certificates
+$params = ['page' => 1, 'page_size' => 2, 'domainId' => '00000000-0000-0000-0000-000000000001'];
+$result = $client->certificate->certificatesList($params);
 var_dump($result);
 ```
 
@@ -119,17 +130,6 @@ var_dump($result);
 $applicationId = '1';
 $params = ['page' => 1, 'page_size' => 2, 'status' => 3];
 $result = $client->applicationDeployment->applicationsDeploymentsList($applicationId, $params);
-var_dump($result);
-```
-
-### certificate
-
-```php
-<?php
-
-// List canonical certificates
-$params = ['page' => 1, 'page_size' => 2];
-$result = $client->certificate->certificatesList($params);
 var_dump($result);
 ```
 

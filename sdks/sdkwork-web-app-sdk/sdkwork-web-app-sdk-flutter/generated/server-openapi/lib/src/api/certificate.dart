@@ -11,12 +11,53 @@ class CertificateApi {
 
   CertificateApi(this._client);
 
+  /// List certificates active on the domain listener
+  Future<SitesDomainsListenerCertificateBindingsListResponse?> sitesDomainsListenerCertificateBindingsList(String siteId, String domainId, [int? page, int? pageSize]) async {
+    final query = buildQueryString([
+      QueryParameterSpec('page', page, 'form', true, false, null),
+      QueryParameterSpec('page_size', pageSize, 'form', true, false, null)
+    ]);
+    final response = await _client.get(ApiPaths.appendQueryString(ApiPaths.appPath('/sites/${serializePathParameter(siteId, const PathParameterSpec('siteId', 'simple', false))}/domains/${serializePathParameter(domainId, const PathParameterSpec('domainId', 'simple', false))}/listener_certificate_bindings'), query));
+    return (() {
+      final map = sdkworkResponseAsMap(response);
+      return map == null ? null : SitesDomainsListenerCertificateBindingsListResponse.fromJson(map);
+    })();
+  }
+
+  /// Bind a certificate version to the domain listener
+  Future<SitesDomainsListenerCertificateBindingsCreateResponse201?> sitesDomainsListenerCertificateBindingsCreate(String siteId, String domainId, CreateListenerCertificateBindingRequest body, String idempotencyKey) async {
+    final requestHeaders = buildRequestHeaders(
+      <String, HeaderParameterSpec>{
+        'Idempotency-Key': HeaderParameterSpec(idempotencyKey, 'simple', false, null),
+      },
+      <String, HeaderParameterSpec>{},
+    );
+    final payload = body.toJson();
+    final response = await _client.post(ApiPaths.appPath('/sites/${serializePathParameter(siteId, const PathParameterSpec('siteId', 'simple', false))}/domains/${serializePathParameter(domainId, const PathParameterSpec('domainId', 'simple', false))}/listener_certificate_bindings'), body: payload, headers: requestHeaders, contentType: 'application/json');
+    return (() {
+      final map = sdkworkResponseAsMap(response);
+      return map == null ? null : SitesDomainsListenerCertificateBindingsCreateResponse201.fromJson(map);
+    })();
+  }
+
+  /// Remove a certificate from the domain listener
+  Future<void> sitesDomainsListenerCertificateBindingsDelete(String siteId, String domainId, String bindingId, String idempotencyKey) async {
+    final requestHeaders = buildRequestHeaders(
+      <String, HeaderParameterSpec>{
+        'Idempotency-Key': HeaderParameterSpec(idempotencyKey, 'simple', false, null),
+      },
+      <String, HeaderParameterSpec>{},
+    );
+    await _client.delete(ApiPaths.appPath('/sites/${serializePathParameter(siteId, const PathParameterSpec('siteId', 'simple', false))}/domains/${serializePathParameter(domainId, const PathParameterSpec('domainId', 'simple', false))}/listener_certificate_bindings/${serializePathParameter(bindingId, const PathParameterSpec('bindingId', 'simple', false))}'), headers: requestHeaders);
+  }
+
   /// 获取证书列表
-  Future<CertificatesListResponse?> certificatesList([int? page, int? pageSize, String? siteId]) async {
+  Future<CertificatesListResponse?> certificatesList([int? page, int? pageSize, String? siteId, String? domainId]) async {
     final query = buildQueryString([
       QueryParameterSpec('page', page, 'form', true, false, null),
       QueryParameterSpec('page_size', pageSize, 'form', true, false, null),
-      QueryParameterSpec('siteId', siteId, 'form', true, false, null)
+      QueryParameterSpec('siteId', siteId, 'form', true, false, null),
+      QueryParameterSpec('domainId', domainId, 'form', true, false, null)
     ]);
     final response = await _client.get(ApiPaths.appendQueryString(ApiPaths.appPath('/certificates'), query));
     return (() {
@@ -42,7 +83,77 @@ class CertificateApi {
   }
 }
 
+class PathParameterSpec {
+  final String name;
+  final String style;
+  final bool explode;
 
+  const PathParameterSpec(this.name, this.style, this.explode);
+}
+
+String serializePathParameter(dynamic value, PathParameterSpec spec) {
+  if (value == null) return '';
+  final style = spec.style.trim().isEmpty ? 'simple' : spec.style;
+  if (value is Iterable) {
+    return serializePathArray(spec.name, value, style, spec.explode);
+  }
+  if (value is Map) {
+    return serializePathObject(spec.name, value, style, spec.explode);
+  }
+  return pathPrimitivePrefix(spec.name, style) + Uri.encodeComponent(value.toString());
+}
+
+String serializePathArray(String name, Iterable values, String style, bool explode) {
+  final serialized = values.where((item) => item != null).map((item) => Uri.encodeComponent(item.toString())).toList();
+  if (serialized.isEmpty) return pathPrefix(name, style);
+  if (style == 'matrix') {
+    if (explode) {
+      return serialized.map((item) => ';$name=$item').join();
+    }
+    return ';$name=${serialized.join(',')}';
+  }
+  final separator = explode ? '.' : ',';
+  return pathPrefix(name, style) + serialized.join(separator);
+}
+
+String serializePathObject(String name, Map values, String style, bool explode) {
+  final entries = <String>[];
+  final exploded = <String>[];
+  values.forEach((key, value) {
+    if (value == null) return;
+    final escapedKey = Uri.encodeComponent(key.toString());
+    final escapedValue = Uri.encodeComponent(value.toString());
+    if (explode) {
+      if (style == 'matrix') {
+        exploded.add(';$escapedKey=$escapedValue');
+      } else {
+        exploded.add('$escapedKey=$escapedValue');
+      }
+    } else {
+      entries.add(escapedKey);
+      entries.add(escapedValue);
+    }
+  });
+  if (style == 'matrix') {
+    if (explode) return exploded.join();
+    return ';$name=${entries.join(',')}';
+  }
+  if (explode) {
+    final separator = style == 'label' ? '.' : ',';
+    return pathPrefix(name, style) + exploded.join(separator);
+  }
+  return pathPrefix(name, style) + entries.join(',');
+}
+
+String pathPrefix(String name, String style) {
+  if (style == 'label') return '.';
+  if (style == 'matrix') return ';$name';
+  return '';
+}
+
+String pathPrimitivePrefix(String name, String style) {
+  return style == 'matrix' ? ';$name=' : pathPrefix(name, style);
+}
 class QueryParameterSpec {
   final String name;
   final dynamic value;

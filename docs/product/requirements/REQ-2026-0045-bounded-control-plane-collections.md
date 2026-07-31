@@ -13,7 +13,7 @@ goals:
   - Bound rows, serialized bytes, database work, in-process allocations, and response size for every request.
   - Preserve tenant and node isolation across pagination and synchronization cursors.
 non_goals:
-  - Changing database table ownership or adding SQLite multi-writer/HA support.
+  - Changing database table ownership or adding PostgreSQL HA topology support.
   - Loading all pages inside the server, SDK, agent, or frontend as a compatibility shortcut.
   - Claiming cluster convergence, offline retention, or rollout orchestration without separate HA evidence.
 users:
@@ -77,7 +77,7 @@ either would preserve the unbounded memory behavior this requirement exists to r
 
 ## Current Evidence
 
-- REQ-2026-0004 proves SQLite/PostgreSQL lifecycle and public Repository engine parity, including
+- REQ-2026-0004 proves PostgreSQL lifecycle and public repository behavior, including
   JSONB/TIMESTAMPTZ conversion and tenant isolation.
 - Static inspection and the SDKWork pagination standard identify `list_env_variables`,
   `list_health_checks`, and tenant-wide agent sync vector construction as remaining unbounded

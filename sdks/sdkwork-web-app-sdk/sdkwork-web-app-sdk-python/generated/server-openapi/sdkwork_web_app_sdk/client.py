@@ -1,10 +1,10 @@
 from .http_client import HttpClient, SdkConfig
 from .api.site import SiteApi
 from .api.domain import DomainApi
+from .api.certificate import CertificateApi
 from .api.source_version import SourceVersionApi
 from .api.deployment import DeploymentApi
 from .api.env_variable import EnvVariableApi
-from .api.certificate import CertificateApi
 from .api.monitor import MonitorApi
 
 
@@ -15,19 +15,19 @@ class SdkworkAppClient:
         self._client = HttpClient(config)
         self.site: SiteApi
         self.domain: DomainApi
+        self.certificate: CertificateApi
         self.source_version: SourceVersionApi
         self.deployment: DeploymentApi
         self.env_variable: EnvVariableApi
-        self.certificate: CertificateApi
         self.monitor: MonitorApi
 
         # Initialize API modules
         self.site = SiteApi(self._client)
         self.domain = DomainApi(self._client)
+        self.certificate = CertificateApi(self._client)
         self.source_version = SourceVersionApi(self._client)
         self.deployment = DeploymentApi(self._client)
         self.env_variable = EnvVariableApi(self._client)
-        self.certificate = CertificateApi(self._client)
         self.monitor = MonitorApi(self._client)
     def set_auth_token(self, token: str) -> 'SdkworkAppClient':
         """Set auth token for authentication."""

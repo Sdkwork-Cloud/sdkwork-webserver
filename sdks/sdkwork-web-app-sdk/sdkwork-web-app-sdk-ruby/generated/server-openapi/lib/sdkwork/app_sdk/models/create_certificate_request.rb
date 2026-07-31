@@ -2,12 +2,13 @@ module Sdkwork
   module AppSdk
     module Models
       class CreateCertificateRequest
-              attr_accessor :domain_id, :cert_type, :auto_renew
+              attr_accessor :domain_ids, :cert_type, :key_algorithm, :auto_renew
 
               def initialize(attributes = {})
                 attributes = (attributes || {}).transform_keys(&:to_s)
-                @domain_id = attributes['domainId']
+                @domain_ids = attributes['domainIds'].is_a?(Array) ? attributes['domainIds'].map { |item| item } : []
                 @cert_type = attributes['certType']
+                @key_algorithm = attributes['keyAlgorithm']
                 @auto_renew = attributes['autoRenew']
               end
 
@@ -19,8 +20,9 @@ module Sdkwork
 
               def to_hash
                 {
-                  'domainId' => @domain_id,
+                  'domainIds' => @domain_ids.is_a?(Array) ? @domain_ids.map { |item| item } : [],
                   'certType' => @cert_type,
+                  'keyAlgorithm' => @key_algorithm,
                   'autoRenew' => @auto_renew,
                 }
               end

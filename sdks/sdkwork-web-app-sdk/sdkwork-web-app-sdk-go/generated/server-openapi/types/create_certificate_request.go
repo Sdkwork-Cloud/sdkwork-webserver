@@ -2,7 +2,8 @@ package types
 
 
 type CreateCertificateRequest struct {
-	DomainId string `json:"domainId"`
+	DomainIds []string `json:"domainIds"`
 	CertType int `json:"certType"`
+	KeyAlgorithm string `json:"keyAlgorithm"`
 	AutoRenew bool `json:"autoRenew"`
 }

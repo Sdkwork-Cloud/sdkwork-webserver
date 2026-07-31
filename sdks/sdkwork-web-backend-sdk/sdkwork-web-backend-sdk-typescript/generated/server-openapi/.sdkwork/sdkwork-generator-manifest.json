@@ -44,7 +44,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "2189c035c424eefc1ea49e2080fd950c0fe23e0163e634d0224d446ea6bdc771"
+      "sha256": "eedec5495c7f0e3493fb48f15f5b478fdaa1466633adaa6b96aeb5e1d048b151"
     },
     {
       "path": "sdkwork-sdk.json",
@@ -84,7 +84,7 @@
     },
     {
       "path": "src/api/certificate.ts",
-      "sha256": "aeb02dfdcd47d3bc5de9a07dd8e4cfc0b428417d20c38837ea068e959b49a751"
+      "sha256": "7c30374852d3bf7d6043dae2a38d1678b6f579ca49c4aa5da23e6def8ba9cbf8"
     },
     {
       "path": "src/api/domain.ts",
@@ -92,7 +92,7 @@
     },
     {
       "path": "src/api/index.ts",
-      "sha256": "2926e689610b802c8d4b9a9d780c4a06a855f21e62fd33cc6d60ab5861a45601"
+      "sha256": "b834986515fc0134b739cd3acaa5097880082b355d916011bc346f8e1a06e5a6"
     },
     {
       "path": "src/api/nginx.ts",
@@ -124,15 +124,19 @@
     },
     {
       "path": "src/sdk.ts",
-      "sha256": "f0b1493d6d0221ad9ed43fc2e8075e1aad0246334b03024f7d171ea6e47a99bc"
+      "sha256": "d64db767ec0d8e0fd4bf64ce563264a7cd43cbced215bdd58f94d36ddb1b5636"
     },
     {
       "path": "src/types/agent-certificate-bundle.ts",
-      "sha256": "0ce1b4f2f2ec8cbd1c5785c0e5bb4cee176a8d13a67f1e96e3691b54e931546a"
+      "sha256": "b5b700c09b07acf9dab795ddcfe067aeda576185433c7a27352bb5848a031fde"
+    },
+    {
+      "path": "src/types/agent-certificate-observation.ts",
+      "sha256": "c1e9c839b67b1003b8bc5086b4847bf9931a3fcfb70795b5e5ecdf91228d6cf9"
     },
     {
       "path": "src/types/agent-heartbeat-request.ts",
-      "sha256": "2dbe4611ccedad7dbc70b8dd43f35f992ad86d2a6a5b93564a91fe9805ffa0ba"
+      "sha256": "3c733f2e242624bc9d11e5c50bc686c087e0cbb60a799f7a2aa1e7982909b99a"
     },
     {
       "path": "src/types/agent-heartbeat-response.ts",
@@ -203,6 +207,14 @@
       "sha256": "ad7496ad6a2a8bd2c5e29763e5be672555ac8f1084f2cdb55381b015f0a86b56"
     },
     {
+      "path": "src/types/applications-domains-listener-certificate-bindings-create-response201.ts",
+      "sha256": "8bc5be853332e469834055b04ce15e9164e8a12f6653cf44b19e103c8603b859"
+    },
+    {
+      "path": "src/types/applications-domains-listener-certificate-bindings-list-response.ts",
+      "sha256": "02fcb9a7f9977283fc36973df9cc7ff4a80d7901a6196188a350528c67a800ef"
+    },
+    {
       "path": "src/types/applications-domains-verify-response.ts",
       "sha256": "bf8ed624ecda551c49b4ec5af8190d6cca9f1542d3bf5acb60efe7667f395b6c"
     },
@@ -252,11 +264,15 @@
     },
     {
       "path": "src/types/certificate-distribution-response.ts",
-      "sha256": "e605cc454f88af51b903843b73c09bc3b0b7ceacbdd516068e4f0d6847ceed43"
+      "sha256": "0270bfe7eb0708589eacb06dbda5566e275c86c222b58cd6bbb69a22216478ea"
+    },
+    {
+      "path": "src/types/certificate-identifier-response.ts",
+      "sha256": "a0fea23b578fae454b8ee7189439df62fcbda528ea9426de867d4d31f60a1023"
     },
     {
       "path": "src/types/certificate-response.ts",
-      "sha256": "967365ff575d820be80dcda48b56faa34c0db899c56040707fe68acb875c519a"
+      "sha256": "787a49b889ad93aea125b12d843a4b114300a8f3114118139ab2626b6e84c740"
     },
     {
       "path": "src/types/certificates-create-response201.ts",
@@ -324,7 +340,11 @@
     },
     {
       "path": "src/types/create-certificate-request.ts",
-      "sha256": "4b982effb7b8452ebc2fd5b5b30e20cc68d09533f87306968eec362d1321c7fd"
+      "sha256": "e29be13d982d01ab1a42e1246fdb55001f6e75f20232937fd6c38fa90f905aa6"
+    },
+    {
+      "path": "src/types/create-listener-certificate-binding-request.ts",
+      "sha256": "be9b78b1c575451ccae4759d973364053284922a8318b370226c2acdecadc593"
     },
     {
       "path": "src/types/create-managed-domain-request.ts",
@@ -384,11 +404,19 @@
     },
     {
       "path": "src/types/index.ts",
-      "sha256": "042487f85e93a7e18ffc7360955d3278e31a17c6423346535a7a39778ef573a6"
+      "sha256": "640d16e0efb483e4f6f7fe8e22134a3bcd0ead9262144c6fd813351193cb84ff"
     },
     {
       "path": "src/types/int64-string.ts",
       "sha256": "b5515c01c9562a7aa6276f377702e24f9ab58de44056ad3d0c31f3689821f029"
+    },
+    {
+      "path": "src/types/listener-certificate-binding-response.ts",
+      "sha256": "4c051db7ba2ddcdbcd37b14f95de0d989276487526ccbbb3de873306a204abf8"
+    },
+    {
+      "path": "src/types/listener-certificate-summary-response.ts",
+      "sha256": "b010359c467375b54df2937dd8a27a6ce361363c06eb95b1063ed01e2a12b755"
     },
     {
       "path": "src/types/media-checksum.ts",

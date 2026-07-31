@@ -4,10 +4,10 @@ import com.sdkwork.common.core.SdkConfig
 import com.sdkwork.web.app.sdk.http.HttpClient
 import com.sdkwork.web.app.sdk.api.SiteApi
 import com.sdkwork.web.app.sdk.api.DomainApi
+import com.sdkwork.web.app.sdk.api.CertificateApi
 import com.sdkwork.web.app.sdk.api.SourceVersionApi
 import com.sdkwork.web.app.sdk.api.DeploymentApi
 import com.sdkwork.web.app.sdk.api.EnvVariableApi
-import com.sdkwork.web.app.sdk.api.CertificateApi
 import com.sdkwork.web.app.sdk.api.MonitorApi
 
 open class SdkworkAppClient {
@@ -15,20 +15,20 @@ open class SdkworkAppClient {
 
     lateinit var site: SiteApi
     lateinit var domain: DomainApi
+    lateinit var certificate: CertificateApi
     lateinit var sourceVersion: SourceVersionApi
     lateinit var deployment: DeploymentApi
     lateinit var envVariable: EnvVariableApi
-    lateinit var certificate: CertificateApi
     lateinit var monitor: MonitorApi
 
     constructor(baseUrl: String) {
         this.httpClient = HttpClient(baseUrl)
         site = SiteApi(httpClient)
         domain = DomainApi(httpClient)
+        certificate = CertificateApi(httpClient)
         sourceVersion = SourceVersionApi(httpClient)
         deployment = DeploymentApi(httpClient)
         envVariable = EnvVariableApi(httpClient)
-        certificate = CertificateApi(httpClient)
         monitor = MonitorApi(httpClient)
     }
 
@@ -36,10 +36,10 @@ open class SdkworkAppClient {
         this.httpClient = HttpClient(config)
         site = SiteApi(httpClient)
         domain = DomainApi(httpClient)
+        certificate = CertificateApi(httpClient)
         sourceVersion = SourceVersionApi(httpClient)
         deployment = DeploymentApi(httpClient)
         envVariable = EnvVariableApi(httpClient)
-        certificate = CertificateApi(httpClient)
         monitor = MonitorApi(httpClient)
     }
     fun setAuthToken(token: String): SdkworkAppClient {

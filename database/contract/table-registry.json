@@ -21,6 +21,24 @@
       "lifecycle_status": "active"
     },
     {
+      "table_name": "web_domain_verification",
+      "owner": "web-platform",
+      "compliance_level": "L2",
+      "lifecycle_status": "active"
+    },
+    {
+      "table_name": "web_site_binding",
+      "owner": "web-platform",
+      "compliance_level": "L2",
+      "lifecycle_status": "active"
+    },
+    {
+      "table_name": "web_tls_policy",
+      "owner": "web-platform",
+      "compliance_level": "L2",
+      "lifecycle_status": "active"
+    },
+    {
       "table_name": "web_nginx_config",
       "owner": "web-platform",
       "compliance_level": "L2",
@@ -33,13 +51,37 @@
       "lifecycle_status": "active"
     },
     {
-      "table_name": "web_deployment",
+      "table_name": "web_certificate_identifier",
+      "owner": "web-platform",
+      "compliance_level": "L2",
+      "lifecycle_status": "active"
+    },
+    {
+      "table_name": "web_certificate_version",
+      "owner": "web-platform",
+      "compliance_level": "L2",
+      "lifecycle_status": "active"
+    },
+    {
+      "table_name": "web_certificate_secret_bundle",
+      "owner": "web-platform",
+      "compliance_level": "L2",
+      "lifecycle_status": "active"
+    },
+    {
+      "table_name": "web_listener_certificate_binding",
       "owner": "web-platform",
       "compliance_level": "L2",
       "lifecycle_status": "active"
     },
     {
       "table_name": "web_source_version",
+      "owner": "web-platform",
+      "compliance_level": "L2",
+      "lifecycle_status": "active"
+    },
+    {
+      "table_name": "web_deployment",
       "owner": "web-platform",
       "compliance_level": "L2",
       "lifecycle_status": "active"
@@ -70,6 +112,12 @@
     },
     {
       "table_name": "web_server",
+      "owner": "web-platform",
+      "compliance_level": "L2",
+      "lifecycle_status": "active"
+    },
+    {
+      "table_name": "web_certificate_node_state",
       "owner": "web-platform",
       "compliance_level": "L2",
       "lifecycle_status": "active"

@@ -34,7 +34,7 @@ The database baseline gains one additive constrained column while existing site 
 ## Verification
 
 - OpenAPI materialization and response-envelope, operation-pattern, route-collision, and pagination validators.
-- Rust route/service/repository tests, including SQLite repository parity and sync-version fingerprint changes.
+- Rust route/service/repository tests, including PostgreSQL repository parity and sync-version fingerprint changes.
 - Backend SDK regeneration followed by PC admin typecheck, tests, and build.
 - Contract tests proving one canonical certificate source, no per-server certificate table, and desired/applied manifest convergence fields.
 

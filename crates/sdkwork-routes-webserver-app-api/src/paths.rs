@@ -7,6 +7,10 @@ pub const SITE_PAUSE: &str = "/app/v3/api/sites/{siteId}/pause";
 pub const SITE_DOMAINS: &str = "/app/v3/api/sites/{siteId}/domains";
 pub const SITE_DOMAIN: &str = "/app/v3/api/sites/{siteId}/domains/{domainId}";
 pub const SITE_DOMAIN_VERIFY: &str = "/app/v3/api/sites/{siteId}/domains/{domainId}/verify";
+pub const SITE_DOMAIN_LISTENER_CERTIFICATE_BINDINGS: &str =
+    "/app/v3/api/sites/{siteId}/domains/{domainId}/listener_certificate_bindings";
+pub const SITE_DOMAIN_LISTENER_CERTIFICATE_BINDING: &str =
+    "/app/v3/api/sites/{siteId}/domains/{domainId}/listener_certificate_bindings/{bindingId}";
 pub const SITE_SOURCE_VERSIONS: &str = "/app/v3/api/sites/{siteId}/source_versions";
 pub const SITE_SOURCE_VERSION: &str =
     "/app/v3/api/sites/{siteId}/source_versions/{sourceVersionId}";

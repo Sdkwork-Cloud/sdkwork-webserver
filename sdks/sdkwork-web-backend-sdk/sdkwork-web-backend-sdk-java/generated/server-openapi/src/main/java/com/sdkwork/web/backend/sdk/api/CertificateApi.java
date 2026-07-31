@@ -13,11 +13,42 @@ public class CertificateApi {
         this.client = client;
     }
 
-    /** List canonical certificates */
-    public CertificatesListResponse certificatesList(Integer page, Integer pageSize) throws Exception {
+    /** List certificates active on an application domain listener */
+    public ApplicationsDomainsListenerCertificateBindingsListResponse applicationsDomainsListenerCertificateBindingsList(String applicationId, String domainId, Integer page, Integer pageSize) throws Exception {
         String query = buildQueryString(List.of(
             new QueryParameterSpec("page", page, "form", true, false, null),
             new QueryParameterSpec("page_size", pageSize, "form", true, false, null)
+        ));
+        Object raw = client.get(ApiPaths.appendQueryString(ApiPaths.backendPath("/applications/" + serializePathParameter(applicationId, new PathParameterSpec("applicationId", "simple", false)) + "/domains/" + serializePathParameter(domainId, new PathParameterSpec("domainId", "simple", false)) + "/listener_certificate_bindings"), query));
+        return client.convertValue(raw, new TypeReference<ApplicationsDomainsListenerCertificateBindingsListResponse>() {});
+    }
+
+    /** Bind a certificate version to an application domain listener */
+    public ApplicationsDomainsListenerCertificateBindingsCreateResponse201 applicationsDomainsListenerCertificateBindingsCreate(String applicationId, String domainId, CreateListenerCertificateBindingRequest body, String idempotencyKey) throws Exception {
+        Map<String, String> requestHeaders = buildRequestHeaders(
+                Map.of("Idempotency-Key", new HeaderParameterSpec(idempotencyKey, "simple", false, null)),
+                Map.of()
+        );
+        Object raw = client.post(ApiPaths.backendPath("/applications/" + serializePathParameter(applicationId, new PathParameterSpec("applicationId", "simple", false)) + "/domains/" + serializePathParameter(domainId, new PathParameterSpec("domainId", "simple", false)) + "/listener_certificate_bindings"), body, null, requestHeaders, "application/json");
+        return client.convertValue(raw, new TypeReference<ApplicationsDomainsListenerCertificateBindingsCreateResponse201>() {});
+    }
+
+    /** Remove a certificate from an application domain listener */
+    public Void applicationsDomainsListenerCertificateBindingsDelete(String applicationId, String domainId, String bindingId, String idempotencyKey) throws Exception {
+        Map<String, String> requestHeaders = buildRequestHeaders(
+                Map.of("Idempotency-Key", new HeaderParameterSpec(idempotencyKey, "simple", false, null)),
+                Map.of()
+        );
+        client.delete(ApiPaths.backendPath("/applications/" + serializePathParameter(applicationId, new PathParameterSpec("applicationId", "simple", false)) + "/domains/" + serializePathParameter(domainId, new PathParameterSpec("domainId", "simple", false)) + "/listener_certificate_bindings/" + serializePathParameter(bindingId, new PathParameterSpec("bindingId", "simple", false)) + ""), null, requestHeaders);
+        return null;
+    }
+
+    /** List canonical certificates */
+    public CertificatesListResponse certificatesList(Integer page, Integer pageSize, String domainId) throws Exception {
+        String query = buildQueryString(List.of(
+            new QueryParameterSpec("page", page, "form", true, false, null),
+            new QueryParameterSpec("page_size", pageSize, "form", true, false, null),
+            new QueryParameterSpec("domainId", domainId, "form", true, false, null)
         ));
         Object raw = client.get(ApiPaths.appendQueryString(ApiPaths.backendPath("/certificates"), query));
         return client.convertValue(raw, new TypeReference<CertificatesListResponse>() {});

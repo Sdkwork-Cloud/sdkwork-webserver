@@ -302,6 +302,8 @@ mod tests {
             cert_live_root: root.join("certs"),
             site_family: "sdkwork".to_string(),
             nginx_command_timeout_ms: 10_000,
+            tls_verify_address: "127.0.0.1:443".parse().unwrap(),
+            tls_verify_timeout_ms: 5_000,
         }
     }
 

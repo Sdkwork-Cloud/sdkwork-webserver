@@ -40,7 +40,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "1250662d5b78316186dffb3efc9c88c94464f1376c109cec44e1da19c7370b6d"
+      "sha256": "eb7173bd1cddce8aa7bee2200a954f3f8cb808246580e882850a2cd3a46f466e"
     },
     {
       "path": "requirements.txt",
@@ -52,11 +52,11 @@
     },
     {
       "path": "sdkwork_web_app_sdk/api/__init__.py",
-      "sha256": "05c4d5cc1fe3ea7ff96cc21d516f8643b948ab378c54455ad356d048ea24fddf"
+      "sha256": "9aa7460ec1ceb76197063c195aa698d359ec2df5c4f2124ac1ebec218833a89f"
     },
     {
       "path": "sdkwork_web_app_sdk/api/certificate.py",
-      "sha256": "56c65185c43eed5de61cd83ebe3f7ce45a47396feb9eb2b24f9c6c81a160ccdf"
+      "sha256": "ca1bfec20f403d429f3ffdbbb1f9d1ac5af52a53e0165f76cb1a50b9e0f50908"
     },
     {
       "path": "sdkwork_web_app_sdk/api/deployment.py",
@@ -84,7 +84,7 @@
     },
     {
       "path": "sdkwork_web_app_sdk/client.py",
-      "sha256": "ce9dcd19f08264b40862329e96c15b99837bb26ad860b61d1c0920b347860ddf"
+      "sha256": "493c4322ef1d72668ab483919b9a66d002d06b9973dc67f93799b5e87526d729"
     },
     {
       "path": "sdkwork_web_app_sdk/http_client.py",
@@ -92,11 +92,15 @@
     },
     {
       "path": "sdkwork_web_app_sdk/models/__init__.py",
-      "sha256": "3146b3907248f001dadbead841998adedd6539b4f6305dd99ab2e422be9fbbb5"
+      "sha256": "0ff9bfafdd2ae2d964d0e7b02fc852da945de35043f32a2fe70615eaaf6229cc"
     },
     {
       "path": "sdkwork_web_app_sdk/models/application_store_listing.py",
       "sha256": "0d87a09cc155c1348867aa4e0977205d3f8e6183f29b9cdc9697579d2fb31ec7"
+    },
+    {
+      "path": "sdkwork_web_app_sdk/models/certificate_identifier_response.py",
+      "sha256": "ec348a4bf20c35f200916f84889118dff0954533d063b236caa157a1319cb603"
     },
     {
       "path": "sdkwork_web_app_sdk/models/certificate_page.py",
@@ -104,7 +108,7 @@
     },
     {
       "path": "sdkwork_web_app_sdk/models/certificate_response.py",
-      "sha256": "51689a8b83e4ada2c95e4bf9df8851f3d5df93d32ac7bf8e485fdb13a7526838"
+      "sha256": "2b20b2985cd15dc0554586d6a47eae4c1668d39bd32285c1f050d1642c88ba90"
     },
     {
       "path": "sdkwork_web_app_sdk/models/certificates_create_response201.py",
@@ -116,7 +120,7 @@
     },
     {
       "path": "sdkwork_web_app_sdk/models/create_certificate_request.py",
-      "sha256": "c257e0b03575bb1a76b45af840c0fd0c491f7ada5a92d4de88d7ab4062b2b54e"
+      "sha256": "43fb6735cb13267dc2aa740e000138be43751b522ff08a5e2561918628e90cee"
     },
     {
       "path": "sdkwork_web_app_sdk/models/create_deployment_request.py",
@@ -133,6 +137,10 @@
     {
       "path": "sdkwork_web_app_sdk/models/create_health_check_request.py",
       "sha256": "cdc4fd3ab9c99b67a80411abcd98034013410fca16f81a7cefb0ffcfe04b77c8"
+    },
+    {
+      "path": "sdkwork_web_app_sdk/models/create_listener_certificate_binding_request.py",
+      "sha256": "2ab637092b467fe667fd5b47e6cd79337ffcaff7c6e763e02c1cbb88b2b9f015"
     },
     {
       "path": "sdkwork_web_app_sdk/models/create_site_request.py",
@@ -185,6 +193,14 @@
     {
       "path": "sdkwork_web_app_sdk/models/import_git_source_version_request.py",
       "sha256": "c0d73b10a4d82fdb6a08d7bca530e2622cce3887204d06dd2fc8a9a433dcdd99"
+    },
+    {
+      "path": "sdkwork_web_app_sdk/models/listener_certificate_binding_response.py",
+      "sha256": "c7d3639c175962424af1dbdeb5f63effac6c1fe31caf05ddffc9292197829ffd"
+    },
+    {
+      "path": "sdkwork_web_app_sdk/models/listener_certificate_summary_response.py",
+      "sha256": "1481eb1e3a019bd5c5036a81e1ee49bc43b71ffe693f38e7c27a939e53bf8933"
     },
     {
       "path": "sdkwork_web_app_sdk/models/media_checksum.py",
@@ -269,6 +285,14 @@
     {
       "path": "sdkwork_web_app_sdk/models/sites_domains_list_response.py",
       "sha256": "4321a8a56bb350d72c6553eec4e8beb913acf164a60813e09a939b4f73e10e84"
+    },
+    {
+      "path": "sdkwork_web_app_sdk/models/sites_domains_listener_certificate_bindings_create_response201.py",
+      "sha256": "9ccf8568bf410ba6210a00eb6bb96519ea3a810912f5b2cfa3870c550b681da5"
+    },
+    {
+      "path": "sdkwork_web_app_sdk/models/sites_domains_listener_certificate_bindings_list_response.py",
+      "sha256": "2c4e919043eb6753523694accd3d8e3d2e88a9681c247e633d7bc756e0667af9"
     },
     {
       "path": "sdkwork_web_app_sdk/models/sites_domains_retrieve_response.py",

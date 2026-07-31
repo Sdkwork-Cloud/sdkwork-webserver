@@ -363,8 +363,6 @@ function standaloneManagementEnv(packageRoot, port) {
       'sdkwork-release-smoke-web-secret-encryption-key-2026',
     SDKWORK_WEB_ACME_PROFILE: 'staging',
     SDKWORK_WEB_ACME_CONTACT_EMAIL: 'release-smoke@example.invalid',
-    SDKWORK_WEB_CERT_ENCRYPTION_KEY:
-      'sdkwork-release-smoke-certificate-encryption-key-2026',
     SDKWORK_DRIVE_DOWNLOAD_TOKEN_HMAC_SECRET:
       'sdkwork-release-smoke-drive-download-token-secret-2026',
   };

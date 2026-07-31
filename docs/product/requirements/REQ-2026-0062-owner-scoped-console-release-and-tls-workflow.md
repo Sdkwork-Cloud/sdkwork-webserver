@@ -91,7 +91,7 @@ trace:
 verification:
   - cargo test -p sdkwork-intelligence-webserver-service
   - cargo test -p sdkwork-routes-webserver-app-api
-  - cargo test -p sdkwork-intelligence-webserver-repository-sqlx --test repository_parity sqlite_repository_transactions_tenants_idempotency_and_pagination_are_bounded -- --exact
+  - cargo test -p sdkwork-intelligence-webserver-repository-sqlx --test repository_parity postgres_repository_transactions_tenants_idempotency_and_pagination_are_bounded -- --ignored --exact
   - pnpm sdk:generate:check
   - pnpm --dir apps/sdkwork-webserver-pc check
   - node ../sdkwork-specs/tools/check-app-sdk-consumer-imports.mjs --workspace .

@@ -1413,24 +1413,29 @@ class EnvVariablePage {
 }
 
 class CreateCertificateRequest {
-  final String domainId;
+  final List<String> domainIds;
   final int certType;
+  final String? keyAlgorithm;
   final bool? autoRenew;
 
   CreateCertificateRequest({
-    required this.domainId,
+    required this.domainIds,
     required this.certType,
+    this.keyAlgorithm,
     this.autoRenew
   });
 
   factory CreateCertificateRequest.fromJson(Map<String, dynamic> json) {
     return CreateCertificateRequest(
-      domainId: (() {
-        final value = json['domainId']?.toString();
-        if (value == null) {
-          throw FormatException('CreateCertificateRequest.domainId is required');
+      domainIds: (() {
+        final list = _sdkworkAsList(json['domainIds']);
+        if (list == null) {
+          throw FormatException('CreateCertificateRequest.domainIds is required');
         }
-        return value;
+        return list
+            .map((item) => item?.toString())
+            .whereType<String>()
+            .toList();
       })(),
       certType: (() {
         final value = json['certType'];
@@ -1439,15 +1444,73 @@ class CreateCertificateRequest {
         }
         return value;
       })(),
+      keyAlgorithm: json['keyAlgorithm']?.toString(),
       autoRenew: json['autoRenew'] is bool ? json['autoRenew'] : null
     );
   }
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
-      'domainId': domainId,
+      'domainIds': domainIds.map((item) => item).toList(),
       'certType': certType,
+      'keyAlgorithm': keyAlgorithm,
       'autoRenew': autoRenew,
+    };
+  }
+}
+
+class CertificateIdentifierResponse {
+  final String domainId;
+  final String hostname;
+  final String identifierType;
+  final int position;
+
+  CertificateIdentifierResponse({
+    required this.domainId,
+    required this.hostname,
+    required this.identifierType,
+    required this.position
+  });
+
+  factory CertificateIdentifierResponse.fromJson(Map<String, dynamic> json) {
+    return CertificateIdentifierResponse(
+      domainId: (() {
+        final value = json['domainId']?.toString();
+        if (value == null) {
+          throw FormatException('CertificateIdentifierResponse.domainId is required');
+        }
+        return value;
+      })(),
+      hostname: (() {
+        final value = json['hostname']?.toString();
+        if (value == null) {
+          throw FormatException('CertificateIdentifierResponse.hostname is required');
+        }
+        return value;
+      })(),
+      identifierType: (() {
+        final value = json['identifierType']?.toString();
+        if (value == null) {
+          throw FormatException('CertificateIdentifierResponse.identifierType is required');
+        }
+        return value;
+      })(),
+      position: (() {
+        final value = json['position'];
+        if (value is! int) {
+          throw FormatException('CertificateIdentifierResponse.position is required');
+        }
+        return value;
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'domainId': domainId,
+      'hostname': hostname,
+      'identifierType': identifierType,
+      'position': position,
     };
   }
 }
@@ -1455,26 +1518,26 @@ class CreateCertificateRequest {
 class CertificateResponse {
   final String id;
   final String certName;
-  final String? domain;
-  final String? domainId;
+  final List<CertificateIdentifierResponse> identifiers;
   final int? certType;
   final String? issuer;
   final String? fingerprint;
+  final String keyAlgorithm;
   final String? notBefore;
   final String? notAfter;
   final bool? autoRenew;
-  final int? renewalStatus;
-  final int status;
+  final String? renewalStatus;
+  final String status;
   final String createdAt;
 
   CertificateResponse({
     required this.id,
     required this.certName,
-    this.domain,
-    this.domainId,
+    required this.identifiers,
     this.certType,
     this.issuer,
     this.fingerprint,
+    required this.keyAlgorithm,
     this.notBefore,
     this.notAfter,
     this.autoRenew,
@@ -1499,18 +1562,36 @@ class CertificateResponse {
         }
         return value;
       })(),
-      domain: json['domain']?.toString(),
-      domainId: json['domainId']?.toString(),
+      identifiers: (() {
+        final list = _sdkworkAsList(json['identifiers']);
+        if (list == null) {
+          throw FormatException('CertificateResponse.identifiers is required');
+        }
+        return list
+            .map((item) => (() {
+        final map = _sdkworkAsMap(item);
+        return map == null ? null : CertificateIdentifierResponse.fromJson(map);
+      })())
+            .whereType<CertificateIdentifierResponse>()
+            .toList();
+      })(),
       certType: json['certType'] is int ? json['certType'] : null,
       issuer: json['issuer']?.toString(),
       fingerprint: json['fingerprint']?.toString(),
+      keyAlgorithm: (() {
+        final value = json['keyAlgorithm']?.toString();
+        if (value == null) {
+          throw FormatException('CertificateResponse.keyAlgorithm is required');
+        }
+        return value;
+      })(),
       notBefore: json['notBefore']?.toString(),
       notAfter: json['notAfter']?.toString(),
       autoRenew: json['autoRenew'] is bool ? json['autoRenew'] : null,
-      renewalStatus: json['renewalStatus'] is int ? json['renewalStatus'] : null,
+      renewalStatus: json['renewalStatus']?.toString(),
       status: (() {
-        final value = json['status'];
-        if (value is! int) {
+        final value = json['status']?.toString();
+        if (value == null) {
           throw FormatException('CertificateResponse.status is required');
         }
         return value;
@@ -1529,17 +1610,270 @@ class CertificateResponse {
     return <String, dynamic>{
       'id': id,
       'certName': certName,
-      'domain': domain,
-      'domainId': domainId,
+      'identifiers': identifiers.map((item) => item.toJson()).toList(),
       'certType': certType,
       'issuer': issuer,
       'fingerprint': fingerprint,
+      'keyAlgorithm': keyAlgorithm,
       'notBefore': notBefore,
       'notAfter': notAfter,
       'autoRenew': autoRenew,
       'renewalStatus': renewalStatus,
       'status': status,
       'createdAt': createdAt,
+    };
+  }
+}
+
+class CreateListenerCertificateBindingRequest {
+  final String certificateId;
+  final String? certificateVersionId;
+  final int? priority;
+  final bool? isDefault;
+
+  CreateListenerCertificateBindingRequest({
+    required this.certificateId,
+    this.certificateVersionId,
+    this.priority,
+    this.isDefault
+  });
+
+  factory CreateListenerCertificateBindingRequest.fromJson(Map<String, dynamic> json) {
+    return CreateListenerCertificateBindingRequest(
+      certificateId: (() {
+        final value = json['certificateId']?.toString();
+        if (value == null) {
+          throw FormatException('CreateListenerCertificateBindingRequest.certificateId is required');
+        }
+        return value;
+      })(),
+      certificateVersionId: json['certificateVersionId']?.toString(),
+      priority: json['priority'] is int ? json['priority'] : null,
+      isDefault: json['isDefault'] is bool ? json['isDefault'] : null
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'certificateId': certificateId,
+      'certificateVersionId': certificateVersionId,
+      'priority': priority,
+      'isDefault': isDefault,
+    };
+  }
+}
+
+class ListenerCertificateBindingResponse {
+  final String id;
+  final String siteId;
+  final String domainId;
+  final String certificateId;
+  final String desiredCertificateVersionId;
+  final String? currentCertificateVersionId;
+  final ListenerCertificateSummaryResponse desiredCertificate;
+  final ListenerCertificateSummaryResponse? currentCertificate;
+  final String keyAlgorithm;
+  final int priority;
+  final bool isDefault;
+  final String status;
+  final String? activatedAt;
+  final String createdAt;
+  final String updatedAt;
+
+  ListenerCertificateBindingResponse({
+    required this.id,
+    required this.siteId,
+    required this.domainId,
+    required this.certificateId,
+    required this.desiredCertificateVersionId,
+    this.currentCertificateVersionId,
+    required this.desiredCertificate,
+    this.currentCertificate,
+    required this.keyAlgorithm,
+    required this.priority,
+    required this.isDefault,
+    required this.status,
+    this.activatedAt,
+    required this.createdAt,
+    required this.updatedAt
+  });
+
+  factory ListenerCertificateBindingResponse.fromJson(Map<String, dynamic> json) {
+    return ListenerCertificateBindingResponse(
+      id: (() {
+        final value = json['id']?.toString();
+        if (value == null) {
+          throw FormatException('ListenerCertificateBindingResponse.id is required');
+        }
+        return value;
+      })(),
+      siteId: (() {
+        final value = json['siteId']?.toString();
+        if (value == null) {
+          throw FormatException('ListenerCertificateBindingResponse.siteId is required');
+        }
+        return value;
+      })(),
+      domainId: (() {
+        final value = json['domainId']?.toString();
+        if (value == null) {
+          throw FormatException('ListenerCertificateBindingResponse.domainId is required');
+        }
+        return value;
+      })(),
+      certificateId: (() {
+        final value = json['certificateId']?.toString();
+        if (value == null) {
+          throw FormatException('ListenerCertificateBindingResponse.certificateId is required');
+        }
+        return value;
+      })(),
+      desiredCertificateVersionId: (() {
+        final value = json['desiredCertificateVersionId']?.toString();
+        if (value == null) {
+          throw FormatException('ListenerCertificateBindingResponse.desiredCertificateVersionId is required');
+        }
+        return value;
+      })(),
+      currentCertificateVersionId: json['currentCertificateVersionId']?.toString(),
+      desiredCertificate: (() {
+        final map = _sdkworkAsMap(json['desiredCertificate']);
+        if (map == null) {
+          throw FormatException('ListenerCertificateBindingResponse.desiredCertificate is required');
+        }
+        return ListenerCertificateSummaryResponse.fromJson(map);
+      })(),
+      currentCertificate: (() {
+        final map = _sdkworkAsMap(json['currentCertificate']);
+        return map == null ? null : ListenerCertificateSummaryResponse.fromJson(map);
+      })(),
+      keyAlgorithm: (() {
+        final value = json['keyAlgorithm']?.toString();
+        if (value == null) {
+          throw FormatException('ListenerCertificateBindingResponse.keyAlgorithm is required');
+        }
+        return value;
+      })(),
+      priority: (() {
+        final value = json['priority'];
+        if (value is! int) {
+          throw FormatException('ListenerCertificateBindingResponse.priority is required');
+        }
+        return value;
+      })(),
+      isDefault: (() {
+        final value = json['isDefault'];
+        if (value is! bool) {
+          throw FormatException('ListenerCertificateBindingResponse.isDefault is required');
+        }
+        return value;
+      })(),
+      status: (() {
+        final value = json['status']?.toString();
+        if (value == null) {
+          throw FormatException('ListenerCertificateBindingResponse.status is required');
+        }
+        return value;
+      })(),
+      activatedAt: json['activatedAt']?.toString(),
+      createdAt: (() {
+        final value = json['createdAt']?.toString();
+        if (value == null) {
+          throw FormatException('ListenerCertificateBindingResponse.createdAt is required');
+        }
+        return value;
+      })(),
+      updatedAt: (() {
+        final value = json['updatedAt']?.toString();
+        if (value == null) {
+          throw FormatException('ListenerCertificateBindingResponse.updatedAt is required');
+        }
+        return value;
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'id': id,
+      'siteId': siteId,
+      'domainId': domainId,
+      'certificateId': certificateId,
+      'desiredCertificateVersionId': desiredCertificateVersionId,
+      'currentCertificateVersionId': currentCertificateVersionId,
+      'desiredCertificate': desiredCertificate.toJson(),
+      'currentCertificate': currentCertificate?.toJson(),
+      'keyAlgorithm': keyAlgorithm,
+      'priority': priority,
+      'isDefault': isDefault,
+      'status': status,
+      'activatedAt': activatedAt,
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
+    };
+  }
+}
+
+class ListenerCertificateSummaryResponse {
+  final String certName;
+  final List<CertificateIdentifierResponse> identifiers;
+  final String? issuer;
+  final String? fingerprint;
+  final String? notAfter;
+  final String status;
+
+  ListenerCertificateSummaryResponse({
+    required this.certName,
+    required this.identifiers,
+    this.issuer,
+    this.fingerprint,
+    this.notAfter,
+    required this.status
+  });
+
+  factory ListenerCertificateSummaryResponse.fromJson(Map<String, dynamic> json) {
+    return ListenerCertificateSummaryResponse(
+      certName: (() {
+        final value = json['certName']?.toString();
+        if (value == null) {
+          throw FormatException('ListenerCertificateSummaryResponse.certName is required');
+        }
+        return value;
+      })(),
+      identifiers: (() {
+        final list = _sdkworkAsList(json['identifiers']);
+        if (list == null) {
+          throw FormatException('ListenerCertificateSummaryResponse.identifiers is required');
+        }
+        return list
+            .map((item) => (() {
+        final map = _sdkworkAsMap(item);
+        return map == null ? null : CertificateIdentifierResponse.fromJson(map);
+      })())
+            .whereType<CertificateIdentifierResponse>()
+            .toList();
+      })(),
+      issuer: json['issuer']?.toString(),
+      fingerprint: json['fingerprint']?.toString(),
+      notAfter: json['notAfter']?.toString(),
+      status: (() {
+        final value = json['status']?.toString();
+        if (value == null) {
+          throw FormatException('ListenerCertificateSummaryResponse.status is required');
+        }
+        return value;
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'certName': certName,
+      'identifiers': identifiers.map((item) => item.toJson()).toList(),
+      'issuer': issuer,
+      'fingerprint': fingerprint,
+      'notAfter': notAfter,
+      'status': status,
     };
   }
 }
@@ -2554,6 +2888,98 @@ class SitesDomainsVerifyResponse {
         final value = json['traceId']?.toString();
         if (value == null) {
           throw FormatException('SitesDomainsVerifyResponse.traceId is required');
+        }
+        return value;
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SitesDomainsListenerCertificateBindingsListResponse {
+  final int code;
+  final dynamic data;
+  final String traceId;
+
+  SitesDomainsListenerCertificateBindingsListResponse({
+    required this.code,
+    required this.data,
+    required this.traceId
+  });
+
+  factory SitesDomainsListenerCertificateBindingsListResponse.fromJson(Map<String, dynamic> json) {
+    return SitesDomainsListenerCertificateBindingsListResponse(
+      code: (() {
+        final value = json['code'];
+        if (value is! int) {
+          throw FormatException('SitesDomainsListenerCertificateBindingsListResponse.code is required');
+        }
+        return value;
+      })(),
+      data: (() {
+        final map = _sdkworkAsMap(json['data']);
+        if (map == null) {
+          throw FormatException('SitesDomainsListenerCertificateBindingsListResponse.data is required');
+        }
+        return map;
+      })(),
+      traceId: (() {
+        final value = json['traceId']?.toString();
+        if (value == null) {
+          throw FormatException('SitesDomainsListenerCertificateBindingsListResponse.traceId is required');
+        }
+        return value;
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SitesDomainsListenerCertificateBindingsCreateResponse201 {
+  final int code;
+  final dynamic data;
+  final String traceId;
+
+  SitesDomainsListenerCertificateBindingsCreateResponse201({
+    required this.code,
+    required this.data,
+    required this.traceId
+  });
+
+  factory SitesDomainsListenerCertificateBindingsCreateResponse201.fromJson(Map<String, dynamic> json) {
+    return SitesDomainsListenerCertificateBindingsCreateResponse201(
+      code: (() {
+        final value = json['code'];
+        if (value is! int) {
+          throw FormatException('SitesDomainsListenerCertificateBindingsCreateResponse201.code is required');
+        }
+        return value;
+      })(),
+      data: (() {
+        final map = _sdkworkAsMap(json['data']);
+        if (map == null) {
+          throw FormatException('SitesDomainsListenerCertificateBindingsCreateResponse201.data is required');
+        }
+        return map;
+      })(),
+      traceId: (() {
+        final value = json['traceId']?.toString();
+        if (value == null) {
+          throw FormatException('SitesDomainsListenerCertificateBindingsCreateResponse201.traceId is required');
         }
         return value;
       })()

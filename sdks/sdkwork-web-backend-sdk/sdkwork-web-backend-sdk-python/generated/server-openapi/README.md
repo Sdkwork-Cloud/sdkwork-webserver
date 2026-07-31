@@ -50,10 +50,10 @@ client.set_header('X-Custom-Header', 'value')
 
 - `client.application` - application API
 - `client.application_domain` - application_domain API
+- `client.certificate` - certificate API
 - `client.domain` - domain API
 - `client.application_source_version` - application_source_version API
 - `client.application_deployment` - application_deployment API
-- `client.certificate` - certificate API
 - `client.certificate_distribution` - certificate_distribution API
 - `client.nginx` - nginx API
 - `client.server` - server API
@@ -88,6 +88,19 @@ params = {
     'page_size': 2,
 }
 result = client.application_domain.applications.domains.list(application_id, params)
+print(result)
+```
+
+### certificate
+
+```python
+# List canonical certificates
+params = {
+    'page': 1,
+    'page_size': 2,
+    'domainId': 'domainId',
+}
+result = client.certificate.list(params)
 print(result)
 ```
 
@@ -127,18 +140,6 @@ params = {
     'status': 3,
 }
 result = client.application_deployment.applications.deployments.list(application_id, params)
-print(result)
-```
-
-### certificate
-
-```python
-# List canonical certificates
-params = {
-    'page': 1,
-    'page_size': 2,
-}
-result = client.certificate.list(params)
 print(result)
 ```
 

@@ -2459,7 +2459,6 @@ version = "0.30.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2e99fb7a497b1e3339bc746195567ed8d3e24945ecd636e3619d20b9de9e9149"
 dependencies = [
- "cc",
  "pkg-config",
  "vcpkg",
 ]
@@ -3220,8 +3219,8 @@ version = "0.13.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "75e669e5202259b5314d1ea5397316ad400819437857b90861765f24c4cf80a2"
 dependencies = [
+ "aws-lc-rs",
  "pem",
- "ring",
  "rustls-pki-types",
  "time",
  "yasna 0.5.2",
@@ -3890,7 +3889,6 @@ dependencies = [
 name = "sdkwork-database-sqlx"
 version = "0.1.0"
 dependencies = [
- "libsqlite3-sys",
  "sdkwork-database-config",
  "serde",
  "sqlx",
@@ -4217,6 +4215,7 @@ dependencies = [
  "tempfile",
  "tokio",
  "tracing",
+ "tracing-subscriber",
 ]
 
 [[package]]
@@ -4539,10 +4538,10 @@ name = "sdkwork-web-agent"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "chrono",
  "dotenvy",
  "sdkwork-utils-rust",
  "sdkwork-web-backend-sdk",
- "sdkwork-webserver-acme-service",
  "sdkwork-webserver-contract",
  "sdkwork-webserver-edge-runtime",
  "serde",
@@ -4674,7 +4673,6 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "async-trait",
- "base64",
  "bytes",
  "chrono",
  "http 1.4.2",
@@ -4751,7 +4749,6 @@ dependencies = [
  "sdkwork-database-spi",
  "sdkwork-database-sqlx",
  "sqlx",
- "tempfile",
  "tokio",
 ]
 
@@ -4795,7 +4792,6 @@ dependencies = [
  "rcgen 0.13.2",
  "rustls 0.23.41",
  "sdkwork-utils-rust",
- "sdkwork-webserver-acme-service",
  "serde",
  "serde_json",
  "tempfile",

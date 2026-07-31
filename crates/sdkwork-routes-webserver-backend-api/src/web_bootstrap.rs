@@ -220,7 +220,7 @@ mod tests {
                 permissions: vec!["web.sites.read".to_owned()],
             })
             .await,
-            StatusCode::FORBIDDEN
+            StatusCode::UNPROCESSABLE_ENTITY
         );
         assert_eq!(
             call_applications(TestResolver {

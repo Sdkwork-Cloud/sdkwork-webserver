@@ -90,5 +90,5 @@ The generated family metadata also remains inconsistent: `sdks/sdkwork-web-backe
 - `cargo test -p sdkwork-web-agent` passes 5/5 for canonical envelope decoding, desired/observed restart recovery, corruption, invalid transitions, exact legacy migration, oversized input, and runtime input bounds.
 - `cargo test -p sdkwork-routes-webserver-common` passes 2/2 for canonical Agent resource serialization and non-panicking trace headers on success and Problem Details responses.
 - `node --test tests/contract/agent-sync-state.contract.test.mjs` passes 3/3.
-- `pnpm verify` passes in 266.5 seconds, including the complete Rust workspace, 28 Node contract tests, API materialization, SDKWork repository/API/document/script/agent-workflow validators, topology, SQLite database validation, and cloud-gateway validation.
+- `pnpm verify` passes in 266.5 seconds, including the complete Rust workspace, 28 Node contract tests, API materialization, SDKWork repository/API/document/script/agent-workflow validators, topology, PostgreSQL database validation, and cloud-gateway validation.
 - `git diff --check` passes; line-ending notices are informational and no whitespace errors are present.

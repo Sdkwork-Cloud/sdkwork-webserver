@@ -568,20 +568,29 @@ fn default_environment() -> String {
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
+pub struct CertificateIdentifierResponse {
+    #[serde(rename = "domainId")]
+    pub domain_id: String,
+    pub hostname: String,
+    #[serde(rename = "identifierType")]
+    pub identifier_type: String,
+    pub position: i32,
+}
+
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct CertificateResponse {
     pub id: String,
     #[serde(rename = "certName")]
     pub cert_name: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub domain: Option<String>,
-    #[serde(rename = "domainId", skip_serializing_if = "Option::is_none")]
-    pub domain_id: Option<String>,
+    pub identifiers: Vec<CertificateIdentifierResponse>,
     #[serde(rename = "certType", skip_serializing_if = "Option::is_none")]
     pub cert_type: Option<i32>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub issuer: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub fingerprint: Option<String>,
+    #[serde(rename = "keyAlgorithm")]
+    pub key_algorithm: String,
     #[serde(rename = "notBefore", skip_serializing_if = "Option::is_none")]
     pub not_before: Option<String>,
     #[serde(rename = "notAfter", skip_serializing_if = "Option::is_none")]
@@ -589,8 +598,8 @@ pub struct CertificateResponse {
     #[serde(rename = "autoRenew", skip_serializing_if = "Option::is_none")]
     pub auto_renew: Option<bool>,
     #[serde(rename = "renewalStatus", skip_serializing_if = "Option::is_none")]
-    pub renewal_status: Option<i32>,
-    pub status: i32,
+    pub renewal_status: Option<String>,
+    pub status: String,
     #[serde(rename = "createdAt")]
     pub created_at: String,
 }
@@ -605,18 +614,99 @@ pub struct CertificatePage {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct CreateCertificateRequest {
-    #[serde(rename = "domainId")]
-    pub domain_id: String,
+    #[serde(rename = "domainIds")]
+    pub domain_ids: Vec<String>,
     #[serde(rename = "certType")]
     pub cert_type: i32,
+    #[serde(rename = "keyAlgorithm", default = "default_certificate_key_algorithm")]
+    pub key_algorithm: String,
     #[serde(rename = "autoRenew", default = "default_true")]
     pub auto_renew: bool,
+}
+
+fn default_certificate_key_algorithm() -> String {
+    "ECDSA".to_string()
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct UpdateCertificateRequest {
     #[serde(rename = "autoRenew")]
     pub auto_renew: bool,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct CreateListenerCertificateBindingRequest {
+    #[serde(rename = "certificateId")]
+    pub certificate_id: String,
+    #[serde(
+        rename = "certificateVersionId",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub certificate_version_id: Option<String>,
+    #[serde(default = "default_certificate_binding_priority")]
+    pub priority: i32,
+    #[serde(rename = "isDefault", default)]
+    pub is_default: bool,
+}
+
+fn default_certificate_binding_priority() -> i32 {
+    100
+}
+
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+pub struct ListenerCertificateBindingResponse {
+    pub id: String,
+    #[serde(rename = "siteId")]
+    pub site_id: String,
+    #[serde(rename = "domainId")]
+    pub domain_id: String,
+    #[serde(rename = "certificateId")]
+    pub certificate_id: String,
+    #[serde(rename = "desiredCertificateVersionId")]
+    pub desired_certificate_version_id: String,
+    #[serde(
+        rename = "currentCertificateVersionId",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub current_certificate_version_id: Option<String>,
+    #[serde(rename = "desiredCertificate")]
+    pub desired_certificate: ListenerCertificateSummaryResponse,
+    #[serde(rename = "currentCertificate", skip_serializing_if = "Option::is_none")]
+    pub current_certificate: Option<ListenerCertificateSummaryResponse>,
+    #[serde(rename = "keyAlgorithm")]
+    pub key_algorithm: String,
+    pub priority: i32,
+    #[serde(rename = "isDefault")]
+    pub is_default: bool,
+    pub status: String,
+    #[serde(rename = "activatedAt", skip_serializing_if = "Option::is_none")]
+    pub activated_at: Option<String>,
+    #[serde(rename = "createdAt")]
+    pub created_at: String,
+    #[serde(rename = "updatedAt")]
+    pub updated_at: String,
+}
+
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+pub struct ListenerCertificateSummaryResponse {
+    #[serde(rename = "certName")]
+    pub cert_name: String,
+    pub identifiers: Vec<CertificateIdentifierResponse>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub issuer: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub fingerprint: Option<String>,
+    #[serde(rename = "notAfter", skip_serializing_if = "Option::is_none")]
+    pub not_after: Option<String>,
+    pub status: String,
+}
+
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+pub struct ListenerCertificateBindingPage {
+    pub items: Vec<ListenerCertificateBindingResponse>,
+    #[serde(with = "sdkwork_utils_rust::serde_int64")]
+    pub total: i64,
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
@@ -650,17 +740,16 @@ pub struct CertificateIssueUpdate {
     pub cert_type: i32,
     pub issuer: String,
     pub subject: String,
-    pub san_list: String,
-    pub fingerprint: String,
-    pub cert_path: String,
-    pub key_path: String,
-    pub chain_path: Option<String>,
+    pub serial_sha256: String,
+    pub fingerprint_sha256: String,
+    pub spki_sha256: String,
+    pub chain_sha256: String,
+    pub key_algorithm: String,
+    pub fullchain_pem: String,
+    pub private_key_pem: String,
     pub not_before: String,
     pub not_after: String,
     pub auto_renew: bool,
-    pub cert_pem: String,
-    pub chain_pem: Option<String>,
-    pub encrypted_private_key: String,
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
@@ -845,7 +934,8 @@ pub struct CertificateRenewalCandidate {
     pub certificate_id: String,
     pub cert_type: i32,
     pub cert_name: String,
-    pub hostname: String,
+    pub hostnames: Vec<String>,
+    pub key_algorithm: String,
     pub auto_renew: bool,
     pub not_after: String,
 }
@@ -872,6 +962,23 @@ pub struct AgentHeartbeatRequest {
     pub active_configs: Option<i64>,
     #[serde(rename = "lastSyncVersion", skip_serializing_if = "Option::is_none")]
     pub last_sync_version: Option<String>,
+    #[serde(rename = "certificateObservations", default)]
+    pub certificate_observations: Vec<AgentCertificateObservation>,
+}
+
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct AgentCertificateObservation {
+    #[serde(rename = "certificateId")]
+    pub certificate_id: String,
+    pub fingerprint: String,
+    #[serde(rename = "syncVersion")]
+    pub sync_version: String,
+    pub state: String,
+    #[serde(rename = "observedAt")]
+    pub observed_at: String,
+    #[serde(rename = "failureCode", skip_serializing_if = "Option::is_none")]
+    pub failure_code: Option<String>,
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
@@ -920,6 +1027,7 @@ pub struct AgentCertificateBundle {
     #[serde(rename = "certName")]
     pub cert_name: String,
     pub fingerprint: String,
+    pub hostnames: Vec<String>,
     #[serde(rename = "fullchainPem")]
     pub fullchain_pem: String,
     #[serde(rename = "privkeyPem")]
@@ -983,6 +1091,7 @@ mod tests {
             nginx_enabled: Some(true),
             active_configs: Some(42),
             last_sync_version: Some("v1".into()),
+            certificate_observations: Vec::new(),
         };
         let json = serde_json::to_string(&request).unwrap();
         assert!(json.contains(r#""activeConfigs":"42""#));

@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional
 from ..http_client import HttpClient
-from ..models import CertificatesCreateResponse201, CertificatesListResponse, CreateCertificateRequest
+from ..models import CertificatesCreateResponse201, CertificatesListResponse, CreateCertificateRequest, CreateListenerCertificateBindingRequest, SitesDomainsListenerCertificateBindingsCreateResponse201, SitesDomainsListenerCertificateBindingsListResponse
 
 def _append_query_string(path: str, raw_query_string: str) -> str:
     query = raw_query_string.lstrip('?')
@@ -8,6 +8,67 @@ def _append_query_string(path: str, raw_query_string: str) -> str:
         return path
     separator = '&' if '?' in path else '?'
     return f"{path}{separator}{query}"
+
+def serialize_path_parameter(value: Any, spec: Dict[str, Any]) -> str:
+    if value is None:
+        return ''
+
+    style = str(spec.get('style') or 'simple')
+    name = str(spec.get('name') or '')
+    explode = bool(spec.get('explode'))
+    if isinstance(value, (list, tuple)):
+        return serialize_path_array(name, value, style, explode)
+    if isinstance(value, dict):
+        return serialize_path_object(name, value, style, explode)
+    return path_prefix(name, style) + encode_path_value(serialize_path_primitive(value))
+
+
+def serialize_path_array(name: str, values: Any, style: str, explode: bool) -> str:
+    serialized = [encode_path_value(serialize_path_primitive(item)) for item in values if item is not None]
+    if not serialized:
+        return path_prefix(name, style)
+    if style == 'matrix':
+        return ''.join(f";{name}={item}" for item in serialized) if explode else f";{name}={','.join(serialized)}"
+    return path_prefix(name, style) + ('.' if explode else ',').join(serialized)
+
+
+def serialize_path_object(name: str, value: Dict[str, Any], style: str, explode: bool) -> str:
+    entries = [(key, entry_value) for key, entry_value in value.items() if entry_value is not None]
+    if not entries:
+        return path_prefix(name, style)
+    if style == 'matrix':
+        if explode:
+            return ''.join(f";{encode_path_value(str(key))}={encode_path_value(serialize_path_primitive(entry_value))}" for key, entry_value in entries)
+        serialized = ','.join(item for key, entry_value in entries for item in (encode_path_value(str(key)), encode_path_value(serialize_path_primitive(entry_value))))
+        return f";{name}={serialized}"
+    if explode:
+        separator = '.' if style == 'label' else ','
+        serialized = separator.join(f"{encode_path_value(str(key))}={encode_path_value(serialize_path_primitive(entry_value))}" for key, entry_value in entries)
+    else:
+        serialized = ','.join(item for key, entry_value in entries for item in (encode_path_value(str(key)), encode_path_value(serialize_path_primitive(entry_value))))
+    return path_prefix(name, style) + serialized
+
+
+def path_prefix(name: str, style: str) -> str:
+    if style == 'label':
+        return '.'
+    if style == 'matrix':
+        return f";{name}"
+    return ''
+
+
+def encode_path_value(value: str) -> str:
+    from urllib.parse import quote
+
+    return quote(value, safe='')
+
+
+def serialize_path_primitive(value: Any) -> str:
+    if isinstance(value, dict):
+        import json
+
+        return json.dumps(value, separators=(',', ':'))
+    return str(value)
 
 
 def build_query_string(parameters: List[Dict[str, Any]]) -> str:
@@ -177,18 +238,20 @@ def serialize_header_primitive(value: Any) -> str:
 
 
 class CertificateApi:
-    """certificate certificates API client."""
+    """certificate certificate API client."""
 
     def __init__(self, client: HttpClient):
         self._client = client
+        self.sites = CertificateSitesApi(client)
 
 
-    def list(self, page: Optional[int] = None, page_size: Optional[int] = None, site_id: Optional[str] = None) -> CertificatesListResponse:
+    def list(self, page: Optional[int] = None, page_size: Optional[int] = None, site_id: Optional[str] = None, domain_id: Optional[str] = None) -> CertificatesListResponse:
         """获取证书列表"""
         query = build_query_string([
             {'name': 'page', 'value': page, 'style': 'form', 'explode': True, 'allow_reserved': False},
             {'name': 'page_size', 'value': page_size, 'style': 'form', 'explode': True, 'allow_reserved': False},
             {'name': 'siteId', 'value': site_id, 'style': 'form', 'explode': True, 'allow_reserved': False},
+            {'name': 'domainId', 'value': domain_id, 'style': 'form', 'explode': True, 'allow_reserved': False},
         ])
         return self._client.get(_append_query_string(f"/app/v3/api/certificates", query))
 
@@ -201,3 +264,54 @@ class CertificateApi:
             {}
         )
         return self._client.post(f"/app/v3/api/certificates", json=body, headers=request_headers)
+
+class CertificateSitesApi:
+    """certificate certificate.sites API client."""
+
+    def __init__(self, client: HttpClient):
+        self._client = client
+        self.domains = CertificateSitesDomainsApi(client)
+
+
+class CertificateSitesDomainsApi:
+    """certificate certificate.sites.domains API client."""
+
+    def __init__(self, client: HttpClient):
+        self._client = client
+        self.listener_certificate_bindings = CertificateSitesDomainsListenerCertificateBindingsApi(client)
+
+
+class CertificateSitesDomainsListenerCertificateBindingsApi:
+    """certificate certificate.sites.domains.listener_certificate_bindings API client."""
+
+    def __init__(self, client: HttpClient):
+        self._client = client
+
+
+    def list(self, site_id: str, domain_id: str, page: Optional[int] = None, page_size: Optional[int] = None) -> SitesDomainsListenerCertificateBindingsListResponse:
+        """List certificates active on the domain listener"""
+        query = build_query_string([
+            {'name': 'page', 'value': page, 'style': 'form', 'explode': True, 'allow_reserved': False},
+            {'name': 'page_size', 'value': page_size, 'style': 'form', 'explode': True, 'allow_reserved': False},
+        ])
+        return self._client.get(_append_query_string(f"/app/v3/api/sites/{serialize_path_parameter(site_id, {'name': 'siteId', 'style': 'simple', 'explode': False})}/domains/{serialize_path_parameter(domain_id, {'name': 'domainId', 'style': 'simple', 'explode': False})}/listener_certificate_bindings", query))
+
+    def create(self, site_id: str, domain_id: str, body: CreateListenerCertificateBindingRequest, idempotency_key: str) -> SitesDomainsListenerCertificateBindingsCreateResponse201:
+        """Bind a certificate version to the domain listener"""
+        request_headers = build_request_headers(
+            {
+                'Idempotency-Key': {'value': idempotency_key, 'style': 'simple', 'explode': False},
+            },
+            {}
+        )
+        return self._client.post(f"/app/v3/api/sites/{serialize_path_parameter(site_id, {'name': 'siteId', 'style': 'simple', 'explode': False})}/domains/{serialize_path_parameter(domain_id, {'name': 'domainId', 'style': 'simple', 'explode': False})}/listener_certificate_bindings", json=body, headers=request_headers)
+
+    def delete(self, site_id: str, domain_id: str, binding_id: str, idempotency_key: str) -> None:
+        """Remove a certificate from the domain listener"""
+        request_headers = build_request_headers(
+            {
+                'Idempotency-Key': {'value': idempotency_key, 'style': 'simple', 'explode': False},
+            },
+            {}
+        )
+        return self._client.delete(f"/app/v3/api/sites/{serialize_path_parameter(site_id, {'name': 'siteId', 'style': 'simple', 'explode': False})}/domains/{serialize_path_parameter(domain_id, {'name': 'domainId', 'style': 'simple', 'explode': False})}/listener_certificate_bindings/{serialize_path_parameter(binding_id, {'name': 'bindingId', 'style': 'simple', 'explode': False})}", headers=request_headers)

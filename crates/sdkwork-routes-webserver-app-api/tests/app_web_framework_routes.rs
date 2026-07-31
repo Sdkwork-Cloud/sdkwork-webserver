@@ -402,6 +402,7 @@ impl WebAppApi for StubAppApi {
         &self,
         _context: &WebAppRequestContext,
         _site_id: Option<&str>,
+        _domain_id: Option<&str>,
         _page: i32,
         _page_size: i32,
     ) -> WebServiceResult<sdkwork_webserver_contract::CertificatePage> {
@@ -415,6 +416,43 @@ impl WebAppApi for StubAppApi {
         _context: &WebAppRequestContext,
         _request: &sdkwork_webserver_contract::CreateCertificateRequest,
     ) -> WebServiceResult<sdkwork_webserver_contract::CertificateResponse> {
+        Err(sdkwork_webserver_contract::WebServiceError::Internal(
+            "not implemented".into(),
+        ))
+    }
+
+    async fn list_listener_certificate_bindings(
+        &self,
+        _context: &WebAppRequestContext,
+        _site_id: &str,
+        _domain_id: &str,
+        _page: i32,
+        _page_size: i32,
+    ) -> WebServiceResult<sdkwork_webserver_contract::ListenerCertificateBindingPage> {
+        Err(sdkwork_webserver_contract::WebServiceError::Internal(
+            "not implemented".into(),
+        ))
+    }
+
+    async fn bind_listener_certificate(
+        &self,
+        _context: &WebAppRequestContext,
+        _site_id: &str,
+        _domain_id: &str,
+        _request: &sdkwork_webserver_contract::CreateListenerCertificateBindingRequest,
+    ) -> WebServiceResult<sdkwork_webserver_contract::ListenerCertificateBindingResponse> {
+        Err(sdkwork_webserver_contract::WebServiceError::Internal(
+            "not implemented".into(),
+        ))
+    }
+
+    async fn unbind_listener_certificate(
+        &self,
+        _context: &WebAppRequestContext,
+        _site_id: &str,
+        _domain_id: &str,
+        _binding_id: &str,
+    ) -> WebServiceResult<()> {
         Err(sdkwork_webserver_contract::WebServiceError::Internal(
             "not implemented".into(),
         ))

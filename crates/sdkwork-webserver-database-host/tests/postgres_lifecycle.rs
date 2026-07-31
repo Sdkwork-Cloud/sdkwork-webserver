@@ -58,29 +58,17 @@ async fn postgres_baseline_seed_and_drift_are_clean() {
         .await
         .expect("initialize PostgreSQL baseline");
 
-    sqlx::raw_sql(
-        "DROP TABLE web_runtime_observation; \
-         DROP TABLE web_runtime_assignment; \
-         ALTER TABLE web_server DROP CONSTRAINT uk_web_server_tenant_id; \
-         ALTER TABLE web_server DROP COLUMN tenant_scope_hash; \
-         ALTER TABLE web_site DROP COLUMN application_type;",
-    )
-    .execute(postgres)
-    .await
-    .expect("downgrade the disposable database to the pre-launch legacy schema");
-
     let pending = orchestrator
         .plan_migrations()
         .await
-        .expect("plan pre-launch reconciliation migration");
-    assert_eq!(pending.len(), 1);
-    assert_eq!(pending[0].version, "0001");
+        .expect("plan PostgreSQL migrations");
+    assert!(pending.is_empty(), "pre-launch baseline must be current");
 
     let migrated = orchestrator
         .migrate()
         .await
-        .expect("upgrade the pre-launch PostgreSQL schema");
-    assert_eq!(migrated, 1);
+        .expect("apply PostgreSQL migrations");
+    assert_eq!(migrated, 0);
 
     let application_type_columns: i64 = sqlx::query_scalar(
         "SELECT COUNT(*) FROM information_schema.columns \

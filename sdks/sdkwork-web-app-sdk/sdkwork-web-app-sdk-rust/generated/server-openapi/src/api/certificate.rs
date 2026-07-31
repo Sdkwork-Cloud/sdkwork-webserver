@@ -4,7 +4,7 @@ use crate::api::base::{RequestHeaders};
 use crate::api::paths::app_path;
 use crate::api::paths::append_query_string;
 use crate::http::{SdkworkError, SdkworkHttpClient};
-use crate::models::{CertificateResponse, CreateCertificateRequest};
+use crate::models::{CertificateResponse, CreateCertificateRequest, CreateListenerCertificateBindingRequest, ListenerCertificateBindingResponse};
 
 #[derive(Clone)]
 pub struct CertificateApi {
@@ -16,12 +16,47 @@ impl CertificateApi {
         Self { client }
     }
 
+    /// List certificates active on the domain listener
+    pub async fn sites_domains_listener_certificate_bindings_list(&self, site_id: &str, domain_id: &str, page: Option<i64>, page_size: Option<i64>) -> Result<serde_json::Value, SdkworkError> {
+        let query = build_query_string(&[
+            QueryParameterSpec::new("page", page, "form", true, false, None),
+            QueryParameterSpec::new("page_size", page_size, "form", true, false, None),
+        ]);
+        let path = append_query_string(app_path(&format!("/sites/{}/domains/{}/listener_certificate_bindings", serialize_path_parameter(site_id, PathParameterSpec::new("siteId", "simple", false)), serialize_path_parameter(domain_id, PathParameterSpec::new("domainId", "simple", false)))), &query);
+        self.client.get(&path, None, None).await
+    }
+
+    /// Bind a certificate version to the domain listener
+    pub async fn sites_domains_listener_certificate_bindings_create(&self, site_id: &str, domain_id: &str, body: &CreateListenerCertificateBindingRequest, idempotency_key: &str) -> Result<ListenerCertificateBindingResponse, SdkworkError> {
+        let path = app_path(&format!("/sites/{}/domains/{}/listener_certificate_bindings", serialize_path_parameter(site_id, PathParameterSpec::new("siteId", "simple", false)), serialize_path_parameter(domain_id, PathParameterSpec::new("domainId", "simple", false))));
+        let headers = build_request_headers(
+            &[
+                ("Idempotency-Key", HeaderParameterSpec::new(idempotency_key, "simple", false, None)),
+            ],
+            &[],
+        );
+        self.client.post(&path, Some(body), None, headers.as_ref(), Some("application/json")).await
+    }
+
+    /// Remove a certificate from the domain listener
+    pub async fn sites_domains_listener_certificate_bindings_delete(&self, site_id: &str, domain_id: &str, binding_id: &str, idempotency_key: &str) -> Result<(), SdkworkError> {
+        let path = app_path(&format!("/sites/{}/domains/{}/listener_certificate_bindings/{}", serialize_path_parameter(site_id, PathParameterSpec::new("siteId", "simple", false)), serialize_path_parameter(domain_id, PathParameterSpec::new("domainId", "simple", false)), serialize_path_parameter(binding_id, PathParameterSpec::new("bindingId", "simple", false))));
+        let headers = build_request_headers(
+            &[
+                ("Idempotency-Key", HeaderParameterSpec::new(idempotency_key, "simple", false, None)),
+            ],
+            &[],
+        );
+        self.client.delete(&path, None, headers.as_ref()).await
+    }
+
     /// 获取证书列表
-    pub async fn certificates_list(&self, page: Option<i64>, page_size: Option<i64>, site_id: Option<&str>) -> Result<serde_json::Value, SdkworkError> {
+    pub async fn certificates_list(&self, page: Option<i64>, page_size: Option<i64>, site_id: Option<&str>, domain_id: Option<&str>) -> Result<serde_json::Value, SdkworkError> {
         let query = build_query_string(&[
             QueryParameterSpec::new("page", page, "form", true, false, None),
             QueryParameterSpec::new("page_size", page_size, "form", true, false, None),
             QueryParameterSpec::new("siteId", site_id, "form", true, false, None),
+            QueryParameterSpec::new("domainId", domain_id, "form", true, false, None),
         ]);
         let path = append_query_string(app_path(&"/certificates".to_string()), &query);
         self.client.get(&path, None, None).await
@@ -41,6 +76,103 @@ impl CertificateApi {
 
 }
 
+struct PathParameterSpec<'a> {
+    name: &'a str,
+    style: &'a str,
+    explode: bool,
+}
+
+impl<'a> PathParameterSpec<'a> {
+    fn new(name: &'a str, style: &'a str, explode: bool) -> Self {
+        Self { name, style, explode }
+    }
+}
+
+fn serialize_path_parameter<T: serde::Serialize>(value: T, spec: PathParameterSpec<'_>) -> String {
+    let value = serde_json::to_value(value).unwrap_or(serde_json::Value::Null);
+    if value.is_null() {
+        return String::new();
+    }
+    let style = if spec.style.is_empty() { "simple" } else { spec.style };
+    match value {
+        serde_json::Value::Array(values) => serialize_path_array(spec.name, &values, style, spec.explode),
+        serde_json::Value::Object(values) => serialize_path_object(spec.name, &values, style, spec.explode),
+        value => format!("{}{}", path_primitive_prefix(spec.name, style), percent_encode(&primitive_to_string(&value))),
+    }
+}
+
+fn serialize_path_array(name: &str, values: &[serde_json::Value], style: &str, explode: bool) -> String {
+    let serialized = values
+        .iter()
+        .filter(|value| !value.is_null())
+        .map(|value| percent_encode(&primitive_to_string(value)))
+        .collect::<Vec<_>>();
+    if serialized.is_empty() {
+        return path_prefix(name, style);
+    }
+    if style == "matrix" {
+        if explode {
+            return serialized.iter().map(|item| format!(";{}={}", name, item)).collect::<Vec<_>>().join("");
+        }
+        return format!(";{}={}", name, serialized.join(","));
+    }
+    let separator = if explode { "." } else { "," };
+    format!("{}{}", path_prefix(name, style), serialized.join(separator))
+}
+
+fn serialize_path_object(
+    name: &str,
+    values: &serde_json::Map<String, serde_json::Value>,
+    style: &str,
+    explode: bool,
+) -> String {
+    let mut entries = Vec::new();
+    let mut exploded = Vec::new();
+    for (key, value) in values {
+        if value.is_null() {
+            continue;
+        }
+        let escaped_key = percent_encode(key);
+        let escaped_value = percent_encode(&primitive_to_string(value));
+        if explode {
+            if style == "matrix" {
+                exploded.push(format!(";{}={}", escaped_key, escaped_value));
+            } else {
+                exploded.push(format!("{}={}", escaped_key, escaped_value));
+            }
+        } else {
+            entries.push(escaped_key);
+            entries.push(escaped_value);
+        }
+    }
+    if style == "matrix" {
+        if explode {
+            return exploded.join("");
+        }
+        return format!(";{}={}", name, entries.join(","));
+    }
+    if explode {
+        let separator = if style == "label" { "." } else { "," };
+        return format!("{}{}", path_prefix(name, style), exploded.join(separator));
+    }
+    format!("{}{}", path_prefix(name, style), entries.join(","))
+}
+
+fn path_prefix(name: &str, style: &str) -> String {
+    match style {
+        "label" => ".".to_string(),
+        "matrix" => format!(";{}", name),
+        _ => String::new(),
+    }
+}
+
+fn path_primitive_prefix(name: &str, style: &str) -> String {
+    if style == "matrix" {
+        format!(";{}=", name)
+    } else {
+        path_prefix(name, style)
+    }
+}
 
 struct HeaderParameterSpec {
     value: serde_json::Value,

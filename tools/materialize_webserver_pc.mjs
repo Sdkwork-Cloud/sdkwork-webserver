@@ -149,9 +149,9 @@ function permissionComposition(definition) {
       consumerPolicy: { forbidLocalPermissionCatalogForDependencyDomains: true, allowExplicitOverridesOnly: true, allowFrontendHintsWithoutServerDuplication: true },
     };
   }
-  const moduleCatalogRefs = [{ moduleId: "web", manifestRef: "../../../../../specs/iam.module.manifest.json", inheritPermissions: true, inheritRoles: true }];
+  const moduleCatalogRefs = [{ moduleId: "web", manifestRef: "../../../../specs/iam.module.manifest.json", inheritPermissions: true, inheritRoles: true }];
   if (definition.sdkDependencies?.some((dependency) => dependency.permissionModuleId === "drive")) {
-    moduleCatalogRefs.push({ moduleId: "drive", manifestRef: "../../../../../../sdkwork-iam/iam/modules/drive/iam.module.manifest.json", inheritPermissions: true, inheritRoles: true });
+    moduleCatalogRefs.push({ moduleId: "drive", manifestRef: "../../../../../sdkwork-iam/iam/modules/drive/iam.module.manifest.json", inheritPermissions: true, inheritRoles: true });
   }
   return {
     inheritanceMode: "module-catalog-with-overrides",

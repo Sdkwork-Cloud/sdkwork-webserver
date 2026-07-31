@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional
 from ..http_client import HttpClient
-from ..models import CertificatesCreateResponse201, CertificatesListResponse, CertificatesRenewResponse, CertificatesUpdateResponse, CreateCertificateRequest, UpdateCertificateRequest
+from ..models import ApplicationsDomainsListenerCertificateBindingsCreateResponse201, ApplicationsDomainsListenerCertificateBindingsListResponse, CertificatesCreateResponse201, CertificatesListResponse, CertificatesRenewResponse, CertificatesUpdateResponse, CreateCertificateRequest, CreateListenerCertificateBindingRequest, UpdateCertificateRequest
 
 def _append_query_string(path: str, raw_query_string: str) -> str:
     query = raw_query_string.lstrip('?')
@@ -238,17 +238,19 @@ def serialize_header_primitive(value: Any) -> str:
 
 
 class CertificateApi:
-    """certificate certificates API client."""
+    """certificate certificate API client."""
 
     def __init__(self, client: HttpClient):
         self._client = client
+        self.applications = CertificateApplicationsApi(client)
 
 
-    def list(self, page: Optional[int] = None, page_size: Optional[int] = None) -> CertificatesListResponse:
+    def list(self, page: Optional[int] = None, page_size: Optional[int] = None, domain_id: Optional[str] = None) -> CertificatesListResponse:
         """List canonical certificates"""
         query = build_query_string([
             {'name': 'page', 'value': page, 'style': 'form', 'explode': True, 'allow_reserved': False},
             {'name': 'page_size', 'value': page_size, 'style': 'form', 'explode': True, 'allow_reserved': False},
+            {'name': 'domainId', 'value': domain_id, 'style': 'form', 'explode': True, 'allow_reserved': False},
         ])
         return self._client.get(_append_query_string(f"/backend/v3/api/certificates", query))
 
@@ -281,3 +283,54 @@ class CertificateApi:
             {}
         )
         return self._client.post(f"/backend/v3/api/certificates/{serialize_path_parameter(certificate_id, {'name': 'certificateId', 'style': 'simple', 'explode': False})}/renew", headers=request_headers)
+
+class CertificateApplicationsApi:
+    """certificate certificate.applications API client."""
+
+    def __init__(self, client: HttpClient):
+        self._client = client
+        self.domains = CertificateApplicationsDomainsApi(client)
+
+
+class CertificateApplicationsDomainsApi:
+    """certificate certificate.applications.domains API client."""
+
+    def __init__(self, client: HttpClient):
+        self._client = client
+        self.listener_certificate_bindings = CertificateApplicationsDomainsListenerCertificateBindingsApi(client)
+
+
+class CertificateApplicationsDomainsListenerCertificateBindingsApi:
+    """certificate certificate.applications.domains.listener_certificate_bindings API client."""
+
+    def __init__(self, client: HttpClient):
+        self._client = client
+
+
+    def list(self, application_id: str, domain_id: str, page: Optional[int] = None, page_size: Optional[int] = None) -> ApplicationsDomainsListenerCertificateBindingsListResponse:
+        """List certificates active on an application domain listener"""
+        query = build_query_string([
+            {'name': 'page', 'value': page, 'style': 'form', 'explode': True, 'allow_reserved': False},
+            {'name': 'page_size', 'value': page_size, 'style': 'form', 'explode': True, 'allow_reserved': False},
+        ])
+        return self._client.get(_append_query_string(f"/backend/v3/api/applications/{serialize_path_parameter(application_id, {'name': 'applicationId', 'style': 'simple', 'explode': False})}/domains/{serialize_path_parameter(domain_id, {'name': 'domainId', 'style': 'simple', 'explode': False})}/listener_certificate_bindings", query))
+
+    def create(self, application_id: str, domain_id: str, body: CreateListenerCertificateBindingRequest, idempotency_key: str) -> ApplicationsDomainsListenerCertificateBindingsCreateResponse201:
+        """Bind a certificate version to an application domain listener"""
+        request_headers = build_request_headers(
+            {
+                'Idempotency-Key': {'value': idempotency_key, 'style': 'simple', 'explode': False},
+            },
+            {}
+        )
+        return self._client.post(f"/backend/v3/api/applications/{serialize_path_parameter(application_id, {'name': 'applicationId', 'style': 'simple', 'explode': False})}/domains/{serialize_path_parameter(domain_id, {'name': 'domainId', 'style': 'simple', 'explode': False})}/listener_certificate_bindings", json=body, headers=request_headers)
+
+    def delete(self, application_id: str, domain_id: str, binding_id: str, idempotency_key: str) -> None:
+        """Remove a certificate from an application domain listener"""
+        request_headers = build_request_headers(
+            {
+                'Idempotency-Key': {'value': idempotency_key, 'style': 'simple', 'explode': False},
+            },
+            {}
+        )
+        return self._client.delete(f"/backend/v3/api/applications/{serialize_path_parameter(application_id, {'name': 'applicationId', 'style': 'simple', 'explode': False})}/domains/{serialize_path_parameter(domain_id, {'name': 'domainId', 'style': 'simple', 'explode': False})}/listener_certificate_bindings/{serialize_path_parameter(binding_id, {'name': 'bindingId', 'style': 'simple', 'explode': False})}", headers=request_headers)

@@ -63,10 +63,10 @@ client.getHttpClient().setHeader("X-Custom-Header", "value");
 
 - `client.getApplication()` - application API
 - `client.getApplicationDomain()` - application_domain API
+- `client.getCertificate()` - certificate API
 - `client.getDomain()` - domain API
 - `client.getApplicationSourceVersion()` - application_source_version API
 - `client.getApplicationDeployment()` - application_deployment API
-- `client.getCertificate()` - certificate API
 - `client.getCertificateDistribution()` - certificate_distribution API
 - `client.getNginx()` - nginx API
 - `client.getServer()` - server API
@@ -99,6 +99,18 @@ Map<String, Object> params = new LinkedHashMap<>();
 params.put("page", 1);
 params.put("page_size", 2);
 ApplicationsDomainsListResponse result = client.getApplicationDomain().applicationsDomainsList(applicationId, params);
+System.out.println(result);
+```
+
+### certificate
+
+```java
+// List canonical certificates
+Map<String, Object> params = new LinkedHashMap<>();
+params.put("page", 1);
+params.put("page_size", 2);
+params.put("domainId", "00000000-0000-0000-0000-000000000001");
+CertificatesListResponse result = client.getCertificate().certificatesList(params);
 System.out.println(result);
 ```
 
@@ -135,17 +147,6 @@ params.put("page", 1);
 params.put("page_size", 2);
 params.put("status", 3);
 ApplicationsDeploymentsListResponse result = client.getApplicationDeployment().applicationsDeploymentsList(applicationId, params);
-System.out.println(result);
-```
-
-### certificate
-
-```java
-// List canonical certificates
-Map<String, Object> params = new LinkedHashMap<>();
-params.put("page", 1);
-params.put("page_size", 2);
-CertificatesListResponse result = client.getCertificate().certificatesList(params);
 System.out.println(result);
 ```
 

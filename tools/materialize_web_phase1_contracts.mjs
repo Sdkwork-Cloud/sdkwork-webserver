@@ -113,6 +113,11 @@ function enrichOpenApi(openapi, profile) {
       if (!["get", "post", "put", "patch", "delete"].includes(method)) {
         continue;
       }
+      if (operation["x-sdkwork-owner"] !== SDK_OWNER) {
+        throw new Error(
+          `${profile.yamlPath} ${method.toUpperCase()} ${pathKey} must declare x-sdkwork-owner: ${SDK_OWNER}`,
+        );
+      }
       operation["x-sdkwork-api-surface"] = profile.surface;
       operation["x-sdkwork-api-authority"] = profile.apiAuthority;
       operation["x-sdkwork-request-context"] = "WebRequestContext";
@@ -324,6 +329,8 @@ function writeHttpRouteManifestRust(crateDir, fnName, routes) {
 
 const SDK_VERSION = "1.0.0";
 const STANDARD_VERSION = "2026-06-26";
+const SDK_OWNER = "sdkwork-web";
+const STANDARD_PROFILE = "sdkwork-v3";
 
 const LANGUAGE_LIST = [
   "typescript",
@@ -460,18 +467,33 @@ function sdkDependenciesFor(surface) {
   ];
 }
 
-function syncSdkManifest(profile) {
+function countOwnerOperations(openapi) {
+  let count = 0;
+  for (const pathItem of Object.values(openapi.paths ?? {})) {
+    for (const [method, operation] of Object.entries(pathItem ?? {})) {
+      if (
+        ["get", "post", "put", "patch", "delete"].includes(method) &&
+        operation["x-sdkwork-owner"] === SDK_OWNER
+      ) {
+        count += 1;
+      }
+    }
+  }
+  return count;
+}
+
+function syncSdkManifest(profile, openapi) {
   const relativePath = `sdks/${profile.sdkFamily}/sdk-manifest.json`;
   const manifestPath = path.join(root, relativePath);
   if (!fs.existsSync(manifestPath)) {
-    writeJson(relativePath, newSdkManifest(profile));
+    writeJson(relativePath, newSdkManifest(profile, openapi));
   }
 
   const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
   const expectedIdentity = {
     sdkFamily: profile.sdkFamily,
     sdkName: profile.sdkFamily,
-    sdkOwner: "sdkwork-web",
+    sdkOwner: SDK_OWNER,
     apiAuthority: profile.apiAuthority,
   };
   for (const [field, expected] of Object.entries(expectedIdentity)) {
@@ -482,6 +504,8 @@ function syncSdkManifest(profile) {
     }
   }
 
+  manifest.ownerOnlyOperationCount = countOwnerOperations(openapi);
+  manifest.standardProfile = STANDARD_PROFILE;
   manifest.sdkDependencies = sdkDependenciesFor(profile.surface);
   manifest.sdkSurface = sdkSurfaceLabel(profile.sdkFamily);
   manifest.sdkType = sdkGeneratorType(profile);
@@ -493,7 +517,7 @@ function syncSdkManifest(profile) {
   writeJson(relativePath, manifest);
 }
 
-function newSdkManifest(profile) {
+function newSdkManifest(profile, openapi) {
   const family = profile.sdkFamily;
   const surfaceLabel = sdkSurfaceLabel(family);
   const languages = profile.languages ?? LANGUAGE_LIST;
@@ -542,8 +566,10 @@ function newSdkManifest(profile) {
       default: `openapi/${sdkgenFileName}`,
       flutter: `openapi/${sdkgenFileName}`,
     },
-    sdkOwner: "sdkwork-web",
+    sdkOwner: SDK_OWNER,
     apiAuthority: profile.apiAuthority,
+    ownerOnlyOperationCount: countOwnerOperations(openapi),
+    standardProfile: STANDARD_PROFILE,
     sdkSurface: surfaceLabel,
     sdkType: sdkGeneratorType(profile),
     discoverySurface: {
@@ -562,7 +588,7 @@ function newSdkManifest(profile) {
   };
 }
 
-function writeComponentSpec(profile) {
+function writeComponentSpec(profile, openapi) {
   const family = profile.sdkFamily;
   const surfaceLabel = sdkSurfaceLabel(family);
   const sdkType = sdkGeneratorType(profile);
@@ -579,11 +605,24 @@ function writeComponentSpec(profile) {
     sdkSurface: surfaceLabel,
     sdkType,
     languages,
+    sdk: {
+      family,
+      authority: profile.apiAuthority,
+      sdkOwner: SDK_OWNER,
+      generationInputSpec: `openapi/sdkwork-web-${surfaceLabel}-api.sdkgen.yaml`,
+      apiPrefix: profile.prefix,
+      packageName: `@sdkwork/web-${surfaceLabel}-sdk`,
+      sdkName: family,
+      sdkType,
+      sdkSurface: surfaceLabel,
+      standardProfile: STANDARD_PROFILE,
+      ownerOnlyOperationCount: countOwnerOperations(openapi),
+    },
     generator: {
       package: "@sdkwork/sdk-generator",
       entrypoint: "../sdkwork-sdk-generator/bin/sdkgen.js",
       type: sdkType,
-      standardProfile: "sdkwork-v3",
+      standardProfile: STANDARD_PROFILE,
     },
     contracts: {
       layerRole: "sdk-generated",
@@ -948,8 +987,8 @@ for (const profile of surfaces) {
   });
   writeHttpRouteManifestRust(profile.crateDir, profile.manifestFn, routes);
   // C4-C7: emit full family metadata, sdkgen input, and generate-sdk wrappers.
-  writeComponentSpec(profile);
-  syncSdkManifest(profile);
+  writeComponentSpec(profile, openapi);
+  syncSdkManifest(profile, openapi);
   writeSdkgenInput(profile, openapi);
   writeGenerateSdkScripts(profile);
 }

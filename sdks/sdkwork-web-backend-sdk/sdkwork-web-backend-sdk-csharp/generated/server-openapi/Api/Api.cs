@@ -7,10 +7,10 @@ namespace SDKWork.Web.BackendSdk.Api
     {
         public static ApplicationApi? Application { get; set; }
         public static ApplicationDomainApi? ApplicationDomain { get; set; }
+        public static CertificateApi? Certificate { get; set; }
         public static DomainApi? Domain { get; set; }
         public static ApplicationSourceVersionApi? ApplicationSourceVersion { get; set; }
         public static ApplicationDeploymentApi? ApplicationDeployment { get; set; }
-        public static CertificateApi? Certificate { get; set; }
         public static CertificateDistributionApi? CertificateDistribution { get; set; }
         public static NginxApi? Nginx { get; set; }
         public static ServerApi? Server { get; set; }

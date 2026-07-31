@@ -3,7 +3,7 @@
 Status: active
 Owner: SDKWork maintainers
 Application: sdkwork-web
-Updated: 2026-07-23
+Updated: 2026-07-31
 Parent: [PRD.md](PRD.md)
 Specs: NGINX_SPEC.md, SECURITY_SPEC.md, CONFIG_SPEC.md, ENVIRONMENT_SPEC.md, DEPLOYMENT_SPEC.md, TEST_SPEC.md
 
@@ -40,6 +40,14 @@ Listener activation fails when its TLS policy has no valid certificate candidate
 
 ## 4. SNI And Certificate Selection
 
+- Hostnames are tenant assets under explicit root-domain Zones. Application routing is represented
+  by `web_site_binding`; certificates never own or copy an application id.
+- Managed certificate inventory and issuance are addressed by verified hostname identifiers. A
+  `web_site_binding` is not an issuance prerequisite; it is required only for listener assignment.
+- A certificate covers 1..8 ordered exact or wildcard hostnames through
+  `web_certificate_identifier`. A hostname may participate in several certificate lifecycles.
+- Listener selection intent is represented by `web_listener_certificate_binding`, not by copying a
+  certificate id onto a hostname or application row.
 - Certificate names support exact DNS names, standards-compliant wildcards, and SAN coverage. Regex certificate names are forbidden.
 - The engine selects certificates by normalized SNI name and declared priority, then by compatible signature algorithm and client capabilities.
 - Multiple certificate types, such as ECDSA and RSA, may serve the same names when deterministic selection and fallback are tested.
@@ -80,7 +88,10 @@ Before public activation or managed public-certificate issuance, every requested
 
 Challenge tokens are cryptographically random, time-bounded, single-purpose, stored as secrets or secure digests where possible, and compared safely. A domain is not verified by changing a database status alone. The verifier performs the external observation, records resolver/vantage evidence, handles DNS propagation and negative caching, and expires evidence according to policy.
 
-Wildcard issuance requires DNS-01. Production activation is blocked when ownership evidence is absent, expired, revoked, or belongs to a different tenant/application scope.
+Wildcard issuance requires DNS-01. Production issuance or activation is blocked when ownership
+evidence is absent, expired, revoked, or belongs to a different tenant/domain authorization
+scope. Application authorization is evaluated separately when a certificate is assigned to a
+listener; it is not certificate ownership evidence.
 
 ## 8. ACME Lifecycle
 
@@ -199,10 +210,10 @@ Alerts include configurable 30-day, 14-day, 7-day, 72-hour, and 24-hour expiry t
 
 - Certificate, domain, challenge, issuance, renewal, rotation, revocation, status, event, and audit APIs follow SDKWork response envelopes, problem details, IAM, idempotency, optimistic concurrency, and asynchronous operation semantics.
 - Growing certificate, domain, operation, event, node-status, and audit collections use store-level cursor/keyset pagination with bounded `page_size` and standard `pageInfo`.
-- PostgreSQL is the cloud and default server-grade standalone authority and uses transactional row claims, leases, fencing, unique constraints, and outbox/event delivery for state transitions that cross process boundaries.
-- SQLite is supported only by an explicitly selected single-node standalone profile and provides equivalent supported business state transitions with single-node-safe transaction and worker-claim behavior. It is not a shared cluster database.
+- PostgreSQL is the only cloud and standalone authoritative server database and uses transactional row claims, leases, fencing, unique constraints, and outbox/event delivery for state transitions that cross process boundaries.
 - Database commits never claim external ACME, DNS, KMS, node activation, or public probe success. External effects use durable operations and verified state transitions.
-- PostgreSQL and SQLite run the same certificate lifecycle contract suite, migration tests, rollback policy checks, uniqueness tests, and crash-recovery scenarios.
+- PostgreSQL runs certificate lifecycle, migration, rollback policy, uniqueness, transaction,
+  backup/restore, failover, and crash-recovery scenarios.
 
 ## 18. Verification Matrix
 
@@ -215,7 +226,7 @@ Release verification includes:
 | Lifecycle | Import, issuance, HTTP-01, DNS-01, propagation delay, renewal, key rotation, revocation, challenge cleanup, clock skew, rate limit, and issuer outage tests. |
 | Runtime | Atomic reload, concurrent reload fencing, existing-connection survival, served fingerprint probe, rollback, node restart, offline reconciliation, and rolling upgrade tests. |
 | Scale | Handshake throughput/latency, many SNI names, node-scoped delta sync, bounded caches/queues, 24-hour soak, and no-OOM fault injection. |
-| Persistence | PostgreSQL and SQLite parity, transaction rollback, duplicate worker, lease expiry, stale fencing token, migration, backup/restore, and crash recovery. |
+| Persistence | PostgreSQL transaction rollback, duplicate worker, lease expiry, stale fencing token, migration, backup/restore, failover, and crash recovery. |
 
 ## 19. Acceptance Criteria
 
@@ -226,7 +237,7 @@ Release verification includes:
 - Private keys never appear in authored configuration, API output, logs, metrics, traces, database plaintext, generated Nginx source, or support bundles.
 - Rotation is atomic, existing healthy connections remain available, all ready nodes converge, and a failed candidate restores the last verified context.
 - Certificate operations, queues, caches, TLS contexts, worker concurrency, and node synchronization remain bounded under load and soak tests without OOM.
-- PostgreSQL and SQLite lifecycle suites pass and no database-only state transition is presented as proof of an external effect.
+- PostgreSQL lifecycle and recovery suites pass and no database-only state transition is presented as proof of an external effect.
 - Expiry, renewal, served-certificate divergence, KMS/ACME failure, and node-distribution alerts are exercised with current runbooks before commercial release.
 
 ## 20. Current Verified Delivery Boundary

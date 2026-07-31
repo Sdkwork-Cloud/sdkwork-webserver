@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+use crate::models::{CertificateIdentifierResponse};
+
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct CertificateResponse {
     pub id: String,
@@ -7,12 +9,7 @@ pub struct CertificateResponse {
     #[serde(rename = "certName")]
     pub cert_name: String,
 
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub domain: Option<String>,
-
-    #[serde(rename = "domainId")]
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub domain_id: Option<String>,
+    pub identifiers: Vec<CertificateIdentifierResponse>,
 
     #[serde(rename = "certType")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -23,6 +20,9 @@ pub struct CertificateResponse {
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub fingerprint: Option<String>,
+
+    #[serde(rename = "keyAlgorithm")]
+    pub key_algorithm: String,
 
     #[serde(rename = "notBefore")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -36,13 +36,11 @@ pub struct CertificateResponse {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub auto_renew: Option<bool>,
 
-    /// 0=idle, 1=renewing, 2=pending, 3=failed
     #[serde(rename = "renewalStatus")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub renewal_status: Option<i64>,
+    pub renewal_status: Option<String>,
 
-    /// 0=pending, 1=active, 2=expired, 3=revoked, 4=archived
-    pub status: i64,
+    pub status: String,
 
     #[serde(rename = "createdAt")]
     pub created_at: String,

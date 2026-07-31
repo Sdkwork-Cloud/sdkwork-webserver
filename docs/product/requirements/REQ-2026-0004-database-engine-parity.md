@@ -1,99 +1,70 @@
-# REQ-2026-0004 PostgreSQL And SQLite Lifecycle Parity
+# REQ-2026-0004 PostgreSQL Authoritative Database Lifecycle
 
 ```yaml
 id: REQ-2026-0004
-title: Prove PostgreSQL and SQLite database lifecycle parity for the Web control plane
+title: Prove PostgreSQL lifecycle and repository behavior for every Web Server profile
 owner: SDKWork maintainers
-status: superseded
-superseded_by: MIG-2026-0062
+status: in-progress
 source: reliability
-problem: The application declares PostgreSQL and SQLite support, but a manifest declaration and static DDL validation do not prove that a fresh database can initialize, seed idempotently, remain drift-clean, and preserve SDKWork explicit-id semantics on both engines.
+problem: The authoritative Web control plane requires executable evidence that a fresh PostgreSQL database initializes, remains drift-clean, enforces tenant-safe relationships, and supports bounded repository behavior.
 goals:
-  - Keep PostgreSQL as the default standalone/cloud control-plane engine.
-  - Keep SQLite restricted to an explicit single-node profile.
-  - Execute the same contract, baseline, seed history, idempotency, and drift policy on both engines.
-  - Reject SQLite rowid auto-allocation for SDKWork business identifiers.
-  - Provide repeatable empty-database integration tests for both engines.
+  - Keep PostgreSQL as the only authoritative server database for standalone and cloud profiles.
+  - Execute baseline, lifecycle, seed history, drift, repository, recovery, and failover verification against disposable PostgreSQL.
+  - Require explicit snowflake BIGINT ids and numeric tenant/organization/user scope.
+  - Prove transaction rollback, uniqueness, idempotency, tenant isolation, and store pagination.
 non_goals:
-  - Adding a database dependency to the HTTP/HTTPS request data plane.
-  - Treating SQLite as a cloud, multi-writer, or high-availability database.
-  - Backup/restore, PITR, online schema migration, and failover certification; those remain parent commercial-release gates.
+  - Adding a database dependency to the HTTP/HTTPS request path.
+  - Reintroducing an alternative authoritative server database or rollback target.
+  - Claiming managed-provider, PITR, multi-region, or production RPO/RTO completion.
 users:
-  - Platform operators
-  - Site reliability engineers
-  - Backend maintainers
+  - platform operators
+  - site reliability engineers
+  - backend maintainers
 acceptance_criteria:
-  - SQLite fresh init, standard zh-CN seed, repeated seed, and drift analysis pass in an automated Cargo test.
-  - PostgreSQL fresh init, standard zh-CN seed, repeated seed, and drift analysis pass against a disposable database in CI.
-  - Both engine baselines use explicitly supplied int64 business ids and produce zero error-level drift.
-  - Named unique indexes and partial-index predicates match the database contract on both engines.
-  - PostgreSQL/SQLite repository integration tests cover transaction rollback, unique/idempotency conflicts, tenant filters, and store-level pagination before commercial acceptance.
-  - Every public repository path that reads or writes PostgreSQL JSONB or TIMESTAMPTZ values uses an engine-compatible bind/projection boundary and has representative dual-engine integration evidence.
-  - Production topology rejects SQLite for shared/cloud multi-replica deployment.
+  - PostgreSQL fresh initialization, repeated lifecycle execution, and drift analysis pass against a disposable database.
+  - The baseline uses explicitly supplied BIGINT business and subject ids and produces no error-level drift.
+  - Foreign keys, unique constraints, partial indexes, and check expressions match the database contract.
+  - Repository integration tests cover rollback, unique/idempotency conflict, tenant filtering, domain filtering, and store-level pagination.
+  - Root-domain, hostname, certificate identifier/version, listener binding, and deployment relationships pass real PostgreSQL tests.
+  - CI and release validation fail when PostgreSQL lifecycle or repository parity does not execute.
 non_functional_requirements:
-  security: Test tooling refuses to run PostgreSQL lifecycle tests against a schema that already contains Web business tables; credentials remain environment-owned.
-  privacy: Database tests use synthetic data only and do not read production rows.
-  performance: P0/P1 repository queries retain bounded SQL pagination and engine-appropriate indexes.
-  reliability: Seed execution is checksum-tracked and idempotent; fresh bootstrap produces a clean drift report.
+  security: Disposable test tooling rejects non-empty or non-test targets and never accepts production credentials.
+  privacy: Verification uses synthetic tenant data only.
+  performance: P0/P1 queries use bounded SQL pagination and reviewed PostgreSQL indexes/query plans.
+  reliability: Initialization and drift checks are deterministic and backup/restore and failover are separate mandatory gates.
 affected_surfaces:
+  - database
   - backend
   - composition
 trace:
   specs:
+    - SUBJECT_ID_SPEC.md
     - DATABASE_SPEC.md
     - DATABASE_FRAMEWORK_SPEC.md
     - PAGINATION_SPEC.md
     - TEST_SPEC.md
   components:
     - database/database.manifest.json
+    - database/contract/schema.yaml
     - database/ddl/baseline/postgres/0001_web_baseline.sql
-    - database/ddl/baseline/sqlite/0001_web_baseline.sql
     - crates/sdkwork-webserver-database-host
+    - crates/sdkwork-intelligence-webserver-repository-sqlx
 verification:
   - pnpm db:validate
-  - pnpm db:test:sqlite
-  - SDKWORK_DATABASE_TEST_POSTGRES_URL=<disposable-url> pnpm db:test:postgres
-  - pnpm verify
+  - pnpm test:postgres:required
+  - pnpm test:database:recovery
+  - pnpm test:postgres:ha
 ```
 
-## Evidence
+## Evidence Boundary
 
-Evidence collected on 2026-07-19 against isolated build targets and disposable PostgreSQL 16
-containers:
+The disposable PostgreSQL lifecycle, repository parity, backup/restore, and bounded physical
+promotion drills are engineering evidence. Managed failover, client endpoint switching,
+split-brain fencing, PITR, production scheduling, encrypted retention, and measured RPO/RTO remain
+commercial release gates.
 
-- SQLite lifecycle, repeat seed, explicit-id, and zero-error drift verification passes.
-- PostgreSQL lifecycle, repeat seed, explicit-id, and zero-error drift verification passes.
-- The shared drift matcher recognizes redundant boolean grouping and PostgreSQL
-  `x = ANY (ARRAY[...])` output as equivalent to contract `x IN (...)`; positive and
-  negative matcher tests pass, and drift policy contains no ignore workaround.
-- SQLite and PostgreSQL repository parity pass through the real `WebRepositoryPort` for
-  tenant isolation, tenant-scoped uniqueness, filtered/store-level pagination, stable
-  tied-row ordering, bounded `i32::MAX` deep pages, idempotent replay/conflict,
-  concurrent idempotent create, and atomic rollback on forced insert failure.
-- The same dual-engine scenario now executes site update/delete, domain primary/verify/delete,
-  public and encrypted environment variables, health checks, tenant/global Nginx list/update/
-  activation, certificate create/finalize/renewal/failure, server token authentication and
-  heartbeat, agent configuration/certificate sync, and audit insert/list paths.
-- SQLx `Any` JSONB/TIMESTAMPTZ boundaries use explicit engine-compatible write casts and text
-  projections. PostgreSQL BOOLEAN columns use standard `TRUE`/`FALSE`, structured JSON token
-  lookup replaces serialization-dependent `LIKE`, and database instant parsing covers SQLite
-  RFC3339 plus PostgreSQL text projections.
-- `cargo test -p sdkwork-database-drift` passes all 24 unit/integration tests and strict
-  crate Clippy passes with warnings denied.
-- `cargo test -p sdkwork-intelligence-webserver-repository-sqlx` passes; the explicit
-  disposable PostgreSQL parity test passes when its ignored environment gate is enabled.
-- Strict component-port validation, pagination validation, database-framework validation,
-  and strict repository Clippy pass.
+## Change Control
 
-Before supersession, this requirement remained `in-progress` because its bounded-query
-non-functional criterion was not true for every growing collection. That separate pagination and
-agent delta-sync work remains tracked by
-[REQ-2026-0045](REQ-2026-0045-bounded-control-plane-collections.md). Historical dual-engine test
-evidence does not make SQLite an authoritative server engine under manifest v2.
-
-## Supersession
-
-`MIG-2026-0062` supersedes SQLite as a Web control-plane lifecycle engine. PostgreSQL is the
-only authoritative server engine under database manifest v2. The SQLite DDL is retained only as
-an isolated repository test fixture; it is not a deployable profile, release asset, lifecycle
-contract, recovery authority, or production fallback.
+- 2026-07-31: Replaced the prelaunch dual-engine requirement with PostgreSQL-only authoritative
+  lifecycle and repository evidence. Removed alternative-engine lifecycle, release, recovery, and
+  rollback claims.

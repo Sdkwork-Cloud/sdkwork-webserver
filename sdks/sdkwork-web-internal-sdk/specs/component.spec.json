@@ -11,6 +11,19 @@
     "typescript",
     "rust"
   ],
+  "sdk": {
+    "family": "sdkwork-web-internal-sdk",
+    "authority": "sdkwork-web-internal-api",
+    "sdkOwner": "sdkwork-web",
+    "generationInputSpec": "openapi/sdkwork-web-internal-api.sdkgen.yaml",
+    "apiPrefix": "/internal/v3/api",
+    "packageName": "@sdkwork/web-internal-sdk",
+    "sdkName": "sdkwork-web-internal-sdk",
+    "sdkType": "custom",
+    "sdkSurface": "internal",
+    "standardProfile": "sdkwork-v3",
+    "ownerOnlyOperationCount": 4
+  },
   "generator": {
     "package": "@sdkwork/sdk-generator",
     "entrypoint": "../sdkwork-sdk-generator/bin/sdkgen.js",

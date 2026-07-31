@@ -19,13 +19,14 @@ export function createWebserverAdminCertificateRegistry(client: WebserverAdminSd
         action(
           "create",
           "Issue certificate",
-          { domainId: "", certType: 1, autoRenew: true },
+          { domainIds: [], certType: 1, keyAlgorithm: "ECDSA", autoRenew: true },
           async (context) => client.certificate.create(createCertificateRequest(context.body), idempotencyParams(context)),
           {
-            fieldOptions: { domainId: [], certType: [1, 3] },
-            loadFieldOptions: async () => ({ domainId: await domainOptions(client) }),
+            fieldOptions: { domainIds: [], certType: [1, 3], keyAlgorithm: ["ECDSA", "RSA"] },
+            loadFieldOptions: async () => ({ domainIds: await domainOptions(client) }),
+            multipleFields: ["domainIds"],
             permission: "web.certificates.write",
-            requiredFields: ["domainId"],
+            requiredFields: ["domainIds"],
           },
         ),
         action(
@@ -105,8 +106,9 @@ function createCertificateRequest(body: Readonly<Record<string, unknown>>): Cert
     throw new Error("Automatic renewal is unavailable for self-signed certificates");
   }
   return {
-    domainId: requiredText(body.domainId, "Domain ID"),
+    domainIds: requiredTextList(body.domainIds, "Certificate domains", 8),
     certType,
+    keyAlgorithm: certificateKeyAlgorithm(body.keyAlgorithm),
     autoRenew,
   };
 }
@@ -119,6 +121,20 @@ function certificateType(value: unknown): 1 | 3 {
   const parsed = Number(value);
   if (parsed === 1 || parsed === 3) return parsed;
   throw new Error("Certificate type is invalid");
+}
+
+function certificateKeyAlgorithm(value: unknown): "ECDSA" | "RSA" {
+  if (value === "ECDSA" || value === "RSA") return value;
+  throw new Error("Certificate key algorithm is invalid");
+}
+
+function requiredTextList(value: unknown, label: string, maximum: number): string[] {
+  if (!Array.isArray(value)) throw new Error(`${label} is required`);
+  const items = [...new Set(value.map((item) => requiredText(item, label)))];
+  if (items.length === 0 || items.length > maximum) {
+    throw new Error(`${label} must contain between 1 and ${maximum} unique values`);
+  }
+  return items;
 }
 
 function requiredText(value: unknown, label: string): string {

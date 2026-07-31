@@ -61,6 +61,7 @@ import {
   APPLICATION_GIT_REPOSITORY_MAX_LENGTH,
   isValidApplicationGitRepositoryUrl,
 } from "./application-source-repository.ts";
+import { formatWebserverErrorMessage } from "./error-message.ts";
 import {
   hasPlatformSuperAdminAccess,
   hasWebserverPermission,
@@ -79,7 +80,6 @@ import type {
   WebserverResourceRegistry,
 } from "./types.ts";
 import { WorkspaceHeader, WorkspaceSidebar } from "./WebserverWorkspaceChrome.tsx";
-import { WebserverActionError } from "./types.ts";
 
 export interface WebserverWorkspaceProps {
   locale: WebserverLocale;
@@ -258,8 +258,8 @@ function ResourcePage({
       });
       setItems(result.items);
       setPageInfo(result.pageInfo);
-    } catch {
-      setError(t("error.operation"));
+    } catch (caught) {
+      setError(formatWebserverErrorMessage(caught, t));
     } finally {
       setBusy(false);
     }
@@ -284,8 +284,8 @@ function ResourcePage({
           : options[0]?.id ?? "";
         persistScope(nextScopeId);
       })
-      .catch(() => {
-        if (active) setError(t("error.operation"));
+      .catch((caught) => {
+        if (active) setError(formatWebserverErrorMessage(caught, t));
       })
       .finally(() => {
         if (active) setScopeBusy(false);
@@ -760,6 +760,7 @@ function ActionDialog({
               [name]: next,
               ...relatedValues,
             }))}
+            multiple={action.multipleFields?.includes(name)}
             options={fieldOptions[name]}
             readOnly={action.readOnlyFields?.includes(name)}
             required={applicationCreationWizard && applicationRequiredFields.includes(name)}
@@ -889,8 +890,8 @@ function ActionDialog({
           return next;
         });
       })
-      .catch(() => {
-        if (active) setError(t("error.options"));
+      .catch((caught) => {
+        if (active) setError(formatWebserverErrorMessage(caught, t, { fallbackKey: "error.options" }));
       })
       .finally(() => {
         if (active) setOptionsBusy(false);
@@ -959,7 +960,7 @@ function ActionDialog({
       }
       onComplete();
     } catch (caught) {
-      setError(actionErrorMessage(caught, t));
+      setError(formatWebserverErrorMessage(caught, t));
     } finally {
       submitInFlightRef.current = false;
       if (abortControllerRef.current === abortController) abortControllerRef.current = undefined;
@@ -1222,6 +1223,7 @@ function ActionDialog({
                 [name]: next,
                 ...relatedValues,
               }))}
+              multiple={action.multipleFields?.includes(name)}
               options={fieldOptions[name]}
               readOnly={action.readOnlyFields?.includes(name)}
               value={value}
@@ -2210,6 +2212,7 @@ function trapDialogFocus(event: ReactKeyboardEvent<HTMLFormElement>): void {
 
 function Field({
   locale,
+  multiple = false,
   name,
   onChange,
   options,
@@ -2218,6 +2221,7 @@ function Field({
   value,
 }: {
   locale: WebserverLocale;
+  multiple?: boolean;
   name: string;
   onChange(value: unknown, relatedValues?: Readonly<Record<string, number | string>>): void;
   options?: readonly WebserverResourceFieldOptionValue[];
@@ -2234,6 +2238,9 @@ function Field({
     );
   }
   if (options) {
+    const selectedValues = Array.isArray(value)
+      ? value.map((item) => String(item))
+      : [String(value ?? "")];
     return (
       <label data-field={name}>
         <span className="field-label-row">
@@ -2244,12 +2251,22 @@ function Field({
           aria-label={fieldLabel(name, locale)}
           aria-required={required}
           onChange={(event) => {
+            if (multiple) {
+              onChange(Array.from(event.target.selectedOptions).map((selected) => {
+                const option = options.find((candidate) => String(optionValue(candidate)) === selected.value)
+                  ?? selected.value;
+                return optionValue(option);
+              }));
+              return;
+            }
             const selectedOption = options.find((option) => String(optionValue(option)) === event.target.value)
               ?? event.target.value;
             onChange(optionValue(selectedOption), optionRelatedValues(selectedOption));
           }}
           disabled={readOnly || options.length === 0}
-          value={String(value ?? "")}
+          multiple={multiple}
+          size={multiple ? Math.min(6, Math.max(3, options.length)) : undefined}
+          value={multiple ? selectedValues : selectedValues[0]}
         >
           {options.length === 0 ? <option value="">-</option> : null}
           {options.map((option) => (
@@ -2509,6 +2526,7 @@ function fieldLabel(value: string, locale: WebserverLocale): string {
       officialWebsiteUrl: "Official website URL",
       domain: "Domain",
       domainId: "Domain",
+      domainIds: "Certificate domains",
       durationMs: "Duration",
       environment: "Environment",
       endDate: "End date",
@@ -2520,6 +2538,7 @@ function fieldLabel(value: string, locale: WebserverLocale): string {
       isSecret: "Secret value",
       isVerified: "Verification",
       issuer: "Issuer",
+      keyAlgorithm: "Key algorithm",
       key: "Variable name",
       name: "Application name",
       operatorId: "Operator ID",
@@ -2595,6 +2614,7 @@ function fieldLabel(value: string, locale: WebserverLocale): string {
       officialWebsiteUrl: "官方网站",
       domain: "域名",
       domainId: "域名",
+      domainIds: "证书域名",
       durationMs: "耗时",
       environment: "发布环境",
       endDate: "结束日期",
@@ -2606,6 +2626,7 @@ function fieldLabel(value: string, locale: WebserverLocale): string {
       isSecret: "敏感变量",
       isVerified: "验证状态",
       issuer: "签发机构",
+      keyAlgorithm: "密钥算法",
       key: "变量名",
       name: "应用名称",
       operatorId: "操作人 ID",
@@ -2645,20 +2666,6 @@ function fieldLabel(value: string, locale: WebserverLocale): string {
     },
   };
   return labels[locale][value] ?? humanize(value);
-}
-
-function actionErrorMessage(
-  error: unknown,
-  translate: (key: WebserverMessageKey, values?: Record<string, string | number>) => string,
-): string {
-  if (!(error instanceof WebserverActionError)) return translate("error.operation");
-  const keys: Record<typeof error.code, WebserverMessageKey> = {
-    "application-draft-media-failed": "error.applicationDraftMedia",
-    "application-draft-source-failed": "error.applicationDraftSource",
-    "application-draft-deployment-failed": "error.applicationDraftDeployment",
-    "deployment-source-stored": "error.deploymentSourceStored",
-  };
-  return translate(keys[error.code], { ...error.details });
 }
 
 function sensitive(value: string): boolean {
@@ -2790,7 +2797,10 @@ function hasMissingRequiredFields(
 ): boolean {
   return requiredFields?.some((field) => {
     const value = body[field];
-    return value === undefined || value === null || (typeof value === "string" && !value.trim());
+    return value === undefined
+      || value === null
+      || (typeof value === "string" && !value.trim())
+      || (Array.isArray(value) && value.length === 0);
   }) ?? false;
 }
 

@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::api::{SiteApi, DomainApi, SourceVersionApi, DeploymentApi, EnvVariableApi, CertificateApi, MonitorApi};
+use crate::api::{SiteApi, DomainApi, CertificateApi, SourceVersionApi, DeploymentApi, EnvVariableApi, MonitorApi};
 use crate::http::{SdkworkConfig, SdkworkError, SdkworkHttpClient};
 
 #[derive(Clone)]
@@ -46,6 +46,10 @@ impl SdkworkAppClient {
             DomainApi::new(Arc::clone(&self.http))
         }
 
+    pub fn certificate(&self) -> CertificateApi {
+            CertificateApi::new(Arc::clone(&self.http))
+        }
+
     pub fn source_version(&self) -> SourceVersionApi {
             SourceVersionApi::new(Arc::clone(&self.http))
         }
@@ -56,10 +60,6 @@ impl SdkworkAppClient {
 
     pub fn env_variable(&self) -> EnvVariableApi {
             EnvVariableApi::new(Arc::clone(&self.http))
-        }
-
-    pub fn certificate(&self) -> CertificateApi {
-            CertificateApi::new(Arc::clone(&self.http))
         }
 
     pub fn monitor(&self) -> MonitorApi {

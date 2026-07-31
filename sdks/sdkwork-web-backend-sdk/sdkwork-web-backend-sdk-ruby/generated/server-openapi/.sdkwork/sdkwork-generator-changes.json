@@ -9,30 +9,17 @@
     "protocol": "http",
     "packageName": "sdkwork-web-backend-sdk"
   },
-  "changeFingerprint": "34e137ac3219038e54267520e14d2ba5e66b694a432f3fd4737370e9433f072b",
+  "changeFingerprint": "836c810353158480ef142d371890c8640365dc6c846c4a9c4979b31518faae31",
   "changes": {
-    "createdGeneratedFiles": [
-      "lib/sdkwork/backend_sdk/models/create_root_domain_hostname_request.rb",
-      "lib/sdkwork/backend_sdk/models/create_root_domain_request.rb",
-      "lib/sdkwork/backend_sdk/models/domain_deployment_response.rb",
-      "lib/sdkwork/backend_sdk/models/root_domain_response.rb",
-      "lib/sdkwork/backend_sdk/models/root_domains_create_response201.rb",
-      "lib/sdkwork/backend_sdk/models/root_domains_list_response.rb",
-      "lib/sdkwork/backend_sdk/models/root_domains_retrieve_response.rb",
-      "lib/sdkwork/backend_sdk/models/root_domains_subdomains_create_response201.rb",
-      "lib/sdkwork/backend_sdk/models/root_domains_subdomains_list_response.rb"
-    ],
-    "updatedGeneratedFiles": [
-      "lib/sdkwork/backend_sdk.rb",
-      "lib/sdkwork/backend_sdk/api/domain.rb",
-      "lib/sdkwork/backend_sdk/models/application_domain_response.rb"
-    ],
+    "createdGeneratedFiles": [],
+    "updatedGeneratedFiles": [],
     "unchangedGeneratedFiles": [
       "bin/publish-core.mjs",
       "bin/publish.ps1",
       "bin/publish.sh",
       "CHANGELOG.md",
       "Gemfile",
+      "lib/sdkwork/backend_sdk.rb",
       "lib/sdkwork/backend_sdk/api/agent.rb",
       "lib/sdkwork/backend_sdk/api/application_deployment.rb",
       "lib/sdkwork/backend_sdk/api/application_domain.rb",
@@ -42,16 +29,19 @@
       "lib/sdkwork/backend_sdk/api/base_api.rb",
       "lib/sdkwork/backend_sdk/api/certificate_distribution.rb",
       "lib/sdkwork/backend_sdk/api/certificate.rb",
+      "lib/sdkwork/backend_sdk/api/domain.rb",
       "lib/sdkwork/backend_sdk/api/nginx.rb",
       "lib/sdkwork/backend_sdk/api/server.rb",
       "lib/sdkwork/backend_sdk/client.rb",
       "lib/sdkwork/backend_sdk/http/client.rb",
       "lib/sdkwork/backend_sdk/models/agent_certificate_bundle.rb",
+      "lib/sdkwork/backend_sdk/models/agent_certificate_observation.rb",
       "lib/sdkwork/backend_sdk/models/agent_heartbeat_request.rb",
       "lib/sdkwork/backend_sdk/models/agent_heartbeat_response.rb",
       "lib/sdkwork/backend_sdk/models/agent_nginx_config_bundle.rb",
       "lib/sdkwork/backend_sdk/models/agent_sync_response.rb",
       "lib/sdkwork/backend_sdk/models/application_deployment_response.rb",
+      "lib/sdkwork/backend_sdk/models/application_domain_response.rb",
       "lib/sdkwork/backend_sdk/models/application_domain_verify_response.rb",
       "lib/sdkwork/backend_sdk/models/application_response.rb",
       "lib/sdkwork/backend_sdk/models/application_source_version_config_snapshot.rb",
@@ -64,6 +54,8 @@
       "lib/sdkwork/backend_sdk/models/applications_deployments_rollback_response.rb",
       "lib/sdkwork/backend_sdk/models/applications_domains_create_response201.rb",
       "lib/sdkwork/backend_sdk/models/applications_domains_list_response.rb",
+      "lib/sdkwork/backend_sdk/models/applications_domains_listener_certificate_bindings_create_response201.rb",
+      "lib/sdkwork/backend_sdk/models/applications_domains_listener_certificate_bindings_list_response.rb",
       "lib/sdkwork/backend_sdk/models/applications_domains_verify_response.rb",
       "lib/sdkwork/backend_sdk/models/applications_list_response.rb",
       "lib/sdkwork/backend_sdk/models/applications_pause_response.rb",
@@ -77,6 +69,7 @@
       "lib/sdkwork/backend_sdk/models/audit_log_response.rb",
       "lib/sdkwork/backend_sdk/models/audit_logs_list_response.rb",
       "lib/sdkwork/backend_sdk/models/certificate_distribution_response.rb",
+      "lib/sdkwork/backend_sdk/models/certificate_identifier_response.rb",
       "lib/sdkwork/backend_sdk/models/certificate_response.rb",
       "lib/sdkwork/backend_sdk/models/certificates_create_response201.rb",
       "lib/sdkwork/backend_sdk/models/certificates_distribution_list_response.rb",
@@ -94,10 +87,14 @@
       "lib/sdkwork/backend_sdk/models/create_application_request.rb",
       "lib/sdkwork/backend_sdk/models/create_application_source_version_request.rb",
       "lib/sdkwork/backend_sdk/models/create_certificate_request.rb",
+      "lib/sdkwork/backend_sdk/models/create_listener_certificate_binding_request.rb",
       "lib/sdkwork/backend_sdk/models/create_managed_domain_request.rb",
       "lib/sdkwork/backend_sdk/models/create_nginx_config_request.rb",
+      "lib/sdkwork/backend_sdk/models/create_root_domain_hostname_request.rb",
+      "lib/sdkwork/backend_sdk/models/create_root_domain_request.rb",
       "lib/sdkwork/backend_sdk/models/create_server_request.rb",
       "lib/sdkwork/backend_sdk/models/create_server_response.rb",
+      "lib/sdkwork/backend_sdk/models/domain_deployment_response.rb",
       "lib/sdkwork/backend_sdk/models/domains_application_binding_update_response.rb",
       "lib/sdkwork/backend_sdk/models/domains_create_response201.rb",
       "lib/sdkwork/backend_sdk/models/domains_list_response.rb",
@@ -105,6 +102,8 @@
       "lib/sdkwork/backend_sdk/models/field_error.rb",
       "lib/sdkwork/backend_sdk/models/heartbeat_response.rb",
       "lib/sdkwork/backend_sdk/models/import_application_git_source_version_request.rb",
+      "lib/sdkwork/backend_sdk/models/listener_certificate_binding_response.rb",
+      "lib/sdkwork/backend_sdk/models/listener_certificate_summary_response.rb",
       "lib/sdkwork/backend_sdk/models/media_checksum.rb",
       "lib/sdkwork/backend_sdk/models/media_resource.rb",
       "lib/sdkwork/backend_sdk/models/nginx_config_page.rb",
@@ -117,6 +116,12 @@
       "lib/sdkwork/backend_sdk/models/problem_detail.rb",
       "lib/sdkwork/backend_sdk/models/reload_response.rb",
       "lib/sdkwork/backend_sdk/models/retrieve_response.rb",
+      "lib/sdkwork/backend_sdk/models/root_domain_response.rb",
+      "lib/sdkwork/backend_sdk/models/root_domains_create_response201.rb",
+      "lib/sdkwork/backend_sdk/models/root_domains_list_response.rb",
+      "lib/sdkwork/backend_sdk/models/root_domains_retrieve_response.rb",
+      "lib/sdkwork/backend_sdk/models/root_domains_subdomains_create_response201.rb",
+      "lib/sdkwork/backend_sdk/models/root_domains_subdomains_list_response.rb",
       "lib/sdkwork/backend_sdk/models/sdk_work_api_response.rb",
       "lib/sdkwork/backend_sdk/models/sdk_work_command_data.rb",
       "lib/sdkwork/backend_sdk/models/sdk_work_command_response.rb",
@@ -149,79 +154,26 @@
   },
   "impact": {
     "schemaVersion": 1,
-    "areas": [
-      "api-surface",
-      "models",
-      "unknown"
-    ],
-    "details": [
-      {
-        "area": "api-surface",
-        "paths": [
-          "lib/sdkwork/backend_sdk/api/domain.rb"
-        ]
-      },
-      {
-        "area": "models",
-        "paths": [
-          "lib/sdkwork/backend_sdk/models/application_domain_response.rb",
-          "lib/sdkwork/backend_sdk/models/create_root_domain_hostname_request.rb",
-          "lib/sdkwork/backend_sdk/models/create_root_domain_request.rb",
-          "lib/sdkwork/backend_sdk/models/domain_deployment_response.rb",
-          "lib/sdkwork/backend_sdk/models/root_domain_response.rb",
-          "lib/sdkwork/backend_sdk/models/root_domains_create_response201.rb",
-          "lib/sdkwork/backend_sdk/models/root_domains_list_response.rb",
-          "lib/sdkwork/backend_sdk/models/root_domains_retrieve_response.rb",
-          "lib/sdkwork/backend_sdk/models/root_domains_subdomains_create_response201.rb",
-          "lib/sdkwork/backend_sdk/models/root_domains_subdomains_list_response.rb"
-        ]
-      },
-      {
-        "area": "unknown",
-        "paths": [
-          "lib/sdkwork/backend_sdk.rb"
-        ]
-      }
-    ],
-    "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, models, unknown. Verification is required."
+    "areas": [],
+    "details": [],
+    "requiresVerification": false,
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
   },
   "verificationPlan": {
-    "shouldRun": true,
-    "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, models, unknown. Verification is required. Run the required verification commands now against the generated SDK output.",
-    "steps": [
-      {
-        "id": "check",
-        "title": "Unified package check",
-        "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, unknown.",
-        "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-ruby\\generated\\server-openapi",
-        "command": "node",
-        "args": [
-          "./bin/publish-core.mjs",
-          "--language",
-          "ruby",
-          "--project-dir",
-          ".",
-          "--action",
-          "check"
-        ],
-        "displayCommand": "node ./bin/publish-core.mjs --language ruby --project-dir . --action check"
-      }
-    ]
+    "shouldRun": false,
+    "runPhase": "skip",
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
+    "steps": []
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "high",
-    "nextAction": "verify",
+    "riskLevel": "low",
+    "nextAction": "skip",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
-    "summary": "Changes have been applied. Run the required verification plan now.",
+    "summary": "No actionable changes were detected. No apply or verification step is required.",
     "reasons": [
-      "manual-review-required",
-      "unknown-impact",
-      "verification-required"
+      "no-actionable-changes"
     ]
   },
   "preservedLegacyFiles": false

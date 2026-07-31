@@ -8,9 +8,9 @@ import com.sdkwork.web.app.sdk.http.HttpClient
 class Api(private val client: HttpClient) {
     val site: SiteApi = SiteApi(client)
     val domain: DomainApi = DomainApi(client)
+    val certificate: CertificateApi = CertificateApi(client)
     val sourceVersion: SourceVersionApi = SourceVersionApi(client)
     val deployment: DeploymentApi = DeploymentApi(client)
     val envVariable: EnvVariableApi = EnvVariableApi(client)
-    val certificate: CertificateApi = CertificateApi(client)
     val monitor: MonitorApi = MonitorApi(client)
 }

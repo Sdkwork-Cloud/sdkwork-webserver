@@ -739,7 +739,6 @@ test('Linux release smoke validates, extracts, serves HTTP and HTTPS, and cleans
   assert.match(source, /SDKWORK_WEB_SECRET_ENCRYPTION_KEY/u);
   assert.match(source, /SDKWORK_WEB_ACME_PROFILE: 'staging'/u);
   assert.match(source, /SDKWORK_WEB_ACME_CONTACT_EMAIL/u);
-  assert.match(source, /SDKWORK_WEB_CERT_ENCRYPTION_KEY/u);
   assert.match(source, /SDKWORK_DRIVE_DOWNLOAD_TOKEN_HMAC_SECRET/u);
   assert.match(source, /sites\.list/u);
   assert.match(source, /sessions\.current\.retrieve/u);

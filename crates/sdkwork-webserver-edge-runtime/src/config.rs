@@ -1,3 +1,4 @@
+use std::net::SocketAddr;
 use std::path::PathBuf;
 
 use crate::EdgeRuntimeResult;
@@ -11,6 +12,8 @@ pub struct EdgeRuntimeConfig {
     pub cert_live_root: PathBuf,
     pub site_family: String,
     pub nginx_command_timeout_ms: u64,
+    pub tls_verify_address: SocketAddr,
+    pub tls_verify_timeout_ms: u64,
 }
 
 impl EdgeRuntimeConfig {
@@ -62,6 +65,35 @@ impl EdgeRuntimeConfig {
                 "SDKWORK_WEB_NGINX_COMMAND_TIMEOUT_MS must be between 100 and 60000".to_string(),
             ));
         }
+        let tls_verify_address = std::env::var("SDKWORK_WEB_TLS_VERIFY_ADDRESS")
+            .unwrap_or_else(|_| "127.0.0.1:443".to_string())
+            .parse::<SocketAddr>()
+            .map_err(|error| {
+                crate::EdgeRuntimeError::Config(format!(
+                    "invalid SDKWORK_WEB_TLS_VERIFY_ADDRESS: {error}"
+                ))
+            })?;
+        if !tls_verify_address.ip().is_loopback() {
+            return Err(crate::EdgeRuntimeError::Config(
+                "SDKWORK_WEB_TLS_VERIFY_ADDRESS must be a loopback socket address".to_string(),
+            ));
+        }
+        let tls_verify_timeout_ms = std::env::var("SDKWORK_WEB_TLS_VERIFY_TIMEOUT_MS")
+            .ok()
+            .map(|value| {
+                value.parse::<u64>().map_err(|error| {
+                    crate::EdgeRuntimeError::Config(format!(
+                        "invalid SDKWORK_WEB_TLS_VERIFY_TIMEOUT_MS: {error}"
+                    ))
+                })
+            })
+            .transpose()?
+            .unwrap_or(5_000);
+        if !(100..=30_000).contains(&tls_verify_timeout_ms) {
+            return Err(crate::EdgeRuntimeError::Config(
+                "SDKWORK_WEB_TLS_VERIFY_TIMEOUT_MS must be between 100 and 30000".to_string(),
+            ));
+        }
 
         Ok(Self {
             nginx_enabled,
@@ -71,6 +103,8 @@ impl EdgeRuntimeConfig {
             cert_live_root,
             site_family,
             nginx_command_timeout_ms,
+            tls_verify_address,
+            tls_verify_timeout_ms,
         })
     }
 }

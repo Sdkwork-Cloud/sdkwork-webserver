@@ -4,7 +4,6 @@ use tokio::sync::Semaphore;
 
 use crate::challenge_store::ChallengeStore;
 use crate::config::AcmeConfig;
-use crate::encrypt::{decrypt_secret, encrypt_secret};
 use crate::lets_encrypt::issue_lets_encrypt;
 use crate::model::IssuedCertificateMaterial;
 use crate::self_signed::issue_self_signed;
@@ -14,6 +13,7 @@ use crate::{
 };
 
 const MAX_CONCURRENT_CERTIFICATE_ISSUANCE: usize = 8;
+const MAX_CERTIFICATE_IDENTIFIERS: usize = 8;
 
 pub struct CertificateIssuer {
     config: AcmeConfig,
@@ -61,23 +61,6 @@ impl CertificateIssuer {
         })
     }
 
-    /// Compatibility loader. Deployable runtimes should inject typed configuration.
-    pub fn from_env() -> AcmeServiceResult<Self> {
-        let config = AcmeConfig::from_env()?;
-        let cert_root = std::env::var("SDKWORK_WEB_CERT_LIVE_ROOT")
-            .unwrap_or_else(|_| "/opt/certs/letsencrypt/live".to_string());
-        let operation_timeout_ms = std::env::var("SDKWORK_WEB_ACME_OPERATION_TIMEOUT_MS")
-            .map(|value| {
-                value.parse::<u64>().map_err(|error| {
-                    AcmeServiceError::config(format!(
-                        "invalid SDKWORK_WEB_ACME_OPERATION_TIMEOUT_MS: {error}"
-                    ))
-                })
-            })
-            .unwrap_or(Ok(DEFAULT_ACME_OPERATION_TIMEOUT_MS))?;
-        Self::new_with_operation_timeout_ms(config, cert_root, operation_timeout_ms)
-    }
-
     pub fn challenge_store(&self) -> Arc<ChallengeStore> {
         self.challenge_store.clone()
     }
@@ -93,10 +76,29 @@ impl CertificateIssuer {
     pub async fn issue(
         &self,
         cert_type: i32,
-        hostname: &str,
+        hostnames: &[String],
         cert_name: &str,
+        key_algorithm: &str,
     ) -> AcmeServiceResult<IssuedCertificateMaterial> {
-        validate_hostname(hostname)?;
+        if hostnames.is_empty() || hostnames.len() > MAX_CERTIFICATE_IDENTIFIERS {
+            return Err(AcmeServiceError::validation(format!(
+                "certificate identifiers must contain 1..{MAX_CERTIFICATE_IDENTIFIERS} hostnames"
+            )));
+        }
+        let mut unique_hostnames = std::collections::HashSet::with_capacity(hostnames.len());
+        for hostname in hostnames {
+            validate_hostname(hostname)?;
+            if !unique_hostnames.insert(hostname.as_str()) {
+                return Err(AcmeServiceError::validation(
+                    "certificate identifiers must be unique",
+                ));
+            }
+        }
+        if !matches!(key_algorithm, "ECDSA" | "RSA") {
+            return Err(AcmeServiceError::validation(
+                "keyAlgorithm must be ECDSA or RSA",
+            ));
+        }
         validate_certificate_name(cert_name)?;
         let _permit = self.admission.try_acquire().map_err(|_| {
             AcmeServiceError::provider(format!(
@@ -108,31 +110,24 @@ impl CertificateIssuer {
                 issue_lets_encrypt(
                     &self.config,
                     self.challenge_store.as_ref(),
-                    hostname,
+                    hostnames,
                     cert_name,
                     &self.cert_root,
                     self.operation_timeout,
+                    key_algorithm,
                 )
                 .await
             }
-            3 => issue_self_signed(hostname, cert_name, &self.cert_root),
+            3 => issue_self_signed(hostnames, cert_name, &self.cert_root, key_algorithm),
             other => Err(AcmeServiceError::validation(format!(
                 "unsupported certType {other}; supported: 1 (Let's Encrypt), 3 (self-signed)"
             ))),
         }
     }
-
-    pub fn encrypt_private_key(&self, private_key_pem: &str) -> AcmeServiceResult<String> {
-        encrypt_secret(&self.config.encryption_key, private_key_pem.as_bytes())
-    }
-
-    pub fn decrypt_private_key(&self, encoded: &str) -> AcmeServiceResult<String> {
-        let bytes = decrypt_secret(&self.config.encryption_key, encoded)?;
-        String::from_utf8(bytes).map_err(|error| AcmeServiceError::Encryption(error.to_string()))
-    }
 }
 
 fn validate_hostname(hostname: &str) -> AcmeServiceResult<()> {
+    let hostname = hostname.strip_prefix("*.").unwrap_or(hostname);
     if hostname.is_empty()
         || hostname.len() > 253
         || hostname.starts_with('.')
@@ -183,14 +178,12 @@ mod tests {
             "admin@example.com".to_string(),
             30,
             None,
-            b"test-encryption-key-for-acme-service",
-            false,
             false,
         )
         .expect("config");
         let issuer = CertificateIssuer::new(config, "/tmp/certs/live").expect("issuer");
         let material = issuer
-            .issue(3, "dev.localhost", "dev-localhost")
+            .issue(3, &["dev.localhost".to_string()], "dev-localhost", "ECDSA")
             .await
             .expect("issue");
         assert_eq!(material.cert_type, 3);
@@ -205,8 +198,6 @@ mod tests {
             "admin@example.com".to_string(),
             30,
             None,
-            b"test-encryption-key-for-acme-service",
-            false,
             false,
         )
         .expect("config");
@@ -222,14 +213,18 @@ mod tests {
             "admin@example.com".to_string(),
             30,
             None,
-            b"test-encryption-key-for-acme-service",
-            false,
             false,
         )
         .expect("config");
         let issuer = CertificateIssuer::new(config, "/tmp/certs/live").expect("issuer");
-        assert!(issuer.issue(3, "../escape", "safe-name").await.is_err());
-        assert!(issuer.issue(3, "dev.localhost", "../escape").await.is_err());
+        assert!(issuer
+            .issue(3, &["../escape".to_string()], "safe-name", "ECDSA")
+            .await
+            .is_err());
+        assert!(issuer
+            .issue(3, &["dev.localhost".to_string()], "../escape", "ECDSA")
+            .await
+            .is_err());
     }
 
     #[tokio::test]
@@ -239,8 +234,6 @@ mod tests {
             "admin@example.com".to_string(),
             30,
             None,
-            b"test-encryption-key-for-acme-service",
-            false,
             false,
         )
         .expect("config");
@@ -249,13 +242,13 @@ mod tests {
             .map(|_| issuer.admission.try_acquire().expect("permit"))
             .collect::<Vec<_>>();
         let error = issuer
-            .issue(3, "dev.localhost", "dev-localhost")
+            .issue(3, &["dev.localhost".to_string()], "dev-localhost", "ECDSA")
             .await
             .expect_err("capacity must fail closed");
         assert!(error.to_string().contains("capacity exhausted"));
         drop(permits);
         issuer
-            .issue(3, "dev.localhost", "dev-localhost")
+            .issue(3, &["dev.localhost".to_string()], "dev-localhost", "ECDSA")
             .await
             .expect("capacity recovers");
     }

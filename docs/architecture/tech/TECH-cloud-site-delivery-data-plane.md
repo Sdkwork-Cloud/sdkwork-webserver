@@ -628,7 +628,7 @@ The Web Server must not approximate these authorities with process-local token m
 headers, raw HTTP, cross-database reads, or direct object-store access.
 
 Standalone can compose Deploy/source/provider/runtime in one unit or load an approved local
-descriptor, but it uses the same routing/provider/TLS behavior. SQLite/local secret/file capability
+descriptor, but it uses the same routing/provider/TLS behavior. local secret/file capability
 differences are explicit and do not claim cloud multi-node semantics.
 
 ## 15. Verification Matrix

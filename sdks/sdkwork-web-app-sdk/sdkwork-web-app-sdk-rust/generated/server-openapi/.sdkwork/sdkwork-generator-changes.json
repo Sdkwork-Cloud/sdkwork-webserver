@@ -9,14 +9,11 @@
     "protocol": "http",
     "packageName": "sdkwork-web-app-sdk"
   },
-  "changeFingerprint": "7270b02d0eeaf8123a40e7b6f710400ca4b0c413a5a80ad0ee7db1dbf93a60e8",
+  "changeFingerprint": "6a04a4a59094c802b3bdeab1c8ca996fa0dad8f766b65e899b7aae35dcb95f3f",
   "changes": {
-    "createdGeneratedFiles": [
-      "src/models/sites_source_versions_git_import_create_response201.rs"
-    ],
+    "createdGeneratedFiles": [],
     "updatedGeneratedFiles": [
-      "src/api/source_version.rs",
-      "src/models/mod.rs"
+      "src/models/listener_certificate_binding_response.rs"
     ],
     "unchangedGeneratedFiles": [
       "bin/publish-core.mjs",
@@ -36,11 +33,13 @@
       "src/api/monitor.rs",
       "src/api/paths.rs",
       "src/api/site.rs",
+      "src/api/source_version.rs",
       "src/client.rs",
       "src/http/client.rs",
       "src/http/mod.rs",
       "src/lib.rs",
       "src/models/application_store_listing.rs",
+      "src/models/certificate_identifier_response.rs",
       "src/models/certificate_page.rs",
       "src/models/certificate_response.rs",
       "src/models/certificates_create_response201.rs",
@@ -51,6 +50,7 @@
       "src/models/create_domain_request.rs",
       "src/models/create_env_variable_request.rs",
       "src/models/create_health_check_request.rs",
+      "src/models/create_listener_certificate_binding_request.rs",
       "src/models/create_site_request.rs",
       "src/models/create_source_version_request.rs",
       "src/models/deployment_page.rs",
@@ -64,8 +64,10 @@
       "src/models/health_check_page.rs",
       "src/models/health_check_response.rs",
       "src/models/import_git_source_version_request.rs",
+      "src/models/listener_certificate_summary_response.rs",
       "src/models/media_checksum.rs",
       "src/models/media_resource.rs",
+      "src/models/mod.rs",
       "src/models/page_info.rs",
       "src/models/problem_detail.rs",
       "src/models/sdk_work_api_response.rs",
@@ -85,6 +87,8 @@
       "src/models/sites_deployments_rollback_response.rs",
       "src/models/sites_domains_create_response201.rs",
       "src/models/sites_domains_list_response.rs",
+      "src/models/sites_domains_listener_certificate_bindings_create_response201.rs",
+      "src/models/sites_domains_listener_certificate_bindings_list_response.rs",
       "src/models/sites_domains_retrieve_response.rs",
       "src/models/sites_domains_verify_response.rs",
       "src/models/sites_env_variables_create_response201.rs",
@@ -95,6 +99,7 @@
       "src/models/sites_pause_response.rs",
       "src/models/sites_retrieve_response.rs",
       "src/models/sites_source_versions_create_response201.rs",
+      "src/models/sites_source_versions_git_import_create_response201.rs",
       "src/models/sites_source_versions_list_response.rs",
       "src/models/sites_source_versions_retrieve_response.rs",
       "src/models/sites_update_response.rs",
@@ -103,9 +108,7 @@
       "src/models/source_version_response.rs",
       "src/models/update_site_request.rs"
     ],
-    "deletedGeneratedFiles": [
-      "src/models/sites_source_versions_import_git_response201.rs"
-    ],
+    "deletedGeneratedFiles": [],
     "scaffoldedFiles": [],
     "preservedScaffoldFiles": [
       "custom/README.md"
@@ -115,38 +118,29 @@
   "impact": {
     "schemaVersion": 1,
     "areas": [
-      "api-surface",
       "models"
     ],
     "details": [
       {
-        "area": "api-surface",
-        "paths": [
-          "src/api/source_version.rs"
-        ]
-      },
-      {
         "area": "models",
         "paths": [
-          "src/models/mod.rs",
-          "src/models/sites_source_versions_git_import_create_response201.rs",
-          "src/models/sites_source_versions_import_git_response201.rs"
+          "src/models/listener_certificate_binding_response.rs"
         ]
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, models. Verification is required."
+    "summary": "Detected impact areas: models. Verification is required."
   },
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-rust\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -164,7 +158,7 @@
         "id": "build",
         "title": "Unified package build",
         "required": true,
-        "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: api-surface, models.",
+        "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-rust\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -182,14 +176,12 @@
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "high",
+    "riskLevel": "medium",
     "nextAction": "verify",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
     "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
-      "deleted-generated-files",
-      "manual-review-required",
       "verification-required"
     ]
   },

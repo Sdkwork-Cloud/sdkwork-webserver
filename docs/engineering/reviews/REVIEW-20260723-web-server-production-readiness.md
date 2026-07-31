@@ -578,7 +578,7 @@ The following blockers remain active in addition to sections 1, 11, and 13:
    finalization; stale renewal claims are not durably recovered after process death; certificate
    mutations and business audit inserts are not one atomic transaction.
 4. PostgreSQL repository parity is still ignored without an explicitly configured disposable
-   PostgreSQL instance. SQLite success is not PostgreSQL transaction/isolation evidence.
+   PostgreSQL instance. Only real PostgreSQL satisfies transaction/isolation evidence.
 5. Multi-replica Redis framework-store, signing, provenance, SBOM, load, soak, rolling upgrade,
    backup/restore, and multi-Node failure evidence remain absent.
 6. Drive extraction still has the leading-dot path defect, React Router RSC advisory review is
@@ -673,7 +673,7 @@ The following release blockers remain authoritative:
 3. Certificate filesystem activation and database/audit finalization are not one crash-consistent
    transaction. The lease and fence prevent stale finalization but do not make cross-resource
    commit atomic.
-4. PostgreSQL parity requires an explicitly configured disposable instance. SQLite parity and SQL
+4. PostgreSQL parity requires an explicitly configured disposable instance. Static SQL
    compilation do not prove PostgreSQL isolation, lock, or rollback behavior.
 5. Standalone rate limit, idempotency, concurrent admission, and several HA stores remain
    process-local. Redis-backed multi-replica, load/soak, rolling upgrade, backup/restore, and

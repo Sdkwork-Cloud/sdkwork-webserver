@@ -1,13 +1,18 @@
 //! Web Node heartbeat and sync orchestration for the v3 Agent wire contract.
 
+use chrono::{Duration, Utc};
 use sdkwork_webserver_contract::{
-    AgentHeartbeatRequest, AgentHeartbeatResponse, AgentSyncResponse, WebServiceError,
-    WebServiceResult,
+    AgentCertificateObservation, AgentHeartbeatRequest, AgentHeartbeatResponse, AgentSyncResponse,
+    WebServiceError, WebServiceResult,
 };
+use std::collections::HashSet;
 
 use crate::WebService;
 
 const MAX_NODE_SYNC_RESPONSE_BYTES: usize = 15 * 1024 * 1024;
+const MAX_CERTIFICATE_OBSERVATIONS: usize = 2_048;
+const MAX_OBSERVATION_AGE_HOURS: i64 = 24;
+const MAX_OBSERVATION_CLOCK_SKEW_MINUTES: i64 = 5;
 
 impl WebService {
     /// Authenticates an agent bootstrap token and returns `(server_uuid, tenant_id)`.
@@ -29,6 +34,7 @@ impl WebService {
         tenant_id: i64,
         request: &AgentHeartbeatRequest,
     ) -> WebServiceResult<AgentHeartbeatResponse> {
+        validate_certificate_observations(&request.certificate_observations)?;
         self.repository
             .record_agent_heartbeat(server_id, tenant_id, request)
             .await
@@ -42,33 +48,112 @@ impl WebService {
         tenant_id: i64,
         if_sync_version: Option<&str>,
     ) -> WebServiceResult<AgentSyncResponse> {
-        let (mut manifest, encrypted_private_keys) = self
+        let manifest = self
             .repository
             .build_agent_sync_manifest(server_id, tenant_id, if_sync_version)
             .await?;
-
-        if !manifest.unchanged {
-            if manifest.certificates.len() != encrypted_private_keys.len() {
-                return Err(WebServiceError::Internal(
-                    "node sync certificate credential count mismatch".to_string(),
-                ));
-            }
-            for (certificate, encrypted_private_key) in manifest
-                .certificates
-                .iter_mut()
-                .zip(encrypted_private_keys.iter())
-            {
-                certificate.privkey_pem = self
-                    .certificate_issuer
-                    .decrypt_private_key(encrypted_private_key)
-                    .map_err(|error| WebServiceError::Internal(error.to_string()))?;
-            }
-        }
 
         validate_node_sync_response_size(&manifest, MAX_NODE_SYNC_RESPONSE_BYTES)?;
 
         Ok(manifest)
     }
+}
+
+fn validate_certificate_observations(
+    observations: &[AgentCertificateObservation],
+) -> WebServiceResult<()> {
+    if observations.len() > MAX_CERTIFICATE_OBSERVATIONS {
+        return Err(WebServiceError::validation(format!(
+            "certificateObservations must contain at most {MAX_CERTIFICATE_OBSERVATIONS} items"
+        )));
+    }
+    let now = Utc::now();
+    let oldest = now - Duration::hours(MAX_OBSERVATION_AGE_HOURS);
+    let latest = now + Duration::minutes(MAX_OBSERVATION_CLOCK_SKEW_MINUTES);
+    let mut certificate_ids = HashSet::with_capacity(observations.len());
+    for observation in observations {
+        if !(1..=64).contains(&observation.certificate_id.len())
+            || observation
+                .certificate_id
+                .bytes()
+                .any(|byte| byte.is_ascii_control())
+            || !certificate_ids.insert(observation.certificate_id.as_str())
+        {
+            return Err(WebServiceError::validation(
+                "certificateObservations must contain unique bounded certificateId values",
+            ));
+        }
+        validate_sha256(
+            &observation.fingerprint,
+            "certificate observation fingerprint",
+        )?;
+        validate_sync_version(&observation.sync_version)?;
+        if !matches!(
+            observation.state.as_str(),
+            "STAGED" | "ACTIVE" | "SERVED" | "FAILED"
+        ) {
+            return Err(WebServiceError::validation(
+                "certificate observation state is unsupported",
+            ));
+        }
+        match (
+            observation.state.as_str(),
+            observation.failure_code.as_deref(),
+        ) {
+            ("FAILED", Some(code)) if valid_failure_code(code) => {}
+            ("FAILED", _) => {
+                return Err(WebServiceError::validation(
+                    "FAILED certificate observations require a valid failureCode",
+                ));
+            }
+            (_, None) => {}
+            _ => {
+                return Err(WebServiceError::validation(
+                    "failureCode is only valid for FAILED certificate observations",
+                ));
+            }
+        }
+        let observed_at = chrono::DateTime::parse_from_rfc3339(&observation.observed_at)
+            .map_err(|_| {
+                WebServiceError::validation("certificate observation observedAt must be RFC 3339")
+            })?
+            .with_timezone(&Utc);
+        if observed_at < oldest || observed_at > latest {
+            return Err(WebServiceError::validation(
+                "certificate observation observedAt is outside the accepted time window",
+            ));
+        }
+    }
+    Ok(())
+}
+
+fn validate_sha256(value: &str, field: &str) -> WebServiceResult<()> {
+    if value.len() != 64
+        || !value
+            .bytes()
+            .all(|byte| byte.is_ascii_hexdigit() && !byte.is_ascii_uppercase())
+    {
+        return Err(WebServiceError::validation(format!(
+            "{field} must be exactly 64 lowercase hexadecimal characters"
+        )));
+    }
+    Ok(())
+}
+
+fn validate_sync_version(value: &str) -> WebServiceResult<()> {
+    let digest = value.strip_prefix("sv1:").ok_or_else(|| {
+        WebServiceError::validation("certificate observation syncVersion must use sv1")
+    })?;
+    validate_sha256(digest, "certificate observation syncVersion digest")
+}
+
+fn valid_failure_code(value: &str) -> bool {
+    (1..=64).contains(&value.len())
+        && value.bytes().enumerate().all(|(index, byte)| {
+            byte.is_ascii_uppercase()
+                || byte.is_ascii_digit()
+                || (index > 0 && matches!(byte, b'_' | b'.' | b'-'))
+        })
 }
 
 fn validate_node_sync_response_size(

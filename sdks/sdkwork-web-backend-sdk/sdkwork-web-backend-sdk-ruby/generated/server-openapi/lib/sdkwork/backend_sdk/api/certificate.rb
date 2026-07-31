@@ -1,21 +1,71 @@
 require_relative 'base_api'
+require_relative '../models/applications_domains_listener_certificate_bindings_create_response201'
+require_relative '../models/applications_domains_listener_certificate_bindings_list_response'
 require_relative '../models/certificates_create_response201'
 require_relative '../models/certificates_list_response'
 require_relative '../models/certificates_renew_response'
 require_relative '../models/certificates_update_response'
 require_relative '../models/create_certificate_request'
+require_relative '../models/create_listener_certificate_binding_request'
 require_relative '../models/update_certificate_request'
 
 module Sdkwork
   module BackendSdk
     module Api
       class CertificateApi < BaseApi
+          # List certificates active on an application domain listener
+          def applications_domains_listener_certificate_bindings_list(application_id, domain_id, page: nil, page_size: nil)
+            path = interpolate_path('/backend/v3/api/applications/{applicationId}/domains/{domainId}/listener_certificate_bindings', applicationId: serialize_path_parameter(application_id, PathParameterSpec.new('applicationId', 'simple', false)), domainId: serialize_path_parameter(domain_id, PathParameterSpec.new('domainId', 'simple', false)))
+            query = build_query_string([
+              QueryParameterSpec.new('page', page, 'form', true, false, nil),
+              QueryParameterSpec.new('page_size', page_size, 'form', true, false, nil),
+            ])
+            path = append_query_string(path, query)
+            options = {}
+
+            result = @client.request('GET', path, **options)
+            result.is_a?(Hash) ? Models::ApplicationsDomainsListenerCertificateBindingsListResponse.from_hash(result) : nil
+          end
+
+          # Bind a certificate version to an application domain listener
+          def applications_domains_listener_certificate_bindings_create(application_id, domain_id, idempotency_key, body: nil)
+            path = interpolate_path('/backend/v3/api/applications/{applicationId}/domains/{domainId}/listener_certificate_bindings', applicationId: serialize_path_parameter(application_id, PathParameterSpec.new('applicationId', 'simple', false)), domainId: serialize_path_parameter(domain_id, PathParameterSpec.new('domainId', 'simple', false)))
+            payload = body.respond_to?(:to_hash) ? body.to_hash : body
+            request_headers = build_request_headers(
+              {
+                'Idempotency-Key' => HeaderParameterSpec.new(idempotency_key, 'simple', false, nil),
+              },
+              {}
+            )
+            options = {}
+            options[:headers] = request_headers unless request_headers.empty?
+            options[:json] = payload unless payload.nil?
+            result = @client.request('POST', path, **options)
+            result.is_a?(Hash) ? Models::ApplicationsDomainsListenerCertificateBindingsCreateResponse201.from_hash(result) : nil
+          end
+
+          # Remove a certificate from an application domain listener
+          def applications_domains_listener_certificate_bindings_delete(application_id, domain_id, binding_id, idempotency_key)
+            path = interpolate_path('/backend/v3/api/applications/{applicationId}/domains/{domainId}/listener_certificate_bindings/{bindingId}', applicationId: serialize_path_parameter(application_id, PathParameterSpec.new('applicationId', 'simple', false)), domainId: serialize_path_parameter(domain_id, PathParameterSpec.new('domainId', 'simple', false)), bindingId: serialize_path_parameter(binding_id, PathParameterSpec.new('bindingId', 'simple', false)))
+            request_headers = build_request_headers(
+              {
+                'Idempotency-Key' => HeaderParameterSpec.new(idempotency_key, 'simple', false, nil),
+              },
+              {}
+            )
+            options = {}
+            options[:headers] = request_headers unless request_headers.empty?
+            result = @client.request('DELETE', path, **options)
+            result
+          end
+
           # List canonical certificates
-          def certificates_list(page: nil, page_size: nil)
+          def certificates_list(page: nil, page_size: nil, domain_id: nil)
             path = '/backend/v3/api/certificates'
             query = build_query_string([
               QueryParameterSpec.new('page', page, 'form', true, false, nil),
               QueryParameterSpec.new('page_size', page_size, 'form', true, false, nil),
+              QueryParameterSpec.new('domainId', domain_id, 'form', true, false, nil),
             ])
             path = append_query_string(path, query)
             options = {}

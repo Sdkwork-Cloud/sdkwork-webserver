@@ -9,22 +9,12 @@
     "protocol": "http",
     "packageName": "sdkwork/web-backend-sdk"
   },
-  "changeFingerprint": "2e92b36c8e25f7160a89e509f18aee36c146a7f766fdb9676a1b7f044ebef738",
+  "changeFingerprint": "aa746a7a0c8a0e5c726ba9f0958a6bdbd684e5e59817574cbae707921c08a7d1",
   "changes": {
-    "createdGeneratedFiles": [
-      "src/Models/CreateRootDomainHostnameRequest.php",
-      "src/Models/CreateRootDomainRequest.php",
-      "src/Models/DomainDeploymentResponse.php",
-      "src/Models/RootDomainResponse.php",
-      "src/Models/RootDomainsCreateResponse201.php",
-      "src/Models/RootDomainsListResponse.php",
-      "src/Models/RootDomainsRetrieveResponse.php",
-      "src/Models/RootDomainsSubdomainsCreateResponse201.php",
-      "src/Models/RootDomainsSubdomainsListResponse.php"
-    ],
+    "createdGeneratedFiles": [],
     "updatedGeneratedFiles": [
-      "src/Api/Domain.php",
-      "src/Models/ApplicationDomainResponse.php"
+      "src/Models/AgentCertificateObservation.php",
+      "src/Models/AgentHeartbeatRequest.php"
     ],
     "unchangedGeneratedFiles": [
       "bin/publish-core.mjs",
@@ -44,15 +34,16 @@
       "src/Api/BaseApi.php",
       "src/Api/Certificate.php",
       "src/Api/CertificateDistribution.php",
+      "src/Api/Domain.php",
       "src/Api/Nginx.php",
       "src/Api/Server.php",
       "src/Http/HttpClient.php",
       "src/Models/AgentCertificateBundle.php",
-      "src/Models/AgentHeartbeatRequest.php",
       "src/Models/AgentHeartbeatResponse.php",
       "src/Models/AgentNginxConfigBundle.php",
       "src/Models/AgentSyncResponse.php",
       "src/Models/ApplicationDeploymentResponse.php",
+      "src/Models/ApplicationDomainResponse.php",
       "src/Models/ApplicationDomainVerifyResponse.php",
       "src/Models/ApplicationResponse.php",
       "src/Models/ApplicationsActivateResponse.php",
@@ -61,6 +52,8 @@
       "src/Models/ApplicationsDeploymentsListResponse.php",
       "src/Models/ApplicationsDeploymentsRollbackResponse.php",
       "src/Models/ApplicationsDomainsCreateResponse201.php",
+      "src/Models/ApplicationsDomainsListenerCertificateBindingsCreateResponse201.php",
+      "src/Models/ApplicationsDomainsListenerCertificateBindingsListResponse.php",
       "src/Models/ApplicationsDomainsListResponse.php",
       "src/Models/ApplicationsDomainsVerifyResponse.php",
       "src/Models/ApplicationsListResponse.php",
@@ -78,6 +71,7 @@
       "src/Models/AuditLogResponse.php",
       "src/Models/AuditLogsListResponse.php",
       "src/Models/CertificateDistributionResponse.php",
+      "src/Models/CertificateIdentifierResponse.php",
       "src/Models/CertificateResponse.php",
       "src/Models/CertificatesCreateResponse201.php",
       "src/Models/CertificatesDistributionListResponse.php",
@@ -95,10 +89,14 @@
       "src/Models/CreateApplicationRequest.php",
       "src/Models/CreateApplicationSourceVersionRequest.php",
       "src/Models/CreateCertificateRequest.php",
+      "src/Models/CreateListenerCertificateBindingRequest.php",
       "src/Models/CreateManagedDomainRequest.php",
       "src/Models/CreateNginxConfigRequest.php",
+      "src/Models/CreateRootDomainHostnameRequest.php",
+      "src/Models/CreateRootDomainRequest.php",
       "src/Models/CreateServerRequest.php",
       "src/Models/CreateServerResponse.php",
+      "src/Models/DomainDeploymentResponse.php",
       "src/Models/DomainsApplicationBindingUpdateResponse.php",
       "src/Models/DomainsCreateResponse201.php",
       "src/Models/DomainsListResponse.php",
@@ -106,6 +104,8 @@
       "src/Models/FieldError.php",
       "src/Models/HeartbeatResponse.php",
       "src/Models/ImportApplicationGitSourceVersionRequest.php",
+      "src/Models/ListenerCertificateBindingResponse.php",
+      "src/Models/ListenerCertificateSummaryResponse.php",
       "src/Models/MediaChecksum.php",
       "src/Models/MediaResource.php",
       "src/Models/NginxConfigPage.php",
@@ -118,6 +118,12 @@
       "src/Models/ProblemDetail.php",
       "src/Models/ReloadResponse.php",
       "src/Models/RetrieveResponse.php",
+      "src/Models/RootDomainResponse.php",
+      "src/Models/RootDomainsCreateResponse201.php",
+      "src/Models/RootDomainsListResponse.php",
+      "src/Models/RootDomainsRetrieveResponse.php",
+      "src/Models/RootDomainsSubdomainsCreateResponse201.php",
+      "src/Models/RootDomainsSubdomainsListResponse.php",
       "src/Models/SdkWorkApiResponse.php",
       "src/Models/SdkWorkCommandData.php",
       "src/Models/SdkWorkCommandResponse.php",
@@ -147,45 +153,30 @@
   "impact": {
     "schemaVersion": 1,
     "areas": [
-      "api-surface",
       "models"
     ],
     "details": [
       {
-        "area": "api-surface",
-        "paths": [
-          "src/Api/Domain.php"
-        ]
-      },
-      {
         "area": "models",
         "paths": [
-          "src/Models/ApplicationDomainResponse.php",
-          "src/Models/CreateRootDomainHostnameRequest.php",
-          "src/Models/CreateRootDomainRequest.php",
-          "src/Models/DomainDeploymentResponse.php",
-          "src/Models/RootDomainResponse.php",
-          "src/Models/RootDomainsCreateResponse201.php",
-          "src/Models/RootDomainsListResponse.php",
-          "src/Models/RootDomainsRetrieveResponse.php",
-          "src/Models/RootDomainsSubdomainsCreateResponse201.php",
-          "src/Models/RootDomainsSubdomainsListResponse.php"
+          "src/Models/AgentCertificateObservation.php",
+          "src/Models/AgentHeartbeatRequest.php"
         ]
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, models. Verification is required."
+    "summary": "Detected impact areas: models. Verification is required."
   },
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-php\\generated\\server-openapi",
         "command": "node",
         "args": [

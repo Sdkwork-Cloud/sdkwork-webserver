@@ -36,7 +36,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "f0d6838272874da8c18b6818cc5a6fe9b09a1b36ea41a178e7c2553259e299b1"
+      "sha256": "053950312b19b7d1c4883c99fcfb0b5fb9b737b94eb026eff16d848901d78341"
     },
     {
       "path": "sdkwork-sdk.json",
@@ -48,7 +48,7 @@
     },
     {
       "path": "Sources/API/API.swift",
-      "sha256": "ff5a87847d6ed95ac521c25fa8bf839aecf2a6a13caea20bbbcc6e9ec9494093"
+      "sha256": "ed2ab475342310dc1c7321825097668f235229d7b6890d627440ef491b84d3ad"
     },
     {
       "path": "Sources/API/ApiPaths.swift",
@@ -76,7 +76,7 @@
     },
     {
       "path": "Sources/API/CertificateApi.swift",
-      "sha256": "07a34fa7a0bf486cf8b055c35b08b0428b29481d7d927063ea84bb4a2c7f985b"
+      "sha256": "5894c83502c04704e3a8d046ec771145886fa4fc49a447825ae5ebd59f328fdb"
     },
     {
       "path": "Sources/API/CertificateDistributionApi.swift",
@@ -100,11 +100,11 @@
     },
     {
       "path": "Sources/Models.swift",
-      "sha256": "db32d9f309694f8b0f10d6e0cdffe8f87b80ccc0af69c8cd619d18ab4fbe9254"
+      "sha256": "cefabb0159be513a7d73584d54b33e1f8c11c70e89d3175bcd64f260f0dce933"
     },
     {
       "path": "Sources/SdkworkBackendClient.swift",
-      "sha256": "ba5abe49473cb28c8a36b4f2766c91042522d98d340cf28b2f4300313ac35404"
+      "sha256": "3e2257a1338af466331efe9a77aec64e935f27f18dba65d8e4e893e72edee6bd"
     }
   ],
   "scaffoldFiles": [

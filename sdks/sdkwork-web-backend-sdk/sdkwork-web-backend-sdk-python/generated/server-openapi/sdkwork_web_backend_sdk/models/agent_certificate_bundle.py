@@ -8,5 +8,6 @@ class AgentCertificateBundle:
     certificate_id: str
     cert_name: str
     fingerprint: str
+    hostnames: List[str]
     fullchain_pem: str
     privkey_pem: str

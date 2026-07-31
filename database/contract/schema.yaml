@@ -2,16 +2,12 @@ schema_version: 1
 kind: sdkwork.database.schema
 database_role: authoritative-server
 module_id: web
-contract_version: 1.4.0
+contract_version: 1.6.0
 owner_team: web-platform
 compliance_level: L2
 engines:
   - postgres
 table_prefix: web_
-serialization:
-  int64: string
-  decimal: string
-  time: iso8601_utc
 tables:
   - name: web_site
     lifecycle_status: active
@@ -39,18 +35,19 @@ tables:
     constraints:
       - { name: web_site_pkey, type: primary_key, columns: [id] }
       - { name: uk_web_site_uuid, type: unique, columns: [uuid] }
+      - { name: uk_web_site_tenant_id, type: unique, columns: [tenant_id, id] }
       - { name: uk_web_site_slug, type: unique, columns: [tenant_id, slug] }
       - { name: chk_web_site_application_type, type: check }
       - { name: chk_web_site_type, type: check }
       - { name: chk_web_site_status, type: check }
     indexes:
       - { name: uk_web_site_uuid, columns: [uuid], unique: true }
+      - { name: uk_web_site_tenant_id, columns: [tenant_id, id], unique: true }
       - { name: uk_web_site_slug, columns: [tenant_id, slug], unique: true }
       - { name: idx_web_site_tenant_status_updated, columns: [tenant_id, organization_id, status, updated_at] }
       - { name: idx_web_site_tenant_application_type_updated, columns: [tenant_id, application_type, updated_at] }
       - { name: idx_web_site_user_updated, columns: [tenant_id, user_id, updated_at] }
       - { name: idx_web_site_slug, columns: [tenant_id, slug] }
-
   - name: web_root_domain
     lifecycle_status: active
     owner: web-platform
@@ -60,6 +57,9 @@ tables:
       tenant_id: { type: int64, required: true }
       organization_id: { type: int64, required: true }
       hostname: { type: string, required: true }
+      display_name: { type: string, required: false }
+      dns_provider: { type: string, required: false }
+      provider_zone_ref: { type: string, required: false }
       status: { type: enum_int32, required: true }
       metadata: { type: json, required: true }
       created_at: { type: instant, required: true }
@@ -69,12 +69,13 @@ tables:
     constraints:
       - { name: web_root_domain_pkey, type: primary_key, columns: [id] }
       - { name: uk_web_root_domain_uuid, type: unique, columns: [uuid] }
+      - { name: uk_web_root_domain_tenant_id, type: unique, columns: [tenant_id, id] }
       - { name: chk_web_root_domain_status, type: check }
     indexes:
       - { name: uk_web_root_domain_uuid, columns: [uuid], unique: true }
-      - { name: uk_web_root_domain_tenant_hostname, columns: [tenant_id, hostname], unique: true, predicate: "deleted_at IS NULL" }
+      - { name: uk_web_root_domain_tenant_id, columns: [tenant_id, id], unique: true }
+      - { name: uk_web_root_domain_active_hostname, columns: [hostname], unique: true, predicate: "deleted_at IS NULL" }
       - { name: idx_web_root_domain_tenant_updated, columns: [tenant_id, updated_at, id] }
-
   - name: web_domain
     lifecycle_status: active
     owner: web-platform
@@ -83,15 +84,12 @@ tables:
       uuid: { type: string, required: true }
       tenant_id: { type: int64, required: true }
       organization_id: { type: int64, required: true }
-      root_domain_id: { type: int64, required: false }
-      site_id: { type: int64, required: false }
+      user_id: { type: int64, required: false }
+      root_domain_id: { type: int64, required: true }
       hostname: { type: string, required: true }
-      is_primary: { type: bool, required: true }
-      is_verified: { type: bool, required: true }
-      verify_token: { type: string, required: false }
-      ssl_enabled: { type: bool, required: true }
-      ssl_provider: { type: string, required: false }
-      redirect_target: { type: string, required: false }
+      hostname_type: { type: string, required: true }
+      verification_status: { type: string, required: true }
+      verified_at: { type: instant, required: false }
       status: { type: enum_int32, required: true }
       metadata: { type: json, required: true }
       created_at: { type: instant, required: true }
@@ -101,27 +99,149 @@ tables:
     constraints:
       - { name: web_domain_pkey, type: primary_key, columns: [id] }
       - { name: uk_web_domain_uuid, type: unique, columns: [uuid] }
-      - { name: uk_web_domain_hostname, type: unique, columns: [hostname] }
-      - name: chk_web_domain_primary_binding
-        type: check
-        expression: site_id IS NOT NULL OR is_primary = false
-      - name: fk_web_domain_site
-        type: foreign_key
-        columns: [site_id]
-        references_table: web_site
-        references_columns: [id]
+      - { name: uk_web_domain_tenant_id, type: unique, columns: [tenant_id, id] }
       - name: fk_web_domain_root_domain
         type: foreign_key
-        columns: [root_domain_id]
+        columns: [tenant_id, root_domain_id]
         references_table: web_root_domain
-        references_columns: [id]
+        references_columns: [tenant_id, id]
+      - { name: chk_web_domain_hostname_type, type: check }
+      - { name: chk_web_domain_verification_status, type: check }
+      - { name: chk_web_domain_verified_at, type: check }
+      - { name: chk_web_domain_status, type: check }
     indexes:
       - { name: uk_web_domain_uuid, columns: [uuid], unique: true }
-      - { name: uk_web_domain_hostname, columns: [hostname], unique: true }
-      - { name: idx_web_domain_site, columns: [site_id] }
-      - { name: idx_web_domain_tenant_status, columns: [tenant_id, status] }
-      - { name: idx_web_domain_root_updated, columns: [tenant_id, root_domain_id, updated_at, id] }
-
+      - { name: uk_web_domain_tenant_id, columns: [tenant_id, id], unique: true }
+      - { name: uk_web_domain_active_hostname, columns: [hostname], unique: true, predicate: "deleted_at IS NULL" }
+      - { name: idx_web_domain_tenant_status, columns: [tenant_id, status, updated_at, id], predicate: "deleted_at IS NULL" }
+      - { name: idx_web_domain_root_updated, columns: [tenant_id, root_domain_id, updated_at, id], predicate: "deleted_at IS NULL" }
+      - { name: idx_web_domain_user_updated, columns: [tenant_id, user_id, updated_at, id], predicate: "user_id IS NOT NULL AND deleted_at IS NULL" }
+  - name: web_domain_verification
+    lifecycle_status: active
+    owner: web-platform
+    columns:
+      id: { type: int64, required: true }
+      uuid: { type: string, required: true }
+      tenant_id: { type: int64, required: true }
+      domain_id: { type: int64, required: true }
+      method: { type: string, required: true }
+      record_name: { type: string, required: true }
+      proof_sha256: { type: string, required: true }
+      status: { type: string, required: true }
+      observed_sha256: { type: string, required: false }
+      attempt_count: { type: int32, required: true }
+      next_attempt_at: { type: instant, required: false }
+      expires_at: { type: instant, required: true }
+      checked_at: { type: instant, required: false }
+      verified_at: { type: instant, required: false }
+      failure_code: { type: string, required: false }
+      created_at: { type: instant, required: true }
+      updated_at: { type: instant, required: true }
+      version: { type: int64, required: true }
+    constraints:
+      - { name: web_domain_verification_pkey, type: primary_key, columns: [id] }
+      - { name: uk_web_domain_verification_uuid, type: unique, columns: [uuid] }
+      - name: fk_web_domain_verification_domain
+        type: foreign_key
+        columns: [tenant_id, domain_id]
+        references_table: web_domain
+        references_columns: [tenant_id, id]
+      - { name: chk_web_domain_verification_method, type: check }
+      - { name: chk_web_domain_verification_status, type: check }
+      - { name: chk_web_domain_verification_hash, type: check }
+      - { name: chk_web_domain_verification_attempts, type: check }
+    indexes:
+      - { name: uk_web_domain_verification_uuid, columns: [uuid], unique: true }
+      - { name: uk_web_domain_verification_active, columns: [domain_id], unique: true, predicate: "((status)::text = ANY ((ARRAY['PENDING'::character varying, 'CHECKING'::character varying])::text[]))" }
+      - { name: idx_web_domain_verification_due, columns: [status, next_attempt_at, expires_at, id], predicate: "((status)::text = ANY ((ARRAY['PENDING'::character varying, 'CHECKING'::character varying])::text[]))" }
+  - name: web_site_binding
+    lifecycle_status: active
+    owner: web-platform
+    columns:
+      id: { type: int64, required: true }
+      uuid: { type: string, required: true }
+      tenant_id: { type: int64, required: true }
+      organization_id: { type: int64, required: true }
+      site_id: { type: int64, required: true }
+      domain_id: { type: int64, required: true }
+      environment: { type: string, required: true }
+      path_prefix: { type: string, required: true }
+      action_type: { type: string, required: true }
+      is_primary: { type: bool, required: true }
+      redirect_scheme: { type: string, required: false }
+      redirect_hostname: { type: string, required: false }
+      redirect_path_prefix: { type: string, required: false }
+      redirect_status_code: { type: int32, required: false }
+      preserve_path: { type: bool, required: true }
+      preserve_query: { type: bool, required: true }
+      status: { type: string, required: true }
+      activated_at: { type: instant, required: false }
+      created_at: { type: instant, required: true }
+      updated_at: { type: instant, required: true }
+      version: { type: int64, required: true }
+      deleted_at: { type: instant, required: false }
+    constraints:
+      - { name: web_site_binding_pkey, type: primary_key, columns: [id] }
+      - { name: uk_web_site_binding_uuid, type: unique, columns: [uuid] }
+      - { name: uk_web_site_binding_tenant_id, type: unique, columns: [tenant_id, id] }
+      - name: fk_web_site_binding_site
+        type: foreign_key
+        columns: [tenant_id, site_id]
+        references_table: web_site
+        references_columns: [tenant_id, id]
+      - name: fk_web_site_binding_domain
+        type: foreign_key
+        columns: [tenant_id, domain_id]
+        references_table: web_domain
+        references_columns: [tenant_id, id]
+      - { name: chk_web_site_binding_environment, type: check }
+      - { name: chk_web_site_binding_action, type: check }
+      - { name: chk_web_site_binding_status, type: check }
+      - { name: chk_web_site_binding_redirect_status, type: check }
+      - { name: chk_web_site_binding_redirect, type: check }
+    indexes:
+      - { name: uk_web_site_binding_uuid, columns: [uuid], unique: true }
+      - { name: uk_web_site_binding_tenant_id, columns: [tenant_id, id], unique: true }
+      - { name: uk_web_site_binding_active_route, columns: [domain_id, environment, path_prefix], unique: true, predicate: "(((status)::text = ANY ((ARRAY['PENDING'::character varying, 'ACTIVE'::character varying, 'PAUSED'::character varying])::text[])) AND (deleted_at IS NULL))" }
+      - { name: uk_web_site_binding_primary, columns: [site_id, environment], unique: true, predicate: "((is_primary = true) AND ((status)::text = 'ACTIVE'::text) AND (deleted_at IS NULL))" }
+      - { name: idx_web_site_binding_site_status, columns: [tenant_id, site_id, environment, status, updated_at, id], predicate: "deleted_at IS NULL" }
+      - { name: idx_web_site_binding_domain_status, columns: [tenant_id, domain_id, environment, status, updated_at, id], predicate: "deleted_at IS NULL" }
+  - name: web_tls_policy
+    lifecycle_status: active
+    owner: web-platform
+    columns:
+      id: { type: int64, required: true }
+      uuid: { type: string, required: true }
+      tenant_id: { type: int64, required: true }
+      site_binding_id: { type: int64, required: true }
+      certificate_source: { type: string, required: true }
+      challenge_method: { type: string, required: true }
+      minimum_tls_version: { type: string, required: true }
+      maximum_tls_version: { type: string, required: true }
+      alpn_json: { type: json, required: true }
+      auto_renew: { type: bool, required: true }
+      renew_before_days: { type: int32, required: true }
+      status: { type: string, required: true }
+      created_at: { type: instant, required: true }
+      updated_at: { type: instant, required: true }
+      version: { type: int64, required: true }
+      deleted_at: { type: instant, required: false }
+    constraints:
+      - { name: web_tls_policy_pkey, type: primary_key, columns: [id] }
+      - { name: uk_web_tls_policy_uuid, type: unique, columns: [uuid] }
+      - name: fk_web_tls_policy_binding
+        type: foreign_key
+        columns: [tenant_id, site_binding_id]
+        references_table: web_site_binding
+        references_columns: [tenant_id, id]
+      - { name: chk_web_tls_policy_source, type: check }
+      - { name: chk_web_tls_policy_challenge, type: check }
+      - { name: chk_web_tls_policy_versions, type: check }
+      - { name: chk_web_tls_policy_renewal, type: check }
+      - { name: chk_web_tls_policy_status, type: check }
+    indexes:
+      - { name: uk_web_tls_policy_uuid, columns: [uuid], unique: true }
+      - { name: uk_web_tls_policy_active_binding, columns: [site_binding_id], unique: true, predicate: "(((status)::text = 'ACTIVE'::text) AND (deleted_at IS NULL))" }
   - name: web_nginx_config
     lifecycle_status: active
     owner: web-platform
@@ -155,7 +275,6 @@ tables:
       - { name: uk_web_nginx_config_uuid, columns: [uuid], unique: true }
       - { name: idx_web_nginx_config_site_active, columns: [site_id, is_active] }
       - { name: idx_web_nginx_config_type_status, columns: [config_type, status] }
-
   - name: web_certificate
     lifecycle_status: active
     owner: web-platform
@@ -163,35 +282,198 @@ tables:
       id: { type: int64, required: true }
       uuid: { type: string, required: true }
       tenant_id: { type: int64, required: true }
-      domain_id: { type: int64, required: false }
-      site_id: { type: int64, required: false }
+      organization_id: { type: int64, required: true }
+      user_id: { type: int64, required: false }
       cert_name: { type: string, required: true }
       cert_type: { type: enum_int32, required: true }
-      issuer: { type: string, required: false }
-      subject: { type: string, required: false }
-      san_list: { type: text, required: false }
-      fingerprint: { type: string, required: false }
-      cert_path: { type: string, required: false }
-      key_path: { type: string, required: false }
-      chain_path: { type: string, required: false }
-      not_before: { type: instant, required: false }
-      not_after: { type: instant, required: false }
+      ca_profile: { type: string, required: true }
+      preferred_key_algorithm: { type: string, required: true }
       auto_renew: { type: bool, required: true }
       renewal_status: { type: enum_int32, required: true }
       status: { type: enum_int32, required: true }
+      current_version_id: { type: int64, required: false }
       metadata: { type: json, required: true }
       created_at: { type: instant, required: true }
       updated_at: { type: instant, required: true }
       version: { type: int64, required: true }
+      deleted_at: { type: instant, required: false }
     constraints:
       - { name: web_certificate_pkey, type: primary_key, columns: [id] }
       - { name: uk_web_certificate_uuid, type: unique, columns: [uuid] }
+      - { name: uk_web_certificate_tenant_id, type: unique, columns: [tenant_id, id] }
+      - { name: chk_web_certificate_type, type: check }
+      - { name: chk_web_certificate_ca_profile, type: check }
+      - { name: chk_web_certificate_key_algorithm, type: check }
+      - { name: chk_web_certificate_renewal_status, type: check }
+      - { name: chk_web_certificate_status, type: check }
     indexes:
       - { name: uk_web_certificate_uuid, columns: [uuid], unique: true }
-      - { name: idx_web_certificate_domain, columns: [domain_id] }
-      - { name: idx_web_certificate_expiry, columns: [not_after], predicate: status = 1 }
-      - { name: idx_web_certificate_renewal, columns: [renewal_status, not_after], predicate: auto_renew = true AND status = 1 }
-
+      - { name: uk_web_certificate_tenant_id, columns: [tenant_id, id], unique: true }
+      - { name: idx_web_certificate_renewal, columns: [tenant_id, renewal_status, updated_at, id], predicate: "auto_renew = true AND status IN (1, 2) AND deleted_at IS NULL" }
+      - { name: idx_web_certificate_tenant_updated, columns: [tenant_id, updated_at, id], predicate: "deleted_at IS NULL" }
+      - { name: idx_web_certificate_user_updated, columns: [tenant_id, user_id, updated_at, id], predicate: "user_id IS NOT NULL AND deleted_at IS NULL" }
+  - name: web_certificate_identifier
+    lifecycle_status: active
+    owner: web-platform
+    columns:
+      id: { type: int64, required: true }
+      uuid: { type: string, required: true }
+      tenant_id: { type: int64, required: true }
+      certificate_id: { type: int64, required: true }
+      domain_id: { type: int64, required: true }
+      identifier_type: { type: string, required: true }
+      hostname: { type: string, required: true }
+      position: { type: int32, required: true }
+      created_at: { type: instant, required: true }
+    constraints:
+      - { name: web_certificate_identifier_pkey, type: primary_key, columns: [id] }
+      - { name: uk_web_certificate_identifier_uuid, type: unique, columns: [uuid] }
+      - { name: uk_web_certificate_identifier_name, type: unique, columns: [certificate_id, hostname] }
+      - { name: uk_web_certificate_identifier_position, type: unique, columns: [certificate_id, position] }
+      - name: fk_web_certificate_identifier_certificate
+        type: foreign_key
+        columns: [tenant_id, certificate_id]
+        references_table: web_certificate
+        references_columns: [tenant_id, id]
+      - name: fk_web_certificate_identifier_domain
+        type: foreign_key
+        columns: [tenant_id, domain_id]
+        references_table: web_domain
+        references_columns: [tenant_id, id]
+      - { name: chk_web_certificate_identifier_type, type: check }
+      - name: chk_web_certificate_identifier_position
+        type: check
+        columns: [position]
+        expression: position BETWEEN 0 AND 7
+    indexes:
+      - { name: uk_web_certificate_identifier_uuid, columns: [uuid], unique: true }
+      - { name: uk_web_certificate_identifier_name, columns: [certificate_id, hostname], unique: true }
+      - { name: uk_web_certificate_identifier_position, columns: [certificate_id, '"position"'], unique: true }
+      - { name: idx_web_certificate_identifier_domain, columns: [tenant_id, domain_id, certificate_id] }
+  - name: web_certificate_version
+    lifecycle_status: active
+    owner: web-platform
+    columns:
+      id: { type: int64, required: true }
+      uuid: { type: string, required: true }
+      tenant_id: { type: int64, required: true }
+      certificate_id: { type: int64, required: true }
+      version_no: { type: int64, required: true }
+      serial_sha256: { type: string, required: true }
+      fingerprint_sha256: { type: string, required: true }
+      spki_sha256: { type: string, required: true }
+      chain_sha256: { type: string, required: true }
+      issuer: { type: string, required: true }
+      subject: { type: string, required: true }
+      key_algorithm: { type: string, required: true }
+      not_before: { type: instant, required: true }
+      not_after: { type: instant, required: true }
+      secret_bundle_ref: { type: string, required: true }
+      status: { type: string, required: true }
+      created_at: { type: instant, required: true }
+    constraints:
+      - { name: web_certificate_version_pkey, type: primary_key, columns: [id] }
+      - { name: uk_web_certificate_version_uuid, type: unique, columns: [uuid] }
+      - { name: uk_web_certificate_version_id, type: unique, columns: [certificate_id, id] }
+      - { name: uk_web_certificate_version_tenant_id, type: unique, columns: [tenant_id, id] }
+      - { name: uk_web_certificate_version_no, type: unique, columns: [certificate_id, version_no] }
+      - { name: uk_web_certificate_version_fingerprint, type: unique, columns: [tenant_id, fingerprint_sha256] }
+      - name: fk_web_certificate_version_certificate
+        type: foreign_key
+        columns: [tenant_id, certificate_id]
+        references_table: web_certificate
+        references_columns: [tenant_id, id]
+      - { name: chk_web_certificate_version_key_algorithm, type: check }
+      - { name: chk_web_certificate_version_status, type: check }
+      - { name: chk_web_certificate_version_validity, type: check }
+      - { name: chk_web_certificate_version_hashes, type: check }
+      - { name: chk_web_certificate_version_secret_ref, type: check }
+    indexes:
+      - { name: uk_web_certificate_version_uuid, columns: [uuid], unique: true }
+      - { name: uk_web_certificate_version_id, columns: [certificate_id, id], unique: true }
+      - { name: uk_web_certificate_version_tenant_id, columns: [tenant_id, id], unique: true }
+      - { name: uk_web_certificate_version_no, columns: [certificate_id, version_no], unique: true }
+      - { name: uk_web_certificate_version_fingerprint, columns: [tenant_id, fingerprint_sha256], unique: true }
+      - { name: idx_web_certificate_version_lifecycle, columns: [tenant_id, status, not_after, id] }
+  - name: web_certificate_secret_bundle
+    lifecycle_status: active
+    owner: web-platform
+    columns:
+      id: { type: int64, required: true }
+      uuid: { type: string, required: true }
+      tenant_id: { type: int64, required: true }
+      certificate_version_id: { type: int64, required: true }
+      encryption_algorithm: { type: string, required: true }
+      bundle_encrypted: { type: string, required: true }
+      created_at: { type: instant, required: true }
+    constraints:
+      - { name: web_certificate_secret_bundle_pkey, type: primary_key, columns: [id] }
+      - { name: uk_web_certificate_secret_bundle_uuid, type: unique, columns: [uuid] }
+      - { name: uk_web_certificate_secret_bundle_version, type: unique, columns: [tenant_id, certificate_version_id] }
+      - name: fk_web_certificate_secret_bundle_version
+        type: foreign_key
+        columns: [tenant_id, certificate_version_id]
+        references_table: web_certificate_version
+        references_columns: [tenant_id, id]
+      - { name: chk_web_certificate_secret_bundle_algorithm, type: check }
+      - { name: chk_web_certificate_secret_bundle_payload, type: check }
+    indexes:
+      - { name: uk_web_certificate_secret_bundle_uuid, columns: [uuid], unique: true }
+      - { name: uk_web_certificate_secret_bundle_version, columns: [tenant_id, certificate_version_id], unique: true }
+  - name: web_listener_certificate_binding
+    lifecycle_status: active
+    owner: web-platform
+    columns:
+      id: { type: int64, required: true }
+      uuid: { type: string, required: true }
+      tenant_id: { type: int64, required: true }
+      site_binding_id: { type: int64, required: true }
+      certificate_id: { type: int64, required: true }
+      desired_version_id: { type: int64, required: true }
+      current_version_id: { type: int64, required: false }
+      key_algorithm: { type: string, required: true }
+      priority: { type: int32, required: true }
+      is_default: { type: bool, required: true }
+      status: { type: string, required: true }
+      activated_at: { type: instant, required: false }
+      created_at: { type: instant, required: true }
+      updated_at: { type: instant, required: true }
+      version: { type: int64, required: true }
+      deleted_at: { type: instant, required: false }
+    constraints:
+      - { name: web_listener_certificate_binding_pkey, type: primary_key, columns: [id] }
+      - { name: uk_web_listener_certificate_binding_uuid, type: unique, columns: [uuid] }
+      - { name: uk_web_listener_certificate_binding_certificate, type: unique, columns: [site_binding_id, certificate_id] }
+      - name: fk_web_listener_certificate_binding_route
+        type: foreign_key
+        columns: [tenant_id, site_binding_id]
+        references_table: web_site_binding
+        references_columns: [tenant_id, id]
+      - name: fk_web_listener_certificate_binding_certificate
+        type: foreign_key
+        columns: [tenant_id, certificate_id]
+        references_table: web_certificate
+        references_columns: [tenant_id, id]
+      - name: fk_web_listener_certificate_binding_desired_version
+        type: foreign_key
+        columns: [certificate_id, desired_version_id]
+        references_table: web_certificate_version
+        references_columns: [certificate_id, id]
+      - name: fk_web_listener_certificate_binding_current_version
+        type: foreign_key
+        columns: [certificate_id, current_version_id]
+        references_table: web_certificate_version
+        references_columns: [certificate_id, id]
+      - { name: chk_web_listener_certificate_binding_algorithm, type: check }
+      - { name: chk_web_listener_certificate_binding_priority, type: check }
+      - { name: chk_web_listener_certificate_binding_status, type: check }
+      - { name: chk_web_listener_certificate_binding_active_version, type: check }
+    indexes:
+      - { name: uk_web_listener_certificate_binding_uuid, columns: [uuid], unique: true }
+      - { name: uk_web_listener_certificate_binding_certificate, columns: [site_binding_id, certificate_id], unique: true }
+      - { name: uk_web_listener_certificate_binding_active_algorithm, columns: [site_binding_id, key_algorithm], unique: true, predicate: "(((status)::text <> 'ARCHIVED'::text) AND (deleted_at IS NULL))" }
+      - { name: uk_web_listener_certificate_binding_default, columns: [site_binding_id], unique: true, predicate: "((is_default = true) AND ((status)::text <> 'ARCHIVED'::text) AND (deleted_at IS NULL))" }
+      - { name: idx_web_listener_certificate_binding_certificate, columns: [tenant_id, certificate_id, status], predicate: "deleted_at IS NULL" }
   - name: web_source_version
     lifecycle_status: active
     owner: web-platform
@@ -233,7 +515,6 @@ tables:
       - { name: uk_web_source_version_site_tag, columns: [tenant_id, site_id, version_tag], unique: true }
       - { name: idx_web_source_version_site_created, columns: [site_id, created_at] }
       - { name: idx_web_source_version_retention, columns: [tenant_id, site_id, status, created_at] }
-
   - name: web_deployment
     lifecycle_status: active
     owner: web-platform
@@ -287,7 +568,6 @@ tables:
       - { name: idx_web_deployment_source_version, columns: [source_version_id] }
       - { name: idx_web_deployment_tenant_status, columns: [tenant_id, status, created_at] }
       - { name: idx_web_deployment_status, columns: [status], predicate: "(status = ANY (ARRAY[0, 1, 2]))" }
-
   - name: web_env_variable
     lifecycle_status: active
     owner: web-platform
@@ -312,7 +592,6 @@ tables:
       - { name: uk_web_env_variable_uuid, columns: [uuid], unique: true }
       - { name: uk_web_env_variable_key, columns: [site_id, environment, key], unique: true }
       - { name: idx_web_env_variable_site_env, columns: [site_id, environment] }
-
   - name: web_health_check
     lifecycle_status: active
     owner: web-platform
@@ -344,7 +623,6 @@ tables:
     indexes:
       - { name: uk_web_health_check_uuid, columns: [uuid], unique: true }
       - { name: idx_web_health_check_site, columns: [site_id] }
-
   - name: web_health_result
     lifecycle_status: active
     owner: web-platform
@@ -365,7 +643,6 @@ tables:
     indexes:
       - { name: idx_web_health_result_check_time, columns: [health_check_id, checked_at] }
       - { name: idx_web_health_result_site_time, columns: [site_id, checked_at] }
-
   - name: web_audit_log
     lifecycle_status: active
     owner: web-platform
@@ -392,7 +669,6 @@ tables:
       - { name: idx_web_audit_log_target, columns: [target_type, target_id, created_at] }
       - { name: idx_web_audit_log_operator, columns: [operator_id, created_at] }
       - { name: idx_web_audit_log_tenant_action, columns: [tenant_id, action, created_at] }
-
   - name: web_server
     lifecycle_status: active
     owner: web-platform
@@ -420,7 +696,52 @@ tables:
       - { name: uk_web_server_host, columns: [tenant_id, host], unique: true }
       - { name: uk_web_server_tenant_id, columns: [tenant_id, id], unique: true }
       - { name: idx_web_server_tenant_status, columns: [tenant_id, status, updated_at] }
-
+  - name: web_certificate_node_state
+    lifecycle_status: active
+    owner: web-platform
+    columns:
+      id: { type: int64, required: true }
+      uuid: { type: string, required: true }
+      tenant_id: { type: int64, required: true }
+      server_id: { type: int64, required: true }
+      certificate_id: { type: int64, required: true }
+      certificate_version_id: { type: int64, required: true }
+      state: { type: string, required: true }
+      fingerprint_sha256: { type: string, required: true }
+      sync_version: { type: string, required: true }
+      failure_code: { type: string, required: false }
+      observed_at: { type: instant, required: true }
+      created_at: { type: instant, required: true }
+      updated_at: { type: instant, required: true }
+      version: { type: int64, required: true }
+    constraints:
+      - { name: web_certificate_node_state_pkey, type: primary_key, columns: [id] }
+      - { name: uk_web_certificate_node_state_uuid, type: unique, columns: [uuid] }
+      - { name: uk_web_certificate_node_state_version, type: unique, columns: [tenant_id, server_id, certificate_version_id] }
+      - name: fk_web_certificate_node_state_server
+        type: foreign_key
+        columns: [tenant_id, server_id]
+        references_table: web_server
+        references_columns: [tenant_id, id]
+      - name: fk_web_certificate_node_state_certificate
+        type: foreign_key
+        columns: [tenant_id, certificate_id]
+        references_table: web_certificate
+        references_columns: [tenant_id, id]
+      - name: fk_web_certificate_node_state_version
+        type: foreign_key
+        columns: [certificate_id, certificate_version_id]
+        references_table: web_certificate_version
+        references_columns: [certificate_id, id]
+      - { name: chk_web_certificate_node_state_phase, type: check }
+      - { name: chk_web_certificate_node_state_fingerprint, type: check }
+      - { name: chk_web_certificate_node_state_sync_version, type: check }
+      - { name: chk_web_certificate_node_state_failure_code, type: check }
+    indexes:
+      - { name: uk_web_certificate_node_state_uuid, columns: [uuid], unique: true }
+      - { name: uk_web_certificate_node_state_version, columns: [tenant_id, server_id, certificate_version_id], unique: true }
+      - { name: idx_web_certificate_node_state_version, columns: [tenant_id, certificate_version_id, state, server_id] }
+      - { name: idx_web_certificate_node_state_server, columns: [tenant_id, server_id, state, observed_at] }
   - name: web_runtime_assignment
     lifecycle_status: active
     owner: web-platform
@@ -461,7 +782,6 @@ tables:
       - { name: uk_web_runtime_assignment_generation, columns: [tenant_id, server_id, environment, generation], unique: true }
       - { name: uk_web_runtime_assignment_snapshot, columns: [snapshot_uuid], unique: true }
       - { name: idx_web_runtime_assignment_current, columns: [tenant_id, server_id, environment, generation] }
-
   - name: web_runtime_observation
     lifecycle_status: active
     owner: web-platform

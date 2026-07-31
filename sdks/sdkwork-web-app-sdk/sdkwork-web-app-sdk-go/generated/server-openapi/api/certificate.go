@@ -17,12 +17,55 @@ func NewCertificateApi(client *sdkhttp.Client) *CertificateApi {
     return &CertificateApi{client: client}
 }
 
+// List certificates active on the domain listener
+func (a *CertificateApi) SitesDomainsListenerCertificateBindingsList(siteId string, domainId string, page *int, pageSize *int) (sdktypes.SitesDomainsListenerCertificateBindingsListResponse, error) {
+    query := BuildQueryString([]QueryParameterSpec{
+        {Name: "page", Value: func() interface{} { if page == nil { return nil }; return *page }(), Style: "form", Explode: true, AllowReserved: false},
+        {Name: "page_size", Value: func() interface{} { if pageSize == nil { return nil }; return *pageSize }(), Style: "form", Explode: true, AllowReserved: false},
+    })
+    raw, err := a.client.Get(AppendQueryString(AppApiPath(fmt.Sprintf("/sites/%s/domains/%s/listener_certificate_bindings", SerializePathParameter(siteId, PathParameterSpec{Name: "siteId", Style: "simple", Explode: false}), SerializePathParameter(domainId, PathParameterSpec{Name: "domainId", Style: "simple", Explode: false}))), query), nil, nil)
+    if err != nil {
+        var zero sdktypes.SitesDomainsListenerCertificateBindingsListResponse
+        return zero, err
+    }
+    return decodeResult[sdktypes.SitesDomainsListenerCertificateBindingsListResponse](raw)
+}
+
+// Bind a certificate version to the domain listener
+func (a *CertificateApi) SitesDomainsListenerCertificateBindingsCreate(siteId string, domainId string, body sdktypes.CreateListenerCertificateBindingRequest, idempotencyKey string) (sdktypes.SitesDomainsListenerCertificateBindingsCreateResponse201, error) {
+    headers := BuildRequestHeaders(
+        map[string]ParameterSpec{"Idempotency-Key": ParameterSpec{Value: idempotencyKey, Style: "simple", Explode: false},},
+        map[string]ParameterSpec{},
+    )
+    raw, err := a.client.Post(AppApiPath(fmt.Sprintf("/sites/%s/domains/%s/listener_certificate_bindings", SerializePathParameter(siteId, PathParameterSpec{Name: "siteId", Style: "simple", Explode: false}), SerializePathParameter(domainId, PathParameterSpec{Name: "domainId", Style: "simple", Explode: false}))), body, nil, headers, "application/json")
+    if err != nil {
+        var zero sdktypes.SitesDomainsListenerCertificateBindingsCreateResponse201
+        return zero, err
+    }
+    return decodeResult[sdktypes.SitesDomainsListenerCertificateBindingsCreateResponse201](raw)
+}
+
+// Remove a certificate from the domain listener
+func (a *CertificateApi) SitesDomainsListenerCertificateBindingsDelete(siteId string, domainId string, bindingId string, idempotencyKey string) (struct{}, error) {
+    headers := BuildRequestHeaders(
+        map[string]ParameterSpec{"Idempotency-Key": ParameterSpec{Value: idempotencyKey, Style: "simple", Explode: false},},
+        map[string]ParameterSpec{},
+    )
+    raw, err := a.client.Delete(AppApiPath(fmt.Sprintf("/sites/%s/domains/%s/listener_certificate_bindings/%s", SerializePathParameter(siteId, PathParameterSpec{Name: "siteId", Style: "simple", Explode: false}), SerializePathParameter(domainId, PathParameterSpec{Name: "domainId", Style: "simple", Explode: false}), SerializePathParameter(bindingId, PathParameterSpec{Name: "bindingId", Style: "simple", Explode: false}))), nil, headers)
+    if err != nil {
+        var zero struct{}
+        return zero, err
+    }
+    return decodeResult[struct{}](raw)
+}
+
 // 获取证书列表
-func (a *CertificateApi) CertificatesList(page *int, pageSize *int, siteId *string) (sdktypes.CertificatesListResponse, error) {
+func (a *CertificateApi) CertificatesList(page *int, pageSize *int, siteId *string, domainId *string) (sdktypes.CertificatesListResponse, error) {
     query := BuildQueryString([]QueryParameterSpec{
         {Name: "page", Value: func() interface{} { if page == nil { return nil }; return *page }(), Style: "form", Explode: true, AllowReserved: false},
         {Name: "page_size", Value: func() interface{} { if pageSize == nil { return nil }; return *pageSize }(), Style: "form", Explode: true, AllowReserved: false},
         {Name: "siteId", Value: func() interface{} { if siteId == nil { return nil }; return *siteId }(), Style: "form", Explode: true, AllowReserved: false},
+        {Name: "domainId", Value: func() interface{} { if domainId == nil { return nil }; return *domainId }(), Style: "form", Explode: true, AllowReserved: false},
     })
     raw, err := a.client.Get(AppendQueryString(AppApiPath("/certificates"), query), nil, nil)
     if err != nil {
@@ -46,7 +89,110 @@ func (a *CertificateApi) CertificatesCreate(body sdktypes.CreateCertificateReque
     return decodeResult[sdktypes.CertificatesCreateResponse201](raw)
 }
 
+type PathParameterSpec struct {
+    Name    string
+    Style   string
+    Explode bool
+}
 
+func SerializePathParameter(value interface{}, spec PathParameterSpec) string {
+    if value == nil {
+        return ""
+    }
+    style := spec.Style
+    if style == "" {
+        style = "simple"
+    }
+
+    switch typed := value.(type) {
+    case []string:
+        return SerializePathArray(spec.Name, stringSliceToInterface(typed), style, spec.Explode)
+    case []int:
+        return SerializePathArray(spec.Name, intSliceToInterface(typed), style, spec.Explode)
+    case []interface{}:
+        return SerializePathArray(spec.Name, typed, style, spec.Explode)
+    case map[string]string:
+        return SerializePathObject(spec.Name, stringMapToInterface(typed), style, spec.Explode)
+    case map[string]int:
+        return SerializePathObject(spec.Name, intMapToInterface(typed), style, spec.Explode)
+    case map[string]interface{}:
+        return SerializePathObject(spec.Name, typed, style, spec.Explode)
+    default:
+        return PathPrefix(spec.Name, style) + url.PathEscape(fmt.Sprint(value))
+    }
+}
+
+func SerializePathArray(name string, values []interface{}, style string, explode bool) string {
+    serialized := make([]string, 0, len(values))
+    for _, item := range values {
+        if item != nil {
+            serialized = append(serialized, url.PathEscape(fmt.Sprint(item)))
+        }
+    }
+    if len(serialized) == 0 {
+        return PathPrefix(name, style)
+    }
+    if style == "matrix" {
+        if explode {
+            parts := make([]string, 0, len(serialized))
+            for _, item := range serialized {
+                parts = append(parts, ";"+name+"="+item)
+            }
+            return strings.Join(parts, "")
+        }
+        return ";" + name + "=" + strings.Join(serialized, ",")
+    }
+    separator := ","
+    if explode {
+        separator = "."
+    }
+    return PathPrefix(name, style) + strings.Join(serialized, separator)
+}
+
+func SerializePathObject(name string, values map[string]interface{}, style string, explode bool) string {
+    entries := make([]string, 0, len(values)*2)
+    exploded := make([]string, 0, len(values))
+    for key, value := range values {
+        if value == nil {
+            continue
+        }
+        escapedKey := url.PathEscape(key)
+        escapedValue := url.PathEscape(fmt.Sprint(value))
+        if explode {
+            if style == "matrix" {
+                exploded = append(exploded, ";"+escapedKey+"="+escapedValue)
+            } else {
+                exploded = append(exploded, escapedKey+"="+escapedValue)
+            }
+        } else {
+            entries = append(entries, escapedKey, escapedValue)
+        }
+    }
+    if style == "matrix" {
+        if explode {
+            return strings.Join(exploded, "")
+        }
+        return ";" + name + "=" + strings.Join(entries, ",")
+    }
+    if explode {
+        separator := ","
+        if style == "label" {
+            separator = "."
+        }
+        return PathPrefix(name, style) + strings.Join(exploded, separator)
+    }
+    return PathPrefix(name, style) + strings.Join(entries, ",")
+}
+
+func PathPrefix(name string, style string) string {
+    if style == "label" {
+        return "."
+    }
+    if style == "matrix" {
+        return ";" + name
+    }
+    return ""
+}
 type QueryParameterSpec struct {
     Name          string
     Value         interface{}

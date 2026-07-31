@@ -1,10 +1,12 @@
 package com.sdkwork.web.backend.sdk.model;
 
+import java.util.List;
 
 public class AgentCertificateBundle {
     private String certificateId;
     private String certName;
     private String fingerprint;
+    private List<String> hostnames;
     private String fullchainPem;
     private String privkeyPem;
 
@@ -30,6 +32,14 @@ public class AgentCertificateBundle {
 
     public void setFingerprint(String fingerprint) {
         this.fingerprint = fingerprint;
+    }
+
+    public List<String> getHostnames() {
+        return this.hostnames;
+    }
+
+    public void setHostnames(List<String> hostnames) {
+        this.hostnames = hostnames;
     }
 
     public String getFullchainPem() {

@@ -89,6 +89,31 @@ const HTTP_ROUTES: &[HttpRoute] = &[
     .with_rate_limit_tier(RateLimitTier::AuthCritical),
     HttpRoute::dual_token(
         HttpMethod::Get,
+        "/app/v3/api/sites/{siteId}/domains/{domainId}/listener_certificate_bindings",
+        "certificate",
+        "sites.domains.listenerCertificateBindings.list",
+    )
+    .with_required_permission("web.certificates.read"),
+    HttpRoute::dual_token(
+        HttpMethod::Post,
+        "/app/v3/api/sites/{siteId}/domains/{domainId}/listener_certificate_bindings",
+        "certificate",
+        "sites.domains.listenerCertificateBindings.create",
+    )
+    .with_required_permission("web.certificates.write")
+    .with_idempotent(true)
+    .with_rate_limit_tier(RateLimitTier::AuthCritical),
+    HttpRoute::dual_token(
+        HttpMethod::Delete,
+        "/app/v3/api/sites/{siteId}/domains/{domainId}/listener_certificate_bindings/{bindingId}",
+        "certificate",
+        "sites.domains.listenerCertificateBindings.delete",
+    )
+    .with_required_permission("web.certificates.write")
+    .with_idempotent(true)
+    .with_rate_limit_tier(RateLimitTier::AuthCritical),
+    HttpRoute::dual_token(
+        HttpMethod::Get,
         "/app/v3/api/sites/{siteId}/source_versions",
         "sourceVersion",
         "sites.sourceVersions.list",

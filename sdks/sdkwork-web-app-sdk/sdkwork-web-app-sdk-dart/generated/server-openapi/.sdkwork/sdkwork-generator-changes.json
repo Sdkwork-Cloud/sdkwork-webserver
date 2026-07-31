@@ -9,11 +9,10 @@
     "protocol": "http",
     "packageName": "sdkwork_web_app_sdk"
   },
-  "changeFingerprint": "98f2a93c61a099ef01e74097bec1b475b81eecd3c8bc0d7380664989e24cd8b4",
+  "changeFingerprint": "5ca49e585d105eb9468b401325b5464f5b9c213e54c72d0f4c4b53ecbbcf141f",
   "changes": {
     "createdGeneratedFiles": [],
     "updatedGeneratedFiles": [
-      "lib/src/api/source_version.dart",
       "lib/src/models.dart"
     ],
     "unchangedGeneratedFiles": [
@@ -33,6 +32,7 @@
       "lib/src/api/paths.dart",
       "lib/src/api/response_helpers.dart",
       "lib/src/api/site.dart",
+      "lib/src/api/source_version.dart",
       "lib/src/http/client.dart",
       "lib/src/http/sdk_config.dart",
       "LICENSE",
@@ -50,16 +50,9 @@
   "impact": {
     "schemaVersion": 1,
     "areas": [
-      "api-surface",
       "models"
     ],
     "details": [
-      {
-        "area": "api-surface",
-        "paths": [
-          "lib/src/api/source_version.dart"
-        ]
-      },
       {
         "area": "models",
         "paths": [
@@ -68,18 +61,18 @@
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, models. Verification is required."
+    "summary": "Detected impact areas: models. Verification is required."
   },
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-dart\\generated\\server-openapi",
         "command": "node",
         "args": [

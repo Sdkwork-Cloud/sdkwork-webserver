@@ -32,6 +32,7 @@ var query = new Dictionary<string, object>
     ["page"] = 1,
     ["page_size"] = 2,
     ["siteId"] = "00000000-0000-0000-0000-000000000001",
+    ["domainId"] = "00000000-0000-0000-0000-000000000001",
 };
 var result = await client.Certificate.CertificatesListAsync(query);
 Console.WriteLine(result);
@@ -59,10 +60,10 @@ client.SetHeader("X-Custom-Header", "value");
 
 - `client.Site` - site API
 - `client.Domain` - domain API
+- `client.Certificate` - certificate API
 - `client.SourceVersion` - source_version API
 - `client.Deployment` - deployment API
 - `client.EnvVariable` - env_variable API
-- `client.Certificate` - certificate API
 - `client.Monitor` - monitor API
 
 ## Usage Examples
@@ -95,6 +96,21 @@ var query = new Dictionary<string, object>
     ["page_size"] = 2,
 };
 var result = await client.Domain.SitesDomainsListAsync(siteId, query);
+Console.WriteLine(result);
+```
+
+### certificate
+
+```csharp
+// 获取证书列表
+var query = new Dictionary<string, object>
+{
+    ["page"] = 1,
+    ["page_size"] = 2,
+    ["siteId"] = "00000000-0000-0000-0000-000000000001",
+    ["domainId"] = "00000000-0000-0000-0000-000000000001",
+};
+var result = await client.Certificate.CertificatesListAsync(query);
 Console.WriteLine(result);
 ```
 
@@ -140,20 +156,6 @@ var result = await client.EnvVariable.SitesEnvVariablesListAsync(siteId, query);
 Console.WriteLine(result);
 ```
 
-### certificate
-
-```csharp
-// 获取证书列表
-var query = new Dictionary<string, object>
-{
-    ["page"] = 1,
-    ["page_size"] = 2,
-    ["siteId"] = "00000000-0000-0000-0000-000000000001",
-};
-var result = await client.Certificate.CertificatesListAsync(query);
-Console.WriteLine(result);
-```
-
 ### monitor
 
 ```csharp
@@ -173,6 +175,7 @@ try
         ["page"] = 1,
         ["page_size"] = 2,
         ["siteId"] = "00000000-0000-0000-0000-000000000001",
+        ["domainId"] = "00000000-0000-0000-0000-000000000001",
     };
     await client.Certificate.CertificatesListAsync(query);
 }

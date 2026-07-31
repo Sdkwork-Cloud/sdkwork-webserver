@@ -52,10 +52,10 @@ client.SetHeader("X-Custom-Header", "value");
 
 - `client.Application` - application API
 - `client.ApplicationDomain` - application_domain API
+- `client.Certificate` - certificate API
 - `client.Domain` - domain API
 - `client.ApplicationSourceVersion` - application_source_version API
 - `client.ApplicationDeployment` - application_deployment API
-- `client.Certificate` - certificate API
 - `client.CertificateDistribution` - certificate_distribution API
 - `client.Nginx` - nginx API
 - `client.Server` - server API
@@ -92,6 +92,20 @@ var query = new Dictionary<string, object>
     ["page_size"] = 2,
 };
 var result = await client.ApplicationDomain.ApplicationsDomainsListAsync(applicationId, query);
+Console.WriteLine(result);
+```
+
+### certificate
+
+```csharp
+// List canonical certificates
+var query = new Dictionary<string, object>
+{
+    ["page"] = 1,
+    ["page_size"] = 2,
+    ["domainId"] = "00000000-0000-0000-0000-000000000001",
+};
+var result = await client.Certificate.CertificatesListAsync(query);
 Console.WriteLine(result);
 ```
 
@@ -134,19 +148,6 @@ var query = new Dictionary<string, object>
     ["status"] = 3,
 };
 var result = await client.ApplicationDeployment.ApplicationsDeploymentsListAsync(applicationId, query);
-Console.WriteLine(result);
-```
-
-### certificate
-
-```csharp
-// List canonical certificates
-var query = new Dictionary<string, object>
-{
-    ["page"] = 1,
-    ["page_size"] = 2,
-};
-var result = await client.Certificate.CertificatesListAsync(query);
 Console.WriteLine(result);
 ```
 

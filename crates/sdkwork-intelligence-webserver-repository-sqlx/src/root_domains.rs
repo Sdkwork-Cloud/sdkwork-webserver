@@ -8,7 +8,8 @@ use sqlx::Row;
 
 use super::support::{
     bool_from_row, instant_from_row, instant_write_expression, new_uuid, next_id, now_rfc3339,
-    optional_instant_from_row, pagination, resolve_site_internal_id, store_error,
+    optional_instant_from_row, pagination, resolve_site_internal_id, resolve_site_owner_id,
+    store_error,
 };
 
 impl WebRepository {
@@ -43,23 +44,34 @@ impl WebRepository {
                     (SELECT COUNT(*) FROM web_domain d
                      WHERE d.tenant_id = r.tenant_id AND d.root_domain_id = r.id
                        AND d.deleted_at IS NULL) AS subdomain_count,
-                    (SELECT COUNT(*) FROM web_domain d
+                    (SELECT COUNT(DISTINCT d.id) FROM web_domain d
+                     INNER JOIN web_site_binding b ON b.tenant_id = d.tenant_id
+                         AND b.domain_id = d.id AND b.deleted_at IS NULL
+                         AND b.status <> 'ARCHIVED'
                      WHERE d.tenant_id = r.tenant_id AND d.root_domain_id = r.id
-                       AND d.site_id IS NOT NULL AND d.deleted_at IS NULL)
+                       AND d.deleted_at IS NULL)
                         AS bound_subdomain_count,
                     (SELECT COUNT(*) FROM web_domain d
                      WHERE d.tenant_id = r.tenant_id AND d.root_domain_id = r.id
-                       AND d.is_verified = TRUE AND d.deleted_at IS NULL)
+                       AND d.verification_status = 'VERIFIED' AND d.deleted_at IS NULL)
                         AS verified_subdomain_count,
-                    (SELECT COUNT(*) FROM web_domain d
+                    (SELECT COUNT(DISTINCT d.id) FROM web_domain d
+                     INNER JOIN web_site_binding b ON b.tenant_id = d.tenant_id
+                         AND b.domain_id = d.id AND b.deleted_at IS NULL
+                     INNER JOIN web_listener_certificate_binding l ON l.tenant_id = b.tenant_id
+                         AND l.site_binding_id = b.id AND l.status = 'ACTIVE'
+                         AND l.deleted_at IS NULL
                      WHERE d.tenant_id = r.tenant_id AND d.root_domain_id = r.id
-                       AND d.ssl_enabled = TRUE AND d.deleted_at IS NULL)
+                       AND d.deleted_at IS NULL)
                         AS https_subdomain_count,
-                    (SELECT COUNT(*) FROM web_domain d
+                    (SELECT COUNT(DISTINCT d.id) FROM web_domain d
+                     INNER JOIN web_site_binding b ON b.tenant_id = d.tenant_id
+                         AND b.domain_id = d.id AND b.status = 'ACTIVE'
+                         AND b.deleted_at IS NULL
                      WHERE d.tenant_id = r.tenant_id AND d.root_domain_id = r.id
                        AND d.deleted_at IS NULL
                        AND (SELECT dep.status FROM web_deployment dep
-                            WHERE dep.tenant_id = r.tenant_id AND dep.site_id = d.site_id
+                            WHERE dep.tenant_id = r.tenant_id AND dep.site_id = b.site_id
                             ORDER BY dep.created_at DESC, dep.id DESC LIMIT 1) = 2)
                         AS active_deployment_count,
                     CAST(r.created_at AS TEXT) AS created_at,
@@ -129,23 +141,34 @@ impl WebRepository {
                     (SELECT COUNT(*) FROM web_domain d
                      WHERE d.tenant_id = r.tenant_id AND d.root_domain_id = r.id
                        AND d.deleted_at IS NULL) AS subdomain_count,
-                    (SELECT COUNT(*) FROM web_domain d
+                    (SELECT COUNT(DISTINCT d.id) FROM web_domain d
+                     INNER JOIN web_site_binding b ON b.tenant_id = d.tenant_id
+                         AND b.domain_id = d.id AND b.deleted_at IS NULL
+                         AND b.status <> 'ARCHIVED'
                      WHERE d.tenant_id = r.tenant_id AND d.root_domain_id = r.id
-                       AND d.site_id IS NOT NULL AND d.deleted_at IS NULL)
+                       AND d.deleted_at IS NULL)
                         AS bound_subdomain_count,
                     (SELECT COUNT(*) FROM web_domain d
                      WHERE d.tenant_id = r.tenant_id AND d.root_domain_id = r.id
-                       AND d.is_verified = TRUE AND d.deleted_at IS NULL)
+                       AND d.verification_status = 'VERIFIED' AND d.deleted_at IS NULL)
                         AS verified_subdomain_count,
-                    (SELECT COUNT(*) FROM web_domain d
+                    (SELECT COUNT(DISTINCT d.id) FROM web_domain d
+                     INNER JOIN web_site_binding b ON b.tenant_id = d.tenant_id
+                         AND b.domain_id = d.id AND b.deleted_at IS NULL
+                     INNER JOIN web_listener_certificate_binding l ON l.tenant_id = b.tenant_id
+                         AND l.site_binding_id = b.id AND l.status = 'ACTIVE'
+                         AND l.deleted_at IS NULL
                      WHERE d.tenant_id = r.tenant_id AND d.root_domain_id = r.id
-                       AND d.ssl_enabled = TRUE AND d.deleted_at IS NULL)
+                       AND d.deleted_at IS NULL)
                         AS https_subdomain_count,
-                    (SELECT COUNT(*) FROM web_domain d
+                    (SELECT COUNT(DISTINCT d.id) FROM web_domain d
+                     INNER JOIN web_site_binding b ON b.tenant_id = d.tenant_id
+                         AND b.domain_id = d.id AND b.status = 'ACTIVE'
+                         AND b.deleted_at IS NULL
                      WHERE d.tenant_id = r.tenant_id AND d.root_domain_id = r.id
                        AND d.deleted_at IS NULL
                        AND (SELECT dep.status FROM web_deployment dep
-                            WHERE dep.tenant_id = r.tenant_id AND dep.site_id = d.site_id
+                            WHERE dep.tenant_id = r.tenant_id AND dep.site_id = b.site_id
                             ORDER BY dep.created_at DESC, dep.id DESC LIMIT 1) = 2)
                         AS active_deployment_count,
                     CAST(r.created_at AS TEXT) AS created_at,
@@ -300,9 +323,12 @@ impl WebRepository {
             }
             None => None,
         };
+        let owner_user_id = match site_internal_id {
+            Some(site_id) => resolve_site_owner_id(&self.pool, tenant_id, site_id).await?,
+            None => None,
+        };
         let id = next_id(self.id_generator())?;
         let uuid = new_uuid();
-        let verify_token = new_uuid();
         let now = now_rfc3339();
         let engine = self.database_engine().await?;
         let mut tx = self
@@ -314,9 +340,10 @@ impl WebRepository {
         if request.is_primary {
             let clear_time = instant_write_expression(engine, "$3");
             let clear_sql = format!(
-                "UPDATE web_domain SET is_primary = FALSE, updated_at = {clear_time},
+                "UPDATE web_site_binding SET is_primary = FALSE, updated_at = {clear_time},
                         version = version + 1
-                 WHERE tenant_id = $1 AND site_id = $2 AND deleted_at IS NULL"
+                 WHERE tenant_id = $1 AND site_id = $2 AND environment = 'production'
+                   AND deleted_at IS NULL"
             );
             sqlx::query(&clear_sql)
                 .bind(tenant_id)
@@ -327,14 +354,14 @@ impl WebRepository {
                 .map_err(|error| store_error("clear primary domain for root hostname", error))?;
         }
 
-        let insert_time = instant_write_expression(engine, "$12");
+        let insert_time = instant_write_expression(engine, "$9");
         let insert_sql = format!(
             "INSERT INTO web_domain (
-                id, uuid, tenant_id, root_domain_id, site_id, hostname, is_primary,
-                is_verified, verify_token, ssl_enabled, ssl_provider, status, metadata,
+                id, uuid, tenant_id, user_id, root_domain_id, hostname, hostname_type,
+                verification_status, status, metadata,
                 created_at, updated_at, version
              ) VALUES (
-                $1, $2, $3, $4, $5, $6, $7, FALSE, $8, $9, $10, $11, '{{}}',
+                $1, $2, $3, $4, $5, $6, $7, 'PENDING', $8, '{{}}',
                 {insert_time}, {insert_time}, 0
              )"
         );
@@ -342,18 +369,68 @@ impl WebRepository {
             .bind(id)
             .bind(&uuid)
             .bind(tenant_id)
+            .bind(owner_user_id)
             .bind(root_internal_id)
-            .bind(site_internal_id)
             .bind(&hostname)
-            .bind(request.is_primary)
-            .bind(&verify_token)
-            .bind(request.ssl_enabled)
-            .bind(request.ssl_provider.as_deref())
+            .bind(if hostname.starts_with("*.") { "WILDCARD" } else { "EXACT" })
             .bind(0_i32)
             .bind(&now)
             .execute(&mut *tx)
             .await
             .map_err(|error| store_error("insert root domain hostname", error))?;
+
+        if let Some(site_internal_id) = site_internal_id {
+            let binding_id = next_id(self.id_generator())?;
+            let binding_uuid = new_uuid();
+            let binding_time = instant_write_expression(engine, "$7");
+            let binding_sql = format!(
+                "INSERT INTO web_site_binding (
+                    id, uuid, tenant_id, site_id, domain_id, environment, path_prefix,
+                    action_type, is_primary, status, created_at, updated_at, version
+                 ) VALUES (
+                    $1, $2, $3, $4, $5, 'production', '/', 'SERVE', $6, 'PENDING',
+                    {binding_time}, {binding_time}, 0
+                 )"
+            );
+            sqlx::query(&binding_sql)
+                .bind(binding_id)
+                .bind(binding_uuid)
+                .bind(tenant_id)
+                .bind(site_internal_id)
+                .bind(id)
+                .bind(request.is_primary)
+                .bind(&now)
+                .execute(&mut *tx)
+                .await
+                .map_err(|error| store_error("insert root hostname application binding", error))?;
+
+            if request.ssl_enabled {
+                let policy_id = next_id(self.id_generator())?;
+                let policy_uuid = new_uuid();
+                let policy_time = instant_write_expression(engine, "$6");
+                let policy_sql = format!(
+                    "INSERT INTO web_tls_policy (
+                        id, uuid, tenant_id, site_binding_id, certificate_source,
+                        created_at, updated_at, version
+                     ) VALUES ($1, $2, $3, $4, $5, {policy_time}, {policy_time}, 0)"
+                );
+                let source = match request.ssl_provider.as_deref() {
+                    Some("custom") => "CUSTOM",
+                    Some("none") => "EXTERNAL",
+                    _ => "MANAGED",
+                };
+                sqlx::query(&policy_sql)
+                    .bind(policy_id)
+                    .bind(policy_uuid)
+                    .bind(tenant_id)
+                    .bind(binding_id)
+                    .bind(source)
+                    .bind(&now)
+                    .execute(&mut *tx)
+                    .await
+                    .map_err(|error| store_error("insert root hostname TLS policy", error))?;
+            }
+        }
         tx.commit()
             .await
             .map_err(|error| store_error("commit root domain hostname", error))?;
@@ -406,9 +483,19 @@ fn root_domain_hostname_select(predicate: &str) -> String {
     format!(
         "SELECT d.uuid, d.hostname, r.uuid AS root_domain_id, r.hostname AS root_hostname,
                 s.uuid AS application_id, s.name AS application_name,
-                (SELECT COUNT(*) FROM web_certificate c WHERE c.domain_id = d.id)
+                (SELECT COUNT(*) FROM web_certificate_identifier ci
+                 WHERE ci.tenant_id = d.tenant_id AND ci.domain_id = d.id)
                     AS certificate_count,
-                d.is_primary, d.is_verified, d.ssl_enabled, d.ssl_provider, d.status,
+                COALESCE(b.is_primary, FALSE) AS is_primary,
+                (d.verification_status = 'VERIFIED') AS is_verified,
+                (p.id IS NOT NULL) AS ssl_enabled,
+                CASE p.certificate_source
+                    WHEN 'MANAGED' THEN 'letsencrypt'
+                    WHEN 'CUSTOM' THEN 'custom'
+                    WHEN 'EXTERNAL' THEN 'none'
+                    ELSE NULL
+                END AS ssl_provider,
+                d.status,
                 latest.uuid AS latest_deployment_id,
                 latest.status AS latest_deployment_status,
                 latest.environment AS latest_deployment_environment,
@@ -419,10 +506,20 @@ fn root_domain_hostname_select(predicate: &str) -> String {
                 CAST(d.updated_at AS TEXT) AS updated_at
          FROM web_domain d
          INNER JOIN web_root_domain r ON r.id = d.root_domain_id
-         LEFT JOIN web_site s ON s.id = d.site_id
+         LEFT JOIN LATERAL (
+             SELECT candidate.* FROM web_site_binding candidate
+             WHERE candidate.tenant_id = d.tenant_id AND candidate.domain_id = d.id
+               AND candidate.environment = 'production' AND candidate.deleted_at IS NULL
+               AND candidate.status <> 'ARCHIVED'
+             ORDER BY (candidate.status = 'ACTIVE') DESC, candidate.updated_at DESC, candidate.id DESC
+             LIMIT 1
+         ) b ON TRUE
+         LEFT JOIN web_site s ON s.id = b.site_id
+         LEFT JOIN web_tls_policy p ON p.tenant_id = b.tenant_id
+             AND p.site_binding_id = b.id AND p.status = 'ACTIVE' AND p.deleted_at IS NULL
          LEFT JOIN web_deployment latest ON latest.id = (
              SELECT dep.id FROM web_deployment dep
-             WHERE dep.tenant_id = d.tenant_id AND dep.site_id = d.site_id
+             WHERE dep.tenant_id = d.tenant_id AND dep.site_id = b.site_id
              ORDER BY dep.created_at DESC, dep.id DESC LIMIT 1
          )
          WHERE {predicate}"

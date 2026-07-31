@@ -6,9 +6,9 @@ use axum::{
 };
 use sdkwork_webserver_contract::{
     CreateCertificateRequest, CreateDeploymentRequest, CreateDomainRequest,
-    CreateEnvVariableRequest, CreateHealthCheckRequest, CreateSiteRequest,
-    CreateSourceVersionRequest, ImportGitSourceVersionRequest, ListSitesQuery, UpdateSiteRequest,
-    WebAppApi, WebAppRequestContext,
+    CreateEnvVariableRequest, CreateHealthCheckRequest, CreateListenerCertificateBindingRequest,
+    CreateSiteRequest, CreateSourceVersionRequest, ImportGitSourceVersionRequest, ListSitesQuery,
+    UpdateSiteRequest, WebAppApi, WebAppRequestContext,
 };
 use serde::Deserialize;
 use std::sync::Arc;
@@ -16,8 +16,8 @@ use std::sync::Arc;
 use crate::{auth::require_app_context, paths};
 use sdkwork_routes_webserver_common::{
     created_resource, no_content, ok_certificate_page, ok_deployment_page, ok_domain_page,
-    ok_env_variable_page, ok_health_check_page, ok_resource, ok_site_page,
-    ok_source_version_page, WebApiError,
+    ok_env_variable_page, ok_health_check_page, ok_listener_certificate_binding_page, ok_resource,
+    ok_site_page, ok_source_version_page, WebApiError,
 };
 
 #[derive(Clone)]
@@ -47,6 +47,14 @@ pub fn build_router_with_shared_app_api(api: Arc<dyn WebAppApi>) -> Router {
             get(retrieve_domain).delete(delete_domain),
         )
         .route(paths::SITE_DOMAIN_VERIFY, post(verify_domain))
+        .route(
+            paths::SITE_DOMAIN_LISTENER_CERTIFICATE_BINDINGS,
+            get(list_listener_certificate_bindings).post(bind_listener_certificate),
+        )
+        .route(
+            paths::SITE_DOMAIN_LISTENER_CERTIFICATE_BINDING,
+            axum::routing::delete(unbind_listener_certificate),
+        )
         .route(
             paths::SITE_SOURCE_VERSIONS,
             get(list_source_versions).post(create_source_version),
@@ -93,6 +101,8 @@ struct CertificatePageQuery {
     page_size: i32,
     #[serde(rename = "siteId", alias = "site_id")]
     site_id: Option<String>,
+    #[serde(rename = "domainId", alias = "domain_id")]
+    domain_id: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -415,6 +425,7 @@ async fn list_certificates(
             .list_certificates(
                 &context,
                 query.site_id.as_deref(),
+                query.domain_id.as_deref(),
                 query.page,
                 query.page_size,
             )
@@ -431,6 +442,58 @@ async fn create_certificate(
 ) -> Result<Response, WebApiError> {
     let context = require_app_context(context)?;
     created_resource(state.api.create_certificate(&context, &request).await)
+}
+
+async fn list_listener_certificate_bindings(
+    State(state): State<AppState>,
+    context: Option<Extension<WebAppRequestContext>>,
+    Path((site_id, domain_id)): Path<(String, String)>,
+    Query(query): Query<PageQuery>,
+) -> Result<Response, WebApiError> {
+    let context = require_app_context(context)?;
+    ok_listener_certificate_binding_page(
+        state
+            .api
+            .list_listener_certificate_bindings(
+                &context,
+                &site_id,
+                &domain_id,
+                query.page,
+                query.page_size,
+            )
+            .await,
+        query.page,
+        query.page_size,
+    )
+}
+
+async fn bind_listener_certificate(
+    State(state): State<AppState>,
+    context: Option<Extension<WebAppRequestContext>>,
+    Path((site_id, domain_id)): Path<(String, String)>,
+    Json(request): Json<CreateListenerCertificateBindingRequest>,
+) -> Result<Response, WebApiError> {
+    let context = require_app_context(context)?;
+    created_resource(
+        state
+            .api
+            .bind_listener_certificate(&context, &site_id, &domain_id, &request)
+            .await,
+    )
+}
+
+async fn unbind_listener_certificate(
+    State(state): State<AppState>,
+    context: Option<Extension<WebAppRequestContext>>,
+    Path((site_id, domain_id, binding_id)): Path<(String, String, String)>,
+) -> Result<Response, WebApiError> {
+    let context = require_app_context(context)?;
+    no_content(
+        state
+            .api
+            .unbind_listener_certificate(&context, &site_id, &domain_id, &binding_id)
+            .await,
+    )
 }
 
 async fn list_health_checks(

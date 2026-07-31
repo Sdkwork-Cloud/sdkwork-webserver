@@ -4,10 +4,10 @@ import type { AuthTokenManager } from '@sdkwork/sdk-common';
 
 import { SiteApi, createSiteApi } from './api/site';
 import { DomainApi, createDomainApi } from './api/domain';
+import { CertificateApi, createCertificateApi } from './api/certificate';
 import { SourceVersionApi, createSourceVersionApi } from './api/source-version';
 import { DeploymentApi, createDeploymentApi } from './api/deployment';
 import { EnvVariableApi, createEnvVariableApi } from './api/env-variable';
-import { CertificateApi, createCertificateApi } from './api/certificate';
 import { MonitorApi, createMonitorApi } from './api/monitor';
 
 export class SdkworkAppClient {
@@ -15,10 +15,10 @@ export class SdkworkAppClient {
 
   public readonly site: SiteApi;
   public readonly domain: DomainApi;
+  public readonly certificate: CertificateApi;
   public readonly sourceVersion: SourceVersionApi;
   public readonly deployment: DeploymentApi;
   public readonly envVariable: EnvVariableApi;
-  public readonly certificate: CertificateApi;
   public readonly monitor: MonitorApi;
 
   constructor(config: SdkworkAppConfig) {
@@ -27,13 +27,13 @@ export class SdkworkAppClient {
 
     this.domain = createDomainApi(this.httpClient);
 
+    this.certificate = createCertificateApi(this.httpClient);
+
     this.sourceVersion = createSourceVersionApi(this.httpClient);
 
     this.deployment = createDeploymentApi(this.httpClient);
 
     this.envVariable = createEnvVariableApi(this.httpClient);
-
-    this.certificate = createCertificateApi(this.httpClient);
 
     this.monitor = createMonitorApi(this.httpClient);
   }

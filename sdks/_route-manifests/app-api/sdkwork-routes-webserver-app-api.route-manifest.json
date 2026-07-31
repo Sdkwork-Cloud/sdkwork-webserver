@@ -329,6 +329,84 @@
     },
     {
       "method": "GET",
+      "path": "/app/v3/api/sites/{siteId}/domains/{domainId}/listener_certificate_bindings",
+      "operationId": "sites.domains.listenerCertificateBindings.list",
+      "tags": [
+        "certificate"
+      ],
+      "auth": {
+        "mode": "dual-token",
+        "required": true
+      },
+      "routeAuth": "dual-token",
+      "handler": {
+        "module": "crate::routes",
+        "name": null
+      },
+      "ownership": {
+        "owner": "sdkwork-web",
+        "apiAuthority": "sdkwork-web.app"
+      },
+      "requestContext": "WebRequestContext",
+      "apiSurface": "app-api",
+      "permission": "web.certificates.read",
+      "idempotent": false,
+      "rateLimitTier": null
+    },
+    {
+      "method": "POST",
+      "path": "/app/v3/api/sites/{siteId}/domains/{domainId}/listener_certificate_bindings",
+      "operationId": "sites.domains.listenerCertificateBindings.create",
+      "tags": [
+        "certificate"
+      ],
+      "auth": {
+        "mode": "dual-token",
+        "required": true
+      },
+      "routeAuth": "dual-token",
+      "handler": {
+        "module": "crate::routes",
+        "name": null
+      },
+      "ownership": {
+        "owner": "sdkwork-web",
+        "apiAuthority": "sdkwork-web.app"
+      },
+      "requestContext": "WebRequestContext",
+      "apiSurface": "app-api",
+      "permission": "web.certificates.write",
+      "idempotent": true,
+      "rateLimitTier": "auth-critical"
+    },
+    {
+      "method": "DELETE",
+      "path": "/app/v3/api/sites/{siteId}/domains/{domainId}/listener_certificate_bindings/{bindingId}",
+      "operationId": "sites.domains.listenerCertificateBindings.delete",
+      "tags": [
+        "certificate"
+      ],
+      "auth": {
+        "mode": "dual-token",
+        "required": true
+      },
+      "routeAuth": "dual-token",
+      "handler": {
+        "module": "crate::routes",
+        "name": null
+      },
+      "ownership": {
+        "owner": "sdkwork-web",
+        "apiAuthority": "sdkwork-web.app"
+      },
+      "requestContext": "WebRequestContext",
+      "apiSurface": "app-api",
+      "permission": "web.certificates.write",
+      "idempotent": true,
+      "rateLimitTier": "auth-critical"
+    },
+    {
+      "method": "GET",
       "path": "/app/v3/api/sites/{siteId}/source_versions",
       "operationId": "sites.sourceVersions.list",
       "tags": [

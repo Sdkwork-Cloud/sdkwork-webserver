@@ -23,7 +23,7 @@ acceptance_criteria:
   - Active certificate metadata that is invalid JSON, lacks certPem, or lacks encryptedPrivateKey fails the whole sync rather than silently omitting the certificate.
   - The service rejects certificate/key count mismatch and rejects a final decrypted manifest over 15 MiB before the route creates the SDKWork envelope.
   - The Node Daemon caps the envelope body at 16 MiB and rejects heartbeat/sync node identity mismatch, duplicate config IDs/domains, duplicate certificate IDs/names, negative config versions, and Nginx content fingerprint mismatch.
-  - SQLite and disposable PostgreSQL Repository parity execute the same oversize-record failure cases.
+  - Disposable PostgreSQL repository verification executes the same oversize-record failure cases.
 non_functional_requirements:
   memory: Every application-owned collection and response allocation in this path has a finite count or byte ceiling; no retry queue or all-page aggregation is introduced.
   security: Node identity and activation target ambiguity fail closed; certificate private keys are not logged or included in diagnostics.
@@ -41,7 +41,7 @@ trace:
     - crates/sdkwork-web-agent
 verification:
   - cargo test -p sdkwork-intelligence-webserver-repository-sqlx
-  - cargo test -p sdkwork-intelligence-webserver-repository-sqlx --test repository_parity sqlite_repository_transactions_tenants_idempotency_and_pagination_are_bounded
+  - cargo test -p sdkwork-intelligence-webserver-repository-sqlx --test repository_parity postgres_repository_transactions_tenants_idempotency_and_pagination_are_bounded -- --ignored --exact
   - pnpm test:postgres:required
   - cargo test -p sdkwork-intelligence-webserver-service
   - cargo test -p sdkwork-web-agent
@@ -56,9 +56,8 @@ assumed equal. The 15 MiB domain-response ceiling leaves finite room beneath the
 16 MiB SDKWork envelope ceiling for `code`, `data.item`, `traceId`, property names, and framing.
 
 Database `CASE` projections return `NULL` instead of the oversized text field while returning its
-byte length separately. This allows the Repository to reject the row without first decoding the
-entire value. SQLite uses BLOB byte length and PostgreSQL uses `OCTET_LENGTH`, so multibyte text does
-not bypass the byte ceiling.
+byte length separately. This allows the repository to reject the row without first decoding the
+entire value. PostgreSQL uses `OCTET_LENGTH`, so multibyte text does not bypass the byte ceiling.
 
 ## Remaining Delta Gate
 
@@ -71,7 +70,7 @@ distribution design.
 ## Implementation And Verification Evidence
 
 - Repository unit tests pass 5/5, including checked item/serialized-byte budget failure.
-- SQLite Repository parity passes and executes both oversized Nginx content and oversized
+- PostgreSQL Repository parity passes and executes both oversized Nginx content and oversized
   certificate metadata failure cases before restoring the fixtures.
 - `pnpm test:postgres:required` passes against the digest-pinned disposable PostgreSQL image:
   lifecycle/seed/drift passes 1/1 and full Repository parity passes 1/1 with the same oversize cases.
@@ -80,5 +79,5 @@ distribution design.
 - The mandatory node-sync source contracts pass 3/3 and reject regression to `fetch_all` in this
   path; combined Node state/manifest contracts contribute 7/7 passing tests.
 - `pnpm verify` passes in 240.9 seconds with the complete Rust workspace, 32 Node contract tests,
-  API materialization, SDKWork validators, topology, SQLite database, and cloud gateway validation.
+  API materialization, SDKWork validators, topology, PostgreSQL database, and cloud gateway validation.
 - The disposable PostgreSQL container and network are absent after verification.

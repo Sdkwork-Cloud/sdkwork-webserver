@@ -1,3 +1,5 @@
+import type { AgentCertificateObservation } from './agent-certificate-observation';
+
 export interface AgentHeartbeatRequest {
   agentVersion?: string;
   nginxEnabled?: boolean;
@@ -5,4 +7,5 @@ export interface AgentHeartbeatRequest {
   activeConfigs?: string;
   /** Last successfully applied syncVersion reported by the edge agent. */
   lastSyncVersion?: string;
+  certificateObservations?: AgentCertificateObservation[];
 }

@@ -5,6 +5,14 @@ canon:
   prd: docs/product/prd/PRD.md
   techArchitecture: docs/architecture/tech/TECH_ARCHITECTURE.md
 entries:
+  - id: ADR-20260731-web-deploy-domain-certificate-authority
+    path: docs/architecture/decisions/ADR-20260731-web-deploy-domain-certificate-authority.md
+    kind: adr
+    status: proposed
+  - id: REVIEW-20260731-domain-certificate-deployment-data-model
+    path: docs/engineering/reviews/REVIEW-20260731-domain-certificate-deployment-data-model.md
+    kind: review
+    status: changes-requested
   - id: ADR-20260730-detached-domain-assets-and-certificate-bindings
     path: docs/architecture/decisions/ADR-20260730-detached-domain-assets-and-certificate-bindings.md
     kind: adr

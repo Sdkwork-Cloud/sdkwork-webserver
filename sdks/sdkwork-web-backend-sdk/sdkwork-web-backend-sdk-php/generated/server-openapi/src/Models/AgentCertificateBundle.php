@@ -12,6 +12,8 @@ final class AgentCertificateBundle
 
     public ?string $fingerprint = null;
 
+    public array $hostnames = [];
+
     public ?string $fullchainPem = null;
 
     public ?string $privkeyPem = null;
@@ -27,6 +29,11 @@ final class AgentCertificateBundle
         $this->fingerprint = array_key_exists('fingerprint', $data)
             ? $data['fingerprint']
             : null;
+        $this->hostnames = array_key_exists('hostnames', $data)
+            ? is_array($data['hostnames'])
+                ? array_values(array_map(static fn($item) => $item, $data['hostnames']))
+                : []
+            : [];
         $this->fullchainPem = array_key_exists('fullchainPem', $data)
             ? $data['fullchainPem']
             : null;
@@ -46,6 +53,7 @@ final class AgentCertificateBundle
             'certificateId' => $this->certificateId,
             'certName' => $this->certName,
             'fingerprint' => $this->fingerprint,
+            'hostnames' => array_values(array_map(static fn($item) => $item, $this->hostnames)),
             'fullchainPem' => $this->fullchainPem,
             'privkeyPem' => $this->privkeyPem,
         ];

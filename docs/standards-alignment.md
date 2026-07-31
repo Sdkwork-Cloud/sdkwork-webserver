@@ -2,7 +2,7 @@
 
 Application: `sdkwork-web-server`
 
-Updated: 2026-07-21
+Updated: 2026-07-31
 
 This document records current implementation and evidence. It does not declare production release
 approval. Normative requirements are owned by `../sdkwork-specs`.
@@ -12,7 +12,7 @@ approval. Normative requirements are owned by `../sdkwork-specs`.
 | Capability | Current state | Evidence |
 | --- | --- | --- |
 | `sdkwork-web-framework` | Integrated | App/backend route manifests, `WebRequestContext`, IAM resolver, framework `service_router`, health/readiness/metrics |
-| `sdkwork-database` | Integrated | Database manifest and baselines, lifecycle host, one process-shared typed PostgreSQL/SQLite pool, repository parity tests |
+| `sdkwork-database` | Integrated | PostgreSQL-only authoritative manifest/baseline, lifecycle host, one process-shared typed pool, repository parity and recovery tests |
 | `sdkwork-utils-rust` | Integrated | API envelopes, pagination, crypto, SHA-256, validation, serde helpers, platform helpers |
 | `sdkwork-id-core` | Integrated through database ID support | Snowflake internal IDs and UUID resource identities |
 | Backend SDK | Integrated | Generated TypeScript/Rust family, AgentToken auth, bounded response reads, Node Daemon consumption without handwritten HTTP |
@@ -26,9 +26,8 @@ approval. Normative requirements are owned by `../sdkwork-specs`.
 - App and backend operations use the SDKWork v3 success envelopes and Problem Details error shape.
 - The standalone gateway composes framework management routes with the bounded HTTP/HTTPS data
   plane. Management routes call services through ports; SQLx stays in repository modules.
-- Database bootstrap returns one SDKWork lifecycle-owned typed pool. PostgreSQL and SQLite compile
-  the same repository implementation; production source contains no `AnyPool` bridge or second
-  pool.
+- Database bootstrap returns one SDKWork lifecycle-owned PostgreSQL pool; production source
+  contains no alternative-engine repository, `AnyPool` bridge, or second pool.
 - Agent sync byte-count projections use engine-specific SQL and cast PostgreSQL `OCTET_LENGTH`
   results to `BIGINT`, matching the shared Rust `i64` repository contract.
 - The Web Node Daemon uses the application-root generated Rust backend SDK for heartbeat and sync,
@@ -83,8 +82,8 @@ node ..\sdkwork-github-workflow\scripts\sdkwork-workflow.mjs validate --config s
 ```
 
 On 2026-07-21, a local Docker 28.0.4 Linux daemon completed the pinned PostgreSQL lifecycle/seed/drift
-test, PostgreSQL repository parity test, transactionally consistent SQLite recovery test,
-checksummed PostgreSQL custom-format backup/restore, streaming replication, primary shutdown,
+test, PostgreSQL repository parity test, checksummed PostgreSQL custom-format backup/restore,
+streaming replication, primary shutdown,
 standby promotion, and post-promotion tenant write. Linux x64/arm64 archive smoke, registry
 publication, image signing, Kubernetes rollout, and production observability still require their
 declared Linux runners, credentials, infrastructure, and release approval.

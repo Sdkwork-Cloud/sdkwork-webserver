@@ -9,6 +9,10 @@ pub const APPLICATION_DOMAIN: &str =
     "/backend/v3/api/applications/{applicationId}/domains/{domainId}";
 pub const APPLICATION_DOMAIN_VERIFY: &str =
     "/backend/v3/api/applications/{applicationId}/domains/{domainId}/verify";
+pub const APPLICATION_DOMAIN_LISTENER_CERTIFICATE_BINDINGS: &str =
+    "/backend/v3/api/applications/{applicationId}/domains/{domainId}/listener_certificate_bindings";
+pub const APPLICATION_DOMAIN_LISTENER_CERTIFICATE_BINDING: &str =
+    "/backend/v3/api/applications/{applicationId}/domains/{domainId}/listener_certificate_bindings/{bindingId}";
 pub const ROOT_DOMAINS: &str = "/backend/v3/api/root_domains";
 pub const ROOT_DOMAIN: &str = "/backend/v3/api/root_domains/{rootDomainId}";
 pub const ROOT_DOMAIN_SUBDOMAINS: &str = "/backend/v3/api/root_domains/{rootDomainId}/subdomains";

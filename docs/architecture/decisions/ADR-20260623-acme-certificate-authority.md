@@ -30,7 +30,7 @@ SDKWork Web Server 需要在控制面内嵌 **免费 TLS 证书自动签发与�
 
 - `sdkwork-webserver-acme-service`：ACME 账户、订单、续期、撤销编排。
 - `sdkwork-webserver-certificate-worker`：后台续期与到期扫描 job（已实现）。
-- 私钥：控制面 DB 加密字段 + 环境密钥（`SDKWORK_WEB_CERT_ENCRYPTION_KEY`）；生产 KMS 为后续增强，不阻塞 V1。
+- 私钥：证书签发后写入受限证书根目录，PostgreSQL 的不可变证书版本只保存 `secret_bundle_ref` 与可公开验证的 X.509 元数据。解析器拒绝目录逃逸、符号链接、超限内容及非法 PEM；私钥不得进入数据库、API、日志或审计载荷。外部 Secret Manager/KMS 通过相同解析边界扩展。
 
 ## Alternatives
 

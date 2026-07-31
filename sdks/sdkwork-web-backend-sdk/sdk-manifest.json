@@ -189,5 +189,7 @@
     }
   ],
   "sdkSurface": "backend",
-  "sdkType": "backend"
+  "sdkType": "backend",
+  "ownerOnlyOperationCount": 51,
+  "standardProfile": "sdkwork-v3"
 }

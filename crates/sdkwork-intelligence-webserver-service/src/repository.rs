@@ -7,17 +7,17 @@ use sdkwork_webserver_contract::{
     CertificateDistributionPage, CertificateIssueUpdate, CertificatePage,
     CertificateRenewalCandidate, CertificateResponse, CreateCertificateRequest,
     CreateDeploymentRequest, CreateDomainRequest, CreateEnvVariableRequest,
-    CreateHealthCheckRequest, CreateManagedDomainRequest, CreateNginxConfigRequest,
-    CreateRootDomainHostnameRequest, CreateRootDomainRequest, CreateServerRequest,
-    CreateServerResponse, CreateSiteRequest, CreateSourceVersionRequest, DeploymentPage,
-    DeploymentResponse, DomainPage, DomainResponse, DomainVerifyResponse, EnvVariablePage,
-    EnvVariableResponse, HealthCheckPage, HealthCheckResponse, ListNginxConfigsQuery,
-    ListRootDomainsQuery, ListSitesQuery, NginxConfigPage, NginxConfigResponse,
-    NginxReloadResponse, NginxStatusResponse, NginxValidateResponse, RootDomainPage,
-    RootDomainResponse, RuntimeAssignment, RuntimeAssignmentDelivery, RuntimeObservation,
-    RuntimeObservationState, ServerPage, SitePage, SiteResponse, SourceVersionPage,
-    SourceVersionResponse, UpdateDomainApplicationBindingRequest, UpdateNginxConfigRequest,
-    UpdateSiteRequest,
+    CreateHealthCheckRequest, CreateListenerCertificateBindingRequest, CreateManagedDomainRequest,
+    CreateNginxConfigRequest, CreateRootDomainHostnameRequest, CreateRootDomainRequest,
+    CreateServerRequest, CreateServerResponse, CreateSiteRequest, CreateSourceVersionRequest,
+    DeploymentPage, DeploymentResponse, DomainPage, DomainResponse, DomainVerifyResponse,
+    EnvVariablePage, EnvVariableResponse, HealthCheckPage, HealthCheckResponse,
+    ListNginxConfigsQuery, ListRootDomainsQuery, ListSitesQuery, ListenerCertificateBindingPage,
+    ListenerCertificateBindingResponse, NginxConfigPage, NginxConfigResponse, NginxReloadResponse,
+    NginxStatusResponse, NginxValidateResponse, RootDomainPage, RootDomainResponse,
+    RuntimeAssignment, RuntimeAssignmentDelivery, RuntimeObservation, RuntimeObservationState,
+    ServerPage, SitePage, SiteResponse, SourceVersionPage, SourceVersionResponse,
+    UpdateDomainApplicationBindingRequest, UpdateNginxConfigRequest, UpdateSiteRequest,
 };
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -313,6 +313,7 @@ pub trait WebRepositoryPort: Send + Sync {
         tenant_id: i64,
         owner_id: Option<i64>,
         site_id: Option<&str>,
+        domain_id: Option<&str>,
         page: i32,
         page_size: i32,
     ) -> WebServiceResult<CertificatePage>;
@@ -324,14 +325,40 @@ pub trait WebRepositoryPort: Send + Sync {
         request: &CreateCertificateRequest,
     ) -> WebServiceResult<CertificateResponse>;
 
+    async fn list_listener_certificate_bindings(
+        &self,
+        tenant_id: i64,
+        site_id: &str,
+        domain_id: &str,
+        page: i32,
+        page_size: i32,
+    ) -> WebServiceResult<ListenerCertificateBindingPage>;
+
+    async fn bind_listener_certificate(
+        &self,
+        tenant_id: i64,
+        site_id: &str,
+        domain_id: &str,
+        request: &CreateListenerCertificateBindingRequest,
+    ) -> WebServiceResult<ListenerCertificateBindingResponse>;
+
+    async fn unbind_listener_certificate(
+        &self,
+        tenant_id: i64,
+        site_id: &str,
+        domain_id: &str,
+        binding_id: &str,
+    ) -> WebServiceResult<()>;
+
     async fn insert_certificate_pending(
         &self,
         tenant_id: i64,
         owner_id: Option<i64>,
-        domain_id: &str,
+        domain_ids: &[String],
         cert_type: i32,
+        key_algorithm: &str,
         auto_renew: bool,
-    ) -> WebServiceResult<(String, String)>;
+    ) -> WebServiceResult<(String, Vec<String>)>;
 
     async fn finalize_certificate(
         &self,
@@ -519,7 +546,7 @@ pub trait WebRepositoryPort: Send + Sync {
         server_id: &str,
         tenant_id: i64,
         if_sync_version: Option<&str>,
-    ) -> WebServiceResult<(AgentSyncResponse, Vec<String>)>;
+    ) -> WebServiceResult<AgentSyncResponse>;
 
     async fn list_audit_logs(
         &self,

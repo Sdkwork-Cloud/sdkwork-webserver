@@ -26,6 +26,7 @@ final params = <String, dynamic>{
   'page': 1,
   'page_size': 2,
   'siteId': '00000000-0000-0000-0000-000000000001',
+  'domainId': '00000000-0000-0000-0000-000000000001',
 };
 final result = await client.certificate.certificatesList(params);
 print(result);
@@ -50,10 +51,10 @@ client.setHeader('X-Custom-Header', 'value');
 
 - `client.site` - site API
 - `client.domain` - domain API
+- `client.certificate` - certificate API
 - `client.sourceVersion` - source_version API
 - `client.deployment` - deployment API
 - `client.envVariable` - env_variable API
-- `client.certificate` - certificate API
 - `client.monitor` - monitor API
 
 ## Usage Examples
@@ -84,6 +85,20 @@ final params = <String, dynamic>{
   'page_size': 2,
 };
 final result = await client.domain.sitesDomainsList(siteId, params);
+print(result);
+```
+
+### certificate
+
+```dart
+// 获取证书列表
+final params = <String, dynamic>{
+  'page': 1,
+  'page_size': 2,
+  'siteId': '00000000-0000-0000-0000-000000000001',
+  'domainId': '00000000-0000-0000-0000-000000000001',
+};
+final result = await client.certificate.certificatesList(params);
 print(result);
 ```
 
@@ -126,19 +141,6 @@ final result = await client.envVariable.sitesEnvVariablesList(siteId, params);
 print(result);
 ```
 
-### certificate
-
-```dart
-// 获取证书列表
-final params = <String, dynamic>{
-  'page': 1,
-  'page_size': 2,
-  'siteId': '00000000-0000-0000-0000-000000000001',
-};
-final result = await client.certificate.certificatesList(params);
-print(result);
-```
-
 ### monitor
 
 ```dart
@@ -156,6 +158,7 @@ try {
     'page': 1,
     'page_size': 2,
     'siteId': '00000000-0000-0000-0000-000000000001',
+    'domainId': '00000000-0000-0000-0000-000000000001',
   };
   final result = await client.certificate.certificatesList(params);
   print(result);

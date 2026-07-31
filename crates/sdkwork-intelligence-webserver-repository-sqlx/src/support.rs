@@ -140,6 +140,23 @@ pub(crate) async fn resolve_site_internal_id(
         .map_err(|error| store_error("map web_site id", error))
 }
 
+pub(crate) async fn resolve_site_owner_id(
+    pool: &EnginePool,
+    tenant_id: i64,
+    site_id: i64,
+) -> Result<Option<i64>, WebServiceError> {
+    sqlx::query_scalar(
+        "SELECT user_id FROM web_site
+         WHERE tenant_id = $1 AND id = $2 AND deleted_at IS NULL",
+    )
+    .bind(tenant_id)
+    .bind(site_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|error| store_error("resolve web_site owner", error))?
+    .ok_or_else(|| WebServiceError::not_found("site not found"))
+}
+
 #[cfg(test)]
 mod tests {
     use super::{normalize_database_instant, pagination};

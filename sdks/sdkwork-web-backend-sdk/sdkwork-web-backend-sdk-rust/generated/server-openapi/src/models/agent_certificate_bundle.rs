@@ -10,6 +10,8 @@ pub struct AgentCertificateBundle {
 
     pub fingerprint: String,
 
+    pub hostnames: Vec<String>,
+
     #[serde(rename = "fullchainPem")]
     pub fullchain_pem: String,
 

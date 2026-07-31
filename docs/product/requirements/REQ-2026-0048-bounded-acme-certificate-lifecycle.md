@@ -69,11 +69,11 @@ verification:
   - pnpm.cmd verify
 ```
 
-## Compatibility Boundary
+## Runtime Configuration Boundary
 
-The public `AcmeConfig::from_env` and `CertificateIssuer::from_env` Rust entrypoints remain available for compatibility, but the application bootstrap no longer uses them. New callers should construct `AcmeConfig` from typed runtime values and inject it through `CertificateIssuer::new` or `CertificateIssuer::new_with_operation_timeout_ms`. Invalid values that were previously defaulted or accepted now fail before provider or filesystem work because accepting an unsafe secret, path, timeout, or provider identity is not a valid compatibility behavior.
+The ACME crate accepts typed `AcmeConfig` values only. The application runtime bootstrap owns environment parsing and injects configuration through `CertificateIssuer::new` or `CertificateIssuer::new_with_operation_timeout_ms`; reusable provider code does not read process environment. Invalid paths, timeouts, provider identities, or certificate inputs fail before provider or filesystem work.
 
-No OpenAPI or database schema changes are introduced. ACME account credential persistence and a durable desired/observed certificate activation state machine require separate human-reviewed contracts.
+Certificate persistence and listener activation use the repository's immutable certificate-version and explicit listener-binding contracts. ACME account credential persistence remains outside this requirement and requires a dedicated secret-store contract before implementation.
 
 ## Evidence Boundary
 
@@ -81,8 +81,8 @@ This requirement accepts deterministic local implementation and test evidence on
 
 ## Implementation Evidence
 
-- The active Repository runtime bootstrap now parses environment/profile overrides, applies the canonical test/staging/production security boundary, constructs `AcmeConfig`, and injects `CertificateIssuer`. The compatibility `from_env` methods remain available but are absent from the active application call path.
-- `AcmeConfig` requires an HTTPS directory without userinfo, a bounded ASCII contact, a 1..90 day renewal window, a bounded webroot, and a 32-byte HKDF-derived encryption key. Production ACME profile selection is itself production-like even when the surrounding application environment is development.
+- The active Repository runtime bootstrap parses environment/profile overrides, applies the canonical test/staging/production security boundary, constructs `AcmeConfig`, and injects `CertificateIssuer`; the provider crate exposes no parallel environment loader.
+- `AcmeConfig` requires an HTTPS directory without userinfo, a bounded ASCII contact, a 1..90 day renewal window, and a bounded webroot. Production ACME profile selection is itself production-like even when the surrounding application environment is development.
 - One issuer uses an eight-permit non-queuing semaphore. Each ACME provider response uses the platform TLS verifier and an application-owned streaming body adapter capped at 2 MiB; size hints, declared length, arithmetic overflow, and actual frames are checked before growth.
 - HTTP-01 state reserves one of 64 bounded entries without holding a lock across async I/O. A generation-bound lease owns the memory entry and atomically staged webroot file, and cleanup is serialized against reuse of the same token so an old lease cannot delete a newer challenge.
 - The whole account/order/authorization/challenge/finalize/certificate flow runs under one 10000..600000 ms deadline. At most eight authorizations and challenge leases are retained for an order.
@@ -96,7 +96,7 @@ This requirement accepts deterministic local implementation and test evidence on
 - `cargo test -p sdkwork-webserver-edge-runtime` passes 11/11 tests covering non-queuing async activation admission, real certificate/key parsing, mismatch/size/path rejection, complete replacement, injected rollback, Nginx candidate validation, failure propagation, and child timeout.
 - Strict all-target Clippy passes with `-D warnings` for ACME service, edge runtime, business service, and SQLx Repository.
 - Strict component-port binding, application-layering, route-collision, and repository-document validators pass.
-- `pnpm.cmd verify` passes the complete Rust workspace, 19 Node contract tests, API materialization consistency, repository composition, API envelope, topology, database framework, and cloud gateway validation. Its environment-gated PostgreSQL Repository and lifecycle tests remain ignored without an explicit disposable PostgreSQL URL; prior dual-engine evidence remains owned by REQ-2026-0004.
+- The environment-independent `pnpm.cmd verify` checks passed the complete Rust workspace, 19 Node contract tests, API materialization consistency, repository composition, API envelope, topology, database-framework, and cloud-gateway validation. PostgreSQL repository and lifecycle tests were not executed or claimed by this ACME requirement; REQ-2026-0004/0049 own that evidence.
 - `cargo fmt --all -- --check` and `git diff --check` pass.
 
 ## Remaining Boundary

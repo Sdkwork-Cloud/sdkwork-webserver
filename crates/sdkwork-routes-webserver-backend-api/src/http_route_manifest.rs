@@ -8,382 +8,307 @@ const HTTP_ROUTES: &[HttpRoute] = &[
         "/backend/v3/api/applications",
         "application",
         "applications.list",
-    )
-    .with_required_permission("web.sites.read"),
+    ).with_required_permission("web.sites.read"),
     HttpRoute::dual_token(
         HttpMethod::Post,
         "/backend/v3/api/applications",
         "application",
         "applications.create",
-    )
-    .with_required_permission("web.sites.write")
-    .with_idempotent(true),
+    ).with_required_permission("web.sites.write").with_idempotent(true),
     HttpRoute::dual_token(
         HttpMethod::Get,
         "/backend/v3/api/applications/{applicationId}",
         "application",
         "applications.retrieve",
-    )
-    .with_required_permission("web.sites.read"),
+    ).with_required_permission("web.sites.read"),
     HttpRoute::dual_token(
         HttpMethod::Patch,
         "/backend/v3/api/applications/{applicationId}",
         "application",
         "applications.update",
-    )
-    .with_required_permission("web.sites.write")
-    .with_idempotent(true),
+    ).with_required_permission("web.sites.write").with_idempotent(true),
     HttpRoute::dual_token(
         HttpMethod::Delete,
         "/backend/v3/api/applications/{applicationId}",
         "application",
         "applications.delete",
-    )
-    .with_required_permission("web.sites.write")
-    .with_idempotent(true)
-    .with_rate_limit_tier(RateLimitTier::AuthCritical),
+    ).with_required_permission("web.sites.write").with_idempotent(true).with_rate_limit_tier(RateLimitTier::AuthCritical),
     HttpRoute::dual_token(
         HttpMethod::Post,
         "/backend/v3/api/applications/{applicationId}/activate",
         "application",
         "applications.activate",
-    )
-    .with_required_permission("web.sites.write")
-    .with_idempotent(true)
-    .with_rate_limit_tier(RateLimitTier::AuthCritical),
+    ).with_required_permission("web.sites.write").with_idempotent(true).with_rate_limit_tier(RateLimitTier::AuthCritical),
     HttpRoute::dual_token(
         HttpMethod::Post,
         "/backend/v3/api/applications/{applicationId}/pause",
         "application",
         "applications.pause",
-    )
-    .with_required_permission("web.sites.write")
-    .with_idempotent(true)
-    .with_rate_limit_tier(RateLimitTier::AuthCritical),
+    ).with_required_permission("web.sites.write").with_idempotent(true).with_rate_limit_tier(RateLimitTier::AuthCritical),
     HttpRoute::dual_token(
         HttpMethod::Get,
         "/backend/v3/api/applications/{applicationId}/domains",
         "applicationDomain",
         "applications.domains.list",
-    )
-    .with_required_permission("web.sites.read"),
+    ).with_required_permission("web.sites.read"),
     HttpRoute::dual_token(
         HttpMethod::Post,
         "/backend/v3/api/applications/{applicationId}/domains",
         "applicationDomain",
         "applications.domains.create",
-    )
-    .with_required_permission("web.sites.write")
-    .with_idempotent(true),
+    ).with_required_permission("web.sites.write").with_idempotent(true),
     HttpRoute::dual_token(
         HttpMethod::Delete,
         "/backend/v3/api/applications/{applicationId}/domains/{domainId}",
         "applicationDomain",
         "applications.domains.delete",
-    )
-    .with_required_permission("web.sites.write")
-    .with_idempotent(true)
-    .with_rate_limit_tier(RateLimitTier::AuthCritical),
+    ).with_required_permission("web.sites.write").with_idempotent(true).with_rate_limit_tier(RateLimitTier::AuthCritical),
     HttpRoute::dual_token(
         HttpMethod::Post,
         "/backend/v3/api/applications/{applicationId}/domains/{domainId}/verify",
         "applicationDomain",
         "applications.domains.verify",
-    )
-    .with_required_permission("web.sites.write")
-    .with_idempotent(true),
+    ).with_required_permission("web.sites.write").with_idempotent(true),
+    HttpRoute::dual_token(
+        HttpMethod::Get,
+        "/backend/v3/api/applications/{applicationId}/domains/{domainId}/listener_certificate_bindings",
+        "certificate",
+        "applications.domains.listenerCertificateBindings.list",
+    ).with_required_permission("web.certificates.read"),
+    HttpRoute::dual_token(
+        HttpMethod::Post,
+        "/backend/v3/api/applications/{applicationId}/domains/{domainId}/listener_certificate_bindings",
+        "certificate",
+        "applications.domains.listenerCertificateBindings.create",
+    ).with_required_permission("web.certificates.write").with_idempotent(true).with_rate_limit_tier(RateLimitTier::AuthCritical),
+    HttpRoute::dual_token(
+        HttpMethod::Delete,
+        "/backend/v3/api/applications/{applicationId}/domains/{domainId}/listener_certificate_bindings/{bindingId}",
+        "certificate",
+        "applications.domains.listenerCertificateBindings.delete",
+    ).with_required_permission("web.certificates.write").with_idempotent(true).with_rate_limit_tier(RateLimitTier::AuthCritical),
     HttpRoute::dual_token(
         HttpMethod::Get,
         "/backend/v3/api/root_domains",
         "domain",
         "rootDomains.list",
-    )
-    .with_required_permission("web.sites.read"),
+    ).with_required_permission("web.sites.read"),
     HttpRoute::dual_token(
         HttpMethod::Post,
         "/backend/v3/api/root_domains",
         "domain",
         "rootDomains.create",
-    )
-    .with_required_permission("web.sites.write")
-    .with_idempotent(true),
+    ).with_required_permission("web.sites.write").with_idempotent(true),
     HttpRoute::dual_token(
         HttpMethod::Get,
         "/backend/v3/api/root_domains/{rootDomainId}",
         "domain",
         "rootDomains.retrieve",
-    )
-    .with_required_permission("web.sites.read"),
+    ).with_required_permission("web.sites.read"),
     HttpRoute::dual_token(
         HttpMethod::Delete,
         "/backend/v3/api/root_domains/{rootDomainId}",
         "domain",
         "rootDomains.delete",
-    )
-    .with_required_permission("web.sites.write")
-    .with_idempotent(true)
-    .with_rate_limit_tier(RateLimitTier::AuthCritical),
+    ).with_required_permission("web.sites.write").with_idempotent(true).with_rate_limit_tier(RateLimitTier::AuthCritical),
     HttpRoute::dual_token(
         HttpMethod::Get,
         "/backend/v3/api/root_domains/{rootDomainId}/subdomains",
         "domain",
         "rootDomains.subdomains.list",
-    )
-    .with_required_permission("web.sites.read"),
+    ).with_required_permission("web.sites.read"),
     HttpRoute::dual_token(
         HttpMethod::Post,
         "/backend/v3/api/root_domains/{rootDomainId}/subdomains",
         "domain",
         "rootDomains.subdomains.create",
-    )
-    .with_required_permission("web.sites.write")
-    .with_idempotent(true),
+    ).with_required_permission("web.sites.write").with_idempotent(true),
     HttpRoute::dual_token(
         HttpMethod::Get,
         "/backend/v3/api/domains",
         "domain",
         "domains.list",
-    )
-    .with_required_permission("web.sites.read"),
+    ).with_required_permission("web.sites.read"),
     HttpRoute::dual_token(
         HttpMethod::Post,
         "/backend/v3/api/domains",
         "domain",
         "domains.create",
-    )
-    .with_required_permission("web.sites.write")
-    .with_idempotent(true),
+    ).with_required_permission("web.sites.write").with_idempotent(true),
     HttpRoute::dual_token(
         HttpMethod::Delete,
         "/backend/v3/api/domains/{domainId}",
         "domain",
         "domains.delete",
-    )
-    .with_required_permission("web.sites.write")
-    .with_idempotent(true)
-    .with_rate_limit_tier(RateLimitTier::AuthCritical),
+    ).with_required_permission("web.sites.write").with_idempotent(true).with_rate_limit_tier(RateLimitTier::AuthCritical),
     HttpRoute::dual_token(
         HttpMethod::Post,
         "/backend/v3/api/domains/{domainId}/verify",
         "domain",
         "domains.verify",
-    )
-    .with_required_permission("web.sites.write")
-    .with_idempotent(true),
+    ).with_required_permission("web.sites.write").with_idempotent(true),
     HttpRoute::dual_token(
         HttpMethod::Put,
         "/backend/v3/api/domains/{domainId}/application_binding",
         "domain",
         "domains.applicationBinding.update",
-    )
-    .with_required_permission("web.sites.write")
-    .with_idempotent(true)
-    .with_rate_limit_tier(RateLimitTier::AuthCritical),
+    ).with_required_permission("web.sites.write").with_idempotent(true).with_rate_limit_tier(RateLimitTier::AuthCritical),
     HttpRoute::dual_token(
         HttpMethod::Delete,
         "/backend/v3/api/domains/{domainId}/application_binding",
         "domain",
         "domains.applicationBinding.delete",
-    )
-    .with_required_permission("web.sites.write")
-    .with_idempotent(true)
-    .with_rate_limit_tier(RateLimitTier::AuthCritical),
+    ).with_required_permission("web.sites.write").with_idempotent(true).with_rate_limit_tier(RateLimitTier::AuthCritical),
     HttpRoute::dual_token(
         HttpMethod::Get,
         "/backend/v3/api/applications/{applicationId}/source_versions",
         "applicationSourceVersion",
         "applications.sourceVersions.list",
-    )
-    .with_required_permission("web.sites.read"),
+    ).with_required_permission("web.sites.read"),
     HttpRoute::dual_token(
         HttpMethod::Post,
         "/backend/v3/api/applications/{applicationId}/source_versions",
         "applicationSourceVersion",
         "applications.sourceVersions.create",
-    )
-    .with_required_permission("web.sites.write")
-    .with_idempotent(true),
+    ).with_required_permission("web.sites.write").with_idempotent(true),
     HttpRoute::dual_token(
         HttpMethod::Post,
         "/backend/v3/api/applications/{applicationId}/source_versions/git_import",
         "applicationSourceVersion",
         "applications.sourceVersions.gitImport.create",
-    )
-    .with_required_permission("web.sites.write")
-    .with_idempotent(true)
-    .with_rate_limit_tier(RateLimitTier::AuthCritical),
+    ).with_required_permission("web.sites.write").with_idempotent(true).with_rate_limit_tier(RateLimitTier::AuthCritical),
     HttpRoute::dual_token(
         HttpMethod::Get,
         "/backend/v3/api/applications/{applicationId}/source_versions/{sourceVersionId}",
         "applicationSourceVersion",
         "applications.sourceVersions.retrieve",
-    )
-    .with_required_permission("web.sites.read"),
+    ).with_required_permission("web.sites.read"),
     HttpRoute::dual_token(
         HttpMethod::Get,
         "/backend/v3/api/applications/{applicationId}/deployments",
         "applicationDeployment",
         "applications.deployments.list",
-    )
-    .with_required_permission("web.sites.read"),
+    ).with_required_permission("web.sites.read"),
     HttpRoute::dual_token(
         HttpMethod::Post,
         "/backend/v3/api/applications/{applicationId}/deployments",
         "applicationDeployment",
         "applications.deployments.create",
-    )
-    .with_required_permission("web.sites.write")
-    .with_idempotent(true)
-    .with_rate_limit_tier(RateLimitTier::AuthCritical),
+    ).with_required_permission("web.sites.write").with_idempotent(true).with_rate_limit_tier(RateLimitTier::AuthCritical),
     HttpRoute::dual_token(
         HttpMethod::Post,
         "/backend/v3/api/applications/{applicationId}/deployments/{deploymentId}/rollback",
         "applicationDeployment",
         "applications.deployments.rollback",
-    )
-    .with_required_permission("web.sites.write")
-    .with_idempotent(true)
-    .with_rate_limit_tier(RateLimitTier::AuthCritical),
+    ).with_required_permission("web.sites.write").with_idempotent(true).with_rate_limit_tier(RateLimitTier::AuthCritical),
     HttpRoute::dual_token(
         HttpMethod::Get,
         "/backend/v3/api/certificates",
         "certificate",
         "certificates.list",
-    )
-    .with_required_permission("web.certificates.read"),
+    ).with_required_permission("web.certificates.read"),
     HttpRoute::dual_token(
         HttpMethod::Post,
         "/backend/v3/api/certificates",
         "certificate",
         "certificates.create",
-    )
-    .with_required_permission("web.certificates.write")
-    .with_idempotent(true)
-    .with_rate_limit_tier(RateLimitTier::AuthCritical),
+    ).with_required_permission("web.certificates.write").with_idempotent(true).with_rate_limit_tier(RateLimitTier::AuthCritical),
     HttpRoute::dual_token(
         HttpMethod::Put,
         "/backend/v3/api/certificates/{certificateId}",
         "certificate",
         "certificates.update",
-    )
-    .with_required_permission("web.certificates.write")
-    .with_idempotent(true),
+    ).with_required_permission("web.certificates.write").with_idempotent(true),
     HttpRoute::dual_token(
         HttpMethod::Post,
         "/backend/v3/api/certificates/{certificateId}/renew",
         "certificate",
         "certificates.renew",
-    )
-    .with_required_permission("web.certificates.write")
-    .with_idempotent(true)
-    .with_rate_limit_tier(RateLimitTier::AuthCritical),
+    ).with_required_permission("web.certificates.write").with_idempotent(true).with_rate_limit_tier(RateLimitTier::AuthCritical),
     HttpRoute::dual_token(
         HttpMethod::Get,
         "/backend/v3/api/certificate_distribution",
         "certificateDistribution",
         "certificates.distribution.list",
-    )
-    .with_required_permission("web.certificates.read"),
+    ).with_required_permission("web.certificates.read"),
     HttpRoute::dual_token(
         HttpMethod::Get,
         "/backend/v3/api/nginx/configs",
         "nginx",
         "configs.list",
-    )
-    .with_required_permission("web.nginx.write"),
+    ).with_required_permission("web.nginx.write"),
     HttpRoute::dual_token(
         HttpMethod::Post,
         "/backend/v3/api/nginx/configs",
         "nginx",
         "configs.create",
-    )
-    .with_required_permission("web.nginx.write")
-    .with_idempotent(true),
+    ).with_required_permission("web.nginx.write").with_idempotent(true),
     HttpRoute::dual_token(
         HttpMethod::Get,
         "/backend/v3/api/nginx/etc/{configId}",
         "nginx",
         "configs.retrieve",
-    )
-    .with_required_permission("web.nginx.write"),
+    ).with_required_permission("web.nginx.write"),
     HttpRoute::dual_token(
         HttpMethod::Put,
         "/backend/v3/api/nginx/etc/{configId}",
         "nginx",
         "configs.update",
-    )
-    .with_required_permission("web.nginx.write")
-    .with_idempotent(true),
+    ).with_required_permission("web.nginx.write").with_idempotent(true),
     HttpRoute::dual_token(
         HttpMethod::Post,
         "/backend/v3/api/nginx/etc/{configId}/validate",
         "nginx",
         "configs.validate",
-    )
-    .with_required_permission("web.nginx.write"),
+    ).with_required_permission("web.nginx.write"),
     HttpRoute::dual_token(
         HttpMethod::Post,
         "/backend/v3/api/nginx/etc/{configId}/deploy",
         "nginx",
         "configs.deploy",
-    )
-    .with_required_permission("web.nginx.write")
-    .with_idempotent(true)
-    .with_rate_limit_tier(RateLimitTier::AuthCritical),
+    ).with_required_permission("web.nginx.write").with_idempotent(true).with_rate_limit_tier(RateLimitTier::AuthCritical),
     HttpRoute::dual_token(
         HttpMethod::Post,
         "/backend/v3/api/nginx/reload",
         "nginx",
         "reload",
-    )
-    .with_required_permission("web.nginx.write")
-    .with_idempotent(true),
+    ).with_required_permission("web.nginx.write").with_idempotent(true),
     HttpRoute::dual_token(
         HttpMethod::Get,
         "/backend/v3/api/nginx/status",
         "nginx",
         "status.retrieve",
-    )
-    .with_required_permission("web.nginx.write"),
+    ).with_required_permission("web.nginx.write"),
     HttpRoute::dual_token(
         HttpMethod::Get,
         "/backend/v3/api/servers",
         "server",
         "servers.list",
-    )
-    .with_required_permission("web.servers.read"),
+    ).with_required_permission("web.servers.read"),
     HttpRoute::dual_token(
         HttpMethod::Post,
         "/backend/v3/api/servers",
         "server",
         "servers.create",
-    )
-    .with_required_permission("web.servers.write")
-    .with_idempotent(true)
-    .with_rate_limit_tier(RateLimitTier::AuthCritical),
+    ).with_required_permission("web.servers.write").with_idempotent(true).with_rate_limit_tier(RateLimitTier::AuthCritical),
     HttpRoute::agent_token(
         HttpMethod::Post,
         "/backend/v3/api/agent/heartbeat",
         "agent",
         "heartbeat",
-    )
-    .with_required_permission("web.heartbeat.write")
-    .with_rate_limit_tier(RateLimitTier::AuthCritical),
+    ).with_required_permission("web.heartbeat.write").with_rate_limit_tier(RateLimitTier::AuthCritical),
     HttpRoute::agent_token(
         HttpMethod::Get,
         "/backend/v3/api/agent/sync",
         "agent",
         "retrieve",
-    )
-    .with_required_permission("web.retrieve.write")
-    .with_rate_limit_tier(RateLimitTier::AuthCritical),
+    ).with_required_permission("web.retrieve.write").with_rate_limit_tier(RateLimitTier::AuthCritical),
     HttpRoute::dual_token(
         HttpMethod::Get,
         "/backend/v3/api/audit_logs",
         "audit",
         "auditLogs.list",
-    )
-    .with_required_permission("web.auditLogs.read"),
+    ).with_required_permission("web.auditLogs.read"),
 ];
 
 pub fn backend_route_manifest() -> HttpRouteManifest {

@@ -9,12 +9,14 @@ import { fileURLToPath } from 'node:url';
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DEFAULT_POSTGRES_IMAGE =
   'postgres:16.9-alpine3.22@sha256:7c688148e5e156d0e86df7ba8ae5a05a2386aaec1e2ad8e6d11bdf10504b1fb7';
-const DATABASE_NAME = 'sdkwork_web_ci';
-const DATABASE_USER = 'sdkwork_ci';
+const DATABASE_NAME = 'sdkwork_ai_test_run_web_ci';
+const DATABASE_USER = 'sdkwork_ai_test';
 const DATABASE_PASSWORD = 'sdkwork-ci-only-password';
 const READY_ATTEMPTS = 60;
 const READY_INTERVAL_MS = 1_000;
 const COMMAND_TIMEOUT_MS = 15 * 60 * 1_000;
+const POSTGRES_INITIALIZATION_COMPLETE =
+  'PostgreSQL init process complete; ready for start up.';
 const CRITICAL_SOURCE_FILES = Object.freeze([
   'Cargo.toml',
   'Cargo.lock',
@@ -125,6 +127,12 @@ function ensureCriticalSources() {
   }
 }
 
+export function isPostgresReady(initializationLogs, probeStatus) {
+  return (
+    probeStatus === 0 && String(initializationLogs).includes(POSTGRES_INITIALIZATION_COMPLETE)
+  );
+}
+
 function waitForPostgres(containerName) {
   for (let attempt = 1; attempt <= READY_ATTEMPTS; attempt += 1) {
     const result = spawnSync(
@@ -147,7 +155,16 @@ function waitForPostgres(containerName) {
         windowsHide: true,
       },
     );
-    if (result.status === 0) {
+    const logs = spawnSync('docker', ['logs', containerName], {
+      cwd: REPO_ROOT,
+      encoding: 'utf8',
+      maxBuffer: 256 * 1024,
+      stdio: 'pipe',
+      timeout: 10_000,
+      windowsHide: true,
+    });
+    const initializationLogs = `${logs.stdout || ''}\n${logs.stderr || ''}`;
+    if (isPostgresReady(initializationLogs, result.status)) {
       return;
     }
     if (attempt < READY_ATTEMPTS) {
@@ -170,7 +187,7 @@ function resolvePublishedPort(containerName) {
   return port;
 }
 
-function resetPublicSchema(containerName) {
+function resetCanonicalSchema(containerName) {
   run(
     'docker',
     [
@@ -186,7 +203,7 @@ function resetPublicSchema(containerName) {
       '--set',
       'ON_ERROR_STOP=1',
       '--command',
-      'DROP SCHEMA public CASCADE; CREATE SCHEMA public;',
+      `DROP SCHEMA IF EXISTS ${DATABASE_NAME} CASCADE; CREATE SCHEMA ${DATABASE_NAME};`,
     ],
     { timeoutMs: 60_000 },
   );
@@ -222,6 +239,7 @@ export function runPostgresCi(plan = createPostgresCiPlan()) {
       { capture: true, timeoutMs: 5 * 60 * 1_000 },
     );
     waitForPostgres(containerName);
+    resetCanonicalSchema(containerName);
     const port = resolvePublishedPort(containerName);
     const databaseUrl =
       `postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@127.0.0.1:${port}/${DATABASE_NAME}`
@@ -233,7 +251,7 @@ export function runPostgresCi(plan = createPostgresCiPlan()) {
 
     console.log('[sdkwork-web-postgres-ci] verifying PostgreSQL lifecycle, seed, and drift');
     run(plan.lifecycleTest[0], plan.lifecycleTest.slice(1), { env: testEnv });
-    resetPublicSchema(containerName);
+    resetCanonicalSchema(containerName);
     console.log('[sdkwork-web-postgres-ci] verifying PostgreSQL Repository parity');
     run(plan.repositoryTest[0], plan.repositoryTest.slice(1), { env: testEnv });
   } finally {

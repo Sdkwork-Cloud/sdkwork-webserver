@@ -16,7 +16,7 @@ require 'sdkwork/backend_sdk'
 config = Sdkwork::BackendSdk::SdkConfig.new(base_url: 'http://localhost:3800')
 client = Sdkwork::BackendSdk::SdkworkBackendClient.new(config)
 params = { 'page' => 1, 'page_size' => 2 }
-result = client.certificate.certificates_list(params: params)
+result = client.certificate_distribution.certificates_distribution_list(params: params)
 
 
 puts result.inspect
@@ -44,10 +44,10 @@ client.set_header('X-Custom-Header', 'value')
 
 - `client.application` - application API
 - `client.application_domain` - application_domain API
+- `client.certificate` - certificate API
 - `client.domain` - domain API
 - `client.application_source_version` - application_source_version API
 - `client.application_deployment` - application_deployment API
-- `client.certificate` - certificate API
 - `client.certificate_distribution` - certificate_distribution API
 - `client.nginx` - nginx API
 - `client.server` - server API
@@ -72,6 +72,15 @@ puts result.inspect
 application_id = '1'
 params = { 'page' => 1, 'page_size' => 2 }
 result = client.application_domain.applications_domains_list(application_id, params: params)
+puts result.inspect
+```
+
+### certificate
+
+```ruby
+# List canonical certificates
+params = { 'page' => 1, 'page_size' => 2, 'domainId' => '00000000-0000-0000-0000-000000000001' }
+result = client.certificate.certificates_list(params: params)
 puts result.inspect
 ```
 
@@ -101,15 +110,6 @@ puts result.inspect
 application_id = '1'
 params = { 'page' => 1, 'page_size' => 2, 'status' => 3 }
 result = client.application_deployment.applications_deployments_list(application_id, params: params)
-puts result.inspect
-```
-
-### certificate
-
-```ruby
-# List canonical certificates
-params = { 'page' => 1, 'page_size' => 2 }
-result = client.certificate.certificates_list(params: params)
 puts result.inspect
 ```
 
@@ -162,7 +162,7 @@ puts result.inspect
 ```ruby
 begin
   params = { 'page' => 1, 'page_size' => 2 }
-  client.certificate.certificates_list(params: params)
+  client.certificate_distribution.certificates_distribution_list(params: params)
 rescue StandardError => e
   warn("Error: #{e.message}")
 end

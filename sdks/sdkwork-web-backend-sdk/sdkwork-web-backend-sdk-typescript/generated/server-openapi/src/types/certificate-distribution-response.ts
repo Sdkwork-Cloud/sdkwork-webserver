@@ -4,6 +4,6 @@ export interface CertificateDistributionResponse {
   host: string;
   desiredSyncVersion: string;
   appliedSyncVersion?: string;
-  status: 'SYNCED' | 'PENDING' | 'OFFLINE';
+  status: 'SYNCED' | 'PENDING' | 'OFFLINE' | 'UNASSIGNED';
   lastHeartbeatAt?: string;
 }

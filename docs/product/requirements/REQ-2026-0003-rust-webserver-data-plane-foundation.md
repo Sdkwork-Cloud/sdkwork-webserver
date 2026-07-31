@@ -28,7 +28,7 @@ users:
 acceptance_criteria:
   - A checked-in example passes the authoritative JSON Schema and Rust semantic validation.
   - Unknown fields, duplicate ids, unresolved references, conflicting listeners, unsafe static roots, invalid domains, missing TLS files, unsupported route modes, and unbounded limits fail validation.
-  - The data-plane startup path does not initialize PostgreSQL or SQLite.
+  - The data-plane startup path does not initialize PostgreSQL.
   - A configured HTTP listener serves exact-host and default-host fixed, redirect, static, and proxy routes.
   - A configured HTTPS listener serves TLS 1.2/1.3 with the selected certificate and HTTP/2 ALPN support.
   - Proxy request and response bodies are streamed; configured request-size and request/deadline bounds are enforced.

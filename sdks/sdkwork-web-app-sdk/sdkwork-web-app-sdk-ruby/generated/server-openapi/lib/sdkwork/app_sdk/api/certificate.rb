@@ -2,18 +2,68 @@ require_relative 'base_api'
 require_relative '../models/certificates_create_response201'
 require_relative '../models/certificates_list_response'
 require_relative '../models/create_certificate_request'
+require_relative '../models/create_listener_certificate_binding_request'
+require_relative '../models/sites_domains_listener_certificate_bindings_create_response201'
+require_relative '../models/sites_domains_listener_certificate_bindings_list_response'
 
 module Sdkwork
   module AppSdk
     module Api
       class CertificateApi < BaseApi
+          # List certificates active on the domain listener
+          def sites_domains_listener_certificate_bindings_list(site_id, domain_id, page: nil, page_size: nil)
+            path = interpolate_path('/app/v3/api/sites/{siteId}/domains/{domainId}/listener_certificate_bindings', siteId: serialize_path_parameter(site_id, PathParameterSpec.new('siteId', 'simple', false)), domainId: serialize_path_parameter(domain_id, PathParameterSpec.new('domainId', 'simple', false)))
+            query = build_query_string([
+              QueryParameterSpec.new('page', page, 'form', true, false, nil),
+              QueryParameterSpec.new('page_size', page_size, 'form', true, false, nil),
+            ])
+            path = append_query_string(path, query)
+            options = {}
+
+            result = @client.request('GET', path, **options)
+            result.is_a?(Hash) ? Models::SitesDomainsListenerCertificateBindingsListResponse.from_hash(result) : nil
+          end
+
+          # Bind a certificate version to the domain listener
+          def sites_domains_listener_certificate_bindings_create(site_id, domain_id, idempotency_key, body: nil)
+            path = interpolate_path('/app/v3/api/sites/{siteId}/domains/{domainId}/listener_certificate_bindings', siteId: serialize_path_parameter(site_id, PathParameterSpec.new('siteId', 'simple', false)), domainId: serialize_path_parameter(domain_id, PathParameterSpec.new('domainId', 'simple', false)))
+            payload = body.respond_to?(:to_hash) ? body.to_hash : body
+            request_headers = build_request_headers(
+              {
+                'Idempotency-Key' => HeaderParameterSpec.new(idempotency_key, 'simple', false, nil),
+              },
+              {}
+            )
+            options = {}
+            options[:headers] = request_headers unless request_headers.empty?
+            options[:json] = payload unless payload.nil?
+            result = @client.request('POST', path, **options)
+            result.is_a?(Hash) ? Models::SitesDomainsListenerCertificateBindingsCreateResponse201.from_hash(result) : nil
+          end
+
+          # Remove a certificate from the domain listener
+          def sites_domains_listener_certificate_bindings_delete(site_id, domain_id, binding_id, idempotency_key)
+            path = interpolate_path('/app/v3/api/sites/{siteId}/domains/{domainId}/listener_certificate_bindings/{bindingId}', siteId: serialize_path_parameter(site_id, PathParameterSpec.new('siteId', 'simple', false)), domainId: serialize_path_parameter(domain_id, PathParameterSpec.new('domainId', 'simple', false)), bindingId: serialize_path_parameter(binding_id, PathParameterSpec.new('bindingId', 'simple', false)))
+            request_headers = build_request_headers(
+              {
+                'Idempotency-Key' => HeaderParameterSpec.new(idempotency_key, 'simple', false, nil),
+              },
+              {}
+            )
+            options = {}
+            options[:headers] = request_headers unless request_headers.empty?
+            result = @client.request('DELETE', path, **options)
+            result
+          end
+
           # 获取证书列表
-          def certificates_list(page: nil, page_size: nil, site_id: nil)
+          def certificates_list(page: nil, page_size: nil, site_id: nil, domain_id: nil)
             path = '/app/v3/api/certificates'
             query = build_query_string([
               QueryParameterSpec.new('page', page, 'form', true, false, nil),
               QueryParameterSpec.new('page_size', page_size, 'form', true, false, nil),
               QueryParameterSpec.new('siteId', site_id, 'form', true, false, nil),
+              QueryParameterSpec.new('domainId', domain_id, 'form', true, false, nil),
             ])
             path = append_query_string(path, query)
             options = {}

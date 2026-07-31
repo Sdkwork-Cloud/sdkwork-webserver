@@ -6,11 +6,12 @@ use axum::{
 };
 use sdkwork_webserver_contract::{
     CreateCertificateRequest, CreateDeploymentRequest, CreateDomainRequest,
-    CreateManagedDomainRequest, CreateNginxConfigRequest, CreateRootDomainHostnameRequest,
-    CreateRootDomainRequest, CreateServerRequest, CreateSiteRequest, CreateSourceVersionRequest,
-    ImportGitSourceVersionRequest, ListNginxConfigsQuery, ListRootDomainsQuery, ListSitesQuery,
-    UpdateCertificateRequest, UpdateDomainApplicationBindingRequest, UpdateNginxConfigRequest,
-    UpdateSiteRequest, WebBackendApi, WebBackendRequestContext,
+    CreateListenerCertificateBindingRequest, CreateManagedDomainRequest, CreateNginxConfigRequest,
+    CreateRootDomainHostnameRequest, CreateRootDomainRequest, CreateServerRequest,
+    CreateSiteRequest, CreateSourceVersionRequest, ImportGitSourceVersionRequest,
+    ListNginxConfigsQuery, ListRootDomainsQuery, ListSitesQuery, UpdateCertificateRequest,
+    UpdateDomainApplicationBindingRequest, UpdateNginxConfigRequest, UpdateSiteRequest,
+    WebBackendApi, WebBackendRequestContext,
 };
 use serde::Deserialize;
 use std::sync::Arc;
@@ -18,8 +19,9 @@ use std::sync::Arc;
 use crate::{agent_routes, auth::require_backend_context, paths};
 use sdkwork_routes_webserver_common::{
     created_resource, no_content, ok_audit_log_page, ok_certificate_distribution_page,
-    ok_certificate_page, ok_deployment_page, ok_domain_page, ok_nginx_config_page, ok_resource,
-    ok_root_domain_page, ok_server_page, ok_site_page, ok_source_version_page, WebApiError,
+    ok_certificate_page, ok_deployment_page, ok_domain_page, ok_listener_certificate_binding_page,
+    ok_nginx_config_page, ok_resource, ok_root_domain_page, ok_server_page, ok_site_page,
+    ok_source_version_page, WebApiError,
 };
 
 #[derive(Clone)]
@@ -59,6 +61,15 @@ pub fn build_router_with_shared_backend_api(api: Arc<dyn WebBackendApi>) -> Rout
         .route(
             paths::APPLICATION_DOMAIN_VERIFY,
             post(verify_application_domain),
+        )
+        .route(
+            paths::APPLICATION_DOMAIN_LISTENER_CERTIFICATE_BINDINGS,
+            get(list_application_listener_certificate_bindings)
+                .post(bind_application_listener_certificate),
+        )
+        .route(
+            paths::APPLICATION_DOMAIN_LISTENER_CERTIFICATE_BINDING,
+            axum::routing::delete(unbind_application_listener_certificate),
         )
         .route(
             paths::ROOT_DOMAINS,
@@ -144,6 +155,16 @@ struct PageQuery {
     page: i32,
     #[serde(default = "default_page_size")]
     page_size: i32,
+}
+
+#[derive(Debug, Deserialize)]
+struct CertificatePageQuery {
+    #[serde(default = "default_page")]
+    page: i32,
+    #[serde(default = "default_page_size")]
+    page_size: i32,
+    #[serde(rename = "domainId", alias = "domain_id")]
+    domain_id: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -578,13 +599,18 @@ async fn rollback_application_deployment(
 async fn list_managed_certificates(
     State(state): State<BackendState>,
     context: Option<Extension<WebBackendRequestContext>>,
-    Query(query): Query<PageQuery>,
+    Query(query): Query<CertificatePageQuery>,
 ) -> Result<Response, WebApiError> {
     let context = require_backend_context(context)?;
     ok_certificate_page(
         state
             .api
-            .list_managed_certificates(&context, query.page, query.page_size)
+            .list_managed_certificates(
+                &context,
+                query.domain_id.as_deref(),
+                query.page,
+                query.page_size,
+            )
             .await,
         query.page,
         query.page_size,
@@ -601,6 +627,63 @@ async fn create_managed_certificate(
         state
             .api
             .create_managed_certificate(&context, &request)
+            .await,
+    )
+}
+
+async fn list_application_listener_certificate_bindings(
+    State(state): State<BackendState>,
+    context: Option<Extension<WebBackendRequestContext>>,
+    Path((application_id, domain_id)): Path<(String, String)>,
+    Query(query): Query<PageQuery>,
+) -> Result<Response, WebApiError> {
+    let context = require_backend_context(context)?;
+    ok_listener_certificate_binding_page(
+        state
+            .api
+            .list_application_listener_certificate_bindings(
+                &context,
+                &application_id,
+                &domain_id,
+                query.page,
+                query.page_size,
+            )
+            .await,
+        query.page,
+        query.page_size,
+    )
+}
+
+async fn bind_application_listener_certificate(
+    State(state): State<BackendState>,
+    context: Option<Extension<WebBackendRequestContext>>,
+    Path((application_id, domain_id)): Path<(String, String)>,
+    Json(request): Json<CreateListenerCertificateBindingRequest>,
+) -> Result<Response, WebApiError> {
+    let context = require_backend_context(context)?;
+    created_resource(
+        state
+            .api
+            .bind_application_listener_certificate(&context, &application_id, &domain_id, &request)
+            .await,
+    )
+}
+
+async fn unbind_application_listener_certificate(
+    State(state): State<BackendState>,
+    context: Option<Extension<WebBackendRequestContext>>,
+    Path((application_id, domain_id, binding_id)): Path<(String, String, String)>,
+) -> Result<Response, WebApiError> {
+    let context = require_backend_context(context)?;
+    no_content(
+        state
+            .api
+            .unbind_application_listener_certificate(
+                &context,
+                &application_id,
+                &domain_id,
+                &binding_id,
+            )
             .await,
     )
 }

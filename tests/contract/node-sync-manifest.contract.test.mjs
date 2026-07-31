@@ -20,14 +20,12 @@ test('node sync repository streams bounded projections before materialization', 
     /const MAX_NODE_SYNC_BUNDLE_BYTES: usize = 12 \* 1024 \* 1024/u,
   );
   assert.match(repository, /MAX_NODE_NGINX_CONFIG_BYTES: i64 = 1024 \* 1024/u);
-  assert.match(
-    repository,
-    /MAX_NODE_CERTIFICATE_METADATA_BYTES: i64 = 2 \* 1024 \* 1024/u,
-  );
   assert.match(repository, /\.fetch\(&self\.pool\)/u);
   assert.match(repository, /\.try_next\(\)/u);
   assert.match(repository, /CASE WHEN \{content_size\}/u);
-  assert.match(repository, /CASE WHEN \{metadata_size\}/u);
+  assert.match(repository, /web_listener_certificate_binding/u);
+  assert.match(repository, /web_certificate_version/u);
+  assert.match(repository, /v\.secret_bundle_ref/u);
   assert.match(repository, /reserve_with_additional_bytes/u);
   assert.doesNotMatch(repository, /fetch_all\(&self\.pool\)/u);
 });
@@ -41,7 +39,7 @@ test('node sync service and daemon retain independent final response bounds', ()
     service,
     /const MAX_NODE_SYNC_RESPONSE_BYTES: usize = 15 \* 1024 \* 1024/u,
   );
-  assert.match(service, /manifest\.certificates\.len\(\) != encrypted_private_keys\.len\(\)/u);
+  assert.match(service, /manifest\.certificates\.len\(\) != secret_bundle_refs\.len\(\)/u);
   assert.match(service, /serde_json::to_vec\(manifest\)/u);
   assert.match(daemon, /const MAX_SYNC_RESPONSE_BYTES: usize = 16 \* 1024 \* 1024/u);
   assert.match(daemon, /node identity mismatch between heartbeat acknowledgement and sync manifest/u);

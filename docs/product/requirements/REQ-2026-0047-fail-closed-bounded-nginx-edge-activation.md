@@ -84,10 +84,10 @@ External Nginx remains optional. Operators that do not run it must keep this edg
 
 - `cargo test -p sdkwork-webserver-edge-runtime` passes 8/8 unit/integration tests. The installed `nginx/1.26.2` accepts a valid exact candidate, rejects an unknown directive, preserves the previous active file after rejection, replaces it with a second valid candidate, and leaves one target file only.
 - Edge tests also prove strict enable tokens, path traversal/DNS rejection, empty and over-1-MiB rejection, 8-KiB diagnostic truncation, disabled/unavailable failure, reload spawn failure, and a 100-ms child timeout that kills a five-second process.
-- `cargo test -p sdkwork-intelligence-webserver-service` passes 2/2 tests and compiles the async Nginx orchestration. SQLite full Repository parity passes with the conservative legacy validation result while retaining transaction, tenant, pagination, Nginx activation, certificate, agent, and audit coverage.
+- `cargo test -p sdkwork-intelligence-webserver-service` passes 2/2 tests and compiles the async Nginx orchestration. PostgreSQL Repository parity passes with the conservative legacy validation result while retaining transaction, tenant, pagination, Nginx activation, certificate, agent, and audit coverage.
 - Strict all-target Clippy passes for edge runtime, business service, and SQLx Repository with `-D warnings`.
 - Strict component-port binding, application-layering, and route-collision validators pass after all nine missing Rust component contracts were added; no Cargo member remains without `specs/component.spec.json` or `specs/README.md`.
-- Isolated-target `pnpm.cmd verify` passes workspace Rust tests, contract tests, API materialization consistency, repository standards, topology, database framework validation, SQLite lifecycle, and cloud gateway validation. The environment-gated PostgreSQL tests are ignored in this invocation; their dual-engine evidence remains owned by REQ-2026-0004.
+- Isolated-target, environment-independent `pnpm.cmd verify` checks passed workspace Rust tests, contract tests, API materialization consistency, repository standards, topology, database-framework, and cloud-gateway validation. PostgreSQL lifecycle was not executed or claimed by this Nginx activation requirement; REQ-2026-0004/0049 own that evidence.
 - `cargo fmt --all -- --check` and `git diff --check` pass.
 
 ## Remaining Boundary

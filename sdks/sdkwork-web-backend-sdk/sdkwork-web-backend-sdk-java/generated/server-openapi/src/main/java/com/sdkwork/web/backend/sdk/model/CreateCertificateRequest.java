@@ -1,17 +1,19 @@
 package com.sdkwork.web.backend.sdk.model;
 
+import java.util.List;
 
 public class CreateCertificateRequest {
-    private String domainId;
+    private List<String> domainIds;
     private Integer certType;
+    private String keyAlgorithm;
     private Boolean autoRenew;
 
-    public String getDomainId() {
-        return this.domainId;
+    public List<String> getDomainIds() {
+        return this.domainIds;
     }
 
-    public void setDomainId(String domainId) {
-        this.domainId = domainId;
+    public void setDomainIds(List<String> domainIds) {
+        this.domainIds = domainIds;
     }
 
     public Integer getCertType() {
@@ -20,6 +22,14 @@ public class CreateCertificateRequest {
 
     public void setCertType(Integer certType) {
         this.certType = certType;
+    }
+
+    public String getKeyAlgorithm() {
+        return this.keyAlgorithm;
+    }
+
+    public void setKeyAlgorithm(String keyAlgorithm) {
+        this.keyAlgorithm = keyAlgorithm;
     }
 
     public Boolean getAutoRenew() {

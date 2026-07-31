@@ -74,5 +74,5 @@ This requirement proves one explicitly converged asynchronous physical standby c
 
 - `pnpm test:postgres:ha` passes against the digest-pinned PostgreSQL 16.9 Alpine image: one streaming standby is observed, WAL LSN `0/30001F8` is replayed, the primary is stopped, promotion succeeds, and the promoted node preserves and accepts tenant-scoped writes.
 - `node --test tests/contract/postgres-ha.contract.test.mjs` passes 2/2 and pins the digest, physical base-backup/slot contract, exact replay evidence, shutdown-before-promotion ordering, internal topology, finite resources, unconditional cleanup, and release-gate placement.
-- `pnpm verify` passes with 25 Node contract tests plus the Rust HTTP/HTTPS, Nginx, resource-pressure, ACME, SQLite recovery, database lifecycle, API materialization, SDKWork standards, topology, database-framework, and cloud-gateway verification surfaces.
+- `pnpm verify` passes with 25 Node contract tests plus the Rust HTTP/HTTPS, Nginx, resource-pressure, ACME, PostgreSQL recovery, database lifecycle, API materialization, SDKWork standards, topology, database-framework, and cloud-gateway verification surfaces.
 - Shared workflow, pnpm-script, Agent/workflow, formatting, and diff validators pass. No `sdkwork-web-ha-*` container or network remains after successful or failed runs.

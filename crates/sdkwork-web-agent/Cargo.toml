@@ -19,6 +19,7 @@ path = "src/bin/sdkwork-web-node-daemon.rs"
 
 [dependencies]
 anyhow.workspace = true
+chrono.workspace = true
 dotenvy.workspace = true
 serde.workspace = true
 serde_json.workspace = true
@@ -31,5 +32,4 @@ url.workspace = true
 sdkwork-web-backend-sdk.workspace = true
 sdkwork-webserver-edge-runtime.workspace = true
 sdkwork-webserver-contract.workspace = true
-sdkwork-webserver-acme-service.workspace = true
 sdkwork-utils-rust.workspace = true

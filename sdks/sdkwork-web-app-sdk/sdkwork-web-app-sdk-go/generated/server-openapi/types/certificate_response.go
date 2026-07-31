@@ -4,15 +4,15 @@ package types
 type CertificateResponse struct {
 	Id string `json:"id"`
 	CertName string `json:"certName"`
-	Domain string `json:"domain"`
-	DomainId string `json:"domainId"`
+	Identifiers []CertificateIdentifierResponse `json:"identifiers"`
 	CertType int `json:"certType"`
 	Issuer string `json:"issuer"`
 	Fingerprint string `json:"fingerprint"`
+	KeyAlgorithm string `json:"keyAlgorithm"`
 	NotBefore string `json:"notBefore"`
 	NotAfter string `json:"notAfter"`
 	AutoRenew bool `json:"autoRenew"`
-	RenewalStatus int `json:"renewalStatus"`
-	Status int `json:"status"`
+	RenewalStatus string `json:"renewalStatus"`
+	Status string `json:"status"`
 	CreatedAt string `json:"createdAt"`
 }

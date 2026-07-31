@@ -341,17 +341,19 @@ export function createWebserverConsoleRegistry(
       action("delete", "Unbind", {}, (context) => client.domain.sites.domains.delete(requiredScope(context.scopeId), selectedId(context, "domainId")), { dangerous: true, permission: "web.sites.write", scope: true, selection: true }),
     ]),
     certificates: scopedSource((query) => client.certificate.list({ page: query.page, pageSize: query.pageSize, siteId: requiredScope(query.scopeId) }), [
-      action("create", "Request certificate", { domainId: "", certType: 1, autoRenew: true }, async (context) => client.certificate.create(createCertificateRequest(context.body), idempotencyParams(context)), {
-        fieldOptions: { certType: [1, 3], domainId: [] },
+      action("create", "Request certificate", { domainIds: [], certType: 1, keyAlgorithm: "ECDSA", autoRenew: true }, async (context) => client.certificate.create(createCertificateRequest(context.body), idempotencyParams(context)), {
+        fieldOptions: { certType: [1, 3], domainIds: [], keyAlgorithm: ["ECDSA", "RSA"] },
         loadFieldOptions: async (context) => {
           const result = await client.domain.sites.domains.list(requiredScope(context.scopeId), { page: 1, pageSize: 100 });
           return {
-            domainId: result.items.flatMap((domain) => typeof domain.id === "string"
+            domainIds: result.items.flatMap((domain) => typeof domain.id === "string"
               ? [{ value: domain.id, label: domain.hostname || domain.id }]
               : []),
           };
         },
+        multipleFields: ["domainIds"],
         permission: "web.certificates.write",
+        requiredFields: ["domainIds"],
         scope: true,
       }),
     ]),
@@ -388,7 +390,7 @@ export function createWebserverConsoleRegistry(
 
 function source(load: WebserverResourceDataSource["load"] extends (query: infer Q) => Promise<unknown> ? (query: Q) => Promise<unknown> : never, actions: readonly WebserverResourceAction[]): WebserverResourceDataSource { return { actions, async load(query) { return normalizeWebserverPage(await load(query)); } }; }
 function scopedSource(load: Parameters<typeof source>[0], actions: readonly WebserverResourceAction[]): WebserverResourceDataSource { return { ...source(load, actions), requiresScope: true }; }
-function action(id: string, label: string, bodyTemplate: Record<string, unknown>, execute: WebserverResourceAction["execute"], options: { acceptedFileTypes?: string; applicationSubmission?: WebserverResourceAction["applicationSubmission"]; availableWhen?: WebserverResourceAction["availableWhen"]; confirmation?: boolean; dangerous?: boolean; fieldOptions?: WebserverResourceAction["fieldOptions"]; file?: boolean; loadFieldOptions?: WebserverResourceAction["loadFieldOptions"]; loadSourceInputDefaults?: WebserverResourceAction["loadSourceInputDefaults"]; permission?: string; readOnlyFields?: readonly string[]; requiredFields?: readonly string[]; scope?: boolean; selection?: boolean; sourceInput?: WebserverResourceAction["sourceInput"] } = {}): WebserverResourceAction { return { id, label, bodyTemplate, execute, acceptedFileTypes: options.acceptedFileTypes, applicationSubmission: options.applicationSubmission, availableWhen: options.availableWhen, dangerous: options.dangerous, fieldOptions: options.fieldOptions, loadFieldOptions: options.loadFieldOptions, loadSourceInputDefaults: options.loadSourceInputDefaults, permission: options.permission, readOnlyFields: options.readOnlyFields, requiredFields: options.requiredFields, requiresConfirmation: options.confirmation, requiresFile: options.file, requiresScope: options.scope, requiresSelection: options.selection, sourceInput: options.sourceInput }; }
+function action(id: string, label: string, bodyTemplate: Record<string, unknown>, execute: WebserverResourceAction["execute"], options: { acceptedFileTypes?: string; applicationSubmission?: WebserverResourceAction["applicationSubmission"]; availableWhen?: WebserverResourceAction["availableWhen"]; confirmation?: boolean; dangerous?: boolean; fieldOptions?: WebserverResourceAction["fieldOptions"]; file?: boolean; loadFieldOptions?: WebserverResourceAction["loadFieldOptions"]; loadSourceInputDefaults?: WebserverResourceAction["loadSourceInputDefaults"]; multipleFields?: readonly string[]; permission?: string; readOnlyFields?: readonly string[]; requiredFields?: readonly string[]; scope?: boolean; selection?: boolean; sourceInput?: WebserverResourceAction["sourceInput"] } = {}): WebserverResourceAction { return { id, label, bodyTemplate, execute, acceptedFileTypes: options.acceptedFileTypes, applicationSubmission: options.applicationSubmission, availableWhen: options.availableWhen, dangerous: options.dangerous, fieldOptions: options.fieldOptions, loadFieldOptions: options.loadFieldOptions, loadSourceInputDefaults: options.loadSourceInputDefaults, multipleFields: options.multipleFields, permission: options.permission, readOnlyFields: options.readOnlyFields, requiredFields: options.requiredFields, requiresConfirmation: options.confirmation, requiresFile: options.file, requiresScope: options.scope, requiresSelection: options.selection, sourceInput: options.sourceInput }; }
 function selectedId(context: WebserverResourceActionContext, key: string): string { const value = context.selectedItem?.[key] ?? context.selectedItem?.id; if (typeof value !== "string" && typeof value !== "number") throw new Error(`${key} is unavailable`); return String(value); }
 function requiredScope(value: string | undefined): string { if (!value?.trim()) throw new Error("Site ID is required"); return value.trim(); }
 function idempotencyParams(context: WebserverResourceActionContext): { idempotencyKey: string } { const idempotencyKey = context.idempotencyKey?.trim(); if (!idempotencyKey) throw new Error("Idempotency key is required"); return { idempotencyKey }; }
@@ -795,10 +797,30 @@ function createCertificateRequest(body: Readonly<Record<string, unknown>>): Crea
     throw new Error("Automatic renewal is unavailable for self-signed certificates");
   }
   return {
-    domainId: boundedRequiredText(body.domainId, "Domain ID", 64),
+    domainIds: requiredTextList(body.domainIds, "Certificate domains", 8, 64),
     certType,
+    keyAlgorithm: certificateKeyAlgorithm(body.keyAlgorithm),
     autoRenew,
   };
+}
+
+function certificateKeyAlgorithm(value: unknown): "ECDSA" | "RSA" {
+  if (value === "ECDSA" || value === "RSA") return value;
+  throw new Error("Certificate key algorithm is invalid");
+}
+
+function requiredTextList(
+  value: unknown,
+  label: string,
+  maximum: number,
+  maximumLength: number,
+): string[] {
+  if (!Array.isArray(value)) throw new Error(`${label} is required`);
+  const items = [...new Set(value.map((item) => boundedRequiredText(item, label, maximumLength)))];
+  if (items.length === 0 || items.length > maximum) {
+    throw new Error(`${label} must contain between 1 and ${maximum} unique values`);
+  }
+  return items;
 }
 
 function healthCheckType(value: unknown): 1 | 2 | 3 {

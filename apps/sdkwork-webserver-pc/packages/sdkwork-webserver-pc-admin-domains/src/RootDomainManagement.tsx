@@ -32,11 +32,15 @@ import { Route, Routes, useNavigate, useParams, useSearchParams } from "react-ro
 
 import { useWebserverAdminSdk, type WebserverAdminSdkClient } from "@sdkwork/webserver-pc-admin-core";
 import {
+  formatWebserverErrorMessage,
   hasWebserverPermission,
+  translateWebserver,
   type WebserverLocale,
 } from "@sdkwork/webserver-pc-commons";
 
 import { ApplicationPicker } from "./ApplicationPicker";
+import { DomainCertificateManagementDialog } from "./DomainCertificateManagementDialog";
+import { domainMessages, type DomainMessages } from "./i18n";
 import "./root-domain-management.css";
 
 type RootDomainPage = Awaited<ReturnType<WebserverAdminSdkClient["domain"]["rootDomains"]["list"]>>;
@@ -71,7 +75,7 @@ export function RootDomainManagement(props: RootDomainManagementProps) {
 function RootDomainList({ locale, permissionScope }: RootDomainManagementProps) {
   const client = useWebserverAdminSdk();
   const navigate = useNavigate();
-  const copy = messages(locale);
+  const copy = domainMessages(locale);
   const canWrite = hasWebserverPermission(permissionScope, "web.sites.write");
   const [items, setItems] = useState<readonly RootDomain[]>([]);
   const [pageInfo, setPageInfo] = useState<RootDomainPage["pageInfo"]>();
@@ -102,12 +106,12 @@ function RootDomainList({ locale, permissionScope }: RootDomainManagementProps) 
       }
     } catch (cause) {
       if (sequence === loadSequence.current) {
-        setError(errorMessage(cause, copy.operationFailed));
+        setError(errorMessage(cause, locale));
       }
     } finally {
       if (sequence === loadSequence.current) setBusy(false);
     }
-  }, [client, copy.operationFailed, keyword, page, status]);
+  }, [client, keyword, locale, page, status]);
 
   useEffect(() => {
     void load();
@@ -292,6 +296,7 @@ function RootDomainList({ locale, permissionScope }: RootDomainManagementProps) 
       {createOpen ? (
         <CreateRootDomainDialog
           copy={copy}
+          locale={locale}
           onClose={() => setCreateOpen(false)}
           onSubmit={createRootDomain}
         />
@@ -300,6 +305,7 @@ function RootDomainList({ locale, permissionScope }: RootDomainManagementProps) 
         <ConfirmDialog
           confirmation={confirmation}
           copy={copy}
+          locale={locale}
           onClose={() => setConfirmation(undefined)}
         />
       ) : null}
@@ -312,9 +318,11 @@ function RootDomainDetail({ locale, permissionScope }: RootDomainManagementProps
   const [searchParams, setSearchParams] = useSearchParams();
   const client = useWebserverAdminSdk();
   const navigate = useNavigate();
-  const copy = messages(locale);
+  const copy = domainMessages(locale);
   const canWrite = hasWebserverPermission(permissionScope, "web.sites.write");
   const canWriteCertificates = hasWebserverPermission(permissionScope, "web.certificates.write");
+  const canReadCertificates = canWriteCertificates
+    || hasWebserverPermission(permissionScope, "web.certificates.read");
   const [rootDomain, setRootDomain] = useState<RootDomain>();
   const [items, setItems] = useState<readonly Subdomain[]>([]);
   const [pageInfo, setPageInfo] = useState<SubdomainPage["pageInfo"]>();
@@ -324,6 +332,7 @@ function RootDomainDetail({ locale, permissionScope }: RootDomainManagementProps
   const [error, setError] = useState<string>();
   const [createOpen, setCreateOpen] = useState(false);
   const [binding, setBinding] = useState<Subdomain>();
+  const [certificateDomain, setCertificateDomain] = useState<Subdomain>();
   const [confirmation, setConfirmation] = useState<Confirmation>();
   const loadSequence = useRef(0);
 
@@ -344,12 +353,12 @@ function RootDomainDetail({ locale, permissionScope }: RootDomainManagementProps
       }
     } catch (cause) {
       if (sequence === loadSequence.current) {
-        setError(errorMessage(cause, copy.operationFailed));
+        setError(errorMessage(cause, locale));
       }
     } finally {
       if (sequence === loadSequence.current) setBusy(false);
     }
-  }, [client, copy.operationFailed, page, rootDomainId]);
+  }, [client, locale, page, rootDomainId]);
 
   useEffect(() => {
     void load();
@@ -373,7 +382,7 @@ function RootDomainDetail({ locale, permissionScope }: RootDomainManagementProps
       await operation();
       await load();
     } catch (cause) {
-      setError(errorMessage(cause, copy.operationFailed));
+      setError(errorMessage(cause, locale));
     } finally {
       setActionBusy(undefined);
     }
@@ -551,15 +560,11 @@ function RootDomainDetail({ locale, permissionScope }: RootDomainManagementProps
                             onClick={() => requestUnbind(domain)}
                           ><Unlink aria-hidden="true" size={15} /></IconAction>
                         ) : null}
-                        {canWriteCertificates ? (
+                        {canReadCertificates ? (
                           <IconAction
-                            busy={actionBusy === `certificate:${domain.id}`}
-                            disabled={Boolean(actionBusy) || !domain.isVerified || Number(domain.certificateCount) > 0}
-                            label={copy.issueCertificate}
-                            onClick={() => void runAction("certificate", domain.id, () => client.certificate.create(
-                              { autoRenew: true, certType: 1, domainId: domain.id },
-                              { idempotencyKey: idempotencyKey("certificate-create") },
-                            ))}
+                            disabled={Boolean(actionBusy)}
+                            label={copy.manageCertificates}
+                            onClick={() => setCertificateDomain(domain)}
                           ><ShieldCheck aria-hidden="true" size={15} /></IconAction>
                         ) : null}
                         {canWrite ? (
@@ -594,6 +599,7 @@ function RootDomainDetail({ locale, permissionScope }: RootDomainManagementProps
           client={client}
           copy={copy}
           hostname={rootDomain.hostname}
+          locale={locale}
           onClose={() => setCreateOpen(false)}
           onSubmit={createHostname}
         />
@@ -603,12 +609,29 @@ function RootDomainDetail({ locale, permissionScope }: RootDomainManagementProps
           client={client}
           copy={copy}
           domain={binding}
+          locale={locale}
           onClose={() => setBinding(undefined)}
           onSubmit={bindApplication}
         />
       ) : null}
+      {certificateDomain ? (
+        <DomainCertificateManagementDialog
+          canWrite={canWriteCertificates}
+          client={client}
+          copy={copy}
+          domain={{
+            applicationId: certificateDomain.applicationId,
+            hostname: certificateDomain.hostname,
+            id: certificateDomain.id,
+            isVerified: certificateDomain.isVerified,
+          }}
+          locale={locale}
+          onChanged={() => void load()}
+          onClose={() => setCertificateDomain(undefined)}
+        />
+      ) : null}
       {confirmation ? (
-        <ConfirmDialog confirmation={confirmation} copy={copy} onClose={() => setConfirmation(undefined)} />
+        <ConfirmDialog confirmation={confirmation} copy={copy} locale={locale} onClose={() => setConfirmation(undefined)} />
       ) : null}
     </section>
   );
@@ -622,8 +645,9 @@ interface HostnameForm {
   sslProvider: "custom" | "letsencrypt" | "none";
 }
 
-function CreateRootDomainDialog({ copy, onClose, onSubmit }: {
+function CreateRootDomainDialog({ copy, locale, onClose, onSubmit }: {
   copy: DomainMessages;
+  locale: WebserverLocale;
   onClose(): void;
   onSubmit(hostname: string): Promise<void>;
 }) {
@@ -637,7 +661,7 @@ function CreateRootDomainDialog({ copy, onClose, onSubmit }: {
     try {
       await onSubmit(hostname);
     } catch (cause) {
-      setError(errorMessage(cause, copy.operationFailed));
+      setError(errorMessage(cause, locale));
       setBusy(false);
     }
   }
@@ -655,10 +679,11 @@ function CreateRootDomainDialog({ copy, onClose, onSubmit }: {
   );
 }
 
-function CreateHostnameDialog({ client, copy, hostname, onClose, onSubmit }: {
+function CreateHostnameDialog({ client, copy, hostname, locale, onClose, onSubmit }: {
   client: WebserverAdminSdkClient;
   copy: DomainMessages;
   hostname: string;
+  locale: WebserverLocale;
   onClose(): void;
   onSubmit(form: HostnameForm): Promise<void>;
 }) {
@@ -678,7 +703,7 @@ function CreateHostnameDialog({ client, copy, hostname, onClose, onSubmit }: {
     try {
       await onSubmit(form);
     } catch (cause) {
-      setError(errorMessage(cause, copy.operationFailed));
+      setError(errorMessage(cause, locale));
       setBusy(false);
     }
   }
@@ -698,6 +723,7 @@ function CreateHostnameDialog({ client, copy, hostname, onClose, onSubmit }: {
             allowUnbound
             client={client}
             copy={copy}
+            locale={locale}
             onChange={(applicationId) => setForm((current) => ({
               ...current,
               applicationId,
@@ -727,10 +753,11 @@ function CreateHostnameDialog({ client, copy, hostname, onClose, onSubmit }: {
   );
 }
 
-function BindApplicationDialog({ client, copy, domain, onClose, onSubmit }: {
+function BindApplicationDialog({ client, copy, domain, locale, onClose, onSubmit }: {
   client: WebserverAdminSdkClient;
   copy: DomainMessages;
   domain: Subdomain;
+  locale: WebserverLocale;
   onClose(): void;
   onSubmit(applicationId: string, isPrimary: boolean): Promise<void>;
 }) {
@@ -745,7 +772,7 @@ function BindApplicationDialog({ client, copy, domain, onClose, onSubmit }: {
     try {
       await onSubmit(applicationId, isPrimary);
     } catch (cause) {
-      setError(errorMessage(cause, copy.operationFailed));
+      setError(errorMessage(cause, locale));
       setBusy(false);
     }
   }
@@ -758,6 +785,7 @@ function BindApplicationDialog({ client, copy, domain, onClose, onSubmit }: {
           <ApplicationPicker
             client={client}
             copy={copy}
+            locale={locale}
             onChange={setApplicationId}
             value={applicationId}
           />
@@ -770,9 +798,10 @@ function BindApplicationDialog({ client, copy, domain, onClose, onSubmit }: {
   );
 }
 
-function ConfirmDialog({ confirmation, copy, onClose }: {
+function ConfirmDialog({ confirmation, copy, locale, onClose }: {
   confirmation: Confirmation;
   copy: DomainMessages;
+  locale: WebserverLocale;
   onClose(): void;
 }) {
   const [busy, setBusy] = useState(false);
@@ -793,7 +822,7 @@ function ConfirmDialog({ confirmation, copy, onClose }: {
             setBusy(true);
             setError(undefined);
             void confirmation.onConfirm().catch((cause) => {
-              setError(errorMessage(cause, copy.operationFailed));
+              setError(errorMessage(cause, locale));
               setBusy(false);
             });
           }}
@@ -992,8 +1021,8 @@ function formatDate(value: string | undefined, locale: WebserverLocale): string 
   return new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" }).format(date);
 }
 
-function errorMessage(cause: unknown, fallback: string): string {
-  return cause instanceof Error && cause.message.trim() ? cause.message : fallback;
+function errorMessage(cause: unknown, locale: WebserverLocale): string {
+  return formatWebserverErrorMessage(cause, (key, values) => translateWebserver(locale, key, values));
 }
 
 function rootDomainStatus(status: number, copy: DomainMessages): string {
@@ -1005,160 +1034,4 @@ function rootDomainStatus(status: number, copy: DomainMessages): string {
 function deploymentStatus(status: number, copy: DomainMessages): string {
   const labels = [copy.deploymentPending, copy.deploying, copy.deploymentSucceeded, copy.deploymentFailed, copy.rolledBack, copy.rollbackSource, copy.cancelled];
   return labels[status] ?? String(status);
-}
-
-type DomainMessages = ReturnType<typeof messages>;
-
-function messages(locale: WebserverLocale) {
-  return locale === "zh-CN" ? {
-    actions: "操作",
-    active: "正常",
-    activeDeployments: "有效发布",
-    addHostname: "添加主机名",
-    addRootDomain: "定义根域名",
-    allStatuses: "全部状态",
-    application: "关联应用",
-    bindApplication: "关联应用",
-    boundApplications: "已关联主机名",
-    cancel: "取消",
-    cancelled: "已取消",
-    certificateCount: "{count} 张证书",
-    certificatePending: "待签发证书",
-    certificateProvider: "证书来源",
-    close: "关闭",
-    confirmAdd: "确认添加",
-    confirmBind: "确认关联",
-    confirmDelete: "确认删除",
-    confirmUnbind: "确认解除",
-    customCertificate: "自定义证书",
-    deleteHostname: "删除主机名",
-    deleteHostnameDetail: "将删除主机名 {hostname}。此操作无法撤销。",
-    deleteZone: "删除根域名",
-    deleteZoneBlocked: "请先删除该根域名下的所有主机名",
-    deleteZoneDetail: "将删除根域名 {hostname}。只有不包含主机名的 Zone 才能删除。",
-    deploying: "发布中",
-    deploymentFailed: "发布失败",
-    deploymentPending: "待发布",
-    deploymentSucceeded: "发布成功",
-    disabled: "已停用",
-    enableHttps: "启用 HTTPS",
-    enabled: "已启用",
-    hostname: "完整域名",
-    hostnames: "主机名",
-    https: "HTTPS",
-    issueCertificate: "签发证书",
-    latestDeployment: "最新发布",
-    loading: "正在加载",
-    manageHostnames: "管理主机名",
-    next: "下一页",
-    noCertificate: "暂不签发",
-    noApplications: "没有匹配的应用",
-    noDeployment: "暂无发布",
-    noHostnames: "此根域名下暂无主机名",
-    noRootDomains: "暂无根域名",
-    off: "未启用",
-    operationFailed: "操作失败，请稍后重试",
-    page: "第 {page} 页",
-    pending: "待处理",
-    previous: "上一页",
-    primary: "主域名",
-    primaryHostname: "设为应用主域名",
-    quickAddHostname: "快速添加主机名",
-    recordName: "记录名",
-    refresh: "刷新",
-    rollbackSource: "回滚来源",
-    rolledBack: "已回滚",
-    rootDomain: "根域名",
-    search: "搜索根域名",
-    searchApplications: "搜索应用",
-    searchApplicationsPlaceholder: "输入应用名称",
-    searchPlaceholder: "搜索根域名",
-    selectApplication: "选择应用",
-    status: "状态",
-    title: "域名管理",
-    total: "共 {total} 项",
-    unbindApplication: "解除关联",
-    unbindApplicationDetail: "将解除主机名 {hostname} 与当前应用的关联，线上访问可能中断。",
-    unbound: "未关联",
-    unverified: "未验证",
-    updatedAt: "更新时间",
-    verification: "所有权验证",
-    verify: "验证域名",
-    verified: "已验证",
-  } as const : {
-    actions: "Actions",
-    active: "Active",
-    activeDeployments: "Active deployments",
-    addHostname: "Add hostname",
-    addRootDomain: "Define root domain",
-    allStatuses: "All statuses",
-    application: "Application",
-    bindApplication: "Bind application",
-    boundApplications: "Bound hostnames",
-    cancel: "Cancel",
-    cancelled: "Cancelled",
-    certificateCount: "{count} certificates",
-    certificatePending: "Certificate pending",
-    certificateProvider: "Certificate provider",
-    close: "Close",
-    confirmAdd: "Add",
-    confirmBind: "Bind",
-    confirmDelete: "Delete",
-    confirmUnbind: "Unbind",
-    customCertificate: "Custom certificate",
-    deleteHostname: "Delete hostname",
-    deleteHostnameDetail: "Hostname {hostname} will be deleted. This action cannot be undone.",
-    deleteZone: "Delete root domain",
-    deleteZoneBlocked: "Remove every hostname in this root domain first",
-    deleteZoneDetail: "Root domain {hostname} will be deleted. Only an empty Zone can be deleted.",
-    deploying: "Deploying",
-    deploymentFailed: "Failed",
-    deploymentPending: "Pending",
-    deploymentSucceeded: "Succeeded",
-    disabled: "Disabled",
-    enableHttps: "Enable HTTPS",
-    enabled: "Enabled",
-    hostname: "Hostname",
-    hostnames: "Hostnames",
-    https: "HTTPS",
-    issueCertificate: "Issue certificate",
-    latestDeployment: "Latest deployment",
-    loading: "Loading",
-    manageHostnames: "Manage hostnames",
-    next: "Next page",
-    noCertificate: "No certificate",
-    noApplications: "No matching applications",
-    noDeployment: "No deployment",
-    noHostnames: "No hostnames in this root domain",
-    noRootDomains: "No root domains",
-    off: "Off",
-    operationFailed: "The operation could not be completed",
-    page: "Page {page}",
-    pending: "Pending",
-    previous: "Previous page",
-    primary: "Primary",
-    primaryHostname: "Primary application hostname",
-    quickAddHostname: "Quick add hostname",
-    recordName: "Record name",
-    refresh: "Refresh",
-    rollbackSource: "Rollback source",
-    rolledBack: "Rolled back",
-    rootDomain: "Root domain",
-    search: "Search root domains",
-    searchApplications: "Search applications",
-    searchApplicationsPlaceholder: "Search by application name",
-    searchPlaceholder: "Search root domains",
-    selectApplication: "Select application",
-    status: "Status",
-    title: "Domain management",
-    total: "{total} items",
-    unbindApplication: "Unbind application",
-    unbindApplicationDetail: "This will unbind hostname {hostname} from its application and may interrupt live traffic.",
-    unbound: "Unbound",
-    unverified: "Unverified",
-    updatedAt: "Updated",
-    verification: "Ownership",
-    verify: "Verify domain",
-    verified: "Verified",
-  } as const;
 }

@@ -697,8 +697,10 @@ describe("console release controls", () => {
 
     expect(listCertificates).toHaveBeenCalledWith({ page: 1, pageSize: 20, siteId: "site-1" });
     expect(listDomains).toHaveBeenCalledWith("site-1", { page: 1, pageSize: 100 });
-    expect(options?.domainId).toEqual([{ value: "domain-1", label: "app.example.com" }]);
+    expect(options?.domainIds).toEqual([{ value: "domain-1", label: "app.example.com" }]);
     expect(registry.certificates?.actions[0]?.fieldOptions?.certType).toEqual([1, 3]);
+    expect(registry.certificates?.actions[0]?.fieldOptions?.keyAlgorithm).toEqual(["ECDSA", "RSA"]);
+    expect(registry.certificates?.actions[0]?.multipleFields).toEqual(["domainIds"]);
   });
 
   it("rejects invalid configuration inputs before app SDK calls", async () => {
@@ -740,7 +742,7 @@ describe("console release controls", () => {
     })).rejects.toThrow("safe ASCII DNS name");
     await expect(certificate.execute({
       scopeId: "site-1",
-      body: { domainId: "domain-1", certType: 3, autoRenew: true },
+      body: { domainIds: ["domain-1"], certType: 3, keyAlgorithm: "ECDSA", autoRenew: true },
       idempotencyKey: "invalid-certificate-renewal",
     })).rejects.toThrow("unavailable for self-signed certificates");
 

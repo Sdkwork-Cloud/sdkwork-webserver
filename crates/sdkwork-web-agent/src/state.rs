@@ -5,11 +5,13 @@ use std::path::{Path, PathBuf};
 
 use anyhow::{bail, Context};
 use sdkwork_utils_rust::crypto::sha256_hash;
+use sdkwork_webserver_contract::AgentCertificateObservation;
 use serde::{Deserialize, Serialize};
 use tempfile::NamedTempFile;
 
 const STATE_SCHEMA_VERSION: u32 = 1;
-const MAX_STATE_BYTES: u64 = 8 * 1024;
+const MAX_STATE_BYTES: u64 = 1024 * 1024;
+const MAX_CERTIFICATE_OBSERVATIONS: usize = 2_048;
 const SYNC_VERSION_PREFIX: &str = "sv1:";
 const SYNC_VERSION_HEX_BYTES: usize = 64;
 const NODE_DAEMON_LOCK_FILE: &str = "sdkwork-web-node-daemon.lock";
@@ -66,6 +68,7 @@ pub struct NodeDaemonState {
     revision: u64,
     desired_sync_version: Option<String>,
     observed_sync_version: Option<String>,
+    certificate_observations: Vec<AgentCertificateObservation>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -77,6 +80,8 @@ struct StoredNodeDaemonState {
     desired_sync_version: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     observed_sync_version: Option<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    certificate_observations: Vec<AgentCertificateObservation>,
     checksum: String,
 }
 
@@ -87,6 +92,12 @@ struct StateChecksumPayload<'a> {
     revision: u64,
     desired_sync_version: &'a Option<String>,
     observed_sync_version: &'a Option<String>,
+    #[serde(skip_serializing_if = "certificate_observations_empty")]
+    certificate_observations: &'a [AgentCertificateObservation],
+}
+
+fn certificate_observations_empty(value: &&[AgentCertificateObservation]) -> bool {
+    value.is_empty()
 }
 
 #[derive(Deserialize)]
@@ -179,6 +190,10 @@ impl NodeDaemonState {
         self.desired_sync_version.as_deref()
     }
 
+    pub fn certificate_observations(&self) -> &[AgentCertificateObservation] {
+        &self.certificate_observations
+    }
+
     pub fn revision(&self) -> u64 {
         self.revision
     }
@@ -196,7 +211,30 @@ impl NodeDaemonState {
                 .ok_or_else(|| anyhow::anyhow!("Web Node Daemon state revision exhausted"))?,
             desired_sync_version: Some(sync_version.to_string()),
             observed_sync_version: self.observed_sync_version.clone(),
+            certificate_observations: Vec::new(),
         })
+    }
+
+    pub fn with_certificate_observations(
+        &self,
+        observations: Vec<AgentCertificateObservation>,
+    ) -> anyhow::Result<Self> {
+        if observations.len() > MAX_CERTIFICATE_OBSERVATIONS {
+            bail!(
+                "Web Node Daemon certificate observations exceed {MAX_CERTIFICATE_OBSERVATIONS} items"
+            );
+        }
+        let next = Self {
+            revision: self
+                .revision
+                .checked_add(1)
+                .ok_or_else(|| anyhow::anyhow!("Web Node Daemon state revision exhausted"))?,
+            desired_sync_version: self.desired_sync_version.clone(),
+            observed_sync_version: self.observed_sync_version.clone(),
+            certificate_observations: observations,
+        };
+        next.validate()?;
+        Ok(next)
     }
 
     pub fn with_observed(&self, sync_version: &str) -> anyhow::Result<Self> {
@@ -211,6 +249,7 @@ impl NodeDaemonState {
                 .ok_or_else(|| anyhow::anyhow!("Web Node Daemon state revision exhausted"))?,
             desired_sync_version: Some(sync_version.to_string()),
             observed_sync_version: Some(sync_version.to_string()),
+            certificate_observations: self.certificate_observations.clone(),
         })
     }
 
@@ -226,6 +265,7 @@ impl NodeDaemonState {
             stored.revision,
             &stored.desired_sync_version,
             &stored.observed_sync_version,
+            &stored.certificate_observations,
         )?;
         if stored.checksum != expected {
             bail!("Web Node Daemon state checksum mismatch");
@@ -234,6 +274,7 @@ impl NodeDaemonState {
             revision: stored.revision,
             desired_sync_version: stored.desired_sync_version,
             observed_sync_version: stored.observed_sync_version,
+            certificate_observations: stored.certificate_observations,
         };
         state.validate()?;
         Ok(state)
@@ -247,6 +288,7 @@ impl NodeDaemonState {
             revision: u64::from(legacy.last_sync_version.is_some()),
             desired_sync_version: legacy.last_sync_version.clone(),
             observed_sync_version: legacy.last_sync_version,
+            certificate_observations: Vec::new(),
         })
     }
 
@@ -256,11 +298,13 @@ impl NodeDaemonState {
             revision: self.revision,
             desired_sync_version: self.desired_sync_version.clone(),
             observed_sync_version: self.observed_sync_version.clone(),
+            certificate_observations: self.certificate_observations.clone(),
             checksum: checksum(
                 STATE_SCHEMA_VERSION,
                 self.revision,
                 &self.desired_sync_version,
                 &self.observed_sync_version,
+                &self.certificate_observations,
             )?,
         })
     }
@@ -273,6 +317,22 @@ impl NodeDaemonState {
             validate_sync_version(version)?;
             if self.desired_sync_version.is_none() {
                 bail!("observed sync generation requires a desired generation");
+            }
+        }
+        if self.certificate_observations.len() > MAX_CERTIFICATE_OBSERVATIONS {
+            bail!(
+                "Web Node Daemon certificate observations exceed {MAX_CERTIFICATE_OBSERVATIONS} items"
+            );
+        }
+        let desired_sync_version = self.desired_sync_version.as_deref();
+        let mut certificate_ids =
+            std::collections::HashSet::with_capacity(self.certificate_observations.len());
+        for observation in &self.certificate_observations {
+            if desired_sync_version != Some(observation.sync_version.as_str()) {
+                bail!("certificate observation does not match the durable desired generation");
+            }
+            if !certificate_ids.insert(observation.certificate_id.as_str()) {
+                bail!("certificate observations contain a duplicate certificate ID");
             }
         }
         Ok(())
@@ -371,12 +431,14 @@ fn checksum(
     revision: u64,
     desired_sync_version: &Option<String>,
     observed_sync_version: &Option<String>,
+    certificate_observations: &[AgentCertificateObservation],
 ) -> anyhow::Result<String> {
     let payload = StateChecksumPayload {
         schema_version,
         revision,
         desired_sync_version,
         observed_sync_version,
+        certificate_observations,
     };
     let bytes = serde_json::to_vec(&payload).context("serialize state checksum payload")?;
     Ok(format!("sha256:{}", sha256_hash(&bytes)))

@@ -1,11 +1,13 @@
 package com.sdkwork.web.backend.sdk.model;
 
+import java.util.List;
 
 public class AgentHeartbeatRequest {
     private String agentVersion;
     private Boolean nginxEnabled;
     private String activeConfigs;
     private String lastSyncVersion;
+    private List<AgentCertificateObservation> certificateObservations;
 
     public String getAgentVersion() {
         return this.agentVersion;
@@ -37,5 +39,13 @@ public class AgentHeartbeatRequest {
 
     public void setLastSyncVersion(String lastSyncVersion) {
         this.lastSyncVersion = lastSyncVersion;
+    }
+
+    public List<AgentCertificateObservation> getCertificateObservations() {
+        return this.certificateObservations;
+    }
+
+    public void setCertificateObservations(List<AgentCertificateObservation> certificateObservations) {
+        this.certificateObservations = certificateObservations;
     }
 }

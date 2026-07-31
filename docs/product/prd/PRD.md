@@ -73,7 +73,7 @@ loop or a second authority.
 - Import supported Nginx configuration into a normalized model and render normalized configuration back to Nginx.
 - Support TLS 1.2 and TLS 1.3, SNI, multiple certificates, ACME, managed certificate rotation, and zero-downtime TLS reload.
 - Provide deterministic validation, planning, publication, canary rollout, status observation, and rollback.
-- Support PostgreSQL as the cloud and server-grade standalone default, plus an explicitly selected SQLite single-node standalone profile with equivalent supported business behavior.
+- Use PostgreSQL as the only authoritative cloud and standalone server database.
 - Meet measurable throughput, latency, reload, memory, availability, security, and recovery targets.
 - Operate as a self-contained Web Server when the management control plane and database are temporarily unavailable.
 - Provide strict HTTP parsing, deterministic overload behavior, graceful process lifecycle, and safe operating-system integration.
@@ -85,13 +85,13 @@ loop or a second authority.
 - V1 does not implement OpenResty/Lua, Perl modules, Nginx mail proxy, or Nginx Plus proprietary features.
 - V1 does not treat arbitrary raw Nginx text as executable by the Rust engine.
 - V1 does not store certificate private keys, tokens, passwords, or credentials in `sdkwork.app.config.json` or committed Web Server configuration.
-- V1 does not use SQLite as a shared cloud-cluster database.
+- V1 does not require the request data plane to query PostgreSQL, Redis, ACME, DNS control APIs, or the management control plane for every request.
 - V1 does not allow per-application code to bypass the Web Server compiler with handwritten runtime routes.
 - V1 does not guarantee byte-for-byte identical Nginx-generated error pages; protocol behavior and configured routing semantics are the compatibility target.
 - V1 is a reverse proxy, not an unrestricted forward proxy, and does not expose the HTTP `CONNECT` method as an open tunnel.
 - V1 does not embed PHP, CGI, FastCGI, uWSGI, SCGI, application language runtimes, or arbitrary native code. Dynamic applications run behind supported upstream protocols.
 - V1 static roots are read-only and do not provide WebDAV or arbitrary client-driven filesystem mutation.
-- V1 does not require the request data plane to query PostgreSQL, SQLite, Redis, ACME, DNS control APIs, or the management control plane for every request.
+- V1 does not require the request data plane to query PostgreSQL, Redis, ACME, DNS control APIs, or the management control plane for every request.
 
 ## 5. Scope
 
@@ -108,7 +108,7 @@ loop or a second authority.
 | Cluster operation | Node-scoped assignments, signed delta snapshots, fencing, offline recovery, version convergence, and no tenant-wide secret broadcast. |
 | Control plane | IAM-protected APIs, SDKs, pagination, idempotency, optimistic concurrency, asynchronous operations, audit, and operational status. |
 | PC management application | `apps/sdkwork-webserver-pc` provides an isolated tenant Console and lazy backend-admin surface. Console Web Server operations consume `@sdkwork/web-app-sdk`; application-package bytes are uploaded only through `@sdkwork/drive-app-sdk`; internal operator workflows consume only `@sdkwork/web-backend-sdk`. All authenticated SDK clients share the bootstrap-owned TokenManager. |
-| Persistence | PostgreSQL cloud and default server authority, explicit SQLite single-node standalone support, portable contracts, migration governance, transaction safety, and drift detection. |
+| Persistence | PostgreSQL authoritative server storage, portable contracts, migration governance, transaction safety, drift detection, backup/restore, and failover evidence. |
 | Operations | Health/readiness, structured logs, metrics, traces, alerts, quotas, rate limits, backup/restore, rolling upgrades, and incident runbooks. |
 | Runtime lifecycle | Deterministic bootstrap, config test/dump/explain, non-root operation, atomic reload, graceful shutdown, overload shedding, service-manager integration, and zero-downtime executable upgrade. |
 
@@ -153,7 +153,7 @@ Health or SLO checks detect a failed canary. The control plane stops rollout, re
 - `PRD-FR-009`: Nginx import must preserve source locations and produce an explicit compatibility diagnostic for every parsed directive.
 - `PRD-FR-010`: Every node must receive only the applications, routes, certificates, and secrets assigned to that node.
 - `PRD-FR-011`: Every list/search API must use store-level SDKWork pagination and return standard `pageInfo`; growing logs, events, revisions, operations, and nodes must use cursor/keyset pagination.
-- `PRD-FR-012`: PostgreSQL and SQLite must pass the same business, transaction, migration, and API contract suite for supported deployment profiles.
+- `PRD-FR-012`: PostgreSQL must pass lifecycle, repository, transaction, migration, backup/restore, failover, and API contract suites for every server deployment profile.
 - `PRD-FR-013`: The management client must expose configuration, validation diagnostics, revisions, diff, rollout, HTTPS, certificate, node, metrics, and audit workflows without hand-built HTTP.
 - `PRD-FR-014`: HTTP/1.x and HTTP/2 parsing, framing, method, authority, header, body, connection, and response behavior must be standards-correct and fail closed against request smuggling, slow-client, and protocol-confusion attacks.
 - `PRD-FR-015`: The data plane must start from a locally available verified snapshot and continue serving the last verified snapshot without a synchronous database or control-plane dependency in the request path.
@@ -177,6 +177,9 @@ Health or SLO checks detect a failed canary. The control plane stops rollout, re
 - `PRD-FR-033`: A standalone PC deployment must expose the page and all generated SDK requests through one browser-visible origin. Development may retain Vite HMR only through a canonical-path same-origin proxy, while production must serve the packaged PC shell and composed APIs from application public ingress.
 - `PRD-FR-034`: Application creation and listing updates must support a required 1024 x 1024 opaque PNG icon, either uploaded locally or deterministically generated, plus an optional 1024 x 500 cover, up to eight bounded preview images, short/full descriptions, release notes, category, keywords, and HTTPS support, privacy, and official-site links. SDKWork-owned assets must be uploaded through the injected Drive App SDK and persisted only as canonical Drive-backed `MediaResource` snapshots.
 - `PRD-FR-035`: A draft may be retained when source or media upload fails, with a recovery message that identifies the draft without exposing provider details. Deployment creation must reject an application without a valid icon; activation must additionally require at least one successful immutable deployment. Upload, command acceptance, and activation remain separate truthful states.
+- `PRD-FR-036`: Root domains are explicit tenant-owned Zones. Every apex or subdomain hostname belongs to one Zone and application routing is represented by `web_site_binding`, never a direct application column on the hostname.
+- `PRD-FR-037`: Certificates cover 1..8 unique hostnames through relational identifiers. A hostname may participate in multiple certificate lifecycles, and one listener may activate one RSA and one ECDSA binding with one explicit default.
+- `PRD-FR-038`: Hostname deployment visibility is projected from the bound application. Domain, certificate, listener, deployment, distribution, and target observation states remain separate and truthful.
 
 ## 8. Non-Functional Requirements
 
@@ -229,7 +232,7 @@ Health or SLO checks detect a failed canary. The control plane stops rollout, re
 - 100% of published revisions have validation evidence, checksum, actor, operation, node convergence, and rollback target.
 - Zero unsupported Nginx directives are silently accepted.
 - Zero unbounded interactive list queries, tenant-wide full configuration syncs, or unbounded in-memory request bodies remain in production paths.
-- PostgreSQL and SQLite compatibility suites pass for every release.
+- PostgreSQL lifecycle, migration, repository, recovery, failover, and query-plan gates pass for every release.
 - Nginx conformance, HTTPS, load, soak, security, failover, and rollback gates pass before stable release.
 - Protocol conformance, request-smuggling, slow-client, overload, descriptor exhaustion, disk-full, DNS failure, cache poisoning, and graceful executable-upgrade gates pass before stable release.
 - Critical certificate expiry, invalid rollout, node divergence, and capacity saturation alerts meet documented detection and response targets.
@@ -243,7 +246,7 @@ Health or SLO checks detect a failed canary. The control plane stops rollout, re
 
 ### Phase 1 - Rust HTTP/HTTPS Foundation
 
-- Deliver listeners, virtual hosts, static resources, reverse proxying, TLS, SNI, certificate import, safe reload, configuration compiler, immutable revisions, PostgreSQL standalone defaults, and explicit SQLite single-node behavior.
+- Deliver listeners, virtual hosts, static resources, reverse proxying, TLS, SNI, certificate import, safe reload, configuration compiler, immutable revisions, and PostgreSQL authoritative persistence.
 - Deliver strict HTTP/1.x and HTTP/2 framing, resource governor, DNS resolver, bounded streaming/spooling, process lifecycle, protected administration, and standalone operation from a local verified snapshot.
 
 ### Phase 2 - Nginx Compatibility And Managed Certificates
@@ -261,7 +264,7 @@ Health or SLO checks detect a failed canary. The control plane stops rollout, re
 
 ## 11. Linked Requirements
 
-- [REQ-2026-0067 Detached custom domain assets](../requirements/REQ-2026-0067-detached-custom-domain-assets.md) - allows tenant administrators to register and verify domains before application binding, retain multiple certificates per domain, and activate them only through deployment and TLS runtime contracts.
+- [REQ-2026-0067 Professional domain and certificate relationships](../requirements/REQ-2026-0067-detached-custom-domain-assets.md) - defines application-to-hostname routes, multi-SAN certificates, immutable versions, RSA/ECDSA listener bindings, and fail-closed activation.
 - [REQ-2026-0068 Root domain zone management](../requirements/REQ-2026-0068-root-domain-zone-management.md) - defines explicit root-domain Zones, nested hostname management, and deployment visibility without duplicating deployment authority.
 - [REQ-2026-0066 Idempotency contract closure](../requirements/REQ-2026-0066-idempotency-contract-closure.md) - makes retry safety a generated contract across OpenAPI, route metadata, SDKs, PC actions, framework validation, durable deployment deduplication, and CI.
 - [REQ-2026-0065 Standalone browser same-origin delivery](../requirements/REQ-2026-0065-standalone-browser-same-origin-delivery.md) - makes page/API browser origin explicit, uses a topology-derived Vite proxy for development, and packages the PC shell behind the production Rust application ingress.
@@ -270,7 +273,7 @@ Health or SLO checks detect a failed canary. The control plane stops rollout, re
 - [REQ-2026-0062 Owner-scoped Console release and TLS workflow](../requirements/REQ-2026-0062-owner-scoped-console-release-and-tls-workflow.md) - defines owner isolation, Drive-backed package intake, truthful deployment status, custom-domain certificate selection, persistent Console access, Admin routing, and sign-out behavior.
 - [REQ-2026-0063 Tenant super administrator control plane](../requirements/REQ-2026-0063-tenant-super-admin-control-plane.md) - completes tenant-scoped application lifecycle, domain removal, successful-version rollback, audit filtering, administrator-tier identity, canonical Nginx/server forms, one-time Node credential handling, and dangerous-action controls without claiming cross-tenant or deployment-worker authority.
 - [REQ-2026-0003 Rust Web Server data-plane foundation](../requirements/REQ-2026-0003-rust-webserver-data-plane-foundation.md) - accepted bounded foundation for configuration compilation and the first real HTTP/HTTPS data-plane slice; it does not satisfy the remaining Phase 1 or commercial release gates.
-- [REQ-2026-0004 PostgreSQL and SQLite lifecycle parity](../requirements/REQ-2026-0004-database-engine-parity.md) - SQLite/PostgreSQL lifecycle and full public Repository engine parity pass; bounded collection completion remains linked to REQ-2026-0045.
+- [REQ-2026-0004 PostgreSQL authoritative database lifecycle](../requirements/REQ-2026-0004-database-engine-parity.md) - supersedes the prelaunch dual-engine plan and keeps authoritative server persistence on PostgreSQL.
 - [REQ-2026-0045 Bounded control-plane collections and agent delta sync](../requirements/REQ-2026-0045-bounded-control-plane-collections.md) - draft human-review gate for canonical pagination and node-scoped bounded synchronization; public API/SDK/agent changes are not implemented yet.
 - [REQ-2026-0005 Atomic same-topology configuration reload](../requirements/REQ-2026-0005-atomic-config-reload.md) - accepted local-file Watch and lock-free immutable generation publication; persisted rollback, TLS/listener handoff, executable upgrade, and cluster convergence remain separate gates.
 - [REQ-2026-0006 Multi-certificate SNI selection](../requirements/REQ-2026-0006-multi-certificate-sni.md) - accepted static immutable Exact/Wildcard certificate selection and activation-time leaf/time/SAN/key checks; zero-downtime rotation remains a separate gate.
@@ -309,7 +312,7 @@ Health or SLO checks detect a failed canary. The control plane stops rollout, re
 - [REQ-2026-0047 Fail-closed bounded Nginx edge activation](../requirements/REQ-2026-0047-fail-closed-bounded-nginx-edge-activation.md) - accepted exact-candidate `nginx -t`, bounded/reaped subprocess execution, path confinement, atomic staging, async blocking isolation, conservative Repository behavior, and propagated deployment/reload errors with real Nginx 1.26.2 evidence.
 - [REQ-2026-0048 Bounded ACME and certificate lifecycle](../requirements/REQ-2026-0048-bounded-acme-certificate-lifecycle.md) - accepted typed runtime injection, bounded/cancellation-safe HTTP-01 challenge state, whole-operation timeout, leaf-DER evidence, and fail-closed certificate bundle staging; real public-CA issuance, persistent ACME accounts, and cluster activation convergence remain release gates.
 - [REQ-2026-0049 Mandatory PostgreSQL CI gate](../requirements/REQ-2026-0049-mandatory-postgresql-ci-gate.md) - accepted digest-pinned disposable PostgreSQL verification for lifecycle/seed/drift and full Repository parity in pull requests, main pushes, and release validation; recovery and bounded physical promotion are covered by REQ-2026-0050/0051, while managed-provider and full production HA evidence remain open.
-- [REQ-2026-0050 Bounded database recovery drill](../requirements/REQ-2026-0050-bounded-database-recovery-drill.md) - accepted real SQLite `VACUUM INTO` and PostgreSQL `pg_dump`/`pg_restore` recovery evidence with finite artifact, process, container-resource, output, and cleanup bounds; it does not establish production scheduling, encrypted retention, PITR, managed-provider recovery, or product RPO/RTO.
+- [REQ-2026-0050 Bounded PostgreSQL recovery drill](../requirements/REQ-2026-0050-bounded-database-recovery-drill.md) - owns finite `pg_dump`/`pg_restore` evidence; production scheduling, encrypted retention, PITR, and managed-provider recovery remain release gates.
 - [REQ-2026-0051 Bounded PostgreSQL streaming failover](../requirements/REQ-2026-0051-bounded-postgresql-streaming-failover.md) - accepted real physical base backup, asynchronous WAL streaming, exact flush/replay LSN convergence, primary shutdown, standby promotion, and post-promotion tenant writes under finite topology and resource bounds; automatic election, endpoint failover, split-brain fencing, managed-provider and multi-zone evidence remain open.
 - [REQ-2026-0052 Durable Node Daemon sync generation](../requirements/REQ-2026-0052-durable-agent-sync-generation.md) - accepted bounded, checksummed, atomic local desired/observed sync checkpoints with deterministic crash replay and bounded node ingress; stale-artifact deletion, typed Node Credential SDK transport, served-fingerprint evidence, control-plane acknowledgement, and cluster convergence remain open. Agent remains the v3 compatibility name.
 - [REQ-2026-0053 Web Node Daemon terminology](../requirements/REQ-2026-0053-web-node-daemon-terminology.md) - accepts Web Node Daemon, Web Node, Node Sync Manifest, and Node Credential as canonical product terms; additive NODE environment keys are implemented while v3 Agent API/SDK/binary/state identifiers remain compatibility contracts pending a reviewed major-version migration.
@@ -329,7 +332,7 @@ A stable commercial release is accepted only when:
 
 - All P0/P1 requirements in this PRD and linked ready requirements have implementation and test evidence.
 - Authoritative configuration schemas, OpenAPI, generated SDKs, runtime behavior, database contracts, and documentation agree.
-- PostgreSQL and SQLite tests, Nginx conformance, HTTPS interoperability, security, performance, soak, chaos, rolling upgrade, backup/restore, and rollback tests pass.
+- PostgreSQL, Nginx conformance, HTTPS interoperability, security, performance, soak, chaos, rolling upgrade, backup/restore, and rollback tests pass.
 - No fake success, silent directive ignore, unbounded memory path, plaintext private key exposure, cross-node secret over-distribution, or undocumented compatibility exception remains.
 - Production deployment includes immutable artifacts, checksum, signature, SBOM, provenance, health probes, resource limits, autoscaling policy, disruption policy, secret manager integration, and operational runbooks.
 

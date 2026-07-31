@@ -6,8 +6,9 @@ namespace SDKWork.Web.BackendSdk.Models
 {
     public class CreateCertificateRequest
     {
-        public string DomainId { get; set; }
+        public List<string> DomainIds { get; set; }
         public int CertType { get; set; }
+        public string? KeyAlgorithm { get; set; }
         public bool? AutoRenew { get; set; }
     }
 }

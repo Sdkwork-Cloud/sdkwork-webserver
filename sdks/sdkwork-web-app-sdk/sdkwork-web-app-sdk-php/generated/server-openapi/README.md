@@ -19,7 +19,7 @@ use SDKWork\Web\AppSdk\SdkConfig;
 
 $config = new SdkConfig(baseUrl: 'http://localhost:3800');
 $client = new SdkworkAppClient($config);
-$$params = ['page' => 1, 'page_size' => 2, 'siteId' => '00000000-0000-0000-0000-000000000001'];
+$$params = ['page' => 1, 'page_size' => 2, 'siteId' => '00000000-0000-0000-0000-000000000001', 'domainId' => '00000000-0000-0000-0000-000000000001'];
 $result = $client->certificate->certificatesList($params);
 
 
@@ -53,10 +53,10 @@ $client->setHeader('X-Custom-Header', 'value');
 
 - `$client->site` - site API
 - `$client->domain` - domain API
+- `$client->certificate` - certificate API
 - `$client->sourceVersion` - source_version API
 - `$client->deployment` - deployment API
 - `$client->envVariable` - env_variable API
-- `$client->certificate` - certificate API
 - `$client->monitor` - monitor API
 
 ## Usage Examples
@@ -81,6 +81,17 @@ var_dump($result);
 $siteId = '1';
 $params = ['page' => 1, 'page_size' => 2];
 $result = $client->domain->sitesDomainsList($siteId, $params);
+var_dump($result);
+```
+
+### certificate
+
+```php
+<?php
+
+// 获取证书列表
+$params = ['page' => 1, 'page_size' => 2, 'siteId' => '00000000-0000-0000-0000-000000000001', 'domainId' => '00000000-0000-0000-0000-000000000001'];
+$result = $client->certificate->certificatesList($params);
 var_dump($result);
 ```
 
@@ -120,17 +131,6 @@ $result = $client->envVariable->sitesEnvVariablesList($siteId, $params);
 var_dump($result);
 ```
 
-### certificate
-
-```php
-<?php
-
-// 获取证书列表
-$params = ['page' => 1, 'page_size' => 2, 'siteId' => '00000000-0000-0000-0000-000000000001'];
-$result = $client->certificate->certificatesList($params);
-var_dump($result);
-```
-
 ### monitor
 
 ```php
@@ -155,7 +155,7 @@ $config = new SdkConfig(baseUrl: 'http://localhost:3800');
 $client = new SdkworkAppClient($config);
 
 try {
-    $params = ['page' => 1, 'page_size' => 2, 'siteId' => '00000000-0000-0000-0000-000000000001'];
+    $params = ['page' => 1, 'page_size' => 2, 'siteId' => '00000000-0000-0000-0000-000000000001', 'domainId' => '00000000-0000-0000-0000-000000000001'];
     $client->certificate->certificatesList($params);
 } catch (\Throwable $e) {
     echo "Error: {$e->getMessage()}\n";

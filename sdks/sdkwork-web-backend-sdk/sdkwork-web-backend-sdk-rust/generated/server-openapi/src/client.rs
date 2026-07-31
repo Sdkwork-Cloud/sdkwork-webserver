@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::api::{ApplicationApi, ApplicationDomainApi, DomainApi, ApplicationSourceVersionApi, ApplicationDeploymentApi, CertificateApi, CertificateDistributionApi, NginxApi, ServerApi, AgentApi, AuditApi};
+use crate::api::{ApplicationApi, ApplicationDomainApi, CertificateApi, DomainApi, ApplicationSourceVersionApi, ApplicationDeploymentApi, CertificateDistributionApi, NginxApi, ServerApi, AgentApi, AuditApi};
 use crate::http::{SdkworkConfig, SdkworkError, SdkworkHttpClient};
 
 #[derive(Clone)]
@@ -51,6 +51,10 @@ impl SdkworkBackendClient {
             ApplicationDomainApi::new(Arc::clone(&self.http))
         }
 
+    pub fn certificate(&self) -> CertificateApi {
+            CertificateApi::new(Arc::clone(&self.http))
+        }
+
     pub fn domain(&self) -> DomainApi {
             DomainApi::new(Arc::clone(&self.http))
         }
@@ -61,10 +65,6 @@ impl SdkworkBackendClient {
 
     pub fn application_deployment(&self) -> ApplicationDeploymentApi {
             ApplicationDeploymentApi::new(Arc::clone(&self.http))
-        }
-
-    pub fn certificate(&self) -> CertificateApi {
-            CertificateApi::new(Arc::clone(&self.http))
         }
 
     pub fn certificate_distribution(&self) -> CertificateDistributionApi {

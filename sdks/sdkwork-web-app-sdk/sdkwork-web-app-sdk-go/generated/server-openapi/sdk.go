@@ -9,10 +9,10 @@ type SdkworkAppClient struct {
     http *sdkhttp.Client
     Site *api.SiteApi
     Domain *api.DomainApi
+    Certificate *api.CertificateApi
     SourceVersion *api.SourceVersionApi
     Deployment *api.DeploymentApi
     EnvVariable *api.EnvVariableApi
-    Certificate *api.CertificateApi
     Monitor *api.MonitorApi
 }
 
@@ -27,10 +27,10 @@ func NewSdkworkAppClientWithConfig(config sdkhttp.Config) *SdkworkAppClient {
         http: client,
         Site: api.NewSiteApi(client),
         Domain: api.NewDomainApi(client),
+        Certificate: api.NewCertificateApi(client),
         SourceVersion: api.NewSourceVersionApi(client),
         Deployment: api.NewDeploymentApi(client),
         EnvVariable: api.NewEnvVariableApi(client),
-        Certificate: api.NewCertificateApi(client),
         Monitor: api.NewMonitorApi(client),
     }
 }

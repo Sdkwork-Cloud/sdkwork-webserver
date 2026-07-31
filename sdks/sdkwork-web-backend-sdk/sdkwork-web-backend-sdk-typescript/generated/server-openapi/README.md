@@ -56,10 +56,10 @@ const client = new SdkworkBackendClient({
 
 - `client.application` - application API
 - `client.applicationDomain` - application_domain API
+- `client.certificate` - certificate API
 - `client.domain` - domain API
 - `client.applicationSourceVersion` - application_source_version API
 - `client.applicationDeployment` - application_deployment API
-- `client.certificate` - certificate API
 - `client.certificateDistribution` - certificate_distribution API
 - `client.nginx` - nginx API
 - `client.server` - server API
@@ -93,6 +93,18 @@ const params = {
   page_size: 2,
 };
 const result = await client.applicationDomain.applications.domains.list(applicationId, params);
+```
+
+### certificate
+
+```typescript
+// List canonical certificates
+const params = {
+  page: 1,
+  page_size: 2,
+  domainId: 'domainId',
+};
+const result = await client.certificate.list(params);
 ```
 
 ### domain
@@ -129,17 +141,6 @@ const params = {
   status: 3,
 };
 const result = await client.applicationDeployment.applications.deployments.list(applicationId, params);
-```
-
-### certificate
-
-```typescript
-// List canonical certificates
-const params = {
-  page: 1,
-  page_size: 2,
-};
-const result = await client.certificate.list(params);
 ```
 
 ### certificate_distribution

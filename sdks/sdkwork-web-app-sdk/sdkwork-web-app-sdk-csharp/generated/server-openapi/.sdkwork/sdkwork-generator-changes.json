@@ -9,13 +9,11 @@
     "protocol": "http",
     "packageName": "SDKWork.Web.AppSdk"
   },
-  "changeFingerprint": "fd082f8e0361a27ab1e76cfbe32cfb7b2ec71ae8ec7c8a4129e37ffa179ade94",
+  "changeFingerprint": "33aeae93bf6a12b9ba130bf9c9f85c4cfc5309d61bcddbd6b7dc04b559eb7272",
   "changes": {
-    "createdGeneratedFiles": [
-      "Models/SitesSourceVersionsGitImportCreateResponse201.cs"
-    ],
+    "createdGeneratedFiles": [],
     "updatedGeneratedFiles": [
-      "Api/SourceVersionApi.cs"
+      "Models/ListenerCertificateBindingResponse.cs"
     ],
     "unchangedGeneratedFiles": [
       "Api/Api.cs",
@@ -26,6 +24,7 @@
       "Api/EnvVariableApi.cs",
       "Api/MonitorApi.cs",
       "Api/SiteApi.cs",
+      "Api/SourceVersionApi.cs",
       "bin/publish-core.mjs",
       "bin/publish.ps1",
       "bin/publish.sh",
@@ -33,6 +32,7 @@
       "Http/HttpClient.cs",
       "LICENSE",
       "Models/ApplicationStoreListing.cs",
+      "Models/CertificateIdentifierResponse.cs",
       "Models/CertificatePage.cs",
       "Models/CertificateResponse.cs",
       "Models/CertificatesCreateResponse201.cs",
@@ -42,6 +42,7 @@
       "Models/CreateDomainRequest.cs",
       "Models/CreateEnvVariableRequest.cs",
       "Models/CreateHealthCheckRequest.cs",
+      "Models/CreateListenerCertificateBindingRequest.cs",
       "Models/CreateSiteRequest.cs",
       "Models/CreateSourceVersionRequest.cs",
       "Models/DeploymentPage.cs",
@@ -55,6 +56,7 @@
       "Models/HealthCheckPage.cs",
       "Models/HealthCheckResponse.cs",
       "Models/ImportGitSourceVersionRequest.cs",
+      "Models/ListenerCertificateSummaryResponse.cs",
       "Models/MediaChecksum.cs",
       "Models/MediaResource.cs",
       "Models/PageInfo.cs",
@@ -75,6 +77,8 @@
       "Models/SitesDeploymentsRetrieveResponse.cs",
       "Models/SitesDeploymentsRollbackResponse.cs",
       "Models/SitesDomainsCreateResponse201.cs",
+      "Models/SitesDomainsListenerCertificateBindingsCreateResponse201.cs",
+      "Models/SitesDomainsListenerCertificateBindingsListResponse.cs",
       "Models/SitesDomainsListResponse.cs",
       "Models/SitesDomainsRetrieveResponse.cs",
       "Models/SitesDomainsVerifyResponse.cs",
@@ -86,6 +90,7 @@
       "Models/SitesPauseResponse.cs",
       "Models/SitesRetrieveResponse.cs",
       "Models/SitesSourceVersionsCreateResponse201.cs",
+      "Models/SitesSourceVersionsGitImportCreateResponse201.cs",
       "Models/SitesSourceVersionsListResponse.cs",
       "Models/SitesSourceVersionsRetrieveResponse.cs",
       "Models/SitesUpdateResponse.cs",
@@ -98,9 +103,7 @@
       "SDKWork.Web.AppSdk.csproj",
       "SdkworkAppClient.cs"
     ],
-    "deletedGeneratedFiles": [
-      "Models/SitesSourceVersionsImportGitResponse201.cs"
-    ],
+    "deletedGeneratedFiles": [],
     "scaffoldedFiles": [],
     "preservedScaffoldFiles": [
       "custom/README.md"
@@ -110,37 +113,29 @@
   "impact": {
     "schemaVersion": 1,
     "areas": [
-      "api-surface",
       "models"
     ],
     "details": [
       {
-        "area": "api-surface",
-        "paths": [
-          "Api/SourceVersionApi.cs"
-        ]
-      },
-      {
         "area": "models",
         "paths": [
-          "Models/SitesSourceVersionsGitImportCreateResponse201.cs",
-          "Models/SitesSourceVersionsImportGitResponse201.cs"
+          "Models/ListenerCertificateBindingResponse.cs"
         ]
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, models. Verification is required."
+    "summary": "Detected impact areas: models. Verification is required."
   },
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-csharp\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -158,14 +153,12 @@
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "high",
+    "riskLevel": "medium",
     "nextAction": "verify",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
     "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
-      "deleted-generated-files",
-      "manual-review-required",
       "verification-required"
     ]
   },

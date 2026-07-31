@@ -81,7 +81,6 @@
                     "db:postgres:plan":  "node ../sdkwork-specs/tools/postgres/postgres-db-cli.mjs --mode plan --config .env.postgres --app-root . --dry-run",
                     "db:postgres:init":  "node ../sdkwork-specs/tools/postgres/postgres-db-cli.mjs --mode init --config .env.postgres --app-root .",
                     "db:postgres:migrate":  "node ../sdkwork-specs/tools/postgres/postgres-db-cli.mjs --mode migrate --config .env.postgres --app-root .",
-                    "db:test:sqlite":  "cargo test -p sdkwork-intelligence-webserver-repository-sqlx --test repository_parity sqlite_repository_transactions_tenants_idempotency_and_pagination_are_bounded -- --exact",
                     "db:test:postgres":  "cargo test -p sdkwork-webserver-database-host --test postgres_lifecycle -- --ignored",
                     "gateway:run:standalone":  "pnpm exec sdkwork-app dev --runtime-target server --deployment-profile standalone",
                     "gateway:plan:standalone":  "pnpm exec sdkwork-app dev --runtime-target server --deployment-profile standalone --dry-run",

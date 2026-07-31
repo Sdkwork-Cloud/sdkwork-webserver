@@ -26,6 +26,7 @@ params = {
     'page': 1,
     'page_size': 2,
     'siteId': 'siteId',
+    'domainId': 'domainId',
 }
 result = client.certificate.list(params)
 ```
@@ -55,10 +56,10 @@ client.set_header('X-Custom-Header', 'value')
 
 - `client.site` - site API
 - `client.domain` - domain API
+- `client.certificate` - certificate API
 - `client.source_version` - source_version API
 - `client.deployment` - deployment API
 - `client.env_variable` - env_variable API
-- `client.certificate` - certificate API
 - `client.monitor` - monitor API
 
 ## Usage Examples
@@ -89,6 +90,20 @@ params = {
     'page_size': 2,
 }
 result = client.domain.sites.domains.list(site_id, params)
+print(result)
+```
+
+### certificate
+
+```python
+# 获取证书列表
+params = {
+    'page': 1,
+    'page_size': 2,
+    'siteId': 'siteId',
+    'domainId': 'domainId',
+}
+result = client.certificate.list(params)
 print(result)
 ```
 
@@ -131,19 +146,6 @@ result = client.env_variable.sites.env_variables.list(site_id, params)
 print(result)
 ```
 
-### certificate
-
-```python
-# 获取证书列表
-params = {
-    'page': 1,
-    'page_size': 2,
-    'siteId': 'siteId',
-}
-result = client.certificate.list(params)
-print(result)
-```
-
 ### monitor
 
 ```python
@@ -161,6 +163,7 @@ try:
         'page': 1,
         'page_size': 2,
         'siteId': 'siteId',
+        'domainId': 'domainId',
     }
     client.certificate.list(params)
 except Exception as error:

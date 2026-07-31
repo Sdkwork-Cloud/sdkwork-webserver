@@ -17,11 +17,54 @@ func NewCertificateApi(client *sdkhttp.Client) *CertificateApi {
     return &CertificateApi{client: client}
 }
 
-// List canonical certificates
-func (a *CertificateApi) CertificatesList(page *int, pageSize *int) (sdktypes.CertificatesListResponse, error) {
+// List certificates active on an application domain listener
+func (a *CertificateApi) ApplicationsDomainsListenerCertificateBindingsList(applicationId string, domainId string, page *int, pageSize *int) (sdktypes.ApplicationsDomainsListenerCertificateBindingsListResponse, error) {
     query := BuildQueryString([]QueryParameterSpec{
         {Name: "page", Value: func() interface{} { if page == nil { return nil }; return *page }(), Style: "form", Explode: true, AllowReserved: false},
         {Name: "page_size", Value: func() interface{} { if pageSize == nil { return nil }; return *pageSize }(), Style: "form", Explode: true, AllowReserved: false},
+    })
+    raw, err := a.client.Get(AppendQueryString(BackendApiPath(fmt.Sprintf("/applications/%s/domains/%s/listener_certificate_bindings", SerializePathParameter(applicationId, PathParameterSpec{Name: "applicationId", Style: "simple", Explode: false}), SerializePathParameter(domainId, PathParameterSpec{Name: "domainId", Style: "simple", Explode: false}))), query), nil, nil)
+    if err != nil {
+        var zero sdktypes.ApplicationsDomainsListenerCertificateBindingsListResponse
+        return zero, err
+    }
+    return decodeResult[sdktypes.ApplicationsDomainsListenerCertificateBindingsListResponse](raw)
+}
+
+// Bind a certificate version to an application domain listener
+func (a *CertificateApi) ApplicationsDomainsListenerCertificateBindingsCreate(applicationId string, domainId string, body sdktypes.CreateListenerCertificateBindingRequest, idempotencyKey string) (sdktypes.ApplicationsDomainsListenerCertificateBindingsCreateResponse201, error) {
+    headers := BuildRequestHeaders(
+        map[string]ParameterSpec{"Idempotency-Key": ParameterSpec{Value: idempotencyKey, Style: "simple", Explode: false},},
+        map[string]ParameterSpec{},
+    )
+    raw, err := a.client.Post(BackendApiPath(fmt.Sprintf("/applications/%s/domains/%s/listener_certificate_bindings", SerializePathParameter(applicationId, PathParameterSpec{Name: "applicationId", Style: "simple", Explode: false}), SerializePathParameter(domainId, PathParameterSpec{Name: "domainId", Style: "simple", Explode: false}))), body, nil, headers, "application/json")
+    if err != nil {
+        var zero sdktypes.ApplicationsDomainsListenerCertificateBindingsCreateResponse201
+        return zero, err
+    }
+    return decodeResult[sdktypes.ApplicationsDomainsListenerCertificateBindingsCreateResponse201](raw)
+}
+
+// Remove a certificate from an application domain listener
+func (a *CertificateApi) ApplicationsDomainsListenerCertificateBindingsDelete(applicationId string, domainId string, bindingId string, idempotencyKey string) (struct{}, error) {
+    headers := BuildRequestHeaders(
+        map[string]ParameterSpec{"Idempotency-Key": ParameterSpec{Value: idempotencyKey, Style: "simple", Explode: false},},
+        map[string]ParameterSpec{},
+    )
+    raw, err := a.client.Delete(BackendApiPath(fmt.Sprintf("/applications/%s/domains/%s/listener_certificate_bindings/%s", SerializePathParameter(applicationId, PathParameterSpec{Name: "applicationId", Style: "simple", Explode: false}), SerializePathParameter(domainId, PathParameterSpec{Name: "domainId", Style: "simple", Explode: false}), SerializePathParameter(bindingId, PathParameterSpec{Name: "bindingId", Style: "simple", Explode: false}))), nil, headers)
+    if err != nil {
+        var zero struct{}
+        return zero, err
+    }
+    return decodeResult[struct{}](raw)
+}
+
+// List canonical certificates
+func (a *CertificateApi) CertificatesList(page *int, pageSize *int, domainId *string) (sdktypes.CertificatesListResponse, error) {
+    query := BuildQueryString([]QueryParameterSpec{
+        {Name: "page", Value: func() interface{} { if page == nil { return nil }; return *page }(), Style: "form", Explode: true, AllowReserved: false},
+        {Name: "page_size", Value: func() interface{} { if pageSize == nil { return nil }; return *pageSize }(), Style: "form", Explode: true, AllowReserved: false},
+        {Name: "domainId", Value: func() interface{} { if domainId == nil { return nil }; return *domainId }(), Style: "form", Explode: true, AllowReserved: false},
     })
     raw, err := a.client.Get(AppendQueryString(BackendApiPath("/certificates"), query), nil, nil)
     if err != nil {

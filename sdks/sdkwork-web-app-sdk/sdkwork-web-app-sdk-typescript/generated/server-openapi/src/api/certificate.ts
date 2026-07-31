@@ -1,13 +1,89 @@
 import { appApiPath } from './paths';
 import type { ApiRequestOptions, HttpClient } from '../http/client';
 
-import type { CertificateResponse, CreateCertificateRequest, PageInfo } from '../types';
+import type { CertificateResponse, CreateCertificateRequest, CreateListenerCertificateBindingRequest, ListenerCertificateBindingResponse, PageInfo } from '../types';
 
+
+export interface CertificateSitesDomainsListenerCertificateBindingsListParams {
+  page?: number;
+  pageSize?: number;
+}
+
+export interface CertificateSitesDomainsListenerCertificateBindingsCreateParams {
+  idempotencyKey: string;
+}
+
+export interface CertificateSitesDomainsListenerCertificateBindingsDeleteParams {
+  idempotencyKey: string;
+}
+
+export class CertificateSitesDomainsListenerCertificateBindingsApi {
+  private client: HttpClient;
+
+  constructor(client: HttpClient) {
+    this.client = client;
+  }
+
+
+/** List certificates active on the domain listener */
+  async list(siteId: string, domainId: string, params?: CertificateSitesDomainsListenerCertificateBindingsListParams, requestOptions?: ApiRequestOptions): Promise<{ items: ListenerCertificateBindingResponse[]; pageInfo: PageInfo; }> {
+    const query = buildQueryString([
+      { name: 'page', value: params?.page, style: 'form', explode: true, allowReserved: false },
+      { name: 'page_size', value: params?.pageSize, style: 'form', explode: true, allowReserved: false },
+    ]);
+    return this.client.request<{ items: ListenerCertificateBindingResponse[]; pageInfo: PageInfo; }>(appendQueryString(appApiPath(`/sites/${serializePathParameter(siteId, { name: 'siteId', style: 'simple', explode: false })}/domains/${serializePathParameter(domainId, { name: 'domainId', style: 'simple', explode: false })}/listener_certificate_bindings`), query), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any, sdkworkUnwrapKind: 'page' });
+  }
+
+/** Bind a certificate version to the domain listener */
+  async create(siteId: string, domainId: string, body: CreateListenerCertificateBindingRequest, params: CertificateSitesDomainsListenerCertificateBindingsCreateParams, requestOptions?: ApiRequestOptions): Promise<ListenerCertificateBindingResponse> {
+    const requestHeaders = buildRequestHeaders(
+      {
+        'Idempotency-Key': { value: params.idempotencyKey, style: 'simple', explode: false },
+      },
+      {}
+    );
+    return this.client.request<ListenerCertificateBindingResponse>(appApiPath(`/sites/${serializePathParameter(siteId, { name: 'siteId', style: 'simple', explode: false })}/domains/${serializePathParameter(domainId, { name: 'domainId', style: 'simple', explode: false })}/listener_certificate_bindings`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, body, headers: requestHeaders, contentType: 'application/json', sdkworkUnwrapKind: 'item' });
+  }
+
+/** Remove a certificate from the domain listener */
+  async delete(siteId: string, domainId: string, bindingId: string, params: CertificateSitesDomainsListenerCertificateBindingsDeleteParams, requestOptions?: ApiRequestOptions): Promise<void> {
+    const requestHeaders = buildRequestHeaders(
+      {
+        'Idempotency-Key': { value: params.idempotencyKey, style: 'simple', explode: false },
+      },
+      {}
+    );
+    return this.client.request<void>(appApiPath(`/sites/${serializePathParameter(siteId, { name: 'siteId', style: 'simple', explode: false })}/domains/${serializePathParameter(domainId, { name: 'domainId', style: 'simple', explode: false })}/listener_certificate_bindings/${serializePathParameter(bindingId, { name: 'bindingId', style: 'simple', explode: false })}`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'DELETE' as any, headers: requestHeaders });
+  }
+}
+
+export class CertificateSitesDomainsApi {
+  private client: HttpClient;
+  public readonly listenerCertificateBindings: CertificateSitesDomainsListenerCertificateBindingsApi;
+
+  constructor(client: HttpClient) {
+    this.client = client;
+    this.listenerCertificateBindings = new CertificateSitesDomainsListenerCertificateBindingsApi(client);
+  }
+
+}
+
+export class CertificateSitesApi {
+  private client: HttpClient;
+  public readonly domains: CertificateSitesDomainsApi;
+
+  constructor(client: HttpClient) {
+    this.client = client;
+    this.domains = new CertificateSitesDomainsApi(client);
+  }
+
+}
 
 export interface CertificateListParams {
   page?: number;
   pageSize?: number;
   siteId?: string;
+  domainId?: string;
 }
 
 export interface CertificateCreateParams {
@@ -16,9 +92,11 @@ export interface CertificateCreateParams {
 
 export class CertificateApi {
   private client: HttpClient;
+  public readonly sites: CertificateSitesApi;
 
   constructor(client: HttpClient) {
     this.client = client;
+    this.sites = new CertificateSitesApi(client);
   }
 
 
@@ -28,6 +106,7 @@ export class CertificateApi {
       { name: 'page', value: params?.page, style: 'form', explode: true, allowReserved: false },
       { name: 'page_size', value: params?.pageSize, style: 'form', explode: true, allowReserved: false },
       { name: 'siteId', value: params?.siteId, style: 'form', explode: true, allowReserved: false },
+      { name: 'domainId', value: params?.domainId, style: 'form', explode: true, allowReserved: false },
     ]);
     return this.client.request<{ items: CertificateResponse[]; pageInfo: PageInfo; }>(appendQueryString(appApiPath(`/certificates`), query), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any, sdkworkUnwrapKind: 'page' });
   }
@@ -56,7 +135,77 @@ function appendQueryString(path: string, rawQueryString: string): string {
   return path.includes('?') ? `${path}&${query}` : `${path}?${query}`;
 }
 
+interface PathParameterSpec {
+  name: string;
+  style: string;
+  explode: boolean;
+}
 
+function serializePathParameter(value: unknown, spec: PathParameterSpec): string {
+  if (value === undefined || value === null) {
+    return '';
+  }
+
+  const style = spec.style || 'simple';
+  if (Array.isArray(value)) {
+    return serializePathArray(spec.name, value, style, spec.explode);
+  }
+  if (typeof value === 'object') {
+    return serializePathObject(spec.name, value as Record<string, unknown>, style, spec.explode);
+  }
+  return pathPrefix(spec.name, style, false) + encodePathValue(serializePathPrimitive(value));
+}
+
+function serializePathArray(name: string, values: unknown[], style: string, explode: boolean): string {
+  const serialized = values
+    .filter((item) => item !== undefined && item !== null)
+    .map((item) => encodePathValue(serializePathPrimitive(item)));
+  if (serialized.length === 0) {
+    return pathPrefix(name, style, false);
+  }
+  if (style === 'matrix') {
+    return explode
+      ? serialized.map((item) => `;${name}=${item}`).join('')
+      : `;${name}=${serialized.join(',')}`;
+  }
+  return pathPrefix(name, style, false) + serialized.join(explode ? '.' : ',');
+}
+
+function serializePathObject(name: string, value: Record<string, unknown>, style: string, explode: boolean): string {
+  const entries = Object.entries(value).filter(([, entryValue]) => entryValue !== undefined && entryValue !== null);
+  if (entries.length === 0) {
+    return pathPrefix(name, style, true);
+  }
+  if (style === 'matrix') {
+    return explode
+      ? entries.map(([key, entryValue]) => `;${encodePathValue(key)}=${encodePathValue(serializePathPrimitive(entryValue))}`).join('')
+      : `;${name}=${entries.flatMap(([key, entryValue]) => [encodePathValue(key), encodePathValue(serializePathPrimitive(entryValue))]).join(',')}`;
+  }
+  const serialized = explode
+    ? entries.map(([key, entryValue]) => `${encodePathValue(key)}=${encodePathValue(serializePathPrimitive(entryValue))}`).join(style === 'label' ? '.' : ',')
+    : entries.flatMap(([key, entryValue]) => [encodePathValue(key), encodePathValue(serializePathPrimitive(entryValue))]).join(',');
+  return pathPrefix(name, style, true) + serialized;
+}
+
+function pathPrefix(name: string, style: string, _objectValue: boolean): string {
+  if (style === 'label') return '.';
+  if (style === 'matrix') return `;${name}`;
+  return '';
+}
+
+function encodePathValue(value: string): string {
+  return encodeURIComponent(value);
+}
+
+function serializePathPrimitive(value: unknown): string {
+  if (value instanceof Date) {
+    return value.toISOString();
+  }
+  if (typeof value === 'object') {
+    return JSON.stringify(value);
+  }
+  return String(value);
+}
 interface QueryParameterSpec {
   name: string;
   value: unknown;

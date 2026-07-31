@@ -2,6 +2,7 @@
   "schemaVersion": 5,
   "kind": "sdkwork.app.topology",
   "appId": "sdkwork-web-server",
+  "applicationCode": "web",
   "archetype": "application-http-gateway",
   "profileRoot": "etc/topology",
   "profilePattern": "{deploymentProfile}.{environment}.env",
@@ -93,9 +94,6 @@
     "platform.api-gateway": {
       "httpHost": "api.sdkwork.com"
     }
-  },
-  "database": {
-    "appPrefix": "SDKWORK_WEB"
   },
   "components": {
     "appApiRouter": {

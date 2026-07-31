@@ -34,7 +34,8 @@ client.setAccessToken("your-access-token")
     val params = linkedMapOf<String, Any>(
         "page" to 1,
         "page_size" to 2,
-        "siteId" to "00000000-0000-0000-0000-000000000001"
+        "siteId" to "00000000-0000-0000-0000-000000000001",
+        "domainId" to "00000000-0000-0000-0000-000000000001"
     )
     val result = client.certificate.certificatesList(params)
     println(result)
@@ -60,10 +61,10 @@ val client = SdkworkAppClient(config)
 
 - `client.site` - site API
 - `client.domain` - domain API
+- `client.certificate` - certificate API
 - `client.sourceVersion` - source_version API
 - `client.deployment` - deployment API
 - `client.envVariable` - env_variable API
-- `client.certificate` - certificate API
 - `client.monitor` - monitor API
 
 ## Usage Examples
@@ -94,6 +95,20 @@ val params = linkedMapOf<String, Any>(
     "page_size" to 2
 )
 val result = client.domain.sitesDomainsList(siteId, params)
+println(result)
+```
+
+### certificate
+
+```kotlin
+// 获取证书列表
+val params = linkedMapOf<String, Any>(
+    "page" to 1,
+    "page_size" to 2,
+    "siteId" to "00000000-0000-0000-0000-000000000001",
+    "domainId" to "00000000-0000-0000-0000-000000000001"
+)
+val result = client.certificate.certificatesList(params)
 println(result)
 ```
 
@@ -136,19 +151,6 @@ val result = client.envVariable.sitesEnvVariablesList(siteId, params)
 println(result)
 ```
 
-### certificate
-
-```kotlin
-// 获取证书列表
-val params = linkedMapOf<String, Any>(
-    "page" to 1,
-    "page_size" to 2,
-    "siteId" to "00000000-0000-0000-0000-000000000001"
-)
-val result = client.certificate.certificatesList(params)
-println(result)
-```
-
 ### monitor
 
 ```kotlin
@@ -168,7 +170,8 @@ fun main() = runBlocking {
         val params = linkedMapOf<String, Any>(
             "page" to 1,
             "page_size" to 2,
-            "siteId" to "00000000-0000-0000-0000-000000000001"
+            "siteId" to "00000000-0000-0000-0000-000000000001",
+            "domainId" to "00000000-0000-0000-0000-000000000001"
         )
         val result = client.certificate.certificatesList(params)
         println(result)

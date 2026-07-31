@@ -36,7 +36,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "cf96cd5275e10bf1be5949c670844e7e08d3503cc601350338eeb47c2c3a19d0"
+      "sha256": "d54478476ed39a2c5a618d2f4d16f7afe5eb0d38b0fbb1627dbe7fef8eff7855"
     },
     {
       "path": "sdkwork-sdk.json",
@@ -48,7 +48,7 @@
     },
     {
       "path": "src/api/certificate.rs",
-      "sha256": "784c00aa93de2965db3aae12b08c4ace8723f4dac9996a254daae2403eea61e6"
+      "sha256": "64e24e3000e3e1e1ebdb19d31199be5f776151e83b4a2d955fcce0b905db87dd"
     },
     {
       "path": "src/api/deployment.rs",
@@ -64,7 +64,7 @@
     },
     {
       "path": "src/api/mod.rs",
-      "sha256": "597f37e3538de00f88ad2c2d063ca3b370f6a8728a2062e35c8f0308f9cfb042"
+      "sha256": "154477208c7063207fcde0b60057929eda0d663697ad864ae3445a457cf2eb51"
     },
     {
       "path": "src/api/monitor.rs",
@@ -84,7 +84,7 @@
     },
     {
       "path": "src/client.rs",
-      "sha256": "65cd41790855a0e51855776eb03cc734b11a8be7aea4806594e8d1a31d33ce46"
+      "sha256": "18b492316372acc2f93f7201bcde13c40f8a9c1574143a606ff7a5f4669859f7"
     },
     {
       "path": "src/http/client.rs",
@@ -103,12 +103,16 @@
       "sha256": "0715f662e22202117522ae866ad0c758d61aa5bf3609db819e23ecd223b9eea7"
     },
     {
+      "path": "src/models/certificate_identifier_response.rs",
+      "sha256": "34ba782244920c9f95b766bc72fe0ca5a0744f763fe485f2044e5deeb970a259"
+    },
+    {
       "path": "src/models/certificate_page.rs",
       "sha256": "644bdf780d909542b35b45b18a32f9b0a51825c26666fd1519d02064b61c7a03"
     },
     {
       "path": "src/models/certificate_response.rs",
-      "sha256": "be1be81a259631aed53d0923dbec5115101dd68c4fd4a2355c446cc499a9579d"
+      "sha256": "58bfc9c3fc4afcd57a1af78da37868d4d591c0339c8d8df2047107603aa4e2aa"
     },
     {
       "path": "src/models/certificates_create_response201.rs",
@@ -124,7 +128,7 @@
     },
     {
       "path": "src/models/create_certificate_request.rs",
-      "sha256": "b0397b3e880ef289ccda4c478161b992ff0cc3d65b6e8dce5d1b9501a452ac01"
+      "sha256": "45fa9154ffe953eea85a94380cfda7048e053b51c32f5bd8fccb213c8831791d"
     },
     {
       "path": "src/models/create_deployment_request.rs",
@@ -141,6 +145,10 @@
     {
       "path": "src/models/create_health_check_request.rs",
       "sha256": "4a371ec91121a42bda2034411eb168972341b517342f6364506c60febd7bd844"
+    },
+    {
+      "path": "src/models/create_listener_certificate_binding_request.rs",
+      "sha256": "67788613c8d8c2b1c937825723cabf6e0f73931bfbe6e08ccaae38cd087d7e91"
     },
     {
       "path": "src/models/create_site_request.rs",
@@ -195,6 +203,14 @@
       "sha256": "d7904ab015539d74fea4b5901ab137e801b935db604995935ea68fc3277fd023"
     },
     {
+      "path": "src/models/listener_certificate_binding_response.rs",
+      "sha256": "9da5af95f87de8ccf510fc0f96745a15335a3151645ece8eb4bf15f99cfa4bfa"
+    },
+    {
+      "path": "src/models/listener_certificate_summary_response.rs",
+      "sha256": "d76824c8a2f0b6f418806940af409f74f9b5767f98ab2cae1f30f9ff61b7ccb0"
+    },
+    {
       "path": "src/models/media_checksum.rs",
       "sha256": "ea88fdd40fa405b2b1887c425bd702fb3d792124457cb2049bf6aeb39f1adec6"
     },
@@ -204,7 +220,7 @@
     },
     {
       "path": "src/models/mod.rs",
-      "sha256": "1043bd9fb932e042b03043bd55ef7b6015c24c8401f9bc3a130eff0ff24a6908"
+      "sha256": "07dff0356fa6b7055649c4cf4b78259fccdd20f6e577a297c7b058f1462232dd"
     },
     {
       "path": "src/models/page_info.rs",
@@ -281,6 +297,14 @@
     {
       "path": "src/models/sites_domains_list_response.rs",
       "sha256": "9a4d939ae91a6dea1c0ed56f8e57db0c9bac048d808c5ee9decf19e1560e7c80"
+    },
+    {
+      "path": "src/models/sites_domains_listener_certificate_bindings_create_response201.rs",
+      "sha256": "6340873ccd9346f4fff6143a536f49321d717a283b975d5b74fa34ef7b19b549"
+    },
+    {
+      "path": "src/models/sites_domains_listener_certificate_bindings_list_response.rs",
+      "sha256": "6fab194fb6bed4eab07a88c1f2ee8cb8c04c13639d6642144ac51a59d2b5b1c0"
     },
     {
       "path": "src/models/sites_domains_retrieve_response.rs",

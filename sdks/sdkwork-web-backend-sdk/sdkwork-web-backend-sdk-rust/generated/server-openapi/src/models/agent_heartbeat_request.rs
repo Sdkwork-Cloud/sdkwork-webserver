@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+use crate::models::{AgentCertificateObservation};
+
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct AgentHeartbeatRequest {
     #[serde(rename = "agentVersion")]
@@ -19,4 +21,8 @@ pub struct AgentHeartbeatRequest {
     #[serde(rename = "lastSyncVersion")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub last_sync_version: Option<String>,
+
+    #[serde(rename = "certificateObservations")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub certificate_observations: Option<Vec<AgentCertificateObservation>>,
 }

@@ -55,10 +55,10 @@ val client = SdkworkBackendClient(config)
 
 - `client.application` - application API
 - `client.applicationDomain` - application_domain API
+- `client.certificate` - certificate API
 - `client.domain` - domain API
 - `client.applicationSourceVersion` - application_source_version API
 - `client.applicationDeployment` - application_deployment API
-- `client.certificate` - certificate API
 - `client.certificateDistribution` - certificate_distribution API
 - `client.nginx` - nginx API
 - `client.server` - server API
@@ -93,6 +93,19 @@ val params = linkedMapOf<String, Any>(
     "page_size" to 2
 )
 val result = client.applicationDomain.applicationsDomainsList(applicationId, params)
+println(result)
+```
+
+### certificate
+
+```kotlin
+// List canonical certificates
+val params = linkedMapOf<String, Any>(
+    "page" to 1,
+    "page_size" to 2,
+    "domainId" to "00000000-0000-0000-0000-000000000001"
+)
+val result = client.certificate.certificatesList(params)
 println(result)
 ```
 
@@ -132,18 +145,6 @@ val params = linkedMapOf<String, Any>(
     "status" to 3
 )
 val result = client.applicationDeployment.applicationsDeploymentsList(applicationId, params)
-println(result)
-```
-
-### certificate
-
-```kotlin
-// List canonical certificates
-val params = linkedMapOf<String, Any>(
-    "page" to 1,
-    "page_size" to 2
-)
-val result = client.certificate.certificatesList(params)
 println(result)
 ```
 

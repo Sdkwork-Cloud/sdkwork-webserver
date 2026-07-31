@@ -3,12 +3,13 @@
 use async_trait::async_trait;
 use sdkwork_webserver_contract::{
     CreateCertificateRequest, CreateDeploymentRequest, CreateDomainRequest,
-    CreateManagedDomainRequest, CreateNginxConfigRequest, CreateRootDomainHostnameRequest,
-    CreateRootDomainRequest, CreateServerRequest, CreateSiteRequest, CreateSourceVersionRequest,
-    ImportGitSourceVersionRequest, ListNginxConfigsQuery, ListRootDomainsQuery, ListSitesQuery,
-    UpdateCertificateRequest, UpdateDomainApplicationBindingRequest, UpdateNginxConfigRequest,
-    UpdateSiteRequest, WebAppApi, WebAppRequestContext, WebAppResourceScope, WebBackendApi,
-    WebBackendRequestContext, WebServiceError, WebServiceResult,
+    CreateListenerCertificateBindingRequest, CreateManagedDomainRequest, CreateNginxConfigRequest,
+    CreateRootDomainHostnameRequest, CreateRootDomainRequest, CreateServerRequest,
+    CreateSiteRequest, CreateSourceVersionRequest, ImportGitSourceVersionRequest,
+    ListNginxConfigsQuery, ListRootDomainsQuery, ListSitesQuery, UpdateCertificateRequest,
+    UpdateDomainApplicationBindingRequest, UpdateNginxConfigRequest, UpdateSiteRequest, WebAppApi,
+    WebAppRequestContext, WebAppResourceScope, WebBackendApi, WebBackendRequestContext,
+    WebServiceError, WebServiceResult,
 };
 
 use crate::{AuditLogWrite, WebService};
@@ -543,11 +544,12 @@ impl WebBackendApi for WebService {
     async fn list_managed_certificates(
         &self,
         context: &WebBackendRequestContext,
+        domain_id: Option<&str>,
         page: i32,
         page_size: i32,
     ) -> WebServiceResult<sdkwork_webserver_contract::CertificatePage> {
         let app_context = Self::backend_app_context(context)?;
-        WebAppApi::list_certificates(self, &app_context, None, page, page_size).await
+        WebAppApi::list_certificates(self, &app_context, None, domain_id, page, page_size).await
     }
 
     async fn create_managed_certificate(
@@ -599,6 +601,56 @@ impl WebBackendApi for WebService {
         )
         .await;
         Ok(certificate)
+    }
+
+    async fn list_application_listener_certificate_bindings(
+        &self,
+        context: &WebBackendRequestContext,
+        application_id: &str,
+        domain_id: &str,
+        page: i32,
+        page_size: i32,
+    ) -> WebServiceResult<sdkwork_webserver_contract::ListenerCertificateBindingPage> {
+        let app_context = Self::backend_app_context(context)?;
+        WebAppApi::list_listener_certificate_bindings(
+            self,
+            &app_context,
+            application_id,
+            domain_id,
+            page,
+            page_size,
+        )
+        .await
+    }
+
+    async fn bind_application_listener_certificate(
+        &self,
+        context: &WebBackendRequestContext,
+        application_id: &str,
+        domain_id: &str,
+        request: &CreateListenerCertificateBindingRequest,
+    ) -> WebServiceResult<sdkwork_webserver_contract::ListenerCertificateBindingResponse> {
+        let app_context = Self::backend_app_context(context)?;
+        WebAppApi::bind_listener_certificate(self, &app_context, application_id, domain_id, request)
+            .await
+    }
+
+    async fn unbind_application_listener_certificate(
+        &self,
+        context: &WebBackendRequestContext,
+        application_id: &str,
+        domain_id: &str,
+        binding_id: &str,
+    ) -> WebServiceResult<()> {
+        let app_context = Self::backend_app_context(context)?;
+        WebAppApi::unbind_listener_certificate(
+            self,
+            &app_context,
+            application_id,
+            domain_id,
+            binding_id,
+        )
+        .await
     }
 
     async fn list_certificate_distribution(

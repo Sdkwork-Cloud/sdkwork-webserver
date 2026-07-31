@@ -4,7 +4,7 @@ use crate::api::base::{RequestHeaders};
 use crate::api::paths::backend_path;
 use crate::api::paths::append_query_string;
 use crate::http::{SdkworkError, SdkworkHttpClient};
-use crate::models::{CertificateResponse, CreateCertificateRequest, UpdateCertificateRequest};
+use crate::models::{CertificateResponse, CreateCertificateRequest, CreateListenerCertificateBindingRequest, ListenerCertificateBindingResponse, UpdateCertificateRequest};
 
 #[derive(Clone)]
 pub struct CertificateApi {
@@ -16,11 +16,46 @@ impl CertificateApi {
         Self { client }
     }
 
-    /// List canonical certificates
-    pub async fn certificates_list(&self, page: Option<i64>, page_size: Option<i64>) -> Result<serde_json::Value, SdkworkError> {
+    /// List certificates active on an application domain listener
+    pub async fn applications_domains_listener_certificate_bindings_list(&self, application_id: &str, domain_id: &str, page: Option<i64>, page_size: Option<i64>) -> Result<serde_json::Value, SdkworkError> {
         let query = build_query_string(&[
             QueryParameterSpec::new("page", page, "form", true, false, None),
             QueryParameterSpec::new("page_size", page_size, "form", true, false, None),
+        ]);
+        let path = append_query_string(backend_path(&format!("/applications/{}/domains/{}/listener_certificate_bindings", serialize_path_parameter(application_id, PathParameterSpec::new("applicationId", "simple", false)), serialize_path_parameter(domain_id, PathParameterSpec::new("domainId", "simple", false)))), &query);
+        self.client.get(&path, None, None).await
+    }
+
+    /// Bind a certificate version to an application domain listener
+    pub async fn applications_domains_listener_certificate_bindings_create(&self, application_id: &str, domain_id: &str, body: &CreateListenerCertificateBindingRequest, idempotency_key: &str) -> Result<ListenerCertificateBindingResponse, SdkworkError> {
+        let path = backend_path(&format!("/applications/{}/domains/{}/listener_certificate_bindings", serialize_path_parameter(application_id, PathParameterSpec::new("applicationId", "simple", false)), serialize_path_parameter(domain_id, PathParameterSpec::new("domainId", "simple", false))));
+        let headers = build_request_headers(
+            &[
+                ("Idempotency-Key", HeaderParameterSpec::new(idempotency_key, "simple", false, None)),
+            ],
+            &[],
+        );
+        self.client.post(&path, Some(body), None, headers.as_ref(), Some("application/json")).await
+    }
+
+    /// Remove a certificate from an application domain listener
+    pub async fn applications_domains_listener_certificate_bindings_delete(&self, application_id: &str, domain_id: &str, binding_id: &str, idempotency_key: &str) -> Result<(), SdkworkError> {
+        let path = backend_path(&format!("/applications/{}/domains/{}/listener_certificate_bindings/{}", serialize_path_parameter(application_id, PathParameterSpec::new("applicationId", "simple", false)), serialize_path_parameter(domain_id, PathParameterSpec::new("domainId", "simple", false)), serialize_path_parameter(binding_id, PathParameterSpec::new("bindingId", "simple", false))));
+        let headers = build_request_headers(
+            &[
+                ("Idempotency-Key", HeaderParameterSpec::new(idempotency_key, "simple", false, None)),
+            ],
+            &[],
+        );
+        self.client.delete(&path, None, headers.as_ref()).await
+    }
+
+    /// List canonical certificates
+    pub async fn certificates_list(&self, page: Option<i64>, page_size: Option<i64>, domain_id: Option<&str>) -> Result<serde_json::Value, SdkworkError> {
+        let query = build_query_string(&[
+            QueryParameterSpec::new("page", page, "form", true, false, None),
+            QueryParameterSpec::new("page_size", page_size, "form", true, false, None),
+            QueryParameterSpec::new("domainId", domain_id, "form", true, false, None),
         ]);
         let path = append_query_string(backend_path(&"/certificates".to_string()), &query);
         self.client.get(&path, None, None).await

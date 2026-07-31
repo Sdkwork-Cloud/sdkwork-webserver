@@ -1,5 +1,4 @@
 use futures_util::TryStreamExt;
-use sdkwork_database_config::DatabaseEngine;
 use sdkwork_utils_rust::crypto::sha256_hash;
 use sdkwork_webserver_contract::{
     AgentCertificateBundle, AgentHeartbeatRequest, AgentHeartbeatResponse, AgentNginxConfigBundle,
@@ -7,6 +6,7 @@ use sdkwork_webserver_contract::{
     WebServiceError, WebServiceResult,
 };
 use serde_json::{json, Value};
+use std::collections::BTreeSet;
 use super::{EnginePool, EngineRow, WebRepository};
 use sqlx::Row;
 
@@ -14,11 +14,11 @@ use super::support::{
     instant_write_expression, json_from_row, json_write_expression, new_agent_token, now_rfc3339,
     pagination, sha256_hex, store_error,
 };
+use super::certificate_secrets::decrypt_certificate_secret_bundle;
 
 const MAX_NODE_SYNC_ITEMS: usize = 2_048;
 const MAX_NODE_SYNC_BUNDLE_BYTES: usize = 12 * 1024 * 1024;
 const MAX_NODE_NGINX_CONFIG_BYTES: i64 = 1024 * 1024;
-const MAX_NODE_CERTIFICATE_METADATA_BYTES: i64 = 2 * 1024 * 1024;
 
 struct NodeSyncBudget {
     items: usize,
@@ -105,18 +105,9 @@ impl WebRepository {
         token: &str,
     ) -> WebServiceResult<AuthenticatedAgent> {
         let token_hash = hash_agent_token(token);
-        let sql = match self.database_engine().await? {
-            DatabaseEngine::Sqlite => {
-                "SELECT uuid, tenant_id, name, host
-                 FROM web_server
-                 WHERE json_extract(metadata, '$.agentTokenHash') = $1"
-            }
-            DatabaseEngine::Postgres => {
-                "SELECT uuid, tenant_id, name, host
-                 FROM web_server
-                 WHERE metadata ->> 'agentTokenHash' = $1"
-            }
-        };
+        let sql = "SELECT uuid, tenant_id, name, host
+                   FROM web_server
+                   WHERE metadata ->> 'agentTokenHash' = $1";
         let row = sqlx::query(sql)
             .bind(token_hash)
             .fetch_optional(&self.pool)
@@ -133,6 +124,11 @@ impl WebRepository {
         agent: &AuthenticatedAgent,
         request: &AgentHeartbeatRequest,
     ) -> WebServiceResult<AgentHeartbeatResponse> {
+        let desired_manifest = if !request.certificate_observations.is_empty() {
+            Some(self.build_agent_sync_manifest_repo(agent, None).await?)
+        } else {
+            None
+        };
         let now = now_rfc3339();
         let metadata_patch = json!({
             "lastHeartbeatAt": now,
@@ -162,6 +158,21 @@ impl WebRepository {
             .await
             .map_err(|error| store_error("record web_server heartbeat", error))?;
 
+        if !request.certificate_observations.is_empty() {
+            self.record_certificate_observations(
+                agent,
+                &request.certificate_observations,
+                desired_manifest.as_ref().ok_or_else(|| {
+                    WebServiceError::Internal(
+                        "desired node manifest missing for certificate observations".to_string(),
+                    )
+                })?,
+            )
+                .await?;
+            self.promote_converged_listener_certificate_bindings(agent.tenant_id)
+                .await?;
+        }
+
         Ok(AgentHeartbeatResponse {
             server_id: agent.server_uuid.clone(),
             status: 1,
@@ -173,45 +184,45 @@ impl WebRepository {
         &self,
         agent: &AuthenticatedAgent,
         if_sync_version: Option<&str>,
-    ) -> WebServiceResult<(AgentSyncResponse, Vec<String>)> {
+    ) -> WebServiceResult<AgentSyncResponse> {
         let mut budget = NodeSyncBudget::new();
+        let assigned_site_uuids = self
+            .load_current_assigned_site_uuids(agent)
+            .await?
+            .ok_or_else(|| WebServiceError::conflict("runtime assignment not found for node"))?;
         let nginx_configs = self
-            .load_active_nginx_configs_for_tenant(agent.tenant_id, &mut budget)
+            .load_active_nginx_configs_for_sites(
+                agent.tenant_id,
+                &assigned_site_uuids,
+                &mut budget,
+            )
             .await?;
-        let certificate_rows = self
-            .load_active_certificates_for_tenant(agent.tenant_id, &mut budget)
+        let certificates = self
+            .load_active_certificates_for_sites(
+                agent.tenant_id,
+                &assigned_site_uuids,
+                &mut budget,
+            )
             .await?;
-        let mut encrypted_private_keys = Vec::with_capacity(certificate_rows.len());
-        let mut certificates = Vec::with_capacity(certificate_rows.len());
-        for (bundle, encrypted_private_key) in certificate_rows {
-            encrypted_private_keys.push(encrypted_private_key);
-            certificates.push(bundle);
-        }
         let sync_version = compute_agent_sync_version(&nginx_configs, &certificates);
 
         if if_sync_version.is_some_and(|value| value == sync_version) {
-            return Ok((
-                AgentSyncResponse {
-                    server_id: agent.server_uuid.clone(),
-                    sync_version,
-                    unchanged: true,
-                    nginx_configs: Vec::new(),
-                    certificates: Vec::new(),
-                },
-                Vec::new(),
-            ));
-        }
-
-        Ok((
-            AgentSyncResponse {
+            return Ok(AgentSyncResponse {
                 server_id: agent.server_uuid.clone(),
                 sync_version,
-                unchanged: false,
-                nginx_configs,
-                certificates,
-            },
-            encrypted_private_keys,
-        ))
+                unchanged: true,
+                nginx_configs: Vec::new(),
+                certificates: Vec::new(),
+            });
+        }
+
+        Ok(AgentSyncResponse {
+            server_id: agent.server_uuid.clone(),
+            sync_version,
+            unchanged: false,
+            nginx_configs,
+            certificates,
+        })
     }
 
     pub(super) async fn list_certificate_distribution_repo(
@@ -221,15 +232,6 @@ impl WebRepository {
         page_size: i32,
     ) -> WebServiceResult<CertificateDistributionPage> {
         let (page, page_size, offset) = pagination(page, page_size);
-        let desired_agent = AuthenticatedAgent {
-            server_uuid: "distribution-status".to_string(),
-            tenant_id,
-        };
-        let (manifest, _) = self
-            .build_agent_sync_manifest_repo(&desired_agent, None)
-            .await?;
-        let desired_sync_version = manifest.sync_version;
-
         let count_row = sqlx::query("SELECT COUNT(*) AS total FROM web_server WHERE tenant_id = $1")
             .bind(tenant_id)
             .fetch_one(&self.pool)
@@ -238,7 +240,7 @@ impl WebRepository {
         let total: i64 = count_row
             .try_get("total")
             .map_err(|error| store_error("map web_server sync count", error))?;
-        let mut rows = sqlx::query(
+        let rows = sqlx::query(
             "SELECT uuid, name, host, status, CAST(metadata AS TEXT) AS metadata
              FROM web_server
              WHERE tenant_id = $1
@@ -247,14 +249,32 @@ impl WebRepository {
         .bind(tenant_id)
         .bind(page_size)
         .bind(offset)
-        .fetch(&self.pool);
+        .fetch_all(&self.pool)
+        .await
+        .map_err(|error| store_error("list web_server certificate distribution", error))?;
 
         let mut items = Vec::with_capacity(page_size as usize);
-        while let Some(row) = rows
-            .try_next()
-            .await
-            .map_err(|error| store_error("stream web_server certificate distribution", error))?
-        {
+        for row in rows {
+            let server_uuid: String = row.try_get("uuid").map_err(|error| {
+                WebServiceError::Internal(format!(
+                    "certificate distribution server uuid: {error}"
+                ))
+            })?;
+            let desired_agent = AuthenticatedAgent {
+                server_uuid: server_uuid.clone(),
+                tenant_id,
+            };
+            let assigned = self
+                .load_current_assigned_site_uuids(&desired_agent)
+                .await?
+                .is_some();
+            let desired_sync_version = if assigned {
+                self.build_agent_sync_manifest_repo(&desired_agent, None)
+                    .await?
+                    .sync_version
+            } else {
+                String::new()
+            };
             let metadata = json_from_row(&row, "metadata")
                 .map_err(|error| {
                     WebServiceError::Internal(format!(
@@ -275,15 +295,15 @@ impl WebRepository {
             })?;
             let status = if server_status == 0 {
                 "OFFLINE"
+            } else if !assigned {
+                "UNASSIGNED"
             } else if applied_sync_version.as_deref() == Some(desired_sync_version.as_str()) {
                 "SYNCED"
             } else {
                 "PENDING"
             };
             items.push(CertificateDistributionResponse {
-                server_id: row.try_get("uuid").map_err(|error| {
-                    WebServiceError::Internal(format!("certificate distribution server uuid: {error}"))
-                })?,
+                server_id: server_uuid,
                 server_name: row.try_get("name").map_err(|error| {
                     WebServiceError::Internal(format!("certificate distribution server name: {error}"))
                 })?,
@@ -305,35 +325,119 @@ impl WebRepository {
         })
     }
 
-    async fn load_active_nginx_configs_for_tenant(
+    async fn load_current_assigned_site_uuids(
+        &self,
+        agent: &AuthenticatedAgent,
+    ) -> WebServiceResult<Option<Vec<String>>> {
+        let rows = sqlx::query(
+            "SELECT CAST(a.runtime_set AS TEXT) AS runtime_set
+             FROM web_runtime_assignment a
+             INNER JOIN web_server s ON s.tenant_id = a.tenant_id AND s.id = a.server_id
+             WHERE a.tenant_id = $1 AND s.uuid = $2
+               AND NOT EXISTS (
+                   SELECT 1 FROM web_runtime_assignment newer
+                   WHERE newer.tenant_id = a.tenant_id AND newer.server_id = a.server_id
+                     AND newer.environment = a.environment AND newer.generation > a.generation
+               )
+             ORDER BY a.environment ASC
+             LIMIT 5",
+        )
+        .bind(agent.tenant_id)
+        .bind(&agent.server_uuid)
+        .fetch_all(&self.pool)
+        .await
+        .map_err(|error| store_error("load current node runtime assignments", error))?;
+        if rows.is_empty() {
+            return Ok(None);
+        }
+        if rows.len() > 4 {
+            return Err(WebServiceError::Internal(
+                "node has more than four current runtime assignments".to_string(),
+            ));
+        }
+
+        let mut site_uuids = BTreeSet::new();
+        for row in rows {
+            let raw: String = row.try_get("runtime_set").map_err(|error| {
+                WebServiceError::Internal(format!("node runtime assignment JSON: {error}"))
+            })?;
+            let runtime_set: Value = serde_json::from_str(&raw).map_err(|_| {
+                WebServiceError::Internal("stored node runtime assignment is invalid".to_string())
+            })?;
+            if runtime_set.get("nodeUuid").and_then(Value::as_str)
+                != Some(agent.server_uuid.as_str())
+            {
+                return Err(WebServiceError::Internal(
+                    "stored node runtime assignment has an invalid node scope".to_string(),
+                ));
+            }
+            let descriptors = runtime_set
+                .get("descriptors")
+                .and_then(Value::as_array)
+                .ok_or_else(|| {
+                    WebServiceError::Internal(
+                        "stored node runtime assignment has no descriptors".to_string(),
+                    )
+                })?;
+            for descriptor in descriptors {
+                let site_uuid = descriptor
+                    .get("siteUuid")
+                    .and_then(Value::as_str)
+                    .filter(|value| {
+                        !value.is_empty()
+                            && value.len() <= 128
+                            && !value.bytes().any(|byte| byte.is_ascii_control())
+                    })
+                    .ok_or_else(|| {
+                        WebServiceError::Internal(
+                            "stored node runtime assignment has an invalid Site identity"
+                                .to_string(),
+                        )
+                    })?;
+                site_uuids.insert(site_uuid.to_string());
+                if site_uuids.len() > MAX_NODE_SYNC_ITEMS {
+                    return Err(WebServiceError::Internal(format!(
+                        "node runtime assignment exceeds {MAX_NODE_SYNC_ITEMS} Sites"
+                    )));
+                }
+            }
+        }
+        Ok(Some(site_uuids.into_iter().collect()))
+    }
+
+    async fn load_active_nginx_configs_for_sites(
         &self,
         tenant_id: i64,
+        site_uuids: &[String],
         budget: &mut NodeSyncBudget,
     ) -> WebServiceResult<Vec<AgentNginxConfigBundle>> {
-        let content_size = match self.database_engine().await? {
-            DatabaseEngine::Sqlite => "LENGTH(CAST(nc.config_content AS BLOB))",
-            DatabaseEngine::Postgres => "CAST(OCTET_LENGTH(nc.config_content) AS BIGINT)",
-        };
+        let content_size = "CAST(OCTET_LENGTH(nc.config_content) AS BIGINT)";
         let sql = format!(
             "SELECT nc.uuid,
                     CASE WHEN {content_size} <= {MAX_NODE_NGINX_CONFIG_BYTES}
                          THEN nc.config_content ELSE NULL END AS config_content,
                     {content_size} AS config_content_bytes,
                     nc.version,
-                    (SELECT d.hostname FROM web_domain d
-                     WHERE d.tenant_id = nc.tenant_id AND d.site_id = s.id
-                       AND d.deleted_at IS NULL
-                     ORDER BY d.is_primary DESC, d.created_at ASC
+                    (SELECT d.hostname FROM web_site_binding b
+                     INNER JOIN web_domain d ON d.tenant_id = b.tenant_id AND d.id = b.domain_id
+                     WHERE b.tenant_id = nc.tenant_id AND b.site_id = s.id
+                       AND b.environment = 'production' AND b.status = 'ACTIVE'
+                       AND b.deleted_at IS NULL AND d.deleted_at IS NULL
+                     ORDER BY b.is_primary DESC, b.created_at ASC
                      LIMIT 1) AS domain
              FROM web_nginx_config nc
              INNER JOIN web_site s ON s.id = nc.site_id
-             WHERE nc.tenant_id = $1 AND nc.is_active = TRUE AND nc.status = 1
+             WHERE nc.tenant_id = $1 AND s.uuid = ANY($2)
+               AND nc.is_active = TRUE AND nc.status = 1
                AND s.deleted_at IS NULL
              ORDER BY nc.id ASC
              LIMIT {}",
             MAX_NODE_SYNC_ITEMS + 1
         );
-        let mut rows = sqlx::query(&sql).bind(tenant_id).fetch(&self.pool);
+        let mut rows = sqlx::query(&sql)
+            .bind(tenant_id)
+            .bind(site_uuids)
+            .fetch(&self.pool);
 
         let mut items = Vec::new();
         while let Some(row) = rows
@@ -381,35 +485,66 @@ impl WebRepository {
         Ok(items)
     }
 
-    async fn load_active_certificates_for_tenant(
+    async fn load_active_certificates_for_sites(
         &self,
         tenant_id: i64,
+        site_uuids: &[String],
         budget: &mut NodeSyncBudget,
-    ) -> WebServiceResult<Vec<(AgentCertificateBundle, String)>> {
-        /*
-        // 通过 web_certificate → web_domain → web_site JOIN 过滤，
-        // 仅返回有效（未删除）站点的证书，避免向 agent 泄漏已下线站点的 TLS 私钥。
-         */
-        let metadata_size = match self.database_engine().await? {
-            DatabaseEngine::Sqlite => "LENGTH(CAST(c.metadata AS BLOB))",
-            DatabaseEngine::Postgres => {
-                "CAST(OCTET_LENGTH(CAST(c.metadata AS TEXT)) AS BIGINT)"
-            }
-        };
+    ) -> WebServiceResult<Vec<AgentCertificateBundle>> {
         let sql = format!(
-            "SELECT c.uuid, c.cert_name, c.fingerprint,
-                    CASE WHEN {metadata_size} <= {MAX_NODE_CERTIFICATE_METADATA_BYTES}
-                         THEN CAST(c.metadata AS TEXT) ELSE NULL END AS metadata,
-                    {metadata_size} AS metadata_bytes
-             FROM web_certificate c
-             INNER JOIN web_domain d ON d.id = c.domain_id
-             INNER JOIN web_site s ON s.id = d.site_id
-             WHERE c.tenant_id = $1 AND c.status = 1 AND s.deleted_at IS NULL
-             ORDER BY c.id ASC
+            "SELECT DISTINCT c.uuid, c.cert_name, v.fingerprint_sha256 AS fingerprint,
+                    v.uuid AS certificate_version_uuid, v.secret_bundle_ref,
+                    sb.encryption_algorithm, sb.bundle_encrypted,
+                    CAST((
+                        SELECT jsonb_agg(hostname ORDER BY hostname)
+                        FROM (
+                            SELECT DISTINCT listener_domain.hostname
+                            FROM web_listener_certificate_binding listener
+                            INNER JOIN web_site_binding listener_route
+                                ON listener_route.tenant_id = listener.tenant_id
+                                AND listener_route.id = listener.site_binding_id
+                                AND listener_route.status = 'ACTIVE'
+                                AND listener_route.deleted_at IS NULL
+                            INNER JOIN web_site listener_site
+                                ON listener_site.tenant_id = listener_route.tenant_id
+                                AND listener_site.id = listener_route.site_id
+                                AND listener_site.deleted_at IS NULL
+                            INNER JOIN web_domain listener_domain
+                                ON listener_domain.tenant_id = listener_route.tenant_id
+                                AND listener_domain.id = listener_route.domain_id
+                                AND listener_domain.deleted_at IS NULL
+                            WHERE listener.tenant_id = l.tenant_id
+                              AND listener.certificate_id = c.id
+                              AND listener.desired_version_id = v.id
+                              AND listener.status IN ('PENDING', 'DEPLOYING', 'ACTIVE', 'FAILED')
+                              AND listener.deleted_at IS NULL
+                              AND listener_site.uuid = ANY($2)
+                        ) verification_hostnames
+                    ) AS TEXT) AS verification_hostnames
+             FROM web_listener_certificate_binding l
+             INNER JOIN web_site_binding b ON b.tenant_id = l.tenant_id
+                 AND b.id = l.site_binding_id AND b.status = 'ACTIVE'
+                 AND b.deleted_at IS NULL
+             INNER JOIN web_site s ON s.tenant_id = b.tenant_id AND s.id = b.site_id
+                 AND s.deleted_at IS NULL
+             INNER JOIN web_certificate c ON c.tenant_id = l.tenant_id
+                 AND c.id = l.certificate_id AND c.status = 1 AND c.deleted_at IS NULL
+             INNER JOIN web_certificate_version v ON v.tenant_id = l.tenant_id
+                 AND v.id = l.desired_version_id AND v.certificate_id = c.id
+                 AND v.status = 'ACTIVE'
+             INNER JOIN web_certificate_secret_bundle sb ON sb.tenant_id = v.tenant_id
+                 AND sb.certificate_version_id = v.id
+             WHERE l.tenant_id = $1 AND s.uuid = ANY($2)
+               AND l.status IN ('PENDING', 'DEPLOYING', 'ACTIVE', 'FAILED')
+               AND l.deleted_at IS NULL
+             ORDER BY c.uuid ASC
              LIMIT {}",
             MAX_NODE_SYNC_ITEMS + 1
         );
-        let mut rows = sqlx::query(&sql).bind(tenant_id).fetch(&self.pool);
+        let mut rows = sqlx::query(&sql)
+            .bind(tenant_id)
+            .bind(site_uuids)
+            .fetch(&self.pool);
 
         let mut items = Vec::new();
         while let Some(row) = rows
@@ -417,43 +552,55 @@ impl WebRepository {
             .await
             .map_err(|error| store_error("stream active certificates for agent sync", error))?
         {
-            let metadata_bytes: i64 = row.try_get("metadata_bytes").map_err(|error| {
-                WebServiceError::Internal(format!("agent sync certificate metadata bytes: {error}"))
+            let secret_bundle_ref: String = row.try_get("secret_bundle_ref").map_err(|error| {
+                WebServiceError::Internal(format!("agent sync certificate secret ref: {error}"))
             })?;
-            if !(0..=MAX_NODE_CERTIFICATE_METADATA_BYTES).contains(&metadata_bytes) {
-                return Err(WebServiceError::Internal(format!(
-                    "active certificate metadata exceeds {MAX_NODE_CERTIFICATE_METADATA_BYTES} bytes"
-                )));
-            }
-            let metadata_raw: Option<String> = row.try_get("metadata").map_err(|error| {
-                WebServiceError::Internal(format!("agent sync certificate metadata: {error}"))
-            })?;
-            let metadata_raw = metadata_raw.ok_or_else(|| {
-                WebServiceError::Internal("active certificate metadata is unavailable".to_string())
-            })?;
-            let metadata: Value = serde_json::from_str(&metadata_raw).map_err(|error| {
+            let certificate_version_uuid: String = row
+                .try_get("certificate_version_uuid")
+                .map_err(|error| {
+                    WebServiceError::Internal(format!(
+                        "agent sync certificate version uuid: {error}"
+                    ))
+                })?;
+            let encryption_algorithm: String = row
+                .try_get("encryption_algorithm")
+                .map_err(|error| {
+                    WebServiceError::Internal(format!(
+                        "agent sync certificate encryption algorithm: {error}"
+                    ))
+                })?;
+            let bundle_encrypted: String = row.try_get("bundle_encrypted").map_err(|error| {
                 WebServiceError::Internal(format!(
-                    "active certificate metadata is invalid: {error}"
+                    "agent sync encrypted certificate bundle: {error}"
                 ))
             })?;
-            let cert_pem = metadata
-                .get("certPem")
-                .and_then(Value::as_str)
-                .filter(|value| !value.is_empty())
-                .ok_or_else(|| {
-                    WebServiceError::Internal(
-                        "active certificate missing certPem metadata".to_string(),
-                    )
-                })?
-                .to_string();
-            let encrypted_private_key = metadata
-                .get("encryptedPrivateKey")
-                .and_then(Value::as_str)
-                .ok_or_else(|| {
-                    WebServiceError::Internal(
-                        "active certificate missing encryptedPrivateKey metadata".to_string(),
-                    )
+            let secret_bundle = decrypt_certificate_secret_bundle(
+                self.secret_key(),
+                tenant_id,
+                &certificate_version_uuid,
+                &secret_bundle_ref,
+                &encryption_algorithm,
+                &bundle_encrypted,
+            )?;
+            let verification_hostnames_json: String = row
+                .try_get("verification_hostnames")
+                .map_err(|error| {
+                    WebServiceError::Internal(format!(
+                        "agent sync certificate verification hostnames: {error}"
+                    ))
                 })?;
+            let hostnames = serde_json::from_str::<Vec<String>>(&verification_hostnames_json)
+                .map_err(|error| {
+                    WebServiceError::Internal(format!(
+                        "decode agent sync certificate verification hostnames: {error}"
+                    ))
+                })?;
+            if hostnames.is_empty() || hostnames.len() > 128 {
+                return Err(WebServiceError::Internal(
+                    "agent sync certificate must target between 1 and 128 listener hostnames"
+                        .to_string(),
+                ));
+            }
 
             let item = AgentCertificateBundle {
                 certificate_id: row.try_get("uuid").map_err(|error| {
@@ -467,11 +614,12 @@ impl WebRepository {
                         "agent sync certificate fingerprint: {error}"
                     ))
                 })?,
-                fullchain_pem: cert_pem,
-                privkey_pem: String::new(),
+                hostnames,
+                fullchain_pem: secret_bundle.fullchain_pem,
+                privkey_pem: secret_bundle.private_key_pem,
             };
-            budget.reserve_with_additional_bytes(&item, encrypted_private_key.len())?;
-            items.push((item, encrypted_private_key.to_string()));
+            budget.reserve(&item)?;
+            items.push(item);
         }
         Ok(items)
     }
@@ -531,8 +679,10 @@ pub(crate) fn compute_agent_sync_version(
     }
     for certificate in certificates {
         parts.push(format!(
-            "c:{}:{}",
-            certificate.certificate_id, certificate.fingerprint
+            "c:{}:{}:{}",
+            certificate.certificate_id,
+            certificate.fingerprint,
+            certificate.hostnames.join(",")
         ));
     }
     parts.sort_unstable();
@@ -556,6 +706,7 @@ mod tests {
             certificate_id: "cert-1".to_string(),
             cert_name: "example.com".to_string(),
             fingerprint: "abc123".to_string(),
+            hostnames: vec!["example.com".to_string()],
             fullchain_pem: String::new(),
             privkey_pem: String::new(),
         }];
@@ -573,6 +724,7 @@ mod tests {
             certificate_id: "cert-1".to_string(),
             cert_name: "example.com".to_string(),
             fingerprint: "abc123".to_string(),
+            hostnames: vec!["example.com".to_string()],
             fullchain_pem: String::new(),
             privkey_pem: String::new(),
         }];

@@ -57,10 +57,10 @@ client.SetHeader("X-Custom-Header", "value")
 
 - `client.Application` - application API
 - `client.ApplicationDomain` - application_domain API
+- `client.Certificate` - certificate API
 - `client.Domain` - domain API
 - `client.ApplicationSourceVersion` - application_source_version API
 - `client.ApplicationDeployment` - application_deployment API
-- `client.Certificate` - certificate API
 - `client.CertificateDistribution` - certificate_distribution API
 - `client.Nginx` - nginx API
 - `client.Server` - server API
@@ -98,6 +98,22 @@ params := map[string]interface{}{
     "page_size": 2,
 }
 result, err := client.ApplicationDomain.ApplicationsDomainsList(applicationId, params)
+if err != nil {
+    panic(err)
+}
+fmt.Println(result)
+```
+
+### certificate
+
+```go
+// List canonical certificates
+params := map[string]interface{}{
+    "page": 1,
+    "page_size": 2,
+    "domainId": "domainId",
+}
+result, err := client.Certificate.CertificatesList(params)
 if err != nil {
     panic(err)
 }
@@ -146,21 +162,6 @@ params := map[string]interface{}{
     "status": 3,
 }
 result, err := client.ApplicationDeployment.ApplicationsDeploymentsList(applicationId, params)
-if err != nil {
-    panic(err)
-}
-fmt.Println(result)
-```
-
-### certificate
-
-```go
-// List canonical certificates
-params := map[string]interface{}{
-    "page": 1,
-    "page_size": 2,
-}
-result, err := client.Certificate.CertificatesList(params)
 if err != nil {
     panic(err)
 }

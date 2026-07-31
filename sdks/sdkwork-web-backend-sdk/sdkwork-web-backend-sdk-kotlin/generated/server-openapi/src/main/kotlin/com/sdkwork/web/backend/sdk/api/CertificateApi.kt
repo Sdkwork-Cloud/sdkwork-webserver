@@ -8,11 +8,45 @@ import com.sdkwork.web.backend.sdk.http.HttpClient
 
 class CertificateApi(private val client: HttpClient) {
 
-    /** List canonical certificates */
-    suspend fun certificatesList(page: Int? = null, pageSize: Int? = null): CertificatesListResponse? {
+    /** List certificates active on an application domain listener */
+    suspend fun applicationsDomainsListenerCertificateBindingsList(applicationId: String, domainId: String, page: Int? = null, pageSize: Int? = null): ApplicationsDomainsListenerCertificateBindingsListResponse? {
         val query = buildQueryString(listOf(
             QueryParameterSpec("page", page, "form", true, false, null),
             QueryParameterSpec("page_size", pageSize, "form", true, false, null)
+        ))
+        val raw = client.get(ApiPaths.appendQueryString(ApiPaths.backendPath("/applications/${serializePathParameter(applicationId, PathParameterSpec("applicationId", "simple", false))}/domains/${serializePathParameter(domainId, PathParameterSpec("domainId", "simple", false))}/listener_certificate_bindings"), query))
+        return client.convertValue(raw, object : TypeReference<ApplicationsDomainsListenerCertificateBindingsListResponse>() {})
+    }
+
+    /** Bind a certificate version to an application domain listener */
+    suspend fun applicationsDomainsListenerCertificateBindingsCreate(applicationId: String, domainId: String, body: CreateListenerCertificateBindingRequest, idempotencyKey: String): ApplicationsDomainsListenerCertificateBindingsCreateResponse201? {
+        val requestHeaders = buildRequestHeaders(
+            mapOf(
+                "Idempotency-Key" to HeaderParameterSpec(idempotencyKey, "simple", false, null),
+            ),
+            emptyMap()
+        )
+        val raw = client.post(ApiPaths.backendPath("/applications/${serializePathParameter(applicationId, PathParameterSpec("applicationId", "simple", false))}/domains/${serializePathParameter(domainId, PathParameterSpec("domainId", "simple", false))}/listener_certificate_bindings"), body, null, requestHeaders, "application/json")
+        return client.convertValue(raw, object : TypeReference<ApplicationsDomainsListenerCertificateBindingsCreateResponse201>() {})
+    }
+
+    /** Remove a certificate from an application domain listener */
+    suspend fun applicationsDomainsListenerCertificateBindingsDelete(applicationId: String, domainId: String, bindingId: String, idempotencyKey: String): Unit {
+        val requestHeaders = buildRequestHeaders(
+            mapOf(
+                "Idempotency-Key" to HeaderParameterSpec(idempotencyKey, "simple", false, null),
+            ),
+            emptyMap()
+        )
+        client.delete(ApiPaths.backendPath("/applications/${serializePathParameter(applicationId, PathParameterSpec("applicationId", "simple", false))}/domains/${serializePathParameter(domainId, PathParameterSpec("domainId", "simple", false))}/listener_certificate_bindings/${serializePathParameter(bindingId, PathParameterSpec("bindingId", "simple", false))}"), null, requestHeaders)
+    }
+
+    /** List canonical certificates */
+    suspend fun certificatesList(page: Int? = null, pageSize: Int? = null, domainId: String? = null): CertificatesListResponse? {
+        val query = buildQueryString(listOf(
+            QueryParameterSpec("page", page, "form", true, false, null),
+            QueryParameterSpec("page_size", pageSize, "form", true, false, null),
+            QueryParameterSpec("domainId", domainId, "form", true, false, null)
         ))
         val raw = client.get(ApiPaths.appendQueryString(ApiPaths.backendPath("/certificates"), query))
         return client.convertValue(raw, object : TypeReference<CertificatesListResponse>() {})

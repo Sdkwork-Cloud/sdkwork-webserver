@@ -11,11 +11,52 @@ class CertificateApi {
 
   CertificateApi(this._client);
 
-  /// List canonical certificates
-  Future<CertificatesListResponse?> certificatesList([int? page, int? pageSize]) async {
+  /// List certificates active on an application domain listener
+  Future<ApplicationsDomainsListenerCertificateBindingsListResponse?> applicationsDomainsListenerCertificateBindingsList(String applicationId, String domainId, [int? page, int? pageSize]) async {
     final query = buildQueryString([
       QueryParameterSpec('page', page, 'form', true, false, null),
       QueryParameterSpec('page_size', pageSize, 'form', true, false, null)
+    ]);
+    final response = await _client.get(ApiPaths.appendQueryString(ApiPaths.backendPath('/applications/${serializePathParameter(applicationId, const PathParameterSpec('applicationId', 'simple', false))}/domains/${serializePathParameter(domainId, const PathParameterSpec('domainId', 'simple', false))}/listener_certificate_bindings'), query));
+    return (() {
+      final map = sdkworkResponseAsMap(response);
+      return map == null ? null : ApplicationsDomainsListenerCertificateBindingsListResponse.fromJson(map);
+    })();
+  }
+
+  /// Bind a certificate version to an application domain listener
+  Future<ApplicationsDomainsListenerCertificateBindingsCreateResponse201?> applicationsDomainsListenerCertificateBindingsCreate(String applicationId, String domainId, CreateListenerCertificateBindingRequest body, String idempotencyKey) async {
+    final requestHeaders = buildRequestHeaders(
+      <String, HeaderParameterSpec>{
+        'Idempotency-Key': HeaderParameterSpec(idempotencyKey, 'simple', false, null),
+      },
+      <String, HeaderParameterSpec>{},
+    );
+    final payload = body.toJson();
+    final response = await _client.post(ApiPaths.backendPath('/applications/${serializePathParameter(applicationId, const PathParameterSpec('applicationId', 'simple', false))}/domains/${serializePathParameter(domainId, const PathParameterSpec('domainId', 'simple', false))}/listener_certificate_bindings'), body: payload, headers: requestHeaders, contentType: 'application/json');
+    return (() {
+      final map = sdkworkResponseAsMap(response);
+      return map == null ? null : ApplicationsDomainsListenerCertificateBindingsCreateResponse201.fromJson(map);
+    })();
+  }
+
+  /// Remove a certificate from an application domain listener
+  Future<void> applicationsDomainsListenerCertificateBindingsDelete(String applicationId, String domainId, String bindingId, String idempotencyKey) async {
+    final requestHeaders = buildRequestHeaders(
+      <String, HeaderParameterSpec>{
+        'Idempotency-Key': HeaderParameterSpec(idempotencyKey, 'simple', false, null),
+      },
+      <String, HeaderParameterSpec>{},
+    );
+    await _client.delete(ApiPaths.backendPath('/applications/${serializePathParameter(applicationId, const PathParameterSpec('applicationId', 'simple', false))}/domains/${serializePathParameter(domainId, const PathParameterSpec('domainId', 'simple', false))}/listener_certificate_bindings/${serializePathParameter(bindingId, const PathParameterSpec('bindingId', 'simple', false))}'), headers: requestHeaders);
+  }
+
+  /// List canonical certificates
+  Future<CertificatesListResponse?> certificatesList([int? page, int? pageSize, String? domainId]) async {
+    final query = buildQueryString([
+      QueryParameterSpec('page', page, 'form', true, false, null),
+      QueryParameterSpec('page_size', pageSize, 'form', true, false, null),
+      QueryParameterSpec('domainId', domainId, 'form', true, false, null)
     ]);
     final response = await _client.get(ApiPaths.appendQueryString(ApiPaths.backendPath('/certificates'), query));
     return (() {

@@ -1110,29 +1110,74 @@ class EnvVariablePage {
 }
 
 class CreateCertificateRequest {
-  final String? domainId;
+  final List<String>? domainIds;
   final int? certType;
+  final String? keyAlgorithm;
   final bool? autoRenew;
 
   CreateCertificateRequest({
-    this.domainId,
+    this.domainIds,
     this.certType,
+    this.keyAlgorithm,
     this.autoRenew
   });
 
   factory CreateCertificateRequest.fromJson(Map<String, dynamic> json) {
     return CreateCertificateRequest(
-      domainId: json['domainId']?.toString(),
+      domainIds: (() {
+        final list = _sdkworkAsList(json['domainIds']);
+        if (list == null) {
+          return null;
+        }
+        return list
+            .map((item) => item?.toString())
+            .whereType<String>()
+            .toList();
+      })(),
       certType: json['certType'] is int ? json['certType'] : null,
+      keyAlgorithm: json['keyAlgorithm']?.toString(),
       autoRenew: json['autoRenew'] is bool ? json['autoRenew'] : null
     );
   }
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
-      'domainId': domainId,
+      'domainIds': domainIds?.map((item) => item).toList(),
       'certType': certType,
+      'keyAlgorithm': keyAlgorithm,
       'autoRenew': autoRenew,
+    };
+  }
+}
+
+class CertificateIdentifierResponse {
+  final String? domainId;
+  final String? hostname;
+  final String? identifierType;
+  final int? position;
+
+  CertificateIdentifierResponse({
+    this.domainId,
+    this.hostname,
+    this.identifierType,
+    this.position
+  });
+
+  factory CertificateIdentifierResponse.fromJson(Map<String, dynamic> json) {
+    return CertificateIdentifierResponse(
+      domainId: json['domainId']?.toString(),
+      hostname: json['hostname']?.toString(),
+      identifierType: json['identifierType']?.toString(),
+      position: json['position'] is int ? json['position'] : null
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'domainId': domainId,
+      'hostname': hostname,
+      'identifierType': identifierType,
+      'position': position,
     };
   }
 }
@@ -1140,26 +1185,26 @@ class CreateCertificateRequest {
 class CertificateResponse {
   final String? id;
   final String? certName;
-  final String? domain;
-  final String? domainId;
+  final List<CertificateIdentifierResponse>? identifiers;
   final int? certType;
   final String? issuer;
   final String? fingerprint;
+  final String? keyAlgorithm;
   final String? notBefore;
   final String? notAfter;
   final bool? autoRenew;
-  final int? renewalStatus;
-  final int? status;
+  final String? renewalStatus;
+  final String? status;
   final String? createdAt;
 
   CertificateResponse({
     this.id,
     this.certName,
-    this.domain,
-    this.domainId,
+    this.identifiers,
     this.certType,
     this.issuer,
     this.fingerprint,
+    this.keyAlgorithm,
     this.notBefore,
     this.notAfter,
     this.autoRenew,
@@ -1172,16 +1217,28 @@ class CertificateResponse {
     return CertificateResponse(
       id: json['id']?.toString(),
       certName: json['certName']?.toString(),
-      domain: json['domain']?.toString(),
-      domainId: json['domainId']?.toString(),
+      identifiers: (() {
+        final list = _sdkworkAsList(json['identifiers']);
+        if (list == null) {
+          return null;
+        }
+        return list
+            .map((item) => (() {
+        final map = _sdkworkAsMap(item);
+        return map == null ? null : CertificateIdentifierResponse.fromJson(map);
+      })())
+            .whereType<CertificateIdentifierResponse>()
+            .toList();
+      })(),
       certType: json['certType'] is int ? json['certType'] : null,
       issuer: json['issuer']?.toString(),
       fingerprint: json['fingerprint']?.toString(),
+      keyAlgorithm: json['keyAlgorithm']?.toString(),
       notBefore: json['notBefore']?.toString(),
       notAfter: json['notAfter']?.toString(),
       autoRenew: json['autoRenew'] is bool ? json['autoRenew'] : null,
-      renewalStatus: json['renewalStatus'] is int ? json['renewalStatus'] : null,
-      status: json['status'] is int ? json['status'] : null,
+      renewalStatus: json['renewalStatus']?.toString(),
+      status: json['status']?.toString(),
       createdAt: json['createdAt']?.toString()
     );
   }
@@ -1190,17 +1247,183 @@ class CertificateResponse {
     return <String, dynamic>{
       'id': id,
       'certName': certName,
-      'domain': domain,
-      'domainId': domainId,
+      'identifiers': identifiers?.map((item) => item.toJson()).toList(),
       'certType': certType,
       'issuer': issuer,
       'fingerprint': fingerprint,
+      'keyAlgorithm': keyAlgorithm,
       'notBefore': notBefore,
       'notAfter': notAfter,
       'autoRenew': autoRenew,
       'renewalStatus': renewalStatus,
       'status': status,
       'createdAt': createdAt,
+    };
+  }
+}
+
+class CreateListenerCertificateBindingRequest {
+  final String? certificateId;
+  final String? certificateVersionId;
+  final int? priority;
+  final bool? isDefault;
+
+  CreateListenerCertificateBindingRequest({
+    this.certificateId,
+    this.certificateVersionId,
+    this.priority,
+    this.isDefault
+  });
+
+  factory CreateListenerCertificateBindingRequest.fromJson(Map<String, dynamic> json) {
+    return CreateListenerCertificateBindingRequest(
+      certificateId: json['certificateId']?.toString(),
+      certificateVersionId: json['certificateVersionId']?.toString(),
+      priority: json['priority'] is int ? json['priority'] : null,
+      isDefault: json['isDefault'] is bool ? json['isDefault'] : null
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'certificateId': certificateId,
+      'certificateVersionId': certificateVersionId,
+      'priority': priority,
+      'isDefault': isDefault,
+    };
+  }
+}
+
+class ListenerCertificateBindingResponse {
+  final String? id;
+  final String? siteId;
+  final String? domainId;
+  final String? certificateId;
+  final String? desiredCertificateVersionId;
+  final String? currentCertificateVersionId;
+  final ListenerCertificateSummaryResponse? desiredCertificate;
+  final ListenerCertificateSummaryResponse? currentCertificate;
+  final String? keyAlgorithm;
+  final int? priority;
+  final bool? isDefault;
+  final String? status;
+  final String? activatedAt;
+  final String? createdAt;
+  final String? updatedAt;
+
+  ListenerCertificateBindingResponse({
+    this.id,
+    this.siteId,
+    this.domainId,
+    this.certificateId,
+    this.desiredCertificateVersionId,
+    this.currentCertificateVersionId,
+    this.desiredCertificate,
+    this.currentCertificate,
+    this.keyAlgorithm,
+    this.priority,
+    this.isDefault,
+    this.status,
+    this.activatedAt,
+    this.createdAt,
+    this.updatedAt
+  });
+
+  factory ListenerCertificateBindingResponse.fromJson(Map<String, dynamic> json) {
+    return ListenerCertificateBindingResponse(
+      id: json['id']?.toString(),
+      siteId: json['siteId']?.toString(),
+      domainId: json['domainId']?.toString(),
+      certificateId: json['certificateId']?.toString(),
+      desiredCertificateVersionId: json['desiredCertificateVersionId']?.toString(),
+      currentCertificateVersionId: json['currentCertificateVersionId']?.toString(),
+      desiredCertificate: (() {
+        final map = _sdkworkAsMap(json['desiredCertificate']);
+        return map == null ? null : ListenerCertificateSummaryResponse.fromJson(map);
+      })(),
+      currentCertificate: (() {
+        final map = _sdkworkAsMap(json['currentCertificate']);
+        return map == null ? null : ListenerCertificateSummaryResponse.fromJson(map);
+      })(),
+      keyAlgorithm: json['keyAlgorithm']?.toString(),
+      priority: json['priority'] is int ? json['priority'] : null,
+      isDefault: json['isDefault'] is bool ? json['isDefault'] : null,
+      status: json['status']?.toString(),
+      activatedAt: json['activatedAt']?.toString(),
+      createdAt: json['createdAt']?.toString(),
+      updatedAt: json['updatedAt']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'id': id,
+      'siteId': siteId,
+      'domainId': domainId,
+      'certificateId': certificateId,
+      'desiredCertificateVersionId': desiredCertificateVersionId,
+      'currentCertificateVersionId': currentCertificateVersionId,
+      'desiredCertificate': desiredCertificate?.toJson(),
+      'currentCertificate': currentCertificate?.toJson(),
+      'keyAlgorithm': keyAlgorithm,
+      'priority': priority,
+      'isDefault': isDefault,
+      'status': status,
+      'activatedAt': activatedAt,
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
+    };
+  }
+}
+
+class ListenerCertificateSummaryResponse {
+  final String? certName;
+  final List<CertificateIdentifierResponse>? identifiers;
+  final String? issuer;
+  final String? fingerprint;
+  final String? notAfter;
+  final String? status;
+
+  ListenerCertificateSummaryResponse({
+    this.certName,
+    this.identifiers,
+    this.issuer,
+    this.fingerprint,
+    this.notAfter,
+    this.status
+  });
+
+  factory ListenerCertificateSummaryResponse.fromJson(Map<String, dynamic> json) {
+    return ListenerCertificateSummaryResponse(
+      certName: json['certName']?.toString(),
+      identifiers: (() {
+        final list = _sdkworkAsList(json['identifiers']);
+        if (list == null) {
+          return null;
+        }
+        return list
+            .map((item) => (() {
+        final map = _sdkworkAsMap(item);
+        return map == null ? null : CertificateIdentifierResponse.fromJson(map);
+      })())
+            .whereType<CertificateIdentifierResponse>()
+            .toList();
+      })(),
+      issuer: json['issuer']?.toString(),
+      fingerprint: json['fingerprint']?.toString(),
+      notAfter: json['notAfter']?.toString(),
+      status: json['status']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'certName': certName,
+      'identifiers': identifiers?.map((item) => item.toJson()).toList(),
+      'issuer': issuer,
+      'fingerprint': fingerprint,
+      'notAfter': notAfter,
+      'status': status,
     };
   }
 }
@@ -1894,6 +2117,62 @@ class SitesDomainsVerifyResponse {
 
   factory SitesDomainsVerifyResponse.fromJson(Map<String, dynamic> json) {
     return SitesDomainsVerifyResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SitesDomainsListenerCertificateBindingsListResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  SitesDomainsListenerCertificateBindingsListResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory SitesDomainsListenerCertificateBindingsListResponse.fromJson(Map<String, dynamic> json) {
+    return SitesDomainsListenerCertificateBindingsListResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SitesDomainsListenerCertificateBindingsCreateResponse201 {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  SitesDomainsListenerCertificateBindingsCreateResponse201({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory SitesDomainsListenerCertificateBindingsCreateResponse201.fromJson(Map<String, dynamic> json) {
+    return SitesDomainsListenerCertificateBindingsCreateResponse201(
       code: json['code'] is int ? json['code'] : null,
       data: _sdkworkAsMap(json['data']),
       traceId: json['traceId']?.toString()

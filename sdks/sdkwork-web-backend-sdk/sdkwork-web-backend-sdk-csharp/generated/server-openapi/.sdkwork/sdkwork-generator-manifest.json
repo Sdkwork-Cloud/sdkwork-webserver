@@ -16,7 +16,7 @@
     },
     {
       "path": "Api/Api.cs",
-      "sha256": "e0b80cc901c5d6d3ae4df5a2260a1d0eb293e96c6f84470170c39a77de39d08d"
+      "sha256": "9b5bbb57aa33764de68b01e2ba32c31a3026ce992f68801362993ed863374cf2"
     },
     {
       "path": "Api/ApiPaths.cs",
@@ -44,7 +44,7 @@
     },
     {
       "path": "Api/CertificateApi.cs",
-      "sha256": "a0a937d182ca440917d3da266f59435e8638e46ab8afdfa61059062f65428968"
+      "sha256": "f810621640c5b67af028bd9e09c9bfe690e3e40d6d6c4aeaaf541eb55133e31e"
     },
     {
       "path": "Api/CertificateDistributionApi.cs",
@@ -88,11 +88,15 @@
     },
     {
       "path": "Models/AgentCertificateBundle.cs",
-      "sha256": "9fc2cbca5a7709cb621eb6dc4968066dc74f18dac5fb5cdb41cc8a09b13987eb"
+      "sha256": "c70fb7b814ee8df52b9d04f6ad9c150830871ac047befa5dcb662a474c3c0bf3"
+    },
+    {
+      "path": "Models/AgentCertificateObservation.cs",
+      "sha256": "be277f4dcc8c85a84bffee3fb1cc9d52afcdfd4fedea3c6f968ba02412d33247"
     },
     {
       "path": "Models/AgentHeartbeatRequest.cs",
-      "sha256": "24d9ede97a3e95bbfa4c4156bfb14621a5471928fd35f642aded5ffa306386e7"
+      "sha256": "ec71efe3740fee0928880018e8061506ce5d8539d2a8c12feff5f15c9874f8e0"
     },
     {
       "path": "Models/AgentHeartbeatResponse.cs",
@@ -145,6 +149,14 @@
     {
       "path": "Models/ApplicationsDomainsCreateResponse201.cs",
       "sha256": "8395f3ef6399e5d9a48e2ae3a39fb6764d436001f67b6674afadbf5ea7f0b51a"
+    },
+    {
+      "path": "Models/ApplicationsDomainsListenerCertificateBindingsCreateResponse201.cs",
+      "sha256": "344a19e1ad8274165088bb198b362d71daa8eea8130461629ffeda0e68c1610b"
+    },
+    {
+      "path": "Models/ApplicationsDomainsListenerCertificateBindingsListResponse.cs",
+      "sha256": "e4af14f4581ee79584fa2181ededb9174e09af6d7e0f8013768e368094b6927c"
     },
     {
       "path": "Models/ApplicationsDomainsListResponse.cs",
@@ -215,8 +227,12 @@
       "sha256": "987ce1494b5c4149f5c1a9328be57da564926169f3065c333661a1d19be0ed5f"
     },
     {
+      "path": "Models/CertificateIdentifierResponse.cs",
+      "sha256": "f2d9edf6fee84259b37b279c5090c356d8bdc3832a54c76713df6cf1f262bdb0"
+    },
+    {
       "path": "Models/CertificateResponse.cs",
-      "sha256": "d1321460d77617ea46ab0cd2cefaa6e605b6627a9c62a0356d6ad36830db10be"
+      "sha256": "17ae556dad21f0bca7464b947fa6e4f5d10eef9f5f51d8b72aaedd992be7cd42"
     },
     {
       "path": "Models/CertificatesCreateResponse201.cs",
@@ -280,7 +296,11 @@
     },
     {
       "path": "Models/CreateCertificateRequest.cs",
-      "sha256": "e036dd5cc3d75be78f160ce583f2a0c711c101256e5007c9878dea2618476bdd"
+      "sha256": "04c33874ffb819f93e0634b817651b6b481b87e570f6996ea400fd064ad79bf9"
+    },
+    {
+      "path": "Models/CreateListenerCertificateBindingRequest.cs",
+      "sha256": "25506a16ab859fa4709ddeb98540cfd6422cf91dc22917186453a0fdd87d9837"
     },
     {
       "path": "Models/CreateManagedDomainRequest.cs",
@@ -337,6 +357,14 @@
     {
       "path": "Models/ImportApplicationGitSourceVersionRequest.cs",
       "sha256": "ab0c8f8d53352f94b7b933fea3a4c758a3fc6b83ca8e025c9c1b120f5450b3cf"
+    },
+    {
+      "path": "Models/ListenerCertificateBindingResponse.cs",
+      "sha256": "ace058e80ee19ef3ad4a924c376112de207e2e1a0fc10d66c6ae285223c44b35"
+    },
+    {
+      "path": "Models/ListenerCertificateSummaryResponse.cs",
+      "sha256": "d2ea011677e00373ceb9d9c88c0413c9cb550f7ee862f529a8d55670cbb65fba"
     },
     {
       "path": "Models/MediaChecksum.cs",
@@ -476,7 +504,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "12e96508671118c2dd3f7653cb4a5fa52a44cfa70b819aaba52b29101f858085"
+      "sha256": "0baf323ac1b28f2ada1dff4d2299ace56c25ec72a5f61d07e469527e3c90d149"
     },
     {
       "path": "sdkwork-sdk.json",
@@ -488,7 +516,7 @@
     },
     {
       "path": "SdkworkBackendClient.cs",
-      "sha256": "e162a081d26815ea944522a3218ecad4948f29f3255433d44c12f4ce84cbacf5"
+      "sha256": "68545d1b2d1b990732411950c9285350208898fe7fb6fa11d73b6165e2206be9"
     }
   ],
   "scaffoldFiles": [

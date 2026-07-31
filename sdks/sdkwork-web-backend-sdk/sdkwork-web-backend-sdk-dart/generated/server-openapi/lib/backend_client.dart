@@ -2,10 +2,10 @@ import 'src/http/client.dart';
 import 'src/http/sdk_config.dart';
 import 'src/api/application.dart';
 import 'src/api/application_domain.dart';
+import 'src/api/certificate.dart';
 import 'src/api/domain.dart';
 import 'src/api/application_source_version.dart';
 import 'src/api/application_deployment.dart';
-import 'src/api/certificate.dart';
 import 'src/api/certificate_distribution.dart';
 import 'src/api/nginx.dart';
 import 'src/api/server.dart';
@@ -17,10 +17,10 @@ class SdkworkBackendClient {
 
   late final ApplicationApi application;
   late final ApplicationDomainApi applicationDomain;
+  late final CertificateApi certificate;
   late final DomainApi domain;
   late final ApplicationSourceVersionApi applicationSourceVersion;
   late final ApplicationDeploymentApi applicationDeployment;
-  late final CertificateApi certificate;
   late final CertificateDistributionApi certificateDistribution;
   late final NginxApi nginx;
   late final ServerApi server;
@@ -32,10 +32,10 @@ class SdkworkBackendClient {
   }) : _httpClient = HttpClient(config: config) {
     application = ApplicationApi(_httpClient);
     applicationDomain = ApplicationDomainApi(_httpClient);
+    certificate = CertificateApi(_httpClient);
     domain = DomainApi(_httpClient);
     applicationSourceVersion = ApplicationSourceVersionApi(_httpClient);
     applicationDeployment = ApplicationDeploymentApi(_httpClient);
-    certificate = CertificateApi(_httpClient);
     certificateDistribution = CertificateDistributionApi(_httpClient);
     nginx = NginxApi(_httpClient);
     server = ServerApi(_httpClient);

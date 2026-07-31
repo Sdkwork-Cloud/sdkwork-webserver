@@ -29,7 +29,6 @@ const CRITICAL_SOURCE_FILES = Object.freeze([
   'Cargo.toml',
   'Cargo.lock',
   BASELINE_PATH,
-  'crates/sdkwork-webserver-database-host/tests/sqlite_recovery.rs',
 ]);
 
 export function createDatabaseRecoveryPlan({
@@ -51,18 +50,6 @@ export function createDatabaseRecoveryPlan({
       containerCpus: 1,
       containerPids: 256,
     }),
-    sqliteTest: Object.freeze([
-      'cargo',
-      'test',
-      '-p',
-      'sdkwork-webserver-database-host',
-      '--test',
-      'sqlite_recovery',
-      'sqlite_consistent_backup_restores_integrity_and_tenant_data',
-      '--',
-      '--exact',
-      '--nocapture',
-    ]),
     postgres: Object.freeze({
       dump: Object.freeze([
         'pg_dump',
@@ -105,7 +92,7 @@ function printHelp() {
   console.log(`Usage: node scripts/database-recovery-verify.mjs [options]
 
 Options:
-  --dry-run  Print the bounded SQLite/PostgreSQL recovery verification plan
+  --dry-run  Print the bounded PostgreSQL recovery verification plan
   --help     Show this help`);
 }
 
@@ -345,10 +332,6 @@ function verifyPostgresRecovery(containerName, plan, remainingTimeout) {
 export function runDatabaseRecovery(plan = createDatabaseRecoveryPlan()) {
   const remainingTimeout = createDeadline();
   ensureCriticalSources(remainingTimeout);
-  console.log('[sdkwork-web-recovery] verifying transactionally consistent SQLite backup/restore');
-  run(plan.sqliteTest[0], plan.sqliteTest.slice(1), {
-    timeoutMs: remainingTimeout(5 * 60 * 1_000),
-  });
   run('docker', ['version', '--format', '{{.Server.Version}}'], {
     capture: true,
     timeoutMs: remainingTimeout(30_000),

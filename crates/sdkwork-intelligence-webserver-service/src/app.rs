@@ -3,9 +3,10 @@
 use async_trait::async_trait;
 use sdkwork_webserver_contract::{
     ApplicationStoreListing, CreateCertificateRequest, CreateDeploymentRequest,
-    CreateDomainRequest, CreateEnvVariableRequest, CreateHealthCheckRequest, CreateSiteRequest,
-    CreateSourceVersionRequest, ImportGitSourceVersionRequest, ListSitesQuery, MediaResource,
-    UpdateSiteRequest, WebAppApi, WebAppRequestContext, WebAppResourceScope, WebServiceResult,
+    CreateDomainRequest, CreateEnvVariableRequest, CreateHealthCheckRequest,
+    CreateListenerCertificateBindingRequest, CreateSiteRequest, CreateSourceVersionRequest,
+    ImportGitSourceVersionRequest, ListSitesQuery, MediaResource, UpdateSiteRequest, WebAppApi,
+    WebAppRequestContext, WebAppResourceScope, WebServiceResult,
 };
 use std::collections::HashSet;
 
@@ -16,6 +17,7 @@ const MAX_ENV_VARIABLE_VALUE_BYTES: usize = 64 * 1024;
 const MAX_ICON_BYTES: u64 = 2 * 1024 * 1024;
 const MAX_STORE_IMAGE_BYTES: u64 = 10 * 1024 * 1024;
 const MAX_STORE_PREVIEWS: usize = 8;
+const MAX_CERTIFICATE_IDENTIFIERS: usize = 8;
 const DEFAULT_SOURCE_VERSION_RETENTION_LIMIT: i32 = 5;
 const MAX_SOURCE_VERSION_RETENTION_LIMIT: i32 = 50;
 
@@ -422,13 +424,27 @@ impl WebService {
                 "automatic renewal is unavailable for self-signed certificates",
             ));
         }
-        if request.domain_id.is_empty()
-            || request.domain_id != request.domain_id.trim()
-            || request.domain_id.len() > 64
-            || request.domain_id.chars().any(char::is_control)
-        {
+        if request.domain_ids.is_empty() || request.domain_ids.len() > MAX_CERTIFICATE_IDENTIFIERS {
             return Err(sdkwork_webserver_contract::WebServiceError::validation(
-                "domainId is invalid",
+                "domainIds must contain between 1 and 8 identifiers",
+            ));
+        }
+        let mut unique_domain_ids = HashSet::with_capacity(request.domain_ids.len());
+        for domain_id in &request.domain_ids {
+            if domain_id.is_empty()
+                || domain_id != domain_id.trim()
+                || domain_id.len() > 64
+                || domain_id.chars().any(char::is_control)
+                || !unique_domain_ids.insert(domain_id)
+            {
+                return Err(sdkwork_webserver_contract::WebServiceError::validation(
+                    "domainIds must contain unique valid identifiers",
+                ));
+            }
+        }
+        if !matches!(request.key_algorithm.as_str(), "ECDSA" | "RSA") {
+            return Err(sdkwork_webserver_contract::WebServiceError::validation(
+                "keyAlgorithm must be ECDSA or RSA",
             ));
         }
         Ok(())
@@ -1193,6 +1209,7 @@ impl WebAppApi for WebService {
         &self,
         context: &WebAppRequestContext,
         site_id: Option<&str>,
+        domain_id: Option<&str>,
         page: i32,
         page_size: i32,
     ) -> WebServiceResult<sdkwork_webserver_contract::CertificatePage> {
@@ -1203,7 +1220,7 @@ impl WebAppApi for WebService {
         };
         let owner_id = Self::owner_filter(context)?;
         self.repository
-            .list_certificates(tenant_id, owner_id, site_id, page, page_size)
+            .list_certificates(tenant_id, owner_id, site_id, domain_id, page, page_size)
             .await
     }
 
@@ -1213,6 +1230,61 @@ impl WebAppApi for WebService {
         request: &CreateCertificateRequest,
     ) -> WebServiceResult<sdkwork_webserver_contract::CertificateResponse> {
         self.issue_certificate(context, request).await
+    }
+
+    async fn list_listener_certificate_bindings(
+        &self,
+        context: &WebAppRequestContext,
+        site_id: &str,
+        domain_id: &str,
+        page: i32,
+        page_size: i32,
+    ) -> WebServiceResult<sdkwork_webserver_contract::ListenerCertificateBindingPage> {
+        let tenant_id = self.require_site_access(context, site_id).await?;
+        self.repository
+            .list_listener_certificate_bindings(tenant_id, site_id, domain_id, page, page_size)
+            .await
+    }
+
+    async fn bind_listener_certificate(
+        &self,
+        context: &WebAppRequestContext,
+        site_id: &str,
+        domain_id: &str,
+        request: &CreateListenerCertificateBindingRequest,
+    ) -> WebServiceResult<sdkwork_webserver_contract::ListenerCertificateBindingResponse> {
+        let tenant_id = self.require_site_access(context, site_id).await?;
+        let binding = self
+            .repository
+            .bind_listener_certificate(tenant_id, site_id, domain_id, request)
+            .await?;
+        self.audit_site_action(
+            context,
+            "sites.domains.listener_certificate_bindings.create",
+            site_id,
+        )
+        .await;
+        Ok(binding)
+    }
+
+    async fn unbind_listener_certificate(
+        &self,
+        context: &WebAppRequestContext,
+        site_id: &str,
+        domain_id: &str,
+        binding_id: &str,
+    ) -> WebServiceResult<()> {
+        let tenant_id = self.require_site_access(context, site_id).await?;
+        self.repository
+            .unbind_listener_certificate(tenant_id, site_id, domain_id, binding_id)
+            .await?;
+        self.audit_site_action(
+            context,
+            "sites.domains.listener_certificate_bindings.delete",
+            site_id,
+        )
+        .await;
+        Ok(())
     }
 
     async fn list_health_checks(
@@ -1527,16 +1599,18 @@ mod tests {
 
         assert!(
             WebService::validate_certificate_request(&CreateCertificateRequest {
-                domain_id: "domain-1".to_owned(),
+                domain_ids: vec!["domain-1".to_owned(), "domain-2".to_owned()],
                 cert_type: 1,
+                key_algorithm: "ECDSA".to_owned(),
                 auto_renew: true,
             })
             .is_ok()
         );
         assert!(
             WebService::validate_certificate_request(&CreateCertificateRequest {
-                domain_id: "domain-1".to_owned(),
+                domain_ids: vec!["domain-1".to_owned()],
                 cert_type: 3,
+                key_algorithm: "RSA".to_owned(),
                 auto_renew: true,
             })
             .is_err()

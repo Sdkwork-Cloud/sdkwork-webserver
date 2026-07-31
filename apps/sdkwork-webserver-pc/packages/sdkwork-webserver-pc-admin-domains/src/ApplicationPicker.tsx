@@ -8,6 +8,11 @@ import {
 import { useEffect, useId, useState, type KeyboardEvent } from "react";
 
 import type { WebserverAdminSdkClient } from "@sdkwork/webserver-pc-admin-core";
+import {
+  formatWebserverErrorMessage,
+  translateWebserver,
+  type WebserverLocale,
+} from "@sdkwork/webserver-pc-commons";
 
 type ApplicationPage = Awaited<ReturnType<WebserverAdminSdkClient["application"]["list"]>>;
 type Application = ApplicationPage["items"][number];
@@ -29,6 +34,7 @@ interface ApplicationPickerProps {
   allowUnbound?: boolean;
   client: WebserverAdminSdkClient;
   copy: ApplicationPickerCopy;
+  locale: WebserverLocale;
   onChange(applicationId: string): void;
   value: string;
 }
@@ -39,6 +45,7 @@ export function ApplicationPicker({
   allowUnbound = false,
   client,
   copy,
+  locale,
   onChange,
   value,
 }: ApplicationPickerProps) {
@@ -68,13 +75,16 @@ export function ApplicationPicker({
       setPageInfo(response.pageInfo);
     }).catch((cause: unknown) => {
       if (!controller.signal.aborted) {
-        setError(cause instanceof Error && cause.message.trim() ? cause.message : copy.operationFailed);
+        setError(formatWebserverErrorMessage(
+          cause,
+          (key, values) => translateWebserver(locale, key, values),
+        ));
       }
     }).finally(() => {
       if (!controller.signal.aborted) setBusy(false);
     });
     return () => controller.abort();
-  }, [client, copy.operationFailed, keyword, page]);
+  }, [client, keyword, locale, page]);
 
   const total = numericCount(pageInfo?.totalItems);
   const hasNext = pageInfo?.hasMore ?? (total !== undefined && page * APPLICATION_PAGE_SIZE < total);

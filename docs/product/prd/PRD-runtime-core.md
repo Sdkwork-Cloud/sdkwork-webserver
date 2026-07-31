@@ -61,7 +61,7 @@ Startup stages are deterministic:
 
 Production must not silently start with a generated default site, self-signed certificate, empty route table, permissive proxy, or incomplete snapshot. If no acceptable snapshot is available, affected public listeners remain closed and diagnostics identify the exact blocker.
 
-The last verified snapshot and assigned encrypted resources are retained locally within a bounded rollback policy. A temporary control-plane, PostgreSQL, SQLite, Redis, ACME, or DNS control API outage must not interrupt already active configuration.
+The last verified snapshot and assigned encrypted resources are retained locally within a bounded rollback policy. A temporary control-plane, PostgreSQL, Redis, ACME, or DNS control API outage must not interrupt already active configuration.
 
 ## 5. HTTP/1.x Protocol Correctness
 

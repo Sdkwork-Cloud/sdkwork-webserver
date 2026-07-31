@@ -83,6 +83,6 @@ Executed acceptance evidence:
 - `cargo clippy --workspace --all-targets -- -D warnings`: passed.
 - `cargo fmt -- --check`: passed.
 - `cargo run -p sdkwork-api-web-server-standalone-gateway -- validate etc/examples/sdkwork.webserver.config.json`: passed.
-- `pnpm verify`: passed, including full-workspace Rust tests, SQLite lifecycle, contract materialization, repository/docs/topology/database checks, and cloud gateway validation.
+- `pnpm verify`: passed, including full-workspace Rust tests, database lifecycle, contract materialization, repository/docs/topology/database checks, and cloud gateway validation.
 
 This acceptance closes only HTTP/1 request-between-request idle reaping. HTTP/1 Pipeline depth was subsequently delivered by accepted [REQ-2026-0019](REQ-2026-0019-bounded-http1-pipeline-depth.md), and H2 PING/ACK failure detection by accepted [REQ-2026-0020](REQ-2026-0020-http2-keep-alive-ping-timeout.md). Responsive-but-idle H2 maximum lifetime, load/soak evidence, and the other non-goals remain separate commercial gates. PostgreSQL lifecycle execution remained ignored because no disposable URL was configured. The pre-existing public API operation-pattern violation for `GET /backend/v3/api/agent/sync` remains subject to human review.

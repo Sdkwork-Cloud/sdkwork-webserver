@@ -11,31 +11,23 @@
   "status": "ok",
   "mode": "apply",
   "hasChanges": true,
-  "hasDestructiveChanges": true,
-  "changeFingerprint": "53b4b81df78f199d7e08a9e674a72f104513fa19a517d1795e07cfa871cabf37",
+  "hasDestructiveChanges": false,
+  "changeFingerprint": "a9bbf34cf47656376f78aacabc57f6024a3ec9522c6946b01bd6355dbe98cbb4",
   "changeImpact": {
     "schemaVersion": 1,
     "areas": [
-      "api-surface",
       "unknown"
     ],
     "details": [
       {
-        "area": "api-surface",
-        "paths": [
-          "src/main/kotlin/com/sdkwork/web/app/sdk/api/SourceVersionApi.kt"
-        ]
-      },
-      {
         "area": "unknown",
         "paths": [
-          "src/main/kotlin/com/sdkwork/web/app/sdk/SitesSourceVersionsGitImportCreateResponse201.kt",
-          "src/main/kotlin/com/sdkwork/web/app/sdk/SitesSourceVersionsImportGitResponse201.kt"
+          "src/main/kotlin/com/sdkwork/web/app/sdk/ListenerCertificateBindingResponse.kt"
         ]
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, unknown. Verification is required."
+    "summary": "Detected impact areas: unknown. Verification is required."
   },
   "executionDecision": {
     "schemaVersion": 1,
@@ -45,7 +37,6 @@
     "applyRequiresExpectedFingerprint": false,
     "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
-      "deleted-generated-files",
       "manual-review-required",
       "unknown-impact",
       "verification-required"
@@ -59,7 +50,7 @@
         "id": "verify-check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, unknown.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: unknown.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-kotlin\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -78,13 +69,13 @@
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, unknown. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: unknown. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, unknown.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: unknown.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-kotlin\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -114,8 +105,8 @@
     "localVersions": []
   },
   "stats": {
-    "totalFiles": 83,
-    "models": 62,
+    "totalFiles": 89,
+    "models": 68,
     "apis": 7,
     "types": 0
   },
@@ -123,18 +114,16 @@
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 2,
+    "writtenFiles": 1,
     "skippedScaffoldFiles": 1,
-    "skippedUnchangedGeneratedFiles": 80,
-    "deletedGeneratedFiles": 1,
+    "skippedUnchangedGeneratedFiles": 87,
+    "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "53b4b81df78f199d7e08a9e674a72f104513fa19a517d1795e07cfa871cabf37",
+    "changeFingerprint": "a9bbf34cf47656376f78aacabc57f6024a3ec9522c6946b01bd6355dbe98cbb4",
     "changes": {
-      "createdGeneratedFiles": [
-        "src/main/kotlin/com/sdkwork/web/app/sdk/SitesSourceVersionsGitImportCreateResponse201.kt"
-      ],
+      "createdGeneratedFiles": [],
       "updatedGeneratedFiles": [
-        "src/main/kotlin/com/sdkwork/web/app/sdk/api/SourceVersionApi.kt"
+        "src/main/kotlin/com/sdkwork/web/app/sdk/ListenerCertificateBindingResponse.kt"
       ],
       "unchangedGeneratedFiles": [
         "bin/publish-core.mjs",
@@ -154,7 +143,9 @@
         "src/main/kotlin/com/sdkwork/web/app/sdk/api/EnvVariableApi.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/api/MonitorApi.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/api/SiteApi.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/api/SourceVersionApi.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/ApplicationStoreListing.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/CertificateIdentifierResponse.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatePage.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/CertificateResponse.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatesCreateResponse201.kt",
@@ -164,6 +155,7 @@
         "src/main/kotlin/com/sdkwork/web/app/sdk/CreateDomainRequest.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/CreateEnvVariableRequest.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/CreateHealthCheckRequest.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/CreateListenerCertificateBindingRequest.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/CreateSiteRequest.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/CreateSourceVersionRequest.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/DeploymentPage.kt",
@@ -178,6 +170,7 @@
         "src/main/kotlin/com/sdkwork/web/app/sdk/HealthCheckResponse.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/http/HttpClient.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/ImportGitSourceVersionRequest.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/ListenerCertificateSummaryResponse.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/MediaChecksum.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/MediaResource.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/PageInfo.kt",
@@ -199,6 +192,8 @@
         "src/main/kotlin/com/sdkwork/web/app/sdk/SitesDeploymentsRetrieveResponse.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/SitesDeploymentsRollbackResponse.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/SitesDomainsCreateResponse201.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/SitesDomainsListenerCertificateBindingsCreateResponse201.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/SitesDomainsListenerCertificateBindingsListResponse.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/SitesDomainsListResponse.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/SitesDomainsRetrieveResponse.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/SitesDomainsVerifyResponse.kt",
@@ -210,6 +205,7 @@
         "src/main/kotlin/com/sdkwork/web/app/sdk/SitesPauseResponse.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/SitesRetrieveResponse.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/SitesSourceVersionsCreateResponse201.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/SitesSourceVersionsGitImportCreateResponse201.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/SitesSourceVersionsListResponse.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/SitesSourceVersionsRetrieveResponse.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/SitesUpdateResponse.kt",
@@ -218,9 +214,7 @@
         "src/main/kotlin/com/sdkwork/web/app/sdk/SourceVersionResponse.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/UpdateSiteRequest.kt"
       ],
-      "deletedGeneratedFiles": [
-        "src/main/kotlin/com/sdkwork/web/app/sdk/SitesSourceVersionsImportGitResponse201.kt"
-      ],
+      "deletedGeneratedFiles": [],
       "scaffoldedFiles": [],
       "preservedScaffoldFiles": [
         "custom/README.md"
@@ -230,37 +224,29 @@
     "impact": {
       "schemaVersion": 1,
       "areas": [
-        "api-surface",
         "unknown"
       ],
       "details": [
         {
-          "area": "api-surface",
-          "paths": [
-            "src/main/kotlin/com/sdkwork/web/app/sdk/api/SourceVersionApi.kt"
-          ]
-        },
-        {
           "area": "unknown",
           "paths": [
-            "src/main/kotlin/com/sdkwork/web/app/sdk/SitesSourceVersionsGitImportCreateResponse201.kt",
-            "src/main/kotlin/com/sdkwork/web/app/sdk/SitesSourceVersionsImportGitResponse201.kt"
+            "src/main/kotlin/com/sdkwork/web/app/sdk/ListenerCertificateBindingResponse.kt"
           ]
         }
       ],
       "requiresVerification": true,
-      "summary": "Detected impact areas: api-surface, unknown. Verification is required."
+      "summary": "Detected impact areas: unknown. Verification is required."
     },
     "verificationPlan": {
       "shouldRun": true,
       "runPhase": "now",
-      "summary": "Detected impact areas: api-surface, unknown. Verification is required. Run the required verification commands now against the generated SDK output.",
+      "summary": "Detected impact areas: unknown. Verification is required. Run the required verification commands now against the generated SDK output.",
       "steps": [
         {
           "id": "check",
           "title": "Unified package check",
           "required": true,
-          "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, unknown.",
+          "rationale": "Validate the generated package with the unified publish helper. Triggered by: unknown.",
           "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-kotlin\\generated\\server-openapi",
           "command": "node",
           "args": [
@@ -284,7 +270,6 @@
       "applyRequiresExpectedFingerprint": false,
       "summary": "Changes have been applied. Run the required verification plan now.",
       "reasons": [
-        "deleted-generated-files",
         "manual-review-required",
         "unknown-impact",
         "verification-required"

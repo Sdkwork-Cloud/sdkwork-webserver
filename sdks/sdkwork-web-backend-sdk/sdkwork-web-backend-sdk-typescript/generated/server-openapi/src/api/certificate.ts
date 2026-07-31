@@ -1,12 +1,88 @@
 import { backendApiPath } from './paths';
 import type { ApiRequestOptions, HttpClient } from '../http/client';
 
-import type { CertificateResponse, CreateCertificateRequest, PageInfo, UpdateCertificateRequest } from '../types';
+import type { CertificateResponse, CreateCertificateRequest, CreateListenerCertificateBindingRequest, ListenerCertificateBindingResponse, PageInfo, UpdateCertificateRequest } from '../types';
 
+
+export interface CertificateApplicationsDomainsListenerCertificateBindingsListParams {
+  page?: number;
+  pageSize?: number;
+}
+
+export interface CertificateApplicationsDomainsListenerCertificateBindingsCreateParams {
+  idempotencyKey: string;
+}
+
+export interface CertificateApplicationsDomainsListenerCertificateBindingsDeleteParams {
+  idempotencyKey: string;
+}
+
+export class CertificateApplicationsDomainsListenerCertificateBindingsApi {
+  private client: HttpClient;
+
+  constructor(client: HttpClient) {
+    this.client = client;
+  }
+
+
+/** List certificates active on an application domain listener */
+  async list(applicationId: string, domainId: string, params?: CertificateApplicationsDomainsListenerCertificateBindingsListParams, requestOptions?: ApiRequestOptions): Promise<{ items: ListenerCertificateBindingResponse[]; pageInfo: PageInfo; }> {
+    const query = buildQueryString([
+      { name: 'page', value: params?.page, style: 'form', explode: true, allowReserved: false },
+      { name: 'page_size', value: params?.pageSize, style: 'form', explode: true, allowReserved: false },
+    ]);
+    return this.client.request<{ items: ListenerCertificateBindingResponse[]; pageInfo: PageInfo; }>(appendQueryString(backendApiPath(`/applications/${serializePathParameter(applicationId, { name: 'applicationId', style: 'simple', explode: false })}/domains/${serializePathParameter(domainId, { name: 'domainId', style: 'simple', explode: false })}/listener_certificate_bindings`), query), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any, sdkworkUnwrapKind: 'page' });
+  }
+
+/** Bind a certificate version to an application domain listener */
+  async create(applicationId: string, domainId: string, body: CreateListenerCertificateBindingRequest, params: CertificateApplicationsDomainsListenerCertificateBindingsCreateParams, requestOptions?: ApiRequestOptions): Promise<ListenerCertificateBindingResponse> {
+    const requestHeaders = buildRequestHeaders(
+      {
+        'Idempotency-Key': { value: params.idempotencyKey, style: 'simple', explode: false },
+      },
+      {}
+    );
+    return this.client.request<ListenerCertificateBindingResponse>(backendApiPath(`/applications/${serializePathParameter(applicationId, { name: 'applicationId', style: 'simple', explode: false })}/domains/${serializePathParameter(domainId, { name: 'domainId', style: 'simple', explode: false })}/listener_certificate_bindings`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, body, headers: requestHeaders, contentType: 'application/json', sdkworkUnwrapKind: 'item' });
+  }
+
+/** Remove a certificate from an application domain listener */
+  async delete(applicationId: string, domainId: string, bindingId: string, params: CertificateApplicationsDomainsListenerCertificateBindingsDeleteParams, requestOptions?: ApiRequestOptions): Promise<void> {
+    const requestHeaders = buildRequestHeaders(
+      {
+        'Idempotency-Key': { value: params.idempotencyKey, style: 'simple', explode: false },
+      },
+      {}
+    );
+    return this.client.request<void>(backendApiPath(`/applications/${serializePathParameter(applicationId, { name: 'applicationId', style: 'simple', explode: false })}/domains/${serializePathParameter(domainId, { name: 'domainId', style: 'simple', explode: false })}/listener_certificate_bindings/${serializePathParameter(bindingId, { name: 'bindingId', style: 'simple', explode: false })}`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'DELETE' as any, headers: requestHeaders });
+  }
+}
+
+export class CertificateApplicationsDomainsApi {
+  private client: HttpClient;
+  public readonly listenerCertificateBindings: CertificateApplicationsDomainsListenerCertificateBindingsApi;
+
+  constructor(client: HttpClient) {
+    this.client = client;
+    this.listenerCertificateBindings = new CertificateApplicationsDomainsListenerCertificateBindingsApi(client);
+  }
+
+}
+
+export class CertificateApplicationsApi {
+  private client: HttpClient;
+  public readonly domains: CertificateApplicationsDomainsApi;
+
+  constructor(client: HttpClient) {
+    this.client = client;
+    this.domains = new CertificateApplicationsDomainsApi(client);
+  }
+
+}
 
 export interface CertificateListParams {
   page?: number;
   pageSize?: number;
+  domainId?: string;
 }
 
 export interface CertificateCreateParams {
@@ -23,9 +99,11 @@ export interface CertificateRenewParams {
 
 export class CertificateApi {
   private client: HttpClient;
+  public readonly applications: CertificateApplicationsApi;
 
   constructor(client: HttpClient) {
     this.client = client;
+    this.applications = new CertificateApplicationsApi(client);
   }
 
 
@@ -34,6 +112,7 @@ export class CertificateApi {
     const query = buildQueryString([
       { name: 'page', value: params?.page, style: 'form', explode: true, allowReserved: false },
       { name: 'page_size', value: params?.pageSize, style: 'form', explode: true, allowReserved: false },
+      { name: 'domainId', value: params?.domainId, style: 'form', explode: true, allowReserved: false },
     ]);
     return this.client.request<{ items: CertificateResponse[]; pageInfo: PageInfo; }>(appendQueryString(backendApiPath(`/certificates`), query), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any, sdkworkUnwrapKind: 'page' });
   }

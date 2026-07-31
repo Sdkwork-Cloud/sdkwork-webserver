@@ -25,6 +25,7 @@ client.set_access_token("your-access-token");
     query.insert("page".to_string(), serde_json::json!(1));
     query.insert("page_size".to_string(), serde_json::json!(2));
     query.insert("siteId".to_string(), serde_json::json!("00000000-0000-0000-0000-000000000001"));
+    query.insert("domainId".to_string(), serde_json::json!("00000000-0000-0000-0000-000000000001"));
     let result = client.certificate().certificates_list(Some(&query)).await?;
     println!("{result:?}");
     Ok(())
@@ -50,10 +51,10 @@ client.set_header("X-Custom-Header", "value");
 
 - `client.site()` - site API
 - `client.domain()` - domain API
+- `client.certificate()` - certificate API
 - `client.source_version()` - source_version API
 - `client.deployment()` - deployment API
 - `client.env_variable()` - env_variable API
-- `client.certificate()` - certificate API
 - `client.monitor()` - monitor API
 
 ## Usage Examples
@@ -84,6 +85,20 @@ let mut query = HashMap::new();
 query.insert("page".to_string(), serde_json::json!(1));
 query.insert("page_size".to_string(), serde_json::json!(2));
 let result = client.domain().sites_domains_list(site_id, Some(&query)).await?;
+println!("{result:?}");
+```
+
+### certificate
+
+```rust
+use std::collections::HashMap;
+// 获取证书列表
+let mut query = HashMap::new();
+query.insert("page".to_string(), serde_json::json!(1));
+query.insert("page_size".to_string(), serde_json::json!(2));
+query.insert("siteId".to_string(), serde_json::json!("00000000-0000-0000-0000-000000000001"));
+query.insert("domainId".to_string(), serde_json::json!("00000000-0000-0000-0000-000000000001"));
+let result = client.certificate().certificates_list(Some(&query)).await?;
 println!("{result:?}");
 ```
 
@@ -126,19 +141,6 @@ let result = client.env_variable().sites_env_variables_list(site_id, Some(&query
 println!("{result:?}");
 ```
 
-### certificate
-
-```rust
-use std::collections::HashMap;
-// 获取证书列表
-let mut query = HashMap::new();
-query.insert("page".to_string(), serde_json::json!(1));
-query.insert("page_size".to_string(), serde_json::json!(2));
-query.insert("siteId".to_string(), serde_json::json!("00000000-0000-0000-0000-000000000001"));
-let result = client.certificate().certificates_list(Some(&query)).await?;
-println!("{result:?}");
-```
-
 ### monitor
 
 ```rust
@@ -162,6 +164,7 @@ let outcome: Result<(), _> = async {
     query.insert("page".to_string(), serde_json::json!(1));
     query.insert("page_size".to_string(), serde_json::json!(2));
     query.insert("siteId".to_string(), serde_json::json!("00000000-0000-0000-0000-000000000001"));
+    query.insert("domainId".to_string(), serde_json::json!("00000000-0000-0000-0000-000000000001"));
     client.certificate().certificates_list(Some(&query)).await?;
     Ok(())
 }.await;

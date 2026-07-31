@@ -19,7 +19,7 @@ The product supports the SDKWork `standalone` and `cloud` deployment profiles wi
 
 | Profile | Runtime expectation |
 | --- | --- |
-| Standalone service | One self-contained Web Server installation or container serves one or more configured apps, uses local verified snapshots, may use SQLite only for approved single-node control-plane state, and is supervised by the OS/container runtime. |
+| Standalone service | One self-contained Web Server installation or container serves one or more configured apps, uses PostgreSQL authoritative control-plane state and local verified runtime snapshots, and is supervised by the OS/container runtime. |
 | Cloud | Horizontally scaled stateless request data-plane nodes serve node-scoped immutable snapshots; PostgreSQL is control-plane authority; managed secrets, ingress/load balancing, orchestration, autoscaling, disruption control, and multi-zone placement are explicit. |
 
 Standalone is not automatically highly available. Cloud is not automatically highly available merely because multiple replicas exist. Availability claims require independent failure domains, health-based traffic removal, bounded shared dependencies, rollout safety, capacity headroom, and tested recovery.
@@ -160,7 +160,7 @@ Each dependency declares whether it is bootstrap-required, request-path-required
 | Failure | Required behavior |
 | --- | --- |
 | Control plane/PostgreSQL | Continue last verified data-plane snapshot; management mutations become unavailable or durable-pending, never fake-success. |
-| SQLite standalone state | Continue active in-memory snapshot where safe; block state-changing management and alert persistence failure. |
+| PostgreSQL unavailable | Continue the last verified runtime snapshot where safe; block state-changing management, fail readiness for control-plane writes, and alert persistence failure. |
 | Redis/shared limiter | Follow explicit fail-open/fail-closed policy per security tier; never silently change scope. |
 | DNS resolver | Use bounded last-valid addresses only within declared stale window; stop retry storms. |
 | Upstream | Health-aware failover, bounded queues/retries, circuit behavior, and deterministic error/stale-cache policy. |
@@ -232,12 +232,11 @@ Capacity claims identify hardware, OS/kernel, network, TLS algorithms, payload m
 
 - PostgreSQL backups, point-in-time recovery, migration state, encrypted control-plane secrets, configuration revisions, audit evidence, and certificate metadata follow documented retention and restore procedures.
 - Private keys are backed up only through approved encrypted KMS/secret mechanisms; plaintext key archives are forbidden.
-- SQLite standalone backup uses a transactionally consistent mechanism and verifies restore to a separate location.
 - Local data-plane snapshots are recovery caches, not the sole authoritative cloud backup.
 - Restore exercises prove database integrity, tenant isolation, snapshot regeneration, certificate usability, node re-enrollment, served traffic, and audit continuity.
 - Disaster-recovery exercises measure the parent PRD RPO/RTO and record unmet dependencies rather than declaring success after database restore alone.
 
-Current verified boundary: REQ-2026-0050 adds a disposable, bounded recovery drill using SQLite `VACUUM INTO` and PostgreSQL custom-format `pg_dump`/`pg_restore`. It proves independent restored schema integrity and a tenant-scoped canary after the source diverges. Production scheduling, encryption/KMS, immutable off-host retention, PostgreSQL WAL/PITR, managed-provider recovery, node/certificate reconstruction, audit continuity, and measured RPO/RTO remain required by this PRD.
+Current verified boundary: REQ-2026-0050 adds a disposable, bounded recovery drill using PostgreSQL custom-format `pg_dump`/`pg_restore`. It proves independent restored schema integrity and a tenant-scoped canary after the source diverges. Production scheduling, encryption/KMS, immutable off-host retention, PostgreSQL WAL/PITR, managed-provider recovery, node/certificate reconstruction, audit continuity, and measured RPO/RTO remain required by this PRD.
 
 REQ-2026-0051 adds a bounded two-node PostgreSQL physical-replication drill. It proves a tenant write whose primary flush LSN is explicitly replayed on the standby survives primary shutdown, standby promotion, and subsequent writes. It does not establish automatic failure detection, leader election, client endpoint failover, synchronous-replication RPO, split-brain fencing, failback/rejoin, managed-provider behavior, independent failure domains, three-node capacity, or the product availability and RPO/RTO targets.
 
@@ -282,7 +281,7 @@ Production requires owned runbooks for:
 - TLS expiry/rotation/revocation, KMS outage, ACME outage, and clock skew.
 - DNS failure/rebinding, upstream outage, retry storm, cache poisoning, and purge.
 - Failed reload, stuck drain, failed executable upgrade, divergent nodes, and split rollout.
-- PostgreSQL/SQLite recovery, backup restore, control-plane outage, agent re-enrollment, and audit investigation.
+- PostgreSQL recovery, backup restore, control-plane outage, agent re-enrollment, and audit investigation.
 - Security vulnerability, secret exposure, request smuggling, abuse traffic, and tenant isolation incident.
 
 Support bundles are generated through a bounded, redacted, authorized operation and include version/build, host profile summary, checksums, active/previous generations, listener status, resource saturation, recent classified errors, and dependency state. They exclude secrets, private keys, raw tokens, request bodies, unrestricted logs, and tenant content.
@@ -294,7 +293,7 @@ Required evidence includes:
 - Fresh install, upgrade, downgrade where supported, rollback, uninstall, restart, crash, and corrupt-local-state tests for each package/profile.
 - Non-root bind, permissions, read-only filesystem, secret mount, signal, systemd/service/container, and runtime-directory tests.
 - Reload/upgrade races, concurrent operator command, stale generation, stuck long-lived connection, process crash, and supervisor recovery tests.
-- Control-plane, PostgreSQL, SQLite, Redis, DNS, KMS, ACME, telemetry, upstream, disk, and network partition fault injection.
+- Control-plane, PostgreSQL, Redis, DNS, KMS, ACME, telemetry, upstream, disk, and network partition fault injection.
 - Memory, descriptor, disk, CPU, event-loop, handshake, connection, queue, cache, and log overload tests with emergency-reserve verification.
 - Multi-node canary, failure-domain loss, node divergence, scale up/down, rolling upgrade, disruption, backup/restore, and RPO/RTO exercises.
 - Security, supply-chain, SBOM/signature, vulnerability-response, compatibility, and support-bundle redaction gates.
@@ -310,5 +309,5 @@ Operational tests verify the real process, socket, filesystem, TLS handshake, tr
 - Overload and dependency failures preserve the emergency operations reserve and degrade according to explicit policy without OOM, deadlock, disk exhaustion, or false readiness.
 - Three-node/multi-zone evidence meets the parent availability target and capacity survives the declared failure domain loss.
 - Logs, metrics, traces, audits, alerts, dashboards, support bundles, and runbooks cover every release-critical failure mode without secrets or unbounded cardinality.
-- Backup/restore and disaster-recovery exercises meet the parent RPO/RTO using PostgreSQL cloud/default server authority and the explicitly selected SQLite single-node standalone profile where applicable.
+- Backup/restore and disaster-recovery exercises meet the parent RPO/RTO using PostgreSQL authority for every server deployment profile.
 - Release artifacts include signature, checksum, SBOM, provenance, compatibility matrix, migration/rollback guidance, and verified package/container security posture.

@@ -234,6 +234,7 @@ pub trait WebAppApi: Send + Sync {
         &self,
         context: &WebAppRequestContext,
         site_id: Option<&str>,
+        domain_id: Option<&str>,
         page: i32,
         page_size: i32,
     ) -> WebServiceResult<CertificatePage>;
@@ -243,6 +244,31 @@ pub trait WebAppApi: Send + Sync {
         context: &WebAppRequestContext,
         request: &CreateCertificateRequest,
     ) -> WebServiceResult<CertificateResponse>;
+
+    async fn list_listener_certificate_bindings(
+        &self,
+        context: &WebAppRequestContext,
+        site_id: &str,
+        domain_id: &str,
+        page: i32,
+        page_size: i32,
+    ) -> WebServiceResult<ListenerCertificateBindingPage>;
+
+    async fn bind_listener_certificate(
+        &self,
+        context: &WebAppRequestContext,
+        site_id: &str,
+        domain_id: &str,
+        request: &CreateListenerCertificateBindingRequest,
+    ) -> WebServiceResult<ListenerCertificateBindingResponse>;
+
+    async fn unbind_listener_certificate(
+        &self,
+        context: &WebAppRequestContext,
+        site_id: &str,
+        domain_id: &str,
+        binding_id: &str,
+    ) -> WebServiceResult<()>;
 
     async fn list_health_checks(
         &self,
@@ -464,6 +490,7 @@ pub trait WebBackendApi: Send + Sync {
     async fn list_managed_certificates(
         &self,
         context: &WebBackendRequestContext,
+        domain_id: Option<&str>,
         page: i32,
         page_size: i32,
     ) -> WebServiceResult<CertificatePage>;
@@ -486,6 +513,31 @@ pub trait WebBackendApi: Send + Sync {
         context: &WebBackendRequestContext,
         certificate_id: &str,
     ) -> WebServiceResult<CertificateResponse>;
+
+    async fn list_application_listener_certificate_bindings(
+        &self,
+        context: &WebBackendRequestContext,
+        application_id: &str,
+        domain_id: &str,
+        page: i32,
+        page_size: i32,
+    ) -> WebServiceResult<ListenerCertificateBindingPage>;
+
+    async fn bind_application_listener_certificate(
+        &self,
+        context: &WebBackendRequestContext,
+        application_id: &str,
+        domain_id: &str,
+        request: &CreateListenerCertificateBindingRequest,
+    ) -> WebServiceResult<ListenerCertificateBindingResponse>;
+
+    async fn unbind_application_listener_certificate(
+        &self,
+        context: &WebBackendRequestContext,
+        application_id: &str,
+        domain_id: &str,
+        binding_id: &str,
+    ) -> WebServiceResult<()>;
 
     async fn list_certificate_distribution(
         &self,

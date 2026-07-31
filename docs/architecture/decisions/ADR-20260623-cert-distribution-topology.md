@@ -21,7 +21,7 @@ SDKWork Web Server 控制面签发 TLS 证书与 nginx 配置后，需向多边�
 
 1. **当前默认路径（已实现）**：agent `GET /backend/v3/api/agent/sync?ifSyncVersion=…` + 控制面 **稳定 SHA-256 指纹** `syncVersion`（前缀 `sv1:`）。
 2. **指纹组成**：排序后的 `nginx:{configId}:{fingerprint}:{version}` 与 `certificate:{certificateId}:{fingerprint}` 条目；nginx `fingerprint` 为 `configContent` 的 SHA-256 hex。
-3. **unchanged 语义**：`ifSyncVersion == syncVersion` 时响应 `unchanged=true`，省略 nginx/cert bundle，**不解密** DB 中私钥。
+3. **unchanged 语义**：`ifSyncVersion == syncVersion` 时响应 `unchanged=true`，省略 nginx/cert bundle，且不读取证书文件或解析 `secret_bundle_ref`。
 4. **离线补偿**：REQ-2026-0052 supersedes the original best-effort `lastSyncVersion` file with bounded, checksummed, atomic `desiredSyncVersion` and `observedSyncVersion` checkpoints. Only observed is sent as `ifSyncVersion`; an interrupted desired generation therefore retrieves and reapplies a complete manifest before observed advances.
 5. **可观测性**：agent heartbeat 上报 `lastSyncVersion`；控制面写入 `web_server.metadata.lastAppliedSyncVersion` 与 `lastHeartbeatAt`。
 6. **后续增强（未上线）**：per-node 增量 delta、推送通知、KMS 信封加密轮换；不阻塞当前生产路径。
@@ -40,7 +40,7 @@ SDKWork Web Server 控制面签发 TLS 证书与 nginx 配置后，需向多边�
 - OpenAPI：`AgentSyncResponse.unchanged`、`AgentNginxConfigBundle.fingerprint`、`ifSyncVersion` query、`AgentHeartbeatRequest.lastSyncVersion`。
 - `sdkwork-web-agent` 在 unchanged 时跳过 deploy/reload；成功 apply 后更新本地 state 文件。
 - 控制面仍按 tenant 过滤 active nginx/cert；多租户隔离不变。
-- 生产 KMS（`SDKWORK_WEB_CERT_ENCRYPTION_KEY`）与 per-node delta 为独立后续增强项。
+- 证书私钥不进入 PostgreSQL、OpenAPI、日志或审计载荷；当前文件型 `secret_bundle_ref` 受证书根目录、符号链接拒绝和 PEM 大小上限约束，外部 Secret Manager/KMS 提供器可通过同一解析端口扩展。
 
 ## Verification
 

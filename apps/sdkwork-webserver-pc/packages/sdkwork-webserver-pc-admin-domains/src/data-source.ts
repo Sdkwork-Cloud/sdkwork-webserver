@@ -88,13 +88,13 @@ export function createWebserverAdminDomainRegistry(
         action(
           "issue-certificate",
           "Issue certificate",
-          { certType: 1, autoRenew: true },
+          { certType: 1, keyAlgorithm: "ECDSA", autoRenew: true },
           (context) => client.certificate.create(
             createCertificateRequest(selectedId(context), context.body),
             idempotencyParams(context),
           ),
           {
-            fieldOptions: { certType: [1, 3] },
+            fieldOptions: { certType: [1, 3], keyAlgorithm: ["ECDSA", "RSA"] },
             permission: "web.certificates.write",
             requiresSelection: true,
           },
@@ -188,7 +188,12 @@ function createCertificateRequest(
   if (certType === 3 && autoRenew) {
     throw new Error("Automatic renewal is unavailable for self-signed certificates");
   }
-  return { domainId, certType, autoRenew };
+  return {
+    domainIds: [domainId],
+    certType,
+    keyAlgorithm: certificateKeyAlgorithm(body.keyAlgorithm),
+    autoRenew,
+  };
 }
 
 function selectedId(context: WebserverResourceActionContext): string {
@@ -217,6 +222,11 @@ function certificateType(value: unknown): 1 | 3 {
   const parsed = Number(value);
   if (parsed === 1 || parsed === 3) return parsed;
   throw new Error("Certificate type is invalid");
+}
+
+function certificateKeyAlgorithm(value: unknown): "ECDSA" | "RSA" {
+  if (value === "ECDSA" || value === "RSA") return value;
+  throw new Error("Certificate key algorithm is invalid");
 }
 
 function sslProvider(value: unknown): "letsencrypt" | "custom" | "none" | undefined {

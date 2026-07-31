@@ -10,5 +10,6 @@ namespace SDKWork.Web.BackendSdk.Models
         public bool? NginxEnabled { get; set; }
         public string? ActiveConfigs { get; set; }
         public string? LastSyncVersion { get; set; }
+        public List<AgentCertificateObservation>? CertificateObservations { get; set; }
     }
 }

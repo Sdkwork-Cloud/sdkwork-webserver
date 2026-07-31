@@ -11,7 +11,7 @@ use rustls::sign::CertifiedKey;
 use tempfile::{Builder, TempDir};
 
 use crate::config::EdgeRuntimeConfig;
-use crate::{EdgeRuntimeError, EdgeRuntimeResult};
+use crate::{CertificateBundleMaterial, EdgeRuntimeError, EdgeRuntimeResult};
 
 const MAX_CERTIFICATE_PEM_BYTES: usize = 1024 * 1024;
 const MAX_PRIVATE_KEY_PEM_BYTES: usize = 128 * 1024;
@@ -30,7 +30,7 @@ pub fn cert_bundle_paths(config: &EdgeRuntimeConfig, cert_name: &str) -> (PathBu
 
 pub fn write_certificate_bundle(
     cert_live_root: &Path,
-    material: &sdkwork_webserver_acme_service::IssuedCertificateMaterial,
+    material: &CertificateBundleMaterial,
 ) -> EdgeRuntimeResult<()> {
     activate_certificate_bundle_with_activator(cert_live_root, material, |staged, target| {
         std::fs::rename(staged, target)
@@ -40,7 +40,7 @@ pub fn write_certificate_bundle(
 
 pub(crate) fn activate_certificate_bundle(
     cert_live_root: &Path,
-    material: &sdkwork_webserver_acme_service::IssuedCertificateMaterial,
+    material: &CertificateBundleMaterial,
 ) -> EdgeRuntimeResult<CertificateBundleActivation> {
     activate_certificate_bundle_with_activator(cert_live_root, material, |staged, target| {
         std::fs::rename(staged, target)
@@ -50,7 +50,7 @@ pub(crate) fn activate_certificate_bundle(
 #[cfg(test)]
 fn write_certificate_bundle_with_activator<F>(
     cert_live_root: &Path,
-    material: &sdkwork_webserver_acme_service::IssuedCertificateMaterial,
+    material: &CertificateBundleMaterial,
     activate: F,
 ) -> EdgeRuntimeResult<()>
 where
@@ -61,14 +61,14 @@ where
 
 fn activate_certificate_bundle_with_activator<F>(
     cert_live_root: &Path,
-    material: &sdkwork_webserver_acme_service::IssuedCertificateMaterial,
+    material: &CertificateBundleMaterial,
     activate: F,
 ) -> EdgeRuntimeResult<CertificateBundleActivation>
 where
     F: FnOnce(&Path, &Path) -> std::io::Result<()>,
 {
-    validate_certificate_name(&material.cert_name)?;
-    validate_certificate_material(&material.cert_pem, &material.private_key_pem)?;
+    validate_certificate_name(&material.bundle_name)?;
+    validate_certificate_material(&material.fullchain_pem, &material.private_key_pem)?;
     let _guard = CertificateActivationGuard::try_acquire()?;
 
     std::fs::create_dir_all(cert_live_root).map_err(|error| {
@@ -79,7 +79,7 @@ where
     })?;
     let process_lock = acquire_certificate_activation_lock(cert_live_root)?;
 
-    let target = cert_live_root.join(&material.cert_name);
+    let target = cert_live_root.join(&material.bundle_name);
     if let Ok(metadata) = std::fs::symlink_metadata(&target) {
         if metadata.file_type().is_symlink() || !metadata.is_dir() {
             return Err(EdgeRuntimeError::Filesystem(format!(
@@ -231,11 +231,11 @@ impl Drop for CertificateBundleActivation {
 
 fn write_staged_bundle(
     staged: &TempDir,
-    material: &sdkwork_webserver_acme_service::IssuedCertificateMaterial,
+    material: &CertificateBundleMaterial,
 ) -> EdgeRuntimeResult<()> {
     let fullchain = staged.path().join("fullchain.pem");
     let privkey = staged.path().join("privkey.pem");
-    write_new_file(&fullchain, material.cert_pem.as_bytes())?;
+    write_new_file(&fullchain, material.fullchain_pem.as_bytes())?;
     write_new_file(&privkey, material.private_key_pem.as_bytes())?;
 
     #[cfg(unix)]
@@ -466,32 +466,20 @@ mod tests {
     use std::path::PathBuf;
 
     use rcgen::{CertificateParams, DistinguishedName, KeyPair};
-    use sdkwork_webserver_acme_service::IssuedCertificateMaterial;
     use tempfile::TempDir;
 
     use super::*;
 
-    fn sample_material(cert_name: &str, generation: &str) -> IssuedCertificateMaterial {
+    fn sample_material(cert_name: &str, generation: &str) -> CertificateBundleMaterial {
         let mut params = CertificateParams::new(vec![format!("{generation}.localhost")])
             .expect("certificate params");
         params.distinguished_name = DistinguishedName::new();
         let key_pair = KeyPair::generate().expect("key pair");
         let certificate = params.self_signed(&key_pair).expect("certificate");
-        IssuedCertificateMaterial {
-            cert_name: cert_name.to_string(),
-            cert_type: 3,
-            issuer: "Self-Signed".to_string(),
-            subject: "dev.localhost".to_string(),
-            san_list: "dev.localhost".to_string(),
-            fingerprint: "abc123".to_string(),
-            cert_pem: certificate.pem(),
+        CertificateBundleMaterial {
+            bundle_name: cert_name.to_string(),
+            fullchain_pem: certificate.pem(),
             private_key_pem: key_pair.serialize_pem(),
-            chain_pem: None,
-            not_before: "2024-01-01T00:00:00Z".to_string(),
-            not_after: "2027-01-01T00:00:00Z".to_string(),
-            cert_path: format!("/tmp/live/{cert_name}/fullchain.pem"),
-            key_path: format!("/tmp/live/{cert_name}/privkey.pem"),
-            chain_path: None,
         }
     }
 
@@ -504,7 +492,7 @@ mod tests {
         )
         .expect("first bundle");
         let replacement = sample_material("dev-localhost", "generation-2");
-        let expected_certificate = replacement.cert_pem.clone();
+        let expected_certificate = replacement.fullchain_pem.clone();
         let expected_key = replacement.private_key_pem.clone();
         write_certificate_bundle(temp.path(), &replacement).expect("replacement bundle");
 
@@ -524,11 +512,11 @@ mod tests {
     fn pending_activation_can_commit_or_restore_the_previous_generation() {
         let temp = TempDir::new().expect("tempdir");
         let old = sample_material("dev-localhost", "generation-1");
-        let old_certificate = old.cert_pem.clone();
+        let old_certificate = old.fullchain_pem.clone();
         write_certificate_bundle(temp.path(), &old).expect("first bundle");
 
         let replacement = sample_material("dev-localhost", "generation-2");
-        let replacement_certificate = replacement.cert_pem.clone();
+        let replacement_certificate = replacement.fullchain_pem.clone();
         let pending = activate_certificate_bundle(temp.path(), &replacement)
             .expect("activate replacement pending database commit");
         assert_eq!(
@@ -544,7 +532,7 @@ mod tests {
         );
 
         let committed = sample_material("dev-localhost", "generation-3");
-        let committed_certificate = committed.cert_pem.clone();
+        let committed_certificate = committed.fullchain_pem.clone();
         activate_certificate_bundle(temp.path(), &committed)
             .expect("activate committed replacement")
             .commit()
@@ -585,7 +573,7 @@ mod tests {
     fn activation_failure_restores_previous_complete_generation() {
         let temp = TempDir::new().expect("tempdir");
         let old = sample_material("dev-localhost", "generation-1");
-        let old_certificate = old.cert_pem.clone();
+        let old_certificate = old.fullchain_pem.clone();
         let old_key = old.private_key_pem.clone();
         write_certificate_bundle(temp.path(), &old).expect("first bundle");
         let replacement = sample_material("dev-localhost", "generation-2");
@@ -614,7 +602,7 @@ mod tests {
             write_certificate_bundle(temp.path(), &sample_material("../escape", "one")).is_err()
         );
         let mut oversized = sample_material("safe-name", "one");
-        oversized.cert_pem = format!(
+        oversized.fullchain_pem = format!(
             "-----BEGIN CERTIFICATE-----\n{}\n-----END CERTIFICATE-----",
             "a".repeat(MAX_CERTIFICATE_PEM_BYTES)
         );
@@ -640,6 +628,8 @@ mod tests {
             cert_live_root: PathBuf::from("/etc/letsencrypt/live"),
             site_family: "sdkwork".to_string(),
             nginx_command_timeout_ms: 10_000,
+            tls_verify_address: "127.0.0.1:443".parse().unwrap(),
+            tls_verify_timeout_ms: 5_000,
         };
         assert_eq!(
             nginx_site_path(&config, "example.com"),

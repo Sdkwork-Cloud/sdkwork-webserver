@@ -141,6 +141,47 @@ fn domain_asset_routes_keep_authorization_and_runtime_change_contracts() {
 }
 
 #[test]
+fn listener_certificate_binding_routes_keep_security_contracts() {
+    let expected = [
+        (
+            HttpMethod::Get,
+            "applications.domains.listenerCertificateBindings.list",
+            "web.certificates.read",
+            false,
+            None,
+        ),
+        (
+            HttpMethod::Post,
+            "applications.domains.listenerCertificateBindings.create",
+            "web.certificates.write",
+            true,
+            Some(RateLimitTier::AuthCritical),
+        ),
+        (
+            HttpMethod::Delete,
+            "applications.domains.listenerCertificateBindings.delete",
+            "web.certificates.write",
+            true,
+            Some(RateLimitTier::AuthCritical),
+        ),
+    ];
+    let manifest = backend_route_manifest();
+
+    for (method, operation_id, permission, idempotent, rate_limit_tier) in expected {
+        let route = manifest
+            .routes()
+            .iter()
+            .find(|route| route.operation_id == operation_id)
+            .unwrap_or_else(|| panic!("missing route manifest entry for {operation_id}"));
+        assert_eq!(route.method, method, "method mismatch for {operation_id}");
+        assert_eq!(route.auth, RouteAuth::DualToken);
+        assert_eq!(route.required_permission, Some(permission));
+        assert_eq!(route.idempotent, idempotent);
+        assert_eq!(route.rate_limit_tier, rate_limit_tier);
+    }
+}
+
+#[test]
 fn root_domain_zone_routes_keep_authorization_and_navigation_contracts() {
     let expected = [
         (HttpMethod::Get, "rootDomains.list", "web.sites.read", false),

@@ -1,9 +1,11 @@
 // @vitest-environment jsdom
 
 import { createWebserverAdminApplicationRegistry, webserverModule as applicationsModule } from "@sdkwork/webserver-pc-admin-applications";
-import type { WebserverAdminSdkClient } from "@sdkwork/webserver-pc-admin-core";
+import { createWebserverAdminCertificateRegistry, webserverModule as certificatesModule } from "@sdkwork/webserver-pc-admin-certificates";
+import { createWebserverAdminSdkClient, type WebserverAdminSdkClient } from "@sdkwork/webserver-pc-admin-core";
 import { createWebserverAdminDomainRegistry, webserverModule as domainsModule } from "@sdkwork/webserver-pc-admin-domains";
 import { WebserverWorkspace, type ApplicationMediaStorage, type ApplicationSourceStorage } from "@sdkwork/webserver-pc-commons";
+import { createTokenManager } from "@sdkwork/sdk-common";
 import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -11,6 +13,108 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
+});
+
+describe("admin workspace certificate controls", () => {
+  it("renders a non-empty standard SDKWork certificate page through the generated backend SDK", async () => {
+    const fetchApi = vi.fn(async () => new Response(JSON.stringify({
+      code: 0,
+      data: {
+        items: [{
+          autoRenew: true,
+          certName: "api.example.com ECDSA",
+          certType: 1,
+          createdAt: "2026-07-31T08:00:00.000Z",
+          fingerprint: "sha256:certificate-1",
+          id: "certificate-1",
+          identifiers: [{
+            domainId: "domain-1",
+            hostname: "api.example.com",
+            identifierType: "EXACT",
+            position: 0,
+          }],
+          issuer: "Let's Encrypt",
+          keyAlgorithm: "ECDSA",
+          notAfter: "2026-10-29T08:00:00.000Z",
+          status: "ISSUED",
+        }],
+        pageInfo: {
+          hasMore: false,
+          mode: "offset",
+          page: 1,
+          pageSize: 20,
+          totalItems: "1",
+        },
+      },
+      traceId: "trace-certificate-page-1",
+    }), {
+      headers: { "content-type": "application/json" },
+      status: 200,
+    }));
+    vi.stubGlobal("fetch", fetchApi);
+    const client = createWebserverAdminSdkClient(
+      "https://backend.example.test",
+      createTokenManager({ accessToken: "test-access-token", authToken: "test-auth-token" }),
+    );
+    const registry = createWebserverAdminCertificateRegistry(client);
+
+    const page = await registry["managed-certificates"]?.load({ page: 1, pageSize: 20 });
+    expect(page?.items).toHaveLength(1);
+    expect(page?.pageInfo).toEqual({ hasMore: false, page: 1, pageSize: 20, total: 1 });
+
+    renderCertificateWorkspace(registry);
+    expect(await screen.findByText("api.example.com ECDSA")).toBeTruthy();
+    expect(fetchApi).toHaveBeenCalledWith(
+      "https://backend.example.test/backend/v3/api/certificates?page=1&page_size=20",
+      expect.objectContaining({ method: "GET" }),
+    );
+  });
+
+  it("submits multiple SAN domains and an explicit key algorithm", async () => {
+    const create = vi.fn().mockResolvedValue({ id: "certificate-1" });
+    const registry = createWebserverAdminCertificateRegistry({
+      certificate: {
+        create,
+        list: vi.fn().mockResolvedValue({ items: [], pageInfo: { hasMore: false, page: 1, pageSize: 20 } }),
+      },
+      certificateDistribution: {
+        certificates: {
+          distribution: {
+            list: vi.fn().mockResolvedValue({ items: [], pageInfo: { hasMore: false, page: 1, pageSize: 20 } }),
+          },
+        },
+      },
+      domain: {
+        list: vi.fn().mockResolvedValue({
+          items: [
+            { applicationName: "Public API", hostname: "api.example.com", id: "domain-1" },
+            { applicationName: "Public API", hostname: "www.example.com", id: "domain-2" },
+          ],
+          pageInfo: { hasMore: false, page: 1, pageSize: 100 },
+        }),
+      },
+    } as unknown as WebserverAdminSdkClient);
+    renderCertificateWorkspace(registry);
+
+    fireEvent.click(await screen.findByRole("button", { name: "Issue certificate" }));
+    const domains = await screen.findByLabelText("Certificate domains") as HTMLSelectElement;
+    expect(domains.multiple).toBe(true);
+    domains.options[0].selected = true;
+    domains.options[1].selected = true;
+    fireEvent.change(domains);
+    fireEvent.change(screen.getByLabelText("Key algorithm"), { target: { value: "RSA" } });
+    fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
+
+    await waitFor(() => expect(create).toHaveBeenCalledWith(
+      {
+        autoRenew: true,
+        certType: 1,
+        domainIds: ["domain-1", "domain-2"],
+        keyAlgorithm: "RSA",
+      },
+      { idempotencyKey: expect.any(String) },
+    ));
+  });
 });
 
 describe("admin workspace application controls", () => {
@@ -398,6 +502,42 @@ describe("admin workspace application controls", () => {
       "Application app-1 was created, but the initial deployment command was not accepted.",
     );
     expect(screen.queryByText("provider detail must remain hidden")).toBeNull();
+  });
+
+  it("shows the structured reason and support reference when application creation is rejected", async () => {
+    const create = vi.fn().mockRejectedValue({
+      code: "VALIDATION_ERROR",
+      httpStatus: 422,
+      problem: {
+        code: 42201,
+        detail: "Invalid organization context; sign in again before retrying",
+        status: 422,
+        traceId: "trace-application-create-42201",
+      },
+    });
+    const registry = createWebserverAdminApplicationRegistry(
+      client({ create }),
+      testSourceStorage(),
+      testMediaStorage(),
+    );
+    renderWorkspace("/admin/applications", registry);
+
+    fireEvent.click(await screen.findByRole("button", { name: "Create application" }));
+    fireEvent.change(screen.getByLabelText("Application name"), { target: { value: "Commercial portal" } });
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+    fireEvent.change(screen.getByTestId("application-source-input"), {
+      target: { files: [new File(["source"], "source.zip", { type: "application/zip" })] },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+    fireEvent.click(screen.getByRole("button", { name: "Review" }));
+    fireEvent.click(screen.getAllByRole("button", { name: "Create application" }).at(-1)!);
+
+    const alert = await screen.findByRole("alert");
+    expect(alert.textContent).toContain("The current inputs or context cannot be processed");
+    expect(alert.textContent).toContain("Invalid organization context; sign in again before retrying");
+    expect(alert.textContent).toContain("Support reference: trace-application-create-42201");
+    expect(alert.textContent).not.toContain("Review the inputs and try again.");
   });
 
   it("keeps the application draft recoverable when store media upload fails", async () => {
@@ -821,6 +961,29 @@ function renderDomainWorkspace(
             <WebserverWorkspace
               locale="en-US"
               modules={[managedDomainsModule]}
+              permissionScope={["*"]}
+              registry={registry}
+              surface="backend-admin"
+            />
+          }
+        />
+      </Routes>
+    </MemoryRouter>,
+  );
+}
+
+function renderCertificateWorkspace(
+  registry: ReturnType<typeof createWebserverAdminCertificateRegistry>,
+): void {
+  render(
+    <MemoryRouter initialEntries={["/admin/managed-certificates"]}>
+      <Routes>
+        <Route
+          path="/admin/*"
+          element={
+            <WebserverWorkspace
+              locale="en-US"
+              modules={[certificatesModule]}
               permissionScope={["*"]}
               registry={registry}
               surface="backend-admin"

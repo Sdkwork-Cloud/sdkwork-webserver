@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
 import { spawn } from 'node:child_process';
-import { mkdirSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 
@@ -55,8 +54,8 @@ function parseArgs(argv) {
     }
   }
 
-  if (!['postgres', 'sqlite'].includes(settings.database)) {
-    throw new Error('--database must be postgres or sqlite');
+  if (settings.database !== 'postgres') {
+    throw new Error('--database must be postgres');
   }
   if (!VALID_DEPLOYMENT_PROFILES.includes(settings.deploymentProfile)) {
     throw new Error(
@@ -66,10 +65,6 @@ function parseArgs(argv) {
   if (!VALID_ENVIRONMENTS.includes(settings.environment)) {
     throw new Error(`--environment must be ${VALID_ENVIRONMENTS.join(' or ')}`);
   }
-  if (settings.database === 'sqlite' && settings.deploymentProfile !== 'standalone') {
-    throw new Error('SQLite is supported only by the standalone development profile');
-  }
-
   return settings;
 }
 
@@ -77,7 +72,7 @@ function printHelp() {
   console.log(`Usage: node scripts/webserver-dev.mjs [options]
 
 Options:
-  --database <postgres|sqlite>              Default: postgres
+  --database <postgres>                     Default: postgres
   --deployment-profile <standalone|cloud>  Default: standalone
   --environment <environment>              Default: development
   --dev-env-file <path>                    Default: .env.postgres
@@ -92,17 +87,6 @@ function ensureCriticalSources() {
   });
 }
 
-function createSqliteEnv() {
-  const runtimeDirectory = path.join(REPO_ROOT, '.sdkwork', 'runtime', 'webserver');
-  mkdirSync(runtimeDirectory, { recursive: true });
-  const databasePath = path.join(runtimeDirectory, 'webserver.sqlite').split(path.sep).join('/');
-  return {
-    SDKWORK_DATABASE_ENGINE: 'sqlite',
-    SDKWORK_DATABASE_MAX_CONNECTIONS: '1',
-    SDKWORK_DATABASE_URL: `sqlite:///${databasePath}?mode=rwc`,
-  };
-}
-
 function buildRuntimeEnv(settings) {
   const profileId = `${settings.deploymentProfile}.${settings.environment}`;
   const profileEnv = loadProfile(profileId);
@@ -110,17 +94,13 @@ function buildRuntimeEnv(settings) {
   const iamEnv = canonicalizeWorkspaceDatabaseEnv(
     resolveIamDevEnv(baseEnv, { postgresEnvFile: settings.devEnvFile }),
   );
-  const databaseEnv = settings.database === 'sqlite' ? createSqliteEnv() : {};
-  const databaseSource = settings.database === 'postgres'
-    ? path.relative(REPO_ROOT, path.resolve(REPO_ROOT, settings.devEnvFile))
-    : '.sdkwork/runtime/webserver/webserver.sqlite';
+  const databaseSource = path.relative(REPO_ROOT, path.resolve(REPO_ROOT, settings.devEnvFile));
   const autoMigrate = settings.environment === 'development' ? 'true' : 'false';
 
   return {
     databaseSource,
     env: {
       ...iamEnv,
-      ...databaseEnv,
       ...IAM_APPLICATION_BOOTSTRAP_ENV,
       SDKWORK_DEPLOYMENT_PROFILE: settings.deploymentProfile,
       SDKWORK_ENVIRONMENT: settings.environment,

@@ -27,7 +27,8 @@ client.setAccessToken("your-access-token")
 let params: [String: Any] = [
     "page": 1,
     "page_size": 2,
-    "siteId": "00000000-0000-0000-0000-000000000001"
+    "siteId": "00000000-0000-0000-0000-000000000001",
+    "domainId": "00000000-0000-0000-0000-000000000001"
 ]
 let result = try await client.certificate.certificatesList(params: params)
 print(result)
@@ -55,10 +56,10 @@ client.setHeader("X-Custom-Header", value: "value")
 
 - `client.site` - site API
 - `client.domain` - domain API
+- `client.certificate` - certificate API
 - `client.sourceVersion` - source_version API
 - `client.deployment` - deployment API
 - `client.envVariable` - env_variable API
-- `client.certificate` - certificate API
 - `client.monitor` - monitor API
 
 ## Usage Examples
@@ -89,6 +90,20 @@ let params: [String: Any] = [
     "page_size": 2
 ]
 let result = try await client.domain.sitesDomainsList(siteId: siteId, params: params)
+print(result)
+```
+
+### certificate
+
+```swift
+// 获取证书列表
+let params: [String: Any] = [
+    "page": 1,
+    "page_size": 2,
+    "siteId": "00000000-0000-0000-0000-000000000001",
+    "domainId": "00000000-0000-0000-0000-000000000001"
+]
+let result = try await client.certificate.certificatesList(params: params)
 print(result)
 ```
 
@@ -131,19 +146,6 @@ let result = try await client.envVariable.sitesEnvVariablesList(siteId: siteId, 
 print(result)
 ```
 
-### certificate
-
-```swift
-// 获取证书列表
-let params: [String: Any] = [
-    "page": 1,
-    "page_size": 2,
-    "siteId": "00000000-0000-0000-0000-000000000001"
-]
-let result = try await client.certificate.certificatesList(params: params)
-print(result)
-```
-
 ### monitor
 
 ```swift
@@ -160,7 +162,8 @@ do {
     let params: [String: Any] = [
         "page": 1,
         "page_size": 2,
-        "siteId": "00000000-0000-0000-0000-000000000001"
+        "siteId": "00000000-0000-0000-0000-000000000001",
+        "domainId": "00000000-0000-0000-0000-000000000001"
     ]
     try await client.certificate.certificatesList(params: params)
 } catch {

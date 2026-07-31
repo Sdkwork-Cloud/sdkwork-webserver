@@ -9,23 +9,10 @@
     "protocol": "http",
     "packageName": "com.sdkwork:sdkwork-web-backend-sdk"
   },
-  "changeFingerprint": "db5c18e8868103e16cb27da2701ce262a9d39b1e67c6bef4363fe40a705c4ec7",
+  "changeFingerprint": "c42ac44b2a173a79f176638f1c478d83830efdcc2377e81f8305f2f7a796b906",
   "changes": {
-    "createdGeneratedFiles": [
-      "src/main/java/com/sdkwork/web/backend/sdk/model/CreateRootDomainHostnameRequest.java",
-      "src/main/java/com/sdkwork/web/backend/sdk/model/CreateRootDomainRequest.java",
-      "src/main/java/com/sdkwork/web/backend/sdk/model/DomainDeploymentResponse.java",
-      "src/main/java/com/sdkwork/web/backend/sdk/model/RootDomainResponse.java",
-      "src/main/java/com/sdkwork/web/backend/sdk/model/RootDomainsCreateResponse201.java",
-      "src/main/java/com/sdkwork/web/backend/sdk/model/RootDomainsListResponse.java",
-      "src/main/java/com/sdkwork/web/backend/sdk/model/RootDomainsRetrieveResponse.java",
-      "src/main/java/com/sdkwork/web/backend/sdk/model/RootDomainsSubdomainsCreateResponse201.java",
-      "src/main/java/com/sdkwork/web/backend/sdk/model/RootDomainsSubdomainsListResponse.java"
-    ],
-    "updatedGeneratedFiles": [
-      "src/main/java/com/sdkwork/web/backend/sdk/api/DomainApi.java",
-      "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationDomainResponse.java"
-    ],
+    "createdGeneratedFiles": [],
+    "updatedGeneratedFiles": [],
     "unchangedGeneratedFiles": [
       "bin/publish-core.mjs",
       "bin/publish.ps1",
@@ -44,16 +31,19 @@
       "src/main/java/com/sdkwork/web/backend/sdk/api/AuditApi.java",
       "src/main/java/com/sdkwork/web/backend/sdk/api/CertificateApi.java",
       "src/main/java/com/sdkwork/web/backend/sdk/api/CertificateDistributionApi.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/api/DomainApi.java",
       "src/main/java/com/sdkwork/web/backend/sdk/api/NginxApi.java",
       "src/main/java/com/sdkwork/web/backend/sdk/api/package-info.java",
       "src/main/java/com/sdkwork/web/backend/sdk/api/ServerApi.java",
       "src/main/java/com/sdkwork/web/backend/sdk/http/HttpClient.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/AgentCertificateBundle.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/model/AgentCertificateObservation.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/AgentHeartbeatRequest.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/AgentHeartbeatResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/AgentNginxConfigBundle.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/AgentSyncResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationDeploymentResponse.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationDomainResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationDomainVerifyResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsActivateResponse.java",
@@ -62,6 +52,8 @@
       "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsDeploymentsListResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsDeploymentsRollbackResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsDomainsCreateResponse201.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsDomainsListenerCertificateBindingsCreateResponse201.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsDomainsListenerCertificateBindingsListResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsDomainsListResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsDomainsVerifyResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationsListResponse.java",
@@ -79,6 +71,7 @@
       "src/main/java/com/sdkwork/web/backend/sdk/model/AuditLogResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/AuditLogsListResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/CertificateDistributionResponse.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/model/CertificateIdentifierResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/CertificateResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/CertificatesCreateResponse201.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/CertificatesDistributionListResponse.java",
@@ -96,10 +89,14 @@
       "src/main/java/com/sdkwork/web/backend/sdk/model/CreateApplicationRequest.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/CreateApplicationSourceVersionRequest.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/CreateCertificateRequest.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/model/CreateListenerCertificateBindingRequest.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/CreateManagedDomainRequest.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/CreateNginxConfigRequest.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/model/CreateRootDomainHostnameRequest.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/model/CreateRootDomainRequest.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/CreateServerRequest.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/CreateServerResponse.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/model/DomainDeploymentResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/DomainsApplicationBindingUpdateResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/DomainsCreateResponse201.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/DomainsListResponse.java",
@@ -107,6 +104,8 @@
       "src/main/java/com/sdkwork/web/backend/sdk/model/FieldError.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/HeartbeatResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/ImportApplicationGitSourceVersionRequest.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/model/ListenerCertificateBindingResponse.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/model/ListenerCertificateSummaryResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/MediaChecksum.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/MediaResource.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/NginxConfigPage.java",
@@ -119,6 +118,12 @@
       "src/main/java/com/sdkwork/web/backend/sdk/model/ProblemDetail.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/ReloadResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/RetrieveResponse.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/model/RootDomainResponse.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/model/RootDomainsCreateResponse201.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/model/RootDomainsListResponse.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/model/RootDomainsRetrieveResponse.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/model/RootDomainsSubdomainsCreateResponse201.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/model/RootDomainsSubdomainsListResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/SdkWorkApiResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/SdkWorkCommandData.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/SdkWorkCommandResponse.java",
@@ -146,70 +151,26 @@
   },
   "impact": {
     "schemaVersion": 1,
-    "areas": [
-      "api-surface",
-      "models"
-    ],
-    "details": [
-      {
-        "area": "api-surface",
-        "paths": [
-          "src/main/java/com/sdkwork/web/backend/sdk/api/DomainApi.java"
-        ]
-      },
-      {
-        "area": "models",
-        "paths": [
-          "src/main/java/com/sdkwork/web/backend/sdk/model/ApplicationDomainResponse.java",
-          "src/main/java/com/sdkwork/web/backend/sdk/model/CreateRootDomainHostnameRequest.java",
-          "src/main/java/com/sdkwork/web/backend/sdk/model/CreateRootDomainRequest.java",
-          "src/main/java/com/sdkwork/web/backend/sdk/model/DomainDeploymentResponse.java",
-          "src/main/java/com/sdkwork/web/backend/sdk/model/RootDomainResponse.java",
-          "src/main/java/com/sdkwork/web/backend/sdk/model/RootDomainsCreateResponse201.java",
-          "src/main/java/com/sdkwork/web/backend/sdk/model/RootDomainsListResponse.java",
-          "src/main/java/com/sdkwork/web/backend/sdk/model/RootDomainsRetrieveResponse.java",
-          "src/main/java/com/sdkwork/web/backend/sdk/model/RootDomainsSubdomainsCreateResponse201.java",
-          "src/main/java/com/sdkwork/web/backend/sdk/model/RootDomainsSubdomainsListResponse.java"
-        ]
-      }
-    ],
-    "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, models. Verification is required."
+    "areas": [],
+    "details": [],
+    "requiresVerification": false,
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
   },
   "verificationPlan": {
-    "shouldRun": true,
-    "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
-    "steps": [
-      {
-        "id": "check",
-        "title": "Unified package check",
-        "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
-        "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-java\\generated\\server-openapi",
-        "command": "node",
-        "args": [
-          "./bin/publish-core.mjs",
-          "--language",
-          "java",
-          "--project-dir",
-          ".",
-          "--action",
-          "check"
-        ],
-        "displayCommand": "node ./bin/publish-core.mjs --language java --project-dir . --action check"
-      }
-    ]
+    "shouldRun": false,
+    "runPhase": "skip",
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
+    "steps": []
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "medium",
-    "nextAction": "verify",
+    "riskLevel": "low",
+    "nextAction": "skip",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
-    "summary": "Changes have been applied. Run the required verification plan now.",
+    "summary": "No actionable changes were detected. No apply or verification step is required.",
     "reasons": [
-      "verification-required"
+      "no-actionable-changes"
     ]
   },
   "preservedLegacyFiles": false

@@ -8,7 +8,7 @@ export function normalizeWebserverPage(value: unknown): WebserverResourcePage {
   const info = isRecord(candidate.pageInfo) ? candidate.pageInfo : {};
   const page = positiveInteger(info.page, 1);
   const pageSize = positiveInteger(info.pageSize, Math.max(items.length, 20));
-  const total = typeof info.total === "number" && Number.isFinite(info.total) ? info.total : undefined;
+  const total = nonNegativeSafeInteger(info.totalItems);
   return { items, pageInfo: { page, pageSize, total, hasMore: typeof info.hasMore === "boolean" ? info.hasMore : total === undefined ? items.length >= pageSize : page * pageSize < total } };
 }
 
@@ -22,6 +22,10 @@ function unwrap(value: unknown): unknown {
 }
 
 function positiveInteger(value: unknown, fallback: number): number { return typeof value === "number" && Number.isInteger(value) && value > 0 ? value : fallback; }
+function nonNegativeSafeInteger(value: unknown): number | undefined {
+  if (typeof value !== "string" || !/^(0|[1-9]\d*)$/u.test(value)) return undefined;
+  const parsed = Number(value);
+  return Number.isSafeInteger(parsed) ? parsed : undefined;
+}
 function toRecord(value: unknown): Record<string, unknown> { return isRecord(value) ? value : { value }; }
 export function isRecord(value: unknown): value is Record<string, unknown> { return typeof value === "object" && value !== null && !Array.isArray(value); }
-

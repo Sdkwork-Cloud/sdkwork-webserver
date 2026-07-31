@@ -186,4 +186,421 @@ describe("root-domain management", () => {
     ));
     expect(await screen.findByText("Public API")).toBeTruthy();
   });
+
+  it("manages ECDSA and RSA listener certificates for one application domain", async () => {
+    const rootDomain = rootDomainFixture();
+    const domain = subdomainFixture();
+    const ecdsaBinding = listenerBindingFixture({
+      certificateId: "certificate-ecdsa",
+      certificateName: "example.com ECDSA",
+      id: "binding-ecdsa",
+      keyAlgorithm: "ECDSA",
+    });
+    const rsaBinding = listenerBindingFixture({
+      certificateId: "certificate-rsa",
+      certificateName: "example.com RSA",
+      id: "binding-rsa",
+      keyAlgorithm: "RSA",
+    });
+    const listBindings = vi.fn()
+      .mockResolvedValueOnce(pageOf([ecdsaBinding]))
+      .mockResolvedValueOnce(pageOf([ecdsaBinding]))
+      .mockResolvedValueOnce(pageOf([ecdsaBinding, rsaBinding]))
+      .mockResolvedValueOnce(pageOf([rsaBinding]));
+    const listCertificates = vi.fn().mockResolvedValue(pageOf([
+      certificateFixture("certificate-ecdsa", "example.com ECDSA", "ECDSA"),
+      certificateFixture("certificate-rsa", "example.com RSA", "RSA"),
+    ]));
+    const issueCertificate = vi.fn().mockResolvedValue({
+      ...certificateFixture("certificate-pending", "example.com RSA renewal", "RSA"),
+      status: "PENDING",
+    });
+    const bindCertificate = vi.fn().mockResolvedValue(rsaBinding);
+    const removeBinding = vi.fn().mockResolvedValue(undefined);
+    const sdk = domainSdk({
+      certificate: {
+        applications: {
+          domains: {
+            listenerCertificateBindings: {
+              create: bindCertificate,
+              delete: removeBinding,
+              list: listBindings,
+            },
+          },
+        },
+        create: issueCertificate,
+        list: listCertificates,
+      },
+      rootDomain,
+      subdomains: [domain],
+    });
+
+    renderRootDomain(sdk, [
+      "web.sites.read",
+      "web.certificates.read",
+      "web.certificates.write",
+    ]);
+
+    fireEvent.click(await screen.findByRole("button", { name: "Manage certificates" }));
+    expect(await screen.findByRole("dialog", { name: "Certificate management for example.com" })).toBeTruthy();
+    await waitFor(() => expect(listCertificates).toHaveBeenCalledWith({
+      domainId: "domain-1",
+      page: 1,
+      pageSize: 10,
+    }));
+    expect(listBindings).toHaveBeenCalledWith(
+      "application-1",
+      "domain-1",
+      { page: 1, pageSize: 10 },
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "RSA" }));
+    fireEvent.click(screen.getByRole("button", { name: "Issue new certificate" }));
+    await waitFor(() => expect(issueCertificate).toHaveBeenCalledWith(
+      {
+        autoRenew: true,
+        certType: 1,
+        domainIds: ["domain-1"],
+        keyAlgorithm: "RSA",
+      },
+      { idempotencyKey: expect.any(String) },
+    ));
+
+    fireEvent.click(screen.getByRole("radio", { name: /example\.com RSA/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Bind certificate" }));
+    await waitFor(() => expect(bindCertificate).toHaveBeenCalledWith(
+      "application-1",
+      "domain-1",
+      {
+        certificateId: "certificate-rsa",
+        isDefault: false,
+        priority: 100,
+      },
+      { idempotencyKey: expect.any(String) },
+    ));
+    expect((await screen.findAllByText("example.com RSA")).length).toBeGreaterThan(0);
+
+    fireEvent.click(screen.getAllByRole("button", { name: "Remove certificate binding" })[0]);
+    expect(screen.getByRole("alertdialog", { name: "Remove certificate binding" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Unbind" }));
+    await waitFor(() => expect(removeBinding).toHaveBeenCalledWith(
+      "application-1",
+      "domain-1",
+      "binding-ecdsa",
+      { idempotencyKey: expect.any(String) },
+    ));
+  });
+
+  it("exposes listener certificate details without mutation controls to read-only operators", async () => {
+    const binding = listenerBindingFixture({
+      certificateId: "certificate-ecdsa",
+      certificateName: "example.com ECDSA",
+      id: "binding-ecdsa",
+      keyAlgorithm: "ECDSA",
+    });
+    const sdk = domainSdk({
+      certificate: {
+        applications: {
+          domains: {
+            listenerCertificateBindings: {
+              create: vi.fn(),
+              delete: vi.fn(),
+              list: vi.fn().mockResolvedValue(pageOf([binding])),
+            },
+          },
+        },
+        create: vi.fn(),
+        list: vi.fn().mockResolvedValue(pageOf([
+          certificateFixture("certificate-ecdsa", "example.com ECDSA", "ECDSA"),
+        ])),
+      },
+      rootDomain: rootDomainFixture(),
+      subdomains: [subdomainFixture()],
+    });
+
+    renderRootDomain(sdk, ["web.sites.read", "web.certificates.read"]);
+    fireEvent.click(await screen.findByRole("button", { name: "Manage certificates" }));
+
+    expect((await screen.findAllByText("example.com ECDSA")).length).toBeGreaterThan(0);
+    expect(screen.queryByRole("button", { name: "Issue new certificate" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Remove certificate binding" })).toBeNull();
+  });
+
+  it("shows every returned certificate as a binding candidate with explicit availability", async () => {
+    const certificates = [
+      { ...certificateFixture("certificate-pending", "Pending certificate", "ECDSA"), status: "PENDING" },
+      certificateFixture("certificate-issued", "Issued certificate", "ECDSA"),
+      { ...certificateFixture("certificate-failed", "Failed certificate", "RSA"), status: "FAILED" },
+      { ...certificateFixture("certificate-expired", "Expired certificate", "RSA"), status: "EXPIRED" },
+      { ...certificateFixture("certificate-revoked", "Revoked certificate", "RSA"), status: "REVOKED" },
+      { ...certificateFixture("certificate-archived", "Archived certificate", "RSA"), status: "ARCHIVED" },
+    ];
+    const sdk = domainSdk({
+      certificate: {
+        applications: {
+          domains: {
+            listenerCertificateBindings: {
+              create: vi.fn(),
+              delete: vi.fn(),
+              list: vi.fn().mockResolvedValue(pageOf([])),
+            },
+          },
+        },
+        create: vi.fn(),
+        list: vi.fn().mockResolvedValue(pageOf(certificates)),
+      },
+      rootDomain: rootDomainFixture(),
+      subdomains: [subdomainFixture()],
+    });
+
+    renderRootDomain(sdk, [
+      "web.sites.read",
+      "web.certificates.read",
+      "web.certificates.write",
+    ]);
+    fireEvent.click(await screen.findByRole("button", { name: "Manage certificates" }));
+
+    const candidates = await screen.findAllByRole("radio");
+    expect(candidates).toHaveLength(certificates.length);
+    expect((screen.getByRole("radio", { name: /Pending certificate.*issuance has not completed/i }) as HTMLInputElement).disabled).toBe(true);
+    expect((screen.getByRole("radio", { name: /Issued certificate/i }) as HTMLInputElement).disabled).toBe(false);
+    expect((screen.getByRole("radio", { name: /Failed certificate.*not available/i }) as HTMLInputElement).disabled).toBe(true);
+    expect((screen.getByRole("radio", { name: /Expired certificate.*cannot be bound/i }) as HTMLInputElement).disabled).toBe(true);
+    expect((screen.getByRole("radio", { name: /Revoked certificate.*cannot be bound/i }) as HTMLInputElement).disabled).toBe(true);
+    expect((screen.getByRole("radio", { name: /Archived certificate.*cannot be bound/i }) as HTMLInputElement).disabled).toBe(true);
+    expect(screen.queryByText("No active certificates cover this hostname")).toBeNull();
+  });
+
+  it("issues a certificate for a verified hostname before an application is bound", async () => {
+    const domain = {
+      ...subdomainFixture(),
+      applicationId: undefined,
+      applicationName: undefined,
+      certificateCount: "1",
+      isPrimary: false,
+    };
+    const certificate = certificateFixture("certificate-ecdsa", "example.com ECDSA", "ECDSA");
+    const listBindings = vi.fn().mockResolvedValue(pageOf([]));
+    const listCertificates = vi.fn().mockResolvedValue(pageOf([certificate]));
+    const issueCertificate = vi.fn().mockResolvedValue(certificate);
+    const sdk = domainSdk({
+      certificate: {
+        applications: {
+          domains: {
+            listenerCertificateBindings: {
+              create: vi.fn(),
+              delete: vi.fn(),
+              list: listBindings,
+            },
+          },
+        },
+        create: issueCertificate,
+        list: listCertificates,
+      },
+      rootDomain: rootDomainFixture(),
+      subdomains: [domain],
+    });
+
+    renderRootDomain(sdk, [
+      "web.sites.read",
+      "web.certificates.read",
+      "web.certificates.write",
+    ]);
+
+    fireEvent.click(await screen.findByRole("button", { name: "Manage certificates" }));
+    expect(await screen.findByRole("dialog", { name: "Certificate management for example.com" })).toBeTruthy();
+    await waitFor(() => expect(listCertificates).toHaveBeenCalledWith({
+      domainId: "domain-1",
+      page: 1,
+      pageSize: 10,
+    }));
+    expect(listBindings).not.toHaveBeenCalled();
+    expect(screen.getByText(/Certificate issuance remains available/)).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Bind certificate" })).toBeNull();
+
+    const issueButton = screen.getByRole("button", { name: "Issue new certificate" });
+    expect((issueButton as HTMLButtonElement).disabled).toBe(false);
+    fireEvent.click(issueButton);
+
+    await waitFor(() => expect(issueCertificate).toHaveBeenCalledWith(
+      {
+        autoRenew: true,
+        certType: 1,
+        domainIds: ["domain-1"],
+        keyAlgorithm: "ECDSA",
+      },
+      { idempotencyKey: expect.any(String) },
+    ));
+    expect(listBindings).not.toHaveBeenCalled();
+  });
+
+  it("localizes SDK failures without exposing raw permission diagnostics", async () => {
+    const sdk = domainSdk({
+      certificate: { create: vi.fn(), list: vi.fn().mockResolvedValue(pageOf([])) },
+      rootDomain: rootDomainFixture(),
+      subdomains: [],
+    });
+    vi.mocked(sdk.domain.rootDomains.retrieve).mockRejectedValue({
+      code: "FORBIDDEN",
+      httpStatus: 403,
+      problem: {
+        code: 40301,
+        detail: "permission web.sites.read denied for tenant 42",
+        status: 403,
+        traceId: "trace-root-domain-40301",
+      },
+    });
+
+    renderRootDomain(sdk, ["web.sites.read"]);
+
+    const alert = await screen.findByRole("alert");
+    expect(alert.textContent).toContain("does not have permission");
+    expect(alert.textContent).toContain("Support reference: trace-root-domain-40301");
+    expect(alert.textContent).not.toContain("web.sites.read");
+    expect(alert.textContent).not.toContain("tenant 42");
+  });
 });
+
+function renderRootDomain(
+  sdk: WebserverAdminSdkClient,
+  permissionScope: readonly string[],
+): void {
+  render(
+    <WebserverAdminSdkProvider client={sdk}>
+      <MemoryRouter initialEntries={["/admin/root-domains/root-domain-1"]}>
+        <Routes>
+          <Route
+            path="/admin/root-domains/*"
+            element={<RootDomainManagement locale="en-US" permissionScope={permissionScope} />}
+          />
+        </Routes>
+      </MemoryRouter>
+    </WebserverAdminSdkProvider>,
+  );
+}
+
+function domainSdk({ certificate, rootDomain, subdomains }: {
+  certificate: unknown;
+  rootDomain: ReturnType<typeof rootDomainFixture>;
+  subdomains: readonly Record<string, unknown>[];
+}): WebserverAdminSdkClient {
+  return {
+    application: { list: vi.fn().mockResolvedValue(pageOf([])) },
+    certificate,
+    domain: {
+      applicationBinding: { delete: vi.fn(), update: vi.fn() },
+      delete: vi.fn(),
+      rootDomains: {
+        create: vi.fn(),
+        delete: vi.fn(),
+        list: vi.fn(),
+        retrieve: vi.fn().mockResolvedValue(rootDomain),
+        subdomains: { create: vi.fn(), list: vi.fn().mockResolvedValue(pageOf(subdomains, 20)) },
+      },
+      verify: vi.fn(),
+    },
+  } as unknown as WebserverAdminSdkClient;
+}
+
+function rootDomainFixture() {
+  return {
+    activeDeploymentCount: "1",
+    boundSubdomainCount: "1",
+    createdAt: "2026-07-30T08:00:00.000Z",
+    hostname: "example.com",
+    httpsSubdomainCount: "1",
+    id: "root-domain-1",
+    status: 1,
+    subdomainCount: "1",
+    updatedAt: "2026-07-30T09:00:00.000Z",
+    verifiedSubdomainCount: "1",
+  };
+}
+
+function subdomainFixture() {
+  return {
+    applicationId: "application-1",
+    applicationName: "Public API",
+    certificateCount: "2",
+    createdAt: "2026-07-30T08:10:00.000Z",
+    hostname: "example.com",
+    id: "domain-1",
+    isPrimary: true,
+    isVerified: true,
+    recordName: "@",
+    rootDomainId: "root-domain-1",
+    sslEnabled: true,
+    sslProvider: "letsencrypt",
+    status: 1,
+    updatedAt: "2026-07-30T09:00:00.000Z",
+  };
+}
+
+function certificateFixture(id: string, certName: string, keyAlgorithm: "ECDSA" | "RSA") {
+  return {
+    autoRenew: true,
+    certName,
+    certType: 1,
+    createdAt: "2026-07-30T08:00:00.000Z",
+    fingerprint: `${id}-fingerprint`,
+    id,
+    identifiers: [{ domainId: "domain-1", hostname: "example.com", identifierType: "EXACT", position: 0 }],
+    issuer: "Let's Encrypt",
+    keyAlgorithm,
+    notAfter: "2026-10-30T08:00:00.000Z",
+    status: "ISSUED",
+    updatedAt: "2026-07-30T08:00:00.000Z",
+  };
+}
+
+function listenerBindingFixture({ certificateId, certificateName, id, keyAlgorithm }: {
+  certificateId: string;
+  certificateName: string;
+  id: string;
+  keyAlgorithm: "ECDSA" | "RSA";
+}) {
+  return {
+    activatedAt: "2026-07-30T08:00:00.000Z",
+    currentCertificate: {
+      certName: certificateName,
+      fingerprint: `${certificateId}-fingerprint`,
+      identifiers: [{ domainId: "domain-1", hostname: "example.com", identifierType: "EXACT", position: 0 }],
+      issuer: "Let's Encrypt",
+      notAfter: "2026-10-30T08:00:00.000Z",
+      status: "ISSUED",
+    },
+    certificateId,
+    currentCertificateVersionId: `${certificateId}-version-1`,
+    createdAt: "2026-07-30T08:00:00.000Z",
+    domainId: "domain-1",
+    id,
+    isDefault: keyAlgorithm === "ECDSA",
+    keyAlgorithm,
+    priority: keyAlgorithm === "ECDSA" ? 10 : 20,
+    siteId: "application-1",
+    desiredCertificate: {
+      certName: certificateName,
+      fingerprint: `${certificateId}-fingerprint`,
+      identifiers: [{ domainId: "domain-1", hostname: "example.com", identifierType: "EXACT", position: 0 }],
+      issuer: "Let's Encrypt",
+      notAfter: "2026-10-30T08:00:00.000Z",
+      status: "ISSUED",
+    },
+    desiredCertificateVersionId: `${certificateId}-version-1`,
+    status: "ACTIVE",
+    updatedAt: "2026-07-30T08:00:00.000Z",
+  };
+}
+
+function pageOf<T>(items: readonly T[], pageSize = 10) {
+  return {
+    items,
+    pageInfo: {
+      hasMore: false,
+      mode: "offset",
+      page: 1,
+      pageSize,
+      totalItems: String(items.length),
+    },
+  };
+}

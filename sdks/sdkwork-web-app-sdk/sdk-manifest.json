@@ -189,5 +189,7 @@
     }
   ],
   "sdkSurface": "app",
-  "sdkType": "app"
+  "sdkType": "app",
+  "ownerOnlyOperationCount": 29,
+  "standardProfile": "sdkwork-v3"
 }

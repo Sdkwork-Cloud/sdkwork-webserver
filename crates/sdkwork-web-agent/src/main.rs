@@ -6,16 +6,19 @@ mod state;
 use std::collections::HashSet;
 use std::time::Duration;
 
+use chrono::Utc;
 use sdkwork_utils_rust::crypto::sha256_hash;
 use sdkwork_web_backend_sdk::{
+    AgentCertificateObservation as SdkAgentCertificateObservation,
     AgentHeartbeatRequest as SdkAgentHeartbeatRequest,
     AgentHeartbeatResponse as SdkAgentHeartbeatResponse, AgentSyncResponse as SdkAgentSyncResponse,
     SdkworkBackendClient, SdkworkConfig,
 };
 use sdkwork_webserver_contract::{
-    AgentCertificateBundle, AgentHeartbeatResponse, AgentNginxConfigBundle, AgentSyncResponse,
+    AgentCertificateBundle, AgentCertificateObservation, AgentHeartbeatResponse,
+    AgentNginxConfigBundle, AgentSyncResponse,
 };
-use sdkwork_webserver_edge_runtime::EdgeRuntime;
+use sdkwork_webserver_edge_runtime::{CertificateBundleMaterial, EdgeRuntime};
 use state::{resolve_state_path, NodeDaemonLock, NodeDaemonState};
 use tracing::{info, warn};
 
@@ -121,20 +124,7 @@ async fn sync_once(
     state_path: &std::path::Path,
     local_state: &mut NodeDaemonState,
 ) -> anyhow::Result<()> {
-    let heartbeat = SdkAgentHeartbeatRequest {
-        agent_version: Some(NODE_DAEMON_VERSION.to_string()),
-        nginx_enabled: Some(edge.config().nginx_enabled),
-        active_configs: None,
-        last_sync_version: local_state.observed_sync_version().map(str::to_string),
-    };
-    let heartbeat_ack =
-        map_heartbeat_response(clients.heartbeat.agent().heartbeat(&heartbeat).await?)?;
-    if heartbeat_ack.server_id.trim().is_empty() {
-        anyhow::bail!("control-plane heartbeat acknowledgement has an empty serverId");
-    }
-    if heartbeat_ack.status != 1 {
-        anyhow::bail!("control-plane heartbeat acknowledgement did not mark the node active");
-    }
+    let heartbeat_ack = report_heartbeat(edge, clients, local_state).await?;
 
     let manifest = map_sync_response(
         clients
@@ -175,21 +165,168 @@ async fn sync_once(
     );
 
     for config in &manifest.nginx_configs {
-        edge.deploy_site_config(&config.domain, &config.config_content)
-            .map_err(|error| anyhow::anyhow!("deploy nginx site {}: {error}", config.domain))?;
+        if let Err(error) = edge.deploy_site_config(&config.domain, &config.config_content) {
+            persist_certificate_observations(
+                state_path,
+                local_state,
+                certificate_observations(&manifest, "FAILED", Some("NGINX_CONFIG_STAGE_FAILED")),
+            )?;
+            report_observation_failure(edge, clients, local_state).await;
+            return Err(anyhow::anyhow!(
+                "deploy nginx site {}: {error}",
+                config.domain
+            ));
+        }
     }
 
     for certificate in &manifest.certificates {
-        apply_certificate_bundle(edge, certificate)?;
+        if let Err(error) = apply_certificate_bundle(edge, certificate) {
+            persist_certificate_observations(
+                state_path,
+                local_state,
+                certificate_observations(&manifest, "FAILED", Some("CERTIFICATE_STAGE_FAILED")),
+            )?;
+            report_observation_failure(edge, clients, local_state).await;
+            return Err(error);
+        }
     }
 
-    edge.reload()?;
+    if !manifest.certificates.is_empty() {
+        persist_certificate_observations(
+            state_path,
+            local_state,
+            certificate_observations(&manifest, "STAGED", None),
+        )?;
+        report_heartbeat(edge, clients, local_state).await?;
+    }
+
+    if let Err(error) = edge.reload() {
+        persist_certificate_observations(
+            state_path,
+            local_state,
+            certificate_observations(&manifest, "FAILED", Some("NGINX_RELOAD_FAILED")),
+        )?;
+        report_observation_failure(edge, clients, local_state).await;
+        return Err(anyhow::anyhow!("reload nginx after node sync: {error}"));
+    }
+
+    if !manifest.certificates.is_empty() {
+        persist_certificate_observations(
+            state_path,
+            local_state,
+            certificate_observations(&manifest, "ACTIVE", None),
+        )?;
+        report_heartbeat(edge, clients, local_state).await?;
+
+        for certificate in &manifest.certificates {
+            for hostname in &certificate.hostnames {
+                if let Err(error) =
+                    edge.verify_served_certificate(hostname, &certificate.fingerprint)
+                {
+                    persist_certificate_observations(
+                        state_path,
+                        local_state,
+                        certificate_observations(&manifest, "FAILED", Some("TLS_SNI_PROBE_FAILED")),
+                    )?;
+                    report_observation_failure(edge, clients, local_state).await;
+                    return Err(anyhow::anyhow!(
+                        "verify served certificate {} for {hostname}: {error}",
+                        certificate.certificate_id
+                    ));
+                }
+            }
+        }
+
+        persist_certificate_observations(
+            state_path,
+            local_state,
+            certificate_observations(&manifest, "SERVED", None),
+        )?;
+    }
 
     let observed_state = local_state.with_observed(&manifest.sync_version)?;
     observed_state.save(state_path)?;
     *local_state = observed_state;
+    report_heartbeat(edge, clients, local_state).await?;
 
     Ok(())
+}
+
+async fn report_heartbeat(
+    edge: &EdgeRuntime,
+    clients: &NodeDaemonSdkClients,
+    local_state: &NodeDaemonState,
+) -> anyhow::Result<AgentHeartbeatResponse> {
+    let heartbeat = SdkAgentHeartbeatRequest {
+        agent_version: Some(NODE_DAEMON_VERSION.to_string()),
+        nginx_enabled: Some(edge.config().nginx_enabled),
+        active_configs: None,
+        last_sync_version: local_state.observed_sync_version().map(str::to_string),
+        certificate_observations: Some(
+            local_state
+                .certificate_observations()
+                .iter()
+                .map(|observation| SdkAgentCertificateObservation {
+                    certificate_id: observation.certificate_id.clone(),
+                    fingerprint: observation.fingerprint.clone(),
+                    sync_version: observation.sync_version.clone(),
+                    state: observation.state.clone(),
+                    observed_at: observation.observed_at.clone(),
+                    failure_code: observation.failure_code.clone(),
+                })
+                .collect(),
+        ),
+    };
+    let acknowledgement =
+        map_heartbeat_response(clients.heartbeat.agent().heartbeat(&heartbeat).await?)?;
+    if acknowledgement.server_id.trim().is_empty() {
+        anyhow::bail!("control-plane heartbeat acknowledgement has an empty serverId");
+    }
+    if acknowledgement.status != 1 {
+        anyhow::bail!("control-plane heartbeat acknowledgement did not mark the node active");
+    }
+    Ok(acknowledgement)
+}
+
+async fn report_observation_failure(
+    edge: &EdgeRuntime,
+    clients: &NodeDaemonSdkClients,
+    local_state: &NodeDaemonState,
+) {
+    if let Err(error) = report_heartbeat(edge, clients, local_state).await {
+        warn!(error = %error, "report failed certificate observation");
+    }
+}
+
+fn persist_certificate_observations(
+    state_path: &std::path::Path,
+    local_state: &mut NodeDaemonState,
+    observations: Vec<AgentCertificateObservation>,
+) -> anyhow::Result<()> {
+    let next = local_state.with_certificate_observations(observations)?;
+    next.save(state_path)?;
+    *local_state = next;
+    Ok(())
+}
+
+fn certificate_observations(
+    manifest: &AgentSyncResponse,
+    state: &str,
+    failure_code: Option<&str>,
+) -> Vec<AgentCertificateObservation> {
+    let observed_at = Utc::now().to_rfc3339();
+    manifest
+        .certificates
+        .iter()
+        .map(|certificate| AgentCertificateObservation {
+            certificate_id: certificate.certificate_id.clone(),
+            fingerprint: certificate.fingerprint.clone(),
+            sync_version: manifest.sync_version.clone(),
+            state: state.to_string(),
+            observed_at: observed_at.clone(),
+            failure_code: failure_code.map(str::to_string),
+        })
+        .collect()
 }
 
 fn map_heartbeat_response(
@@ -227,6 +364,7 @@ fn map_sync_response(response: SdkAgentSyncResponse) -> anyhow::Result<AgentSync
             certificate_id: certificate.certificate_id,
             cert_name: certificate.cert_name,
             fingerprint: certificate.fingerprint,
+            hostnames: certificate.hostnames,
             fullchain_pem: certificate.fullchain_pem,
             privkey_pem: certificate.privkey_pem,
         })
@@ -279,6 +417,26 @@ fn validate_manifest_bounds(manifest: &AgentSyncResponse) -> anyhow::Result<()> 
         }
         if !certificate_names.insert(certificate.cert_name.to_ascii_lowercase()) {
             anyhow::bail!("node sync contains a duplicate certificate activation name");
+        }
+        if certificate.fingerprint.len() != 64
+            || !certificate
+                .fingerprint
+                .bytes()
+                .all(|byte| byte.is_ascii_hexdigit() && !byte.is_ascii_uppercase())
+        {
+            anyhow::bail!("node sync contains an invalid certificate fingerprint");
+        }
+        if certificate.hostnames.is_empty() || certificate.hostnames.len() > 128 {
+            anyhow::bail!("node sync certificate verification hostname count is invalid");
+        }
+        let mut hostnames = HashSet::with_capacity(certificate.hostnames.len());
+        for hostname in &certificate.hostnames {
+            if hostname.is_empty()
+                || hostname.len() > 253
+                || !hostnames.insert(hostname.to_ascii_lowercase())
+            {
+                anyhow::bail!("node sync contains an invalid certificate verification hostname");
+            }
         }
     }
     Ok(())
@@ -360,23 +518,10 @@ fn apply_certificate_bundle(
     edge: &EdgeRuntime,
     certificate: &AgentCertificateBundle,
 ) -> anyhow::Result<()> {
-    use sdkwork_webserver_acme_service::IssuedCertificateMaterial;
-
-    let material = IssuedCertificateMaterial {
-        cert_name: certificate.cert_name.clone(),
-        cert_type: 0,
-        issuer: String::new(),
-        subject: certificate.cert_name.clone(),
-        san_list: certificate.cert_name.clone(),
-        fingerprint: certificate.fingerprint.clone(),
-        cert_pem: certificate.fullchain_pem.clone(),
+    let material = CertificateBundleMaterial {
+        bundle_name: certificate.cert_name.clone(),
+        fullchain_pem: certificate.fullchain_pem.clone(),
         private_key_pem: certificate.privkey_pem.clone(),
-        chain_pem: Some(certificate.fullchain_pem.clone()),
-        not_before: String::new(),
-        not_after: String::new(),
-        cert_path: String::new(),
-        key_path: String::new(),
-        chain_path: None,
     };
     edge.write_certificate_bundle(&material)
         .map_err(|error| anyhow::anyhow!("write certificate {}: {error}", certificate.cert_name))
@@ -429,6 +574,7 @@ mod tests {
             nginx_enabled: Some(true),
             active_configs: None,
             last_sync_version: None,
+            certificate_observations: None,
         }
     }
 

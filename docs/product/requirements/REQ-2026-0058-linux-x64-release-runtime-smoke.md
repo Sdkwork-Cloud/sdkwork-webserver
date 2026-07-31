@@ -16,7 +16,7 @@ goals:
   - Preserve the source workspace and host Cargo target by honoring an explicit CARGO_TARGET_DIR during release packaging.
 non_goals:
   - Linux arm64, OCI/container, deb/rpm, Windows service, macOS, installer, upgrade, rollback, or uninstall parity.
-  - PostgreSQL/SQLite production topology, automatic election, fencing, multi-zone failover, 100,000-connection capacity, or 24-hour soak.
+  - PostgreSQL production topology, automatic election, fencing, multi-zone failover, 100,000-connection capacity, or 24-hour soak.
   - SBOM, signing, provenance, attestation, vulnerability, or license evidence beyond the separate supply-chain requirements.
 users:
   - release engineer

@@ -9,23 +9,12 @@
     "protocol": "http",
     "packageName": "sdkwork-web-backend-sdk"
   },
-  "changeFingerprint": "358afba582fe73cd129374df84eda85c8595f12259604a698547e9d2db25616e",
+  "changeFingerprint": "b8b7e9a6e5f7fec6debc22e9c377f1115d581771509546e11e309407268efb6d",
   "changes": {
-    "createdGeneratedFiles": [
-      "src/models/create_root_domain_hostname_request.rs",
-      "src/models/create_root_domain_request.rs",
-      "src/models/domain_deployment_response.rs",
-      "src/models/root_domain_response.rs",
-      "src/models/root_domains_create_response201.rs",
-      "src/models/root_domains_list_response.rs",
-      "src/models/root_domains_retrieve_response.rs",
-      "src/models/root_domains_subdomains_create_response201.rs",
-      "src/models/root_domains_subdomains_list_response.rs"
-    ],
+    "createdGeneratedFiles": [],
     "updatedGeneratedFiles": [
-      "src/api/domain.rs",
-      "src/models/application_domain_response.rs",
-      "src/models/mod.rs"
+      "src/models/agent_certificate_observation.rs",
+      "src/models/agent_heartbeat_request.rs"
     ],
     "unchangedGeneratedFiles": [
       "bin/publish-core.mjs",
@@ -45,6 +34,7 @@
       "src/api/base.rs",
       "src/api/certificate_distribution.rs",
       "src/api/certificate.rs",
+      "src/api/domain.rs",
       "src/api/mod.rs",
       "src/api/nginx.rs",
       "src/api/paths.rs",
@@ -54,11 +44,11 @@
       "src/http/mod.rs",
       "src/lib.rs",
       "src/models/agent_certificate_bundle.rs",
-      "src/models/agent_heartbeat_request.rs",
       "src/models/agent_heartbeat_response.rs",
       "src/models/agent_nginx_config_bundle.rs",
       "src/models/agent_sync_response.rs",
       "src/models/application_deployment_response.rs",
+      "src/models/application_domain_response.rs",
       "src/models/application_domain_verify_response.rs",
       "src/models/application_response.rs",
       "src/models/application_source_version_config_snapshot.rs",
@@ -71,6 +61,8 @@
       "src/models/applications_deployments_rollback_response.rs",
       "src/models/applications_domains_create_response201.rs",
       "src/models/applications_domains_list_response.rs",
+      "src/models/applications_domains_listener_certificate_bindings_create_response201.rs",
+      "src/models/applications_domains_listener_certificate_bindings_list_response.rs",
       "src/models/applications_domains_verify_response.rs",
       "src/models/applications_list_response.rs",
       "src/models/applications_pause_response.rs",
@@ -84,6 +76,7 @@
       "src/models/audit_log_response.rs",
       "src/models/audit_logs_list_response.rs",
       "src/models/certificate_distribution_response.rs",
+      "src/models/certificate_identifier_response.rs",
       "src/models/certificate_response.rs",
       "src/models/certificates_create_response201.rs",
       "src/models/certificates_distribution_list_response.rs",
@@ -102,10 +95,14 @@
       "src/models/create_application_request.rs",
       "src/models/create_application_source_version_request.rs",
       "src/models/create_certificate_request.rs",
+      "src/models/create_listener_certificate_binding_request.rs",
       "src/models/create_managed_domain_request.rs",
       "src/models/create_nginx_config_request.rs",
+      "src/models/create_root_domain_hostname_request.rs",
+      "src/models/create_root_domain_request.rs",
       "src/models/create_server_request.rs",
       "src/models/create_server_response.rs",
+      "src/models/domain_deployment_response.rs",
       "src/models/domains_application_binding_update_response.rs",
       "src/models/domains_create_response201.rs",
       "src/models/domains_list_response.rs",
@@ -113,8 +110,11 @@
       "src/models/field_error.rs",
       "src/models/heartbeat_response.rs",
       "src/models/import_application_git_source_version_request.rs",
+      "src/models/listener_certificate_binding_response.rs",
+      "src/models/listener_certificate_summary_response.rs",
       "src/models/media_checksum.rs",
       "src/models/media_resource.rs",
+      "src/models/mod.rs",
       "src/models/nginx_config_page.rs",
       "src/models/nginx_config_response.rs",
       "src/models/nginx_deploy_response.rs",
@@ -125,6 +125,12 @@
       "src/models/problem_detail.rs",
       "src/models/reload_response.rs",
       "src/models/retrieve_response.rs",
+      "src/models/root_domain_response.rs",
+      "src/models/root_domains_create_response201.rs",
+      "src/models/root_domains_list_response.rs",
+      "src/models/root_domains_retrieve_response.rs",
+      "src/models/root_domains_subdomains_create_response201.rs",
+      "src/models/root_domains_subdomains_list_response.rs",
       "src/models/sdk_work_api_response.rs",
       "src/models/sdk_work_command_data.rs",
       "src/models/sdk_work_command_response.rs",
@@ -152,46 +158,30 @@
   "impact": {
     "schemaVersion": 1,
     "areas": [
-      "api-surface",
       "models"
     ],
     "details": [
       {
-        "area": "api-surface",
-        "paths": [
-          "src/api/domain.rs"
-        ]
-      },
-      {
         "area": "models",
         "paths": [
-          "src/models/application_domain_response.rs",
-          "src/models/create_root_domain_hostname_request.rs",
-          "src/models/create_root_domain_request.rs",
-          "src/models/domain_deployment_response.rs",
-          "src/models/mod.rs",
-          "src/models/root_domain_response.rs",
-          "src/models/root_domains_create_response201.rs",
-          "src/models/root_domains_list_response.rs",
-          "src/models/root_domains_retrieve_response.rs",
-          "src/models/root_domains_subdomains_create_response201.rs",
-          "src/models/root_domains_subdomains_list_response.rs"
+          "src/models/agent_certificate_observation.rs",
+          "src/models/agent_heartbeat_request.rs"
         ]
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, models. Verification is required."
+    "summary": "Detected impact areas: models. Verification is required."
   },
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-rust\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -209,7 +199,7 @@
         "id": "build",
         "title": "Unified package build",
         "required": true,
-        "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: api-surface, models.",
+        "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-rust\\generated\\server-openapi",
         "command": "node",
         "args": [

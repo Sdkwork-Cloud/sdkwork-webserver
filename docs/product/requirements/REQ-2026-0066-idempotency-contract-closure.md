@@ -69,7 +69,7 @@ verification:
   - pnpm --dir apps/sdkwork-webserver-pc typecheck
   - pnpm --dir apps/sdkwork-webserver-pc test
   - cargo test -p sdkwork-api-web-server-standalone-gateway generated_internal_sdk_preserves_runtime_assignment_wire_contract
-  - cargo test -p sdkwork-intelligence-webserver-repository-sqlx --test repository_parity sqlite_repository_transactions_tenants_idempotency_and_pagination_are_bounded -- --exact
+  - cargo test -p sdkwork-intelligence-webserver-repository-sqlx --test repository_parity postgres_repository_transactions_tenants_idempotency_and_pagination_are_bounded -- --ignored --exact
   - cargo test -p sdkwork-web-core
 ```
 

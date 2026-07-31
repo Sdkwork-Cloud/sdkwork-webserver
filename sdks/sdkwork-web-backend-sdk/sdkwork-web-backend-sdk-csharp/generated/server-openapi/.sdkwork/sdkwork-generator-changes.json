@@ -9,23 +9,10 @@
     "protocol": "http",
     "packageName": "SDKWork.Web.BackendSdk"
   },
-  "changeFingerprint": "bf63b054f13dfb4360abcd9d1190179bf5cbef8f8e232f5cf4535e510d6a2c8d",
+  "changeFingerprint": "03a590da05ffd67a2db668937be17d0ff77759f49fc30bbb10c9abf21fd10b13",
   "changes": {
-    "createdGeneratedFiles": [
-      "Models/CreateRootDomainHostnameRequest.cs",
-      "Models/CreateRootDomainRequest.cs",
-      "Models/DomainDeploymentResponse.cs",
-      "Models/RootDomainResponse.cs",
-      "Models/RootDomainsCreateResponse201.cs",
-      "Models/RootDomainsListResponse.cs",
-      "Models/RootDomainsRetrieveResponse.cs",
-      "Models/RootDomainsSubdomainsCreateResponse201.cs",
-      "Models/RootDomainsSubdomainsListResponse.cs"
-    ],
-    "updatedGeneratedFiles": [
-      "Api/DomainApi.cs",
-      "Models/ApplicationDomainResponse.cs"
-    ],
+    "createdGeneratedFiles": [],
+    "updatedGeneratedFiles": [],
     "unchangedGeneratedFiles": [
       "Api/AgentApi.cs",
       "Api/Api.cs",
@@ -37,6 +24,7 @@
       "Api/AuditApi.cs",
       "Api/CertificateApi.cs",
       "Api/CertificateDistributionApi.cs",
+      "Api/DomainApi.cs",
       "Api/NginxApi.cs",
       "Api/ServerApi.cs",
       "bin/publish-core.mjs",
@@ -46,11 +34,13 @@
       "Http/HttpClient.cs",
       "LICENSE",
       "Models/AgentCertificateBundle.cs",
+      "Models/AgentCertificateObservation.cs",
       "Models/AgentHeartbeatRequest.cs",
       "Models/AgentHeartbeatResponse.cs",
       "Models/AgentNginxConfigBundle.cs",
       "Models/AgentSyncResponse.cs",
       "Models/ApplicationDeploymentResponse.cs",
+      "Models/ApplicationDomainResponse.cs",
       "Models/ApplicationDomainVerifyResponse.cs",
       "Models/ApplicationResponse.cs",
       "Models/ApplicationsActivateResponse.cs",
@@ -59,6 +49,8 @@
       "Models/ApplicationsDeploymentsListResponse.cs",
       "Models/ApplicationsDeploymentsRollbackResponse.cs",
       "Models/ApplicationsDomainsCreateResponse201.cs",
+      "Models/ApplicationsDomainsListenerCertificateBindingsCreateResponse201.cs",
+      "Models/ApplicationsDomainsListenerCertificateBindingsListResponse.cs",
       "Models/ApplicationsDomainsListResponse.cs",
       "Models/ApplicationsDomainsVerifyResponse.cs",
       "Models/ApplicationsListResponse.cs",
@@ -76,6 +68,7 @@
       "Models/AuditLogResponse.cs",
       "Models/AuditLogsListResponse.cs",
       "Models/CertificateDistributionResponse.cs",
+      "Models/CertificateIdentifierResponse.cs",
       "Models/CertificateResponse.cs",
       "Models/CertificatesCreateResponse201.cs",
       "Models/CertificatesDistributionListResponse.cs",
@@ -93,10 +86,14 @@
       "Models/CreateApplicationRequest.cs",
       "Models/CreateApplicationSourceVersionRequest.cs",
       "Models/CreateCertificateRequest.cs",
+      "Models/CreateListenerCertificateBindingRequest.cs",
       "Models/CreateManagedDomainRequest.cs",
       "Models/CreateNginxConfigRequest.cs",
+      "Models/CreateRootDomainHostnameRequest.cs",
+      "Models/CreateRootDomainRequest.cs",
       "Models/CreateServerRequest.cs",
       "Models/CreateServerResponse.cs",
+      "Models/DomainDeploymentResponse.cs",
       "Models/DomainsApplicationBindingUpdateResponse.cs",
       "Models/DomainsCreateResponse201.cs",
       "Models/DomainsListResponse.cs",
@@ -104,6 +101,8 @@
       "Models/FieldError.cs",
       "Models/HeartbeatResponse.cs",
       "Models/ImportApplicationGitSourceVersionRequest.cs",
+      "Models/ListenerCertificateBindingResponse.cs",
+      "Models/ListenerCertificateSummaryResponse.cs",
       "Models/MediaChecksum.cs",
       "Models/MediaResource.cs",
       "Models/NginxConfigPage.cs",
@@ -116,6 +115,12 @@
       "Models/ProblemDetail.cs",
       "Models/ReloadResponse.cs",
       "Models/RetrieveResponse.cs",
+      "Models/RootDomainResponse.cs",
+      "Models/RootDomainsCreateResponse201.cs",
+      "Models/RootDomainsListResponse.cs",
+      "Models/RootDomainsRetrieveResponse.cs",
+      "Models/RootDomainsSubdomainsCreateResponse201.cs",
+      "Models/RootDomainsSubdomainsListResponse.cs",
       "Models/SdkWorkApiResponse.cs",
       "Models/SdkWorkCommandData.cs",
       "Models/SdkWorkCommandResponse.cs",
@@ -146,70 +151,26 @@
   },
   "impact": {
     "schemaVersion": 1,
-    "areas": [
-      "api-surface",
-      "models"
-    ],
-    "details": [
-      {
-        "area": "api-surface",
-        "paths": [
-          "Api/DomainApi.cs"
-        ]
-      },
-      {
-        "area": "models",
-        "paths": [
-          "Models/ApplicationDomainResponse.cs",
-          "Models/CreateRootDomainHostnameRequest.cs",
-          "Models/CreateRootDomainRequest.cs",
-          "Models/DomainDeploymentResponse.cs",
-          "Models/RootDomainResponse.cs",
-          "Models/RootDomainsCreateResponse201.cs",
-          "Models/RootDomainsListResponse.cs",
-          "Models/RootDomainsRetrieveResponse.cs",
-          "Models/RootDomainsSubdomainsCreateResponse201.cs",
-          "Models/RootDomainsSubdomainsListResponse.cs"
-        ]
-      }
-    ],
-    "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, models. Verification is required."
+    "areas": [],
+    "details": [],
+    "requiresVerification": false,
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
   },
   "verificationPlan": {
-    "shouldRun": true,
-    "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
-    "steps": [
-      {
-        "id": "check",
-        "title": "Unified package check",
-        "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
-        "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-csharp\\generated\\server-openapi",
-        "command": "node",
-        "args": [
-          "./bin/publish-core.mjs",
-          "--language",
-          "csharp",
-          "--project-dir",
-          ".",
-          "--action",
-          "check"
-        ],
-        "displayCommand": "node ./bin/publish-core.mjs --language csharp --project-dir . --action check"
-      }
-    ]
+    "shouldRun": false,
+    "runPhase": "skip",
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
+    "steps": []
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "medium",
-    "nextAction": "verify",
+    "riskLevel": "low",
+    "nextAction": "skip",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
-    "summary": "Changes have been applied. Run the required verification plan now.",
+    "summary": "No actionable changes were detected. No apply or verification step is required.",
     "reasons": [
-      "verification-required"
+      "no-actionable-changes"
     ]
   },
   "preservedLegacyFiles": false

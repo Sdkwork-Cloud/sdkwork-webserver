@@ -88,13 +88,13 @@
       "moduleCatalogRefs": [
         {
           "moduleId": "web",
-          "manifestRef": "../../../../../specs/iam.module.manifest.json",
+          "manifestRef": "../../../../specs/iam.module.manifest.json",
           "inheritPermissions": true,
           "inheritRoles": true
         },
         {
           "moduleId": "drive",
-          "manifestRef": "../../../../../../sdkwork-iam/iam/modules/drive/iam.module.manifest.json",
+          "manifestRef": "../../../../../sdkwork-iam/iam/modules/drive/iam.module.manifest.json",
           "inheritPermissions": true,
           "inheritRoles": true
         }

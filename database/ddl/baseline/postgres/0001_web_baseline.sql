@@ -1,5 +1,4 @@
--- Consolidated legacy baseline imported by bootstrap-database-module.mjs
--- Review and replace with contract-first migrations.
+-- SDKWork Web Server PostgreSQL authoritative baseline.
 -- Contract authority: database/contract/schema.yaml
 
 -- source: migrations/001_create_web_site.sql
@@ -30,6 +29,7 @@ CREATE TABLE web_site (
     deleted_by      BIGINT,
     PRIMARY KEY (id),
     CONSTRAINT uk_web_site_uuid UNIQUE (uuid),
+    CONSTRAINT uk_web_site_tenant_id UNIQUE (tenant_id, id),
     CONSTRAINT uk_web_site_slug UNIQUE (tenant_id, slug),
     CONSTRAINT chk_web_site_application_type CHECK (application_type IN ('WEB', 'API')),
     CONSTRAINT chk_web_site_type CHECK (site_type BETWEEN 1 AND 6),
@@ -69,6 +69,9 @@ CREATE TABLE web_root_domain (
     tenant_id       BIGINT       NOT NULL DEFAULT 0,
     organization_id BIGINT       NOT NULL DEFAULT 0,
     hostname        VARCHAR(253) NOT NULL,
+    display_name    VARCHAR(200),
+    dns_provider    VARCHAR(64),
+    provider_zone_ref VARCHAR(512),
     status          INTEGER      NOT NULL DEFAULT 1,
     metadata        JSONB        NOT NULL DEFAULT '{}',
     created_at      TIMESTAMPTZ  NOT NULL,
@@ -77,6 +80,7 @@ CREATE TABLE web_root_domain (
     deleted_at      TIMESTAMPTZ,
     PRIMARY KEY (id),
     CONSTRAINT uk_web_root_domain_uuid UNIQUE (uuid),
+    CONSTRAINT uk_web_root_domain_tenant_id UNIQUE (tenant_id, id),
     CONSTRAINT chk_web_root_domain_status CHECK (status BETWEEN 0 AND 2)
 );
 
@@ -84,33 +88,24 @@ COMMENT ON TABLE web_root_domain IS 'Tenant-owned root-domain Zone';
 COMMENT ON COLUMN web_root_domain.hostname IS 'Explicit normalized root domain';
 COMMENT ON COLUMN web_root_domain.status IS 'Status: 0=pending, 1=active, 2=disabled';
 
-CREATE UNIQUE INDEX uk_web_root_domain_tenant_hostname
-    ON web_root_domain (tenant_id, hostname)
+CREATE UNIQUE INDEX uk_web_root_domain_active_hostname
+    ON web_root_domain (hostname)
     WHERE deleted_at IS NULL;
 
 CREATE INDEX idx_web_root_domain_tenant_updated
     ON web_root_domain (tenant_id, updated_at DESC, id DESC);
-
--- source: migrations/002_create_web_domain.sql
--- Migration: 002_create_web_domain
--- Description: Web domain registry table
--- Author: SDKWork Web Server
--- Date: 2026-06-14
 
 CREATE TABLE web_domain (
     id              BIGINT       NOT NULL,
     uuid            VARCHAR(64)  NOT NULL,
     tenant_id       BIGINT       NOT NULL DEFAULT 0,
     organization_id BIGINT       NOT NULL DEFAULT 0,
-    root_domain_id  BIGINT,
-    site_id         BIGINT,
+    user_id         BIGINT,
+    root_domain_id  BIGINT       NOT NULL,
     hostname        VARCHAR(255) NOT NULL,
-    is_primary      BOOLEAN      NOT NULL DEFAULT false,
-    is_verified     BOOLEAN      NOT NULL DEFAULT false,
-    verify_token    VARCHAR(128),
-    ssl_enabled     BOOLEAN      NOT NULL DEFAULT false,
-    ssl_provider    VARCHAR(32),
-    redirect_target VARCHAR(2000),
+    hostname_type   VARCHAR(16)  NOT NULL DEFAULT 'EXACT',
+    verification_status VARCHAR(16) NOT NULL DEFAULT 'PENDING',
+    verified_at     TIMESTAMPTZ,
     status          INTEGER      NOT NULL DEFAULT 0,
     metadata        JSONB        NOT NULL DEFAULT '{}',
     created_at      TIMESTAMPTZ  NOT NULL,
@@ -119,29 +114,171 @@ CREATE TABLE web_domain (
     deleted_at      TIMESTAMPTZ,
     PRIMARY KEY (id),
     CONSTRAINT uk_web_domain_uuid UNIQUE (uuid),
-    CONSTRAINT uk_web_domain_hostname UNIQUE (hostname),
-    CONSTRAINT chk_web_domain_primary_binding CHECK (site_id IS NOT NULL OR is_primary = false),
-    CONSTRAINT fk_web_domain_root_domain FOREIGN KEY (root_domain_id) REFERENCES web_root_domain(id),
-    CONSTRAINT fk_web_domain_site FOREIGN KEY (site_id) REFERENCES web_site(id)
+    CONSTRAINT uk_web_domain_tenant_id UNIQUE (tenant_id, id),
+    CONSTRAINT fk_web_domain_root_domain FOREIGN KEY (tenant_id, root_domain_id)
+        REFERENCES web_root_domain(tenant_id, id),
+    CONSTRAINT chk_web_domain_hostname_type CHECK (hostname_type IN ('EXACT', 'WILDCARD')),
+    CONSTRAINT chk_web_domain_verification_status CHECK (
+        verification_status IN ('PENDING', 'VERIFIED', 'FAILED', 'EXPIRED')
+    ),
+    CONSTRAINT chk_web_domain_verified_at CHECK (
+        (verification_status = 'VERIFIED' AND verified_at IS NOT NULL)
+        OR (verification_status <> 'VERIFIED' AND verified_at IS NULL)
+    ),
+    CONSTRAINT chk_web_domain_status CHECK (status BETWEEN 0 AND 2)
 );
 
-COMMENT ON TABLE web_domain IS 'Web domain registry';
-COMMENT ON COLUMN web_domain.hostname IS 'Fully qualified domain name';
-COMMENT ON COLUMN web_domain.site_id IS 'Optional current application binding';
-COMMENT ON COLUMN web_domain.is_primary IS 'Whether this is the primary domain for the site';
-COMMENT ON COLUMN web_domain.is_verified IS 'Whether domain ownership is verified';
-COMMENT ON COLUMN web_domain.ssl_enabled IS 'Whether SSL/TLS is enabled';
-COMMENT ON COLUMN web_domain.ssl_provider IS 'SSL provider: letsencrypt, custom, none';
+COMMENT ON TABLE web_domain IS 'Root-domain owned hostname asset independent of application routing and TLS';
+COMMENT ON COLUMN web_domain.hostname IS 'Normalized lowercase ASCII hostname';
 COMMENT ON COLUMN web_domain.status IS 'Status: 0=pending, 1=active, 2=disabled';
 
-CREATE INDEX idx_web_domain_site
-    ON web_domain (site_id);
+CREATE UNIQUE INDEX uk_web_domain_active_hostname
+    ON web_domain (hostname)
+    WHERE deleted_at IS NULL;
 
 CREATE INDEX idx_web_domain_tenant_status
-    ON web_domain (tenant_id, status);
+    ON web_domain (tenant_id, status, updated_at DESC, id DESC)
+    WHERE deleted_at IS NULL;
 
 CREATE INDEX idx_web_domain_root_updated
-    ON web_domain (tenant_id, root_domain_id, updated_at DESC, id DESC);
+    ON web_domain (tenant_id, root_domain_id, updated_at DESC, id DESC)
+    WHERE deleted_at IS NULL;
+
+CREATE INDEX idx_web_domain_user_updated
+    ON web_domain (tenant_id, user_id, updated_at DESC, id DESC)
+    WHERE user_id IS NOT NULL AND deleted_at IS NULL;
+
+CREATE TABLE web_domain_verification (
+    id                BIGINT       NOT NULL,
+    uuid              VARCHAR(64)  NOT NULL,
+    tenant_id         BIGINT       NOT NULL,
+    domain_id         BIGINT       NOT NULL,
+    method            VARCHAR(16)  NOT NULL,
+    record_name       VARCHAR(253) NOT NULL,
+    proof_sha256      VARCHAR(64)  NOT NULL,
+    status            VARCHAR(16)  NOT NULL DEFAULT 'PENDING',
+    observed_sha256   VARCHAR(64),
+    attempt_count     INTEGER      NOT NULL DEFAULT 0,
+    next_attempt_at   TIMESTAMPTZ,
+    expires_at        TIMESTAMPTZ  NOT NULL,
+    checked_at        TIMESTAMPTZ,
+    verified_at       TIMESTAMPTZ,
+    failure_code      VARCHAR(64),
+    created_at        TIMESTAMPTZ  NOT NULL,
+    updated_at        TIMESTAMPTZ  NOT NULL,
+    version           BIGINT       NOT NULL DEFAULT 0,
+    PRIMARY KEY (id),
+    CONSTRAINT uk_web_domain_verification_uuid UNIQUE (uuid),
+    CONSTRAINT fk_web_domain_verification_domain FOREIGN KEY (tenant_id, domain_id)
+        REFERENCES web_domain(tenant_id, id),
+    CONSTRAINT chk_web_domain_verification_method CHECK (method IN ('DNS_TXT', 'DNS_CNAME', 'HTTP_FILE')),
+    CONSTRAINT chk_web_domain_verification_status CHECK (status IN ('PENDING', 'CHECKING', 'VERIFIED', 'FAILED', 'EXPIRED')),
+    CONSTRAINT chk_web_domain_verification_hash CHECK (
+        proof_sha256 ~ '^[0-9a-f]{64}$'
+        AND (observed_sha256 IS NULL OR observed_sha256 ~ '^[0-9a-f]{64}$')
+    ),
+    CONSTRAINT chk_web_domain_verification_attempts CHECK (attempt_count BETWEEN 0 AND 1000)
+);
+
+CREATE UNIQUE INDEX uk_web_domain_verification_active
+    ON web_domain_verification (domain_id)
+    WHERE status IN ('PENDING', 'CHECKING');
+
+CREATE INDEX idx_web_domain_verification_due
+    ON web_domain_verification (status, next_attempt_at, expires_at, id)
+    WHERE status IN ('PENDING', 'CHECKING');
+
+CREATE TABLE web_site_binding (
+    id                BIGINT        NOT NULL,
+    uuid              VARCHAR(64)   NOT NULL,
+    tenant_id         BIGINT        NOT NULL,
+    organization_id   BIGINT        NOT NULL DEFAULT 0,
+    site_id           BIGINT        NOT NULL,
+    domain_id         BIGINT        NOT NULL,
+    environment       VARCHAR(16)   NOT NULL DEFAULT 'production',
+    path_prefix       VARCHAR(4096) NOT NULL DEFAULT '/',
+    action_type       VARCHAR(16)   NOT NULL DEFAULT 'SERVE',
+    is_primary        BOOLEAN       NOT NULL DEFAULT false,
+    redirect_scheme   VARCHAR(8),
+    redirect_hostname VARCHAR(253),
+    redirect_path_prefix VARCHAR(4096),
+    redirect_status_code INTEGER,
+    preserve_path     BOOLEAN       NOT NULL DEFAULT true,
+    preserve_query    BOOLEAN       NOT NULL DEFAULT true,
+    status            VARCHAR(16)   NOT NULL DEFAULT 'PENDING',
+    activated_at      TIMESTAMPTZ,
+    created_at        TIMESTAMPTZ   NOT NULL,
+    updated_at        TIMESTAMPTZ   NOT NULL,
+    version           BIGINT        NOT NULL DEFAULT 0,
+    deleted_at        TIMESTAMPTZ,
+    PRIMARY KEY (id),
+    CONSTRAINT uk_web_site_binding_uuid UNIQUE (uuid),
+    CONSTRAINT uk_web_site_binding_tenant_id UNIQUE (tenant_id, id),
+    CONSTRAINT fk_web_site_binding_site FOREIGN KEY (tenant_id, site_id)
+        REFERENCES web_site(tenant_id, id),
+    CONSTRAINT fk_web_site_binding_domain FOREIGN KEY (tenant_id, domain_id)
+        REFERENCES web_domain(tenant_id, id),
+    CONSTRAINT chk_web_site_binding_environment CHECK (environment IN ('development', 'test', 'staging', 'production')),
+    CONSTRAINT chk_web_site_binding_action CHECK (action_type IN ('SERVE', 'REDIRECT')),
+    CONSTRAINT chk_web_site_binding_status CHECK (status IN ('PENDING', 'ACTIVE', 'PAUSED', 'FAILED', 'ARCHIVED')),
+    CONSTRAINT chk_web_site_binding_redirect_status CHECK (redirect_status_code IS NULL OR redirect_status_code IN (301, 302, 307, 308)),
+    CONSTRAINT chk_web_site_binding_redirect CHECK (
+        (action_type = 'SERVE' AND redirect_scheme IS NULL AND redirect_hostname IS NULL AND redirect_path_prefix IS NULL AND redirect_status_code IS NULL)
+        OR (action_type = 'REDIRECT' AND redirect_status_code IS NOT NULL)
+    )
+);
+
+CREATE UNIQUE INDEX uk_web_site_binding_active_route
+    ON web_site_binding (domain_id, environment, path_prefix)
+    WHERE status IN ('PENDING', 'ACTIVE', 'PAUSED') AND deleted_at IS NULL;
+
+CREATE UNIQUE INDEX uk_web_site_binding_primary
+    ON web_site_binding (site_id, environment)
+    WHERE is_primary = true AND status = 'ACTIVE' AND deleted_at IS NULL;
+
+CREATE INDEX idx_web_site_binding_site_status
+    ON web_site_binding (tenant_id, site_id, environment, status, updated_at DESC, id DESC)
+    WHERE deleted_at IS NULL;
+
+CREATE INDEX idx_web_site_binding_domain_status
+    ON web_site_binding (tenant_id, domain_id, environment, status, updated_at DESC, id DESC)
+    WHERE deleted_at IS NULL;
+
+CREATE TABLE web_tls_policy (
+    id                  BIGINT       NOT NULL,
+    uuid                VARCHAR(64)  NOT NULL,
+    tenant_id           BIGINT       NOT NULL,
+    site_binding_id     BIGINT       NOT NULL,
+    certificate_source  VARCHAR(16)  NOT NULL DEFAULT 'MANAGED',
+    challenge_method    VARCHAR(16)  NOT NULL DEFAULT 'AUTO',
+    minimum_tls_version VARCHAR(8)   NOT NULL DEFAULT 'TLS1.2',
+    maximum_tls_version VARCHAR(8)   NOT NULL DEFAULT 'TLS1.3',
+    alpn_json           JSONB        NOT NULL DEFAULT '["h2","http/1.1"]',
+    auto_renew          BOOLEAN      NOT NULL DEFAULT true,
+    renew_before_days   INTEGER      NOT NULL DEFAULT 30,
+    status              VARCHAR(16)  NOT NULL DEFAULT 'ACTIVE',
+    created_at          TIMESTAMPTZ  NOT NULL,
+    updated_at          TIMESTAMPTZ  NOT NULL,
+    version             BIGINT       NOT NULL DEFAULT 0,
+    deleted_at          TIMESTAMPTZ,
+    PRIMARY KEY (id),
+    CONSTRAINT uk_web_tls_policy_uuid UNIQUE (uuid),
+    CONSTRAINT fk_web_tls_policy_binding FOREIGN KEY (tenant_id, site_binding_id)
+        REFERENCES web_site_binding(tenant_id, id),
+    CONSTRAINT chk_web_tls_policy_source CHECK (certificate_source IN ('MANAGED', 'CUSTOM', 'EXTERNAL')),
+    CONSTRAINT chk_web_tls_policy_challenge CHECK (challenge_method IN ('AUTO', 'HTTP_01', 'DNS_01')),
+    CONSTRAINT chk_web_tls_policy_versions CHECK (
+        minimum_tls_version IN ('TLS1.2', 'TLS1.3')
+        AND maximum_tls_version IN ('TLS1.2', 'TLS1.3')
+        AND minimum_tls_version <= maximum_tls_version
+    ),
+    CONSTRAINT chk_web_tls_policy_renewal CHECK (renew_before_days BETWEEN 14 AND 90),
+    CONSTRAINT chk_web_tls_policy_status CHECK (status IN ('ACTIVE', 'PAUSED', 'ARCHIVED'))
+);
+
+CREATE UNIQUE INDEX uk_web_tls_policy_active_binding
+    ON web_tls_policy (site_binding_id)
+    WHERE status = 'ACTIVE' AND deleted_at IS NULL;
 
 -- source: migrations/003_create_web_nginx_config.sql
 -- Migration: 003_create_web_nginx_config
@@ -187,57 +324,197 @@ CREATE INDEX idx_web_nginx_config_site_active
 CREATE INDEX idx_web_nginx_config_type_status
     ON web_nginx_config (config_type, status);
 
--- source: migrations/004_create_web_certificate.sql
--- Migration: 004_create_web_certificate
--- Description: SSL certificate registry table
--- Author: SDKWork Web Server
--- Date: 2026-06-14
-
 CREATE TABLE web_certificate (
-    id              BIGINT       NOT NULL,
-    uuid            VARCHAR(64)  NOT NULL,
-    tenant_id       BIGINT       NOT NULL DEFAULT 0,
-    domain_id       BIGINT,
-    site_id         BIGINT,
-    cert_name       VARCHAR(200) NOT NULL,
-    cert_type       INTEGER      NOT NULL DEFAULT 1,
-    issuer          VARCHAR(200),
-    subject         VARCHAR(500),
-    san_list        TEXT,
-    fingerprint     VARCHAR(128),
-    cert_path       VARCHAR(500),
-    key_path        VARCHAR(500),
-    chain_path      VARCHAR(500),
-    not_before      TIMESTAMPTZ,
-    not_after       TIMESTAMPTZ,
-    auto_renew      BOOLEAN      NOT NULL DEFAULT true,
-    renewal_status  INTEGER      NOT NULL DEFAULT 0,
-    status          INTEGER      NOT NULL DEFAULT 0,
-    metadata        JSONB        NOT NULL DEFAULT '{}',
-    created_at      TIMESTAMPTZ  NOT NULL,
-    updated_at      TIMESTAMPTZ  NOT NULL,
-    version         BIGINT       NOT NULL DEFAULT 0,
+    id                      BIGINT       NOT NULL,
+    uuid                    VARCHAR(64)  NOT NULL,
+    tenant_id               BIGINT       NOT NULL,
+    organization_id         BIGINT       NOT NULL DEFAULT 0,
+    user_id                 BIGINT,
+    cert_name               VARCHAR(200) NOT NULL,
+    cert_type               INTEGER      NOT NULL DEFAULT 1,
+    ca_profile              VARCHAR(32)  NOT NULL DEFAULT 'LETS_ENCRYPT_PRODUCTION',
+    preferred_key_algorithm VARCHAR(16)  NOT NULL DEFAULT 'ECDSA',
+    auto_renew              BOOLEAN      NOT NULL DEFAULT true,
+    renewal_status          INTEGER      NOT NULL DEFAULT 0,
+    status                  INTEGER      NOT NULL DEFAULT 0,
+    current_version_id      BIGINT,
+    metadata                JSONB        NOT NULL DEFAULT '{}',
+    created_at              TIMESTAMPTZ  NOT NULL,
+    updated_at              TIMESTAMPTZ  NOT NULL,
+    version                 BIGINT       NOT NULL DEFAULT 0,
+    deleted_at              TIMESTAMPTZ,
     PRIMARY KEY (id),
-    CONSTRAINT uk_web_certificate_uuid UNIQUE (uuid)
+    CONSTRAINT uk_web_certificate_uuid UNIQUE (uuid),
+    CONSTRAINT uk_web_certificate_tenant_id UNIQUE (tenant_id, id),
+    CONSTRAINT chk_web_certificate_type CHECK (cert_type IN (1, 2, 3)),
+    CONSTRAINT chk_web_certificate_ca_profile CHECK (ca_profile IN ('LETS_ENCRYPT_STAGING', 'LETS_ENCRYPT_PRODUCTION', 'CUSTOM', 'SELF_SIGNED')),
+    CONSTRAINT chk_web_certificate_key_algorithm CHECK (preferred_key_algorithm IN ('RSA', 'ECDSA')),
+    CONSTRAINT chk_web_certificate_renewal_status CHECK (renewal_status BETWEEN 0 AND 3),
+    CONSTRAINT chk_web_certificate_status CHECK (status BETWEEN 0 AND 4)
 );
 
-COMMENT ON TABLE web_certificate IS 'SSL certificate registry';
+COMMENT ON TABLE web_certificate IS 'TLS certificate lifecycle aggregate without private material';
 COMMENT ON COLUMN web_certificate.cert_type IS 'Cert type: 1=Lets Encrypt, 2=custom, 3=self-signed';
-COMMENT ON COLUMN web_certificate.san_list IS 'Subject Alternative Names list';
 COMMENT ON COLUMN web_certificate.auto_renew IS 'Whether auto-renewal is enabled';
 COMMENT ON COLUMN web_certificate.renewal_status IS 'Renewal status: 0=idle, 1=renewing, 2=pending, 3=failed';
-COMMENT ON COLUMN web_certificate.status IS 'Status: 0=pending, 1=active, 2=expired, 3=revoked, 4=archived';
-
-CREATE INDEX idx_web_certificate_domain
-    ON web_certificate (domain_id);
-
-CREATE INDEX idx_web_certificate_expiry
-    ON web_certificate (not_after)
-    WHERE status = 1;
+COMMENT ON COLUMN web_certificate.status IS 'Asset status: 0=pending, 1=issued, 2=expired, 3=revoked, 4=archived';
 
 CREATE INDEX idx_web_certificate_renewal
-    ON web_certificate (renewal_status, not_after)
-    WHERE auto_renew = true AND status = 1;
+    ON web_certificate (tenant_id, renewal_status, updated_at, id)
+    WHERE auto_renew = true AND status IN (1, 2) AND deleted_at IS NULL;
+
+CREATE INDEX idx_web_certificate_tenant_updated
+    ON web_certificate (tenant_id, updated_at DESC, id DESC)
+    WHERE deleted_at IS NULL;
+
+CREATE INDEX idx_web_certificate_user_updated
+    ON web_certificate (tenant_id, user_id, updated_at DESC, id DESC)
+    WHERE user_id IS NOT NULL AND deleted_at IS NULL;
+
+CREATE TABLE web_certificate_identifier (
+    id              BIGINT       NOT NULL,
+    uuid            VARCHAR(64)  NOT NULL,
+    tenant_id       BIGINT       NOT NULL,
+    certificate_id  BIGINT       NOT NULL,
+    domain_id       BIGINT       NOT NULL,
+    identifier_type VARCHAR(16)  NOT NULL,
+    hostname        VARCHAR(253) NOT NULL,
+    position        INTEGER      NOT NULL,
+    created_at      TIMESTAMPTZ  NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT uk_web_certificate_identifier_uuid UNIQUE (uuid),
+    CONSTRAINT uk_web_certificate_identifier_name UNIQUE (certificate_id, hostname),
+    CONSTRAINT uk_web_certificate_identifier_position UNIQUE (certificate_id, position),
+    CONSTRAINT fk_web_certificate_identifier_certificate FOREIGN KEY (tenant_id, certificate_id)
+        REFERENCES web_certificate(tenant_id, id),
+    CONSTRAINT fk_web_certificate_identifier_domain FOREIGN KEY (tenant_id, domain_id)
+        REFERENCES web_domain(tenant_id, id),
+    CONSTRAINT chk_web_certificate_identifier_type CHECK (identifier_type IN ('EXACT', 'WILDCARD')),
+    CONSTRAINT chk_web_certificate_identifier_position CHECK (position BETWEEN 0 AND 7)
+);
+
+CREATE INDEX idx_web_certificate_identifier_domain
+    ON web_certificate_identifier (tenant_id, domain_id, certificate_id);
+
+CREATE TABLE web_certificate_version (
+    id                 BIGINT        NOT NULL,
+    uuid               VARCHAR(64)   NOT NULL,
+    tenant_id          BIGINT        NOT NULL,
+    certificate_id     BIGINT        NOT NULL,
+    version_no         BIGINT        NOT NULL,
+    serial_sha256      VARCHAR(64)   NOT NULL,
+    fingerprint_sha256 VARCHAR(64)   NOT NULL,
+    spki_sha256        VARCHAR(64)   NOT NULL,
+    chain_sha256       VARCHAR(64)   NOT NULL,
+    issuer             VARCHAR(500)  NOT NULL,
+    subject            VARCHAR(500)  NOT NULL,
+    key_algorithm      VARCHAR(16)   NOT NULL,
+    not_before         TIMESTAMPTZ   NOT NULL,
+    not_after          TIMESTAMPTZ   NOT NULL,
+    secret_bundle_ref  VARCHAR(64)   NOT NULL,
+    status             VARCHAR(16)   NOT NULL DEFAULT 'ACTIVE',
+    created_at         TIMESTAMPTZ   NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT uk_web_certificate_version_uuid UNIQUE (uuid),
+    CONSTRAINT uk_web_certificate_version_id UNIQUE (certificate_id, id),
+    CONSTRAINT uk_web_certificate_version_tenant_id UNIQUE (tenant_id, id),
+    CONSTRAINT uk_web_certificate_version_no UNIQUE (certificate_id, version_no),
+    CONSTRAINT uk_web_certificate_version_fingerprint UNIQUE (tenant_id, fingerprint_sha256),
+    CONSTRAINT fk_web_certificate_version_certificate FOREIGN KEY (tenant_id, certificate_id)
+        REFERENCES web_certificate(tenant_id, id),
+    CONSTRAINT chk_web_certificate_version_key_algorithm CHECK (key_algorithm IN ('RSA', 'ECDSA')),
+    CONSTRAINT chk_web_certificate_version_status CHECK (status IN ('ACTIVE', 'SUPERSEDED', 'REVOKED', 'EXPIRED')),
+    CONSTRAINT chk_web_certificate_version_validity CHECK (not_after > not_before),
+    CONSTRAINT chk_web_certificate_version_hashes CHECK (
+        serial_sha256 ~ '^[0-9a-f]{64}$'
+        AND fingerprint_sha256 ~ '^[0-9a-f]{64}$'
+        AND spki_sha256 ~ '^[0-9a-f]{64}$'
+        AND chain_sha256 ~ '^[0-9a-f]{64}$'
+    ),
+    CONSTRAINT chk_web_certificate_version_secret_ref CHECK (
+        secret_bundle_ref ~ '^secret:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+    )
+);
+
+CREATE INDEX idx_web_certificate_version_lifecycle
+    ON web_certificate_version (tenant_id, status, not_after, id);
+
+CREATE TABLE web_certificate_secret_bundle (
+    id                     BIGINT       NOT NULL,
+    uuid                   VARCHAR(64)  NOT NULL,
+    tenant_id              BIGINT       NOT NULL,
+    certificate_version_id BIGINT       NOT NULL,
+    encryption_algorithm   VARCHAR(32)  NOT NULL,
+    bundle_encrypted       TEXT         NOT NULL,
+    created_at             TIMESTAMPTZ  NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT uk_web_certificate_secret_bundle_uuid UNIQUE (uuid),
+    CONSTRAINT uk_web_certificate_secret_bundle_version UNIQUE (tenant_id, certificate_version_id),
+    CONSTRAINT fk_web_certificate_secret_bundle_version FOREIGN KEY (tenant_id, certificate_version_id)
+        REFERENCES web_certificate_version(tenant_id, id) ON DELETE CASCADE,
+    CONSTRAINT chk_web_certificate_secret_bundle_algorithm CHECK (
+        encryption_algorithm = 'AES_256_GCM_V1'
+    ),
+    CONSTRAINT chk_web_certificate_secret_bundle_payload CHECK (
+        OCTET_LENGTH(bundle_encrypted) BETWEEN 64 AND 2097152
+    )
+);
+
+ALTER TABLE web_certificate
+    ADD CONSTRAINT fk_web_certificate_current_version
+        FOREIGN KEY (id, current_version_id) REFERENCES web_certificate_version(certificate_id, id);
+
+CREATE TABLE web_listener_certificate_binding (
+    id                     BIGINT      NOT NULL,
+    uuid                   VARCHAR(64) NOT NULL,
+    tenant_id              BIGINT      NOT NULL,
+    site_binding_id        BIGINT      NOT NULL,
+    certificate_id         BIGINT      NOT NULL,
+    desired_version_id     BIGINT      NOT NULL,
+    current_version_id     BIGINT,
+    key_algorithm          VARCHAR(16) NOT NULL,
+    priority               INTEGER     NOT NULL DEFAULT 100,
+    is_default             BOOLEAN     NOT NULL DEFAULT false,
+    status                 VARCHAR(16) NOT NULL DEFAULT 'PENDING',
+    activated_at           TIMESTAMPTZ,
+    created_at             TIMESTAMPTZ NOT NULL,
+    updated_at             TIMESTAMPTZ NOT NULL,
+    version                BIGINT      NOT NULL DEFAULT 0,
+    deleted_at             TIMESTAMPTZ,
+    PRIMARY KEY (id),
+    CONSTRAINT uk_web_listener_certificate_binding_uuid UNIQUE (uuid),
+    CONSTRAINT uk_web_listener_certificate_binding_certificate UNIQUE (site_binding_id, certificate_id),
+    CONSTRAINT fk_web_listener_certificate_binding_route FOREIGN KEY (tenant_id, site_binding_id)
+        REFERENCES web_site_binding(tenant_id, id),
+    CONSTRAINT fk_web_listener_certificate_binding_certificate FOREIGN KEY (tenant_id, certificate_id)
+        REFERENCES web_certificate(tenant_id, id),
+    CONSTRAINT fk_web_listener_certificate_binding_desired_version FOREIGN KEY (certificate_id, desired_version_id)
+        REFERENCES web_certificate_version(certificate_id, id),
+    CONSTRAINT fk_web_listener_certificate_binding_current_version FOREIGN KEY (certificate_id, current_version_id)
+        REFERENCES web_certificate_version(certificate_id, id),
+    CONSTRAINT chk_web_listener_certificate_binding_algorithm CHECK (key_algorithm IN ('RSA', 'ECDSA')),
+    CONSTRAINT chk_web_listener_certificate_binding_priority CHECK (priority BETWEEN 0 AND 10000),
+    CONSTRAINT chk_web_listener_certificate_binding_status CHECK (status IN ('PENDING', 'DEPLOYING', 'ACTIVE', 'PAUSED', 'FAILED', 'ARCHIVED')),
+    CONSTRAINT chk_web_listener_certificate_binding_active_version CHECK (
+        status <> 'ACTIVE'
+        OR (
+            current_version_id = desired_version_id
+            AND activated_at IS NOT NULL
+        )
+    )
+);
+
+CREATE UNIQUE INDEX uk_web_listener_certificate_binding_active_algorithm
+    ON web_listener_certificate_binding (site_binding_id, key_algorithm)
+    WHERE status <> 'ARCHIVED' AND deleted_at IS NULL;
+
+CREATE UNIQUE INDEX uk_web_listener_certificate_binding_default
+    ON web_listener_certificate_binding (site_binding_id)
+    WHERE is_default = true AND status <> 'ARCHIVED' AND deleted_at IS NULL;
+
+CREATE INDEX idx_web_listener_certificate_binding_certificate
+    ON web_listener_certificate_binding (tenant_id, certificate_id, status)
+    WHERE deleted_at IS NULL;
 
 CREATE TABLE web_source_version (
     id              BIGINT       NOT NULL,
@@ -518,6 +795,51 @@ COMMENT ON COLUMN web_server.status IS 'Status: 0=offline, 1=online, 2=deploying
 
 CREATE INDEX idx_web_server_tenant_status
     ON web_server (tenant_id, status, updated_at DESC);
+
+CREATE TABLE web_certificate_node_state (
+    id                     BIGINT       NOT NULL,
+    uuid                   VARCHAR(64)  NOT NULL,
+    tenant_id              BIGINT       NOT NULL,
+    server_id              BIGINT       NOT NULL,
+    certificate_id         BIGINT       NOT NULL,
+    certificate_version_id BIGINT       NOT NULL,
+    state                  VARCHAR(16)  NOT NULL,
+    fingerprint_sha256     VARCHAR(64)  NOT NULL,
+    sync_version           VARCHAR(80)  NOT NULL,
+    failure_code           VARCHAR(64),
+    observed_at            TIMESTAMPTZ  NOT NULL,
+    created_at             TIMESTAMPTZ  NOT NULL,
+    updated_at             TIMESTAMPTZ  NOT NULL,
+    version                BIGINT       NOT NULL DEFAULT 0,
+    PRIMARY KEY (id),
+    CONSTRAINT uk_web_certificate_node_state_uuid UNIQUE (uuid),
+    CONSTRAINT uk_web_certificate_node_state_version
+        UNIQUE (tenant_id, server_id, certificate_version_id),
+    CONSTRAINT fk_web_certificate_node_state_server FOREIGN KEY (tenant_id, server_id)
+        REFERENCES web_server(tenant_id, id),
+    CONSTRAINT fk_web_certificate_node_state_certificate FOREIGN KEY (tenant_id, certificate_id)
+        REFERENCES web_certificate(tenant_id, id),
+    CONSTRAINT fk_web_certificate_node_state_version FOREIGN KEY (certificate_id, certificate_version_id)
+        REFERENCES web_certificate_version(certificate_id, id),
+    CONSTRAINT chk_web_certificate_node_state_phase CHECK (
+        state IN ('STAGED', 'ACTIVE', 'SERVED', 'FAILED')
+    ),
+    CONSTRAINT chk_web_certificate_node_state_fingerprint CHECK (
+        fingerprint_sha256 ~ '^[0-9a-f]{64}$'
+    ),
+    CONSTRAINT chk_web_certificate_node_state_sync_version CHECK (
+        sync_version ~ '^sv1:[0-9a-f]{64}$'
+    ),
+    CONSTRAINT chk_web_certificate_node_state_failure_code CHECK (
+        failure_code IS NULL OR failure_code ~ '^[A-Z0-9][A-Z0-9_.-]{0,63}$'
+    )
+);
+
+CREATE INDEX idx_web_certificate_node_state_version
+    ON web_certificate_node_state (tenant_id, certificate_version_id, state, server_id);
+
+CREATE INDEX idx_web_certificate_node_state_server
+    ON web_certificate_node_state (tenant_id, server_id, state, observed_at DESC);
 
 CREATE TABLE web_runtime_assignment (
     id                  BIGINT        NOT NULL,

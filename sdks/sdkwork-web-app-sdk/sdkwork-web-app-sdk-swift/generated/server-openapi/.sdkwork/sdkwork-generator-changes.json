@@ -9,11 +9,10 @@
     "protocol": "http",
     "packageName": "sdkwork-web-app-sdk"
   },
-  "changeFingerprint": "a88b9ef5be313a8faf151f569d71b62bd8c9f80887f6e2a3fcf8f86933201edc",
+  "changeFingerprint": "48c0244f1994e93ff8e8772b8597fdb8c0d1ffa2b24201c8e84d7eedc9922373",
   "changes": {
     "createdGeneratedFiles": [],
     "updatedGeneratedFiles": [
-      "Sources/API/SourceVersionApi.swift",
       "Sources/Models.swift"
     ],
     "unchangedGeneratedFiles": [
@@ -33,6 +32,7 @@
       "Sources/API/EnvVariableApi.swift",
       "Sources/API/MonitorApi.swift",
       "Sources/API/SiteApi.swift",
+      "Sources/API/SourceVersionApi.swift",
       "Sources/HTTP/HttpClient.swift",
       "Sources/SdkworkAppClient.swift"
     ],
@@ -46,16 +46,9 @@
   "impact": {
     "schemaVersion": 1,
     "areas": [
-      "api-surface",
       "models"
     ],
     "details": [
-      {
-        "area": "api-surface",
-        "paths": [
-          "Sources/API/SourceVersionApi.swift"
-        ]
-      },
       {
         "area": "models",
         "paths": [
@@ -64,18 +57,18 @@
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, models. Verification is required."
+    "summary": "Detected impact areas: models. Verification is required."
   },
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-swift\\generated\\server-openapi",
         "command": "node",
         "args": [

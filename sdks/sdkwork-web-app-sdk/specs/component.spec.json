@@ -21,6 +21,19 @@
     "php",
     "ruby"
   ],
+  "sdk": {
+    "family": "sdkwork-web-app-sdk",
+    "authority": "sdkwork-web.app",
+    "sdkOwner": "sdkwork-web",
+    "generationInputSpec": "openapi/sdkwork-web-app-api.sdkgen.yaml",
+    "apiPrefix": "/app/v3/api",
+    "packageName": "@sdkwork/web-app-sdk",
+    "sdkName": "sdkwork-web-app-sdk",
+    "sdkType": "app",
+    "sdkSurface": "app",
+    "standardProfile": "sdkwork-v3",
+    "ownerOnlyOperationCount": 29
+  },
   "generator": {
     "package": "@sdkwork/sdk-generator",
     "entrypoint": "../sdkwork-sdk-generator/bin/sdkgen.js",

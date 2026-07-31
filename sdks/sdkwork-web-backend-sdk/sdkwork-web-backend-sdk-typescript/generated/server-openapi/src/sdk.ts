@@ -4,10 +4,10 @@ import type { AuthTokenManager } from '@sdkwork/sdk-common';
 
 import { ApplicationApi, createApplicationApi } from './api/application';
 import { ApplicationDomainApi, createApplicationDomainApi } from './api/application-domain';
+import { CertificateApi, createCertificateApi } from './api/certificate';
 import { DomainApi, createDomainApi } from './api/domain';
 import { ApplicationSourceVersionApi, createApplicationSourceVersionApi } from './api/application-source-version';
 import { ApplicationDeploymentApi, createApplicationDeploymentApi } from './api/application-deployment';
-import { CertificateApi, createCertificateApi } from './api/certificate';
 import { CertificateDistributionApi, createCertificateDistributionApi } from './api/certificate-distribution';
 import { NginxApi, createNginxApi } from './api/nginx';
 import { ServerApi, createServerApi } from './api/server';
@@ -19,10 +19,10 @@ export class SdkworkBackendClient {
 
   public readonly application: ApplicationApi;
   public readonly applicationDomain: ApplicationDomainApi;
+  public readonly certificate: CertificateApi;
   public readonly domain: DomainApi;
   public readonly applicationSourceVersion: ApplicationSourceVersionApi;
   public readonly applicationDeployment: ApplicationDeploymentApi;
-  public readonly certificate: CertificateApi;
   public readonly certificateDistribution: CertificateDistributionApi;
   public readonly nginx: NginxApi;
   public readonly server: ServerApi;
@@ -35,13 +35,13 @@ export class SdkworkBackendClient {
 
     this.applicationDomain = createApplicationDomainApi(this.httpClient);
 
+    this.certificate = createCertificateApi(this.httpClient);
+
     this.domain = createDomainApi(this.httpClient);
 
     this.applicationSourceVersion = createApplicationSourceVersionApi(this.httpClient);
 
     this.applicationDeployment = createApplicationDeploymentApi(this.httpClient);
-
-    this.certificate = createCertificateApi(this.httpClient);
 
     this.certificateDistribution = createCertificateDistributionApi(this.httpClient);
 

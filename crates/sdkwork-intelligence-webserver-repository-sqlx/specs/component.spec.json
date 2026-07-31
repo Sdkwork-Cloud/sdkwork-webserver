@@ -52,7 +52,6 @@
   "verification": {
     "commands": [
       "cargo test -p sdkwork-intelligence-webserver-repository-sqlx",
-      "cargo test -p sdkwork-intelligence-webserver-repository-sqlx --test repository_parity sqlite_repository",
       "cargo test -p sdkwork-intelligence-webserver-repository-sqlx --test repository_parity postgres_repository -- --ignored",
       "node ../sdkwork-specs/tools/check-pagination.mjs --workspace ."
     ]

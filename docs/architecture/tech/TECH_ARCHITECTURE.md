@@ -2,7 +2,7 @@
 
 Status: active
 Owner: SDKWork maintainers
-Updated: 2026-07-22
+Updated: 2026-07-31
 Specs: ARCHITECTURE_DECISION_SPEC.md, DOCUMENTATION_SPEC.md, RUST_CODE_SPEC.md, WEB_FRAMEWORK_SPEC.md, WEB_BACKEND_SPEC.md, DATABASE_FRAMEWORK_SPEC.md, CONFIG_SPEC.md, SECURITY_SPEC.md, DEPLOYMENT_SPEC.md, NGINX_SPEC.md
 
 ## Document Map
@@ -94,7 +94,7 @@ and production monitoring evidence.
 | Static content | Compiled route/static-file service | Implemented bounded baseline |
 | Reverse proxy transport | Hyper/Rustls with streamed bodies and bounded retries | Implemented bounded baseline |
 | App Web Server config | JSON Schema authority + Serde + semantic compiler | Implemented |
-| Database | `sdkwork-database` + SQLx; PostgreSQL default, explicit single-node SQLite profile | Implemented; parity, recovery, and bounded primary/standby promotion verified; managed HA, client failover, fencing, and PITR remain open |
+| Database | `sdkwork-database` + SQLx; PostgreSQL authoritative-server profile only | Implemented baseline; managed HA, client failover, fencing, PITR, and production query-plan evidence remain open |
 | IAM | `sdkwork-iam-web-adapter` for protected management surfaces | Implemented |
 | Certificates | `instant-acme`, `rcgen`, encrypted persistence, Rustls activation | Implemented bounded baseline |
 
@@ -147,7 +147,8 @@ The request path does not call management services or repositories. Management r
 - SDK families are `sdkwork-web-app-sdk`, `sdkwork-web-backend-sdk`, and the machine-to-machine
   `sdkwork-web-internal-sdk` used for runtime assignment publication, retrieval, and observations.
 - Request data-plane traffic preserves the configured upstream or static Web protocol; it does not wrap arbitrary application responses in SDKWork management envelopes.
-- PostgreSQL is cloud/default server authority. SQLite is limited to explicitly selected single-node standalone behavior.
+- PostgreSQL is the only authoritative server database and lifecycle, recovery, and
+  release-verification profile.
 - List/search repositories and SDKs remain subject to store-level SDKWork pagination.
 - The PC Console owns tenant workflows for sites, configuration, domains, certificates, and
   deployments. The backend-admin surface owns WEB/API application deployment, public domains,
@@ -166,6 +167,29 @@ The request path does not call management services or repositories. Management r
   and activation enforce the icon invariant server-side, and activation also checks durable
   successful-deployment evidence.
 
+The domain, certificate, and deployment relationship is normalized:
+
+```text
+web_root_domain 1 -> N web_domain
+web_site 1 -> N web_site_binding N -> 1 web_domain
+web_certificate N <-> N web_domain through web_certificate_identifier
+web_certificate 1 -> N web_certificate_version
+web_site_binding 1 -> N web_listener_certificate_binding
+web_site 1 -> N web_deployment
+```
+
+Backend certificate listing and issuance use verified domain identifiers and remain available
+before `web_site_binding` exists. Application identity enters only at
+`web_listener_certificate_binding`, where hostname coverage, usable version, key algorithm, and
+listener conflicts are checked before activation intent is accepted.
+
+`sdkwork-web` owns the mutable Zone, hostname, verification, route, certificate, listener, and Web
+deployment intent. `sdkwork-deploy` is being aligned to immutable rollout, distribution, snapshot,
+and observation evidence that references Web public ids and versions. `sdkwork-iam` owns identity,
+application registration, and authorization; it must not own primary-domain or domain-configuration
+state. The cross-repository boundary remains proposed pending human review in
+`ADR-20260731-web-deploy-domain-certificate-authority`.
+
 ## 6. Security, Privacy, And Resource Boundaries
 
 - Protected management surfaces use SDKWork IAM and typed request context.
@@ -177,8 +201,8 @@ The request path does not call management services or repositories. Management r
 
 ## 7. Deployment And Runtime Topology
 
-- `standalone`: one packaged gateway runs the composed management and data plane; server-grade
-  deployments default to PostgreSQL, with an explicit SQLite single-node development exception.
+- `standalone`: one packaged gateway runs the composed management and data plane and uses
+  PostgreSQL for authoritative control-plane persistence.
   IAM and Drive browser dependency APIs are dependency-owned Rust assembly contributions linked
   into this gateway and use `application.public-ingress`; no dependency gateway or port 3900 is
   required. Development keeps Vite only as the browser-visible origin and proxies canonical API
@@ -200,7 +224,8 @@ The request path does not call management services or repositories. Management r
 
 ## 8. Architecture Decision Index
 
-- [ADR-20260730 Detached Domain Assets And Certificate Bindings](../decisions/ADR-20260730-detached-domain-assets-and-certificate-bindings.md) - accepted tenant-owned domain assets, optional application binding, canonical one-to-many certificates, and fail-closed deployment activation.
+- [ADR-20260731 Web And Deploy Domain-Certificate Authority Boundary](../decisions/ADR-20260731-web-deploy-domain-certificate-authority.md) - proposed single mutable Web authority with immutable Deploy rollout evidence and no IAM domain configuration.
+- [ADR-20260730 Domain, Certificate, And Listener Bindings](../decisions/ADR-20260730-detached-domain-assets-and-certificate-bindings.md) - accepted normalized site routes, multi-SAN certificate identifiers, immutable versions, and listener bindings.
 - [ADR-20260730 Root Domain Zones And Hostname Deployments](../decisions/ADR-20260730-root-domain-zones-and-hostname-deployments.md) - accepted explicit root-domain Zones, store-paginated hostname children, and derived application deployment visibility.
 - [ADR-20260730 Drive-Backed Application Source Versions](../decisions/ADR-20260730-drive-backed-application-source-versions.md) - accepted immutable Drive source catalog, five-version default retention, and release provenance through `sourceVersionId`.
 - [ADR-20260728 Idempotency Contract Closure](../decisions/ADR-20260728-idempotency-contract-closure.md) - accepted strict marker/Header/route/SDK parity, stable action keys, bounded runtime validation, and Header-owned durable deduplication.
@@ -210,7 +235,8 @@ The request path does not call management services or repositories. Management r
 
 | ADR | Topic | Status |
 | --- | --- | --- |
-| ADR-20260730-detached-domain-assets-and-certificate-bindings | Detached tenant domains and one-to-many certificate bindings | accepted |
+| ADR-20260731-web-deploy-domain-certificate-authority | Web mutable authority and Deploy immutable rollout evidence | proposed; human review required |
+| ADR-20260730-detached-domain-assets-and-certificate-bindings | Domain, certificate identifier/version, and listener binding relationships | accepted |
 | ADR-20260730-drive-backed-application-source-versions | Immutable Drive source versions and release provenance | accepted |
 | ADR-20260728-idempotency-contract-closure | Generated replay-safe API/SDK idempotency contract | accepted |
 | ADR-20260716-canonical-uri-dual-representation | Raw request URI preservation and bounded canonical routing Path | proposed; human review required |

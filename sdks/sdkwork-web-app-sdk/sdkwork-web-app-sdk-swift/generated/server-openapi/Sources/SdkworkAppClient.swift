@@ -5,20 +5,20 @@ public class SdkworkAppClient {
     private let httpClient: HttpClient
     public let site: SiteApi
     public let domain: DomainApi
+    public let certificate: CertificateApi
     public let sourceVersion: SourceVersionApi
     public let deployment: DeploymentApi
     public let envVariable: EnvVariableApi
-    public let certificate: CertificateApi
     public let monitor: MonitorApi
 
     public init(baseURL: String) {
         self.httpClient = HttpClient(baseURL: baseURL)
         self.site = SiteApi(client: httpClient)
         self.domain = DomainApi(client: httpClient)
+        self.certificate = CertificateApi(client: httpClient)
         self.sourceVersion = SourceVersionApi(client: httpClient)
         self.deployment = DeploymentApi(client: httpClient)
         self.envVariable = EnvVariableApi(client: httpClient)
-        self.certificate = CertificateApi(client: httpClient)
         self.monitor = MonitorApi(client: httpClient)
     }
 
@@ -26,10 +26,10 @@ public class SdkworkAppClient {
         self.httpClient = HttpClient(config: config)
         self.site = SiteApi(client: httpClient)
         self.domain = DomainApi(client: httpClient)
+        self.certificate = CertificateApi(client: httpClient)
         self.sourceVersion = SourceVersionApi(client: httpClient)
         self.deployment = DeploymentApi(client: httpClient)
         self.envVariable = EnvVariableApi(client: httpClient)
-        self.certificate = CertificateApi(client: httpClient)
         self.monitor = MonitorApi(client: httpClient)
     }
     public func setAuthToken(_ token: String) -> SdkworkAppClient {

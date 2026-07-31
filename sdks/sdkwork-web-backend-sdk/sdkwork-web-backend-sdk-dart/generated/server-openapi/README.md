@@ -45,10 +45,10 @@ client.setHeader('X-Custom-Header', 'value');
 
 - `client.application` - application API
 - `client.applicationDomain` - application_domain API
+- `client.certificate` - certificate API
 - `client.domain` - domain API
 - `client.applicationSourceVersion` - application_source_version API
 - `client.applicationDeployment` - application_deployment API
-- `client.certificate` - certificate API
 - `client.certificateDistribution` - certificate_distribution API
 - `client.nginx` - nginx API
 - `client.server` - server API
@@ -83,6 +83,19 @@ final params = <String, dynamic>{
   'page_size': 2,
 };
 final result = await client.applicationDomain.applicationsDomainsList(applicationId, params);
+print(result);
+```
+
+### certificate
+
+```dart
+// List canonical certificates
+final params = <String, dynamic>{
+  'page': 1,
+  'page_size': 2,
+  'domainId': '00000000-0000-0000-0000-000000000001',
+};
+final result = await client.certificate.certificatesList(params);
 print(result);
 ```
 
@@ -122,18 +135,6 @@ final params = <String, dynamic>{
   'status': 3,
 };
 final result = await client.applicationDeployment.applicationsDeploymentsList(applicationId, params);
-print(result);
-```
-
-### certificate
-
-```dart
-// List canonical certificates
-final params = <String, dynamic>{
-  'page': 1,
-  'page_size': 2,
-};
-final result = await client.certificate.certificatesList(params);
 print(result);
 ```
 

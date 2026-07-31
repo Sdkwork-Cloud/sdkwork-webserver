@@ -15,7 +15,7 @@ goals:
   - Prove each PostgreSQL suite starts from an empty schema and cannot silently skip.
 non_goals:
   - Replacing developer-owned PostgreSQL profiles or changing production database configuration.
-  - Adding a schema migration or changing SQLite/PostgreSQL application semantics.
+  - Adding a schema migration or changing PostgreSQL application semantics.
   - PostgreSQL HA/failover, backup/restore, or multi-region evidence.
 users:
   - maintainers reviewing merge readiness
@@ -82,7 +82,7 @@ Passing this requirement proves PostgreSQL 16.9 lifecycle and Repository behavio
 
 ## Verification Evidence
 
-- `pnpm test:postgres:required` passes against the pinned PostgreSQL image: lifecycle/seed/drift passes 1/1, schema reset succeeds, and full PostgreSQL Repository parity passes 1/1 with one unrelated SQLite test filtered out.
+- `pnpm test:postgres:required` passes against the pinned PostgreSQL image: lifecycle/seed/drift and full PostgreSQL repository parity each execute and pass after a fail-closed schema reset.
 - `node --test tests/contract/postgres-ci.contract.test.mjs` passes 2/2.
 - `sdkwork-workflow.mjs validate --config sdkwork.workflow.json` passes.
 - SDKWork pnpm-script and agent/workflow standard validators pass; the workflow validator confirms exactly one compliant packaging workflow.

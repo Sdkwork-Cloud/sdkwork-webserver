@@ -16,14 +16,58 @@ namespace SDKWork.Web.BackendSdk.Api
         }
 
         /// <summary>
-        /// List canonical certificates
+        /// List certificates active on an application domain listener
         /// </summary>
-        public async Task<SDKWork.Web.BackendSdk.Models.CertificatesListResponse?> CertificatesListAsync(int? page = null, int? pageSize = null)
+        public async Task<SDKWork.Web.BackendSdk.Models.ApplicationsDomainsListenerCertificateBindingsListResponse?> ApplicationsDomainsListenerCertificateBindingsListAsync(string applicationId, string domainId, int? page = null, int? pageSize = null)
         {
             var queryString = BuildQueryString(new[]
             {
                 new QueryParameterSpec("page", page, "form", true, false, null),
                 new QueryParameterSpec("page_size", pageSize, "form", true, false, null),
+            });
+            return await _client.GetAsync<SDKWork.Web.BackendSdk.Models.ApplicationsDomainsListenerCertificateBindingsListResponse>(ApiPaths.AppendQueryString(ApiPaths.BackendPath($"/applications/{SerializePathParameter(applicationId, new PathParameterSpec("applicationId", "simple", false))}/domains/{SerializePathParameter(domainId, new PathParameterSpec("domainId", "simple", false))}/listener_certificate_bindings"), queryString));
+        }
+
+        /// <summary>
+        /// Bind a certificate version to an application domain listener
+        /// </summary>
+        public async Task<SDKWork.Web.BackendSdk.Models.ApplicationsDomainsListenerCertificateBindingsCreateResponse201?> ApplicationsDomainsListenerCertificateBindingsCreateAsync(string applicationId, string domainId, SDKWork.Web.BackendSdk.Models.CreateListenerCertificateBindingRequest body, string idempotencyKey)
+        {
+            var requestHeaders = BuildRequestHeaders(
+                new Dictionary<string, HeaderParameterSpec>
+                {
+                    ["Idempotency-Key"] = new HeaderParameterSpec(idempotencyKey, "simple", false, null),
+                },
+                new Dictionary<string, HeaderParameterSpec>()
+            );
+            return await _client.PostAsync<SDKWork.Web.BackendSdk.Models.ApplicationsDomainsListenerCertificateBindingsCreateResponse201>(ApiPaths.BackendPath($"/applications/{SerializePathParameter(applicationId, new PathParameterSpec("applicationId", "simple", false))}/domains/{SerializePathParameter(domainId, new PathParameterSpec("domainId", "simple", false))}/listener_certificate_bindings"), body, null, requestHeaders, "application/json");
+        }
+
+        /// <summary>
+        /// Remove a certificate from an application domain listener
+        /// </summary>
+        public async Task ApplicationsDomainsListenerCertificateBindingsDeleteAsync(string applicationId, string domainId, string bindingId, string idempotencyKey)
+        {
+            var requestHeaders = BuildRequestHeaders(
+                new Dictionary<string, HeaderParameterSpec>
+                {
+                    ["Idempotency-Key"] = new HeaderParameterSpec(idempotencyKey, "simple", false, null),
+                },
+                new Dictionary<string, HeaderParameterSpec>()
+            );
+            await _client.DeleteAsync<object>(ApiPaths.BackendPath($"/applications/{SerializePathParameter(applicationId, new PathParameterSpec("applicationId", "simple", false))}/domains/{SerializePathParameter(domainId, new PathParameterSpec("domainId", "simple", false))}/listener_certificate_bindings/{SerializePathParameter(bindingId, new PathParameterSpec("bindingId", "simple", false))}"), null, requestHeaders);
+        }
+
+        /// <summary>
+        /// List canonical certificates
+        /// </summary>
+        public async Task<SDKWork.Web.BackendSdk.Models.CertificatesListResponse?> CertificatesListAsync(int? page = null, int? pageSize = null, string? domainId = null)
+        {
+            var queryString = BuildQueryString(new[]
+            {
+                new QueryParameterSpec("page", page, "form", true, false, null),
+                new QueryParameterSpec("page_size", pageSize, "form", true, false, null),
+                new QueryParameterSpec("domainId", domainId, "form", true, false, null),
             });
             return await _client.GetAsync<SDKWork.Web.BackendSdk.Models.CertificatesListResponse>(ApiPaths.AppendQueryString(ApiPaths.BackendPath("/certificates"), queryString));
         }

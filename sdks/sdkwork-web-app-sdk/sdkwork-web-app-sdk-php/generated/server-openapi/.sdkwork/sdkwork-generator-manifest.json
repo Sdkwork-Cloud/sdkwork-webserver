@@ -36,7 +36,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "f47fc0d7037cbaf1bf6339f3e0a42235faeb5913864e4589bc66c35dc0135721"
+      "sha256": "77bc19b61ce1a64e80fe282498c503fe8237fd5a691b982655ab11d7857aee78"
     },
     {
       "path": "sdkwork-sdk.json",
@@ -48,7 +48,7 @@
     },
     {
       "path": "src/Api/Certificate.php",
-      "sha256": "e8cc3d9e9b816d890c7cdf54aa1fb455a432e736c45d700babcffa451afd5c6b"
+      "sha256": "9bf408e4e913ad32d375bb5552091f41fe1e988a472a7dbdb70f7672f55a1006"
     },
     {
       "path": "src/Api/Deployment.php",
@@ -83,12 +83,16 @@
       "sha256": "9f7551d5b12cdd87db22e9145b6ca0585b183922b9172ac81305649861ed6889"
     },
     {
+      "path": "src/Models/CertificateIdentifierResponse.php",
+      "sha256": "b7da63765422230317d9ab8a24f43ec63354d0e0589e2d5fe8ed7c0d7790eb55"
+    },
+    {
       "path": "src/Models/CertificatePage.php",
       "sha256": "c34c5493ab2bdf7b5645ca20324cf05c9e540507ffdda209f447dce88e4a9c18"
     },
     {
       "path": "src/Models/CertificateResponse.php",
-      "sha256": "078cd6cd35bf8d6a5211b147d9544d13b17afadc966430206c10e92ba55dff34"
+      "sha256": "03dc3797bc07cc6ad523e01cb14e2e5ecc68773c3ce77403f19f93dd6815c733"
     },
     {
       "path": "src/Models/CertificatesCreateResponse201.php",
@@ -100,7 +104,7 @@
     },
     {
       "path": "src/Models/CreateCertificateRequest.php",
-      "sha256": "d08a6a2bdbb8e71668ebda590def4bfbab80a83b4a19fc8a78d9d415759b41b7"
+      "sha256": "16250d5bfedc6cecc5b58dbd37cc2e427dc4999825945a2d3e4d9950550956a3"
     },
     {
       "path": "src/Models/CreateDeploymentRequest.php",
@@ -117,6 +121,10 @@
     {
       "path": "src/Models/CreateHealthCheckRequest.php",
       "sha256": "3c2a4431adae96d5ead9f3179cb7bb79c99f433fe84b42a54e54e7cfc6f29b2f"
+    },
+    {
+      "path": "src/Models/CreateListenerCertificateBindingRequest.php",
+      "sha256": "fb3872e949c6762c1931fb47ef6de4a35d9dfce5f23071c6f1176e7b55e17238"
     },
     {
       "path": "src/Models/CreateSiteRequest.php",
@@ -169,6 +177,14 @@
     {
       "path": "src/Models/ImportGitSourceVersionRequest.php",
       "sha256": "3fe7d844d6b5f98e3b987816ab6970b4f6ebb311f549e90a8899d06d753b3da6"
+    },
+    {
+      "path": "src/Models/ListenerCertificateBindingResponse.php",
+      "sha256": "9aa45b9a4cc7f51ac82af67e4e1d970628d578c870dffa4f121673596c330cb6"
+    },
+    {
+      "path": "src/Models/ListenerCertificateSummaryResponse.php",
+      "sha256": "d6c534f5bd9efb4ae3d89e56af2ecb1c3e7e4ea0d4a849fcaad59828fe4cb672"
     },
     {
       "path": "src/Models/MediaChecksum.php",
@@ -249,6 +265,14 @@
     {
       "path": "src/Models/SitesDomainsCreateResponse201.php",
       "sha256": "5a3058086c287692c29f21ca53f2f5980758bfdea823bf8b9431709ab8593c59"
+    },
+    {
+      "path": "src/Models/SitesDomainsListenerCertificateBindingsCreateResponse201.php",
+      "sha256": "88c25b0dee3268870f6a859f4780bb05aa1aa815083ca22bcde4cc05dc468111"
+    },
+    {
+      "path": "src/Models/SitesDomainsListenerCertificateBindingsListResponse.php",
+      "sha256": "f847b1b779aa68b210353d7a704b322d2b7080bd1d205b4df4d700cb87a4868d"
     },
     {
       "path": "src/Models/SitesDomainsListResponse.php",
@@ -332,7 +356,7 @@
     },
     {
       "path": "src/SdkworkAppClient.php",
-      "sha256": "9db843f5abd3a4eda069eb331de89c1de842a37120fba8c398ddd42c6741f996"
+      "sha256": "42f2e5594bdff099de361b4ff518144bc9e3a7126bfb734f378c5c260a141456"
     }
   ],
   "scaffoldFiles": [

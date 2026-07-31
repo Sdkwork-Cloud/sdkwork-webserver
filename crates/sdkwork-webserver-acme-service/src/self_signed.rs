@@ -1,5 +1,7 @@
 use chrono::{Duration, TimeZone, Utc};
-use rcgen::{CertificateParams, DistinguishedName, DnType, KeyPair};
+use rcgen::{
+    CertificateParams, DistinguishedName, DnType, KeyPair, PKCS_ECDSA_P256_SHA256, PKCS_RSA_SHA256,
+};
 use sdkwork_utils_rust::crypto::sha256_hash;
 use time::OffsetDateTime;
 use x509_parser::pem::parse_x509_pem;
@@ -8,14 +10,20 @@ use crate::model::IssuedCertificateMaterial;
 use crate::{AcmeServiceError, AcmeServiceResult};
 
 pub fn issue_self_signed(
-    hostname: &str,
+    hostnames: &[String],
     cert_name: &str,
     cert_root: &str,
+    key_algorithm: &str,
 ) -> AcmeServiceResult<IssuedCertificateMaterial> {
-    let mut params = CertificateParams::new(vec![hostname.to_string()])
+    let primary_hostname = hostnames.first().ok_or_else(|| {
+        AcmeServiceError::validation("at least one certificate identifier is required")
+    })?;
+    let mut params = CertificateParams::new(hostnames.to_vec())
         .map_err(|error| AcmeServiceError::Internal(error.to_string()))?;
     params.distinguished_name = DistinguishedName::new();
-    params.distinguished_name.push(DnType::CommonName, hostname);
+    params
+        .distinguished_name
+        .push(DnType::CommonName, primary_hostname);
 
     let now = Utc::now();
     let not_before = now - Duration::minutes(5);
@@ -25,15 +33,14 @@ pub fn issue_self_signed(
     params.not_after = OffsetDateTime::from_unix_timestamp(not_after.timestamp())
         .map_err(|error| AcmeServiceError::Internal(error.to_string()))?;
 
-    let key_pair =
-        KeyPair::generate().map_err(|error| AcmeServiceError::Internal(error.to_string()))?;
+    let key_pair = generate_key_pair(key_algorithm)?;
     let cert = params
         .self_signed(&key_pair)
         .map_err(|error| AcmeServiceError::Internal(error.to_string()))?;
 
     let cert_pem = cert.pem();
     let private_key_pem = key_pair.serialize_pem();
-    let (not_before, not_after, fingerprint) = certificate_evidence_from_pem(&cert_pem)?;
+    let evidence = certificate_evidence_from_pem(&cert_pem)?;
     let cert_dir = format!("{cert_root}/{cert_name}");
     let cert_path = format!("{cert_dir}/fullchain.pem");
     let key_path = format!("{cert_dir}/privkey.pem");
@@ -41,24 +48,55 @@ pub fn issue_self_signed(
     Ok(IssuedCertificateMaterial {
         cert_name: cert_name.to_string(),
         cert_type: 3,
-        issuer: "SDKWork Web Server Self-Signed".to_string(),
-        subject: hostname.to_string(),
-        san_list: hostname.to_string(),
-        fingerprint,
+        issuer: evidence.issuer,
+        subject: evidence.subject,
+        san_list: evidence.san_list,
+        serial_sha256: evidence.serial_sha256,
+        fingerprint_sha256: evidence.fingerprint_sha256,
+        spki_sha256: evidence.spki_sha256,
+        chain_sha256: evidence.chain_sha256,
+        key_algorithm: evidence.key_algorithm,
         cert_pem,
         private_key_pem,
         chain_pem: None,
-        not_before,
-        not_after,
+        not_before: evidence.not_before,
+        not_after: evidence.not_after,
         cert_path,
         key_path,
         chain_path: None,
     })
 }
 
+pub(crate) fn generate_key_pair(key_algorithm: &str) -> AcmeServiceResult<KeyPair> {
+    let algorithm = match key_algorithm {
+        "ECDSA" => &PKCS_ECDSA_P256_SHA256,
+        "RSA" => &PKCS_RSA_SHA256,
+        _ => {
+            return Err(AcmeServiceError::validation(
+                "keyAlgorithm must be ECDSA or RSA",
+            ));
+        }
+    };
+    KeyPair::generate_for(algorithm)
+        .map_err(|error| AcmeServiceError::Internal(format!("generate certificate key: {error}")))
+}
+
+pub(crate) struct CertificateEvidence {
+    pub issuer: String,
+    pub subject: String,
+    pub san_list: Vec<String>,
+    pub serial_sha256: String,
+    pub fingerprint_sha256: String,
+    pub spki_sha256: String,
+    pub chain_sha256: String,
+    pub key_algorithm: String,
+    pub not_before: String,
+    pub not_after: String,
+}
+
 pub(crate) fn certificate_evidence_from_pem(
     pem_chain: &str,
-) -> AcmeServiceResult<(String, String, String)> {
+) -> AcmeServiceResult<CertificateEvidence> {
     let (_, pem) = parse_x509_pem(pem_chain.as_bytes())
         .map_err(|error| AcmeServiceError::Internal(error.to_string()))?;
     if pem.label != "CERTIFICATE" {
@@ -69,10 +107,45 @@ pub(crate) fn certificate_evidence_from_pem(
     let cert = pem
         .parse_x509()
         .map_err(|error| AcmeServiceError::Internal(error.to_string()))?;
-    let not_before = timestamp_to_rfc3339(cert.validity().not_before.timestamp())?;
-    let not_after = timestamp_to_rfc3339(cert.validity().not_after.timestamp())?;
-    let fingerprint = fingerprint_sha256_hex(&pem.contents);
-    Ok((not_before, not_after, fingerprint))
+    let san_list = cert
+        .subject_alternative_name()
+        .map_err(|error| AcmeServiceError::Internal(error.to_string()))?
+        .ok_or_else(|| AcmeServiceError::Internal("certificate has no SAN extension".to_string()))?
+        .value
+        .general_names
+        .iter()
+        .filter_map(|name| match name {
+            x509_parser::extensions::GeneralName::DNSName(value) => Some((*value).to_string()),
+            _ => None,
+        })
+        .collect::<Vec<_>>();
+    if san_list.is_empty() {
+        return Err(AcmeServiceError::Internal(
+            "certificate has no DNS SAN identifiers".to_string(),
+        ));
+    }
+    let public_key_oid = cert.public_key().algorithm.algorithm.to_id_string();
+    let key_algorithm = match public_key_oid.as_str() {
+        "1.2.840.10045.2.1" => "ECDSA",
+        "1.2.840.113549.1.1.1" => "RSA",
+        other => {
+            return Err(AcmeServiceError::Internal(format!(
+                "unsupported certificate public key algorithm {other}"
+            )));
+        }
+    };
+    Ok(CertificateEvidence {
+        issuer: cert.issuer().to_string(),
+        subject: cert.subject().to_string(),
+        san_list,
+        serial_sha256: sha256_hash(cert.raw_serial()),
+        fingerprint_sha256: fingerprint_sha256_hex(&pem.contents),
+        spki_sha256: sha256_hash(cert.public_key().raw),
+        chain_sha256: sha256_hash(pem_chain.as_bytes()),
+        key_algorithm: key_algorithm.to_string(),
+        not_before: timestamp_to_rfc3339(cert.validity().not_before.timestamp())?,
+        not_after: timestamp_to_rfc3339(cert.validity().not_after.timestamp())?,
+    })
 }
 
 fn timestamp_to_rfc3339(timestamp: i64) -> AcmeServiceResult<String> {
@@ -93,8 +166,13 @@ mod tests {
 
     #[test]
     fn self_signed_material_matches_actual_leaf_evidence() {
-        let material =
-            issue_self_signed("dev.localhost", "dev-localhost", "/tmp/certs/live").expect("issue");
+        let material = issue_self_signed(
+            &["dev.localhost".to_string(), "www.dev.localhost".to_string()],
+            "dev-localhost",
+            "/tmp/certs/live",
+            "ECDSA",
+        )
+        .expect("issue");
         let (_, pem) = parse_x509_pem(material.cert_pem.as_bytes()).expect("PEM");
         let cert = pem.parse_x509().expect("X.509");
         let sans = cert
@@ -107,14 +185,31 @@ mod tests {
             .iter()
             .any(|name| matches!(name, GeneralName::DNSName(value) if *value == "dev.localhost")));
 
-        let (not_before, not_after, fingerprint) =
-            certificate_evidence_from_pem(&material.cert_pem).expect("evidence");
-        assert_eq!(material.not_before, not_before);
-        assert_eq!(material.not_after, not_after);
-        assert_eq!(material.fingerprint, fingerprint);
-        assert_eq!(fingerprint, fingerprint_sha256_hex(&pem.contents));
+        let evidence = certificate_evidence_from_pem(&material.cert_pem).expect("evidence");
+        assert_eq!(material.not_before, evidence.not_before);
+        assert_eq!(material.not_after, evidence.not_after);
+        assert_eq!(material.fingerprint_sha256, evidence.fingerprint_sha256);
+        assert_eq!(
+            evidence.fingerprint_sha256,
+            fingerprint_sha256_hex(&pem.contents)
+        );
+        assert_eq!(material.key_algorithm, "ECDSA");
+        assert_eq!(material.san_list.len(), 2);
         assert!(chrono::DateTime::parse_from_rfc3339(&material.not_before).is_ok());
         assert!(chrono::DateTime::parse_from_rfc3339(&material.not_after).is_ok());
+        assert!(material.private_key_pem.contains("BEGIN PRIVATE KEY"));
+    }
+
+    #[test]
+    fn self_signed_rsa_material_reports_actual_algorithm() {
+        let material = issue_self_signed(
+            &["rsa.dev.localhost".to_string()],
+            "rsa-dev-localhost",
+            "/tmp/certs/live",
+            "RSA",
+        )
+        .expect("issue RSA");
+        assert_eq!(material.key_algorithm, "RSA");
         assert!(material.private_key_pem.contains("BEGIN PRIVATE KEY"));
     }
 }

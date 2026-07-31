@@ -19,7 +19,11 @@ impl TenantIsolationPolicy for WebServerTenantIsolationPolicy {
             .parse::<i64>()
             .ok()
             .filter(|tenant_id| *tenant_id > 0)
-            .ok_or_else(|| WebFrameworkError::forbidden("invalid Web tenant context"))?;
+            .ok_or_else(|| {
+                WebFrameworkError::unprocessable_entity(
+                    "invalid Web tenant subject; repair IAM subject IDs and sign in again",
+                )
+            })?;
         if principal.app_id().trim().is_empty() {
             return Err(WebFrameworkError::forbidden(
                 "invalid Web application context",
@@ -32,7 +36,11 @@ impl TenantIsolationPolicy for WebServerTenantIsolationPolicy {
                 .organization_id()
                 .and_then(|value| value.parse::<i64>().ok())
                 .filter(|organization_id| *organization_id > 0)
-                .ok_or_else(|| WebFrameworkError::forbidden("invalid Web organization context"))?;
+                .ok_or_else(|| {
+                    WebFrameworkError::unprocessable_entity(
+                        "invalid Web organization subject; repair IAM subject IDs and sign in again",
+                    )
+                })?;
         }
         Ok(())
     }
@@ -43,17 +51,18 @@ mod tests {
     use super::WebServerTenantIsolationPolicy;
     use sdkwork_web_core::{
         TenantIsolationPolicy, WebApiSurface, WebAuthLevel, WebAuthMode, WebDeploymentMode,
-        WebEnvironment, WebLoginScope, WebRequestContext, WebRequestPrincipal, WebSubjectType,
-        WebTransportFacts,
+        WebEnvironment, WebFrameworkError, WebFrameworkErrorKind, WebLoginScope, WebRequestContext,
+        WebRequestPrincipal, WebSubjectType, WebTransportFacts,
     };
 
     #[test]
     fn rejects_non_numeric_and_zero_tenant_ids() {
         for tenant_id in ["", "0", "-1", "tenant-1"] {
             let context = context(tenant_id, WebLoginScope::Organization, Some("9"));
-            assert!(WebServerTenantIsolationPolicy
+            let error = WebServerTenantIsolationPolicy
                 .enforce(&context, Some("applications.list"))
-                .is_err());
+                .expect_err("invalid tenant subject must fail closed");
+            assert_subject_mapping_error(error);
         }
     }
 
@@ -61,14 +70,21 @@ mod tests {
     fn requires_positive_organization_for_backend_scope() {
         for organization_id in [None, Some(""), Some("0"), Some("organization-1")] {
             let context = context("42", WebLoginScope::Organization, organization_id);
-            assert!(WebServerTenantIsolationPolicy
+            let error = WebServerTenantIsolationPolicy
                 .enforce(&context, Some("applications.list"))
-                .is_err());
+                .expect_err("invalid organization subject must fail closed");
+            assert_subject_mapping_error(error);
         }
         let context = context("42", WebLoginScope::Organization, Some("9"));
         assert!(WebServerTenantIsolationPolicy
             .enforce(&context, Some("applications.list"))
             .is_ok());
+    }
+
+    fn assert_subject_mapping_error(error: WebFrameworkError) {
+        assert_eq!(WebFrameworkErrorKind::UnprocessableEntity, error.kind);
+        assert_eq!(axum::http::StatusCode::UNPROCESSABLE_ENTITY, error.status());
+        assert_eq!(42201, error.result_code());
     }
 
     fn context(

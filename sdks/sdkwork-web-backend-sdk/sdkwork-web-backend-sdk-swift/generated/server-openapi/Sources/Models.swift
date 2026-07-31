@@ -509,15 +509,32 @@ public struct ApplicationDeploymentResponse: Codable {
 }
 
 public struct CreateCertificateRequest: Codable {
-    public let domainId: String?
+    public let domainIds: [String]?
     public let certType: Int?
+    public let keyAlgorithm: String?
     public let autoRenew: Bool?
 
 
-    public init(domainId: String? = nil, certType: Int? = nil, autoRenew: Bool? = nil) {
-        self.domainId = domainId
+    public init(domainIds: [String]? = nil, certType: Int? = nil, keyAlgorithm: String? = nil, autoRenew: Bool? = nil) {
+        self.domainIds = domainIds
         self.certType = certType
+        self.keyAlgorithm = keyAlgorithm
         self.autoRenew = autoRenew
+    }
+}
+
+public struct CertificateIdentifierResponse: Codable {
+    public let domainId: String?
+    public let hostname: String?
+    public let identifierType: String?
+    public let position: Int?
+
+
+    public init(domainId: String? = nil, hostname: String? = nil, identifierType: String? = nil, position: Int? = nil) {
+        self.domainId = domainId
+        self.hostname = hostname
+        self.identifierType = identifierType
+        self.position = position
     }
 }
 
@@ -533,33 +550,104 @@ public struct UpdateCertificateRequest: Codable {
 public struct CertificateResponse: Codable {
     public let id: String?
     public let certName: String?
-    public let domain: String?
-    public let domainId: String?
+    public let identifiers: [CertificateIdentifierResponse]?
     public let certType: Int?
     public let issuer: String?
     public let fingerprint: String?
+    public let keyAlgorithm: String?
     public let notBefore: String?
     public let notAfter: String?
     public let autoRenew: Bool?
-    public let renewalStatus: Int?
-    public let status: Int?
+    public let renewalStatus: String?
+    public let status: String?
     public let createdAt: String?
 
 
-    public init(id: String? = nil, certName: String? = nil, domain: String? = nil, domainId: String? = nil, certType: Int? = nil, issuer: String? = nil, fingerprint: String? = nil, notBefore: String? = nil, notAfter: String? = nil, autoRenew: Bool? = nil, renewalStatus: Int? = nil, status: Int? = nil, createdAt: String? = nil) {
+    public init(id: String? = nil, certName: String? = nil, identifiers: [CertificateIdentifierResponse]? = nil, certType: Int? = nil, issuer: String? = nil, fingerprint: String? = nil, keyAlgorithm: String? = nil, notBefore: String? = nil, notAfter: String? = nil, autoRenew: Bool? = nil, renewalStatus: String? = nil, status: String? = nil, createdAt: String? = nil) {
         self.id = id
         self.certName = certName
-        self.domain = domain
-        self.domainId = domainId
+        self.identifiers = identifiers
         self.certType = certType
         self.issuer = issuer
         self.fingerprint = fingerprint
+        self.keyAlgorithm = keyAlgorithm
         self.notBefore = notBefore
         self.notAfter = notAfter
         self.autoRenew = autoRenew
         self.renewalStatus = renewalStatus
         self.status = status
         self.createdAt = createdAt
+    }
+}
+
+public struct CreateListenerCertificateBindingRequest: Codable {
+    public let certificateId: String?
+    public let certificateVersionId: String?
+    public let priority: Int?
+    public let isDefault: Bool?
+
+
+    public init(certificateId: String? = nil, certificateVersionId: String? = nil, priority: Int? = nil, isDefault: Bool? = nil) {
+        self.certificateId = certificateId
+        self.certificateVersionId = certificateVersionId
+        self.priority = priority
+        self.isDefault = isDefault
+    }
+}
+
+public struct ListenerCertificateBindingResponse: Codable {
+    public let id: String?
+    public let siteId: String?
+    public let domainId: String?
+    public let certificateId: String?
+    public let desiredCertificateVersionId: String?
+    public let currentCertificateVersionId: String?
+    public let desiredCertificate: ListenerCertificateSummaryResponse?
+    public let currentCertificate: ListenerCertificateSummaryResponse?
+    public let keyAlgorithm: String?
+    public let priority: Int?
+    public let isDefault: Bool?
+    public let status: String?
+    public let activatedAt: String?
+    public let createdAt: String?
+    public let updatedAt: String?
+
+
+    public init(id: String? = nil, siteId: String? = nil, domainId: String? = nil, certificateId: String? = nil, desiredCertificateVersionId: String? = nil, currentCertificateVersionId: String? = nil, desiredCertificate: ListenerCertificateSummaryResponse? = nil, currentCertificate: ListenerCertificateSummaryResponse? = nil, keyAlgorithm: String? = nil, priority: Int? = nil, isDefault: Bool? = nil, status: String? = nil, activatedAt: String? = nil, createdAt: String? = nil, updatedAt: String? = nil) {
+        self.id = id
+        self.siteId = siteId
+        self.domainId = domainId
+        self.certificateId = certificateId
+        self.desiredCertificateVersionId = desiredCertificateVersionId
+        self.currentCertificateVersionId = currentCertificateVersionId
+        self.desiredCertificate = desiredCertificate
+        self.currentCertificate = currentCertificate
+        self.keyAlgorithm = keyAlgorithm
+        self.priority = priority
+        self.isDefault = isDefault
+        self.status = status
+        self.activatedAt = activatedAt
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
+    }
+}
+
+public struct ListenerCertificateSummaryResponse: Codable {
+    public let certName: String?
+    public let identifiers: [CertificateIdentifierResponse]?
+    public let issuer: String?
+    public let fingerprint: String?
+    public let notAfter: String?
+    public let status: String?
+
+
+    public init(certName: String? = nil, identifiers: [CertificateIdentifierResponse]? = nil, issuer: String? = nil, fingerprint: String? = nil, notAfter: String? = nil, status: String? = nil) {
+        self.certName = certName
+        self.identifiers = identifiers
+        self.issuer = issuer
+        self.fingerprint = fingerprint
+        self.notAfter = notAfter
+        self.status = status
     }
 }
 
@@ -750,13 +838,34 @@ public struct AgentHeartbeatRequest: Codable {
     public let nginxEnabled: Bool?
     public let activeConfigs: String?
     public let lastSyncVersion: String?
+    public let certificateObservations: [AgentCertificateObservation]?
 
 
-    public init(agentVersion: String? = nil, nginxEnabled: Bool? = nil, activeConfigs: String? = nil, lastSyncVersion: String? = nil) {
+    public init(agentVersion: String? = nil, nginxEnabled: Bool? = nil, activeConfigs: String? = nil, lastSyncVersion: String? = nil, certificateObservations: [AgentCertificateObservation]? = nil) {
         self.agentVersion = agentVersion
         self.nginxEnabled = nginxEnabled
         self.activeConfigs = activeConfigs
         self.lastSyncVersion = lastSyncVersion
+        self.certificateObservations = certificateObservations
+    }
+}
+
+public struct AgentCertificateObservation: Codable {
+    public let certificateId: String?
+    public let fingerprint: String?
+    public let syncVersion: String?
+    public let state: String?
+    public let observedAt: String?
+    public let failureCode: String?
+
+
+    public init(certificateId: String? = nil, fingerprint: String? = nil, syncVersion: String? = nil, state: String? = nil, observedAt: String? = nil, failureCode: String? = nil) {
+        self.certificateId = certificateId
+        self.fingerprint = fingerprint
+        self.syncVersion = syncVersion
+        self.state = state
+        self.observedAt = observedAt
+        self.failureCode = failureCode
     }
 }
 
@@ -811,14 +920,16 @@ public struct AgentCertificateBundle: Codable {
     public let certificateId: String?
     public let certName: String?
     public let fingerprint: String?
+    public let hostnames: [String]?
     public let fullchainPem: String?
     public let privkeyPem: String?
 
 
-    public init(certificateId: String? = nil, certName: String? = nil, fingerprint: String? = nil, fullchainPem: String? = nil, privkeyPem: String? = nil) {
+    public init(certificateId: String? = nil, certName: String? = nil, fingerprint: String? = nil, hostnames: [String]? = nil, fullchainPem: String? = nil, privkeyPem: String? = nil) {
         self.certificateId = certificateId
         self.certName = certName
         self.fingerprint = fingerprint
+        self.hostnames = hostnames
         self.fullchainPem = fullchainPem
         self.privkeyPem = privkeyPem
     }
@@ -1097,6 +1208,32 @@ public struct ApplicationsDomainsCreateResponse201: Codable {
 }
 
 public struct ApplicationsDomainsVerifyResponse: Codable {
+    public let code: Int?
+    public let data: Any?
+    public let traceId: String?
+
+
+    public init(code: Int? = nil, data: Any? = nil, traceId: String? = nil) {
+        self.code = code
+        self.data = data
+        self.traceId = traceId
+    }
+}
+
+public struct ApplicationsDomainsListenerCertificateBindingsListResponse: Codable {
+    public let code: Int?
+    public let data: Any?
+    public let traceId: String?
+
+
+    public init(code: Int? = nil, data: Any? = nil, traceId: String? = nil) {
+        self.code = code
+        self.data = data
+        self.traceId = traceId
+    }
+}
+
+public struct ApplicationsDomainsListenerCertificateBindingsCreateResponse201: Codable {
     public let code: Int?
     public let data: Any?
     public let traceId: String?

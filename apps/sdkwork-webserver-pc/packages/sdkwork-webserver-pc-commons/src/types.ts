@@ -128,6 +128,7 @@ export interface WebserverResourceAction {
   loadSourceInputDefaults?(
     context: WebserverResourceActionContext,
   ): Promise<ApplicationDeploymentSourceDefaults>;
+  multipleFields?: readonly string[];
   permission?: string;
   readOnlyFields?: readonly string[];
   requiredFields?: readonly string[];

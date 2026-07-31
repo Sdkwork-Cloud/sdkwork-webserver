@@ -69,7 +69,7 @@ trace:
 verification:
   - cargo test -p sdkwork-routes-webserver-backend-api
   - cargo test -p sdkwork-intelligence-webserver-service
-  - cargo test -p sdkwork-intelligence-webserver-repository-sqlx --test repository_parity sqlite_repository
+  - cargo test -p sdkwork-intelligence-webserver-repository-sqlx --test repository_parity postgres_repository_transactions_tenants_idempotency_and_pagination_are_bounded -- --ignored --exact
   - cargo test -p sdkwork-webserver-certificate-worker
   - pnpm sdk:generate:backend
   - pnpm sdk:generate:check
