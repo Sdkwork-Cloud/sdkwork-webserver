@@ -254,7 +254,13 @@ mod tests {
                 "/internal/v3/api/web/runtime_assignments/current",
                 get(|| async { StatusCode::OK }),
             ),
-            build_web_internal_api_framework_layer(resolver, None),
+            build_web_internal_api_framework_layer(
+                MachineCredentialResolverDecorator::new(
+                    resolver,
+                    std::sync::Arc::new(NoopMachineAuthenticator),
+                ),
+                None,
+            ),
         );
         app.oneshot(
             Request::builder()
@@ -270,5 +276,43 @@ mod tests {
         .await
         .expect("internal framework response")
         .status()
+    }
+
+    #[tokio::test]
+    async fn machine_only_internal_surface_rejects_unvalidated_credentials() {
+        let app = with_web_request_context(
+            Router::new().route(
+                "/internal/v3/api/web/runtime_assignments/current",
+                get(|| async { StatusCode::OK }),
+            ),
+            build_web_internal_api_framework_layer(
+                MachineCredentialResolverDecorator::new_machine_only(
+                    TestResolver {
+                        tenant_id: "42",
+                        permissions: vec!["web.agent.read".to_owned()],
+                    },
+                    std::sync::Arc::new(NoopMachineAuthenticator),
+                ),
+                None,
+            ),
+        );
+        let response = app
+            .oneshot(
+                Request::builder()
+                    .uri("/internal/v3/api/web/runtime_assignments/current")
+                    .header("x-sdkwork-ingress-token", "ingress-test")
+                    .header(
+                        "access-token",
+                        access_token_jwt("42", "7", "session-1", "web"),
+                    )
+                    .body(Body::empty())
+                    .expect("valid internal request"),
+            )
+            .await
+            .expect("internal framework response");
+        // The credential is not a validated machine credential, so the
+        // machine-only surface must reject it instead of falling back to
+        // user API-key resolution.
+        assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
     }
 }
