@@ -99,7 +99,8 @@ async fn app_router_rejects_non_canonical_or_out_of_range_pagination() {
             .await
             .expect("collect bounded problem response")
             .to_bytes();
-        assert!(String::from_utf8_lossy(&body).contains("40003"), "{query}");
+        let body = String::from_utf8_lossy(&body);
+        assert!(body.contains("40003"), "{query}: {body}");
     }
 }
 
