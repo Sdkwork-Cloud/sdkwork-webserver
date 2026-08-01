@@ -142,6 +142,7 @@ async fn wrap_router_with_web_framework_from_env_and_optional_metrics(
 #[cfg(test)]
 mod tests {
     use super::build_web_internal_api_framework_layer;
+    use crate::web_bootstrap::MachineCredentialResolverDecorator;
     use async_trait::async_trait;
     use axum::body::Body;
     use axum::http::{Request, StatusCode};
@@ -152,7 +153,25 @@ mod tests {
         access_token_jwt, WebAuthLevel, WebDeploymentMode, WebEnvironment, WebFrameworkError,
         WebLoginScope, WebRequestContextResolver, WebRequestPrincipal, WebSubjectType,
     };
+    use sdkwork_webserver_contract::{
+        AuthenticatedMachineCredential, MachineCredentialAuthenticator, WebServiceResult,
+    };
     use tower::ServiceExt;
+
+    /// Machine authenticator that never validates credentials; used to exercise
+    /// the framework permission/tenant logic via user-style resolution.
+    #[derive(Clone)]
+    struct NoopMachineAuthenticator;
+
+    #[async_trait]
+    impl MachineCredentialAuthenticator for NoopMachineAuthenticator {
+        async fn authenticate_machine_credential(
+            &self,
+            _credential: &str,
+        ) -> WebServiceResult<Option<AuthenticatedMachineCredential>> {
+            Ok(None)
+        }
+    }
 
     #[derive(Clone)]
     struct TestResolver {
