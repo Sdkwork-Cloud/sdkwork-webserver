@@ -73,6 +73,24 @@ async fn configured_host_allowlist_is_case_insensitive_and_fail_closed() {
     expect_validation(validate_repository_target("https://1.1.1.1/team/repository.git").await);
 }
 
+#[tokio::test]
+async fn missing_host_allowlist_disables_git_import() {
+    let _lock = GIT_ALLOWED_HOSTS_ENV_LOCK.lock().unwrap();
+    let _guard = EnvironmentVariableGuard::set("");
+    expect_validation(validate_repository_target("https://8.8.8.8/team/repository.git").await);
+}
+
+#[tokio::test]
+async fn validated_target_retains_the_pinned_public_address() {
+    let _lock = GIT_ALLOWED_HOSTS_ENV_LOCK.lock().unwrap();
+    let _guard = EnvironmentVariableGuard::set("8.8.8.8");
+    let target = validate_repository_target("https://8.8.8.8/team/repository.git")
+        .await
+        .expect("allowlisted public target");
+    assert_eq!(target.host_name, "8.8.8.8");
+    assert_eq!(target.resolved_addresses, vec!["8.8.8.8".parse().unwrap()]);
+}
+
 #[test]
 fn repository_packaging_is_deterministic_and_detects_standard_configuration() {
     let root = TempDir::new().unwrap();

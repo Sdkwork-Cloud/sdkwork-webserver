@@ -16,10 +16,12 @@ use std::io::{Cursor, Write};
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 use std::path::{Path, PathBuf};
 use std::process::Stdio;
+use std::sync::Arc;
 use std::time::Duration;
 use tempfile::TempDir;
 use tokio::net::lookup_host;
 use tokio::process::Command;
+use tokio::sync::Semaphore;
 use tokio::time::timeout;
 use url::{Host, Url};
 use zip::write::SimpleFileOptions;
@@ -32,11 +34,15 @@ const MAX_ARCHIVE_BYTES: usize = 64 * 1024 * 1024;
 const MAX_PATH_BYTES: usize = 512;
 const MAX_PATH_DEPTH: usize = 32;
 const GIT_TIMEOUT: Duration = Duration::from_secs(60);
+const DEFAULT_GIT_IMPORT_CONCURRENCY: usize = 2;
+const MAXIMUM_GIT_IMPORT_CONCURRENCY: usize = 16;
+const GIT_IMPORT_CONCURRENCY_ENV: &str = "SDKWORK_WEB_GIT_IMPORT_CONCURRENCY";
 
 pub struct GitDriveSourceImporter {
     pool: PgPool,
     uploader: DriveUploaderService<SqlUploaderStore>,
     object_runtime: DriveObjectStoreRuntime,
+    import_permits: Arc<Semaphore>,
 }
 
 impl GitDriveSourceImporter {
@@ -46,10 +52,25 @@ impl GitDriveSourceImporter {
         let pool = connect_postgres_database_and_install_schema(&config)
             .await
             .map_err(|error| format!("initialize Drive source importer failed: {error}"))?;
+        let concurrency = std::env::var(GIT_IMPORT_CONCURRENCY_ENV)
+            .ok()
+            .map(|value| {
+                value.parse::<usize>().map_err(|_| {
+                    format!("{GIT_IMPORT_CONCURRENCY_ENV} must be an integer between 1 and {MAXIMUM_GIT_IMPORT_CONCURRENCY}")
+                })
+            })
+            .transpose()?
+            .unwrap_or(DEFAULT_GIT_IMPORT_CONCURRENCY);
+        if !(1..=MAXIMUM_GIT_IMPORT_CONCURRENCY).contains(&concurrency) {
+            return Err(format!(
+                "{GIT_IMPORT_CONCURRENCY_ENV} must be an integer between 1 and {MAXIMUM_GIT_IMPORT_CONCURRENCY}"
+            ));
+        }
         Ok(Self {
             uploader: DriveUploaderService::new(SqlUploaderStore::new(pool.clone())),
             object_runtime: DriveObjectStoreRuntime::new(pool.clone()),
             pool,
+            import_permits: Arc::new(Semaphore::new(concurrency)),
         })
     }
 
@@ -149,10 +170,17 @@ impl ApplicationSourceImporter for GitDriveSourceImporter {
         &self,
         request: &GitSourceImportRequest,
     ) -> WebServiceResult<ImportedApplicationSource> {
-        validate_repository_target(&request.repository_url).await?;
+        let _permit = self
+            .import_permits
+            .clone()
+            .try_acquire_owned()
+            .map_err(|_| {
+                WebServiceError::conflict("Git source import capacity is exhausted; retry later")
+            })?;
+        let target = validate_repository_target(&request.repository_url).await?;
         let checkout = TempDir::new().map_err(internal_io("create Git import workspace"))?;
         let repository_root = checkout.path().join("repository");
-        clone_repository(request, &repository_root).await?;
+        clone_repository(request, &target, &repository_root).await?;
         let commit_hash = resolve_commit_hash(&repository_root).await?;
         let package = tokio::task::spawn_blocking({
             let repository_root = repository_root.clone();
@@ -182,7 +210,16 @@ struct PackagedRepository {
     config_snapshot: SourceVersionConfigSnapshot,
 }
 
-async fn validate_repository_target(repository_url: &str) -> WebServiceResult<()> {
+#[derive(Debug)]
+struct ValidatedRepositoryTarget {
+    url: Url,
+    host_name: String,
+    resolved_addresses: Vec<IpAddr>,
+}
+
+async fn validate_repository_target(
+    repository_url: &str,
+) -> WebServiceResult<ValidatedRepositoryTarget> {
     let url = Url::parse(repository_url)
         .map_err(|_| WebServiceError::validation("repositoryUrl must be an absolute HTTPS URL"))?;
     if url.scheme() != "https"
@@ -200,14 +237,17 @@ async fn validate_repository_target(repository_url: &str) -> WebServiceResult<()
         .host()
         .ok_or_else(|| WebServiceError::validation("repositoryUrl must include a public host"))?;
     let host_name = url.host_str().unwrap_or_default().to_ascii_lowercase();
-    if let Some(allowed_hosts) = configured_allowed_hosts() {
-        if !allowed_hosts.iter().any(|allowed| allowed == &host_name) {
-            return Err(WebServiceError::validation(
-                "repositoryUrl host is not allowed by SDKWORK_WEB_GIT_ALLOWED_HOSTS",
-            ));
-        }
+    let allowed_hosts = configured_allowed_hosts().ok_or_else(|| {
+        WebServiceError::validation(
+            "Git source import is disabled until SDKWORK_WEB_GIT_ALLOWED_HOSTS is configured",
+        )
+    })?;
+    if !allowed_hosts.iter().any(|allowed| allowed == &host_name) {
+        return Err(WebServiceError::validation(
+            "repositoryUrl host is not allowed by SDKWORK_WEB_GIT_ALLOWED_HOSTS",
+        ));
     }
-    match host {
+    let resolved_addresses = match host {
         Host::Ipv4(address) if is_forbidden_ip(IpAddr::V4(address)) => {
             return Err(WebServiceError::validation(
                 "repositoryUrl must resolve to a public address",
@@ -219,7 +259,7 @@ async fn validate_repository_target(repository_url: &str) -> WebServiceResult<()
             ));
         }
         Host::Domain(domain) => {
-            let addresses = timeout(GIT_TIMEOUT, lookup_host((domain, 443)))
+            let mut addresses = timeout(GIT_TIMEOUT, lookup_host((domain, 443)))
                 .await
                 .map_err(|_| WebServiceError::validation("repositoryUrl DNS lookup timed out"))?
                 .map_err(|_| {
@@ -227,19 +267,28 @@ async fn validate_repository_target(repository_url: &str) -> WebServiceResult<()
                 })?
                 .map(|address| address.ip())
                 .collect::<Vec<_>>();
+            addresses.sort_unstable();
+            addresses.dedup();
             if addresses.is_empty() || addresses.iter().copied().any(is_forbidden_ip) {
                 return Err(WebServiceError::validation(
                     "repositoryUrl must resolve only to public addresses",
                 ));
             }
+            addresses
         }
-        _ => {}
-    }
-    Ok(())
+        Host::Ipv4(address) => vec![IpAddr::V4(address)],
+        Host::Ipv6(address) => vec![IpAddr::V6(address)],
+    };
+    Ok(ValidatedRepositoryTarget {
+        url,
+        host_name,
+        resolved_addresses,
+    })
 }
 
 async fn clone_repository(
     request: &GitSourceImportRequest,
+    target: &ValidatedRepositoryTarget,
     repository_root: &Path,
 ) -> WebServiceResult<()> {
     let mut command = Command::new("git");
@@ -248,6 +297,19 @@ async fn clone_repository(
         .arg("credential.helper=")
         .arg("-c")
         .arg("core.askPass=")
+        .arg("-c")
+        .arg("http.followRedirects=false");
+    for address in &target.resolved_addresses {
+        let address = match address {
+            IpAddr::V4(address) => address.to_string(),
+            IpAddr::V6(address) => format!("[{address}]"),
+        };
+        command.arg("-c").arg(format!(
+            "http.curloptResolve={}:443:{address}",
+            target.host_name
+        ));
+    }
+    command
         .arg("clone")
         .arg("--depth")
         .arg("1")
@@ -257,7 +319,7 @@ async fn clone_repository(
         command.arg("--branch").arg(git_ref);
     }
     command
-        .arg(&request.repository_url)
+        .arg(target.url.as_str())
         .arg(repository_root)
         .env("GIT_TERMINAL_PROMPT", "0")
         .stdin(Stdio::null())

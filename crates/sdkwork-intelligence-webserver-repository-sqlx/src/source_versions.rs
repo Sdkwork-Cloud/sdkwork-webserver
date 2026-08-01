@@ -6,8 +6,8 @@ use sdkwork_webserver_contract::{
 use sqlx::Row;
 
 use super::support::{
-    instant_from_row, instant_write_expression, json_from_row, json_write_expression, new_uuid,
-    next_id, now_rfc3339, pagination, resolve_site_internal_id, store_error,
+    instant_from_row, json_from_row, new_uuid, next_id, now_rfc3339, pagination,
+    resolve_site_internal_id, store_error,
 };
 
 impl WebRepository {
@@ -19,7 +19,7 @@ impl WebRepository {
         page_size: i32,
     ) -> WebServiceResult<SourceVersionPage> {
         let site_internal_id = resolve_site_internal_id(&self.pool, tenant_id, site_id).await?;
-        let (page, page_size, offset) = pagination(page, page_size);
+        let (page, page_size, offset) = pagination(page, page_size)?;
         let count_row = sqlx::query(
             "SELECT COUNT(*) AS total FROM web_source_version
              WHERE tenant_id = $1 AND site_id = $2",
@@ -69,31 +69,54 @@ impl WebRepository {
         retention_limit: i32,
         request: &CreateSourceVersionRequest,
     ) -> WebServiceResult<SourceVersionResponse> {
-        let site_internal_id = resolve_site_internal_id(&self.pool, tenant_id, site_id).await?;
+        if !(1..=50).contains(&retention_limit) {
+            return Err(WebServiceError::validation(
+                "source version retention limit must be between 1 and 50",
+            ));
+        }
         let id = next_id(self.id_generator())?;
         let uuid = new_uuid();
         let now = now_rfc3339();
-        let engine = self.database_engine().await?;
-        let instant_expression = instant_write_expression(engine, "$14");
-        let config_expression = json_write_expression(engine, "$13");
         let config_snapshot = serde_json::to_string(&request.config_snapshot)
             .map_err(|error| WebServiceError::Internal(error.to_string()))?;
-        let insert_sql = format!(
+        let mut transaction = self
+            .pool
+            .begin()
+            .await
+            .map_err(|error| store_error("begin source version transaction", error))?;
+        let site_row = sqlx::query(
+            "SELECT id, organization_id FROM web_site
+             WHERE tenant_id = $1 AND uuid = $2 AND deleted_at IS NULL
+             FOR UPDATE",
+        )
+        .bind(tenant_id)
+        .bind(site_id)
+        .fetch_optional(&mut *transaction)
+        .await
+        .map_err(|error| store_error("lock source version site", error))?
+        .ok_or_else(|| WebServiceError::not_found("site not found"))?;
+        let site_internal_id: i64 = site_row
+            .try_get("id")
+            .map_err(|error| store_error("map source version site id", error))?;
+        let organization_id: i64 = site_row
+            .try_get("organization_id")
+            .map_err(|error| store_error("map source version organization id", error))?;
+
+        sqlx::query(
             "INSERT INTO web_source_version (
                 id, uuid, tenant_id, organization_id, user_id, site_id, version_tag,
                 source_type, source_ref, commit_hash, artifact_path, artifact_size,
                 artifact_hash, config_snapshot, status, metadata, created_at, updated_at, version
              ) VALUES (
-                $1, $2, $3,
-                COALESCE((SELECT organization_id FROM web_site WHERE tenant_id = $3 AND id = $5), 0),
-                $4, $5, $6, $7, $8, $9, $10, $11, $12, {config_expression}, 1, '{{}}',
-                {instant_expression}, {instant_expression}, 0
-             )"
-        );
-        sqlx::query(&insert_sql)
+                $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13,
+                CAST($14 AS JSONB), 1, '{}', CAST($15 AS TIMESTAMPTZ),
+                CAST($15 AS TIMESTAMPTZ), 0
+             )",
+        )
             .bind(id)
             .bind(&uuid)
             .bind(tenant_id)
+            .bind(organization_id)
             .bind(actor_id)
             .bind(site_internal_id)
             .bind(request.version_tag.trim())
@@ -105,14 +128,55 @@ impl WebRepository {
             .bind(request.artifact_hash.trim())
             .bind(&config_snapshot)
             .bind(&now)
-            .execute(&self.pool)
+            .execute(&mut *transaction)
             .await
             .map_err(|error| store_error("insert web_source_version", error))?;
 
-        self.prune_source_versions_repo(tenant_id, site_internal_id, actor_id, retention_limit)
-            .await?;
-        self.retrieve_source_version_repo(tenant_id, site_id, &uuid)
+        sqlx::query(
+            "WITH retained AS (
+                 SELECT id
+                 FROM web_source_version
+                 WHERE tenant_id = $1 AND site_id = $2 AND status = 1
+                 ORDER BY created_at DESC, id DESC
+                 OFFSET $3
+             )
+             UPDATE web_source_version AS source_version
+             SET status = 3, pruned_at = CAST($5 AS TIMESTAMPTZ), pruned_by = $4,
+                 updated_at = CAST($5 AS TIMESTAMPTZ), version = source_version.version + 1
+             FROM retained
+             WHERE source_version.tenant_id = $1
+               AND source_version.id = retained.id
+               AND source_version.status = 1",
+        )
+        .bind(tenant_id)
+        .bind(site_internal_id)
+        .bind(retention_limit)
+        .bind(actor_id)
+        .bind(&now)
+        .execute(&mut *transaction)
+        .await
+        .map_err(|error| store_error("prune web_source_version", error))?;
+
+        let row = sqlx::query(
+            "SELECT uuid, version_tag, source_type, source_ref, commit_hash, artifact_path,
+                    artifact_size, artifact_hash, CAST(config_snapshot AS TEXT) AS config_snapshot,
+                    status, CAST(created_at AS TEXT) AS created_at
+             FROM web_source_version
+             WHERE tenant_id = $1 AND site_id = $2 AND uuid = $3",
+        )
+        .bind(tenant_id)
+        .bind(site_internal_id)
+        .bind(&uuid)
+        .fetch_one(&mut *transaction)
+        .await
+        .map_err(|error| store_error("retrieve created web_source_version", error))?;
+        let response = map_source_version_row(&row, site_id)
+            .map_err(|error| WebServiceError::Internal(format!("map web_source_version: {error}")))?;
+        transaction
+            .commit()
             .await
+            .map_err(|error| store_error("commit source version transaction", error))?;
+        Ok(response)
     }
 
     pub(super) async fn retrieve_source_version_repo(
@@ -138,52 +202,6 @@ impl WebRepository {
         .ok_or_else(|| WebServiceError::not_found("source version not found"))?;
         map_source_version_row(&row, site_id)
             .map_err(|error| WebServiceError::Internal(format!("map web_source_version: {error}")))
-    }
-
-    async fn prune_source_versions_repo(
-        &self,
-        tenant_id: i64,
-        site_internal_id: i64,
-        actor_id: Option<i64>,
-        retention_limit: i32,
-    ) -> WebServiceResult<()> {
-        let rows = sqlx::query(
-            "SELECT id FROM web_source_version
-             WHERE tenant_id = $1 AND site_id = $2 AND status = 1
-             ORDER BY created_at DESC, id DESC LIMIT 100 OFFSET $3",
-        )
-        .bind(tenant_id)
-        .bind(site_internal_id)
-        .bind(retention_limit)
-        .fetch_all(&self.pool)
-        .await
-        .map_err(|error| store_error("select retained web_source_version", error))?;
-        if rows.is_empty() {
-            return Ok(());
-        }
-        let now = now_rfc3339();
-        let engine = self.database_engine().await?;
-        let instant_expression = instant_write_expression(engine, "$4");
-        for row in rows {
-            let id: i64 = row
-                .try_get("id")
-                .map_err(|error| store_error("map pruned web_source_version id", error))?;
-            let update_sql = format!(
-                "UPDATE web_source_version
-                 SET status = 3, pruned_at = {instant_expression}, pruned_by = $3,
-                     updated_at = {instant_expression}, version = version + 1
-                 WHERE tenant_id = $1 AND id = $2 AND status = 1"
-            );
-            sqlx::query(&update_sql)
-                .bind(tenant_id)
-                .bind(id)
-                .bind(actor_id)
-                .bind(&now)
-                .execute(&self.pool)
-                .await
-                .map_err(|error| store_error("prune web_source_version", error))?;
-        }
-        Ok(())
     }
 }
 

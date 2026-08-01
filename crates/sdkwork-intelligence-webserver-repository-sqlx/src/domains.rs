@@ -25,7 +25,7 @@ impl WebRepository {
         page_size: i32,
     ) -> WebServiceResult<DomainPage> {
         let site_internal_id = resolve_site_internal_id(&self.pool, tenant_id, site_id).await?;
-        let (_page, page_size, offset) = pagination(page, page_size);
+        let (_page, page_size, offset) = pagination(page, page_size)?;
         let total: i64 = sqlx::query_scalar(
             "SELECT COUNT(DISTINCT d.id)
              FROM web_domain d
@@ -82,7 +82,7 @@ impl WebRepository {
         page: i32,
         page_size: i32,
     ) -> WebServiceResult<DomainPage> {
-        let (_page, page_size, offset) = pagination(page, page_size);
+        let (_page, page_size, offset) = pagination(page, page_size)?;
         let total: i64 = sqlx::query_scalar(
             "SELECT COUNT(*) FROM web_domain WHERE tenant_id = $1 AND deleted_at IS NULL",
         )

@@ -572,9 +572,11 @@ async fn verify_repository_contract(context: &TestContext) {
             },
         )
         .await
-        .expect("deep page must remain a bounded SQL query");
-    assert!(deep_page.items.is_empty());
-    assert_eq!(deep_page.page_size, 100);
+        .expect_err("invalid page_size must be rejected");
+    assert!(matches!(
+        deep_page,
+        sdkwork_webserver_contract::WebServiceError::Validation(_)
+    ));
 
     verify_source_version_contract(context, &sites[0].id, &sites[1].id, &tenant_b_site.id).await;
     verify_deployment_idempotency(context, &sites[0].id, &sites[1].id).await;
@@ -2588,9 +2590,17 @@ async fn verify_source_version_contract(
     let page = repository
         .list_source_versions(TENANT_A, site_id, 1, i32::MAX)
         .await
+        .expect_err("invalid page_size must be rejected");
+    assert!(matches!(
+        page,
+        sdkwork_webserver_contract::WebServiceError::Validation(_)
+    ));
+    let page = repository
+        .list_source_versions(TENANT_A, site_id, 1, 200)
+        .await
         .expect("list retained and pruned source versions");
     assert_eq!(page.total, 7);
-    assert_eq!(page.page_size, 100);
+    assert_eq!(page.page_size, 200);
     assert_eq!(page.items.iter().filter(|item| item.retained).count(), 5);
     assert!(page.items[..5]
         .iter()

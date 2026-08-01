@@ -21,7 +21,7 @@ use sdkwork_routes_webserver_common::{
     accepted_async, created_resource, no_content, ok_audit_log_page,
     ok_certificate_distribution_page, ok_certificate_page, ok_deployment_page, ok_domain_page,
     ok_listener_certificate_binding_page, ok_nginx_config_page, ok_resource, ok_root_domain_page,
-    ok_server_page, ok_site_page, ok_source_version_page, WebApiError,
+    ok_server_page, ok_site_page, ok_source_version_page, validate_pagination_query, WebApiError,
 };
 
 #[derive(Clone)]
@@ -148,6 +148,7 @@ pub fn build_router_with_shared_backend_api(api: Arc<dyn WebBackendApi>) -> Rout
         // Arc<WebService> and WebBackendRequestContext from Extension layers.
         .route(paths::AGENT_HEARTBEAT, post(agent_routes::agent_heartbeat))
         .route(paths::AGENT_SYNC, get(agent_routes::agent_sync))
+        .layer(axum::middleware::from_fn(validate_pagination_query))
         .with_state(BackendState { api })
 }
 

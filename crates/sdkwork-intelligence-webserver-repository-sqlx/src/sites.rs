@@ -18,7 +18,7 @@ impl WebRepository {
         owner_id: Option<i64>,
         query: &ListSitesQuery,
     ) -> WebServiceResult<SitePage> {
-        let (page, page_size, offset) = pagination(query.page, query.page_size);
+        let (page, page_size, offset) = pagination(query.page, query.page_size)?;
         let keyword = query
             .keyword
             .as_deref()

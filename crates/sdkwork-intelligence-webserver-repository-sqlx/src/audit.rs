@@ -17,7 +17,7 @@ impl WebRepository {
         page: i32,
         page_size: i32,
     ) -> WebServiceResult<AuditLogPage> {
-        let (page, page_size, offset) = pagination(page, page_size);
+        let (page, page_size, offset) = pagination(page, page_size)?;
 
         let (count_row, rows) = if let Some(tenant_id) = tenant_id {
             let count_row =

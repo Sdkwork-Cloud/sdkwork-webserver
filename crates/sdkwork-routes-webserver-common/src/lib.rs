@@ -1,5 +1,6 @@
 //! Shared response adapters for SDKWork Web Server route crates.
 
+pub mod pagination;
 pub mod problem;
 pub mod response;
 
@@ -15,6 +16,7 @@ pub mod machine_credential {
 
 pub use correlation::{with_problem_correlation, WebProblemCorrelation};
 pub use machine_credential::MachineCredentialResolverDecorator;
+pub use pagination::validate_pagination_query;
 pub use problem::{WebApiError, WebApiResult};
 pub use response::{
     accepted_async, created_resource, no_content, ok_audit_log_page,

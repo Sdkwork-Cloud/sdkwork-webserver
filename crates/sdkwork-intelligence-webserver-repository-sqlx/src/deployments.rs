@@ -47,7 +47,7 @@ impl WebRepository {
         status: Option<i32>,
     ) -> WebServiceResult<DeploymentPage> {
         let site_internal_id = resolve_site_internal_id(&self.pool, tenant_id, site_id).await?;
-        let (page, page_size, offset) = pagination(page, page_size);
+        let (page, page_size, offset) = pagination(page, page_size)?;
 
         let (count_row, rows) = if let Some(status) = status {
             let count_row = sqlx::query(

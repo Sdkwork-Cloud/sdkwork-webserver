@@ -17,7 +17,7 @@ impl WebRepository {
         tenant_id: Option<i64>,
         query: &ListNginxConfigsQuery,
     ) -> WebServiceResult<NginxConfigPage> {
-        let (page, page_size, offset) = pagination(query.page, query.page_size);
+        let (page, page_size, offset) = pagination(query.page, query.page_size)?;
         let mut count_sql = String::from(
             "SELECT COUNT(*) AS total
              FROM web_nginx_config config

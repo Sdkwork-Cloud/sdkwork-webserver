@@ -1,6 +1,6 @@
 use sdkwork_database_config::DatabaseEngine;
 use sdkwork_database_id::{uuid_v4, uuid_v4_with_prefix, SnowflakeIdGenerator};
-use sdkwork_utils_rust::{crypto::sha256_hash, number::clamp};
+use sdkwork_utils_rust::crypto::sha256_hash;
 use sdkwork_webserver_contract::WebServiceError;
 use super::{EnginePool, EngineRow};
 use sqlx::{Error as SqlxError, Row};
@@ -12,9 +12,16 @@ pub(crate) fn now_rfc3339() -> String {
 pub(crate) fn store_error(context: &str, error: SqlxError) -> WebServiceError {
     tracing::error!(context, error = ?error, "database operation failed");
     match error {
-        SqlxError::Database(db) if db.is_unique_violation() => {
-            WebServiceError::conflict("resource already exists")
-        }
+        SqlxError::Database(db) => match db.code().as_deref() {
+            Some("23505") => WebServiceError::conflict("resource already exists"),
+            Some("23503" | "23514" | "22P02") => {
+                WebServiceError::validation("database constraint rejected the request")
+            }
+            Some("40001" | "40P01" | "55P03" | "57014") => {
+                WebServiceError::DatabaseUnavailable
+            }
+            _ => WebServiceError::Internal("database operation failed".to_string()),
+        },
         SqlxError::RowNotFound => WebServiceError::not_found("resource not found"),
         SqlxError::PoolTimedOut
         | SqlxError::PoolClosed
@@ -25,14 +32,25 @@ pub(crate) fn store_error(context: &str, error: SqlxError) -> WebServiceError {
 }
 
 pub(crate) fn is_unique_violation(error: &SqlxError) -> bool {
-    matches!(error, SqlxError::Database(database) if database.is_unique_violation())
+    matches!(error, SqlxError::Database(database) if database.code().as_deref() == Some("23505"))
 }
 
-pub(crate) fn pagination(page: i32, page_size: i32) -> (i32, i32, i64) {
-    let page = page.max(1);
-    let page_size = clamp(page_size, 1, 100);
-    let offset = (i64::from(page) - 1) * i64::from(page_size);
-    (page, page_size, offset)
+pub(crate) fn pagination(
+    page: i32,
+    page_size: i32,
+) -> Result<(i32, i32, i64), WebServiceError> {
+    if page < 1 {
+        return Err(WebServiceError::validation("page must be greater than or equal to 1"));
+    }
+    if !(1..=200).contains(&page_size) {
+        return Err(WebServiceError::validation(
+            "page_size must be between 1 and 200",
+        ));
+    }
+    let offset = (i64::from(page) - 1)
+        .checked_mul(i64::from(page_size))
+        .ok_or_else(|| WebServiceError::validation("pagination offset is too large"))?;
+    Ok((page, page_size, offset))
 }
 
 pub(crate) fn next_id(generator: &SnowflakeIdGenerator) -> Result<i64, WebServiceError> {
@@ -162,12 +180,13 @@ mod tests {
     use super::{normalize_database_instant, pagination};
 
     #[test]
-    fn pagination_clamps_inputs_and_computes_offset_without_i32_overflow() {
-        assert_eq!(pagination(-10, -20), (1, 1, 0));
-        assert_eq!(pagination(2, 500), (2, 100, 100));
+    fn pagination_rejects_invalid_inputs_and_computes_offset_without_i32_overflow() {
+        assert!(pagination(-10, 20).is_err());
+        assert!(pagination(1, 0).is_err());
+        assert!(pagination(1, 201).is_err());
         assert_eq!(
-            pagination(i32::MAX, i32::MAX),
-            (i32::MAX, 100, 214_748_364_600)
+            pagination(i32::MAX, 200).unwrap(),
+            (i32::MAX, 200, 429_496_729_200)
         );
     }
 

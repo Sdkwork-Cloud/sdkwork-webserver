@@ -24,9 +24,9 @@ encryption configuration is absent.
 
 ## Deployment Profile And Runtime Target Behavior
 
-The same repository contract runs against PostgreSQL and single-node SQLite.
-List operations bind finite `LIMIT` and `OFFSET` values in SQL; no repository
-list method collects an unbounded table and slices in memory.
+This repository implements the PostgreSQL authoritative-server contract only. SQLite is not a
+server fallback or a second repository engine. List operations bind finite `LIMIT` and `OFFSET`
+values in SQL; no repository list method collects an unbounded table and slices in memory.
 
 ## Security
 

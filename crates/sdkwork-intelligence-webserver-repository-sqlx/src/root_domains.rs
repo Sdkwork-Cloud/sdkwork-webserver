@@ -18,7 +18,7 @@ impl WebRepository {
         tenant_id: i64,
         query: &ListRootDomainsQuery,
     ) -> WebServiceResult<RootDomainPage> {
-        let (_page, page_size, offset) = pagination(query.page, query.page_size);
+        let (_page, page_size, offset) = pagination(query.page, query.page_size)?;
         let keyword = query
             .keyword
             .as_deref()
@@ -247,7 +247,7 @@ impl WebRepository {
         let root_internal_id = self
             .resolve_root_domain_internal_id(tenant_id, root_domain_id)
             .await?;
-        let (_page, page_size, offset) = pagination(page, page_size);
+        let (_page, page_size, offset) = pagination(page, page_size)?;
         let total: i64 = sqlx::query_scalar(
             "SELECT COUNT(*) FROM web_domain
              WHERE tenant_id = $1 AND root_domain_id = $2 AND deleted_at IS NULL",

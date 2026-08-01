@@ -19,7 +19,7 @@ impl WebRepository {
         page: i32,
         page_size: i32,
     ) -> WebServiceResult<ListenerCertificateBindingPage> {
-        let (_, page_size, offset) = pagination(page, page_size);
+        let (_, page_size, offset) = pagination(page, page_size)?;
         let count_row = sqlx::query(
             "SELECT COUNT(*) AS total
              FROM web_listener_certificate_binding l

@@ -71,6 +71,38 @@ async fn app_router_enforces_manifest_permissions_before_business_logic() {
     assert_eq!(allowed.status(), StatusCode::OK);
 }
 
+#[tokio::test]
+async fn app_router_rejects_non_canonical_or_out_of_range_pagination() {
+    let app = build_router_with_shared_app_api(Arc::new(StubAppApi));
+    for query in [
+        "page=0",
+        "page_size=201",
+        "pageSize=20",
+        "limit=20",
+        "page=1&page=2",
+        "page=1&cursor=opaque",
+    ] {
+        let response = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .uri(format!("/app/v3/api/sites?{query}"))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(response.status(), StatusCode::BAD_REQUEST, "{query}");
+        let body = response
+            .into_body()
+            .collect()
+            .await
+            .expect("collect bounded problem response")
+            .to_bytes();
+        assert!(String::from_utf8_lossy(&body).contains("40003"), "{query}");
+    }
+}
+
 fn authorized_request(auth_token: String) -> Request<Body> {
     Request::builder()
         .uri("/app/v3/api/sites")

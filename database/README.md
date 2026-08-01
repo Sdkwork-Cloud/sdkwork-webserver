@@ -26,9 +26,10 @@ runtime control plane and `application_type` were added. It preserves existing s
 refuses to invent tenant-scope hashes for legacy Web Nodes; operators must supply those hashes from
 their authoritative tenant assignments before rerunning the migration.
 
-SQLite is not an authoritative server engine or deployment profile. The historical SQLite DDL is
-retained under `tests/fixtures/database/sqlite/` only for isolated SQLx repository parity. It is not
-read by database lifecycle discovery, included in release packages, or accepted as a rollback target.
+SQLite is not an authoritative server engine or deployment profile. This Web Server repository
+does not provide a server-side SQLite repository or SQLite release profile. Any future SQLite
+fixture must be declared separately as `client-local`; it cannot be used as server parity evidence,
+an authority fallback, or a rollback target.
 
 ## Commands
 
@@ -41,19 +42,18 @@ pnpm run db:migrate
 pnpm run db:seed
 pnpm run db:status
 pnpm run db:drift:check
-pnpm run db:test:sqlite
 SDKWORK_DATABASE_TEST_POSTGRES_URL=<disposable-url> pnpm run db:test:postgres
 pnpm run test:database:recovery
 pnpm run test:postgres:ha
 ```
 
-`db:test:sqlite` exercises only the repository test fixture. `db:test:postgres` requires an explicit,
-disposable, empty PostgreSQL database and refuses to continue if the target schema already contains
+`db:test:postgres` requires an explicit, disposable, empty PostgreSQL database and refuses to continue if the target schema already contains
 `web_*` tables.
 
 `test:database:recovery` is a destructive drill scoped to its temporary test directory and disposable
-PostgreSQL container. PostgreSQL recovery is the authoritative release evidence. Any retained SQLite
-fixture coverage is compatibility evidence only and does not establish server backup support.
+PostgreSQL container. PostgreSQL recovery is the authoritative release evidence. SQLite client-local
+tests, if introduced by a client component, cannot establish server backup, transaction, or
+compatibility support.
 
 `test:postgres:ha` owns two disposable PostgreSQL containers and one internal Docker network. It proves
 physical base backup, asynchronous WAL streaming, replay to a recorded flush LSN, primary shutdown,

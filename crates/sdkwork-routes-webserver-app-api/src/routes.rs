@@ -18,7 +18,7 @@ use sdkwork_routes_webserver_common::{
     accepted_async, created_resource, no_content, ok_certificate_page, ok_deployment_page,
     ok_domain_page, ok_env_variable_page, ok_health_check_page,
     ok_listener_certificate_binding_page, ok_resource, ok_site_page, ok_source_version_page,
-    WebApiError,
+    validate_pagination_query, WebApiError,
 };
 
 #[derive(Clone)]
@@ -85,6 +85,7 @@ pub fn build_router_with_shared_app_api(api: Arc<dyn WebAppApi>) -> Router {
             paths::SITE_HEALTH_CHECKS,
             get(list_health_checks).post(create_health_check),
         )
+        .layer(axum::middleware::from_fn(validate_pagination_query))
         .with_state(AppState { api })
 }
 

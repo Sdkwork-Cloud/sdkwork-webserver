@@ -24,7 +24,7 @@ impl WebRepository {
         page: i32,
         page_size: i32,
     ) -> WebServiceResult<CertificatePage> {
-        let (_page, page_size, offset) = pagination(page, page_size);
+        let (_page, page_size, offset) = pagination(page, page_size)?;
         let total: i64 = sqlx::query_scalar(
              "SELECT COUNT(*) FROM web_certificate c
               WHERE c.tenant_id = $1 AND c.deleted_at IS NULL
