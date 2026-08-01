@@ -109,7 +109,7 @@ async fn wrap_router_with_web_framework_from_env_and_optional_metrics(
         WebAuthMode::DevInline => with_web_request_context(
             correlated,
             build_web_internal_api_framework_layer(
-                MachineCredentialResolverDecorator::new(
+                MachineCredentialResolverDecorator::new_machine_only(
                     DefaultWebRequestContextResolver::default(),
                     machine_authenticator,
                 ),
@@ -119,7 +119,7 @@ async fn wrap_router_with_web_framework_from_env_and_optional_metrics(
         WebAuthMode::ProductionFailClosed => with_web_request_context(
             correlated,
             build_web_internal_api_framework_layer(
-                MachineCredentialResolverDecorator::new(
+                MachineCredentialResolverDecorator::new_machine_only(
                     ProductionFailClosedResolver,
                     machine_authenticator,
                 ),
@@ -129,7 +129,10 @@ async fn wrap_router_with_web_framework_from_env_and_optional_metrics(
         WebAuthMode::IamDatabase(resolver) => with_web_request_context(
             correlated,
             build_web_internal_api_framework_layer(
-                MachineCredentialResolverDecorator::new(resolver, machine_authenticator),
+                MachineCredentialResolverDecorator::new_machine_only(
+                    resolver,
+                    machine_authenticator,
+                ),
                 metrics,
             ),
         ),

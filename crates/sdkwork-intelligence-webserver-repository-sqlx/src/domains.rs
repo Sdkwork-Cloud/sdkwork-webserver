@@ -273,6 +273,9 @@ impl WebRepository {
                      WHERE b.tenant_id = d.tenant_id AND b.domain_id = d.id
                        AND b.deleted_at IS NULL AND b.status <> 'ARCHIVED') AS binding_count,
                     (SELECT COUNT(*) FROM web_certificate_identifier ci
+                     INNER JOIN web_certificate c
+                       ON c.tenant_id = ci.tenant_id AND c.id = ci.certificate_id
+                      AND c.deleted_at IS NULL
                      WHERE ci.tenant_id = d.tenant_id AND ci.domain_id = d.id) AS certificate_count
              FROM web_domain d
              WHERE d.tenant_id = $1 AND d.uuid = $2 AND d.deleted_at IS NULL",
@@ -733,6 +736,21 @@ impl WebRepository {
         }
         let engine = self.database_engine().await?;
         if is_primary {
+            // Serialize primary binding creation on the site row so concurrent
+            // primary bindings cannot both pass the single-primary check and
+            // collide at activation time.
+            let locked = sqlx::query(
+                "UPDATE web_site SET version = version
+                 WHERE tenant_id = $1 AND id = $2 AND deleted_at IS NULL",
+            )
+            .bind(tenant_id)
+            .bind(site_id)
+            .execute(&mut **tx)
+            .await
+            .map_err(|error| store_error("lock site for primary binding", error))?;
+            if locked.rows_affected() != 1 {
+                return Err(WebServiceError::not_found("site not found"));
+            }
             let clear_time = instant_write_expression(engine, "$3");
             let clear_sql = format!(
                 "UPDATE web_site_binding SET is_primary = FALSE, updated_at = {clear_time},

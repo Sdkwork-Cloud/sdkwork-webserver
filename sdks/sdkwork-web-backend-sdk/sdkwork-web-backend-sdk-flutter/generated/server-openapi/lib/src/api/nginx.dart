@@ -16,9 +16,9 @@ class NginxApi {
     final query = buildQueryString([
       QueryParameterSpec('page', page, 'form', true, false, null),
       QueryParameterSpec('page_size', pageSize, 'form', true, false, null),
-      QueryParameterSpec('siteId', siteId, 'form', true, false, null),
-      QueryParameterSpec('configType', configType, 'form', true, false, null),
-      QueryParameterSpec('isActive', isActive, 'form', true, false, null)
+      QueryParameterSpec('site_id', siteId, 'form', true, false, null),
+      QueryParameterSpec('config_type', configType, 'form', true, false, null),
+      QueryParameterSpec('is_active', isActive, 'form', true, false, null)
     ]);
     final response = await _client.get(ApiPaths.appendQueryString(ApiPaths.backendPath('/nginx/configs'), query));
     return (() {

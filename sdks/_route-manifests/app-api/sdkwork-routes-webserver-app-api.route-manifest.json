@@ -666,6 +666,58 @@
       "rateLimitTier": null
     },
     {
+      "method": "PATCH",
+      "path": "/app/v3/api/sites/{siteId}/env_variables/{variableId}",
+      "operationId": "sites.envVariables.update",
+      "tags": [
+        "envVariable"
+      ],
+      "auth": {
+        "mode": "dual-token",
+        "required": true
+      },
+      "routeAuth": "dual-token",
+      "handler": {
+        "module": "crate::routes",
+        "name": null
+      },
+      "ownership": {
+        "owner": "sdkwork-web",
+        "apiAuthority": "sdkwork-web.app"
+      },
+      "requestContext": "WebRequestContext",
+      "apiSurface": "app-api",
+      "permission": "web.sites.write",
+      "idempotent": true,
+      "rateLimitTier": null
+    },
+    {
+      "method": "DELETE",
+      "path": "/app/v3/api/sites/{siteId}/env_variables/{variableId}",
+      "operationId": "sites.envVariables.delete",
+      "tags": [
+        "envVariable"
+      ],
+      "auth": {
+        "mode": "dual-token",
+        "required": true
+      },
+      "routeAuth": "dual-token",
+      "handler": {
+        "module": "crate::routes",
+        "name": null
+      },
+      "ownership": {
+        "owner": "sdkwork-web",
+        "apiAuthority": "sdkwork-web.app"
+      },
+      "requestContext": "WebRequestContext",
+      "apiSurface": "app-api",
+      "permission": "web.sites.write",
+      "idempotent": true,
+      "rateLimitTier": null
+    },
+    {
       "method": "GET",
       "path": "/app/v3/api/certificates",
       "operationId": "certificates.list",

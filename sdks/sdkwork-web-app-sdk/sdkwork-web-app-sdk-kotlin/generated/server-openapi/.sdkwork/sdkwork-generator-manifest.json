@@ -36,7 +36,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "2caa0eba80635437cf29d11308a411b64b537bcafc09db2ce67cf2777b0cfbba"
+      "sha256": "39736c64a7c5e1692ee57b774852014b4639631f170f14efabd782d716d941d8"
     },
     {
       "path": "sdkwork-sdk.json",
@@ -56,11 +56,11 @@
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/api/CertificateApi.kt",
-      "sha256": "7fa62b51e7700a2ec622b69b6ffd856ae0d529cd41eb4c9c4bfd16acd5a265db"
+      "sha256": "82e8c03786776e504dc1009ef962969abbe07c0f840b33cf6ddd7fa92cd0a1f9"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/api/DeploymentApi.kt",
-      "sha256": "aaeeedd2bd471266162c5e9c76063f929f200bd03b6e5bbeb7aa6791b2f8f27c"
+      "sha256": "3d541fa6f85a1d34cb365fd8bb996d6f596cf835d7b2aee35ebb4b2f46c473c7"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/api/DomainApi.kt",
@@ -68,7 +68,7 @@
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/api/EnvVariableApi.kt",
-      "sha256": "ddc5b5b28c23ccb6e16d10915ee57cffcc1b4834bae6b24c4e17ffa2ec52fc5e"
+      "sha256": "81dcc47e7a4d47ba505f7ae129c04e449ee99043aa57a32407b62bfe75820b41"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/api/MonitorApi.kt",
@@ -76,7 +76,7 @@
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/api/SiteApi.kt",
-      "sha256": "6b1154473781463c277ec012202be9ead460144c6e55f5c07bf5b47572d5d957"
+      "sha256": "debb9f4e6d2f99cdbb4052f8b64544dbcea8f10fe0a38596bb8b5c399ecd8cf8"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/api/SourceVersionApi.kt",
@@ -319,6 +319,10 @@
       "sha256": "c92e5c2173e2f6b39cd08d87c5603f7bc3f5c08587a178faec7a3669b96734e9"
     },
     {
+      "path": "src/main/kotlin/com/sdkwork/web/app/sdk/SitesEnvVariablesUpdateResponse.kt",
+      "sha256": "f616f49e643fd706544c512a37903c9cf2cfafdecfc76f9aac75f61941488f75"
+    },
+    {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/SitesHealthChecksCreateResponse201.kt",
       "sha256": "c264a7307b1c501265296a8e87ce546bfa7c00df9e383dfbed59ad9ad29fc38d"
     },
@@ -369,6 +373,10 @@
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/SourceVersionResponse.kt",
       "sha256": "7e746e08b7b24deb119fff19db7693520a23f12dd0f4702a3b921bcc0d91af29"
+    },
+    {
+      "path": "src/main/kotlin/com/sdkwork/web/app/sdk/UpdateEnvVariableRequest.kt",
+      "sha256": "b01068e9a388354c657808d6d0157bb89f59361480fe0f6199084b13066f93c7"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/UpdateSiteRequest.kt",

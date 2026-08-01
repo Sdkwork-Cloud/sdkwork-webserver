@@ -27,8 +27,8 @@ client.setAccessToken("your-access-token")
 let params: [String: Any] = [
     "page": 1,
     "page_size": 2,
-    "siteId": "00000000-0000-0000-0000-000000000001",
-    "domainId": "00000000-0000-0000-0000-000000000001"
+    "site_id": "00000000-0000-0000-0000-000000000001",
+    "domain_id": "00000000-0000-0000-0000-000000000001"
 ]
 let result = try await client.certificate.certificatesList(params: params)
 print(result)
@@ -72,8 +72,8 @@ let params: [String: Any] = [
     "page": 1,
     "page_size": 2,
     "status": 0,
-    "applicationType": "WEB",
-    "siteType": 1,
+    "application_type": "WEB",
+    "site_type": 1,
     "keyword": "keyword"
 ]
 let result = try await client.site.sitesList(params: params)
@@ -100,8 +100,8 @@ print(result)
 let params: [String: Any] = [
     "page": 1,
     "page_size": 2,
-    "siteId": "00000000-0000-0000-0000-000000000001",
-    "domainId": "00000000-0000-0000-0000-000000000001"
+    "site_id": "00000000-0000-0000-0000-000000000001",
+    "domain_id": "00000000-0000-0000-0000-000000000001"
 ]
 let result = try await client.certificate.certificatesList(params: params)
 print(result)
@@ -128,6 +128,7 @@ let siteId = "1"
 let params: [String: Any] = [
     "page": 1,
     "page_size": 2,
+    "cursor": "cursor",
     "status": 0
 ]
 let result = try await client.deployment.sitesDeploymentsList(siteId: siteId, params: params)
@@ -162,8 +163,8 @@ do {
     let params: [String: Any] = [
         "page": 1,
         "page_size": 2,
-        "siteId": "00000000-0000-0000-0000-000000000001",
-        "domainId": "00000000-0000-0000-0000-000000000001"
+        "site_id": "00000000-0000-0000-0000-000000000001",
+        "domain_id": "00000000-0000-0000-0000-000000000001"
     ]
     try await client.certificate.certificatesList(params: params)
 } catch {

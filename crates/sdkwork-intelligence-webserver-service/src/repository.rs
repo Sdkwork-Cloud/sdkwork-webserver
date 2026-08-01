@@ -12,12 +12,13 @@ use sdkwork_webserver_contract::{
     CreateServerRequest, CreateServerResponse, CreateSiteRequest, CreateSourceVersionRequest,
     DeploymentPage, DeploymentResponse, DomainPage, DomainResponse, EnvVariablePage,
     EnvVariableResponse, HealthCheckPage, HealthCheckResponse, IssueCertificateRequest,
-    ListNginxConfigsQuery, ListRootDomainsQuery, ListSitesQuery, ListenerCertificateBindingPage,
+    ListAuditLogsQuery, ListNginxConfigsQuery, ListRootDomainsQuery, ListSitesQuery, ListenerCertificateBindingPage,
     ListenerCertificateBindingResponse, NginxConfigPage, NginxConfigResponse, NginxReloadResponse,
     NginxStatusResponse, NginxValidateResponse, RootDomainPage, RootDomainResponse,
     RuntimeAssignment, RuntimeAssignmentDelivery, RuntimeObservation, RuntimeObservationState,
     ServerPage, SitePage, SiteResponse, SourceVersionPage, SourceVersionResponse,
-    UpdateDomainApplicationBindingRequest, UpdateNginxConfigRequest, UpdateSiteRequest,
+    UpdateDomainApplicationBindingRequest, UpdateEnvVariableRequest, UpdateNginxConfigRequest,
+    UpdateSiteRequest,
 };
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -297,6 +298,7 @@ pub trait WebRepositoryPort: Send + Sync {
         page: i32,
         page_size: i32,
         status: Option<i32>,
+        cursor: Option<&str>,
     ) -> WebServiceResult<DeploymentPage>;
 
     async fn create_deployment(
@@ -336,6 +338,21 @@ pub trait WebRepositoryPort: Send + Sync {
         site_id: &str,
         request: &CreateEnvVariableRequest,
     ) -> WebServiceResult<EnvVariableResponse>;
+
+    async fn update_env_variable(
+        &self,
+        tenant_id: i64,
+        site_id: &str,
+        variable_id: &str,
+        request: &UpdateEnvVariableRequest,
+    ) -> WebServiceResult<EnvVariableResponse>;
+
+    async fn delete_env_variable(
+        &self,
+        tenant_id: i64,
+        site_id: &str,
+        variable_id: &str,
+    ) -> WebServiceResult<()>;
 
     async fn list_certificates(
         &self,
@@ -383,6 +400,19 @@ pub trait WebRepositoryPort: Send + Sync {
         lease_seconds: i64,
         limit: i32,
     ) -> WebServiceResult<Vec<CertificateOperationLease>>;
+
+    async fn renew_certificate_operation_lease(
+        &self,
+        lease: &CertificateOperationLease,
+        lease_seconds: i64,
+    ) -> WebServiceResult<()>;
+
+    async fn delete_certificate(
+        &self,
+        tenant_id: i64,
+        certificate_id: &str,
+        deleted_by: Option<i64>,
+    ) -> WebServiceResult<()>;
 
     async fn list_listener_certificate_bindings(
         &self,
@@ -571,8 +601,7 @@ pub trait WebRepositoryPort: Send + Sync {
     async fn list_audit_logs(
         &self,
         tenant_id: Option<i64>,
-        page: i32,
-        page_size: i32,
+        query: &ListAuditLogsQuery,
     ) -> WebServiceResult<AuditLogPage>;
 
     async fn insert_audit_log(&self, entry: AuditLogWrite<'_>) -> WebServiceResult<()>;

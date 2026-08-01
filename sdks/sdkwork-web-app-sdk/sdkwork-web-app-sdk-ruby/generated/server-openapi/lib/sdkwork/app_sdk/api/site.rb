@@ -19,8 +19,8 @@ module Sdkwork
               QueryParameterSpec.new('page', page, 'form', true, false, nil),
               QueryParameterSpec.new('page_size', page_size, 'form', true, false, nil),
               QueryParameterSpec.new('status', status, 'form', true, false, nil),
-              QueryParameterSpec.new('applicationType', application_type, 'form', true, false, nil),
-              QueryParameterSpec.new('siteType', site_type, 'form', true, false, nil),
+              QueryParameterSpec.new('application_type', application_type, 'form', true, false, nil),
+              QueryParameterSpec.new('site_type', site_type, 'form', true, false, nil),
               QueryParameterSpec.new('keyword', keyword, 'form', true, false, nil),
             ])
             path = append_query_string(path, query)

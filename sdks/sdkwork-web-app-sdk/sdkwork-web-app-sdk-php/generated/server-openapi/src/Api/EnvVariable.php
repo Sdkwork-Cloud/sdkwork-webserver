@@ -7,6 +7,8 @@ namespace SDKWork\Web\AppSdk\Api;
 use SDKWork\Web\AppSdk\Models\CreateEnvVariableRequest;
 use SDKWork\Web\AppSdk\Models\SitesEnvVariablesCreateResponse201;
 use SDKWork\Web\AppSdk\Models\SitesEnvVariablesListResponse;
+use SDKWork\Web\AppSdk\Models\SitesEnvVariablesUpdateResponse;
+use SDKWork\Web\AppSdk\Models\UpdateEnvVariableRequest;
 
 final class EnvVariableApi extends BaseApi
 {
@@ -38,6 +40,40 @@ final class EnvVariableApi extends BaseApi
             'json' => $payload,
         ]);
         return is_array($result) ? SitesEnvVariablesCreateResponse201::fromArray($result) : null;
+    }
+
+    /** 轮换环境变量值 */
+    public function sitesEnvVariablesUpdate(string $siteId, string $variableId, array|UpdateEnvVariableRequest $body, string $idempotencyKey): ?SitesEnvVariablesUpdateResponse
+    {
+        $path = $this->interpolatePath('/app/v3/api/sites/{siteId}/env_variables/{variableId}', ['siteId' => $this->serializePathParameter($siteId, new PathParameterSpec('siteId', 'simple', false)), 'variableId' => $this->serializePathParameter($variableId, new PathParameterSpec('variableId', 'simple', false))]);
+        $payload = $body instanceof UpdateEnvVariableRequest ? $body->toArray() : $body;
+        $requestHeaders = $this->buildRequestHeaders(
+            [
+                'Idempotency-Key' => new HeaderParameterSpec($idempotencyKey, 'simple', false, null),
+            ],
+            []
+        );
+        $result = $this->client->request('PATCH', $path, [
+            'headers' => $requestHeaders,
+            'json' => $payload,
+        ]);
+        return is_array($result) ? SitesEnvVariablesUpdateResponse::fromArray($result) : null;
+    }
+
+    /** 删除环境变量 */
+    public function sitesEnvVariablesDelete(string $siteId, string $variableId, string $idempotencyKey): void
+    {
+        $path = $this->interpolatePath('/app/v3/api/sites/{siteId}/env_variables/{variableId}', ['siteId' => $this->serializePathParameter($siteId, new PathParameterSpec('siteId', 'simple', false)), 'variableId' => $this->serializePathParameter($variableId, new PathParameterSpec('variableId', 'simple', false))]);
+        $requestHeaders = $this->buildRequestHeaders(
+            [
+                'Idempotency-Key' => new HeaderParameterSpec($idempotencyKey, 'simple', false, null),
+            ],
+            []
+        );
+        $this->client->request('DELETE', $path, [
+            'headers' => $requestHeaders,
+        ]);
+        return;
     }
 
     private function buildRequestHeaders(array $headers, array $cookies): array

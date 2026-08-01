@@ -15,15 +15,16 @@ impl AuditApi {
     }
 
     /// List audit logs
-    pub async fn logs_list(&self, page: Option<i64>, page_size: Option<i64>, target_type: Option<&str>, action: Option<&str>, operator_id: Option<&str>, start_date: Option<&str>, end_date: Option<&str>) -> Result<serde_json::Value, SdkworkError> {
+    pub async fn logs_list(&self, page: Option<i64>, page_size: Option<i64>, cursor: Option<&str>, target_type: Option<&str>, action: Option<&str>, operator_id: Option<&str>, start_date: Option<&str>, end_date: Option<&str>) -> Result<serde_json::Value, SdkworkError> {
         let query = build_query_string(&[
             QueryParameterSpec::new("page", page, "form", true, false, None),
             QueryParameterSpec::new("page_size", page_size, "form", true, false, None),
-            QueryParameterSpec::new("targetType", target_type, "form", true, false, None),
+            QueryParameterSpec::new("cursor", cursor, "form", true, false, None),
+            QueryParameterSpec::new("target_type", target_type, "form", true, false, None),
             QueryParameterSpec::new("action", action, "form", true, false, None),
-            QueryParameterSpec::new("operatorId", operator_id, "form", true, false, None),
-            QueryParameterSpec::new("startDate", start_date, "form", true, false, None),
-            QueryParameterSpec::new("endDate", end_date, "form", true, false, None),
+            QueryParameterSpec::new("operator_id", operator_id, "form", true, false, None),
+            QueryParameterSpec::new("start_date", start_date, "form", true, false, None),
+            QueryParameterSpec::new("end_date", end_date, "form", true, false, None),
         ]);
         let path = append_query_string(backend_path(&"/audit_logs".to_string()), &query);
         self.client.get(&path, None, None).await

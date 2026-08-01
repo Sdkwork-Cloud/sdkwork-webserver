@@ -12,11 +12,11 @@
   "generatedFiles": [
     {
       "path": "api/agent.go",
-      "sha256": "09fd345e9244fc07dcb329cb1f4628a585abbce6f96f476faa8699cf10e6c17b"
+      "sha256": "af8eaad01699e6e6b4a3b84e9a7ea8c3cca7698ec364cb50b12880a22c9c4d83"
     },
     {
       "path": "api/application_deployment.go",
-      "sha256": "5d71fa1be0fe34386d2e4ced732f0c26610a193386980106b5a8d9a3e1fa68cc"
+      "sha256": "6e9f887b7e6b9cc24da5243bda8487ef7ace671dc5f7159884ebeb0be770f233"
     },
     {
       "path": "api/application_domain.go",
@@ -28,11 +28,11 @@
     },
     {
       "path": "api/application.go",
-      "sha256": "9a91955965c042102784d43385415bc3898fd616ab9f1c29c2a9b0efe0271357"
+      "sha256": "532e1361247213e44b7c8da65fb7621812fecbdf7d59f1c124140a9a0f4fb47a"
     },
     {
       "path": "api/audit.go",
-      "sha256": "2a6088094f29214109b427c62c227dcc2ef94008865a18fa03a8afebd70f1792"
+      "sha256": "ed1e27a39be63675dc3c4b01032c9e7e4963e430077400149968f8395596317e"
     },
     {
       "path": "api/base.go",
@@ -44,7 +44,7 @@
     },
     {
       "path": "api/certificate.go",
-      "sha256": "ff8ad9e0488d666bd56a71e0ed96f0e6f716cae8395a9f275cefa1e5d1a9c802"
+      "sha256": "9943a18988d94bef48050313e37e045496577a40cf38efb8d5cf2610b1e7b6b4"
     },
     {
       "path": "api/doc.go",
@@ -56,7 +56,7 @@
     },
     {
       "path": "api/nginx.go",
-      "sha256": "5e9f4e635d778c7f5a09087e421aa92cf7da8e7d9cdf6dbc8b1c2cf43a5747bc"
+      "sha256": "c6de18fc72deab917b8ef1f141534283d063340f9d2e2ab77b0e9f20863e3ef8"
     },
     {
       "path": "api/paths.go",
@@ -104,7 +104,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "0979d1c57a29c7634b84cd7fa038270f2bf743a5e7f76beee5d33af0454047f1"
+      "sha256": "3689ca03a1e90e123f352d6264fba00cd125061866e8671569aec4c1acc0b5b7"
     },
     {
       "path": "sdk.go",

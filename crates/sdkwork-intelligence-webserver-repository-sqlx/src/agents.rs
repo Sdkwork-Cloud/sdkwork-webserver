@@ -7,11 +7,11 @@ use sdkwork_webserver_contract::{
 };
 use serde_json::{json, Value};
 use std::collections::{BTreeMap, BTreeSet};
-use super::{EngineDatabase, EnginePool, EngineRow, WebRepository};
+use super::{EngineDatabase, EngineRow, WebRepository};
 use sqlx::Row;
 
 use super::support::{
-    instant_write_expression, json_from_row, json_write_expression, new_agent_token, now_rfc3339,
+    instant_write_expression, json_from_row, new_agent_token, now_rfc3339,
     pagination, sha256_hex, store_error,
 };
 use super::certificate_secrets::decrypt_certificate_secret_bundle;
@@ -138,20 +138,19 @@ impl WebRepository {
             "lastAppliedSyncVersion": request.last_sync_version,
         });
 
-        let metadata =
-            merge_server_metadata(&self.pool, &agent.server_uuid, &metadata_patch).await?;
+        // Atomic JSONB merge so concurrent heartbeats never lose fields.
         let engine = self.database_engine().await?;
-        let metadata_expression = json_write_expression(engine, "$2");
         let now_expression = instant_write_expression(engine, "$3");
         let update_sql = format!(
-            "UPDATE web_server SET status = 1, metadata = {metadata_expression},
-                    updated_at = {now_expression}, version = version + 1
+            "UPDATE web_server
+             SET status = 1, metadata = metadata || CAST($2 AS JSONB),
+                 updated_at = {now_expression}, version = version + 1
              WHERE tenant_id = $1 AND uuid = $4"
         );
 
         sqlx::query(&update_sql)
             .bind(agent.tenant_id)
-            .bind(metadata.to_string())
+            .bind(metadata_patch.to_string())
             .bind(&now)
             .bind(&agent.server_uuid)
             .execute(&self.pool)
@@ -1046,32 +1045,6 @@ impl WebRepository {
         }
         Ok(items)
     }
-}
-
-async fn merge_server_metadata(
-    pool: &EnginePool,
-    server_uuid: &str,
-    patch: &Value,
-) -> Result<Value, WebServiceError> {
-    let row =
-        sqlx::query("SELECT CAST(metadata AS TEXT) AS metadata FROM web_server WHERE uuid = $1")
-            .bind(server_uuid)
-            .fetch_optional(pool)
-            .await
-            .map_err(|error| store_error("load web_server metadata", error))?
-            .ok_or_else(|| WebServiceError::not_found("server not found"))?;
-
-    let mut existing = json_from_row(&row, "metadata")
-        .map_err(|error| WebServiceError::Internal(format!("read server metadata: {error}")))?
-        .unwrap_or_else(|| json!({}));
-    if let Some(object) = existing.as_object_mut() {
-        if let Some(patch_object) = patch.as_object() {
-            for (key, value) in patch_object {
-                object.insert(key.clone(), value.clone());
-            }
-        }
-    }
-    Ok(existing)
 }
 
 fn map_authenticated_agent(row: &EngineRow) -> Result<AuthenticatedAgent, sqlx::Error> {

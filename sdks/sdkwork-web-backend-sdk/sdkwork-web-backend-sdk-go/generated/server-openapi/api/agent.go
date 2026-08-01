@@ -30,7 +30,7 @@ func (a *AgentApi) Heartbeat(body sdktypes.AgentHeartbeatRequest) (sdktypes.Hear
 // Retrieve the Nginx configuration and certificate bundle
 func (a *AgentApi) Retrieve(ifSyncVersion *string) (sdktypes.RetrieveResponse, error) {
     query := BuildQueryString([]QueryParameterSpec{
-        {Name: "ifSyncVersion", Value: func() interface{} { if ifSyncVersion == nil { return nil }; return *ifSyncVersion }(), Style: "form", Explode: true, AllowReserved: false},
+        {Name: "if_sync_version", Value: func() interface{} { if ifSyncVersion == nil { return nil }; return *ifSyncVersion }(), Style: "form", Explode: true, AllowReserved: false},
     })
     raw, err := a.client.Get(AppendQueryString(BackendApiPath("/agent/sync"), query), nil, nil)
     if err != nil {

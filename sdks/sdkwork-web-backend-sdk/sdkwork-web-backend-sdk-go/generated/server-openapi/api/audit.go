@@ -18,15 +18,16 @@ func NewAuditApi(client *sdkhttp.Client) *AuditApi {
 }
 
 // List audit logs
-func (a *AuditApi) LogsList(page *int, pageSize *int, targetType *string, action *string, operatorId *string, startDate *string, endDate *string) (sdktypes.AuditLogsListResponse, error) {
+func (a *AuditApi) LogsList(page *int, pageSize *int, cursor *string, targetType *string, action *string, operatorId *string, startDate *string, endDate *string) (sdktypes.AuditLogsListResponse, error) {
     query := BuildQueryString([]QueryParameterSpec{
         {Name: "page", Value: func() interface{} { if page == nil { return nil }; return *page }(), Style: "form", Explode: true, AllowReserved: false},
         {Name: "page_size", Value: func() interface{} { if pageSize == nil { return nil }; return *pageSize }(), Style: "form", Explode: true, AllowReserved: false},
-        {Name: "targetType", Value: func() interface{} { if targetType == nil { return nil }; return *targetType }(), Style: "form", Explode: true, AllowReserved: false},
+        {Name: "cursor", Value: func() interface{} { if cursor == nil { return nil }; return *cursor }(), Style: "form", Explode: true, AllowReserved: false},
+        {Name: "target_type", Value: func() interface{} { if targetType == nil { return nil }; return *targetType }(), Style: "form", Explode: true, AllowReserved: false},
         {Name: "action", Value: func() interface{} { if action == nil { return nil }; return *action }(), Style: "form", Explode: true, AllowReserved: false},
-        {Name: "operatorId", Value: func() interface{} { if operatorId == nil { return nil }; return *operatorId }(), Style: "form", Explode: true, AllowReserved: false},
-        {Name: "startDate", Value: func() interface{} { if startDate == nil { return nil }; return *startDate }(), Style: "form", Explode: true, AllowReserved: false},
-        {Name: "endDate", Value: func() interface{} { if endDate == nil { return nil }; return *endDate }(), Style: "form", Explode: true, AllowReserved: false},
+        {Name: "operator_id", Value: func() interface{} { if operatorId == nil { return nil }; return *operatorId }(), Style: "form", Explode: true, AllowReserved: false},
+        {Name: "start_date", Value: func() interface{} { if startDate == nil { return nil }; return *startDate }(), Style: "form", Explode: true, AllowReserved: false},
+        {Name: "end_date", Value: func() interface{} { if endDate == nil { return nil }; return *endDate }(), Style: "form", Explode: true, AllowReserved: false},
     })
     raw, err := a.client.Get(AppendQueryString(BackendApiPath("/audit_logs"), query), nil, nil)
     if err != nil {

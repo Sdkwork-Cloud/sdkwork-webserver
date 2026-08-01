@@ -40,7 +40,7 @@ export class CertificateSitesDomainsListenerCertificateBindingsApi {
 
 
 /** List certificates active on the domain listener */
-  async list(siteId: string, domainId: string, params?: CertificateSitesDomainsListenerCertificateBindingsListParams, requestOptions?: ApiRequestOptions): Promise<{ items: ListenerCertificateBindingResponse[]; pageInfo: PageInfo; }> {
+  async list(siteId: string | number, domainId: string | number, params?: CertificateSitesDomainsListenerCertificateBindingsListParams, requestOptions?: ApiRequestOptions): Promise<{ items: ListenerCertificateBindingResponse[]; pageInfo: PageInfo; }> {
     const query = buildQueryString([
       { name: 'page', value: params?.page, style: 'form', explode: true, allowReserved: false },
       { name: 'page_size', value: params?.pageSize, style: 'form', explode: true, allowReserved: false },
@@ -49,7 +49,7 @@ export class CertificateSitesDomainsListenerCertificateBindingsApi {
   }
 
 /** Bind a certificate version to the domain listener */
-  async create(siteId: string, domainId: string, body: CreateListenerCertificateBindingRequest, params: CertificateSitesDomainsListenerCertificateBindingsCreateParams, requestOptions?: ApiRequestOptions): Promise<ListenerCertificateBindingResponse> {
+  async create(siteId: string | number, domainId: string | number, body: CreateListenerCertificateBindingRequest, params: CertificateSitesDomainsListenerCertificateBindingsCreateParams, requestOptions?: ApiRequestOptions): Promise<ListenerCertificateBindingResponse> {
     const requestHeaders = buildRequestHeaders(
       {
         'Idempotency-Key': { value: params.idempotencyKey, style: 'simple', explode: false },
@@ -60,7 +60,7 @@ export class CertificateSitesDomainsListenerCertificateBindingsApi {
   }
 
 /** Remove a certificate from the domain listener */
-  async delete(siteId: string, domainId: string, bindingId: string, params: CertificateSitesDomainsListenerCertificateBindingsDeleteParams, requestOptions?: ApiRequestOptions): Promise<void> {
+  async delete(siteId: string | number, domainId: string | number, bindingId: string, params: CertificateSitesDomainsListenerCertificateBindingsDeleteParams, requestOptions?: ApiRequestOptions): Promise<void> {
     const requestHeaders = buildRequestHeaders(
       {
         'Idempotency-Key': { value: params.idempotencyKey, style: 'simple', explode: false },
@@ -121,8 +121,8 @@ export class CertificateApi {
     const query = buildQueryString([
       { name: 'page', value: params?.page, style: 'form', explode: true, allowReserved: false },
       { name: 'page_size', value: params?.pageSize, style: 'form', explode: true, allowReserved: false },
-      { name: 'siteId', value: params?.siteId, style: 'form', explode: true, allowReserved: false },
-      { name: 'domainId', value: params?.domainId, style: 'form', explode: true, allowReserved: false },
+      { name: 'site_id', value: params?.siteId, style: 'form', explode: true, allowReserved: false },
+      { name: 'domain_id', value: params?.domainId, style: 'form', explode: true, allowReserved: false },
     ]);
     return this.client.request<{ items: CertificateResponse[]; pageInfo: PageInfo; }>(appendQueryString(appApiPath(`/certificates`), query), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any, sdkworkUnwrapKind: 'page' });
   }

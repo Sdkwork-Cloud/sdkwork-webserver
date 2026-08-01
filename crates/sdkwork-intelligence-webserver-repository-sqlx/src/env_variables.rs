@@ -1,7 +1,7 @@
 use sdkwork_utils_rust::aes_gcm_encrypt;
 use sdkwork_webserver_contract::{
-    CreateEnvVariableRequest, EnvVariablePage, EnvVariableResponse, WebServiceError,
-    WebServiceResult,
+    CreateEnvVariableRequest, EnvVariablePage, EnvVariableResponse, UpdateEnvVariableRequest,
+    WebServiceError, WebServiceResult,
 };
 use sqlx::Row;
 
@@ -202,6 +202,105 @@ impl WebRepository {
             environment: request.environment.clone(),
             is_secret: request.is_secret,
         })
+    }
+
+    /// Rotates an active variable's value in place (encrypted when secret).
+    pub(super) async fn update_env_variable_repo(
+        &self,
+        tenant_id: i64,
+        site_id: &str,
+        variable_id: &str,
+        request: &UpdateEnvVariableRequest,
+    ) -> WebServiceResult<EnvVariableResponse> {
+        let site_internal_id = resolve_site_internal_id(&self.pool, tenant_id, site_id).await?;
+        let row = sqlx::query(
+            "SELECT uuid, key, environment, is_secret
+             FROM web_env_variable
+             WHERE tenant_id = $1 AND site_id = $2 AND uuid = $3 AND status = 1",
+        )
+        .bind(tenant_id)
+        .bind(site_internal_id)
+        .bind(variable_id)
+        .fetch_optional(&self.pool)
+        .await
+        .map_err(|error| store_error("retrieve web_env_variable for update", error))?
+        .ok_or_else(|| WebServiceError::not_found("environment variable not found"))?;
+        let key: String = row
+            .try_get("key")
+            .map_err(|error| store_error("map web_env_variable key", error))?;
+        let environment: String = row
+            .try_get("environment")
+            .map_err(|error| store_error("map web_env_variable environment", error))?;
+        let stored_value = if request.is_secret {
+            aes_gcm_encrypt(self.secret_key(), request.value.as_bytes()).map_err(|error| {
+                WebServiceError::Internal(format!("encrypt env variable: {error}"))
+            })?
+        } else {
+            request.value.clone()
+        };
+        let now = now_rfc3339();
+        let engine = self.database_engine().await?;
+        let now_expression = instant_write_expression(engine, "$5");
+        let update_sql = format!(
+            "UPDATE web_env_variable
+             SET value_encrypted = $4, is_secret = $6,
+                 updated_at = {now_expression}, version = version + 1
+             WHERE tenant_id = $1 AND site_id = $2 AND uuid = $3 AND status = 1"
+        );
+        let result = sqlx::query(&update_sql)
+            .bind(tenant_id)
+            .bind(site_internal_id)
+            .bind(variable_id)
+            .bind(&stored_value)
+            .bind(&now)
+            .bind(request.is_secret)
+            .execute(&self.pool)
+            .await
+            .map_err(|error| store_error("update web_env_variable", error))?;
+        if result.rows_affected() == 0 {
+            return Err(WebServiceError::not_found("environment variable not found"));
+        }
+        Ok(EnvVariableResponse {
+            id: variable_id.to_string(),
+            key,
+            value: if request.is_secret {
+                SECRET_VALUE_MASK.to_string()
+            } else {
+                request.value.clone()
+            },
+            environment,
+            is_secret: request.is_secret,
+        })
+    }
+
+    /// Soft-deletes an active variable so its key can be re-created.
+    pub(super) async fn delete_env_variable_repo(
+        &self,
+        tenant_id: i64,
+        site_id: &str,
+        variable_id: &str,
+    ) -> WebServiceResult<()> {
+        let site_internal_id = resolve_site_internal_id(&self.pool, tenant_id, site_id).await?;
+        let now = now_rfc3339();
+        let engine = self.database_engine().await?;
+        let now_expression = instant_write_expression(engine, "$4");
+        let update_sql = format!(
+            "UPDATE web_env_variable
+             SET status = 0, updated_at = {now_expression}, version = version + 1
+             WHERE tenant_id = $1 AND site_id = $2 AND uuid = $3 AND status = 1"
+        );
+        let result = sqlx::query(&update_sql)
+            .bind(tenant_id)
+            .bind(site_internal_id)
+            .bind(variable_id)
+            .bind(&now)
+            .execute(&self.pool)
+            .await
+            .map_err(|error| store_error("delete web_env_variable", error))?;
+        if result.rows_affected() == 0 {
+            return Err(WebServiceError::not_found("environment variable not found"));
+        }
+        Ok(())
     }
 }
 

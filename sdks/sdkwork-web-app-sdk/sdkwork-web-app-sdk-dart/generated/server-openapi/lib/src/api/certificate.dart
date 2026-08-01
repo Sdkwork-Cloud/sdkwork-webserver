@@ -56,8 +56,8 @@ class CertificateApi {
     final query = buildQueryString([
       QueryParameterSpec('page', page, 'form', true, false, null),
       QueryParameterSpec('page_size', pageSize, 'form', true, false, null),
-      QueryParameterSpec('siteId', siteId, 'form', true, false, null),
-      QueryParameterSpec('domainId', domainId, 'form', true, false, null)
+      QueryParameterSpec('site_id', siteId, 'form', true, false, null),
+      QueryParameterSpec('domain_id', domainId, 'form', true, false, null)
     ]);
     final response = await _client.get(ApiPaths.appendQueryString(ApiPaths.appPath('/certificates'), query));
     return (() {

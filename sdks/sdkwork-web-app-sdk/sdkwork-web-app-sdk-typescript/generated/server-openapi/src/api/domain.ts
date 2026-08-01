@@ -26,7 +26,7 @@ export class DomainSitesDomainsApi {
 
 
 /** 获取站点域名列表 */
-  async list(siteId: string, params?: DomainSitesDomainsListParams, requestOptions?: ApiRequestOptions): Promise<{ items: DomainResponse[]; pageInfo: PageInfo; }> {
+  async list(siteId: string | number, params?: DomainSitesDomainsListParams, requestOptions?: ApiRequestOptions): Promise<{ items: DomainResponse[]; pageInfo: PageInfo; }> {
     const query = buildQueryString([
       { name: 'page', value: params?.page, style: 'form', explode: true, allowReserved: false },
       { name: 'page_size', value: params?.pageSize, style: 'form', explode: true, allowReserved: false },
@@ -35,7 +35,7 @@ export class DomainSitesDomainsApi {
   }
 
 /** 绑定域名 */
-  async create(siteId: string, body: CreateDomainRequest, params: DomainSitesDomainsCreateParams, requestOptions?: ApiRequestOptions): Promise<DomainResponse> {
+  async create(siteId: string | number, body: CreateDomainRequest, params: DomainSitesDomainsCreateParams, requestOptions?: ApiRequestOptions): Promise<DomainResponse> {
     const requestHeaders = buildRequestHeaders(
       {
         'Idempotency-Key': { value: params.idempotencyKey, style: 'simple', explode: false },
@@ -46,17 +46,17 @@ export class DomainSitesDomainsApi {
   }
 
 /** 获取域名详情 */
-  async retrieve(siteId: string, domainId: string, requestOptions?: ApiRequestOptions): Promise<DomainResponse> {
+  async retrieve(siteId: string | number, domainId: string | number, requestOptions?: ApiRequestOptions): Promise<DomainResponse> {
     return this.client.request<DomainResponse>(appApiPath(`/sites/${serializePathParameter(siteId, { name: 'siteId', style: 'simple', explode: false })}/domains/${serializePathParameter(domainId, { name: 'domainId', style: 'simple', explode: false })}`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any, sdkworkUnwrapKind: 'item' });
   }
 
 /** 解绑域名 */
-  async delete(siteId: string, domainId: string, requestOptions?: ApiRequestOptions): Promise<void> {
+  async delete(siteId: string | number, domainId: string | number, requestOptions?: ApiRequestOptions): Promise<void> {
     return this.client.request<void>(appApiPath(`/sites/${serializePathParameter(siteId, { name: 'siteId', style: 'simple', explode: false })}/domains/${serializePathParameter(domainId, { name: 'domainId', style: 'simple', explode: false })}`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'DELETE' as any });
   }
 
 /** 创建或检查域名所有权验证挑战 */
-  async verify(siteId: string, domainId: string, params: DomainSitesDomainsVerifyParams, requestOptions?: ApiRequestOptions): Promise<DomainVerifyResponse> {
+  async verify(siteId: string | number, domainId: string | number, params: DomainSitesDomainsVerifyParams, requestOptions?: ApiRequestOptions): Promise<DomainVerifyResponse> {
     const requestHeaders = buildRequestHeaders(
       {
         'Idempotency-Key': { value: params.idempotencyKey, style: 'simple', explode: false },

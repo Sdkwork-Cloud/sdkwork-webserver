@@ -48,7 +48,7 @@ public class CertificateApi {
         String query = buildQueryString(List.of(
             new QueryParameterSpec("page", page, "form", true, false, null),
             new QueryParameterSpec("page_size", pageSize, "form", true, false, null),
-            new QueryParameterSpec("domainId", domainId, "form", true, false, null)
+            new QueryParameterSpec("domain_id", domainId, "form", true, false, null)
         ));
         Object raw = client.get(ApiPaths.appendQueryString(ApiPaths.backendPath("/certificates"), query));
         return client.convertValue(raw, new TypeReference<CertificatesListResponse>() {});
@@ -78,6 +78,16 @@ public class CertificateApi {
         );
         Object raw = client.put(ApiPaths.backendPath("/certificates/" + serializePathParameter(certificateId, new PathParameterSpec("certificateId", "simple", false)) + ""), body, null, requestHeaders, "application/json");
         return client.convertValue(raw, new TypeReference<CertificatesUpdateResponse>() {});
+    }
+
+    /** Soft-delete a certificate and release its domain identifiers */
+    public Void certificatesDelete(String certificateId, String idempotencyKey) throws Exception {
+        Map<String, String> requestHeaders = buildRequestHeaders(
+                Map.of("Idempotency-Key", new HeaderParameterSpec(idempotencyKey, "simple", false, null)),
+                Map.of()
+        );
+        client.delete(ApiPaths.backendPath("/certificates/" + serializePathParameter(certificateId, new PathParameterSpec("certificateId", "simple", false)) + ""), null, requestHeaders);
+        return null;
     }
 
     /** Renew a canonical certificate now */

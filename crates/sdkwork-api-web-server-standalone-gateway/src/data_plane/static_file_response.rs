@@ -19,8 +19,12 @@ pub(crate) async fn serve_opened_file(
     headers: &HeaderMap,
 ) -> Response<Body> {
     let modified = opened.metadata.modified().ok().map(HttpDate::from);
+    let etag = weak_etag(&opened.metadata);
     if !if_unmodified_since_passes(headers, modified) {
         return empty_response(StatusCode::PRECONDITION_FAILED);
+    }
+    if !if_none_match_passes(headers, etag.as_deref()) {
+        return empty_response(StatusCode::NOT_MODIFIED);
     }
     if !if_modified_since_is_modified(headers, modified) {
         return empty_response(StatusCode::NOT_MODIFIED);
@@ -37,6 +41,9 @@ pub(crate) async fn serve_opened_file(
         .header(header::ACCEPT_RANGES, "bytes");
     if let Some(modified) = modified {
         builder = builder.header(header::LAST_MODIFIED, modified.to_string());
+    }
+    if let Some(etag) = etag {
+        builder = builder.header(header::ETAG, etag);
     }
 
     match ranges {
@@ -100,6 +107,40 @@ fn if_unmodified_since_passes(headers: &HeaderMap, modified: Option<HttpDate>) -
         return true;
     };
     modified.is_some_and(|modified| condition >= modified)
+}
+
+/// Weak entity tag derived from modification time and size; safe for
+/// byte-range responses because the tag changes whenever the file changes.
+fn weak_etag(metadata: &std::fs::Metadata) -> Option<String> {
+    let modified = metadata.modified().ok()?;
+    let seconds = modified
+        .duration_since(std::time::UNIX_EPOCH)
+        .ok()?
+        .as_secs();
+    Some(format!("W/\"{seconds:x}-{:x}\"", metadata.len()))
+}
+
+/// RFC 9110 `If-None-Match`: any matching entity tag means the representation
+/// is unchanged. A `*` matches when the representation exists (it always does
+/// at this point). When the header is absent the check passes.
+fn if_none_match_passes(headers: &HeaderMap, etag: Option<&str>) -> bool {
+    let Some(condition) = headers.get(header::IF_NONE_MATCH) else {
+        return true;
+    };
+    let Ok(condition) = condition.to_str() else {
+        return true;
+    };
+    let Some(etag) = etag else {
+        return true;
+    };
+    if condition.trim() == "*" {
+        return false;
+    }
+    // Tag list is comma-separated; weak comparison strips the W/ prefix.
+    condition.split(',').any(|candidate| {
+        candidate.trim() == etag
+            || candidate.trim().strip_prefix("W/") == etag.strip_prefix("W/")
+    })
 }
 
 fn if_modified_since_is_modified(headers: &HeaderMap, modified: Option<HttpDate>) -> bool {

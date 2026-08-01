@@ -518,10 +518,19 @@ impl WebBackendApi for WebService {
         page: i32,
         page_size: i32,
         status: Option<i32>,
+        cursor: Option<&str>,
     ) -> WebServiceResult<sdkwork_webserver_contract::DeploymentPage> {
         let app_context = Self::backend_app_context(context)?;
-        WebAppApi::list_deployments(self, &app_context, application_id, page, page_size, status)
-            .await
+        WebAppApi::list_deployments(
+            self,
+            &app_context,
+            application_id,
+            page,
+            page_size,
+            status,
+            cursor,
+        )
+        .await
     }
 
     async fn create_application_deployment(
@@ -612,6 +621,25 @@ impl WebBackendApi for WebService {
         )
         .await;
         Ok(certificate)
+    }
+
+    async fn delete_managed_certificate(
+        &self,
+        context: &WebBackendRequestContext,
+        certificate_id: &str,
+    ) -> WebServiceResult<()> {
+        let tenant_id = Self::require_backend_tenant(context)?;
+        self.repository
+            .delete_certificate(tenant_id, certificate_id, context.operator_id)
+            .await?;
+        self.audit_backend_action(
+            context,
+            "certificates.delete",
+            "certificate",
+            certificate_id,
+        )
+        .await;
+        Ok(())
     }
 
     async fn renew_managed_certificate(
@@ -802,8 +830,13 @@ impl WebBackendApi for WebService {
 
     async fn reload_nginx(
         &self,
-        _context: &WebBackendRequestContext,
+        context: &WebBackendRequestContext,
     ) -> WebServiceResult<sdkwork_webserver_contract::NginxReloadResponse> {
+        if context.operator_id.is_none() {
+            // A global Nginx reload affects every tenant's sites on this host;
+            // machine principals (Web Node Daemon credentials) must never reach it.
+            return Err(sdkwork_webserver_contract::WebServiceError::Forbidden);
+        }
         self.reload_nginx_runtime().await?;
         Ok(sdkwork_webserver_contract::NginxReloadResponse { reloaded: true })
     }
@@ -841,12 +874,41 @@ impl WebBackendApi for WebService {
     async fn list_audit_logs(
         &self,
         context: &WebBackendRequestContext,
-        page: i32,
-        page_size: i32,
+        query: &sdkwork_webserver_contract::ListAuditLogsQuery,
     ) -> WebServiceResult<sdkwork_webserver_contract::AuditLogPage> {
         let tenant_id = Self::require_backend_tenant(context)?;
+        if let Some(operator_id) = query.operator_id {
+            if operator_id <= 0 {
+                return Err(sdkwork_webserver_contract::WebServiceError::validation(
+                    "operatorId must be a positive integer",
+                ));
+            }
+        }
+        for (field, value) in [
+            ("startDate", query.start_date.as_deref()),
+            ("endDate", query.end_date.as_deref()),
+        ] {
+            if let Some(value) = value {
+                if chrono::DateTime::parse_from_rfc3339(value).is_err() {
+                    return Err(sdkwork_webserver_contract::WebServiceError::validation(
+                        format!("{field} must be an RFC 3339 date-time"),
+                    ));
+                }
+            }
+        }
+        if let (Some(start), Some(end)) = (query.start_date.as_deref(), query.end_date.as_deref()) {
+            let start = chrono::DateTime::parse_from_rfc3339(start)
+                .map_err(|_| sdkwork_webserver_contract::WebServiceError::validation("startDate is invalid"))?;
+            let end = chrono::DateTime::parse_from_rfc3339(end)
+                .map_err(|_| sdkwork_webserver_contract::WebServiceError::validation("endDate is invalid"))?;
+            if start >= end {
+                return Err(sdkwork_webserver_contract::WebServiceError::validation(
+                    "startDate must be earlier than endDate",
+                ));
+            }
+        }
         self.repository
-            .list_audit_logs(Some(tenant_id), page, page_size)
+            .list_audit_logs(Some(tenant_id), query)
             .await
     }
 }

@@ -43,7 +43,7 @@ public class CertificateApi {
         let query = buildQueryString([
             QueryParameterSpec(name: "page", value: page, style: "form", explode: true, allowReserved: false, contentType: nil),
             QueryParameterSpec(name: "page_size", value: pageSize, style: "form", explode: true, allowReserved: false, contentType: nil),
-            QueryParameterSpec(name: "domainId", value: domainId, style: "form", explode: true, allowReserved: false, contentType: nil)
+            QueryParameterSpec(name: "domain_id", value: domainId, style: "form", explode: true, allowReserved: false, contentType: nil)
         ])
         return try await client.get(ApiPaths.appendQueryString(ApiPaths.backendPath("/certificates"), query), responseType: CertificatesListResponse.self)
     }
@@ -73,6 +73,17 @@ public class CertificateApi {
             [:]
         )
         return try await client.put(ApiPaths.backendPath("/certificates/\(serializePathParameter(certificateId, PathParameterSpec(name: "certificateId", style: "simple", explode: false)))"), body: body, params: nil, headers: requestHeaders, contentType: "application/json", responseType: CertificatesUpdateResponse.self)
+    }
+
+    /// Soft-delete a certificate and release its domain identifiers
+    public func certificatesDelete(certificateId: String, idempotencyKey: String) async throws -> Void {
+        let requestHeaders = buildRequestHeaders(
+            [
+                "Idempotency-Key": HeaderParameterSpec(value: idempotencyKey, style: "simple", explode: false, contentType: nil),
+            ],
+            [:]
+        )
+        _ = try await client.delete(ApiPaths.backendPath("/certificates/\(serializePathParameter(certificateId, PathParameterSpec(name: "certificateId", style: "simple", explode: false)))"), params: nil, headers: requestHeaders)
     }
 
     /// Renew a canonical certificate now

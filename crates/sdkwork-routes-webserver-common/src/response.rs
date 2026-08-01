@@ -32,14 +32,19 @@ fn envelope<T: Serialize>(status: StatusCode, data: T) -> Response {
 }
 
 fn offset_page_info(page: i32, page_size: i32, total: i64) -> PageInfo {
+    let total_pages = if total <= 0 {
+        0
+    } else {
+        i32::try_from((total - 1) / i64::from(page_size) + 1).unwrap_or(i32::MAX)
+    };
     PageInfo {
         mode: PageMode::Offset,
         page: Some(page),
         page_size: Some(page_size),
         total_items: Some(total.to_string()),
-        total_pages: None,
+        total_pages: Some(total_pages),
         next_cursor: None,
-        has_more: None,
+        has_more: Some(total > i64::from(page) * i64::from(page_size)),
     }
 }
 
@@ -92,10 +97,25 @@ pub fn ok_deployment_page(
     result: WebServiceResult<DeploymentPage>,
 ) -> Result<Response, WebApiError> {
     match result {
-        Ok(page) => Ok(envelope(
-            StatusCode::OK,
-            build_page_data(page.items, page.page, page.page_size, page.total),
-        )),
+        Ok(page) => {
+            let payload = if let Some(next_cursor) = page.next_cursor {
+                SdkWorkPageData {
+                    items: page.items,
+                    page_info: PageInfo {
+                        mode: PageMode::Cursor,
+                        page: None,
+                        page_size: Some(page.page_size),
+                        total_items: None,
+                        total_pages: None,
+                        next_cursor: Some(next_cursor),
+                        has_more: page.has_more,
+                    },
+                }
+            } else {
+                build_page_data(page.items, page.page, page.page_size, page.total)
+            };
+            Ok(envelope(StatusCode::OK, payload))
+        }
         Err(error) => Err(error.into()),
     }
 }
@@ -126,10 +146,25 @@ pub fn ok_nginx_config_page(
 
 pub fn ok_audit_log_page(result: WebServiceResult<AuditLogPage>) -> Result<Response, WebApiError> {
     match result {
-        Ok(page) => Ok(envelope(
-            StatusCode::OK,
-            build_page_data(page.items, page.page, page.page_size, page.total),
-        )),
+        Ok(page) => {
+            let payload = if let Some(next_cursor) = page.next_cursor {
+                SdkWorkPageData {
+                    items: page.items,
+                    page_info: PageInfo {
+                        mode: PageMode::Cursor,
+                        page: None,
+                        page_size: Some(page.page_size),
+                        total_items: None,
+                        total_pages: None,
+                        next_cursor: Some(next_cursor),
+                        has_more: page.has_more,
+                    },
+                }
+            } else {
+                build_page_data(page.items, page.page, page.page_size, page.total)
+            };
+            Ok(envelope(StatusCode::OK, payload))
+        }
         Err(error) => Err(error.into()),
     }
 }
@@ -162,17 +197,25 @@ pub fn ok_root_domain_page(
     }
 }
 
+/// Bounded-by-design collections (`envVariables.list`, `healthChecks.list`) are
+/// transactionally capped at 100 items (PAGINATION_SPEC §11) and are served as a
+/// single page with the collection capacity as `page_size`, so `pageInfo` truthfully
+/// reports one page, `hasMore=false`, and `total` matching the returned items.
+const BOUNDED_COLLECTION_MAXIMUM_PAGE_SIZE: i32 = 100;
+
 pub fn ok_env_variable_page(
     result: WebServiceResult<EnvVariablePage>,
 ) -> Result<Response, WebApiError> {
     match result {
-        Ok(page) => {
-            let page_size = page.items.len().max(1) as i32;
-            Ok(envelope(
-                StatusCode::OK,
-                build_page_data(page.items, 1, page_size, page.total),
-            ))
-        }
+        Ok(page) => Ok(envelope(
+            StatusCode::OK,
+            build_page_data(
+                page.items,
+                1,
+                BOUNDED_COLLECTION_MAXIMUM_PAGE_SIZE,
+                page.total,
+            ),
+        )),
         Err(error) => Err(error.into()),
     }
 }
@@ -221,13 +264,15 @@ pub fn ok_health_check_page(
     result: WebServiceResult<HealthCheckPage>,
 ) -> Result<Response, WebApiError> {
     match result {
-        Ok(page) => {
-            let page_size = page.items.len().max(1) as i32;
-            Ok(envelope(
-                StatusCode::OK,
-                build_page_data(page.items, 1, page_size, page.total),
-            ))
-        }
+        Ok(page) => Ok(envelope(
+            StatusCode::OK,
+            build_page_data(
+                page.items,
+                1,
+                BOUNDED_COLLECTION_MAXIMUM_PAGE_SIZE,
+                page.total,
+            ),
+        )),
         Err(error) => Err(error.into()),
     }
 }

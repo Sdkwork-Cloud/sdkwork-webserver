@@ -16,8 +16,8 @@ class ApplicationApi {
     final query = buildQueryString([
       QueryParameterSpec('page', page, 'form', true, false, null),
       QueryParameterSpec('page_size', pageSize, 'form', true, false, null),
-      QueryParameterSpec('applicationType', applicationType, 'form', true, false, null),
-      QueryParameterSpec('siteType', siteType, 'form', true, false, null),
+      QueryParameterSpec('application_type', applicationType, 'form', true, false, null),
+      QueryParameterSpec('site_type', siteType, 'form', true, false, null),
       QueryParameterSpec('status', status, 'form', true, false, null),
       QueryParameterSpec('keyword', keyword, 'form', true, false, null)
     ]);

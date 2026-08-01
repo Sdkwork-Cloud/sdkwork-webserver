@@ -9,15 +9,16 @@ import com.sdkwork.web.backend.sdk.http.HttpClient
 class AuditApi(private val client: HttpClient) {
 
     /** List audit logs */
-    suspend fun logsList(page: Int? = null, pageSize: Int? = null, targetType: String? = null, action: String? = null, operatorId: String? = null, startDate: String? = null, endDate: String? = null): AuditLogsListResponse? {
+    suspend fun logsList(page: Int? = null, pageSize: Int? = null, cursor: String? = null, targetType: String? = null, action: String? = null, operatorId: String? = null, startDate: String? = null, endDate: String? = null): AuditLogsListResponse? {
         val query = buildQueryString(listOf(
             QueryParameterSpec("page", page, "form", true, false, null),
             QueryParameterSpec("page_size", pageSize, "form", true, false, null),
-            QueryParameterSpec("targetType", targetType, "form", true, false, null),
+            QueryParameterSpec("cursor", cursor, "form", true, false, null),
+            QueryParameterSpec("target_type", targetType, "form", true, false, null),
             QueryParameterSpec("action", action, "form", true, false, null),
-            QueryParameterSpec("operatorId", operatorId, "form", true, false, null),
-            QueryParameterSpec("startDate", startDate, "form", true, false, null),
-            QueryParameterSpec("endDate", endDate, "form", true, false, null)
+            QueryParameterSpec("operator_id", operatorId, "form", true, false, null),
+            QueryParameterSpec("start_date", startDate, "form", true, false, null),
+            QueryParameterSpec("end_date", endDate, "form", true, false, null)
         ))
         val raw = client.get(ApiPaths.appendQueryString(ApiPaths.backendPath("/audit_logs"), query))
         return client.convertValue(raw, object : TypeReference<AuditLogsListResponse>() {})

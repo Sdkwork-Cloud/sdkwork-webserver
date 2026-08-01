@@ -30,7 +30,6 @@ CREATE TABLE web_site (
     PRIMARY KEY (id),
     CONSTRAINT uk_web_site_uuid UNIQUE (uuid),
     CONSTRAINT uk_web_site_tenant_id UNIQUE (tenant_id, id),
-    CONSTRAINT uk_web_site_slug UNIQUE (tenant_id, slug),
     CONSTRAINT chk_web_site_application_type CHECK (application_type IN ('WEB', 'API')),
     CONSTRAINT chk_web_site_type CHECK (site_type BETWEEN 1 AND 6),
     CONSTRAINT chk_web_site_status CHECK (status BETWEEN 0 AND 3)
@@ -59,6 +58,11 @@ CREATE INDEX idx_web_site_tenant_application_type_updated
 
 CREATE INDEX idx_web_site_user_updated
     ON web_site (tenant_id, user_id, updated_at DESC);
+
+-- Active slugs are unique per tenant; soft-deleted sites release their slug.
+CREATE UNIQUE INDEX uk_web_site_slug
+    ON web_site (tenant_id, slug)
+    WHERE deleted_at IS NULL;
 
 CREATE INDEX idx_web_site_slug
     ON web_site (tenant_id, slug);
@@ -323,6 +327,9 @@ CREATE INDEX idx_web_nginx_config_site_active
 
 CREATE INDEX idx_web_nginx_config_type_status
     ON web_nginx_config (config_type, status);
+
+CREATE INDEX idx_web_nginx_config_tenant_updated
+    ON web_nginx_config (tenant_id, updated_at DESC, id DESC);
 
 CREATE TABLE web_certificate (
     id                      BIGINT       NOT NULL,
@@ -703,8 +710,14 @@ CREATE TABLE web_env_variable (
     version         BIGINT       NOT NULL DEFAULT 0,
     PRIMARY KEY (id),
     CONSTRAINT uk_web_env_variable_uuid UNIQUE (uuid),
-    CONSTRAINT uk_web_env_variable_key UNIQUE (site_id, environment, key)
+    CONSTRAINT fk_web_env_variable_site FOREIGN KEY (site_id) REFERENCES web_site(id)
 );
+
+-- Active environment variables are unique per site and environment; deactivated
+-- (soft-deleted) variables release their key so it can be re-created.
+CREATE UNIQUE INDEX uk_web_env_variable_active_key
+    ON web_env_variable (site_id, environment, key)
+    WHERE status = 1;
 
 COMMENT ON TABLE web_env_variable IS 'Web environment variable';
 COMMENT ON COLUMN web_env_variable.key IS 'Variable key name';
@@ -770,7 +783,11 @@ CREATE TABLE web_health_result (
     error_message   VARCHAR(1000),
     checked_at      TIMESTAMPTZ  NOT NULL,
     created_at      TIMESTAMPTZ  NOT NULL,
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    CONSTRAINT uk_web_health_result_uuid UNIQUE (uuid),
+    CONSTRAINT fk_web_health_result_check FOREIGN KEY (health_check_id)
+        REFERENCES web_health_check(id),
+    CONSTRAINT fk_web_health_result_site FOREIGN KEY (site_id) REFERENCES web_site(id)
 );
 
 COMMENT ON TABLE web_health_result IS 'Web health check result';
@@ -828,6 +845,9 @@ CREATE INDEX idx_web_audit_log_operator
 CREATE INDEX idx_web_audit_log_tenant_action
     ON web_audit_log (tenant_id, action, created_at DESC);
 
+CREATE INDEX idx_web_audit_log_tenant_created
+    ON web_audit_log (tenant_id, created_at DESC, id DESC);
+
 -- source: migrations/010_create_web_server.sql
 -- Migration: 010_create_web_server
 -- Description: Web edge server registry table
@@ -860,6 +880,12 @@ COMMENT ON COLUMN web_server.status IS 'Status: 0=offline, 1=online, 2=deploying
 
 CREATE INDEX idx_web_server_tenant_status
     ON web_server (tenant_id, status, updated_at DESC);
+
+-- Node credential lookup: agent token hashes are stored in metadata and must
+-- be indexed for bounded authentication, otherwise every node heartbeat scans
+-- the whole server registry.
+CREATE INDEX idx_web_server_metadata_gin
+    ON web_server USING GIN (metadata);
 
 CREATE TABLE web_certificate_node_state (
     id                     BIGINT       NOT NULL,

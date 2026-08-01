@@ -17,7 +17,7 @@ export class SourceVersionSitesSourceVersionsGitImportApi {
 
 
 /** 从公共 Git 仓库导入应用源码版本 */
-  async create(siteId: string, body: ImportGitSourceVersionRequest, params: SourceVersionSitesSourceVersionsGitImportCreateParams, requestOptions?: ApiRequestOptions): Promise<SourceVersionResponse> {
+  async create(siteId: string | number, body: ImportGitSourceVersionRequest, params: SourceVersionSitesSourceVersionsGitImportCreateParams, requestOptions?: ApiRequestOptions): Promise<SourceVersionResponse> {
     const requestHeaders = buildRequestHeaders(
       {
         'Idempotency-Key': { value: params.idempotencyKey, style: 'simple', explode: false },
@@ -48,7 +48,7 @@ export class SourceVersionSitesSourceVersionsApi {
 
 
 /** 获取应用源码版本 */
-  async list(siteId: string, params?: SourceVersionSitesSourceVersionsListParams, requestOptions?: ApiRequestOptions): Promise<{ items: SourceVersionResponse[]; pageInfo: PageInfo; }> {
+  async list(siteId: string | number, params?: SourceVersionSitesSourceVersionsListParams, requestOptions?: ApiRequestOptions): Promise<{ items: SourceVersionResponse[]; pageInfo: PageInfo; }> {
     const query = buildQueryString([
       { name: 'page', value: params?.page, style: 'form', explode: true, allowReserved: false },
       { name: 'page_size', value: params?.pageSize, style: 'form', explode: true, allowReserved: false },
@@ -57,7 +57,7 @@ export class SourceVersionSitesSourceVersionsApi {
   }
 
 /** 登记 Drive 中的应用源码版本 */
-  async create(siteId: string, body: CreateSourceVersionRequest, params: SourceVersionSitesSourceVersionsCreateParams, requestOptions?: ApiRequestOptions): Promise<SourceVersionResponse> {
+  async create(siteId: string | number, body: CreateSourceVersionRequest, params: SourceVersionSitesSourceVersionsCreateParams, requestOptions?: ApiRequestOptions): Promise<SourceVersionResponse> {
     const requestHeaders = buildRequestHeaders(
       {
         'Idempotency-Key': { value: params.idempotencyKey, style: 'simple', explode: false },
@@ -68,7 +68,7 @@ export class SourceVersionSitesSourceVersionsApi {
   }
 
 /** 获取应用源码版本详情 */
-  async retrieve(siteId: string, sourceVersionId: string, requestOptions?: ApiRequestOptions): Promise<SourceVersionResponse> {
+  async retrieve(siteId: string | number, sourceVersionId: string, requestOptions?: ApiRequestOptions): Promise<SourceVersionResponse> {
     return this.client.request<SourceVersionResponse>(appApiPath(`/sites/${serializePathParameter(siteId, { name: 'siteId', style: 'simple', explode: false })}/source_versions/${serializePathParameter(sourceVersionId, { name: 'sourceVersionId', style: 'simple', explode: false })}`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any, sdkworkUnwrapKind: 'item' });
   }
 }

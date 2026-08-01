@@ -13,9 +13,9 @@ class NginxApi(private val client: HttpClient) {
         val query = buildQueryString(listOf(
             QueryParameterSpec("page", page, "form", true, false, null),
             QueryParameterSpec("page_size", pageSize, "form", true, false, null),
-            QueryParameterSpec("siteId", siteId, "form", true, false, null),
-            QueryParameterSpec("configType", configType, "form", true, false, null),
-            QueryParameterSpec("isActive", isActive, "form", true, false, null)
+            QueryParameterSpec("site_id", siteId, "form", true, false, null),
+            QueryParameterSpec("config_type", configType, "form", true, false, null),
+            QueryParameterSpec("is_active", isActive, "form", true, false, null)
         ))
         val raw = client.get(ApiPaths.appendQueryString(ApiPaths.backendPath("/nginx/configs"), query))
         return client.convertValue(raw, object : TypeReference<ConfigsListResponse>() {})

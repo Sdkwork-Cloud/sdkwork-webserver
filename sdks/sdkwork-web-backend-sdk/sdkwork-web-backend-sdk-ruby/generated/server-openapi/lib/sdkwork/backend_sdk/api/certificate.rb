@@ -66,7 +66,7 @@ module Sdkwork
             query = build_query_string([
               QueryParameterSpec.new('page', page, 'form', true, false, nil),
               QueryParameterSpec.new('page_size', page_size, 'form', true, false, nil),
-              QueryParameterSpec.new('domainId', domain_id, 'form', true, false, nil),
+              QueryParameterSpec.new('domain_id', domain_id, 'form', true, false, nil),
             ])
             path = append_query_string(path, query)
             options = {}
@@ -116,6 +116,21 @@ module Sdkwork
             options[:json] = payload unless payload.nil?
             result = @client.request('PUT', path, **options)
             result.is_a?(Hash) ? Models::CertificatesUpdateResponse.from_hash(result) : nil
+          end
+
+          # Soft-delete a certificate and release its domain identifiers
+          def certificates_delete(certificate_id, idempotency_key)
+            path = interpolate_path('/backend/v3/api/certificates/{certificateId}', certificateId: serialize_path_parameter(certificate_id, PathParameterSpec.new('certificateId', 'simple', false)))
+            request_headers = build_request_headers(
+              {
+                'Idempotency-Key' => HeaderParameterSpec.new(idempotency_key, 'simple', false, nil),
+              },
+              {}
+            )
+            options = {}
+            options[:headers] = request_headers unless request_headers.empty?
+            result = @client.request('DELETE', path, **options)
+            result
           end
 
           # Renew a canonical certificate now

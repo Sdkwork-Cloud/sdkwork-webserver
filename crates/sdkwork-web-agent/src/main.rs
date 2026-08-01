@@ -4,7 +4,7 @@
 mod state;
 
 use std::collections::HashSet;
-use std::time::Duration;
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use chrono::Utc;
 use sdkwork_utils_rust::crypto::sha256_hash;
@@ -112,12 +112,47 @@ pub async fn run() -> anyhow::Result<()> {
         "sdkwork web node daemon started"
     );
 
+    // Randomize the startup phase so a fleet of nodes does not synchronize in
+    // lockstep against the control plane.
+    tokio::time::sleep(Duration::from_millis(jitter_millis(runtime.interval_secs * 1_000))).await;
+
+    let mut consecutive_failures: u32 = 0;
     loop {
         if let Err(error) = sync_once(&edge, &clients, &state_path, &mut local_state).await {
             warn!(error = %error, "node sync cycle failed");
+            consecutive_failures = consecutive_failures.saturating_add(1);
+        } else {
+            consecutive_failures = 0;
         }
-        tokio::time::sleep(Duration::from_secs(runtime.interval_secs)).await;
+        // Exponential backoff on failure (capped at the configured interval) so
+        // the control plane is not hammered while it is degraded; jitter spreads
+        // retries across the fleet on recovery.
+        let base_secs = if consecutive_failures > 0 {
+            (1_u64 << consecutive_failures.min(6)).min(runtime.interval_secs.max(1))
+        } else {
+            runtime.interval_secs
+        };
+        let delay = Duration::from_secs(base_secs)
+            + Duration::from_millis(jitter_millis(base_secs * 500));
+        tokio::time::sleep(delay).await;
     }
+}
+
+/// Non-cryptographic millisecond jitter in `[0, max_ms)` derived from the clock
+/// and process identity; used only to de-synchronize polling fleets.
+fn jitter_millis(max_ms: u64) -> u64 {
+    if max_ms == 0 {
+        return 0;
+    }
+    let mut state = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_nanos() as u64
+        ^ u64::from(std::process::id()) << 32;
+    state ^= state << 13;
+    state ^= state >> 7;
+    state ^= state << 17;
+    state % max_ms
 }
 
 async fn sync_once(

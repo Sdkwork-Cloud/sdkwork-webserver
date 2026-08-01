@@ -5,9 +5,9 @@ use sdkwork_webserver_contract::{
 use sqlx::Row;
 
 use super::support::{
-    instant_from_row, instant_write_expression, is_unique_violation, new_uuid, next_id,
-    now_rfc3339, optional_instant_from_row, pagination, resolve_site_internal_id, sha256_hex,
-    store_error,
+    decode_keyset_cursor, encode_keyset_cursor, instant_from_row, instant_write_expression,
+    is_unique_violation, new_uuid, next_id, now_rfc3339, optional_instant_from_row, pagination,
+    resolve_site_internal_id, sha256_hex, store_error,
 };
 
 struct DeploymentIdempotencyLookup<'a> {
@@ -37,6 +37,27 @@ struct SourceVersionDeploymentSnapshot {
     artifact_hash: String,
 }
 
+/// Deployment projection shared by offset and cursor list queries.
+const DEPLOYMENT_LIST_SELECT: &str = "SELECT deployment.id, deployment.uuid, deployment.site_id, deployment.status,
+        deployment.deploy_type, deployment.environment, deployment.version_tag,
+        deployment.commit_hash, deployment.source_ref, deployment.artifact_path,
+        deployment.artifact_size, deployment.artifact_hash,
+        source_version.uuid AS source_version_id,
+        source.uuid AS rollback_from_deployment_id,
+        CAST(deployment.started_at AS TEXT) AS started_at,
+        CAST(deployment.completed_at AS TEXT) AS completed_at,
+        deployment.duration_ms,
+        CAST(deployment.created_at AS TEXT) AS created_at
+ FROM web_deployment deployment
+ LEFT JOIN web_deployment source
+   ON source.id = deployment.rollback_from
+  AND source.tenant_id = deployment.tenant_id
+  AND source.site_id = deployment.site_id
+ LEFT JOIN web_source_version source_version
+   ON source_version.id = deployment.source_version_id
+  AND source_version.tenant_id = deployment.tenant_id
+  AND source_version.site_id = deployment.site_id";
+
 impl WebRepository {
     pub(super) async fn list_deployments_repo(
         &self,
@@ -45,8 +66,14 @@ impl WebRepository {
         page: i32,
         page_size: i32,
         status: Option<i32>,
+        cursor: Option<&str>,
     ) -> WebServiceResult<DeploymentPage> {
         let site_internal_id = resolve_site_internal_id(&self.pool, tenant_id, site_id).await?;
+        if let Some(cursor) = cursor {
+            return self
+                .list_deployments_cursor_repo(tenant_id, site_id, page_size, status, cursor)
+                .await;
+        }
         let (page, page_size, offset) = pagination(page, page_size)?;
 
         let (count_row, rows) = if let Some(status) = status {
@@ -61,31 +88,13 @@ impl WebRepository {
             .await
             .map_err(|error| store_error("count web_deployment", error))?;
 
-            let rows = sqlx::query(
-                "SELECT deployment.uuid, deployment.site_id, deployment.status,
-                        deployment.deploy_type, deployment.environment, deployment.version_tag,
-                        deployment.commit_hash, deployment.source_ref, deployment.artifact_path,
-                        deployment.artifact_size, deployment.artifact_hash,
-                        source_version.uuid AS source_version_id,
-                        source.uuid AS rollback_from_deployment_id,
-                        CAST(deployment.started_at AS TEXT) AS started_at,
-                        CAST(deployment.completed_at AS TEXT) AS completed_at,
-                        deployment.duration_ms,
-                        CAST(deployment.created_at AS TEXT) AS created_at
-                 FROM web_deployment deployment
-                 LEFT JOIN web_deployment source
-                   ON source.id = deployment.rollback_from
-                  AND source.tenant_id = deployment.tenant_id
-                  AND source.site_id = deployment.site_id
-                 LEFT JOIN web_source_version source_version
-                   ON source_version.id = deployment.source_version_id
-                  AND source_version.tenant_id = deployment.tenant_id
-                  AND source_version.site_id = deployment.site_id
+            let rows = sqlx::query(&format!(
+                "{DEPLOYMENT_LIST_SELECT}
                  WHERE deployment.tenant_id = $1
                    AND deployment.site_id = $2
                    AND deployment.status = $3
-                 ORDER BY deployment.created_at DESC, deployment.id DESC LIMIT $4 OFFSET $5",
-            )
+                 ORDER BY deployment.created_at DESC, deployment.id DESC LIMIT $4 OFFSET $5"
+            ))
             .bind(tenant_id)
             .bind(site_internal_id)
             .bind(status)
@@ -107,29 +116,11 @@ impl WebRepository {
             .await
             .map_err(|error| store_error("count web_deployment", error))?;
 
-            let rows = sqlx::query(
-                "SELECT deployment.uuid, deployment.site_id, deployment.status,
-                        deployment.deploy_type, deployment.environment, deployment.version_tag,
-                        deployment.commit_hash, deployment.source_ref, deployment.artifact_path,
-                        deployment.artifact_size, deployment.artifact_hash,
-                        source_version.uuid AS source_version_id,
-                        source.uuid AS rollback_from_deployment_id,
-                        CAST(deployment.started_at AS TEXT) AS started_at,
-                        CAST(deployment.completed_at AS TEXT) AS completed_at,
-                        deployment.duration_ms,
-                        CAST(deployment.created_at AS TEXT) AS created_at
-                 FROM web_deployment deployment
-                 LEFT JOIN web_deployment source
-                   ON source.id = deployment.rollback_from
-                  AND source.tenant_id = deployment.tenant_id
-                  AND source.site_id = deployment.site_id
-                 LEFT JOIN web_source_version source_version
-                   ON source_version.id = deployment.source_version_id
-                  AND source_version.tenant_id = deployment.tenant_id
-                  AND source_version.site_id = deployment.site_id
+            let rows = sqlx::query(&format!(
+                "{DEPLOYMENT_LIST_SELECT}
                  WHERE deployment.tenant_id = $1 AND deployment.site_id = $2
-                 ORDER BY deployment.created_at DESC, deployment.id DESC LIMIT $3 OFFSET $4",
-            )
+                 ORDER BY deployment.created_at DESC, deployment.id DESC LIMIT $3 OFFSET $4"
+            ))
             .bind(tenant_id)
             .bind(site_internal_id)
             .bind(page_size)
@@ -156,6 +147,74 @@ impl WebRepository {
             total,
             page,
             page_size,
+            next_cursor: None,
+            has_more: None,
+        })
+    }
+
+    /// Keyset page over `(created_at DESC, id DESC)` with an opaque cursor;
+    /// fetches `page_size + 1` rows so `has_more` is exact and no COUNT runs.
+    async fn list_deployments_cursor_repo(
+        &self,
+        tenant_id: i64,
+        site_id: &str,
+        page_size: i32,
+        status: Option<i32>,
+        cursor: &str,
+    ) -> WebServiceResult<DeploymentPage> {
+        let site_internal_id = resolve_site_internal_id(&self.pool, tenant_id, site_id).await?;
+        if !(1..=200).contains(&page_size) {
+            return Err(WebServiceError::validation(
+                "page_size must be between 1 and 200",
+            ));
+        }
+        let (cursor_created_at, cursor_id) = decode_keyset_cursor(cursor)
+            .ok_or_else(|| WebServiceError::validation("cursor is invalid"))?;
+        let sql = format!(
+            "{DEPLOYMENT_LIST_SELECT}
+             WHERE deployment.tenant_id = $1 AND deployment.site_id = $2
+               AND ($3 IS NULL OR deployment.status = $3)
+               AND (deployment.created_at, deployment.id) < ($4, $5)
+             ORDER BY deployment.created_at DESC, deployment.id DESC LIMIT $6"
+        );
+        let fetch_size = i64::from(page_size) + 1;
+        let rows = sqlx::query(&sql)
+            .bind(tenant_id)
+            .bind(site_internal_id)
+            .bind(status)
+            .bind(&cursor_created_at)
+            .bind(cursor_id)
+            .bind(fetch_size)
+            .fetch_all(&self.pool)
+            .await
+            .map_err(|error| store_error("list web_deployment cursor", error))?;
+        let has_more = rows.len() > page_size as usize;
+        let page_rows = rows.into_iter().take(page_size as usize).collect::<Vec<_>>();
+        let mut items = Vec::with_capacity(page_rows.len());
+        for row in &page_rows {
+            items.push(map_deployment_row(row, site_id).map_err(|error| {
+                WebServiceError::Internal(format!("map web_deployment row: {error}"))
+            })?);
+        }
+        let next_cursor = has_more
+            .then(|| {
+                let last = page_rows.last().expect("non-empty page when has_more");
+                let created_at: String = last
+                    .try_get("created_at")
+                    .map_err(|error| store_error("map web_deployment cursor instant", error))?;
+                let id: i64 = last
+                    .try_get("id")
+                    .map_err(|error| store_error("map web_deployment cursor id", error))?;
+                Ok::<_, WebServiceError>(encode_keyset_cursor(&created_at, id))
+            })
+            .transpose()?;
+        Ok(DeploymentPage {
+            items,
+            total: 0,
+            page: 0,
+            page_size,
+            next_cursor,
+            has_more: Some(has_more),
         })
     }
 

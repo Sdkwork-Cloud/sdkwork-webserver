@@ -43,11 +43,30 @@ pub struct ListSitesQuery {
     #[serde(default = "crate::dto::default_page_size")]
     pub page_size: i32,
     pub status: Option<i32>,
-    #[serde(rename = "applicationType")]
+    #[serde(rename = "application_type")]
     pub application_type: Option<String>,
-    #[serde(rename = "siteType")]
+    #[serde(rename = "site_type")]
     pub site_type: Option<i32>,
     pub keyword: Option<String>,
+}
+
+/// Backend audit log list filters. `start_date`/`end_date` are RFC 3339
+/// instants; `operator_id` is an int64 serialized as a string on the wire.
+/// Cursor mode (`cursor` + `page_size`, keyset on `(created_at, id)`) is the
+/// contract for this growing log table; `page`/`cursor` must not be combined.
+#[derive(Clone, Debug, Default, Deserialize)]
+pub struct ListAuditLogsQuery {
+    #[serde(default = "crate::dto::default_page")]
+    pub page: i32,
+    #[serde(default = "crate::dto::default_page_size")]
+    pub page_size: i32,
+    pub cursor: Option<String>,
+    pub target_type: Option<String>,
+    pub action: Option<String>,
+    #[serde(with = "sdkwork_utils_rust::serde_int64::option")]
+    pub operator_id: Option<i64>,
+    pub start_date: Option<String>,
+    pub end_date: Option<String>,
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
@@ -193,6 +212,7 @@ pub trait WebAppApi: Send + Sync {
         page: i32,
         page_size: i32,
         status: Option<i32>,
+        cursor: Option<&str>,
     ) -> WebServiceResult<DeploymentPage>;
 
     async fn create_deployment(
@@ -229,6 +249,21 @@ pub trait WebAppApi: Send + Sync {
         site_id: &str,
         request: &CreateEnvVariableRequest,
     ) -> WebServiceResult<EnvVariableResponse>;
+
+    async fn update_env_variable(
+        &self,
+        context: &WebAppRequestContext,
+        site_id: &str,
+        variable_id: &str,
+        request: &UpdateEnvVariableRequest,
+    ) -> WebServiceResult<EnvVariableResponse>;
+
+    async fn delete_env_variable(
+        &self,
+        context: &WebAppRequestContext,
+        site_id: &str,
+        variable_id: &str,
+    ) -> WebServiceResult<()>;
 
     async fn list_certificates(
         &self,
@@ -477,6 +512,7 @@ pub trait WebBackendApi: Send + Sync {
         page: i32,
         page_size: i32,
         status: Option<i32>,
+        cursor: Option<&str>,
     ) -> WebServiceResult<DeploymentPage>;
 
     async fn create_application_deployment(
@@ -519,6 +555,12 @@ pub trait WebBackendApi: Send + Sync {
         certificate_id: &str,
         request: &UpdateCertificateRequest,
     ) -> WebServiceResult<CertificateResponse>;
+
+    async fn delete_managed_certificate(
+        &self,
+        context: &WebBackendRequestContext,
+        certificate_id: &str,
+    ) -> WebServiceResult<()>;
 
     async fn renew_managed_certificate(
         &self,
@@ -621,7 +663,6 @@ pub trait WebBackendApi: Send + Sync {
     async fn list_audit_logs(
         &self,
         context: &WebBackendRequestContext,
-        page: i32,
-        page_size: i32,
+        query: &ListAuditLogsQuery,
     ) -> WebServiceResult<AuditLogPage>;
 }

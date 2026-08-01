@@ -139,3 +139,11 @@ sdkwork-drive-workspace-service = { path = "../sdkwork-drive/crates/sdkwork-driv
 sdkwork-drive-internal-sdk = { path = "../sdkwork-drive/sdks/sdkwork-drive-internal-sdk/sdkwork-drive-internal-sdk-rust/generated/server-openapi", package = "sdkwork-drive-internal-sdk-generated-rust" }
 sdkwork-knowledgebase-internal-sdk = { path = "../sdkwork-knowledgebase/sdks/sdkwork-knowledgebase-internal-sdk/sdkwork-knowledgebase-internal-sdk-rust/generated/server-openapi", package = "sdkwork-knowledgebase-internal-sdk-generated-rust" }
 zip = { version = "8.6.0", default-features = false, features = ["deflate-flate2-zlib-rs"] }
+
+# Production binaries benefit from LTO and a single codegen unit; panic=unwind
+# keeps a panicked Tokio task from terminating the long-running process.
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+panic = "unwind"

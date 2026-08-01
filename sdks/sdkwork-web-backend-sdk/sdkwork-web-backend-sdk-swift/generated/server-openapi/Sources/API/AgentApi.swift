@@ -15,7 +15,7 @@ public class AgentApi {
     /// Retrieve the Nginx configuration and certificate bundle
     public func retrieve(ifSyncVersion: String? = nil) async throws -> RetrieveResponse? {
         let query = buildQueryString([
-            QueryParameterSpec(name: "ifSyncVersion", value: ifSyncVersion, style: "form", explode: true, allowReserved: false, contentType: nil)
+            QueryParameterSpec(name: "if_sync_version", value: ifSyncVersion, style: "form", explode: true, allowReserved: false, contentType: nil)
         ])
         return try await client.get(ApiPaths.appendQueryString(ApiPaths.backendPath("/agent/sync"), query), responseType: RetrieveResponse.self)
     }

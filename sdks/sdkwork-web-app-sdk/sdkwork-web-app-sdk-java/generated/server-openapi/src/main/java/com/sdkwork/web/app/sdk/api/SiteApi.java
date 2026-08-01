@@ -19,8 +19,8 @@ public class SiteApi {
             new QueryParameterSpec("page", page, "form", true, false, null),
             new QueryParameterSpec("page_size", pageSize, "form", true, false, null),
             new QueryParameterSpec("status", status, "form", true, false, null),
-            new QueryParameterSpec("applicationType", applicationType, "form", true, false, null),
-            new QueryParameterSpec("siteType", siteType, "form", true, false, null),
+            new QueryParameterSpec("application_type", applicationType, "form", true, false, null),
+            new QueryParameterSpec("site_type", siteType, "form", true, false, null),
             new QueryParameterSpec("keyword", keyword, "form", true, false, null)
         ));
         Object raw = client.get(ApiPaths.appendQueryString(ApiPaths.appPath("/sites"), query));

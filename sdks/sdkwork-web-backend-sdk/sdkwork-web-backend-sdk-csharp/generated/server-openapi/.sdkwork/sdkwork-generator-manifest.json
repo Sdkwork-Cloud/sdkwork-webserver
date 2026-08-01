@@ -12,7 +12,7 @@
   "generatedFiles": [
     {
       "path": "Api/AgentApi.cs",
-      "sha256": "6b9d221a1d7e4b4732f6cf6c541e355571689e68f7fa058e7aaa03854de8641b"
+      "sha256": "989441ecb784348cafa93bb611c53c218cc9d528e70761ed9c5dec003a541d12"
     },
     {
       "path": "Api/Api.cs",
@@ -24,11 +24,11 @@
     },
     {
       "path": "Api/ApplicationApi.cs",
-      "sha256": "651ea3f4b665219c260e284e650e70593b28de3b6c8eb3ca238bf25e4b10f7eb"
+      "sha256": "c3fec4b8e76c99d3786767954fbb3bb03615d6ab01e8dbc7188131a2c04a8ed2"
     },
     {
       "path": "Api/ApplicationDeploymentApi.cs",
-      "sha256": "15f5d92fd2158bfff67ed8783064aa61e9d565c52e7ad440c248946a86081d6b"
+      "sha256": "39a1177cbf8fbc639999f4227d16a57b99685de37046fc4cca300738dd259fe2"
     },
     {
       "path": "Api/ApplicationDomainApi.cs",
@@ -40,11 +40,11 @@
     },
     {
       "path": "Api/AuditApi.cs",
-      "sha256": "3b20a47afd37f5f6d0473287df2e36408aaa9e65ac09d9d7a70bb5a1d1510624"
+      "sha256": "f0e71fca2b9ce3ecc80d83ef9f38ba644dda982bdd6da4e4a252ce7cfd04afe5"
     },
     {
       "path": "Api/CertificateApi.cs",
-      "sha256": "4c7577089d098099877a94fdc60b357126a2a63ffde29f7eb576c6ee6f8be4d5"
+      "sha256": "bb3adc72464b85e78b893ae78e08cb170cf86777dc101974dfbee15211dd4c8f"
     },
     {
       "path": "Api/CertificateDistributionApi.cs",
@@ -56,7 +56,7 @@
     },
     {
       "path": "Api/NginxApi.cs",
-      "sha256": "970acd67a242429979e72e0e7c868b74249cf2ad1bd3d55be6440d36fc7f3d98"
+      "sha256": "879e912e6abe30bed968046d92b94bd5f3b11ae99ef900426f2f9c1c3e91d4f9"
     },
     {
       "path": "Api/ServerApi.cs",
@@ -516,7 +516,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "0baf323ac1b28f2ada1dff4d2299ace56c25ec72a5f61d07e469527e3c90d149"
+      "sha256": "4a7fe2fbc4c9555054e987be6509179f416868fcea654511ff9a372720847073"
     },
     {
       "path": "sdkwork-sdk.json",

@@ -30,8 +30,8 @@ client.SetAccessToken("your-access-token")
     params := map[string]interface{}{
         "page": 1,
         "page_size": 2,
-        "siteId": "siteId",
-        "domainId": "domainId",
+        "site_id": "site_id",
+        "domain_id": "domain_id",
     }
     result, err := client.Certificate.CertificatesList(params)
     if err != nil {
@@ -79,8 +79,8 @@ params := map[string]interface{}{
     "page": 1,
     "page_size": 2,
     "status": 0,
-    "applicationType": "WEB",
-    "siteType": 1,
+    "application_type": "WEB",
+    "site_type": 1,
     "keyword": "keyword",
 }
 result, err := client.Site.SitesList(params)
@@ -113,8 +113,8 @@ fmt.Println(result)
 params := map[string]interface{}{
     "page": 1,
     "page_size": 2,
-    "siteId": "siteId",
-    "domainId": "domainId",
+    "site_id": "site_id",
+    "domain_id": "domain_id",
 }
 result, err := client.Certificate.CertificatesList(params)
 if err != nil {
@@ -147,6 +147,7 @@ siteId := "1"
 params := map[string]interface{}{
     "page": 1,
     "page_size": 2,
+    "cursor": "cursor",
     "status": 0,
 }
 result, err := client.Deployment.SitesDeploymentsList(siteId, params)
@@ -189,8 +190,8 @@ fmt.Println(result)
 params := map[string]interface{}{
     "page": 1,
     "page_size": 2,
-    "siteId": "siteId",
-    "domainId": "domainId",
+    "site_id": "site_id",
+    "domain_id": "domain_id",
 }
 _, err := client.Certificate.CertificatesList(params)
 if err != nil {

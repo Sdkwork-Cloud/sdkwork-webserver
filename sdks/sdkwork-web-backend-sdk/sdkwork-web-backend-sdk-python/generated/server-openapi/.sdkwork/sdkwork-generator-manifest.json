@@ -40,7 +40,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "1a4fb9c81d9817a67d6b90109cfc94af3ba5de68d4907c851fad721b43420f03"
+      "sha256": "222bf80a7c581e32064bb07fa8ed23c232d68b4b10885b5c04466051db33536c"
     },
     {
       "path": "requirements.txt",
@@ -56,11 +56,11 @@
     },
     {
       "path": "sdkwork_web_backend_sdk/api/agent.py",
-      "sha256": "44fb458c49e9c2c787e8bf2d74c5e47c2af05580f15ab44691d3564c59daab6e"
+      "sha256": "82fdf00d5d8fcc47f59dd07021a2b00a5617afb98b5ab77a8c71975c7d643bff"
     },
     {
       "path": "sdkwork_web_backend_sdk/api/application_deployment.py",
-      "sha256": "d383a929fa59efee08677f87672c81dc8da2413eaf73344594d7dc338bc751fe"
+      "sha256": "622c2ce4c9e3495498608d9028260e4a71c4260244528db0ec1bff0254b9e551"
     },
     {
       "path": "sdkwork_web_backend_sdk/api/application_domain.py",
@@ -72,11 +72,11 @@
     },
     {
       "path": "sdkwork_web_backend_sdk/api/application.py",
-      "sha256": "33fec255d81002c5774a3af6e61333db988b978b5d7f24db9799e4a8740d02d1"
+      "sha256": "66ae9885426d98a526ef1ca4e7648619cb172c0efa2766bb1f72c6db8b1dbaee"
     },
     {
       "path": "sdkwork_web_backend_sdk/api/audit.py",
-      "sha256": "2de1db797546fab942be5bd39cf9fb04909764597a34f777af45367db319d57f"
+      "sha256": "ecab8c40b610ce9d52fe74b2e27745022a74c17a6eb7db1f413dc84b974af3b0"
     },
     {
       "path": "sdkwork_web_backend_sdk/api/certificate_distribution.py",
@@ -84,7 +84,7 @@
     },
     {
       "path": "sdkwork_web_backend_sdk/api/certificate.py",
-      "sha256": "5a1597a31b279857e1697b5959e4790bc1eb6c6a74f16b31cad938af30c6dc56"
+      "sha256": "23911922daea2e6a36ed90627b68e09cb022ddf3a5513c1481bb68645c6394f8"
     },
     {
       "path": "sdkwork_web_backend_sdk/api/domain.py",
@@ -92,7 +92,7 @@
     },
     {
       "path": "sdkwork_web_backend_sdk/api/nginx.py",
-      "sha256": "dfa83a81c8afae93e1aaa5d196b77efdad8888fd08221b17b0d1cff68e67d02e"
+      "sha256": "a48133659e325fe0a2a055a8ae6f5672cd09dc94537ee99d0bf826d6132f3fed"
     },
     {
       "path": "sdkwork_web_backend_sdk/api/server.py",

@@ -18,17 +18,18 @@ namespace SDKWork.Web.BackendSdk.Api
         /// <summary>
         /// List audit logs
         /// </summary>
-        public async Task<SDKWork.Web.BackendSdk.Models.AuditLogsListResponse?> LogsListAsync(int? page = null, int? pageSize = null, string? targetType = null, string? action = null, string? operatorId = null, string? startDate = null, string? endDate = null)
+        public async Task<SDKWork.Web.BackendSdk.Models.AuditLogsListResponse?> LogsListAsync(int? page = null, int? pageSize = null, string? cursor = null, string? targetType = null, string? action = null, string? operatorId = null, string? startDate = null, string? endDate = null)
         {
             var queryString = BuildQueryString(new[]
             {
                 new QueryParameterSpec("page", page, "form", true, false, null),
                 new QueryParameterSpec("page_size", pageSize, "form", true, false, null),
-                new QueryParameterSpec("targetType", targetType, "form", true, false, null),
+                new QueryParameterSpec("cursor", cursor, "form", true, false, null),
+                new QueryParameterSpec("target_type", targetType, "form", true, false, null),
                 new QueryParameterSpec("action", action, "form", true, false, null),
-                new QueryParameterSpec("operatorId", operatorId, "form", true, false, null),
-                new QueryParameterSpec("startDate", startDate, "form", true, false, null),
-                new QueryParameterSpec("endDate", endDate, "form", true, false, null),
+                new QueryParameterSpec("operator_id", operatorId, "form", true, false, null),
+                new QueryParameterSpec("start_date", startDate, "form", true, false, null),
+                new QueryParameterSpec("end_date", endDate, "form", true, false, null),
             });
             return await _client.GetAsync<SDKWork.Web.BackendSdk.Models.AuditLogsListResponse>(ApiPaths.AppendQueryString(ApiPaths.BackendPath("/audit_logs"), queryString));
         }

@@ -14,15 +14,16 @@ public class AuditApi {
     }
 
     /** List audit logs */
-    public AuditLogsListResponse logsList(Integer page, Integer pageSize, String targetType, String action, String operatorId, String startDate, String endDate) throws Exception {
+    public AuditLogsListResponse logsList(Integer page, Integer pageSize, String cursor, String targetType, String action, String operatorId, String startDate, String endDate) throws Exception {
         String query = buildQueryString(List.of(
             new QueryParameterSpec("page", page, "form", true, false, null),
             new QueryParameterSpec("page_size", pageSize, "form", true, false, null),
-            new QueryParameterSpec("targetType", targetType, "form", true, false, null),
+            new QueryParameterSpec("cursor", cursor, "form", true, false, null),
+            new QueryParameterSpec("target_type", targetType, "form", true, false, null),
             new QueryParameterSpec("action", action, "form", true, false, null),
-            new QueryParameterSpec("operatorId", operatorId, "form", true, false, null),
-            new QueryParameterSpec("startDate", startDate, "form", true, false, null),
-            new QueryParameterSpec("endDate", endDate, "form", true, false, null)
+            new QueryParameterSpec("operator_id", operatorId, "form", true, false, null),
+            new QueryParameterSpec("start_date", startDate, "form", true, false, null),
+            new QueryParameterSpec("end_date", endDate, "form", true, false, null)
         ));
         Object raw = client.get(ApiPaths.appendQueryString(ApiPaths.backendPath("/audit_logs"), query));
         return client.convertValue(raw, new TypeReference<AuditLogsListResponse>() {});

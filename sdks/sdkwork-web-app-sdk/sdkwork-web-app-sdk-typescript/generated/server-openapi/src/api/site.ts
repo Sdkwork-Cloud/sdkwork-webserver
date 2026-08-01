@@ -35,8 +35,8 @@ export class SiteApi {
       { name: 'page', value: params?.page, style: 'form', explode: true, allowReserved: false },
       { name: 'page_size', value: params?.pageSize, style: 'form', explode: true, allowReserved: false },
       { name: 'status', value: params?.status, style: 'form', explode: true, allowReserved: false },
-      { name: 'applicationType', value: params?.applicationType, style: 'form', explode: true, allowReserved: false },
-      { name: 'siteType', value: params?.siteType, style: 'form', explode: true, allowReserved: false },
+      { name: 'application_type', value: params?.applicationType, style: 'form', explode: true, allowReserved: false },
+      { name: 'site_type', value: params?.siteType, style: 'form', explode: true, allowReserved: false },
       { name: 'keyword', value: params?.keyword, style: 'form', explode: true, allowReserved: false },
     ]);
     return this.client.request<{ items: SiteResponse[]; pageInfo: PageInfo; }>(appendQueryString(appApiPath(`/sites`), query), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any, sdkworkUnwrapKind: 'page' });
@@ -54,12 +54,12 @@ export class SiteApi {
   }
 
 /** 获取站点详情 */
-  async retrieve(siteId: string, requestOptions?: ApiRequestOptions): Promise<SiteResponse> {
+  async retrieve(siteId: string | number, requestOptions?: ApiRequestOptions): Promise<SiteResponse> {
     return this.client.request<SiteResponse>(appApiPath(`/sites/${serializePathParameter(siteId, { name: 'siteId', style: 'simple', explode: false })}`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any, sdkworkUnwrapKind: 'item' });
   }
 
 /** 更新站点 */
-  async update(siteId: string, body: UpdateSiteRequest, params: SiteUpdateParams, requestOptions?: ApiRequestOptions): Promise<SiteResponse> {
+  async update(siteId: string | number, body: UpdateSiteRequest, params: SiteUpdateParams, requestOptions?: ApiRequestOptions): Promise<SiteResponse> {
     const requestHeaders = buildRequestHeaders(
       {
         'Idempotency-Key': { value: params.idempotencyKey, style: 'simple', explode: false },
@@ -70,17 +70,17 @@ export class SiteApi {
   }
 
 /** 删除站点 */
-  async delete(siteId: string, requestOptions?: ApiRequestOptions): Promise<void> {
+  async delete(siteId: string | number, requestOptions?: ApiRequestOptions): Promise<void> {
     return this.client.request<void>(appApiPath(`/sites/${serializePathParameter(siteId, { name: 'siteId', style: 'simple', explode: false })}`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'DELETE' as any });
   }
 
 /** 激活站点 */
-  async activate(siteId: string, requestOptions?: ApiRequestOptions): Promise<SiteResponse> {
+  async activate(siteId: string | number, requestOptions?: ApiRequestOptions): Promise<SiteResponse> {
     return this.client.request<SiteResponse>(appApiPath(`/sites/${serializePathParameter(siteId, { name: 'siteId', style: 'simple', explode: false })}/activate`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, sdkworkUnwrapKind: 'item' });
   }
 
 /** 暂停站点 */
-  async pause(siteId: string, requestOptions?: ApiRequestOptions): Promise<SiteResponse> {
+  async pause(siteId: string | number, requestOptions?: ApiRequestOptions): Promise<SiteResponse> {
     return this.client.request<SiteResponse>(appApiPath(`/sites/${serializePathParameter(siteId, { name: 'siteId', style: 'simple', explode: false })}/pause`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, sdkworkUnwrapKind: 'item' });
   }
 }

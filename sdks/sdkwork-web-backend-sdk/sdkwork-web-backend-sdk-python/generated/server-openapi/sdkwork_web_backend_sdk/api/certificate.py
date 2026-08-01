@@ -251,7 +251,7 @@ class CertificateApi:
         query = build_query_string([
             {'name': 'page', 'value': page, 'style': 'form', 'explode': True, 'allow_reserved': False},
             {'name': 'page_size', 'value': page_size, 'style': 'form', 'explode': True, 'allow_reserved': False},
-            {'name': 'domainId', 'value': domain_id, 'style': 'form', 'explode': True, 'allow_reserved': False},
+            {'name': 'domain_id', 'value': domain_id, 'style': 'form', 'explode': True, 'allow_reserved': False},
         ])
         return self._client.get(_append_query_string(f"/backend/v3/api/certificates", query))
 
@@ -274,6 +274,16 @@ class CertificateApi:
             {}
         )
         return self._client.put(f"/backend/v3/api/certificates/{serialize_path_parameter(certificate_id, {'name': 'certificateId', 'style': 'simple', 'explode': False})}", json=body, headers=request_headers)
+
+    def delete(self, certificate_id: str, idempotency_key: str) -> None:
+        """Soft-delete a certificate and release its domain identifiers"""
+        request_headers = build_request_headers(
+            {
+                'Idempotency-Key': {'value': idempotency_key, 'style': 'simple', 'explode': False},
+            },
+            {}
+        )
+        return self._client.delete(f"/backend/v3/api/certificates/{serialize_path_parameter(certificate_id, {'name': 'certificateId', 'style': 'simple', 'explode': False})}", headers=request_headers)
 
     def create_renew(self, certificate_id: str, idempotency_key: str) -> CertificatesRenewResponse202:
         """Renew a canonical certificate now"""

@@ -25,8 +25,8 @@ client.set_access_token("your-access-token")
 params = {
     'page': 1,
     'page_size': 2,
-    'siteId': 'siteId',
-    'domainId': 'domainId',
+    'site_id': 'site_id',
+    'domain_id': 'domain_id',
 }
 result = client.certificate.list(params)
 ```
@@ -72,8 +72,8 @@ params = {
     'page': 1,
     'page_size': 2,
     'status': 0,
-    'applicationType': 'WEB',
-    'siteType': 1,
+    'application_type': 'WEB',
+    'site_type': 1,
     'keyword': 'keyword',
 }
 result = client.site.list(params)
@@ -100,8 +100,8 @@ print(result)
 params = {
     'page': 1,
     'page_size': 2,
-    'siteId': 'siteId',
-    'domainId': 'domainId',
+    'site_id': 'site_id',
+    'domain_id': 'domain_id',
 }
 result = client.certificate.list(params)
 print(result)
@@ -128,6 +128,7 @@ site_id = '1'
 params = {
     'page': 1,
     'page_size': 2,
+    'cursor': 'cursor',
     'status': 0,
 }
 result = client.deployment.sites.deployments.list(site_id, params)
@@ -162,8 +163,8 @@ try:
     params = {
         'page': 1,
         'page_size': 2,
-        'siteId': 'siteId',
-        'domainId': 'domainId',
+        'site_id': 'site_id',
+        'domain_id': 'domain_id',
     }
     client.certificate.list(params)
 except Exception as error:

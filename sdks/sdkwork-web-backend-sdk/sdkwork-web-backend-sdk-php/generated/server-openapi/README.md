@@ -70,7 +70,7 @@ $client->setHeader('X-Custom-Header', 'value');
 <?php
 
 // List managed applications
-$params = ['page' => 1, 'page_size' => 2, 'applicationType' => 'WEB', 'siteType' => 4, 'status' => 5, 'keyword' => 'keyword'];
+$params = ['page' => 1, 'page_size' => 2, 'application_type' => 'WEB', 'site_type' => 4, 'status' => 5, 'keyword' => 'keyword'];
 $result = $client->application->applicationsList($params);
 var_dump($result);
 ```
@@ -93,7 +93,7 @@ var_dump($result);
 <?php
 
 // List canonical certificates
-$params = ['page' => 1, 'page_size' => 2, 'domainId' => '00000000-0000-0000-0000-000000000001'];
+$params = ['page' => 1, 'page_size' => 2, 'domain_id' => '00000000-0000-0000-0000-000000000001'];
 $result = $client->certificate->certificatesList($params);
 var_dump($result);
 ```
@@ -128,7 +128,7 @@ var_dump($result);
 
 // List application deployments
 $applicationId = '1';
-$params = ['page' => 1, 'page_size' => 2, 'status' => 3];
+$params = ['page' => 1, 'page_size' => 2, 'cursor' => 'cursor', 'status' => 4];
 $result = $client->applicationDeployment->applicationsDeploymentsList($applicationId, $params);
 var_dump($result);
 ```
@@ -171,7 +171,7 @@ var_dump($result);
 <?php
 
 // Retrieve the Nginx configuration and certificate bundle
-$params = ['ifSyncVersion' => 'ifsyncversion'];
+$params = ['if_sync_version' => 'if-sync-version'];
 $result = $client->agent->retrieve($params);
 var_dump($result);
 ```
@@ -182,7 +182,7 @@ var_dump($result);
 <?php
 
 // List audit logs
-$params = ['page' => 1, 'page_size' => 2, 'targetType' => 'targettype', 'action' => 'action', 'operatorId' => '1', 'startDate' => '2026-04-10T00:00:00Z', 'endDate' => '2026-04-10T00:00:00Z'];
+$params = ['page' => 1, 'page_size' => 2, 'cursor' => 'cursor', 'target_type' => 'target-type', 'action' => 'action', 'operator_id' => '1', 'start_date' => '2026-04-10T00:00:00Z', 'end_date' => '2026-04-10T00:00:00Z'];
 $result = $client->audit->logsList($params);
 var_dump($result);
 ```

@@ -76,8 +76,8 @@ client.SetHeader("X-Custom-Header", "value")
 params := map[string]interface{}{
     "page": 1,
     "page_size": 2,
-    "applicationType": "WEB",
-    "siteType": 4,
+    "application_type": "WEB",
+    "site_type": 4,
     "status": 5,
     "keyword": "keyword",
 }
@@ -111,7 +111,7 @@ fmt.Println(result)
 params := map[string]interface{}{
     "page": 1,
     "page_size": 2,
-    "domainId": "domainId",
+    "domain_id": "domain_id",
 }
 result, err := client.Certificate.CertificatesList(params)
 if err != nil {
@@ -159,7 +159,8 @@ applicationId := "1"
 params := map[string]interface{}{
     "page": 1,
     "page_size": 2,
-    "status": 3,
+    "cursor": "cursor",
+    "status": 4,
 }
 result, err := client.ApplicationDeployment.ApplicationsDeploymentsList(applicationId, params)
 if err != nil {
@@ -214,7 +215,7 @@ fmt.Println(result)
 ```go
 // Retrieve the Nginx configuration and certificate bundle
 params := map[string]interface{}{
-    "ifSyncVersion": "ifSyncVersion",
+    "if_sync_version": "if_sync_version",
 }
 result, err := client.Agent.Retrieve(params)
 if err != nil {
@@ -230,11 +231,12 @@ fmt.Println(result)
 params := map[string]interface{}{
     "page": 1,
     "page_size": 2,
-    "targetType": "targetType",
+    "cursor": "cursor",
+    "target_type": "target_type",
     "action": "action",
-    "operatorId": "operatorId",
-    "startDate": "startDate",
-    "endDate": "endDate",
+    "operator_id": "operator_id",
+    "start_date": "start_date",
+    "end_date": "end_date",
 }
 result, err := client.Audit.LogsList(params)
 if err != nil {

@@ -67,7 +67,7 @@ namespace SDKWork.Web.BackendSdk.Api
             {
                 new QueryParameterSpec("page", page, "form", true, false, null),
                 new QueryParameterSpec("page_size", pageSize, "form", true, false, null),
-                new QueryParameterSpec("domainId", domainId, "form", true, false, null),
+                new QueryParameterSpec("domain_id", domainId, "form", true, false, null),
             });
             return await _client.GetAsync<SDKWork.Web.BackendSdk.Models.CertificatesListResponse>(ApiPaths.AppendQueryString(ApiPaths.BackendPath("/certificates"), queryString));
         }
@@ -108,6 +108,21 @@ namespace SDKWork.Web.BackendSdk.Api
                 new Dictionary<string, HeaderParameterSpec>()
             );
             return await _client.PutAsync<SDKWork.Web.BackendSdk.Models.CertificatesUpdateResponse>(ApiPaths.BackendPath($"/certificates/{SerializePathParameter(certificateId, new PathParameterSpec("certificateId", "simple", false))}"), body, null, requestHeaders, "application/json");
+        }
+
+        /// <summary>
+        /// Soft-delete a certificate and release its domain identifiers
+        /// </summary>
+        public async Task CertificatesDeleteAsync(string certificateId, string idempotencyKey)
+        {
+            var requestHeaders = BuildRequestHeaders(
+                new Dictionary<string, HeaderParameterSpec>
+                {
+                    ["Idempotency-Key"] = new HeaderParameterSpec(idempotencyKey, "simple", false, null),
+                },
+                new Dictionary<string, HeaderParameterSpec>()
+            );
+            await _client.DeleteAsync<object>(ApiPaths.BackendPath($"/certificates/{SerializePathParameter(certificateId, new PathParameterSpec("certificateId", "simple", false))}"), null, requestHeaders);
         }
 
         /// <summary>

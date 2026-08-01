@@ -4,7 +4,7 @@ use crate::api::base::{RequestHeaders};
 use crate::api::paths::app_path;
 use crate::api::paths::append_query_string;
 use crate::http::{SdkworkError, SdkworkHttpClient};
-use crate::models::{CreateEnvVariableRequest, EnvVariableResponse};
+use crate::models::{CreateEnvVariableRequest, EnvVariableResponse, UpdateEnvVariableRequest};
 
 #[derive(Clone)]
 pub struct EnvVariableApi {
@@ -35,6 +35,30 @@ impl EnvVariableApi {
             &[],
         );
         self.client.post(&path, Some(body), None, headers.as_ref(), Some("application/json")).await
+    }
+
+    /// 轮换环境变量值
+    pub async fn sites_env_variables_update(&self, site_id: &str, variable_id: &str, body: &UpdateEnvVariableRequest, idempotency_key: &str) -> Result<EnvVariableResponse, SdkworkError> {
+        let path = app_path(&format!("/sites/{}/env_variables/{}", serialize_path_parameter(site_id, PathParameterSpec::new("siteId", "simple", false)), serialize_path_parameter(variable_id, PathParameterSpec::new("variableId", "simple", false))));
+        let headers = build_request_headers(
+            &[
+                ("Idempotency-Key", HeaderParameterSpec::new(idempotency_key, "simple", false, None)),
+            ],
+            &[],
+        );
+        self.client.patch(&path, Some(body), None, headers.as_ref(), Some("application/json")).await
+    }
+
+    /// 删除环境变量
+    pub async fn sites_env_variables_delete(&self, site_id: &str, variable_id: &str, idempotency_key: &str) -> Result<(), SdkworkError> {
+        let path = app_path(&format!("/sites/{}/env_variables/{}", serialize_path_parameter(site_id, PathParameterSpec::new("siteId", "simple", false)), serialize_path_parameter(variable_id, PathParameterSpec::new("variableId", "simple", false))));
+        let headers = build_request_headers(
+            &[
+                ("Idempotency-Key", HeaderParameterSpec::new(idempotency_key, "simple", false, None)),
+            ],
+            &[],
+        );
+        self.client.delete(&path, None, headers.as_ref()).await
     }
 
 }

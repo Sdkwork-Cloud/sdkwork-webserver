@@ -17,10 +17,11 @@ impl ApplicationDeploymentApi {
     }
 
     /// List application deployments
-    pub async fn applications_deployments_list(&self, application_id: &str, page: Option<i64>, page_size: Option<i64>, status: Option<i64>) -> Result<serde_json::Value, SdkworkError> {
+    pub async fn applications_deployments_list(&self, application_id: &str, page: Option<i64>, page_size: Option<i64>, cursor: Option<&str>, status: Option<i64>) -> Result<serde_json::Value, SdkworkError> {
         let query = build_query_string(&[
             QueryParameterSpec::new("page", page, "form", true, false, None),
             QueryParameterSpec::new("page_size", page_size, "form", true, false, None),
+            QueryParameterSpec::new("cursor", cursor, "form", true, false, None),
             QueryParameterSpec::new("status", status, "form", true, false, None),
         ]);
         let path = append_query_string(backend_path(&format!("/applications/{}/deployments", serialize_path_parameter(application_id, PathParameterSpec::new("applicationId", "simple", false)))), &query);

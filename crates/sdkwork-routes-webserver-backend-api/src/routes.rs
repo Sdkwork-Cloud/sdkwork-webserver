@@ -8,8 +8,8 @@ use sdkwork_webserver_contract::{
     CreateDeploymentRequest, CreateDomainRequest, CreateListenerCertificateBindingRequest,
     CreateManagedDomainRequest, CreateNginxConfigRequest, CreateRootDomainHostnameRequest,
     CreateRootDomainRequest, CreateServerRequest, CreateSiteRequest, CreateSourceVersionRequest,
-    ImportGitSourceVersionRequest, IssueCertificateRequest, ListNginxConfigsQuery,
-    ListRootDomainsQuery, ListSitesQuery, UpdateCertificateRequest,
+    ImportGitSourceVersionRequest, IssueCertificateRequest, ListAuditLogsQuery,
+    ListNginxConfigsQuery, ListRootDomainsQuery, ListSitesQuery, UpdateCertificateRequest,
     UpdateDomainApplicationBindingRequest, UpdateNginxConfigRequest, UpdateSiteRequest,
     WebBackendApi, WebBackendRequestContext,
 };
@@ -122,7 +122,8 @@ pub fn build_router_with_shared_backend_api(api: Arc<dyn WebBackendApi>) -> Rout
         )
         .route(
             paths::CERTIFICATE,
-            axum::routing::put(update_managed_certificate),
+            axum::routing::put(update_managed_certificate)
+                .delete(delete_managed_certificate),
         )
         .route(paths::CERTIFICATE_RENEW, post(renew_managed_certificate))
         .route(
@@ -166,7 +167,7 @@ struct CertificatePageQuery {
     page: i32,
     #[serde(default = "default_page_size")]
     page_size: i32,
-    #[serde(rename = "domainId", alias = "domain_id")]
+    #[serde(rename = "domain_id")]
     domain_id: Option<String>,
 }
 
@@ -177,6 +178,7 @@ struct DeploymentPageQuery {
     #[serde(default = "default_page_size")]
     page_size: i32,
     status: Option<i32>,
+    cursor: Option<String>,
 }
 
 fn default_page() -> i32 {
@@ -565,6 +567,7 @@ async fn list_application_deployments(
                 query.page,
                 query.page_size,
                 query.status,
+                query.cursor.as_deref(),
             )
             .await,
     )
@@ -734,6 +737,20 @@ async fn renew_managed_certificate(
     )
 }
 
+async fn delete_managed_certificate(
+    State(state): State<BackendState>,
+    context: Option<Extension<WebBackendRequestContext>>,
+    Path(certificate_id): Path<String>,
+) -> Result<Response, WebApiError> {
+    let context = require_backend_context(context)?;
+    no_content(
+        state
+            .api
+            .delete_managed_certificate(&context, &certificate_id)
+            .await,
+    )
+}
+
 async fn list_certificate_distribution(
     State(state): State<BackendState>,
     context: Option<Extension<WebBackendRequestContext>>,
@@ -852,13 +869,8 @@ async fn create_server(
 async fn list_audit_logs(
     State(state): State<BackendState>,
     context: Option<Extension<WebBackendRequestContext>>,
-    Query(query): Query<PageQuery>,
+    Query(query): Query<ListAuditLogsQuery>,
 ) -> Result<Response, WebApiError> {
     let context = require_backend_context(context)?;
-    ok_audit_log_page(
-        state
-            .api
-            .list_audit_logs(&context, query.page, query.page_size)
-            .await,
-    )
+    ok_audit_log_page(state.api.list_audit_logs(&context, &query).await)
 }

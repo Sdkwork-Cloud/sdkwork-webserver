@@ -153,6 +153,6 @@ class AgentSyncApi:
     def list(self, if_sync_version: Optional[str] = None) -> RetrieveResponse:
         """Retrieve the Nginx configuration and certificate bundle"""
         query = build_query_string([
-            {'name': 'ifSyncVersion', 'value': if_sync_version, 'style': 'form', 'explode': True, 'allow_reserved': False},
+            {'name': 'if_sync_version', 'value': if_sync_version, 'style': 'form', 'explode': True, 'allow_reserved': False},
         ])
         return self._client.get(_append_query_string(f"/backend/v3/api/agent/sync", query))

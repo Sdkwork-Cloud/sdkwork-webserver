@@ -42,6 +42,7 @@ impl WebRepository {
                    SELECT 1 FROM web_certificate_identifier domain_ci
                    INNER JOIN web_domain domain_d ON domain_d.tenant_id = domain_ci.tenant_id
                        AND domain_d.id = domain_ci.domain_id
+                       AND ($2 IS NULL OR domain_d.user_id = $2)
                    WHERE domain_ci.tenant_id = c.tenant_id
                      AND domain_ci.certificate_id = c.id
                      AND domain_d.uuid = $4 AND domain_d.deleted_at IS NULL
@@ -73,6 +74,7 @@ impl WebRepository {
                  SELECT 1 FROM web_certificate_identifier domain_ci
                  INNER JOIN web_domain domain_d ON domain_d.tenant_id = domain_ci.tenant_id
                      AND domain_d.id = domain_ci.domain_id
+                     AND ($2 IS NULL OR domain_d.user_id = $2)
                  WHERE domain_ci.tenant_id = c.tenant_id
                    AND domain_ci.certificate_id = c.id
                    AND domain_d.uuid = $4 AND domain_d.deleted_at IS NULL
@@ -158,6 +160,91 @@ impl WebRepository {
             .await
             .map_err(|error| store_error("commit certificate renewal policy update", error))?;
         self.retrieve_certificate_repo(tenant_id, certificate_uuid).await
+    }
+
+    pub(super) async fn delete_certificate_repo(
+        &self,
+        tenant_id: i64,
+        certificate_uuid: &str,
+        _deleted_by: Option<i64>,
+    ) -> WebServiceResult<()> {
+        let mut tx = self
+            .pool
+            .begin()
+            .await
+            .map_err(|error| store_error("begin delete certificate transaction", error))?;
+        let certificate = sqlx::query(
+            "SELECT id
+             FROM web_certificate
+             WHERE tenant_id = $1 AND uuid = $2 AND deleted_at IS NULL
+             FOR UPDATE",
+        )
+        .bind(tenant_id)
+        .bind(certificate_uuid)
+        .fetch_optional(&mut *tx)
+        .await
+        .map_err(|error| store_error("resolve certificate for deletion", error))?
+        .ok_or_else(|| WebServiceError::not_found("certificate not found"))?;
+        let certificate_internal_id: i64 = certificate
+            .try_get("id")
+            .map_err(|error| store_error("map certificate deletion id", error))?;
+
+        let active_bindings: i64 = sqlx::query_scalar(
+            "SELECT COUNT(*) FROM web_listener_certificate_binding
+             WHERE tenant_id = $1 AND certificate_id = $2
+               AND deleted_at IS NULL AND status <> 'ARCHIVED'",
+        )
+        .bind(tenant_id)
+        .bind(certificate_internal_id)
+        .fetch_one(&mut *tx)
+        .await
+        .map_err(|error| store_error("count certificate listener bindings", error))?;
+        if active_bindings > 0 {
+            return Err(WebServiceError::conflict(
+                "certificate is bound to an active listener; unbind it before deletion",
+            ));
+        }
+        let active_operations: i64 = sqlx::query_scalar(
+            "SELECT COUNT(*) FROM web_certificate_operation
+             WHERE tenant_id = $1 AND certificate_id = $2
+               AND status IN ('PENDING', 'RUNNING')",
+        )
+        .bind(tenant_id)
+        .bind(certificate_internal_id)
+        .fetch_one(&mut *tx)
+        .await
+        .map_err(|error| store_error("count certificate active operations", error))?;
+        if active_operations > 0 {
+            return Err(WebServiceError::conflict(
+                "certificate issuance or renewal is in progress; wait for it to finish",
+            ));
+        }
+
+        sqlx::query(
+            "UPDATE web_certificate
+             SET deleted_at = NOW(), updated_at = NOW(), version = version + 1
+             WHERE tenant_id = $1 AND id = $2",
+        )
+        .bind(tenant_id)
+        .bind(certificate_internal_id)
+        .execute(&mut *tx)
+        .await
+        .map_err(|error| store_error("delete certificate", error))?;
+        // Certificate identifiers are relation rows with no audit value; hard
+        // removal keeps the domain deletable and frees the unique hostname slot.
+        sqlx::query(
+            "DELETE FROM web_certificate_identifier
+             WHERE tenant_id = $1 AND certificate_id = $2",
+        )
+        .bind(tenant_id)
+        .bind(certificate_internal_id)
+        .execute(&mut *tx)
+        .await
+        .map_err(|error| store_error("delete certificate identifiers", error))?;
+        tx.commit()
+            .await
+            .map_err(|error| store_error("commit delete certificate transaction", error))?;
+        Ok(())
     }
 
     pub(super) async fn finalize_certificate_operation_repo(
@@ -290,7 +377,7 @@ impl WebRepository {
              SET cert_name = $3, cert_type = $4, preferred_key_algorithm = $5,
                   auto_renew = $6, renewal_status = 0, status = 1,
                   current_version_id = $7,
-                 metadata = '{}', updated_at = NOW(), version = version + 1
+                 metadata = metadata - 'certificateOperationFailureCode', updated_at = NOW(), version = version + 1
              WHERE tenant_id = $1 AND uuid = $2 AND deleted_at IS NULL",
         )
         .bind(lease.tenant_id)
@@ -326,14 +413,14 @@ impl WebRepository {
         sqlx::query(
             "DELETE FROM web_certificate_node_state
              WHERE tenant_id = $1 AND certificate_id = $2
-               AND certificate_version_id = $3",
+               AND certificate_version_id <> $3",
         )
         .bind(lease.tenant_id)
         .bind(certificate_id)
         .bind(version_id)
         .execute(&mut *tx)
         .await
-        .map_err(|error| store_error("invalidate renewed certificate observations", error))?;
+        .map_err(|error| store_error("invalidate superseded certificate observations", error))?;
         let operation_result = sqlx::query(
             "UPDATE web_certificate_operation
              SET status = 'SUCCEEDED', next_attempt_at = NOW(), lease_owner = NULL,

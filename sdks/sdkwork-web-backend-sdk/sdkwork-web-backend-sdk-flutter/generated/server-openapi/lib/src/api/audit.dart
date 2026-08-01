@@ -12,15 +12,16 @@ class AuditApi {
   AuditApi(this._client);
 
   /// List audit logs
-  Future<AuditLogsListResponse?> logsList([int? page, int? pageSize, String? targetType, String? action, String? operatorId, String? startDate, String? endDate]) async {
+  Future<AuditLogsListResponse?> logsList([int? page, int? pageSize, String? cursor, String? targetType, String? action, String? operatorId, String? startDate, String? endDate]) async {
     final query = buildQueryString([
       QueryParameterSpec('page', page, 'form', true, false, null),
       QueryParameterSpec('page_size', pageSize, 'form', true, false, null),
-      QueryParameterSpec('targetType', targetType, 'form', true, false, null),
+      QueryParameterSpec('cursor', cursor, 'form', true, false, null),
+      QueryParameterSpec('target_type', targetType, 'form', true, false, null),
       QueryParameterSpec('action', action, 'form', true, false, null),
-      QueryParameterSpec('operatorId', operatorId, 'form', true, false, null),
-      QueryParameterSpec('startDate', startDate, 'form', true, false, null),
-      QueryParameterSpec('endDate', endDate, 'form', true, false, null)
+      QueryParameterSpec('operator_id', operatorId, 'form', true, false, null),
+      QueryParameterSpec('start_date', startDate, 'form', true, false, null),
+      QueryParameterSpec('end_date', endDate, 'form', true, false, null)
     ]);
     final response = await _client.get(ApiPaths.appendQueryString(ApiPaths.backendPath('/audit_logs'), query));
     return (() {

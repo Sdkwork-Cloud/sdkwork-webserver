@@ -12,8 +12,8 @@ public class ApplicationApi {
         let query = buildQueryString([
             QueryParameterSpec(name: "page", value: page, style: "form", explode: true, allowReserved: false, contentType: nil),
             QueryParameterSpec(name: "page_size", value: pageSize, style: "form", explode: true, allowReserved: false, contentType: nil),
-            QueryParameterSpec(name: "applicationType", value: applicationType, style: "form", explode: true, allowReserved: false, contentType: nil),
-            QueryParameterSpec(name: "siteType", value: siteType, style: "form", explode: true, allowReserved: false, contentType: nil),
+            QueryParameterSpec(name: "application_type", value: applicationType, style: "form", explode: true, allowReserved: false, contentType: nil),
+            QueryParameterSpec(name: "site_type", value: siteType, style: "form", explode: true, allowReserved: false, contentType: nil),
             QueryParameterSpec(name: "status", value: status, style: "form", explode: true, allowReserved: false, contentType: nil),
             QueryParameterSpec(name: "keyword", value: keyword, style: "form", explode: true, allowReserved: false, contentType: nil)
         ])

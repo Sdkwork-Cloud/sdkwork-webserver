@@ -46,8 +46,8 @@ class CertificateApi(private val client: HttpClient) {
         val query = buildQueryString(listOf(
             QueryParameterSpec("page", page, "form", true, false, null),
             QueryParameterSpec("page_size", pageSize, "form", true, false, null),
-            QueryParameterSpec("siteId", siteId, "form", true, false, null),
-            QueryParameterSpec("domainId", domainId, "form", true, false, null)
+            QueryParameterSpec("site_id", siteId, "form", true, false, null),
+            QueryParameterSpec("domain_id", domainId, "form", true, false, null)
         ))
         val raw = client.get(ApiPaths.appendQueryString(ApiPaths.appPath("/certificates"), query))
         return client.convertValue(raw, object : TypeReference<CertificatesListResponse>() {})

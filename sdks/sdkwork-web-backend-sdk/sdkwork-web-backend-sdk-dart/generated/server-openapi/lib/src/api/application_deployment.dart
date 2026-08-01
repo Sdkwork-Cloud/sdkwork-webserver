@@ -12,10 +12,11 @@ class ApplicationDeploymentApi {
   ApplicationDeploymentApi(this._client);
 
   /// List application deployments
-  Future<ApplicationsDeploymentsListResponse?> applicationsDeploymentsList(String applicationId, [int? page, int? pageSize, int? status]) async {
+  Future<ApplicationsDeploymentsListResponse?> applicationsDeploymentsList(String applicationId, [int? page, int? pageSize, String? cursor, int? status]) async {
     final query = buildQueryString([
       QueryParameterSpec('page', page, 'form', true, false, null),
       QueryParameterSpec('page_size', pageSize, 'form', true, false, null),
+      QueryParameterSpec('cursor', cursor, 'form', true, false, null),
       QueryParameterSpec('status', status, 'form', true, false, null)
     ]);
     final response = await _client.get(ApiPaths.appendQueryString(ApiPaths.backendPath('/applications/${serializePathParameter(applicationId, const PathParameterSpec('applicationId', 'simple', false))}/deployments'), query));

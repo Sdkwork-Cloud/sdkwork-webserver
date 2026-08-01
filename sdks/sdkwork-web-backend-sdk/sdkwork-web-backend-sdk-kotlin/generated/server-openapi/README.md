@@ -74,8 +74,8 @@ val client = SdkworkBackendClient(config)
 val params = linkedMapOf<String, Any>(
     "page" to 1,
     "page_size" to 2,
-    "applicationType" to "WEB",
-    "siteType" to 4,
+    "application_type" to "WEB",
+    "site_type" to 4,
     "status" to 5,
     "keyword" to "keyword"
 )
@@ -103,7 +103,7 @@ println(result)
 val params = linkedMapOf<String, Any>(
     "page" to 1,
     "page_size" to 2,
-    "domainId" to "00000000-0000-0000-0000-000000000001"
+    "domain_id" to "00000000-0000-0000-0000-000000000001"
 )
 val result = client.certificate.certificatesList(params)
 println(result)
@@ -142,7 +142,8 @@ val applicationId = "1"
 val params = linkedMapOf<String, Any>(
     "page" to 1,
     "page_size" to 2,
-    "status" to 3
+    "cursor" to "cursor",
+    "status" to 4
 )
 val result = client.applicationDeployment.applicationsDeploymentsList(applicationId, params)
 println(result)
@@ -185,7 +186,7 @@ println(result)
 ```kotlin
 // Retrieve the Nginx configuration and certificate bundle
 val params = linkedMapOf<String, Any>(
-    "ifSyncVersion" to "ifsyncversion"
+    "if_sync_version" to "if-sync-version"
 )
 val result = client.agent.retrieve(params)
 println(result)
@@ -198,11 +199,12 @@ println(result)
 val params = linkedMapOf<String, Any>(
     "page" to 1,
     "page_size" to 2,
-    "targetType" to "targettype",
+    "cursor" to "cursor",
+    "target_type" to "target-type",
     "action" to "action",
-    "operatorId" to "1",
-    "startDate" to "2026-04-10T00:00:00Z",
-    "endDate" to "2026-04-10T00:00:00Z"
+    "operator_id" to "1",
+    "start_date" to "2026-04-10T00:00:00Z",
+    "end_date" to "2026-04-10T00:00:00Z"
 )
 val result = client.audit.logsList(params)
 println(result)

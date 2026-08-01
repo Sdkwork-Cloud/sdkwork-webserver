@@ -259,9 +259,9 @@ class NginxConfigsApi:
         query = build_query_string([
             {'name': 'page', 'value': page, 'style': 'form', 'explode': True, 'allow_reserved': False},
             {'name': 'page_size', 'value': page_size, 'style': 'form', 'explode': True, 'allow_reserved': False},
-            {'name': 'siteId', 'value': site_id, 'style': 'form', 'explode': True, 'allow_reserved': False},
-            {'name': 'configType', 'value': config_type, 'style': 'form', 'explode': True, 'allow_reserved': False},
-            {'name': 'isActive', 'value': is_active, 'style': 'form', 'explode': True, 'allow_reserved': False},
+            {'name': 'site_id', 'value': site_id, 'style': 'form', 'explode': True, 'allow_reserved': False},
+            {'name': 'config_type', 'value': config_type, 'style': 'form', 'explode': True, 'allow_reserved': False},
+            {'name': 'is_active', 'value': is_active, 'style': 'form', 'explode': True, 'allow_reserved': False},
         ])
         return self._client.get(_append_query_string(f"/backend/v3/api/nginx/configs", query))
 

@@ -30,7 +30,7 @@ namespace SDKWork.Web.BackendSdk.Api
         {
             var queryString = BuildQueryString(new[]
             {
-                new QueryParameterSpec("ifSyncVersion", ifSyncVersion, "form", true, false, null),
+                new QueryParameterSpec("if_sync_version", ifSyncVersion, "form", true, false, null),
             });
             return await _client.GetAsync<SDKWork.Web.BackendSdk.Models.RetrieveResponse>(ApiPaths.AppendQueryString(ApiPaths.BackendPath("/agent/sync"), queryString));
         }

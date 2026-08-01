@@ -18,10 +18,11 @@ func NewDeploymentApi(client *sdkhttp.Client) *DeploymentApi {
 }
 
 // 获取部署历史
-func (a *DeploymentApi) SitesDeploymentsList(siteId string, page *int, pageSize *int, status *int) (sdktypes.SitesDeploymentsListResponse, error) {
+func (a *DeploymentApi) SitesDeploymentsList(siteId string, page *int, pageSize *int, cursor *string, status *int) (sdktypes.SitesDeploymentsListResponse, error) {
     query := BuildQueryString([]QueryParameterSpec{
         {Name: "page", Value: func() interface{} { if page == nil { return nil }; return *page }(), Style: "form", Explode: true, AllowReserved: false},
         {Name: "page_size", Value: func() interface{} { if pageSize == nil { return nil }; return *pageSize }(), Style: "form", Explode: true, AllowReserved: false},
+        {Name: "cursor", Value: func() interface{} { if cursor == nil { return nil }; return *cursor }(), Style: "form", Explode: true, AllowReserved: false},
         {Name: "status", Value: func() interface{} { if status == nil { return nil }; return *status }(), Style: "form", Explode: true, AllowReserved: false},
     })
     raw, err := a.client.Get(AppendQueryString(AppApiPath(fmt.Sprintf("/sites/%s/deployments", SerializePathParameter(siteId, PathParameterSpec{Name: "siteId", Style: "simple", Explode: false}))), query), nil, nil)

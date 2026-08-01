@@ -18,6 +18,7 @@ const CERTIFICATE_RENEWAL_SCHEDULE_BATCH_SIZE: i32 = 50;
 const CERTIFICATE_RETRY_BASE_SECS: i64 = 30;
 const CERTIFICATE_RETRY_MAX_SECS: i64 = 30 * 60;
 const CERTIFICATE_TERMINAL_COOLDOWN_HOURS: i64 = 24;
+const CERTIFICATE_LEASE_HEARTBEAT_DIVISOR: i64 = 3;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum CertificateOperationOutcome {
@@ -100,6 +101,10 @@ async fn execute_certificate_operation(
     certificate_issuer: Arc<CertificateIssuer>,
     lease: CertificateOperationLease,
 ) -> WebServiceResult<CertificateOperationOutcome> {
+    // Long-running issuer work (DNS propagation, CA retries) may outlive the
+    // original claim lease; a heartbeat keeps the fencing token's lease current
+    // so a slow operation is never reaped or re-claimed while still running.
+    let heartbeat = spawn_certificate_lease_heartbeat(Arc::clone(&repository), lease.clone());
     let material = match certificate_issuer
         .issue(
             lease.cert_type,
@@ -111,6 +116,7 @@ async fn execute_certificate_operation(
     {
         Ok(material) => material,
         Err(error) => {
+            heartbeat.abort();
             let failure_code = certificate_issuer_failure_code(&error);
             tracing::warn!(
                 tenant_id = lease.tenant_id,
@@ -128,6 +134,7 @@ async fn execute_certificate_operation(
             .await;
         }
     };
+    heartbeat.abort();
     let update = CertificateIssueUpdate {
         cert_name: material.cert_name,
         cert_type: material.cert_type,
@@ -209,6 +216,42 @@ async fn persist_certificate_operation_failure(
         CertificateOperationOutcome::Failed
     } else {
         CertificateOperationOutcome::Retried
+    })
+}
+
+/// Periodically extends the lease of a RUNNING certificate operation while the
+/// issuer performs its work. The heartbeat stops when the operation completes,
+/// when the lease is no longer current (fencing token moved on), or when the
+/// repository rejects the renewal.
+fn spawn_certificate_lease_heartbeat(
+    repository: Arc<dyn WebRepositoryPort>,
+    lease: CertificateOperationLease,
+) -> tokio::task::JoinHandle<()> {
+    let heartbeat_interval_secs = (CERTIFICATE_OPERATION_LEASE_SECS
+        / CERTIFICATE_LEASE_HEARTBEAT_DIVISOR)
+        .max(60);
+    tokio::spawn(async move {
+        let mut interval =
+            tokio::time::interval(std::time::Duration::from_secs(heartbeat_interval_secs as u64));
+        interval.tick().await;
+        loop {
+            interval.tick().await;
+            match repository
+                .renew_certificate_operation_lease(&lease, heartbeat_interval_secs)
+                .await
+            {
+                Ok(()) => {}
+                Err(error) => {
+                    tracing::debug!(
+                        tenant_id = lease.tenant_id,
+                        operation_id = %lease.operation_id,
+                        error = ?error,
+                        "certificate operation lease heartbeat stopped"
+                    );
+                    break;
+                }
+            }
+        }
     })
 }
 

@@ -1,7 +1,7 @@
 import { appApiPath } from './paths';
 import type { ApiRequestOptions, HttpClient } from '../http/client';
 
-import type { CreateEnvVariableRequest, EnvVariableResponse, PageInfo } from '../types';
+import type { CreateEnvVariableRequest, EnvVariableResponse, PageInfo, UpdateEnvVariableRequest } from '../types';
 
 
 export interface EnvVariableSitesEnvVariablesListParams {
@@ -9,6 +9,14 @@ export interface EnvVariableSitesEnvVariablesListParams {
 }
 
 export interface EnvVariableSitesEnvVariablesCreateParams {
+  idempotencyKey: string;
+}
+
+export interface EnvVariableSitesEnvVariablesUpdateParams {
+  idempotencyKey: string;
+}
+
+export interface EnvVariableSitesEnvVariablesDeleteParams {
   idempotencyKey: string;
 }
 
@@ -21,7 +29,7 @@ export class EnvVariableSitesEnvVariablesApi {
 
 
 /** 获取环境变量列表 */
-  async list(siteId: string, params?: EnvVariableSitesEnvVariablesListParams, requestOptions?: ApiRequestOptions): Promise<{ items: EnvVariableResponse[]; pageInfo: PageInfo; }> {
+  async list(siteId: string | number, params?: EnvVariableSitesEnvVariablesListParams, requestOptions?: ApiRequestOptions): Promise<{ items: EnvVariableResponse[]; pageInfo: PageInfo; }> {
     const query = buildQueryString([
       { name: 'environment', value: params?.environment, style: 'form', explode: true, allowReserved: false },
     ]);
@@ -29,7 +37,7 @@ export class EnvVariableSitesEnvVariablesApi {
   }
 
 /** 创建环境变量 */
-  async create(siteId: string, body: CreateEnvVariableRequest, params: EnvVariableSitesEnvVariablesCreateParams, requestOptions?: ApiRequestOptions): Promise<EnvVariableResponse> {
+  async create(siteId: string | number, body: CreateEnvVariableRequest, params: EnvVariableSitesEnvVariablesCreateParams, requestOptions?: ApiRequestOptions): Promise<EnvVariableResponse> {
     const requestHeaders = buildRequestHeaders(
       {
         'Idempotency-Key': { value: params.idempotencyKey, style: 'simple', explode: false },
@@ -37,6 +45,28 @@ export class EnvVariableSitesEnvVariablesApi {
       {}
     );
     return this.client.request<EnvVariableResponse>(appApiPath(`/sites/${serializePathParameter(siteId, { name: 'siteId', style: 'simple', explode: false })}/env_variables`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, body, headers: requestHeaders, contentType: 'application/json', sdkworkUnwrapKind: 'item' });
+  }
+
+/** 轮换环境变量值 */
+  async update(siteId: string | number, variableId: string, body: UpdateEnvVariableRequest, params: EnvVariableSitesEnvVariablesUpdateParams, requestOptions?: ApiRequestOptions): Promise<EnvVariableResponse> {
+    const requestHeaders = buildRequestHeaders(
+      {
+        'Idempotency-Key': { value: params.idempotencyKey, style: 'simple', explode: false },
+      },
+      {}
+    );
+    return this.client.request<EnvVariableResponse>(appApiPath(`/sites/${serializePathParameter(siteId, { name: 'siteId', style: 'simple', explode: false })}/env_variables/${serializePathParameter(variableId, { name: 'variableId', style: 'simple', explode: false })}`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'PATCH' as any, body, headers: requestHeaders, contentType: 'application/json', sdkworkUnwrapKind: 'item' });
+  }
+
+/** 删除环境变量 */
+  async delete(siteId: string | number, variableId: string, params: EnvVariableSitesEnvVariablesDeleteParams, requestOptions?: ApiRequestOptions): Promise<void> {
+    const requestHeaders = buildRequestHeaders(
+      {
+        'Idempotency-Key': { value: params.idempotencyKey, style: 'simple', explode: false },
+      },
+      {}
+    );
+    return this.client.request<void>(appApiPath(`/sites/${serializePathParameter(siteId, { name: 'siteId', style: 'simple', explode: false })}/env_variables/${serializePathParameter(variableId, { name: 'variableId', style: 'simple', explode: false })}`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'DELETE' as any, headers: requestHeaders });
   }
 }
 

@@ -251,8 +251,8 @@ class CertificateApi:
         query = build_query_string([
             {'name': 'page', 'value': page, 'style': 'form', 'explode': True, 'allow_reserved': False},
             {'name': 'page_size', 'value': page_size, 'style': 'form', 'explode': True, 'allow_reserved': False},
-            {'name': 'siteId', 'value': site_id, 'style': 'form', 'explode': True, 'allow_reserved': False},
-            {'name': 'domainId', 'value': domain_id, 'style': 'form', 'explode': True, 'allow_reserved': False},
+            {'name': 'site_id', 'value': site_id, 'style': 'form', 'explode': True, 'allow_reserved': False},
+            {'name': 'domain_id', 'value': domain_id, 'style': 'form', 'explode': True, 'allow_reserved': False},
         ])
         return self._client.get(_append_query_string(f"/app/v3/api/certificates", query))
 

@@ -40,11 +40,11 @@
     },
     {
       "path": "package.json",
-      "sha256": "5ea1be6e5a1abea15b21e01e39ad74e411609077ee2e710a02603a2768fdaf6b"
+      "sha256": "74db1c0f68f600a1d4341505516541d5c6b7a8171b656e2fac2a7cbb72a35c8d"
     },
     {
       "path": "README.md",
-      "sha256": "eedec5495c7f0e3493fb48f15f5b478fdaa1466633adaa6b96aeb5e1d048b151"
+      "sha256": "130d9ac051e4a127a093d457feb0182788c429db4a90ece36278fcca861cfd88"
     },
     {
       "path": "sdkwork-sdk.json",
@@ -52,15 +52,15 @@
     },
     {
       "path": "src/api/agent.ts",
-      "sha256": "6ef64233b08ef13e24322294da9cfe3ef0d7e2de6f04b4419009c620d79dd0ab"
+      "sha256": "638afa03f6b775084cb26ee9afc5e93834b1e316c2d89f5eaeadfd45ed143dce"
     },
     {
       "path": "src/api/application-deployment.ts",
-      "sha256": "ddd321710925df52dd0f033399ed4177b8ad30df2a7e45a3edf54097c02f1b3f"
+      "sha256": "60cfa30edf0f77ac868f0a63b57209d582dacf0695311a7adcd539de106cffe1"
     },
     {
       "path": "src/api/application-domain.ts",
-      "sha256": "89ab949e6b89a8050933d89e69fdd98c78fcfac6fb4fa75acc7ce511ed29b7cb"
+      "sha256": "330cbbb9400e5735e473eedcc064e9834fd3a9b015988ec81afe0e7c6d26b43a"
     },
     {
       "path": "src/api/application-source-version.ts",
@@ -68,11 +68,11 @@
     },
     {
       "path": "src/api/application.ts",
-      "sha256": "23f599663a0d9a39e47e85f1564f35305cfdf1531d1c490af619d809d0ad70b6"
+      "sha256": "bfe813cbd28dd213272957597401d6c8c0b21259b1ef453261a2d5e33043f0d4"
     },
     {
       "path": "src/api/audit.ts",
-      "sha256": "e8500724eb04dff3a518977444a50cf85a40d419269a5ffecf8f78ae32bfc1b5"
+      "sha256": "a7b22f74a9d1a7d80d63e8fb660df1d838d7c59331615148220b083f91b10aca"
     },
     {
       "path": "src/api/base.ts",
@@ -84,11 +84,11 @@
     },
     {
       "path": "src/api/certificate.ts",
-      "sha256": "ab36d370ea8f24c1203402cdff269c41f32cd494d4bdc13701cd09133be6eb34"
+      "sha256": "ff12c12d7d51582b586ec16bf3fe3b8bd7e84c75954795964551c6aebe9e72a7"
     },
     {
       "path": "src/api/domain.ts",
-      "sha256": "b51ae244c20c31a082264ac65c509a1b76a48f8001b621a0613cc0e635819a8d"
+      "sha256": "a148084dd72b869a2f4274bac14016e9954eefef1324f859a644af2132ddb739"
     },
     {
       "path": "src/api/index.ts",
@@ -96,7 +96,7 @@
     },
     {
       "path": "src/api/nginx.ts",
-      "sha256": "49486e67169924fee65ab96d77c4115e3a20f1ce2950d12d8dc1e3b56e27c067"
+      "sha256": "64a0e181e6f63f8b40fb075de326f32be602cdb4c8d0c92b7e91bf2ac2d24dcb"
     },
     {
       "path": "src/api/paths.ts",

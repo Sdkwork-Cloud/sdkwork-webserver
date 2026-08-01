@@ -21,7 +21,7 @@ module Sdkwork
           def retrieve(if_sync_version: nil)
             path = '/backend/v3/api/agent/sync'
             query = build_query_string([
-              QueryParameterSpec.new('ifSyncVersion', if_sync_version, 'form', true, false, nil),
+              QueryParameterSpec.new('if_sync_version', if_sync_version, 'form', true, false, nil),
             ])
             path = append_query_string(path, query)
             options = {}

@@ -29,6 +29,29 @@ class EnvVariableApi(private val client: HttpClient) {
         return client.convertValue(raw, object : TypeReference<SitesEnvVariablesCreateResponse201>() {})
     }
 
+    /** 轮换环境变量值 */
+    suspend fun sitesEnvVariablesUpdate(siteId: String, variableId: String, body: UpdateEnvVariableRequest, idempotencyKey: String): SitesEnvVariablesUpdateResponse? {
+        val requestHeaders = buildRequestHeaders(
+            mapOf(
+                "Idempotency-Key" to HeaderParameterSpec(idempotencyKey, "simple", false, null),
+            ),
+            emptyMap()
+        )
+        val raw = client.patch(ApiPaths.appPath("/sites/${serializePathParameter(siteId, PathParameterSpec("siteId", "simple", false))}/env_variables/${serializePathParameter(variableId, PathParameterSpec("variableId", "simple", false))}"), body, null, requestHeaders, "application/json")
+        return client.convertValue(raw, object : TypeReference<SitesEnvVariablesUpdateResponse>() {})
+    }
+
+    /** 删除环境变量 */
+    suspend fun sitesEnvVariablesDelete(siteId: String, variableId: String, idempotencyKey: String): Unit {
+        val requestHeaders = buildRequestHeaders(
+            mapOf(
+                "Idempotency-Key" to HeaderParameterSpec(idempotencyKey, "simple", false, null),
+            ),
+            emptyMap()
+        )
+        client.delete(ApiPaths.appPath("/sites/${serializePathParameter(siteId, PathParameterSpec("siteId", "simple", false))}/env_variables/${serializePathParameter(variableId, PathParameterSpec("variableId", "simple", false))}"), null, requestHeaders)
+    }
+
     private data class PathParameterSpec(val name: String, val style: String, val explode: Boolean)
 
     private fun serializePathParameter(value: Any?, spec: PathParameterSpec): String {

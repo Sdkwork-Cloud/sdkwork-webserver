@@ -52,8 +52,11 @@ async fn main() -> anyhow::Result<()> {
         .map_err(|error| anyhow::anyhow!(error))?;
     let mut shutdown_task = tokio::spawn(shutdown_signal());
     let mut next_renewal_schedule = Instant::now();
-    tokio::task::yield_now().await;
+    // Randomize the startup phase so multiple worker replicas do not claim
+    // operations in lockstep.
+    tokio::time::sleep(Duration::from_millis(jitter_millis(poll_interval_secs * 1_000))).await;
 
+    let mut consecutive_failures: u32 = 0;
     loop {
         let schedule_renewals = Instant::now() >= next_renewal_schedule;
         match runtime
@@ -62,6 +65,7 @@ async fn main() -> anyhow::Result<()> {
             .await
         {
             Ok(report) => {
+                consecutive_failures = 0;
                 if schedule_renewals {
                     next_renewal_schedule =
                         Instant::now() + Duration::from_secs(renewal_schedule_interval_secs);
@@ -78,9 +82,19 @@ async fn main() -> anyhow::Result<()> {
                 }
             }
             Err(error) => {
+                consecutive_failures = consecutive_failures.saturating_add(1);
                 warn!(error = %error, "certificate operation cycle failed");
             }
         }
+        // Exponential backoff on failure (bounded) plus per-cycle jitter so
+        // replica workers spread their SKIP LOCKED claim scans.
+        let base_secs = if consecutive_failures > 0 {
+            (2_u64 << consecutive_failures.min(5)).min(poll_interval_secs.max(2))
+        } else {
+            poll_interval_secs
+        };
+        let delay =
+            Duration::from_secs(base_secs) + Duration::from_millis(jitter_millis(base_secs * 250));
         tokio::select! {
             result = &mut shutdown_task => {
                 result
@@ -89,11 +103,28 @@ async fn main() -> anyhow::Result<()> {
                 info!("certificate operation worker stopped after completing the active cycle");
                 break;
             }
-            () = tokio::time::sleep(Duration::from_secs(poll_interval_secs)) => {}
+            () = tokio::time::sleep(delay) => {}
         }
     }
 
     Ok(())
+}
+
+/// Non-cryptographic millisecond jitter in `[0, max_ms)` derived from the clock
+/// and process identity; used only to de-synchronize worker replicas.
+fn jitter_millis(max_ms: u64) -> u64 {
+    if max_ms == 0 {
+        return 0;
+    }
+    let mut state = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_nanos() as u64
+        ^ u64::from(std::process::id()) << 32;
+    state ^= state << 13;
+    state ^= state >> 7;
+    state ^= state << 17;
+    state % max_ms
 }
 
 fn parse_bounded_interval(

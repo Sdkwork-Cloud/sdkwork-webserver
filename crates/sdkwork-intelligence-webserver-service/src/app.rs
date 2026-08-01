@@ -6,7 +6,7 @@ use sdkwork_webserver_contract::{
     CreateEnvVariableRequest, CreateHealthCheckRequest, CreateListenerCertificateBindingRequest,
     CreateSiteRequest, CreateSourceVersionRequest, ImportGitSourceVersionRequest,
     IssueCertificateRequest, ListSitesQuery, MediaResource, UpdateSiteRequest, WebAppApi,
-    WebAppRequestContext, WebAppResourceScope, WebServiceResult,
+    WebAppRequestContext, WebAppResourceScope, WebServiceError, WebServiceResult,
 };
 use std::collections::HashSet;
 
@@ -316,7 +316,7 @@ impl WebService {
         request: &CreateHealthCheckRequest,
     ) -> WebServiceResult<()> {
         if !matches!(request.check_type, 1..=3) {
-            return Err(sdkwork_webserver_contract::WebServiceError::validation(
+            return Err(WebServiceError::validation(
                 "checkType must be 1 (HTTP), 2 (TCP), or 3 (ping)",
             ));
         }
@@ -325,24 +325,42 @@ impl WebService {
             || request.check_url.len() > 2_000
             || request.check_url.chars().any(char::is_control)
         {
-            return Err(sdkwork_webserver_contract::WebServiceError::validation(
+            return Err(WebServiceError::validation(
                 "checkUrl must contain 1..2000 non-control characters",
             ));
         }
+        if request.check_type == 1 {
+            // HTTP checks run from the platform, so the target URL must be a
+            // credentialed-free http(s) URL without query or fragment to avoid
+            // turning a stored target into a platform-side SSRF primitive.
+            let parsed = url::Url::parse(&request.check_url).ok();
+            if parsed.as_ref().is_none_or(|parsed| {
+                !matches!(parsed.scheme(), "http" | "https")
+                    || parsed.host_str().is_none()
+                    || !parsed.username().is_empty()
+                    || parsed.password().is_some()
+                    || parsed.query().is_some()
+                    || parsed.fragment().is_some()
+            }) {
+                return Err(WebServiceError::validation(
+                    "checkUrl must be an HTTP(S) URL without credentials, query parameters, or fragments",
+                ));
+            }
+        }
         if !(5..=86_400).contains(&request.check_interval) {
-            return Err(sdkwork_webserver_contract::WebServiceError::validation(
+            return Err(WebServiceError::validation(
                 "checkInterval must be between 5 and 86400 seconds",
             ));
         }
         if !(100..=60_000).contains(&request.timeout_ms)
             || i64::from(request.timeout_ms) > i64::from(request.check_interval) * 1_000
         {
-            return Err(sdkwork_webserver_contract::WebServiceError::validation(
+            return Err(WebServiceError::validation(
                 "timeoutMs must be between 100 and 60000 and not exceed checkInterval",
             ));
         }
         if !(0..=10).contains(&request.retry_count) {
-            return Err(sdkwork_webserver_contract::WebServiceError::validation(
+            return Err(WebServiceError::validation(
                 "retryCount must be between 0 and 10",
             ));
         }
@@ -391,7 +409,7 @@ impl WebService {
                 byte == b'_' || byte.is_ascii_alphabetic() || (index > 0 && byte.is_ascii_digit())
             })
         {
-            return Err(sdkwork_webserver_contract::WebServiceError::validation(
+            return Err(WebServiceError::validation(
                 "key must be a 1..200 character environment variable name",
             ));
         }
@@ -399,12 +417,16 @@ impl WebService {
             request.environment.as_str(),
             "development" | "test" | "staging" | "production"
         ) {
-            return Err(sdkwork_webserver_contract::WebServiceError::validation(
+            return Err(WebServiceError::validation(
                 "environment must be development, test, staging, or production",
             ));
         }
-        if request.value.len() > MAX_ENV_VARIABLE_VALUE_BYTES || request.value.contains('\0') {
-            return Err(sdkwork_webserver_contract::WebServiceError::validation(
+        Self::validate_env_variable_value(&request.value)
+    }
+
+    pub(crate) fn validate_env_variable_value(value: &str) -> WebServiceResult<()> {
+        if value.len() > MAX_ENV_VARIABLE_VALUE_BYTES || value.contains('\0') {
+            return Err(WebServiceError::validation(
                 "value must not exceed 64 KiB or contain NUL",
             ));
         }
@@ -882,7 +904,7 @@ impl WebAppApi for WebService {
         Self::validate_store_listing(site.store_listing.as_ref(), true)?;
         let successful_deployments = self
             .repository
-            .list_deployments(tenant_id, site_id, 1, 1, Some(2))
+            .list_deployments(tenant_id, site_id, 1, 1, Some(2), None)
             .await?;
         if successful_deployments.total == 0 {
             return Err(sdkwork_webserver_contract::WebServiceError::conflict(
@@ -1092,6 +1114,7 @@ impl WebAppApi for WebService {
         page: i32,
         page_size: i32,
         status: Option<i32>,
+        cursor: Option<&str>,
     ) -> WebServiceResult<sdkwork_webserver_contract::DeploymentPage> {
         if status.is_some_and(|status| !(0..=6).contains(&status)) {
             return Err(sdkwork_webserver_contract::WebServiceError::validation(
@@ -1100,7 +1123,7 @@ impl WebAppApi for WebService {
         }
         let tenant_id = self.require_site_access(context, site_id).await?;
         self.repository
-            .list_deployments(tenant_id, site_id, page, page_size, status)
+            .list_deployments(tenant_id, site_id, page, page_size, status, cursor)
             .await
     }
 
@@ -1204,6 +1227,32 @@ impl WebAppApi for WebService {
         let tenant_id = self.require_site_access(context, site_id).await?;
         self.repository
             .create_env_variable(tenant_id, site_id, request)
+            .await
+    }
+
+    async fn update_env_variable(
+        &self,
+        context: &WebAppRequestContext,
+        site_id: &str,
+        variable_id: &str,
+        request: &sdkwork_webserver_contract::UpdateEnvVariableRequest,
+    ) -> WebServiceResult<sdkwork_webserver_contract::EnvVariableResponse> {
+        Self::validate_env_variable_value(&request.value)?;
+        let tenant_id = self.require_site_access(context, site_id).await?;
+        self.repository
+            .update_env_variable(tenant_id, site_id, variable_id, request)
+            .await
+    }
+
+    async fn delete_env_variable(
+        &self,
+        context: &WebAppRequestContext,
+        site_id: &str,
+        variable_id: &str,
+    ) -> WebServiceResult<()> {
+        let tenant_id = self.require_site_access(context, site_id).await?;
+        self.repository
+            .delete_env_variable(tenant_id, site_id, variable_id)
             .await
     }
 

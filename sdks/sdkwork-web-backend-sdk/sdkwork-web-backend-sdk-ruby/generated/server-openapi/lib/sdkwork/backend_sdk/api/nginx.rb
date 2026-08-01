@@ -20,9 +20,9 @@ module Sdkwork
             query = build_query_string([
               QueryParameterSpec.new('page', page, 'form', true, false, nil),
               QueryParameterSpec.new('page_size', page_size, 'form', true, false, nil),
-              QueryParameterSpec.new('siteId', site_id, 'form', true, false, nil),
-              QueryParameterSpec.new('configType', config_type, 'form', true, false, nil),
-              QueryParameterSpec.new('isActive', is_active, 'form', true, false, nil),
+              QueryParameterSpec.new('site_id', site_id, 'form', true, false, nil),
+              QueryParameterSpec.new('config_type', config_type, 'form', true, false, nil),
+              QueryParameterSpec.new('is_active', is_active, 'form', true, false, nil),
             ])
             path = append_query_string(path, query)
             options = {}

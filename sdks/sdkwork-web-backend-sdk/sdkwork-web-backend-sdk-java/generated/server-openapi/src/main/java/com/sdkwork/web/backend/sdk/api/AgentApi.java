@@ -22,7 +22,7 @@ public class AgentApi {
     /** Retrieve the Nginx configuration and certificate bundle */
     public RetrieveResponse retrieve(String ifSyncVersion) throws Exception {
         String query = buildQueryString(List.of(
-            new QueryParameterSpec("ifSyncVersion", ifSyncVersion, "form", true, false, null)
+            new QueryParameterSpec("if_sync_version", ifSyncVersion, "form", true, false, null)
         ));
         Object raw = client.get(ApiPaths.appendQueryString(ApiPaths.backendPath("/agent/sync"), query));
         return client.convertValue(raw, new TypeReference<RetrieveResponse>() {});

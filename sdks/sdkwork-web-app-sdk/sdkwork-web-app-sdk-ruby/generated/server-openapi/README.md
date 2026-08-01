@@ -15,7 +15,7 @@ require 'sdkwork/app_sdk'
 
 config = Sdkwork::AppSdk::SdkConfig.new(base_url: 'http://localhost:3800')
 client = Sdkwork::AppSdk::SdkworkAppClient.new(config)
-params = { 'page' => 1, 'page_size' => 2, 'status' => 0, 'applicationType' => 'WEB', 'siteType' => 1, 'keyword' => 'keyword' }
+params = { 'page' => 1, 'page_size' => 2, 'status' => 0, 'application_type' => 'WEB', 'site_type' => 1, 'keyword' => 'keyword' }
 result = client.site.sites_list(params: params)
 
 
@@ -56,7 +56,7 @@ client.set_header('X-Custom-Header', 'value')
 
 ```ruby
 # 获取站点列表
-params = { 'page' => 1, 'page_size' => 2, 'status' => 0, 'applicationType' => 'WEB', 'siteType' => 1, 'keyword' => 'keyword' }
+params = { 'page' => 1, 'page_size' => 2, 'status' => 0, 'application_type' => 'WEB', 'site_type' => 1, 'keyword' => 'keyword' }
 result = client.site.sites_list(params: params)
 puts result.inspect
 ```
@@ -75,7 +75,7 @@ puts result.inspect
 
 ```ruby
 # 获取证书列表
-params = { 'page' => 1, 'page_size' => 2, 'siteId' => '00000000-0000-0000-0000-000000000001', 'domainId' => '00000000-0000-0000-0000-000000000001' }
+params = { 'page' => 1, 'page_size' => 2, 'site_id' => '00000000-0000-0000-0000-000000000001', 'domain_id' => '00000000-0000-0000-0000-000000000001' }
 result = client.certificate.certificates_list(params: params)
 puts result.inspect
 ```
@@ -95,7 +95,7 @@ puts result.inspect
 ```ruby
 # 获取部署历史
 site_id = '1'
-params = { 'page' => 1, 'page_size' => 2, 'status' => 0 }
+params = { 'page' => 1, 'page_size' => 2, 'cursor' => 'cursor', 'status' => 0 }
 result = client.deployment.sites_deployments_list(site_id, params: params)
 puts result.inspect
 ```
@@ -123,7 +123,7 @@ puts result.inspect
 
 ```ruby
 begin
-  params = { 'page' => 1, 'page_size' => 2, 'status' => 0, 'applicationType' => 'WEB', 'siteType' => 1, 'keyword' => 'keyword' }
+  params = { 'page' => 1, 'page_size' => 2, 'status' => 0, 'application_type' => 'WEB', 'site_type' => 1, 'keyword' => 'keyword' }
   client.site.sites_list(params: params)
 rescue StandardError => e
   warn("Error: #{e.message}")

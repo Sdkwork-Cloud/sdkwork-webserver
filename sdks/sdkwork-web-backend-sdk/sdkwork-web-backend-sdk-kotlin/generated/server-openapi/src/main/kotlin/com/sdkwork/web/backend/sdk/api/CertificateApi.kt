@@ -46,7 +46,7 @@ class CertificateApi(private val client: HttpClient) {
         val query = buildQueryString(listOf(
             QueryParameterSpec("page", page, "form", true, false, null),
             QueryParameterSpec("page_size", pageSize, "form", true, false, null),
-            QueryParameterSpec("domainId", domainId, "form", true, false, null)
+            QueryParameterSpec("domain_id", domainId, "form", true, false, null)
         ))
         val raw = client.get(ApiPaths.appendQueryString(ApiPaths.backendPath("/certificates"), query))
         return client.convertValue(raw, object : TypeReference<CertificatesListResponse>() {})
@@ -80,6 +80,17 @@ class CertificateApi(private val client: HttpClient) {
         )
         val raw = client.put(ApiPaths.backendPath("/certificates/${serializePathParameter(certificateId, PathParameterSpec("certificateId", "simple", false))}"), body, null, requestHeaders, "application/json")
         return client.convertValue(raw, object : TypeReference<CertificatesUpdateResponse>() {})
+    }
+
+    /** Soft-delete a certificate and release its domain identifiers */
+    suspend fun certificatesDelete(certificateId: String, idempotencyKey: String): Unit {
+        val requestHeaders = buildRequestHeaders(
+            mapOf(
+                "Idempotency-Key" to HeaderParameterSpec(idempotencyKey, "simple", false, null),
+            ),
+            emptyMap()
+        )
+        client.delete(ApiPaths.backendPath("/certificates/${serializePathParameter(certificateId, PathParameterSpec("certificateId", "simple", false))}"), null, requestHeaders)
     }
 
     /** Renew a canonical certificate now */

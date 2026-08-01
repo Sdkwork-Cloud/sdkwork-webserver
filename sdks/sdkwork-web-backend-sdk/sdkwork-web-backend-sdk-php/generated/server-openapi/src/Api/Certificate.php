@@ -71,7 +71,7 @@ final class CertificateApi extends BaseApi
         $query = $this->buildQueryString([
             new QueryParameterSpec('page', $page, 'form', true, false, null),
             new QueryParameterSpec('page_size', $pageSize, 'form', true, false, null),
-            new QueryParameterSpec('domainId', $domainId, 'form', true, false, null),
+            new QueryParameterSpec('domain_id', $domainId, 'form', true, false, null),
         ]);
         $path = $this->appendQueryString($path, $query);
         $result = $this->client->request('GET', $path, []);
@@ -120,6 +120,22 @@ final class CertificateApi extends BaseApi
             'json' => $payload,
         ]);
         return is_array($result) ? CertificatesUpdateResponse::fromArray($result) : null;
+    }
+
+    /** Soft-delete a certificate and release its domain identifiers */
+    public function certificatesDelete(string $certificateId, string $idempotencyKey): mixed
+    {
+        $path = $this->interpolatePath('/backend/v3/api/certificates/{certificateId}', ['certificateId' => $this->serializePathParameter($certificateId, new PathParameterSpec('certificateId', 'simple', false))]);
+        $requestHeaders = $this->buildRequestHeaders(
+            [
+                'Idempotency-Key' => new HeaderParameterSpec($idempotencyKey, 'simple', false, null),
+            ],
+            []
+        );
+        $result = $this->client->request('DELETE', $path, [
+            'headers' => $requestHeaders,
+        ]);
+        return $result;
     }
 
     /** Renew a canonical certificate now */

@@ -65,8 +65,8 @@ use std::collections::HashMap;
 let mut query = HashMap::new();
 query.insert("page".to_string(), serde_json::json!(1));
 query.insert("page_size".to_string(), serde_json::json!(2));
-query.insert("applicationType".to_string(), serde_json::json!("WEB"));
-query.insert("siteType".to_string(), serde_json::json!(4));
+query.insert("application_type".to_string(), serde_json::json!("WEB"));
+query.insert("site_type".to_string(), serde_json::json!(4));
 query.insert("status".to_string(), serde_json::json!(5));
 query.insert("keyword".to_string(), serde_json::json!("keyword"));
 let result = client.application().applications_list(Some(&query)).await?;
@@ -94,7 +94,7 @@ use std::collections::HashMap;
 let mut query = HashMap::new();
 query.insert("page".to_string(), serde_json::json!(1));
 query.insert("page_size".to_string(), serde_json::json!(2));
-query.insert("domainId".to_string(), serde_json::json!("00000000-0000-0000-0000-000000000001"));
+query.insert("domain_id".to_string(), serde_json::json!("00000000-0000-0000-0000-000000000001"));
 let result = client.certificate().certificates_list(Some(&query)).await?;
 println!("{result:?}");
 ```
@@ -133,7 +133,8 @@ let application_id = "1";
 let mut query = HashMap::new();
 query.insert("page".to_string(), serde_json::json!(1));
 query.insert("page_size".to_string(), serde_json::json!(2));
-query.insert("status".to_string(), serde_json::json!(3));
+query.insert("cursor".to_string(), serde_json::json!("cursor"));
+query.insert("status".to_string(), serde_json::json!(4));
 let result = client.application_deployment().applications_deployments_list(application_id, Some(&query)).await?;
 println!("{result:?}");
 ```
@@ -176,7 +177,7 @@ println!("{result:?}");
 use std::collections::HashMap;
 // Retrieve the Nginx configuration and certificate bundle
 let mut query = HashMap::new();
-query.insert("ifSyncVersion".to_string(), serde_json::json!("ifsyncversion"));
+query.insert("if_sync_version".to_string(), serde_json::json!("if-sync-version"));
 let result = client.agent().retrieve(Some(&query)).await?;
 println!("{result:?}");
 ```
@@ -189,11 +190,12 @@ use std::collections::HashMap;
 let mut query = HashMap::new();
 query.insert("page".to_string(), serde_json::json!(1));
 query.insert("page_size".to_string(), serde_json::json!(2));
-query.insert("targetType".to_string(), serde_json::json!("targettype"));
+query.insert("cursor".to_string(), serde_json::json!("cursor"));
+query.insert("target_type".to_string(), serde_json::json!("target-type"));
 query.insert("action".to_string(), serde_json::json!("action"));
-query.insert("operatorId".to_string(), serde_json::json!("1"));
-query.insert("startDate".to_string(), serde_json::json!("2026-04-10T00:00:00Z"));
-query.insert("endDate".to_string(), serde_json::json!("2026-04-10T00:00:00Z"));
+query.insert("operator_id".to_string(), serde_json::json!("1"));
+query.insert("start_date".to_string(), serde_json::json!("2026-04-10T00:00:00Z"));
+query.insert("end_date".to_string(), serde_json::json!("2026-04-10T00:00:00Z"));
 let result = client.audit().logs_list(Some(&query)).await?;
 println!("{result:?}");
 ```

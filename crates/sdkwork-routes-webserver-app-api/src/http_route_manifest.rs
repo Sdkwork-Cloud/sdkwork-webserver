@@ -191,6 +191,22 @@ const HTTP_ROUTES: &[HttpRoute] = &[
     .with_required_permission("web.sites.write")
     .with_idempotent(true),
     HttpRoute::dual_token(
+        HttpMethod::Patch,
+        "/app/v3/api/sites/{siteId}/env_variables/{variableId}",
+        "envVariable",
+        "sites.envVariables.update",
+    )
+    .with_required_permission("web.sites.write")
+    .with_idempotent(true),
+    HttpRoute::dual_token(
+        HttpMethod::Delete,
+        "/app/v3/api/sites/{siteId}/env_variables/{variableId}",
+        "envVariable",
+        "sites.envVariables.delete",
+    )
+    .with_required_permission("web.sites.write")
+    .with_idempotent(true),
+    HttpRoute::dual_token(
         HttpMethod::Get,
         "/app/v3/api/certificates",
         "certificate",

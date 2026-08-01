@@ -30,8 +30,8 @@ client.setAccessToken('your-access-token');
 const params = {
   page: 1,
   page_size: 2,
-  siteId: 'siteId',
-  domainId: 'domainId',
+  site_id: 'site_id',
+  domain_id: 'domain_id',
 };
 const result = await client.certificate.list(params);
 ```
@@ -78,8 +78,8 @@ const params = {
   page: 1,
   page_size: 2,
   status: 0,
-  applicationType: 'WEB',
-  siteType: 1,
+  application_type: 'WEB',
+  site_type: 1,
   keyword: 'keyword',
 };
 const result = await client.site.list(params);
@@ -104,8 +104,8 @@ const result = await client.domain.sites.domains.list(siteId, params);
 const params = {
   page: 1,
   page_size: 2,
-  siteId: 'siteId',
-  domainId: 'domainId',
+  site_id: 'site_id',
+  domain_id: 'domain_id',
 };
 const result = await client.certificate.list(params);
 ```
@@ -130,6 +130,7 @@ const siteId = '1';
 const params = {
   page: 1,
   page_size: 2,
+  cursor: 'cursor',
   status: 0,
 };
 const result = await client.deployment.sites.deployments.list(siteId, params);
@@ -163,8 +164,8 @@ try {
   const params = {
     page: 1,
     page_size: 2,
-    siteId: 'siteId',
-    domainId: 'domainId',
+    site_id: 'site_id',
+    domain_id: 'domain_id',
   };
   const result = await client.certificate.list(params);
 } catch (error) {

@@ -496,6 +496,13 @@ pub struct DeploymentPage {
     pub total: i64,
     pub page: i32,
     pub page_size: i32,
+    /// Opaque keyset continuation for cursor mode; `None` in offset mode or on
+    /// the last page.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub next_cursor: Option<String>,
+    /// Exact page continuation flag for cursor mode; `None` in offset mode.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -574,6 +581,15 @@ pub struct CreateEnvVariableRequest {
     pub value: String,
     #[serde(default = "default_environment")]
     pub environment: String,
+    #[serde(rename = "isSecret", default)]
+    pub is_secret: bool,
+}
+
+/// Environment variable rotation: replaces the stored value (encrypted when
+/// secret) without changing the key or environment.
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct UpdateEnvVariableRequest {
+    pub value: String,
     #[serde(rename = "isSecret", default)]
     pub is_secret: bool,
 }
@@ -874,11 +890,11 @@ pub struct ListNginxConfigsQuery {
     pub page: i32,
     #[serde(default = "crate::dto::default_page_size")]
     pub page_size: i32,
-    #[serde(rename = "siteId", default)]
+    #[serde(rename = "site_id", default)]
     pub site_id: Option<String>,
-    #[serde(rename = "configType", default)]
+    #[serde(rename = "config_type", default)]
     pub config_type: Option<i32>,
-    #[serde(rename = "isActive", default)]
+    #[serde(rename = "is_active", default)]
     pub is_active: Option<bool>,
 }
 
@@ -1111,6 +1127,13 @@ pub struct AuditLogPage {
     pub total: i64,
     pub page: i32,
     pub page_size: i32,
+    /// Opaque keyset continuation for cursor mode; `None` in offset mode or on
+    /// the last page.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub next_cursor: Option<String>,
+    /// Exact page continuation flag for cursor mode; `None` in offset mode.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
 }
 
 #[cfg(test)]

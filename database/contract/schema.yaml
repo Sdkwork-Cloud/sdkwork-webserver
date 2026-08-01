@@ -43,7 +43,7 @@ tables:
     indexes:
       - { name: uk_web_site_uuid, columns: [uuid], unique: true }
       - { name: uk_web_site_tenant_id, columns: [tenant_id, id], unique: true }
-      - { name: uk_web_site_slug, columns: [tenant_id, slug], unique: true }
+      - { name: uk_web_site_slug, columns: [tenant_id, slug], unique: true, predicate: "deleted_at IS NULL" }
       - { name: idx_web_site_tenant_status_updated, columns: [tenant_id, organization_id, status, updated_at] }
       - { name: idx_web_site_tenant_application_type_updated, columns: [tenant_id, application_type, updated_at] }
       - { name: idx_web_site_user_updated, columns: [tenant_id, user_id, updated_at] }
@@ -275,6 +275,7 @@ tables:
       - { name: uk_web_nginx_config_uuid, columns: [uuid], unique: true }
       - { name: idx_web_nginx_config_site_active, columns: [site_id, is_active] }
       - { name: idx_web_nginx_config_type_status, columns: [config_type, status] }
+      - { name: idx_web_nginx_config_tenant_updated, columns: [tenant_id, updated_at, id] }
   - name: web_certificate
     lifecycle_status: active
     owner: web-platform
@@ -423,6 +424,49 @@ tables:
   - name: web_certificate_operation
     lifecycle_status: active
     owner: web-platform
+    columns:
+      id: { type: int64, required: true }
+      uuid: { type: string, required: true }
+      tenant_id: { type: int64, required: true }
+      certificate_id: { type: int64, required: true }
+      requested_by: { type: int64, required: false }
+      operation_type: { type: string, required: true }
+      status: { type: string, required: true }
+      attempt_count: { type: int32, required: true }
+      max_attempts: { type: int32, required: true }
+      next_attempt_at: { type: instant, required: true }
+      lease_owner: { type: string, required: false }
+      lease_expires_at: { type: instant, required: false }
+      fencing_token: { type: int64, required: true }
+      failure_code: { type: string, required: false }
+      idempotency_key_hash: { type: string, required: false }
+      request_sha256: { type: string, required: true }
+      created_at: { type: instant, required: true }
+      updated_at: { type: instant, required: true }
+      completed_at: { type: instant, required: false }
+    constraints:
+      - { name: web_certificate_operation_pkey, type: primary_key, columns: [id] }
+      - { name: uk_web_certificate_operation_uuid, type: unique, columns: [uuid] }
+      - { name: uk_web_certificate_operation_tenant_id, type: unique, columns: [tenant_id, id] }
+      - name: fk_web_certificate_operation_certificate
+        type: foreign_key
+        columns: [tenant_id, certificate_id]
+        references_table: web_certificate
+        references_columns: [tenant_id, id]
+      - { name: chk_web_certificate_operation_type, type: check }
+      - { name: chk_web_certificate_operation_status, type: check }
+      - { name: chk_web_certificate_operation_attempts, type: check }
+      - { name: chk_web_certificate_operation_fencing, type: check }
+      - { name: chk_web_certificate_operation_hashes, type: check }
+      - { name: chk_web_certificate_operation_lease, type: check }
+      - { name: chk_web_certificate_operation_completion, type: check }
+    indexes:
+      - { name: uk_web_certificate_operation_uuid, columns: [uuid], unique: true }
+      - { name: uk_web_certificate_operation_tenant_id, columns: [tenant_id, id], unique: true }
+      - { name: uk_web_certificate_operation_idempotency, columns: [tenant_id, idempotency_key_hash], unique: true, predicate: "idempotency_key_hash IS NOT NULL" }
+      - { name: uk_web_certificate_operation_active_certificate, columns: [tenant_id, certificate_id], unique: true, predicate: "status IN ('PENDING', 'RUNNING')" }
+      - { name: idx_web_certificate_operation_claim, columns: [next_attempt_at, id], predicate: "status IN ('PENDING', 'RUNNING')" }
+      - { name: idx_web_certificate_operation_certificate_history, columns: [tenant_id, certificate_id, created_at, id] }
   - name: web_listener_certificate_binding
     lifecycle_status: active
     owner: web-platform
@@ -590,10 +634,15 @@ tables:
     constraints:
       - { name: web_env_variable_pkey, type: primary_key, columns: [id] }
       - { name: uk_web_env_variable_uuid, type: unique, columns: [uuid] }
-      - { name: uk_web_env_variable_key, type: unique, columns: [site_id, environment, key] }
+      - { name: uk_web_env_variable_active_key, type: unique, columns: [site_id, environment, key], predicate: "status = 1" }
+      - name: fk_web_env_variable_site
+        type: foreign_key
+        columns: [site_id]
+        references_table: web_site
+        references_columns: [id]
     indexes:
       - { name: uk_web_env_variable_uuid, columns: [uuid], unique: true }
-      - { name: uk_web_env_variable_key, columns: [site_id, environment, key], unique: true }
+      - { name: uk_web_env_variable_active_key, columns: [site_id, environment, key], unique: true, predicate: "status = 1" }
       - { name: idx_web_env_variable_site_env, columns: [site_id, environment] }
   - name: web_health_check
     lifecycle_status: active
@@ -643,6 +692,17 @@ tables:
       created_at: { type: instant, required: true }
     constraints:
       - { name: web_health_result_pkey, type: primary_key, columns: [id] }
+      - { name: uk_web_health_result_uuid, type: unique, columns: [uuid] }
+      - name: fk_web_health_result_check
+        type: foreign_key
+        columns: [health_check_id]
+        references_table: web_health_check
+        references_columns: [id]
+      - name: fk_web_health_result_site
+        type: foreign_key
+        columns: [site_id]
+        references_table: web_site
+        references_columns: [id]
     indexes:
       - { name: idx_web_health_result_check_time, columns: [health_check_id, checked_at] }
       - { name: idx_web_health_result_site_time, columns: [site_id, checked_at] }
@@ -672,6 +732,7 @@ tables:
       - { name: idx_web_audit_log_target, columns: [target_type, target_id, created_at] }
       - { name: idx_web_audit_log_operator, columns: [operator_id, created_at] }
       - { name: idx_web_audit_log_tenant_action, columns: [tenant_id, action, created_at] }
+      - { name: idx_web_audit_log_tenant_created, columns: [tenant_id, created_at, id] }
   - name: web_server
     lifecycle_status: active
     owner: web-platform
@@ -699,6 +760,7 @@ tables:
       - { name: uk_web_server_host, columns: [tenant_id, host], unique: true }
       - { name: uk_web_server_tenant_id, columns: [tenant_id, id], unique: true }
       - { name: idx_web_server_tenant_status, columns: [tenant_id, status, updated_at] }
+      - { name: idx_web_server_metadata_gin, columns: [metadata], type: gin }
   - name: web_certificate_node_state
     lifecycle_status: active
     owner: web-platform

@@ -453,6 +453,17 @@ public struct CreateEnvVariableRequest: Codable {
     }
 }
 
+public struct UpdateEnvVariableRequest: Codable {
+    public let value: String?
+    public let isSecret: Bool?
+
+
+    public init(value: String? = nil, isSecret: Bool? = nil) {
+        self.value = value
+        self.isSecret = isSecret
+    }
+}
+
 public struct EnvVariableResponse: Codable {
     public let id: String?
     public let key: String?
@@ -1114,6 +1125,19 @@ public struct SitesEnvVariablesListResponse: Codable {
 }
 
 public struct SitesEnvVariablesCreateResponse201: Codable {
+    public let code: Int?
+    public let data: Any?
+    public let traceId: String?
+
+
+    public init(code: Int? = nil, data: Any? = nil, traceId: String? = nil) {
+        self.code = code
+        self.data = data
+        self.traceId = traceId
+    }
+}
+
+public struct SitesEnvVariablesUpdateResponse: Codable {
     public let code: Int?
     public let data: Any?
     public let traceId: String?

@@ -24,8 +24,8 @@ client.setAccessToken('your-access-token');
 final params = <String, dynamic>{
   'page': 1,
   'page_size': 2,
-  'siteId': '00000000-0000-0000-0000-000000000001',
-  'domainId': '00000000-0000-0000-0000-000000000001',
+  'site_id': '00000000-0000-0000-0000-000000000001',
+  'domain_id': '00000000-0000-0000-0000-000000000001',
 };
 final result = await client.certificate.certificatesList(params);
 print(result);
@@ -67,8 +67,8 @@ final params = <String, dynamic>{
   'page': 1,
   'page_size': 2,
   'status': 0,
-  'applicationType': 'WEB',
-  'siteType': 1,
+  'application_type': 'WEB',
+  'site_type': 1,
   'keyword': 'keyword',
 };
 final result = await client.site.sitesList(params);
@@ -93,8 +93,8 @@ print(result);
 final params = <String, dynamic>{
   'page': 1,
   'page_size': 2,
-  'siteId': '00000000-0000-0000-0000-000000000001',
-  'domainId': '00000000-0000-0000-0000-000000000001',
+  'site_id': '00000000-0000-0000-0000-000000000001',
+  'domain_id': '00000000-0000-0000-0000-000000000001',
 };
 final result = await client.certificate.certificatesList(params);
 print(result);
@@ -119,6 +119,7 @@ final siteId = '1';
 final params = <String, dynamic>{
   'page': 1,
   'page_size': 2,
+  'cursor': 'cursor',
   'status': 0,
 };
 final result = await client.deployment.sitesDeploymentsList(siteId, params);
@@ -151,8 +152,8 @@ try {
   final params = <String, dynamic>{
     'page': 1,
     'page_size': 2,
-    'siteId': '00000000-0000-0000-0000-000000000001',
-    'domainId': '00000000-0000-0000-0000-000000000001',
+    'site_id': '00000000-0000-0000-0000-000000000001',
+    'domain_id': '00000000-0000-0000-0000-000000000001',
   };
   final result = await client.certificate.certificatesList(params);
   print(result);

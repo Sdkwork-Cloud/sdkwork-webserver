@@ -21,8 +21,8 @@ impl ApplicationApi {
         let query = build_query_string(&[
             QueryParameterSpec::new("page", page, "form", true, false, None),
             QueryParameterSpec::new("page_size", page_size, "form", true, false, None),
-            QueryParameterSpec::new("applicationType", application_type, "form", true, false, None),
-            QueryParameterSpec::new("siteType", site_type, "form", true, false, None),
+            QueryParameterSpec::new("application_type", application_type, "form", true, false, None),
+            QueryParameterSpec::new("site_type", site_type, "form", true, false, None),
             QueryParameterSpec::new("status", status, "form", true, false, None),
             QueryParameterSpec::new("keyword", keyword, "form", true, false, None),
         ]);

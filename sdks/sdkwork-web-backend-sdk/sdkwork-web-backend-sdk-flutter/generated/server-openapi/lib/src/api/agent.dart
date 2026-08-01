@@ -24,7 +24,7 @@ class AgentApi {
   /// Retrieve the Nginx configuration and certificate bundle
   Future<RetrieveResponse?> retrieve([String? ifSyncVersion]) async {
     final query = buildQueryString([
-      QueryParameterSpec('ifSyncVersion', ifSyncVersion, 'form', true, false, null)
+      QueryParameterSpec('if_sync_version', ifSyncVersion, 'form', true, false, null)
     ]);
     final response = await _client.get(ApiPaths.appendQueryString(ApiPaths.backendPath('/agent/sync'), query));
     return (() {

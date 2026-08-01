@@ -72,8 +72,8 @@ var query = new Dictionary<string, object>
 {
     ["page"] = 1,
     ["page_size"] = 2,
-    ["applicationType"] = "WEB",
-    ["siteType"] = 4,
+    ["application_type"] = "WEB",
+    ["site_type"] = 4,
     ["status"] = 5,
     ["keyword"] = "keyword",
 };
@@ -103,7 +103,7 @@ var query = new Dictionary<string, object>
 {
     ["page"] = 1,
     ["page_size"] = 2,
-    ["domainId"] = "00000000-0000-0000-0000-000000000001",
+    ["domain_id"] = "00000000-0000-0000-0000-000000000001",
 };
 var result = await client.Certificate.CertificatesListAsync(query);
 Console.WriteLine(result);
@@ -145,7 +145,8 @@ var query = new Dictionary<string, object>
 {
     ["page"] = 1,
     ["page_size"] = 2,
-    ["status"] = 3,
+    ["cursor"] = "cursor",
+    ["status"] = 4,
 };
 var result = await client.ApplicationDeployment.ApplicationsDeploymentsListAsync(applicationId, query);
 Console.WriteLine(result);
@@ -191,7 +192,7 @@ Console.WriteLine(result);
 // Retrieve the Nginx configuration and certificate bundle
 var query = new Dictionary<string, object>
 {
-    ["ifSyncVersion"] = "ifsyncversion",
+    ["if_sync_version"] = "if-sync-version",
 };
 var result = await client.Agent.RetrieveAsync(query);
 Console.WriteLine(result);
@@ -205,11 +206,12 @@ var query = new Dictionary<string, object>
 {
     ["page"] = 1,
     ["page_size"] = 2,
-    ["targetType"] = "targettype",
+    ["cursor"] = "cursor",
+    ["target_type"] = "target-type",
     ["action"] = "action",
-    ["operatorId"] = "1",
-    ["startDate"] = "2026-04-10T00:00:00Z",
-    ["endDate"] = "2026-04-10T00:00:00Z",
+    ["operator_id"] = "1",
+    ["start_date"] = "2026-04-10T00:00:00Z",
+    ["end_date"] = "2026-04-10T00:00:00Z",
 };
 var result = await client.Audit.LogsListAsync(query);
 Console.WriteLine(result);

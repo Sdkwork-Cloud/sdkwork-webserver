@@ -48,8 +48,8 @@ public class CertificateApi {
         String query = buildQueryString(List.of(
             new QueryParameterSpec("page", page, "form", true, false, null),
             new QueryParameterSpec("page_size", pageSize, "form", true, false, null),
-            new QueryParameterSpec("siteId", siteId, "form", true, false, null),
-            new QueryParameterSpec("domainId", domainId, "form", true, false, null)
+            new QueryParameterSpec("site_id", siteId, "form", true, false, null),
+            new QueryParameterSpec("domain_id", domainId, "form", true, false, null)
         ));
         Object raw = client.get(ApiPaths.appendQueryString(ApiPaths.appPath("/certificates"), query));
         return client.convertValue(raw, new TypeReference<CertificatesListResponse>() {});

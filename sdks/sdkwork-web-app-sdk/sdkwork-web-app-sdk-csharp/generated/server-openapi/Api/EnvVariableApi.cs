@@ -42,6 +42,36 @@ namespace SDKWork.Web.AppSdk.Api
             return await _client.PostAsync<SDKWork.Web.AppSdk.Models.SitesEnvVariablesCreateResponse201>(ApiPaths.AppPath($"/sites/{SerializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false))}/env_variables"), body, null, requestHeaders, "application/json");
         }
 
+        /// <summary>
+        /// 轮换环境变量值
+        /// </summary>
+        public async Task<SDKWork.Web.AppSdk.Models.SitesEnvVariablesUpdateResponse?> SitesEnvVariablesUpdateAsync(string siteId, string variableId, SDKWork.Web.AppSdk.Models.UpdateEnvVariableRequest body, string idempotencyKey)
+        {
+            var requestHeaders = BuildRequestHeaders(
+                new Dictionary<string, HeaderParameterSpec>
+                {
+                    ["Idempotency-Key"] = new HeaderParameterSpec(idempotencyKey, "simple", false, null),
+                },
+                new Dictionary<string, HeaderParameterSpec>()
+            );
+            return await _client.PatchAsync<SDKWork.Web.AppSdk.Models.SitesEnvVariablesUpdateResponse>(ApiPaths.AppPath($"/sites/{SerializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false))}/env_variables/{SerializePathParameter(variableId, new PathParameterSpec("variableId", "simple", false))}"), body, null, requestHeaders, "application/json");
+        }
+
+        /// <summary>
+        /// 删除环境变量
+        /// </summary>
+        public async Task SitesEnvVariablesDeleteAsync(string siteId, string variableId, string idempotencyKey)
+        {
+            var requestHeaders = BuildRequestHeaders(
+                new Dictionary<string, HeaderParameterSpec>
+                {
+                    ["Idempotency-Key"] = new HeaderParameterSpec(idempotencyKey, "simple", false, null),
+                },
+                new Dictionary<string, HeaderParameterSpec>()
+            );
+            await _client.DeleteAsync<object>(ApiPaths.AppPath($"/sites/{SerializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false))}/env_variables/{SerializePathParameter(variableId, new PathParameterSpec("variableId", "simple", false))}"), null, requestHeaders);
+        }
+
         private sealed record PathParameterSpec(string Name, string Style, bool Explode);
 
         private static string SerializePathParameter(object? value, PathParameterSpec spec)

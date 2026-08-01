@@ -55,8 +55,8 @@ impl CertificateApi {
         let query = build_query_string(&[
             QueryParameterSpec::new("page", page, "form", true, false, None),
             QueryParameterSpec::new("page_size", page_size, "form", true, false, None),
-            QueryParameterSpec::new("siteId", site_id, "form", true, false, None),
-            QueryParameterSpec::new("domainId", domain_id, "form", true, false, None),
+            QueryParameterSpec::new("site_id", site_id, "form", true, false, None),
+            QueryParameterSpec::new("domain_id", domain_id, "form", true, false, None),
         ]);
         let path = append_query_string(app_path(&"/certificates".to_string()), &query);
         self.client.get(&path, None, None).await

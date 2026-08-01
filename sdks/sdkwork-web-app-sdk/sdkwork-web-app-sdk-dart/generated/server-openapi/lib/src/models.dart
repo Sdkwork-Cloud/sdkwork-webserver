@@ -1065,6 +1065,30 @@ class CreateEnvVariableRequest {
   }
 }
 
+class UpdateEnvVariableRequest {
+  final String? value;
+  final bool? isSecret;
+
+  UpdateEnvVariableRequest({
+    this.value,
+    this.isSecret
+  });
+
+  factory UpdateEnvVariableRequest.fromJson(Map<String, dynamic> json) {
+    return UpdateEnvVariableRequest(
+      value: json['value']?.toString(),
+      isSecret: json['isSecret'] is bool ? json['isSecret'] : null
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'value': value,
+      'isSecret': isSecret,
+    };
+  }
+}
+
 class EnvVariableResponse {
   final String? id;
   final String? key;
@@ -2573,6 +2597,34 @@ class SitesEnvVariablesCreateResponse201 {
 
   factory SitesEnvVariablesCreateResponse201.fromJson(Map<String, dynamic> json) {
     return SitesEnvVariablesCreateResponse201(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SitesEnvVariablesUpdateResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  SitesEnvVariablesUpdateResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory SitesEnvVariablesUpdateResponse.fromJson(Map<String, dynamic> json) {
+    return SitesEnvVariablesUpdateResponse(
       code: json['code'] is int ? json['code'] : null,
       data: _sdkworkAsMap(json['data']),
       traceId: json['traceId']?.toString()

@@ -55,7 +55,7 @@ impl CertificateApi {
         let query = build_query_string(&[
             QueryParameterSpec::new("page", page, "form", true, false, None),
             QueryParameterSpec::new("page_size", page_size, "form", true, false, None),
-            QueryParameterSpec::new("domainId", domain_id, "form", true, false, None),
+            QueryParameterSpec::new("domain_id", domain_id, "form", true, false, None),
         ]);
         let path = append_query_string(backend_path(&"/certificates".to_string()), &query);
         self.client.get(&path, None, None).await
@@ -89,6 +89,18 @@ impl CertificateApi {
             &[],
         );
         self.client.put(&path, Some(body), None, headers.as_ref(), Some("application/json")).await
+    }
+
+    /// Soft-delete a certificate and release its domain identifiers
+    pub async fn certificates_delete(&self, certificate_id: &str, idempotency_key: &str) -> Result<(), SdkworkError> {
+        let path = backend_path(&format!("/certificates/{}", serialize_path_parameter(certificate_id, PathParameterSpec::new("certificateId", "simple", false))));
+        let headers = build_request_headers(
+            &[
+                ("Idempotency-Key", HeaderParameterSpec::new(idempotency_key, "simple", false, None)),
+            ],
+            &[],
+        );
+        self.client.delete(&path, None, headers.as_ref()).await
     }
 
     /// Renew a canonical certificate now

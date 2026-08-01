@@ -64,7 +64,7 @@ fn open_static_path_sync(
 
     match open_relative_entry(root_dir, &components, Path::new(relative)) {
         Ok(OpenedEntry::File(file)) => Ok(StaticPathTarget::File(file)),
-        Ok(OpenedEntry::Directory(directory)) if !request_path_has_trailing_slash => {
+        Ok(OpenedEntry::Directory(_directory)) if !request_path_has_trailing_slash => {
             Ok(StaticPathTarget::RedirectToDirectory)
         }
         Ok(OpenedEntry::Directory(directory)) => match open_index(directory, relative) {

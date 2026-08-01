@@ -2,6 +2,8 @@ require_relative 'base_api'
 require_relative '../models/create_env_variable_request'
 require_relative '../models/sites_env_variables_create_response201'
 require_relative '../models/sites_env_variables_list_response'
+require_relative '../models/sites_env_variables_update_response'
+require_relative '../models/update_env_variable_request'
 
 module Sdkwork
   module AppSdk
@@ -35,6 +37,38 @@ module Sdkwork
             options[:json] = payload unless payload.nil?
             result = @client.request('POST', path, **options)
             result.is_a?(Hash) ? Models::SitesEnvVariablesCreateResponse201.from_hash(result) : nil
+          end
+
+          # 轮换环境变量值
+          def sites_env_variables_update(site_id, variable_id, idempotency_key, body: nil)
+            path = interpolate_path('/app/v3/api/sites/{siteId}/env_variables/{variableId}', siteId: serialize_path_parameter(site_id, PathParameterSpec.new('siteId', 'simple', false)), variableId: serialize_path_parameter(variable_id, PathParameterSpec.new('variableId', 'simple', false)))
+            payload = body.respond_to?(:to_hash) ? body.to_hash : body
+            request_headers = build_request_headers(
+              {
+                'Idempotency-Key' => HeaderParameterSpec.new(idempotency_key, 'simple', false, nil),
+              },
+              {}
+            )
+            options = {}
+            options[:headers] = request_headers unless request_headers.empty?
+            options[:json] = payload unless payload.nil?
+            result = @client.request('PATCH', path, **options)
+            result.is_a?(Hash) ? Models::SitesEnvVariablesUpdateResponse.from_hash(result) : nil
+          end
+
+          # 删除环境变量
+          def sites_env_variables_delete(site_id, variable_id, idempotency_key)
+            path = interpolate_path('/app/v3/api/sites/{siteId}/env_variables/{variableId}', siteId: serialize_path_parameter(site_id, PathParameterSpec.new('siteId', 'simple', false)), variableId: serialize_path_parameter(variable_id, PathParameterSpec.new('variableId', 'simple', false)))
+            request_headers = build_request_headers(
+              {
+                'Idempotency-Key' => HeaderParameterSpec.new(idempotency_key, 'simple', false, nil),
+              },
+              {}
+            )
+            options = {}
+            options[:headers] = request_headers unless request_headers.empty?
+            @client.request('DELETE', path, **options)
+            nil
           end
 
         private

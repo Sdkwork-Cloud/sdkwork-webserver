@@ -20,6 +20,7 @@ export type { CreateDeploymentRequest } from './create-deployment-request';
 export type { DeploymentResponse } from './deployment-response';
 export type { DeploymentPage } from './deployment-page';
 export type { CreateEnvVariableRequest } from './create-env-variable-request';
+export type { UpdateEnvVariableRequest } from './update-env-variable-request';
 export type { EnvVariableResponse } from './env-variable-response';
 export type { EnvVariablePage } from './env-variable-page';
 export type { IssueCertificateRequest } from './issue-certificate-request';
@@ -66,6 +67,7 @@ export type { SitesDeploymentsRetrieveResponse } from './sites-deployments-retri
 export type { SitesDeploymentsRollbackResponse } from './sites-deployments-rollback-response';
 export type { SitesEnvVariablesListResponse } from './sites-env-variables-list-response';
 export type { SitesEnvVariablesCreateResponse201 } from './sites-env-variables-create-response201';
+export type { SitesEnvVariablesUpdateResponse } from './sites-env-variables-update-response';
 export type { CertificatesListResponse } from './certificates-list-response';
 export type { CertificatesIssueResponse202 } from './certificates-issue-response202';
 export type { CertificatesOperationsRetrieveResponse } from './certificates-operations-retrieve-response';

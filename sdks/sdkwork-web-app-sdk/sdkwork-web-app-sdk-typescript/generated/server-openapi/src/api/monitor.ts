@@ -17,12 +17,12 @@ export class MonitorSitesHealthChecksApi {
 
 
 /** 获取健康检查配置 */
-  async list(siteId: string, requestOptions?: ApiRequestOptions): Promise<{ items: HealthCheckResponse[]; pageInfo: PageInfo; }> {
+  async list(siteId: string | number, requestOptions?: ApiRequestOptions): Promise<{ items: HealthCheckResponse[]; pageInfo: PageInfo; }> {
     return this.client.request<{ items: HealthCheckResponse[]; pageInfo: PageInfo; }>(appApiPath(`/sites/${serializePathParameter(siteId, { name: 'siteId', style: 'simple', explode: false })}/health_checks`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any, sdkworkUnwrapKind: 'page' });
   }
 
 /** 创建健康检查 */
-  async create(siteId: string, body: CreateHealthCheckRequest, params: MonitorSitesHealthChecksCreateParams, requestOptions?: ApiRequestOptions): Promise<HealthCheckResponse> {
+  async create(siteId: string | number, body: CreateHealthCheckRequest, params: MonitorSitesHealthChecksCreateParams, requestOptions?: ApiRequestOptions): Promise<HealthCheckResponse> {
     const requestHeaders = buildRequestHeaders(
       {
         'Idempotency-Key': { value: params.idempotencyKey, style: 'simple', explode: false },

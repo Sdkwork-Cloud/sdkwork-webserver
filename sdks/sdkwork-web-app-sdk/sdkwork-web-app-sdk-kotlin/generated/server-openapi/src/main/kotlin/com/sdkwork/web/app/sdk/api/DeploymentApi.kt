@@ -9,10 +9,11 @@ import com.sdkwork.web.app.sdk.http.HttpClient
 class DeploymentApi(private val client: HttpClient) {
 
     /** 获取部署历史 */
-    suspend fun sitesDeploymentsList(siteId: String, page: Int? = null, pageSize: Int? = null, status: Int? = null): SitesDeploymentsListResponse? {
+    suspend fun sitesDeploymentsList(siteId: String, page: Int? = null, pageSize: Int? = null, cursor: String? = null, status: Int? = null): SitesDeploymentsListResponse? {
         val query = buildQueryString(listOf(
             QueryParameterSpec("page", page, "form", true, false, null),
             QueryParameterSpec("page_size", pageSize, "form", true, false, null),
+            QueryParameterSpec("cursor", cursor, "form", true, false, null),
             QueryParameterSpec("status", status, "form", true, false, null)
         ))
         val raw = client.get(ApiPaths.appendQueryString(ApiPaths.appPath("/sites/${serializePathParameter(siteId, PathParameterSpec("siteId", "simple", false))}/deployments"), query))

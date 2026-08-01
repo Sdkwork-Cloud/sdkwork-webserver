@@ -15,10 +15,11 @@ use sdkwork_webserver_contract::{
     CreateDomainRequest, CreateEnvVariableRequest, CreateHealthCheckRequest,
     CreateListenerCertificateBindingRequest, CreateManagedDomainRequest, CreateNginxConfigRequest,
     CreateRootDomainHostnameRequest, CreateRootDomainRequest, CreateServerRequest,
-    CreateSiteRequest, CreateSourceVersionRequest, IssueCertificateRequest, ListNginxConfigsQuery,
-    ListRootDomainsQuery, ListSitesQuery, MediaResource, RuntimeObservationState,
-    SourceVersionConfigSnapshot, UpdateDomainApplicationBindingRequest, UpdateNginxConfigRequest,
-    UpdateSiteRequest, WebServiceErrorKind, WebsiteRuntimeSetSnapshot,
+    CreateSiteRequest, CreateSourceVersionRequest, IssueCertificateRequest, ListAuditLogsQuery,
+    ListNginxConfigsQuery, ListRootDomainsQuery, ListSitesQuery, MediaResource,
+    RuntimeObservationState, SourceVersionConfigSnapshot,
+    UpdateDomainApplicationBindingRequest, UpdateNginxConfigRequest, UpdateSiteRequest,
+    WebServiceErrorKind, WebsiteRuntimeSetSnapshot,
 };
 use sdkwork_webserver_core::website_runtime::website_runtime_set_snapshot_sha256;
 use sdkwork_webserver_database_host::bootstrap_web_database;
@@ -1876,7 +1877,14 @@ async fn verify_public_repository_surface(context: &TestContext, site_id: &str) 
         .await
         .expect("insert audit timestamp");
     let audit_page = repository
-        .list_audit_logs(Some(TENANT_A), 1, 20)
+        .list_audit_logs(
+            Some(TENANT_A),
+            &ListAuditLogsQuery {
+                page: 1,
+                page_size: 20,
+                ..ListAuditLogsQuery::default()
+            },
+        )
         .await
         .expect("list audit timestamp projections");
     assert_eq!(audit_page.total, 1);

@@ -60,7 +60,7 @@ client.set_header('X-Custom-Header', 'value')
 
 ```ruby
 # List managed applications
-params = { 'page' => 1, 'page_size' => 2, 'applicationType' => 'WEB', 'siteType' => 4, 'status' => 5, 'keyword' => 'keyword' }
+params = { 'page' => 1, 'page_size' => 2, 'application_type' => 'WEB', 'site_type' => 4, 'status' => 5, 'keyword' => 'keyword' }
 result = client.application.applications_list(params: params)
 puts result.inspect
 ```
@@ -79,7 +79,7 @@ puts result.inspect
 
 ```ruby
 # List canonical certificates
-params = { 'page' => 1, 'page_size' => 2, 'domainId' => '00000000-0000-0000-0000-000000000001' }
+params = { 'page' => 1, 'page_size' => 2, 'domain_id' => '00000000-0000-0000-0000-000000000001' }
 result = client.certificate.certificates_list(params: params)
 puts result.inspect
 ```
@@ -108,7 +108,7 @@ puts result.inspect
 ```ruby
 # List application deployments
 application_id = '1'
-params = { 'page' => 1, 'page_size' => 2, 'status' => 3 }
+params = { 'page' => 1, 'page_size' => 2, 'cursor' => 'cursor', 'status' => 4 }
 result = client.application_deployment.applications_deployments_list(application_id, params: params)
 puts result.inspect
 ```
@@ -143,7 +143,7 @@ puts result.inspect
 
 ```ruby
 # Retrieve the Nginx configuration and certificate bundle
-params = { 'ifSyncVersion' => 'ifsyncversion' }
+params = { 'if_sync_version' => 'if-sync-version' }
 result = client.agent.retrieve(params: params)
 puts result.inspect
 ```
@@ -152,7 +152,7 @@ puts result.inspect
 
 ```ruby
 # List audit logs
-params = { 'page' => 1, 'page_size' => 2, 'targetType' => 'targettype', 'action' => 'action', 'operatorId' => '1', 'startDate' => '2026-04-10T00:00:00Z', 'endDate' => '2026-04-10T00:00:00Z' }
+params = { 'page' => 1, 'page_size' => 2, 'cursor' => 'cursor', 'target_type' => 'target-type', 'action' => 'action', 'operator_id' => '1', 'start_date' => '2026-04-10T00:00:00Z', 'end_date' => '2026-04-10T00:00:00Z' }
 result = client.audit.logs_list(params: params)
 puts result.inspect
 ```

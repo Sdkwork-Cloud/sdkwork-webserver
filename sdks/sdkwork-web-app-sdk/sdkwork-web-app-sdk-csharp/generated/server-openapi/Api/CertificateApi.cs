@@ -67,8 +67,8 @@ namespace SDKWork.Web.AppSdk.Api
             {
                 new QueryParameterSpec("page", page, "form", true, false, null),
                 new QueryParameterSpec("page_size", pageSize, "form", true, false, null),
-                new QueryParameterSpec("siteId", siteId, "form", true, false, null),
-                new QueryParameterSpec("domainId", domainId, "form", true, false, null),
+                new QueryParameterSpec("site_id", siteId, "form", true, false, null),
+                new QueryParameterSpec("domain_id", domainId, "form", true, false, null),
             });
             return await _client.GetAsync<SDKWork.Web.AppSdk.Models.CertificatesListResponse>(ApiPaths.AppendQueryString(ApiPaths.AppPath("/certificates"), queryString));
         }

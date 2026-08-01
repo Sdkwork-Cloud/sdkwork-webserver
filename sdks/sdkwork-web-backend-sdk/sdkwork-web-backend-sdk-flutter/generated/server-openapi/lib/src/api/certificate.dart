@@ -56,7 +56,7 @@ class CertificateApi {
     final query = buildQueryString([
       QueryParameterSpec('page', page, 'form', true, false, null),
       QueryParameterSpec('page_size', pageSize, 'form', true, false, null),
-      QueryParameterSpec('domainId', domainId, 'form', true, false, null)
+      QueryParameterSpec('domain_id', domainId, 'form', true, false, null)
     ]);
     final response = await _client.get(ApiPaths.appendQueryString(ApiPaths.backendPath('/certificates'), query));
     return (() {
@@ -104,6 +104,17 @@ class CertificateApi {
       final map = sdkworkResponseAsMap(response);
       return map == null ? null : CertificatesUpdateResponse.fromJson(map);
     })();
+  }
+
+  /// Soft-delete a certificate and release its domain identifiers
+  Future<void> certificatesDelete(String certificateId, String idempotencyKey) async {
+    final requestHeaders = buildRequestHeaders(
+      <String, HeaderParameterSpec>{
+        'Idempotency-Key': HeaderParameterSpec(idempotencyKey, 'simple', false, null),
+      },
+      <String, HeaderParameterSpec>{},
+    );
+    await _client.delete(ApiPaths.backendPath('/certificates/${serializePathParameter(certificateId, const PathParameterSpec('certificateId', 'simple', false))}'), headers: requestHeaders);
   }
 
   /// Renew a canonical certificate now

@@ -9,6 +9,7 @@ use sdkwork_webserver_contract::{
     AgentHeartbeatRequest, AgentHeartbeatResponse, AgentSyncResponse, AuditLogPage,
     CertificateDistributionPage, CertificateIssueUpdate, CertificateOperationAcceptedResponse,
     CertificateOperationLease, CertificateOperationResponse, CertificatePage,
+    ListAuditLogsQuery,
     CertificateResponse, IssueCertificateRequest,
     CreateDeploymentRequest, CreateDomainRequest, CreateEnvVariableRequest,
     CreateHealthCheckRequest, CreateManagedDomainRequest, CreateNginxConfigRequest,
@@ -17,6 +18,7 @@ use sdkwork_webserver_contract::{
     CreateRootDomainHostnameRequest, CreateRootDomainRequest, CreateServerRequest,
     CreateServerResponse, CreateSiteRequest, CreateSourceVersionRequest, DeploymentPage,
     DeploymentResponse, DomainPage, DomainResponse, EnvVariablePage, EnvVariableResponse,
+    UpdateEnvVariableRequest,
     HealthCheckPage, HealthCheckResponse, ListNginxConfigsQuery,
     ListRootDomainsQuery, ListSitesQuery, NginxConfigPage, NginxConfigResponse,
     NginxReloadResponse, NginxStatusResponse, NginxValidateResponse, RootDomainPage,
@@ -299,8 +301,9 @@ impl WebRepositoryPort for WebRepository {
         page: i32,
         page_size: i32,
         status: Option<i32>,
+        cursor: Option<&str>,
     ) -> WebServiceResult<DeploymentPage> {
-        self.list_deployments_repo(tenant_id, site_id, page, page_size, status)
+        self.list_deployments_repo(tenant_id, site_id, page, page_size, status, cursor)
             .await
     }
 
@@ -354,6 +357,27 @@ impl WebRepositoryPort for WebRepository {
         request: &CreateEnvVariableRequest,
     ) -> WebServiceResult<EnvVariableResponse> {
         self.create_env_variable_repo(tenant_id, site_id, request)
+            .await
+    }
+
+    async fn update_env_variable(
+        &self,
+        tenant_id: i64,
+        site_id: &str,
+        variable_id: &str,
+        request: &UpdateEnvVariableRequest,
+    ) -> WebServiceResult<EnvVariableResponse> {
+        self.update_env_variable_repo(tenant_id, site_id, variable_id, request)
+            .await
+    }
+
+    async fn delete_env_variable(
+        &self,
+        tenant_id: i64,
+        site_id: &str,
+        variable_id: &str,
+    ) -> WebServiceResult<()> {
+        self.delete_env_variable_repo(tenant_id, site_id, variable_id)
             .await
     }
 
@@ -430,6 +454,25 @@ impl WebRepositoryPort for WebRepository {
         limit: i32,
     ) -> WebServiceResult<Vec<CertificateOperationLease>> {
         self.claim_certificate_operations_repo(lease_owner, lease_seconds, limit)
+            .await
+    }
+
+    async fn renew_certificate_operation_lease(
+        &self,
+        lease: &CertificateOperationLease,
+        lease_seconds: i64,
+    ) -> WebServiceResult<()> {
+        self.renew_certificate_operation_lease_repo(lease, lease_seconds)
+            .await
+    }
+
+    async fn delete_certificate(
+        &self,
+        tenant_id: i64,
+        certificate_id: &str,
+        deleted_by: Option<i64>,
+    ) -> WebServiceResult<()> {
+        self.delete_certificate_repo(tenant_id, certificate_id, deleted_by)
             .await
     }
 
@@ -727,10 +770,9 @@ impl WebRepositoryPort for WebRepository {
     async fn list_audit_logs(
         &self,
         tenant_id: Option<i64>,
-        page: i32,
-        page_size: i32,
+        query: &ListAuditLogsQuery,
     ) -> WebServiceResult<AuditLogPage> {
-        self.list_audit_logs_repo(tenant_id, page, page_size).await
+        self.list_audit_logs_repo(tenant_id, query).await
     }
 
     async fn insert_audit_log(&self, entry: AuditLogWrite<'_>) -> WebServiceResult<()> {

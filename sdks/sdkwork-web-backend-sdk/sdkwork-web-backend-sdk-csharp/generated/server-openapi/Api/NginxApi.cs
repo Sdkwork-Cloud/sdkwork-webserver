@@ -24,9 +24,9 @@ namespace SDKWork.Web.BackendSdk.Api
             {
                 new QueryParameterSpec("page", page, "form", true, false, null),
                 new QueryParameterSpec("page_size", pageSize, "form", true, false, null),
-                new QueryParameterSpec("siteId", siteId, "form", true, false, null),
-                new QueryParameterSpec("configType", configType, "form", true, false, null),
-                new QueryParameterSpec("isActive", isActive, "form", true, false, null),
+                new QueryParameterSpec("site_id", siteId, "form", true, false, null),
+                new QueryParameterSpec("config_type", configType, "form", true, false, null),
+                new QueryParameterSpec("is_active", isActive, "form", true, false, null),
             });
             return await _client.GetAsync<SDKWork.Web.BackendSdk.Models.ConfigsListResponse>(ApiPaths.AppendQueryString(ApiPaths.BackendPath("/nginx/configs"), queryString));
         }

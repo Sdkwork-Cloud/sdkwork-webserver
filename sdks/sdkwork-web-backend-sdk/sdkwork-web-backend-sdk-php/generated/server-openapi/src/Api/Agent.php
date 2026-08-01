@@ -26,7 +26,7 @@ final class AgentApi extends BaseApi
     {
         $path = '/backend/v3/api/agent/sync';
         $query = $this->buildQueryString([
-            new QueryParameterSpec('ifSyncVersion', $ifSyncVersion, 'form', true, false, null),
+            new QueryParameterSpec('if_sync_version', $ifSyncVersion, 'form', true, false, null),
         ]);
         $path = $this->appendQueryString($path, $query);
         $result = $this->client->request('GET', $path, []);

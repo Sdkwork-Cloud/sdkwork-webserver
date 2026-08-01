@@ -36,7 +36,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "cdacc9575729985eb65367b26cb7339216798ea42d69a3417467db31543ca7e9"
+      "sha256": "0c992630ee396ea2dbd93b29831a2cfaba58a23d4bb5a0e18eb9630f77687a11"
     },
     {
       "path": "sdkwork-sdk.json",
@@ -44,7 +44,7 @@
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/api/AgentApi.java",
-      "sha256": "14c4ec4dc01ca97bf0207d0cfaf96dae5d31702bfa999aec80c186bdd3376fe4"
+      "sha256": "b476a9c6d37e18a01097380f1b4625e116d787bd58674a815fcc0c9deab4cdda"
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/api/ApiPaths.java",
@@ -52,11 +52,11 @@
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/api/ApplicationApi.java",
-      "sha256": "d367696de04f62abac911f12170dc9dbb30e5c1abf40a6d2678e3b05f28f6da1"
+      "sha256": "e4bed16c6862f191d60f04fcffdffe0ae892ad6d5dea3d7f42cabeef6517a294"
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/api/ApplicationDeploymentApi.java",
-      "sha256": "a45566b2e9c8bbe2fbfba3883d6fa3e21100154303f95e6c9957f8330a943727"
+      "sha256": "c2d84cc22b042d28d4c47c6c3a181b1e6b420f2c42af94ee3c4aebc18def9630"
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/api/ApplicationDomainApi.java",
@@ -68,11 +68,11 @@
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/api/AuditApi.java",
-      "sha256": "03ba62bb9a490df71986f3e1e8827b37aa63085dd56aa99c275d305a624d0dd8"
+      "sha256": "a4dfbd0a047ad7f1394004152b3efa6c9c802cdea6433fa52502731cab5e9f61"
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/api/CertificateApi.java",
-      "sha256": "1ffc3c044f0d98622548b16f720833cea475dd8dca396cd8b1e5aac1bd579c64"
+      "sha256": "f84a32e45ff540df1bb369999d6d53af3a3207df49b9ce60154a4fc1ce7cff39"
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/api/CertificateDistributionApi.java",
@@ -84,7 +84,7 @@
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/api/NginxApi.java",
-      "sha256": "417f03d3f04fbeda7281213d8372894ddcffb2d5ff4bb18a21f3333cc8b6e0c4"
+      "sha256": "ad09ad3b3e98f9dd18fdf6d78a4849c1cd867d11275368fef46fe60965aecc2b"
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/api/package-info.java",

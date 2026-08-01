@@ -43,8 +43,8 @@ public class CertificateApi {
         let query = buildQueryString([
             QueryParameterSpec(name: "page", value: page, style: "form", explode: true, allowReserved: false, contentType: nil),
             QueryParameterSpec(name: "page_size", value: pageSize, style: "form", explode: true, allowReserved: false, contentType: nil),
-            QueryParameterSpec(name: "siteId", value: siteId, style: "form", explode: true, allowReserved: false, contentType: nil),
-            QueryParameterSpec(name: "domainId", value: domainId, style: "form", explode: true, allowReserved: false, contentType: nil)
+            QueryParameterSpec(name: "site_id", value: siteId, style: "form", explode: true, allowReserved: false, contentType: nil),
+            QueryParameterSpec(name: "domain_id", value: domainId, style: "form", explode: true, allowReserved: false, contentType: nil)
         ])
         return try await client.get(ApiPaths.appendQueryString(ApiPaths.appPath("/certificates"), query), responseType: CertificatesListResponse.self)
     }

@@ -8,7 +8,7 @@ use sqlx::Row;
 
 use super::support::{
     instant_from_row, instant_write_expression, json_from_row, json_write_expression, new_uuid,
-    next_id, now_rfc3339, pagination, store_error,
+    next_id, now_rfc3339, pagination, resolve_site_internal_id, store_error,
 };
 
 impl WebRepository {
@@ -192,6 +192,7 @@ impl WebRepository {
         request: &UpdateSiteRequest,
     ) -> WebServiceResult<SiteResponse> {
         let existing = self.retrieve_site_repo(tenant_id, None, site_id).await?;
+        let current_version = self.retrieve_site_version_repo(tenant_id, site_id).await?;
         let name = request.name.as_ref().unwrap_or(&existing.name);
         let description = request
             .description
@@ -227,7 +228,7 @@ impl WebRepository {
              SET name = $3, description = $4, runtime_config = {runtime_config_expression},
                  metadata = {metadata_expression},
                  updated_at = {now_expression}, version = version + 1
-             WHERE tenant_id = $1 AND uuid = $2 AND deleted_at IS NULL"
+             WHERE tenant_id = $1 AND uuid = $2 AND deleted_at IS NULL AND version = $8"
         );
 
         let updated = sqlx::query(&update_sql)
@@ -238,12 +239,13 @@ impl WebRepository {
             .bind(runtime_config.to_string())
             .bind(store_listing_json)
             .bind(&now)
+            .bind(current_version)
             .execute(&self.pool)
             .await
             .map_err(|error| store_error("update web_site", error))?;
 
         if updated.rows_affected() == 0 {
-            return Err(WebServiceError::not_found("site not found"));
+            return self.conflict_or_missing_site(tenant_id, site_id).await;
         }
 
         self.retrieve_site_repo(tenant_id, None, site_id).await
@@ -273,29 +275,112 @@ impl WebRepository {
             ));
         }
 
+        let site_internal_id = resolve_site_internal_id(&self.pool, tenant_id, site_id).await?;
         let now = now_rfc3339();
         let engine = self.database_engine().await?;
         let now_expression = instant_write_expression(engine, "$3");
-        let update_sql = format!(
+        let mut tx = self
+            .pool
+            .begin()
+            .await
+            .map_err(|error| store_error("begin delete web_site transaction", error))?;
+
+        let site_update = sqlx::query(&format!(
             "UPDATE web_site
              SET deleted_at = {now_expression}, deleted_by = $4,
                  updated_at = {now_expression}, version = version + 1
              WHERE tenant_id = $1 AND uuid = $2 AND deleted_at IS NULL AND status <> 1"
-        );
-        let result = sqlx::query(&update_sql)
-            .bind(tenant_id)
-            .bind(site_id)
-            .bind(&now)
-            .bind(actor_id)
-            .execute(&self.pool)
-            .await
-            .map_err(|error| store_error("delete web_site", error))?;
+        ))
+        .bind(tenant_id)
+        .bind(site_id)
+        .bind(&now)
+        .bind(actor_id)
+        .execute(&mut *tx)
+        .await
+        .map_err(|error| store_error("delete web_site", error))?;
 
-        if result.rows_affected() == 0 {
+        if site_update.rows_affected() == 0 {
+            tx.rollback().await.map_err(|error| {
+                store_error("rollback delete web_site transaction", error)
+            })?;
             return Err(WebServiceError::conflict(
                 "application state changed; disable it before deletion",
             ));
         }
+
+        // Archive the site's owned route surface so deleted applications never
+        // keep occupying domain routes, TLS policies, or listener bindings.
+        sqlx::query(&format!(
+            "UPDATE web_site_binding
+             SET status = 'ARCHIVED', deleted_at = {now_expression},
+                 updated_at = {now_expression}, version = version + 1
+             WHERE tenant_id = $1 AND site_id = $2 AND deleted_at IS NULL"
+        ))
+        .bind(tenant_id)
+        .bind(site_internal_id)
+        .bind(&now)
+        .execute(&mut *tx)
+        .await
+        .map_err(|error| store_error("archive web_site bindings", error))?;
+        sqlx::query(&format!(
+            "UPDATE web_tls_policy policy
+             SET status = 'ARCHIVED', deleted_at = {now_expression},
+                 updated_at = {now_expression}, version = version + 1
+             FROM web_site_binding binding
+             WHERE binding.tenant_id = policy.tenant_id
+               AND binding.id = policy.site_binding_id
+               AND binding.tenant_id = $1 AND binding.site_id = $2
+               AND policy.deleted_at IS NULL"
+        ))
+        .bind(tenant_id)
+        .bind(site_internal_id)
+        .bind(&now)
+        .execute(&mut *tx)
+        .await
+        .map_err(|error| store_error("archive web_site TLS policies", error))?;
+        sqlx::query(&format!(
+            "UPDATE web_listener_certificate_binding listener
+             SET status = 'ARCHIVED', deleted_at = {now_expression},
+                 updated_at = {now_expression}, version = version + 1
+             FROM web_site_binding binding
+             WHERE binding.tenant_id = listener.tenant_id
+               AND binding.id = listener.site_binding_id
+               AND binding.tenant_id = $1 AND binding.site_id = $2
+               AND listener.deleted_at IS NULL"
+        ))
+        .bind(tenant_id)
+        .bind(site_internal_id)
+        .bind(&now)
+        .execute(&mut *tx)
+        .await
+        .map_err(|error| store_error("archive web_site listener certificate bindings", error))?;
+        // Deactivate the site's environment variables and health checks.
+        sqlx::query(&format!(
+            "UPDATE web_env_variable
+             SET status = 0, updated_at = {now_expression}, version = version + 1
+             WHERE tenant_id = $1 AND site_id = $2 AND status = 1"
+        ))
+        .bind(tenant_id)
+        .bind(site_internal_id)
+        .bind(&now)
+        .execute(&mut *tx)
+        .await
+        .map_err(|error| store_error("deactivate web_site environment variables", error))?;
+        sqlx::query(&format!(
+            "UPDATE web_health_check
+             SET status = 0, updated_at = {now_expression}, version = version + 1
+             WHERE tenant_id = $1 AND site_id = $2 AND status = 1"
+        ))
+        .bind(tenant_id)
+        .bind(site_internal_id)
+        .bind(&now)
+        .execute(&mut *tx)
+        .await
+        .map_err(|error| store_error("deactivate web_site health checks", error))?;
+
+        tx.commit()
+            .await
+            .map_err(|error| store_error("commit delete web_site transaction", error))?;
         Ok(())
     }
 
@@ -305,28 +390,63 @@ impl WebRepository {
         site_id: &str,
         status: i32,
     ) -> WebServiceResult<SiteResponse> {
+        let current_version = self.retrieve_site_version_repo(tenant_id, site_id).await?;
         let now = now_rfc3339();
         let engine = self.database_engine().await?;
         let now_expression = instant_write_expression(engine, "$4");
         let update_sql = format!(
             "UPDATE web_site
              SET status = $3, updated_at = {now_expression}, version = version + 1
-             WHERE tenant_id = $1 AND uuid = $2 AND deleted_at IS NULL"
+             WHERE tenant_id = $1 AND uuid = $2 AND deleted_at IS NULL AND version = $5"
         );
         let result = sqlx::query(&update_sql)
             .bind(tenant_id)
             .bind(site_id)
             .bind(status)
             .bind(&now)
+            .bind(current_version)
             .execute(&self.pool)
             .await
             .map_err(|error| store_error("update web_site status", error))?;
 
         if result.rows_affected() == 0 {
-            return Err(WebServiceError::not_found("site not found"));
+            return self.conflict_or_missing_site(tenant_id, site_id).await;
         }
 
         self.retrieve_site_repo(tenant_id, None, site_id).await
+    }
+
+    /// Reads the current optimistic-concurrency version of a live site row.
+    pub(super) async fn retrieve_site_version_repo(
+        &self,
+        tenant_id: i64,
+        site_id: &str,
+    ) -> WebServiceResult<i64> {
+        sqlx::query_scalar(
+            "SELECT version FROM web_site
+             WHERE tenant_id = $1 AND uuid = $2 AND deleted_at IS NULL",
+        )
+        .bind(tenant_id)
+        .bind(site_id)
+        .fetch_optional(&self.pool)
+        .await
+        .map_err(|error| store_error("load web_site version", error))?
+        .ok_or_else(|| WebServiceError::not_found("site not found"))
+    }
+
+    /// Distinguishes a concurrent-write conflict from a missing row after a
+    /// compare-and-swap update affected zero rows.
+    async fn conflict_or_missing_site(
+        &self,
+        tenant_id: i64,
+        site_id: &str,
+    ) -> WebServiceResult<SiteResponse> {
+        if self.retrieve_site_version_repo(tenant_id, site_id).await.is_ok() {
+            return Err(WebServiceError::conflict(
+                "site was modified concurrently; reload and retry",
+            ));
+        }
+        Err(WebServiceError::not_found("site not found"))
     }
 }
 

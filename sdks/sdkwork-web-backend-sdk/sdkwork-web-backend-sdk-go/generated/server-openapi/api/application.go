@@ -22,8 +22,8 @@ func (a *ApplicationApi) ApplicationsList(page *int, pageSize *int, applicationT
     query := BuildQueryString([]QueryParameterSpec{
         {Name: "page", Value: func() interface{} { if page == nil { return nil }; return *page }(), Style: "form", Explode: true, AllowReserved: false},
         {Name: "page_size", Value: func() interface{} { if pageSize == nil { return nil }; return *pageSize }(), Style: "form", Explode: true, AllowReserved: false},
-        {Name: "applicationType", Value: func() interface{} { if applicationType == nil { return nil }; return *applicationType }(), Style: "form", Explode: true, AllowReserved: false},
-        {Name: "siteType", Value: func() interface{} { if siteType == nil { return nil }; return *siteType }(), Style: "form", Explode: true, AllowReserved: false},
+        {Name: "application_type", Value: func() interface{} { if applicationType == nil { return nil }; return *applicationType }(), Style: "form", Explode: true, AllowReserved: false},
+        {Name: "site_type", Value: func() interface{} { if siteType == nil { return nil }; return *siteType }(), Style: "form", Explode: true, AllowReserved: false},
         {Name: "status", Value: func() interface{} { if status == nil { return nil }; return *status }(), Style: "form", Explode: true, AllowReserved: false},
         {Name: "keyword", Value: func() interface{} { if keyword == nil { return nil }; return *keyword }(), Style: "form", Explode: true, AllowReserved: false},
     })

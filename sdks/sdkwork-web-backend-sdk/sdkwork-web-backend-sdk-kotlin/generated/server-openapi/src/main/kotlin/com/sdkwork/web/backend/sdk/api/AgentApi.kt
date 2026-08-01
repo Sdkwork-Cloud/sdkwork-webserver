@@ -17,7 +17,7 @@ class AgentApi(private val client: HttpClient) {
     /** Retrieve the Nginx configuration and certificate bundle */
     suspend fun retrieve(ifSyncVersion: String? = null): RetrieveResponse? {
         val query = buildQueryString(listOf(
-            QueryParameterSpec("ifSyncVersion", ifSyncVersion, "form", true, false, null)
+            QueryParameterSpec("if_sync_version", ifSyncVersion, "form", true, false, null)
         ))
         val raw = client.get(ApiPaths.appendQueryString(ApiPaths.backendPath("/agent/sync"), query))
         return client.convertValue(raw, object : TypeReference<RetrieveResponse>() {})

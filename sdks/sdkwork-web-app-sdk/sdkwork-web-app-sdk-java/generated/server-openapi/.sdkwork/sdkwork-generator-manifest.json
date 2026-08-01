@@ -36,7 +36,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "8a9da78c35cd648ad4918a50f8946b6a965f4c07191086277af26c42dded2ee6"
+      "sha256": "a4961ce86d5a5c08087a482118b87f3d945b1385518949b419f3ff6d1ac73f26"
     },
     {
       "path": "sdkwork-sdk.json",
@@ -48,11 +48,11 @@
     },
     {
       "path": "src/main/java/com/sdkwork/web/app/sdk/api/CertificateApi.java",
-      "sha256": "f417494ecf8eff16c4bb704c5071a7549971617bb42e76d44e0d944703aa81d6"
+      "sha256": "4f0e854d3d5774104681d76414be2d78377d6e473237b0886ef673be1ec591a2"
     },
     {
       "path": "src/main/java/com/sdkwork/web/app/sdk/api/DeploymentApi.java",
-      "sha256": "65e0ea63b2a8667ab812d668cc3a606eb28b29422e95a2a9038b1ccd1e6fd3e7"
+      "sha256": "80421b22d21dc5b6364918f960b59f8b2662ca325793aafa05499f17af782442"
     },
     {
       "path": "src/main/java/com/sdkwork/web/app/sdk/api/DomainApi.java",
@@ -60,7 +60,7 @@
     },
     {
       "path": "src/main/java/com/sdkwork/web/app/sdk/api/EnvVariableApi.java",
-      "sha256": "10ec7dcff700bca1ca846b63b99593b4231350ccc6670027e5e188070fe6446b"
+      "sha256": "179851baa36ccedcdcd4a32bb507839377ff975b687a8b130467ecbce4301789"
     },
     {
       "path": "src/main/java/com/sdkwork/web/app/sdk/api/MonitorApi.java",
@@ -72,7 +72,7 @@
     },
     {
       "path": "src/main/java/com/sdkwork/web/app/sdk/api/SiteApi.java",
-      "sha256": "513b8d95c4911c027156e621b80038f5753a3ac81b842e747c034c6f95c128b2"
+      "sha256": "90233d53d9d4dc1730a0d2810eb2236728c1a3b45169315ebcab5b4c0ba9c945"
     },
     {
       "path": "src/main/java/com/sdkwork/web/app/sdk/api/SourceVersionApi.java",
@@ -311,6 +311,10 @@
       "sha256": "dc25cf2e66495b1f4dba379fc626c61e169b1d2a0088ce8f5bfe15ebe0e80235"
     },
     {
+      "path": "src/main/java/com/sdkwork/web/app/sdk/model/SitesEnvVariablesUpdateResponse.java",
+      "sha256": "f0162035b6eb682ed90f56263d0722652be91a914a0a83b7fc32eda6ff41032f"
+    },
+    {
       "path": "src/main/java/com/sdkwork/web/app/sdk/model/SitesHealthChecksCreateResponse201.java",
       "sha256": "227c7d9e60e880591541bd5efa52b3eec872697234bd188f9297199bf3e2793d"
     },
@@ -361,6 +365,10 @@
     {
       "path": "src/main/java/com/sdkwork/web/app/sdk/model/SourceVersionResponse.java",
       "sha256": "dd956623fe0aa95e85d36cf4bcf4b166e32e8b3068aa5b5d27c22a419c93af67"
+    },
+    {
+      "path": "src/main/java/com/sdkwork/web/app/sdk/model/UpdateEnvVariableRequest.java",
+      "sha256": "0fbe2dd10ba539412e277dc38fd822b4277e1302eb07e09196d83d6a7838fbea"
     },
     {
       "path": "src/main/java/com/sdkwork/web/app/sdk/model/UpdateSiteRequest.java",

@@ -31,8 +31,8 @@ var query = new Dictionary<string, object>
 {
     ["page"] = 1,
     ["page_size"] = 2,
-    ["siteId"] = "00000000-0000-0000-0000-000000000001",
-    ["domainId"] = "00000000-0000-0000-0000-000000000001",
+    ["site_id"] = "00000000-0000-0000-0000-000000000001",
+    ["domain_id"] = "00000000-0000-0000-0000-000000000001",
 };
 var result = await client.Certificate.CertificatesListAsync(query);
 Console.WriteLine(result);
@@ -77,8 +77,8 @@ var query = new Dictionary<string, object>
     ["page"] = 1,
     ["page_size"] = 2,
     ["status"] = 0,
-    ["applicationType"] = "WEB",
-    ["siteType"] = 1,
+    ["application_type"] = "WEB",
+    ["site_type"] = 1,
     ["keyword"] = "keyword",
 };
 var result = await client.Site.SitesListAsync(query);
@@ -107,8 +107,8 @@ var query = new Dictionary<string, object>
 {
     ["page"] = 1,
     ["page_size"] = 2,
-    ["siteId"] = "00000000-0000-0000-0000-000000000001",
-    ["domainId"] = "00000000-0000-0000-0000-000000000001",
+    ["site_id"] = "00000000-0000-0000-0000-000000000001",
+    ["domain_id"] = "00000000-0000-0000-0000-000000000001",
 };
 var result = await client.Certificate.CertificatesListAsync(query);
 Console.WriteLine(result);
@@ -137,6 +137,7 @@ var query = new Dictionary<string, object>
 {
     ["page"] = 1,
     ["page_size"] = 2,
+    ["cursor"] = "cursor",
     ["status"] = 0,
 };
 var result = await client.Deployment.SitesDeploymentsListAsync(siteId, query);
@@ -174,8 +175,8 @@ try
     {
         ["page"] = 1,
         ["page_size"] = 2,
-        ["siteId"] = "00000000-0000-0000-0000-000000000001",
-        ["domainId"] = "00000000-0000-0000-0000-000000000001",
+        ["site_id"] = "00000000-0000-0000-0000-000000000001",
+        ["domain_id"] = "00000000-0000-0000-0000-000000000001",
     };
     await client.Certificate.CertificatesListAsync(query);
 }

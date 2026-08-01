@@ -34,8 +34,8 @@ client.setAccessToken("your-access-token")
     val params = linkedMapOf<String, Any>(
         "page" to 1,
         "page_size" to 2,
-        "siteId" to "00000000-0000-0000-0000-000000000001",
-        "domainId" to "00000000-0000-0000-0000-000000000001"
+        "site_id" to "00000000-0000-0000-0000-000000000001",
+        "domain_id" to "00000000-0000-0000-0000-000000000001"
     )
     val result = client.certificate.certificatesList(params)
     println(result)
@@ -77,8 +77,8 @@ val params = linkedMapOf<String, Any>(
     "page" to 1,
     "page_size" to 2,
     "status" to 0,
-    "applicationType" to "WEB",
-    "siteType" to 1,
+    "application_type" to "WEB",
+    "site_type" to 1,
     "keyword" to "keyword"
 )
 val result = client.site.sitesList(params)
@@ -105,8 +105,8 @@ println(result)
 val params = linkedMapOf<String, Any>(
     "page" to 1,
     "page_size" to 2,
-    "siteId" to "00000000-0000-0000-0000-000000000001",
-    "domainId" to "00000000-0000-0000-0000-000000000001"
+    "site_id" to "00000000-0000-0000-0000-000000000001",
+    "domain_id" to "00000000-0000-0000-0000-000000000001"
 )
 val result = client.certificate.certificatesList(params)
 println(result)
@@ -133,6 +133,7 @@ val siteId = "1"
 val params = linkedMapOf<String, Any>(
     "page" to 1,
     "page_size" to 2,
+    "cursor" to "cursor",
     "status" to 0
 )
 val result = client.deployment.sitesDeploymentsList(siteId, params)
@@ -170,8 +171,8 @@ fun main() = runBlocking {
         val params = linkedMapOf<String, Any>(
             "page" to 1,
             "page_size" to 2,
-            "siteId" to "00000000-0000-0000-0000-000000000001",
-            "domainId" to "00000000-0000-0000-0000-000000000001"
+            "site_id" to "00000000-0000-0000-0000-000000000001",
+            "domain_id" to "00000000-0000-0000-0000-000000000001"
         )
         val result = client.certificate.certificatesList(params)
         println(result)

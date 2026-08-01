@@ -19,7 +19,7 @@ export class AgentSyncApi {
 /** Retrieve the Nginx configuration and certificate bundle */
   async list(params?: AgentSyncListParams, requestOptions?: ApiRequestOptions): Promise<AgentSyncResponse> {
     const query = buildQueryString([
-      { name: 'ifSyncVersion', value: params?.ifSyncVersion, style: 'form', explode: true, allowReserved: false },
+      { name: 'if_sync_version', value: params?.ifSyncVersion, style: 'form', explode: true, allowReserved: false },
     ]);
     return this.client.request<AgentSyncResponse>(appendQueryString(backendApiPath(`/agent/sync`), query), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any, sdkworkUnwrapKind: 'item' });
   }

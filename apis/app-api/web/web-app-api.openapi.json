@@ -65,7 +65,7 @@
             }
           },
           {
-            "name": "applicationType",
+            "name": "application_type",
             "in": "query",
             "schema": {
               "type": "string",
@@ -76,7 +76,7 @@
             }
           },
           {
-            "name": "siteType",
+            "name": "site_type",
             "in": "query",
             "schema": {
               "type": "integer",
@@ -1666,12 +1666,16 @@
         "x-sdkwork-auth-mode": "dual-token",
         "x-sdkwork-permission": "web.sites.write",
         "x-sdkwork-owner": "sdkwork-web",
+        "x-sdkwork-pagination-mode": "cursor-offset",
         "parameters": [
           {
             "$ref": "#/components/parameters/PageParam"
           },
           {
             "$ref": "#/components/parameters/PageSizeParam"
+          },
+          {
+            "$ref": "#/components/parameters/CursorParam"
           },
           {
             "name": "status",
@@ -2146,6 +2150,126 @@
         "x-sdkwork-route-auth": "dual-token"
       }
     },
+    "/app/v3/api/sites/{siteId}/env_variables/{variableId}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/SiteIdParam"
+        },
+        {
+          "name": "variableId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "patch": {
+        "operationId": "sites.envVariables.update",
+        "summary": "轮换环境变量值",
+        "description": "Rotates the stored value of an active environment variable in place; the key and environment cannot change.",
+        "tags": [
+          "envVariable"
+        ],
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-api-surface": "app-api",
+        "x-sdkwork-api-authority": "sdkwork-web.app",
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-permission": "web.sites.write",
+        "x-sdkwork-idempotent": true,
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "x-sdkwork-owner": "sdkwork-web",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateEnvVariableRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "更新成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SdkWorkApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "required": [
+                        "data"
+                      ],
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "required": [
+                            "item"
+                          ],
+                          "properties": {
+                            "item": {
+                              "$ref": "#/components/schemas/EnvVariableResponse"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "x-sdkwork-route-auth": "dual-token"
+      },
+      "delete": {
+        "operationId": "sites.envVariables.delete",
+        "summary": "删除环境变量",
+        "description": "Soft-deletes an active environment variable and releases its key for re-creation.",
+        "tags": [
+          "envVariable"
+        ],
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-api-surface": "app-api",
+        "x-sdkwork-api-authority": "sdkwork-web.app",
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-permission": "web.sites.write",
+        "x-sdkwork-idempotent": true,
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "x-sdkwork-owner": "sdkwork-web",
+        "responses": {
+          "204": {
+            "description": "删除成功"
+          }
+        },
+        "x-sdkwork-route-auth": "dual-token"
+      }
+    },
     "/app/v3/api/certificates": {
       "get": {
         "operationId": "certificates.list",
@@ -2173,7 +2297,7 @@
             "$ref": "#/components/parameters/PageSizeParam"
           },
           {
-            "name": "siteId",
+            "name": "site_id",
             "in": "query",
             "required": false,
             "description": "Limit certificates to one application owned by the authenticated user.",
@@ -2183,7 +2307,7 @@
             }
           },
           {
-            "name": "domainId",
+            "name": "domain_id",
             "in": "query",
             "required": false,
             "description": "Limit certificates to those whose SAN identifiers cover this domain.",
@@ -2589,8 +2713,18 @@
           "default": 20
         }
       },
+      "CursorParam": {
+        "name": "cursor",
+        "in": "query",
+        "description": "Opaque keyset continuation token for cursor-paginated operations; must not be combined with page.",
+        "schema": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        }
+      },
       "SiteIdParam": {
-        "name": "siteId",
+        "name": "site_id",
         "in": "path",
         "required": true,
         "schema": {
@@ -2599,7 +2733,7 @@
         }
       },
       "DomainIdParam": {
-        "name": "domainId",
+        "name": "domain_id",
         "in": "path",
         "required": true,
         "schema": {
@@ -3594,6 +3728,23 @@
               "production"
             ],
             "default": "production"
+          },
+          "isSecret": {
+            "type": "boolean",
+            "default": true
+          }
+        }
+      },
+      "UpdateEnvVariableRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "value"
+        ],
+        "properties": {
+          "value": {
+            "type": "string",
+            "maxLength": 65536
           },
           "isSecret": {
             "type": "boolean",

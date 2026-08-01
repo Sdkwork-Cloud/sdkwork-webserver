@@ -82,8 +82,8 @@ client.getHttpClient().setHeader("X-Custom-Header", "value");
 Map<String, Object> params = new LinkedHashMap<>();
 params.put("page", 1);
 params.put("page_size", 2);
-params.put("applicationType", "WEB");
-params.put("siteType", 4);
+params.put("application_type", "WEB");
+params.put("site_type", 4);
 params.put("status", 5);
 params.put("keyword", "keyword");
 ApplicationsListResponse result = client.getApplication().applicationsList(params);
@@ -109,7 +109,7 @@ System.out.println(result);
 Map<String, Object> params = new LinkedHashMap<>();
 params.put("page", 1);
 params.put("page_size", 2);
-params.put("domainId", "00000000-0000-0000-0000-000000000001");
+params.put("domain_id", "00000000-0000-0000-0000-000000000001");
 CertificatesListResponse result = client.getCertificate().certificatesList(params);
 System.out.println(result);
 ```
@@ -145,7 +145,8 @@ String applicationId = "1";
 Map<String, Object> params = new LinkedHashMap<>();
 params.put("page", 1);
 params.put("page_size", 2);
-params.put("status", 3);
+params.put("cursor", "cursor");
+params.put("status", 4);
 ApplicationsDeploymentsListResponse result = client.getApplicationDeployment().applicationsDeploymentsList(applicationId, params);
 System.out.println(result);
 ```
@@ -185,7 +186,7 @@ System.out.println(result);
 ```java
 // Retrieve the Nginx configuration and certificate bundle
 Map<String, Object> params = new LinkedHashMap<>();
-params.put("ifSyncVersion", "ifsyncversion");
+params.put("if_sync_version", "if-sync-version");
 RetrieveResponse result = client.getAgent().retrieve(params);
 System.out.println(result);
 ```
@@ -197,11 +198,12 @@ System.out.println(result);
 Map<String, Object> params = new LinkedHashMap<>();
 params.put("page", 1);
 params.put("page_size", 2);
-params.put("targetType", "targettype");
+params.put("cursor", "cursor");
+params.put("target_type", "target-type");
 params.put("action", "action");
-params.put("operatorId", "1");
-params.put("startDate", "2026-04-10T00:00:00Z");
-params.put("endDate", "2026-04-10T00:00:00Z");
+params.put("operator_id", "1");
+params.put("start_date", "2026-04-10T00:00:00Z");
+params.put("end_date", "2026-04-10T00:00:00Z");
 AuditLogsListResponse result = client.getAudit().logsList(params);
 System.out.println(result);
 ```

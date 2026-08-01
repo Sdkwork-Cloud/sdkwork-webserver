@@ -8,15 +8,16 @@ public class AuditApi {
     }
 
     /// List audit logs
-    public func logsList(page: Int? = nil, pageSize: Int? = nil, targetType: String? = nil, action: String? = nil, operatorId: String? = nil, startDate: String? = nil, endDate: String? = nil) async throws -> AuditLogsListResponse? {
+    public func logsList(page: Int? = nil, pageSize: Int? = nil, cursor: String? = nil, targetType: String? = nil, action: String? = nil, operatorId: String? = nil, startDate: String? = nil, endDate: String? = nil) async throws -> AuditLogsListResponse? {
         let query = buildQueryString([
             QueryParameterSpec(name: "page", value: page, style: "form", explode: true, allowReserved: false, contentType: nil),
             QueryParameterSpec(name: "page_size", value: pageSize, style: "form", explode: true, allowReserved: false, contentType: nil),
-            QueryParameterSpec(name: "targetType", value: targetType, style: "form", explode: true, allowReserved: false, contentType: nil),
+            QueryParameterSpec(name: "cursor", value: cursor, style: "form", explode: true, allowReserved: false, contentType: nil),
+            QueryParameterSpec(name: "target_type", value: targetType, style: "form", explode: true, allowReserved: false, contentType: nil),
             QueryParameterSpec(name: "action", value: action, style: "form", explode: true, allowReserved: false, contentType: nil),
-            QueryParameterSpec(name: "operatorId", value: operatorId, style: "form", explode: true, allowReserved: false, contentType: nil),
-            QueryParameterSpec(name: "startDate", value: startDate, style: "form", explode: true, allowReserved: false, contentType: nil),
-            QueryParameterSpec(name: "endDate", value: endDate, style: "form", explode: true, allowReserved: false, contentType: nil)
+            QueryParameterSpec(name: "operator_id", value: operatorId, style: "form", explode: true, allowReserved: false, contentType: nil),
+            QueryParameterSpec(name: "start_date", value: startDate, style: "form", explode: true, allowReserved: false, contentType: nil),
+            QueryParameterSpec(name: "end_date", value: endDate, style: "form", explode: true, allowReserved: false, contentType: nil)
         ])
         return try await client.get(ApiPaths.appendQueryString(ApiPaths.backendPath("/audit_logs"), query), responseType: AuditLogsListResponse.self)
     }

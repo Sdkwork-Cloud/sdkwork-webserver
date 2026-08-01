@@ -338,6 +338,22 @@ impl WebRepository {
             .map_err(|error| store_error("begin create root domain hostname", error))?;
 
         if request.is_primary {
+            let site_internal_id =
+                site_internal_id.expect("primary hostname has an application binding");
+            // Serialize primary binding creation on the site row so concurrent
+            // primary hostnames cannot both pass the single-primary check.
+            let locked = sqlx::query(
+                "UPDATE web_site SET version = version
+                 WHERE tenant_id = $1 AND id = $2 AND deleted_at IS NULL",
+            )
+            .bind(tenant_id)
+            .bind(site_internal_id)
+            .execute(&mut *tx)
+            .await
+            .map_err(|error| store_error("lock site for primary hostname", error))?;
+            if locked.rows_affected() != 1 {
+                return Err(WebServiceError::not_found("site not found"));
+            }
             let clear_time = instant_write_expression(engine, "$3");
             let clear_sql = format!(
                 "UPDATE web_site_binding SET is_primary = FALSE, updated_at = {clear_time},
@@ -347,7 +363,7 @@ impl WebRepository {
             );
             sqlx::query(&clear_sql)
                 .bind(tenant_id)
-                .bind(site_internal_id.expect("primary hostname has an application binding"))
+                .bind(site_internal_id)
                 .bind(&now)
                 .execute(&mut *tx)
                 .await

@@ -36,7 +36,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "77bc19b61ce1a64e80fe282498c503fe8237fd5a691b982655ab11d7857aee78"
+      "sha256": "561e2c7bf082ce87b303e9f6edb19421a92f1282717b7b195824b56cd86aef60"
     },
     {
       "path": "sdkwork-sdk.json",
@@ -48,11 +48,11 @@
     },
     {
       "path": "src/Api/Certificate.php",
-      "sha256": "e445a6051eee3ac7a4a45cce0e269064fca7cbd3e5e023e3a6e01b66999744dc"
+      "sha256": "f8966f9e3a9a643b6ed4fb9b66959ee3566230f9d6dfcf858dbd7246a1cb9f49"
     },
     {
       "path": "src/Api/Deployment.php",
-      "sha256": "1b0249735df70133d986b9c2edbc1b5fcf1b3e5a77536f6a96215c1b3d424c7c"
+      "sha256": "88401d2f3ab52e0bff03a92287a572ba195a62f54e294edbd29b6d4e0bba885b"
     },
     {
       "path": "src/Api/Domain.php",
@@ -60,7 +60,7 @@
     },
     {
       "path": "src/Api/EnvVariable.php",
-      "sha256": "1792c48756a8870982e30fa0c79ce6c107b61051a0475960606eaf7190400c2b"
+      "sha256": "9e41e03793a4cfae1f5da4cff8a7e3102a8d79043f36d694e6359b307573c52d"
     },
     {
       "path": "src/Api/Monitor.php",
@@ -68,7 +68,7 @@
     },
     {
       "path": "src/Api/Site.php",
-      "sha256": "6847e4d5f2212a0b2626aaa97fc505f8c6f2fe4b49f95eb38c9a6c05d79b9f54"
+      "sha256": "eb4232f1dea3fa76296264fe0c6ab459986b6d8e1a136e073c6742022d873e0c"
     },
     {
       "path": "src/Api/SourceVersion.php",
@@ -307,6 +307,10 @@
       "sha256": "ed3b1d8228a08b028d19498201793c69d11f57a5cd0076db772220632d108f5c"
     },
     {
+      "path": "src/Models/SitesEnvVariablesUpdateResponse.php",
+      "sha256": "fe416f99942d973864e8be25c2050dd682992cfaa6b46e6224958a251a5dcdad"
+    },
+    {
       "path": "src/Models/SitesHealthChecksCreateResponse201.php",
       "sha256": "6bd93a638a037da202effbbaf880e9f331d364bb12a64e6180ba2d0b1cdb954f"
     },
@@ -357,6 +361,10 @@
     {
       "path": "src/Models/SourceVersionResponse.php",
       "sha256": "4d0a3ea6ccf0f72e87c19a4edf02f98dab34f73ddba4f82c9db9d7ae1de5d8a9"
+    },
+    {
+      "path": "src/Models/UpdateEnvVariableRequest.php",
+      "sha256": "af563de439687b07550bdd06dff4d6358189c53ffc797a86f79efa72a38f8363"
     },
     {
       "path": "src/Models/UpdateSiteRequest.php",

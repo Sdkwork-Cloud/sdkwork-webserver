@@ -8,7 +8,8 @@ use sdkwork_webserver_contract::{
     CreateDeploymentRequest, CreateDomainRequest, CreateEnvVariableRequest,
     CreateHealthCheckRequest, CreateListenerCertificateBindingRequest, CreateSiteRequest,
     CreateSourceVersionRequest, ImportGitSourceVersionRequest, IssueCertificateRequest,
-    ListSitesQuery, UpdateSiteRequest, WebAppApi, WebAppRequestContext,
+    ListSitesQuery, UpdateEnvVariableRequest, UpdateSiteRequest, WebAppApi,
+    WebAppRequestContext,
 };
 use serde::Deserialize;
 use std::sync::Arc;
@@ -75,6 +76,10 @@ pub fn build_router_with_shared_app_api(api: Arc<dyn WebAppApi>) -> Router {
             paths::SITE_ENV_VARIABLES,
             get(list_env_variables).post(create_env_variable),
         )
+        .route(
+            paths::SITE_ENV_VARIABLE,
+            axum::routing::patch(update_env_variable).delete(delete_env_variable),
+        )
         .route(paths::CERTIFICATES, get(list_certificates))
         .route(paths::CERTIFICATES_ISSUE, post(issue_certificate))
         .route(
@@ -103,9 +108,9 @@ struct CertificatePageQuery {
     page: i32,
     #[serde(default = "default_page_size")]
     page_size: i32,
-    #[serde(rename = "siteId", alias = "site_id")]
+    #[serde(rename = "site_id")]
     site_id: Option<String>,
-    #[serde(rename = "domainId", alias = "domain_id")]
+    #[serde(rename = "domain_id")]
     domain_id: Option<String>,
 }
 
@@ -116,6 +121,7 @@ struct DeploymentListQuery {
     #[serde(default = "default_page_size")]
     page_size: i32,
     status: Option<i32>,
+    cursor: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -280,6 +286,7 @@ async fn list_deployments(
                 query.page,
                 query.page_size,
                 query.status,
+                query.cursor.as_deref(),
             )
             .await,
     )
@@ -413,6 +420,35 @@ async fn create_env_variable(
         state
             .api
             .create_env_variable(&context, &site_id, &request)
+            .await,
+    )
+}
+
+async fn update_env_variable(
+    State(state): State<AppState>,
+    context: Option<Extension<WebAppRequestContext>>,
+    Path((site_id, variable_id)): Path<(String, String)>,
+    Json(request): Json<UpdateEnvVariableRequest>,
+) -> Result<Response, WebApiError> {
+    let context = require_app_context(context)?;
+    ok_resource(
+        state
+            .api
+            .update_env_variable(&context, &site_id, &variable_id, &request)
+            .await,
+    )
+}
+
+async fn delete_env_variable(
+    State(state): State<AppState>,
+    context: Option<Extension<WebAppRequestContext>>,
+    Path((site_id, variable_id)): Path<(String, String)>,
+) -> Result<Response, WebApiError> {
+    let context = require_app_context(context)?;
+    no_content(
+        state
+            .api
+            .delete_env_variable(&context, &site_id, &variable_id)
             .await,
     )
 }

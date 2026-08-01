@@ -249,8 +249,8 @@ class ApplicationApi:
         query = build_query_string([
             {'name': 'page', 'value': page, 'style': 'form', 'explode': True, 'allow_reserved': False},
             {'name': 'page_size', 'value': page_size, 'style': 'form', 'explode': True, 'allow_reserved': False},
-            {'name': 'applicationType', 'value': application_type, 'style': 'form', 'explode': True, 'allow_reserved': False},
-            {'name': 'siteType', 'value': site_type, 'style': 'form', 'explode': True, 'allow_reserved': False},
+            {'name': 'application_type', 'value': application_type, 'style': 'form', 'explode': True, 'allow_reserved': False},
+            {'name': 'site_type', 'value': site_type, 'style': 'form', 'explode': True, 'allow_reserved': False},
             {'name': 'status', 'value': status, 'style': 'form', 'explode': True, 'allow_reserved': False},
             {'name': 'keyword', 'value': keyword, 'style': 'form', 'explode': True, 'allow_reserved': False},
         ])

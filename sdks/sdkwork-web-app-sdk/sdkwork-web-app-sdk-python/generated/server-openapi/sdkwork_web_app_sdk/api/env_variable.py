@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional
 from ..http_client import HttpClient
-from ..models import CreateEnvVariableRequest, SitesEnvVariablesCreateResponse201, SitesEnvVariablesListResponse
+from ..models import CreateEnvVariableRequest, SitesEnvVariablesCreateResponse201, SitesEnvVariablesListResponse, SitesEnvVariablesUpdateResponse, UpdateEnvVariableRequest
 
 def _append_query_string(path: str, raw_query_string: str) -> str:
     query = raw_query_string.lstrip('?')
@@ -276,3 +276,23 @@ class EnvVariableSitesEnvVariablesApi:
             {}
         )
         return self._client.post(f"/app/v3/api/sites/{serialize_path_parameter(site_id, {'name': 'siteId', 'style': 'simple', 'explode': False})}/env_variables", json=body, headers=request_headers)
+
+    def update(self, site_id: str, variable_id: str, body: UpdateEnvVariableRequest, idempotency_key: str) -> SitesEnvVariablesUpdateResponse:
+        """轮换环境变量值"""
+        request_headers = build_request_headers(
+            {
+                'Idempotency-Key': {'value': idempotency_key, 'style': 'simple', 'explode': False},
+            },
+            {}
+        )
+        return self._client.patch(f"/app/v3/api/sites/{serialize_path_parameter(site_id, {'name': 'siteId', 'style': 'simple', 'explode': False})}/env_variables/{serialize_path_parameter(variable_id, {'name': 'variableId', 'style': 'simple', 'explode': False})}", json=body, headers=request_headers)
+
+    def delete(self, site_id: str, variable_id: str, idempotency_key: str) -> None:
+        """删除环境变量"""
+        request_headers = build_request_headers(
+            {
+                'Idempotency-Key': {'value': idempotency_key, 'style': 'simple', 'explode': False},
+            },
+            {}
+        )
+        return self._client.delete(f"/app/v3/api/sites/{serialize_path_parameter(site_id, {'name': 'siteId', 'style': 'simple', 'explode': False})}/env_variables/{serialize_path_parameter(variable_id, {'name': 'variableId', 'style': 'simple', 'explode': False})}", headers=request_headers)

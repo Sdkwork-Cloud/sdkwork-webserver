@@ -1410,6 +1410,36 @@ class CreateEnvVariableRequest {
   }
 }
 
+class UpdateEnvVariableRequest {
+  final String value;
+  final bool? isSecret;
+
+  UpdateEnvVariableRequest({
+    required this.value,
+    this.isSecret
+  });
+
+  factory UpdateEnvVariableRequest.fromJson(Map<String, dynamic> json) {
+    return UpdateEnvVariableRequest(
+      value: (() {
+        final value = json['value']?.toString();
+        if (value == null) {
+          throw FormatException('UpdateEnvVariableRequest.value is required');
+        }
+        return value;
+      })(),
+      isSecret: json['isSecret'] is bool ? json['isSecret'] : null
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'value': value,
+      'isSecret': isSecret,
+    };
+  }
+}
+
 class EnvVariableResponse {
   final String? id;
   final String? key;
@@ -3674,6 +3704,52 @@ class SitesEnvVariablesCreateResponse201 {
         final value = json['traceId']?.toString();
         if (value == null) {
           throw FormatException('SitesEnvVariablesCreateResponse201.traceId is required');
+        }
+        return value;
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class SitesEnvVariablesUpdateResponse {
+  final int code;
+  final dynamic data;
+  final String traceId;
+
+  SitesEnvVariablesUpdateResponse({
+    required this.code,
+    required this.data,
+    required this.traceId
+  });
+
+  factory SitesEnvVariablesUpdateResponse.fromJson(Map<String, dynamic> json) {
+    return SitesEnvVariablesUpdateResponse(
+      code: (() {
+        final value = json['code'];
+        if (value is! int) {
+          throw FormatException('SitesEnvVariablesUpdateResponse.code is required');
+        }
+        return value;
+      })(),
+      data: (() {
+        final map = _sdkworkAsMap(json['data']);
+        if (map == null) {
+          throw FormatException('SitesEnvVariablesUpdateResponse.data is required');
+        }
+        return map;
+      })(),
+      traceId: (() {
+        final value = json['traceId']?.toString();
+        if (value == null) {
+          throw FormatException('SitesEnvVariablesUpdateResponse.traceId is required');
         }
         return value;
       })()

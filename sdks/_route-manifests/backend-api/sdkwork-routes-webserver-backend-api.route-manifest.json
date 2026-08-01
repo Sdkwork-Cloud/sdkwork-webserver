@@ -978,6 +978,32 @@
       "rateLimitTier": null
     },
     {
+      "method": "DELETE",
+      "path": "/backend/v3/api/certificates/{certificateId}",
+      "operationId": "certificates.delete",
+      "tags": [
+        "certificate"
+      ],
+      "auth": {
+        "mode": "dual-token",
+        "required": true
+      },
+      "routeAuth": "dual-token",
+      "handler": {
+        "module": "crate::routes",
+        "name": null
+      },
+      "ownership": {
+        "owner": "sdkwork-web",
+        "apiAuthority": "sdkwork-web.backend"
+      },
+      "requestContext": "WebRequestContext",
+      "apiSurface": "backend-api",
+      "permission": "web.certificates.write",
+      "idempotent": true,
+      "rateLimitTier": "auth-critical"
+    },
+    {
       "method": "POST",
       "path": "/backend/v3/api/certificates/{certificateId}/renew",
       "operationId": "certificates.renew",

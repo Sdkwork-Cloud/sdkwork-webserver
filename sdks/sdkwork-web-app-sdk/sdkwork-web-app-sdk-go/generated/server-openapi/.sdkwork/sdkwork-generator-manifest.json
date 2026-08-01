@@ -16,11 +16,11 @@
     },
     {
       "path": "api/certificate.go",
-      "sha256": "a7605564538c1da76b24a0ec39f6ff59e31150eea1b7bad2a4cfa9e7a0d9b2f6"
+      "sha256": "7a5f1bf318476ee88c038c34b4e010831a50e04a6604a98828640c7c85569162"
     },
     {
       "path": "api/deployment.go",
-      "sha256": "27e308b0bb0f14f936dfc63a22331d6184eef7c8f01ba2b1bca9fbb6d075b238"
+      "sha256": "520da960f9cb39c788a8f58f916df24b9e254baa461ccc7856c2607c26704f58"
     },
     {
       "path": "api/doc.go",
@@ -32,7 +32,7 @@
     },
     {
       "path": "api/env_variable.go",
-      "sha256": "2d1d8489dabacd9af1c0757a04fb4db0d6d6d059dbf3bd7d16f2413bec7a880e"
+      "sha256": "f23b29974507344a2e85e410baef7d562b2281b417277e1bf56ae4c64e012518"
     },
     {
       "path": "api/monitor.go",
@@ -44,7 +44,7 @@
     },
     {
       "path": "api/site.go",
-      "sha256": "db518f4d6a5e6aff92c048bb531a8b6b6cbf8e6e789125e365384e1393329cf3"
+      "sha256": "eacb405442c8be9b0370cc560515455914c9baf64b41c858d81fee4dfb3095e3"
     },
     {
       "path": "api/source_version.go",
@@ -88,7 +88,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "5f10e53d3a3889f4f0d1093643cedc0717c753b9584eab7bcf720b2ddc996963"
+      "sha256": "348afcbfaeeb4704afcd2183cb3c6f4d267779b9a460802f5fc5d78b044b52bd"
     },
     {
       "path": "sdk.go",
@@ -339,6 +339,10 @@
       "sha256": "4ce02481dc1d5d61152fb77248d061035352f15a33bcf882cd4af44d7c1efef6"
     },
     {
+      "path": "types/sites_env_variables_update_response.go",
+      "sha256": "298f29f5bfc3cf0d4e26c896be714e6a1e8230e5e3c137698b441cb85c768bcb"
+    },
+    {
       "path": "types/sites_health_checks_create_response201.go",
       "sha256": "3dda8e767180f87183ef55f54b03a7cf061ba05a3a547ace26bb564f4f12e12c"
     },
@@ -389,6 +393,10 @@
     {
       "path": "types/source_version_response.go",
       "sha256": "bb42b005eacf7d3b214ec4a5013d52f602abd2dfa17d37afd26c5aed1247a7ea"
+    },
+    {
+      "path": "types/update_env_variable_request.go",
+      "sha256": "67e71862e7d2d9eab5f0de1e23e83a0f7d1a0db50919f2382b80268e7a392171"
     },
     {
       "path": "types/update_site_request.go",

@@ -44,6 +44,34 @@ func (a *EnvVariableApi) SitesEnvVariablesCreate(siteId string, body sdktypes.Cr
     return decodeResult[sdktypes.SitesEnvVariablesCreateResponse201](raw)
 }
 
+// 轮换环境变量值
+func (a *EnvVariableApi) SitesEnvVariablesUpdate(siteId string, variableId string, body sdktypes.UpdateEnvVariableRequest, idempotencyKey string) (sdktypes.SitesEnvVariablesUpdateResponse, error) {
+    headers := BuildRequestHeaders(
+        map[string]ParameterSpec{"Idempotency-Key": ParameterSpec{Value: idempotencyKey, Style: "simple", Explode: false},},
+        map[string]ParameterSpec{},
+    )
+    raw, err := a.client.Patch(AppApiPath(fmt.Sprintf("/sites/%s/env_variables/%s", SerializePathParameter(siteId, PathParameterSpec{Name: "siteId", Style: "simple", Explode: false}), SerializePathParameter(variableId, PathParameterSpec{Name: "variableId", Style: "simple", Explode: false}))), body, nil, headers, "application/json")
+    if err != nil {
+        var zero sdktypes.SitesEnvVariablesUpdateResponse
+        return zero, err
+    }
+    return decodeResult[sdktypes.SitesEnvVariablesUpdateResponse](raw)
+}
+
+// 删除环境变量
+func (a *EnvVariableApi) SitesEnvVariablesDelete(siteId string, variableId string, idempotencyKey string) (struct{}, error) {
+    headers := BuildRequestHeaders(
+        map[string]ParameterSpec{"Idempotency-Key": ParameterSpec{Value: idempotencyKey, Style: "simple", Explode: false},},
+        map[string]ParameterSpec{},
+    )
+    raw, err := a.client.Delete(AppApiPath(fmt.Sprintf("/sites/%s/env_variables/%s", SerializePathParameter(siteId, PathParameterSpec{Name: "siteId", Style: "simple", Explode: false}), SerializePathParameter(variableId, PathParameterSpec{Name: "variableId", Style: "simple", Explode: false}))), nil, headers)
+    if err != nil {
+        var zero struct{}
+        return zero, err
+    }
+    return decodeResult[struct{}](raw)
+}
+
 type PathParameterSpec struct {
     Name    string
     Style   string

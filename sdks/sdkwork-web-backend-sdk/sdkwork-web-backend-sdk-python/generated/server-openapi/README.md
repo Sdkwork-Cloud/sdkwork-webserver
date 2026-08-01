@@ -69,8 +69,8 @@ client.set_header('X-Custom-Header', 'value')
 params = {
     'page': 1,
     'page_size': 2,
-    'applicationType': 'WEB',
-    'siteType': 4,
+    'application_type': 'WEB',
+    'site_type': 4,
     'status': 5,
     'keyword': 'keyword',
 }
@@ -98,7 +98,7 @@ print(result)
 params = {
     'page': 1,
     'page_size': 2,
-    'domainId': 'domainId',
+    'domain_id': 'domain_id',
 }
 result = client.certificate.list(params)
 print(result)
@@ -137,7 +137,8 @@ application_id = '1'
 params = {
     'page': 1,
     'page_size': 2,
-    'status': 3,
+    'cursor': 'cursor',
+    'status': 4,
 }
 result = client.application_deployment.applications.deployments.list(application_id, params)
 print(result)
@@ -180,7 +181,7 @@ print(result)
 ```python
 # Retrieve the Nginx configuration and certificate bundle
 params = {
-    'ifSyncVersion': 'ifSyncVersion',
+    'if_sync_version': 'if_sync_version',
 }
 result = client.agent.sync.list(params)
 print(result)
@@ -193,11 +194,12 @@ print(result)
 params = {
     'page': 1,
     'page_size': 2,
-    'targetType': 'targetType',
+    'cursor': 'cursor',
+    'target_type': 'target_type',
     'action': 'action',
-    'operatorId': 'operatorId',
-    'startDate': 'startDate',
-    'endDate': 'endDate',
+    'operator_id': 'operator_id',
+    'start_date': 'start_date',
+    'end_date': 'end_date',
 }
 result = client.audit.audit_logs.list(params)
 print(result)

@@ -20,11 +20,11 @@
     },
     {
       "path": "Api/CertificateApi.cs",
-      "sha256": "1899cd9614294703d705c2244c7638612b3f8d3056dafa530c82f2429fdfb5b8"
+      "sha256": "5b11f8a14c853d75655145f8795a6ca05176032a20dbaeebe193959cd40f4166"
     },
     {
       "path": "Api/DeploymentApi.cs",
-      "sha256": "82fb2cdfe646809ad0d7dab0886fb918068ad9e44e4e15be98c7dd806ce3eeac"
+      "sha256": "3c976daa77f32035ff99427bf3269155bcaaed906fc0d46fb4d3508670a9c63b"
     },
     {
       "path": "Api/DomainApi.cs",
@@ -32,7 +32,7 @@
     },
     {
       "path": "Api/EnvVariableApi.cs",
-      "sha256": "4cb44039790e1ae6073126aeeccbb18d5ac64ec5fb518b196cd04fa6886facbb"
+      "sha256": "0e5275605b2b18eac2299f4cb3358463be6251826afca74b7bd5ca9832e2226b"
     },
     {
       "path": "Api/MonitorApi.cs",
@@ -40,7 +40,7 @@
     },
     {
       "path": "Api/SiteApi.cs",
-      "sha256": "fee67e8452338139fb0182573023a2bbca3d19dd4d6de792cfdde929d043dd45"
+      "sha256": "34b988618209f893565f3d1043360824420143663d3211d1e9930bb433107dcf"
     },
     {
       "path": "Api/SourceVersionApi.cs",
@@ -299,6 +299,10 @@
       "sha256": "c26e297a76fd12362a4d4fcb39c1ef7d54039fc491705b0ad88cc9bf67e18a93"
     },
     {
+      "path": "Models/SitesEnvVariablesUpdateResponse.cs",
+      "sha256": "8a96a5f8af174c8ce5e1972b2440f9a76b6ef499c1077a6aa0d95caff41faa60"
+    },
+    {
       "path": "Models/SitesHealthChecksCreateResponse201.cs",
       "sha256": "76b9358693cc18448f6cc6db2036b24d2676761e6f3a9c20f188f1006c02432a"
     },
@@ -351,12 +355,16 @@
       "sha256": "081eda6cb6074437f220c24a79aa08a8852ece6c78066b95b03d412090e9435b"
     },
     {
+      "path": "Models/UpdateEnvVariableRequest.cs",
+      "sha256": "ac0635fff3a371fb8720f3b3b07fe2118ea9c8479ffa08cec6254c536cb757ff"
+    },
+    {
       "path": "Models/UpdateSiteRequest.cs",
       "sha256": "0d81bbab2da0a1dfd61e8298a3d1b15e874f3e40392c1e181444e0361ab43a17"
     },
     {
       "path": "README.md",
-      "sha256": "b6a40f6348abee0b7b4a664c1787e35fcd38561939bd413181025296ddc78cdc"
+      "sha256": "64a3ba4f94dc33b0b24082c9ae8226d26f2459a923e86214c37be3590c48a7a9"
     },
     {
       "path": "sdkwork-sdk.json",

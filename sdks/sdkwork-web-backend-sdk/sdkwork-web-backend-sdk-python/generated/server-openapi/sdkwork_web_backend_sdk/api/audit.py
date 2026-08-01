@@ -138,15 +138,16 @@ class AuditAuditLogsApi:
         self._client = client
 
 
-    def list(self, page: Optional[int] = None, page_size: Optional[int] = None, target_type: Optional[str] = None, action: Optional[str] = None, operator_id: Optional[str] = None, start_date: Optional[str] = None, end_date: Optional[str] = None) -> AuditLogsListResponse:
+    def list(self, page: Optional[int] = None, page_size: Optional[int] = None, cursor: Optional[str] = None, target_type: Optional[str] = None, action: Optional[str] = None, operator_id: Optional[str] = None, start_date: Optional[str] = None, end_date: Optional[str] = None) -> AuditLogsListResponse:
         """List audit logs"""
         query = build_query_string([
             {'name': 'page', 'value': page, 'style': 'form', 'explode': True, 'allow_reserved': False},
             {'name': 'page_size', 'value': page_size, 'style': 'form', 'explode': True, 'allow_reserved': False},
-            {'name': 'targetType', 'value': target_type, 'style': 'form', 'explode': True, 'allow_reserved': False},
+            {'name': 'cursor', 'value': cursor, 'style': 'form', 'explode': True, 'allow_reserved': False},
+            {'name': 'target_type', 'value': target_type, 'style': 'form', 'explode': True, 'allow_reserved': False},
             {'name': 'action', 'value': action, 'style': 'form', 'explode': True, 'allow_reserved': False},
-            {'name': 'operatorId', 'value': operator_id, 'style': 'form', 'explode': True, 'allow_reserved': False},
-            {'name': 'startDate', 'value': start_date, 'style': 'form', 'explode': True, 'allow_reserved': False},
-            {'name': 'endDate', 'value': end_date, 'style': 'form', 'explode': True, 'allow_reserved': False},
+            {'name': 'operator_id', 'value': operator_id, 'style': 'form', 'explode': True, 'allow_reserved': False},
+            {'name': 'start_date', 'value': start_date, 'style': 'form', 'explode': True, 'allow_reserved': False},
+            {'name': 'end_date', 'value': end_date, 'style': 'form', 'explode': True, 'allow_reserved': False},
         ])
         return self._client.get(_append_query_string(f"/backend/v3/api/audit_logs", query))

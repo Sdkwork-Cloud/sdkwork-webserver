@@ -64,8 +64,8 @@ client.setHeader('X-Custom-Header', 'value');
 final params = <String, dynamic>{
   'page': 1,
   'page_size': 2,
-  'applicationType': 'WEB',
-  'siteType': 4,
+  'application_type': 'WEB',
+  'site_type': 4,
   'status': 5,
   'keyword': 'keyword',
 };
@@ -91,7 +91,7 @@ print(result);
 final params = <String, dynamic>{
   'page': 1,
   'page_size': 2,
-  'domainId': '00000000-0000-0000-0000-000000000001',
+  'domain_id': '00000000-0000-0000-0000-000000000001',
 };
 final result = await client.certificate.certificatesList(params);
 print(result);
@@ -127,7 +127,8 @@ final applicationId = '1';
 final params = <String, dynamic>{
   'page': 1,
   'page_size': 2,
-  'status': 3,
+  'cursor': 'cursor',
+  'status': 4,
 };
 final result = await client.applicationDeployment.applicationsDeploymentsList(applicationId, params);
 print(result);
@@ -166,7 +167,7 @@ print(result);
 ```dart
 // Retrieve the Nginx configuration and certificate bundle
 final params = <String, dynamic>{
-  'ifSyncVersion': 'ifsyncversion',
+  'if_sync_version': 'if-sync-version',
 };
 final result = await client.agent.retrieve(params);
 print(result);
@@ -178,11 +179,12 @@ print(result);
 final params = <String, dynamic>{
   'page': 1,
   'page_size': 2,
-  'targetType': 'targettype',
+  'cursor': 'cursor',
+  'target_type': 'target-type',
   'action': 'action',
-  'operatorId': '1',
-  'startDate': '2026-04-10T00:00:00Z',
-  'endDate': '2026-04-10T00:00:00Z',
+  'operator_id': '1',
+  'start_date': '2026-04-10T00:00:00Z',
+  'end_date': '2026-04-10T00:00:00Z',
 };
 final result = await client.audit.logsList(params);
 print(result);

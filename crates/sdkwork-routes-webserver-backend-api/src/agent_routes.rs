@@ -22,7 +22,7 @@ use std::sync::Arc;
 
 #[derive(Debug, Deserialize)]
 pub(crate) struct AgentSyncQuery {
-    #[serde(rename = "ifSyncVersion")]
+    #[serde(rename = "if_sync_version")]
     if_sync_version: Option<String>,
 }
 

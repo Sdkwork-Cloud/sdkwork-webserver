@@ -10,11 +10,12 @@ module Sdkwork
     module Api
       class DeploymentApi < BaseApi
           # 获取部署历史
-          def sites_deployments_list(site_id, page: nil, page_size: nil, status: nil)
+          def sites_deployments_list(site_id, page: nil, page_size: nil, cursor: nil, status: nil)
             path = interpolate_path('/app/v3/api/sites/{siteId}/deployments', siteId: serialize_path_parameter(site_id, PathParameterSpec.new('siteId', 'simple', false)))
             query = build_query_string([
               QueryParameterSpec.new('page', page, 'form', true, false, nil),
               QueryParameterSpec.new('page_size', page_size, 'form', true, false, nil),
+              QueryParameterSpec.new('cursor', cursor, 'form', true, false, nil),
               QueryParameterSpec.new('status', status, 'form', true, false, nil),
             ])
             path = append_query_string(path, query)

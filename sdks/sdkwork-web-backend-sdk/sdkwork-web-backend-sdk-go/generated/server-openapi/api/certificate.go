@@ -64,7 +64,7 @@ func (a *CertificateApi) CertificatesList(page *int, pageSize *int, domainId *st
     query := BuildQueryString([]QueryParameterSpec{
         {Name: "page", Value: func() interface{} { if page == nil { return nil }; return *page }(), Style: "form", Explode: true, AllowReserved: false},
         {Name: "page_size", Value: func() interface{} { if pageSize == nil { return nil }; return *pageSize }(), Style: "form", Explode: true, AllowReserved: false},
-        {Name: "domainId", Value: func() interface{} { if domainId == nil { return nil }; return *domainId }(), Style: "form", Explode: true, AllowReserved: false},
+        {Name: "domain_id", Value: func() interface{} { if domainId == nil { return nil }; return *domainId }(), Style: "form", Explode: true, AllowReserved: false},
     })
     raw, err := a.client.Get(AppendQueryString(BackendApiPath("/certificates"), query), nil, nil)
     if err != nil {
@@ -110,6 +110,20 @@ func (a *CertificateApi) CertificatesUpdate(certificateId string, body sdktypes.
         return zero, err
     }
     return decodeResult[sdktypes.CertificatesUpdateResponse](raw)
+}
+
+// Soft-delete a certificate and release its domain identifiers
+func (a *CertificateApi) CertificatesDelete(certificateId string, idempotencyKey string) (struct{}, error) {
+    headers := BuildRequestHeaders(
+        map[string]ParameterSpec{"Idempotency-Key": ParameterSpec{Value: idempotencyKey, Style: "simple", Explode: false},},
+        map[string]ParameterSpec{},
+    )
+    raw, err := a.client.Delete(BackendApiPath(fmt.Sprintf("/certificates/%s", SerializePathParameter(certificateId, PathParameterSpec{Name: "certificateId", Style: "simple", Explode: false}))), nil, headers)
+    if err != nil {
+        var zero struct{}
+        return zero, err
+    }
+    return decodeResult[struct{}](raw)
 }
 
 // Renew a canonical certificate now

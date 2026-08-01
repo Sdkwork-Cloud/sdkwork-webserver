@@ -370,6 +370,7 @@ impl WebAppApi for StubAppApi {
         _page: i32,
         _page_size: i32,
         _status: Option<i32>,
+        _cursor: Option<&str>,
     ) -> WebServiceResult<sdkwork_webserver_contract::DeploymentPage> {
         Err(sdkwork_webserver_contract::WebServiceError::Internal(
             "not implemented".into(),

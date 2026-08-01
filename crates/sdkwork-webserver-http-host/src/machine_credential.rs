@@ -9,6 +9,10 @@ use sdkwork_web_core::{
 };
 use sdkwork_webserver_contract::MachineCredentialAuthenticator;
 
+/// Prefix of Web Node machine credentials; credentials with this prefix must be
+/// validated by the machine authenticator and never fall back to user API keys.
+pub const MACHINE_CREDENTIAL_PREFIX: &str = "wagent_";
+
 #[derive(Clone)]
 pub struct MachineCredentialResolverDecorator<R>
 where
@@ -17,6 +21,7 @@ where
     inner: R,
     authenticator: Arc<dyn MachineCredentialAuthenticator>,
     production_profile: Option<ResolverProductionProfile>,
+    machine_only: bool,
 }
 
 impl<R> MachineCredentialResolverDecorator<R>
@@ -28,6 +33,22 @@ where
             inner,
             authenticator,
             production_profile: None,
+            machine_only: false,
+        }
+    }
+
+    /// Resolver for machine-only surfaces (the application-ingress internal API):
+    /// credentials that are not validated as machine credentials are rejected and
+    /// never fall back to the user API-key resolver.
+    pub fn new_machine_only(
+        inner: R,
+        authenticator: Arc<dyn MachineCredentialAuthenticator>,
+    ) -> Self {
+        Self {
+            inner,
+            authenticator,
+            production_profile: None,
+            machine_only: true,
         }
     }
 }
@@ -41,6 +62,7 @@ impl MachineCredentialResolverDecorator<IamWebRequestContextResolver> {
             inner,
             authenticator,
             production_profile: Some(ResolverProductionProfile::TenantBoundBootstrap),
+            machine_only: false,
         }
     }
 }
@@ -91,6 +113,14 @@ where
                 .permission_scope(machine.permission_scope)
                 .subject_type(WebSubjectType::Service)
                 .build());
+        }
+        if self.machine_only || raw_api_key.starts_with(MACHINE_CREDENTIAL_PREFIX) {
+            // Machine-prefixed credentials must pass the machine authenticator;
+            // falling back to the user API-key resolver would let user keys pose
+            // as node credentials on agent/internal surfaces.
+            return Err(WebFrameworkError::invalid_credentials(
+                "machine credential required",
+            ));
         }
         self.inner.resolve_api_key(raw_api_key).await
     }

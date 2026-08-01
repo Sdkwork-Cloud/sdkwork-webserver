@@ -75,8 +75,8 @@ const client = new SdkworkBackendClient({
 const params = {
   page: 1,
   page_size: 2,
-  applicationType: 'WEB',
-  siteType: 4,
+  application_type: 'WEB',
+  site_type: 4,
   status: 5,
   keyword: 'keyword',
 };
@@ -102,7 +102,7 @@ const result = await client.applicationDomain.applications.domains.list(applicat
 const params = {
   page: 1,
   page_size: 2,
-  domainId: 'domainId',
+  domain_id: 'domain_id',
 };
 const result = await client.certificate.list(params);
 ```
@@ -138,7 +138,8 @@ const applicationId = '1';
 const params = {
   page: 1,
   page_size: 2,
-  status: 3,
+  cursor: 'cursor',
+  status: 4,
 };
 const result = await client.applicationDeployment.applications.deployments.list(applicationId, params);
 ```
@@ -177,7 +178,7 @@ const result = await client.server.list(params);
 ```typescript
 // Retrieve the Nginx configuration and certificate bundle
 const params = {
-  ifSyncVersion: 'ifSyncVersion',
+  if_sync_version: 'if_sync_version',
 };
 const result = await client.agent.sync.list(params);
 ```
@@ -189,11 +190,12 @@ const result = await client.agent.sync.list(params);
 const params = {
   page: 1,
   page_size: 2,
-  targetType: 'targetType',
+  cursor: 'cursor',
+  target_type: 'target_type',
   action: 'action',
-  operatorId: 'operatorId',
-  startDate: 'startDate',
-  endDate: 'endDate',
+  operator_id: 'operator_id',
+  start_date: 'start_date',
+  end_date: 'end_date',
 };
 const result = await client.audit.auditLogs.list(params);
 ```

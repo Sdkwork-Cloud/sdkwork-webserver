@@ -38,6 +38,33 @@ class EnvVariableApi {
       return map == null ? null : SitesEnvVariablesCreateResponse201.fromJson(map);
     })();
   }
+
+  /// 轮换环境变量值
+  Future<SitesEnvVariablesUpdateResponse?> sitesEnvVariablesUpdate(String siteId, String variableId, UpdateEnvVariableRequest body, String idempotencyKey) async {
+    final requestHeaders = buildRequestHeaders(
+      <String, HeaderParameterSpec>{
+        'Idempotency-Key': HeaderParameterSpec(idempotencyKey, 'simple', false, null),
+      },
+      <String, HeaderParameterSpec>{},
+    );
+    final payload = body.toJson();
+    final response = await _client.patch(ApiPaths.appPath('/sites/${serializePathParameter(siteId, const PathParameterSpec('siteId', 'simple', false))}/env_variables/${serializePathParameter(variableId, const PathParameterSpec('variableId', 'simple', false))}'), body: payload, headers: requestHeaders, contentType: 'application/json');
+    return (() {
+      final map = sdkworkResponseAsMap(response);
+      return map == null ? null : SitesEnvVariablesUpdateResponse.fromJson(map);
+    })();
+  }
+
+  /// 删除环境变量
+  Future<void> sitesEnvVariablesDelete(String siteId, String variableId, String idempotencyKey) async {
+    final requestHeaders = buildRequestHeaders(
+      <String, HeaderParameterSpec>{
+        'Idempotency-Key': HeaderParameterSpec(idempotencyKey, 'simple', false, null),
+      },
+      <String, HeaderParameterSpec>{},
+    );
+    await _client.delete(ApiPaths.appPath('/sites/${serializePathParameter(siteId, const PathParameterSpec('siteId', 'simple', false))}/env_variables/${serializePathParameter(variableId, const PathParameterSpec('variableId', 'simple', false))}'), headers: requestHeaders);
+  }
 }
 
 class PathParameterSpec {

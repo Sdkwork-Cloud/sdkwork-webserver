@@ -187,7 +187,7 @@ impl WebRepository {
     ) -> WebServiceResult<NginxConfigResponse> {
         let row = if let Some(tenant_id) = tenant_id {
             sqlx::query(
-                "SELECT config_name, config_content FROM web_nginx_config
+                "SELECT config_name, config_content, version FROM web_nginx_config
                  WHERE tenant_id = $1 AND uuid = $2",
             )
             .bind(tenant_id)
@@ -196,11 +196,13 @@ impl WebRepository {
             .await
             .map_err(|error| store_error("load web_nginx_config for update", error))?
         } else {
-            sqlx::query("SELECT config_name, config_content FROM web_nginx_config WHERE uuid = $1")
-                .bind(config_id)
-                .fetch_optional(&self.pool)
-                .await
-                .map_err(|error| store_error("load web_nginx_config for update", error))?
+            sqlx::query(
+                "SELECT config_name, config_content, version FROM web_nginx_config WHERE uuid = $1",
+            )
+            .bind(config_id)
+            .fetch_optional(&self.pool)
+            .await
+            .map_err(|error| store_error("load web_nginx_config for update", error))?
         }
         .ok_or_else(|| WebServiceError::not_found("nginx config not found"))?;
 
@@ -210,6 +212,9 @@ impl WebRepository {
         let stored_config_content: String = row
             .try_get("config_content")
             .map_err(|error| store_error("map web_nginx_config config_content", error))?;
+        let stored_version: i64 = row
+            .try_get("version")
+            .map_err(|error| store_error("map web_nginx_config version", error))?;
         let config_name = request
             .config_name
             .as_ref()
@@ -229,13 +234,13 @@ impl WebRepository {
             "UPDATE web_nginx_config
              SET config_name = $3, config_content = $4, config_hash = $5,
                  updated_at = {tenant_time}, version = version + 1
-             WHERE tenant_id = $1 AND uuid = $2"
+             WHERE tenant_id = $1 AND uuid = $2 AND version = $6"
         );
         let global_update_sql = format!(
             "UPDATE web_nginx_config
              SET config_name = $2, config_content = $3, config_hash = $4,
                  updated_at = {global_time}, version = version + 1
-             WHERE uuid = $1"
+             WHERE uuid = $1 AND version = $5"
         );
 
         let result = if let Some(tenant_id) = tenant_id {
@@ -246,6 +251,7 @@ impl WebRepository {
                 .bind(&config_content)
                 .bind(&config_hash)
                 .bind(&now)
+                .bind(stored_version)
                 .execute(&self.pool)
                 .await
                 .map_err(|error| store_error("update web_nginx_config", error))?
@@ -256,13 +262,14 @@ impl WebRepository {
                 .bind(&config_content)
                 .bind(&config_hash)
                 .bind(&now)
+                .bind(stored_version)
                 .execute(&self.pool)
                 .await
                 .map_err(|error| store_error("update web_nginx_config", error))?
         };
 
         if result.rows_affected() == 0 {
-            return Err(WebServiceError::not_found("nginx config not found"));
+            return self.conflict_or_missing_nginx_config(tenant_id, config_id).await;
         }
 
         self.retrieve_nginx_config_repo(tenant_id, config_id).await
@@ -468,9 +475,19 @@ impl WebRepository {
     ) -> WebServiceResult<String> {
         let site_internal_id = resolve_site_internal_id(&self.pool, tenant_id, site_uuid).await?;
         let row = sqlx::query(
-            "SELECT hostname FROM web_domain
-             WHERE tenant_id = $1 AND site_id = $2 AND deleted_at IS NULL
-             ORDER BY is_primary DESC, created_at ASC LIMIT 1",
+            "SELECT domain.hostname
+             FROM web_site_binding binding
+             INNER JOIN web_domain domain
+               ON domain.tenant_id = binding.tenant_id
+              AND domain.id = binding.domain_id
+              AND domain.deleted_at IS NULL
+             WHERE binding.tenant_id = $1
+               AND binding.site_id = $2
+               AND binding.deleted_at IS NULL
+             ORDER BY (binding.status = 'ACTIVE') DESC,
+                      binding.is_primary DESC,
+                      binding.created_at ASC, binding.id ASC
+             LIMIT 1",
         )
         .bind(tenant_id)
         .bind(site_internal_id)
@@ -481,6 +498,36 @@ impl WebRepository {
 
         row.try_get("hostname")
             .map_err(|error| store_error("resolve primary hostname column", error))
+    }
+
+    /// Distinguishes a concurrent-write conflict from a missing row after a
+    /// compare-and-swap update affected zero rows.
+    async fn conflict_or_missing_nginx_config(
+        &self,
+        tenant_id: Option<i64>,
+        config_id: &str,
+    ) -> WebServiceResult<NginxConfigResponse> {
+        let exists = if let Some(tenant_id) = tenant_id {
+            sqlx::query_scalar::<_, i64>(
+                "SELECT 1 FROM web_nginx_config WHERE tenant_id = $1 AND uuid = $2",
+            )
+            .bind(tenant_id)
+            .bind(config_id)
+            .fetch_optional(&self.pool)
+            .await
+        } else {
+            sqlx::query_scalar::<_, i64>("SELECT 1 FROM web_nginx_config WHERE uuid = $1")
+                .bind(config_id)
+                .fetch_optional(&self.pool)
+                .await
+        }
+        .map_err(|error| store_error("recheck web_nginx_config existence", error))?;
+        if exists.is_some() {
+            return Err(WebServiceError::conflict(
+                "nginx config was modified concurrently; reload and retry",
+            ));
+        }
+        Err(WebServiceError::not_found("nginx config not found"))
     }
 }
 

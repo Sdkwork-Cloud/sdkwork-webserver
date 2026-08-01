@@ -22,9 +22,9 @@ func (a *NginxApi) ConfigsList(page *int, pageSize *int, siteId *string, configT
     query := BuildQueryString([]QueryParameterSpec{
         {Name: "page", Value: func() interface{} { if page == nil { return nil }; return *page }(), Style: "form", Explode: true, AllowReserved: false},
         {Name: "page_size", Value: func() interface{} { if pageSize == nil { return nil }; return *pageSize }(), Style: "form", Explode: true, AllowReserved: false},
-        {Name: "siteId", Value: func() interface{} { if siteId == nil { return nil }; return *siteId }(), Style: "form", Explode: true, AllowReserved: false},
-        {Name: "configType", Value: func() interface{} { if configType == nil { return nil }; return *configType }(), Style: "form", Explode: true, AllowReserved: false},
-        {Name: "isActive", Value: func() interface{} { if isActive == nil { return nil }; return *isActive }(), Style: "form", Explode: true, AllowReserved: false},
+        {Name: "site_id", Value: func() interface{} { if siteId == nil { return nil }; return *siteId }(), Style: "form", Explode: true, AllowReserved: false},
+        {Name: "config_type", Value: func() interface{} { if configType == nil { return nil }; return *configType }(), Style: "form", Explode: true, AllowReserved: false},
+        {Name: "is_active", Value: func() interface{} { if isActive == nil { return nil }; return *isActive }(), Style: "form", Explode: true, AllowReserved: false},
     })
     raw, err := a.client.Get(AppendQueryString(BackendApiPath("/nginx/configs"), query), nil, nil)
     if err != nil {

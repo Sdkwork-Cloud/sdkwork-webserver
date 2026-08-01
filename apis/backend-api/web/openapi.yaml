@@ -29,12 +29,12 @@ paths:
       parameters:
       - $ref: '#/components/parameters/PageParam'
       - $ref: '#/components/parameters/PageSizeParam'
-      - name: applicationType
+      - name: application_type
         in: query
         schema:
           type: string
           enum: [WEB, API]
-      - name: siteType
+      - name: site_type
         in: query
         schema:
           type: integer
@@ -1165,9 +1165,11 @@ paths:
       x-sdkwork-auth-mode: dual-token
       x-sdkwork-permission: web.sites.read
       x-sdkwork-owner: sdkwork-web
+      x-sdkwork-pagination-mode: cursor-offset
       parameters:
       - $ref: '#/components/parameters/PageParam'
       - $ref: '#/components/parameters/PageSizeParam'
+      - $ref: '#/components/parameters/CursorParam'
       - name: status
         in: query
         schema:
@@ -1289,7 +1291,7 @@ paths:
       parameters:
       - $ref: '#/components/parameters/PageParam'
       - $ref: '#/components/parameters/PageSizeParam'
-      - name: domainId
+      - name: domain_id
         in: query
         required: false
         description: Limit certificates to those whose SAN identifiers cover this domain.
@@ -1434,6 +1436,30 @@ paths:
                       properties:
                         item:
                           $ref: '#/components/schemas/CertificateResponse'
+    delete:
+      operationId: certificates.delete
+      summary: Soft-delete a certificate and release its domain identifiers
+      tags: [certificate]
+      security:
+      - AuthToken: []
+        AccessToken: []
+      x-sdkwork-api-surface: backend-api
+      x-sdkwork-api-authority: sdkwork-web.backend
+      x-sdkwork-request-context: WebRequestContext
+      x-sdkwork-auth-mode: dual-token
+      x-sdkwork-permission: web.certificates.write
+      x-sdkwork-idempotent: true
+      x-sdkwork-rate-limit-tier: auth-critical
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      x-sdkwork-owner: sdkwork-web
+      responses:
+        '204':
+          description: Certificate deleted successfully.
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '404':
+          $ref: '#/components/responses/NotFound'
   /backend/v3/api/certificates/{certificateId}/renew:
     parameters:
     - $ref: '#/components/parameters/CertificateIdParam'
@@ -1526,12 +1552,12 @@ paths:
       parameters:
       - $ref: '#/components/parameters/PageParam'
       - $ref: '#/components/parameters/PageSizeParam'
-      - name: siteId
+      - name: site_id
         in: query
         schema:
           type: string
           format: uuid
-      - name: configType
+      - name: config_type
         in: query
         schema:
           type: integer
@@ -1540,7 +1566,7 @@ paths:
           - 2
           - 3
           - 4
-      - name: isActive
+      - name: is_active
         in: query
         schema:
           type: boolean
@@ -2003,7 +2029,7 @@ paths:
       x-sdkwork-owner: sdkwork-web
       x-sdkwork-rate-limit-tier: auth-critical
       parameters:
-      - name: ifSyncVersion
+      - name: if_sync_version
         in: query
         description: When it matches the current tenant manifest fingerprint, returns
           unchanged=true with empty bundles.
@@ -2045,10 +2071,12 @@ paths:
       x-sdkwork-auth-mode: dual-token
       x-sdkwork-permission: web.auditLogs.read
       x-sdkwork-owner: sdkwork-web
+      x-sdkwork-pagination-mode: cursor-offset
       parameters:
       - $ref: '#/components/parameters/PageParam'
       - $ref: '#/components/parameters/PageSizeParam'
-      - name: targetType
+      - $ref: '#/components/parameters/CursorParam'
+      - name: target_type
         in: query
         schema:
           type: string
@@ -2056,7 +2084,7 @@ paths:
         in: query
         schema:
           type: string
-      - name: operatorId
+      - name: operator_id
         in: query
         schema:
           type: string
@@ -2064,12 +2092,12 @@ paths:
           pattern: ^[0-9]+$
           x-sdkwork-int64-string: true
           x-sdkwork-rust-type: i64
-      - name: startDate
+      - name: start_date
         in: query
         schema:
           type: string
           format: date-time
-      - name: endDate
+      - name: end_date
         in: query
         schema:
           type: string
@@ -2130,7 +2158,7 @@ components:
         type: string
         format: uuid
     DomainIdParam:
-      name: domainId
+      name: domain_id
       in: path
       required: true
       schema:
@@ -2193,6 +2221,14 @@ components:
         minimum: 1
         maximum: 200
         default: 20
+    CursorParam:
+      name: cursor
+      in: query
+      description: Opaque keyset continuation token for cursor-paginated operations; must not be combined with page.
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 512
   schemas:
     Int64String:
       type: string

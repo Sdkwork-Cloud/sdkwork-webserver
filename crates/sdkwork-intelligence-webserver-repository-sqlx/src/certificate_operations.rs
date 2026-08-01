@@ -273,7 +273,7 @@ impl WebRepository {
         .map_err(|error| store_error("insert certificate renewal operation", error))?;
         sqlx::query(
             "UPDATE web_certificate
-             SET renewal_status = 2, metadata = '{}', updated_at = NOW(), version = version + 1
+             SET renewal_status = 2, metadata = metadata - 'certificateOperationFailureCode', updated_at = NOW(), version = version + 1
              WHERE tenant_id = $1 AND id = $2",
         )
         .bind(tenant_id)
@@ -397,7 +397,7 @@ impl WebRepository {
             .map_err(|error| store_error("insert scheduled certificate renewal", error))?;
             sqlx::query(
                 "UPDATE web_certificate
-                 SET renewal_status = 2, metadata = '{}', updated_at = NOW(), version = version + 1
+                 SET renewal_status = 2, metadata = metadata - 'certificateOperationFailureCode', updated_at = NOW(), version = version + 1
                  WHERE tenant_id = $1 AND id = $2",
             )
             .bind(tenant_id)
@@ -614,6 +614,39 @@ impl WebRepository {
             .await
     }
 
+    pub(super) async fn renew_certificate_operation_lease_repo(
+        &self,
+        lease: &CertificateOperationLease,
+        lease_seconds: i64,
+    ) -> WebServiceResult<()> {
+        if !(MIN_OPERATION_LEASE_SECONDS..=MAX_OPERATION_LEASE_SECONDS).contains(&lease_seconds) {
+            return Err(WebServiceError::validation(format!(
+                "certificate operation lease must be between {MIN_OPERATION_LEASE_SECONDS} and {MAX_OPERATION_LEASE_SECONDS} seconds"
+            )));
+        }
+        let result = sqlx::query(
+            "UPDATE web_certificate_operation
+             SET lease_expires_at = NOW() + ($4 * INTERVAL '1 second'),
+                 updated_at = NOW()
+             WHERE tenant_id = $1 AND uuid = $2 AND status = 'RUNNING'
+               AND lease_owner = $3 AND fencing_token = $5",
+        )
+        .bind(lease.tenant_id)
+        .bind(&lease.operation_id)
+        .bind(&lease.lease_owner)
+        .bind(lease_seconds)
+        .bind(lease.fencing_token)
+        .execute(&self.pool)
+        .await
+        .map_err(|error| store_error("renew certificate operation lease", error))?;
+        if result.rows_affected() == 0 {
+            return Err(WebServiceError::conflict(
+                "certificate operation lease is no longer current",
+            ));
+        }
+        Ok(())
+    }
+
     async fn find_idempotent_certificate_operation(
         &self,
         tenant_id: i64,
@@ -735,6 +768,20 @@ async fn reap_exhausted_certificate_operations_in_tx(
             WHERE certificate.tenant_id = expired.tenant_id
               AND certificate.id = expired.certificate_id
             RETURNING certificate.id
+         ), archived_certificates AS (
+            UPDATE web_certificate certificate
+            SET deleted_at = NOW(), updated_at = NOW(),
+                version = certificate.version + 1
+            FROM expired
+            WHERE certificate.tenant_id = expired.tenant_id
+              AND certificate.id = expired.certificate_id
+              AND expired.operation_type = 'ISSUE'
+            RETURNING certificate.tenant_id, certificate.id AS certificate_id
+         ), removed_identifiers AS (
+            DELETE FROM web_certificate_identifier identifier
+            USING archived_certificates archived
+            WHERE identifier.tenant_id = archived.tenant_id
+              AND identifier.certificate_id = archived.certificate_id
          )
          SELECT COUNT(*)::BIGINT AS reaped_count FROM expired",
     )
@@ -744,9 +791,51 @@ async fn reap_exhausted_certificate_operations_in_tx(
     .fetch_one(&mut **tx)
     .await
     .map_err(|error| store_error("reap exhausted certificate operations", error))?;
-    row.try_get::<i64, _>("reaped_count")
+    let reaped: u64 = row
+        .try_get::<i64, _>("reaped_count")
         .map(|count| count as u64)
-        .map_err(|error| store_error("map reaped certificate operation count", error))
+        .map_err(|error| store_error("map reaped certificate operation count", error))?;
+    // Soft-delete ISSUE certificates whose operations already reached terminal
+    // FAILED through the manual failure path; they have no active operation and
+    // never produced a usable version, so keeping them would accumulate orphan
+    // certificate rows that block domain removal.
+    sqlx::query(
+        "WITH failed_issue_certificates AS (
+             SELECT DISTINCT operation.tenant_id, operation.certificate_id
+             FROM web_certificate_operation operation
+             INNER JOIN web_certificate certificate
+               ON certificate.tenant_id = operation.tenant_id
+              AND certificate.id = operation.certificate_id
+              AND certificate.deleted_at IS NULL
+             WHERE operation.operation_type = 'ISSUE'
+               AND operation.status = 'FAILED'
+               AND operation.completed_at IS NOT NULL
+               AND NOT EXISTS (
+                   SELECT 1 FROM web_certificate_operation active_operation
+                   WHERE active_operation.tenant_id = operation.tenant_id
+                     AND active_operation.certificate_id = operation.certificate_id
+                     AND active_operation.status IN ('PENDING', 'RUNNING')
+               )
+             LIMIT $1
+         ), archived AS (
+             UPDATE web_certificate certificate
+             SET deleted_at = NOW(), updated_at = NOW(),
+                 version = certificate.version + 1
+             FROM failed_issue_certificates failed
+             WHERE certificate.tenant_id = failed.tenant_id
+               AND certificate.id = failed.certificate_id
+             RETURNING certificate.tenant_id, certificate.id AS certificate_id
+         )
+         DELETE FROM web_certificate_identifier identifier
+         USING archived
+         WHERE identifier.tenant_id = archived.tenant_id
+           AND identifier.certificate_id = archived.certificate_id",
+    )
+    .bind(limit)
+    .execute(&mut **tx)
+    .await
+    .map_err(|error| store_error("archive terminal failed ISSUE certificates", error))?;
+    Ok(reaped)
 }
 
 fn accepted_operation(operation_id: &str, status: &str) -> CertificateOperationAcceptedResponse {

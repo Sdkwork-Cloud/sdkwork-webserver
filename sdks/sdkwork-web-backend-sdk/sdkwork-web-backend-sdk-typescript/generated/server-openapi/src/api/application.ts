@@ -46,8 +46,8 @@ export class ApplicationApi {
     const query = buildQueryString([
       { name: 'page', value: params?.page, style: 'form', explode: true, allowReserved: false },
       { name: 'page_size', value: params?.pageSize, style: 'form', explode: true, allowReserved: false },
-      { name: 'applicationType', value: params?.applicationType, style: 'form', explode: true, allowReserved: false },
-      { name: 'siteType', value: params?.siteType, style: 'form', explode: true, allowReserved: false },
+      { name: 'application_type', value: params?.applicationType, style: 'form', explode: true, allowReserved: false },
+      { name: 'site_type', value: params?.siteType, style: 'form', explode: true, allowReserved: false },
       { name: 'status', value: params?.status, style: 'form', explode: true, allowReserved: false },
       { name: 'keyword', value: params?.keyword, style: 'form', explode: true, allowReserved: false },
     ]);

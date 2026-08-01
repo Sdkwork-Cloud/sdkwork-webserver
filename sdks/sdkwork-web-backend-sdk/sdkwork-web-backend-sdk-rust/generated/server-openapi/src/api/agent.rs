@@ -24,7 +24,7 @@ impl AgentApi {
     /// Retrieve the Nginx configuration and certificate bundle
     pub async fn retrieve(&self, if_sync_version: Option<&str>) -> Result<AgentSyncResponse, SdkworkError> {
         let query = build_query_string(&[
-            QueryParameterSpec::new("ifSyncVersion", if_sync_version, "form", true, false, None),
+            QueryParameterSpec::new("if_sync_version", if_sync_version, "form", true, false, None),
         ]);
         let path = append_query_string(backend_path(&"/agent/sync".to_string()), &query);
         self.client.get(&path, None, None).await

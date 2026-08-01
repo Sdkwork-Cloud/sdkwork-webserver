@@ -12,9 +12,9 @@ public class NginxApi {
         let query = buildQueryString([
             QueryParameterSpec(name: "page", value: page, style: "form", explode: true, allowReserved: false, contentType: nil),
             QueryParameterSpec(name: "page_size", value: pageSize, style: "form", explode: true, allowReserved: false, contentType: nil),
-            QueryParameterSpec(name: "siteId", value: siteId, style: "form", explode: true, allowReserved: false, contentType: nil),
-            QueryParameterSpec(name: "configType", value: configType, style: "form", explode: true, allowReserved: false, contentType: nil),
-            QueryParameterSpec(name: "isActive", value: isActive, style: "form", explode: true, allowReserved: false, contentType: nil)
+            QueryParameterSpec(name: "site_id", value: siteId, style: "form", explode: true, allowReserved: false, contentType: nil),
+            QueryParameterSpec(name: "config_type", value: configType, style: "form", explode: true, allowReserved: false, contentType: nil),
+            QueryParameterSpec(name: "is_active", value: isActive, style: "form", explode: true, allowReserved: false, contentType: nil)
         ])
         return try await client.get(ApiPaths.appendQueryString(ApiPaths.backendPath("/nginx/configs"), query), responseType: ConfigsListResponse.self)
     }

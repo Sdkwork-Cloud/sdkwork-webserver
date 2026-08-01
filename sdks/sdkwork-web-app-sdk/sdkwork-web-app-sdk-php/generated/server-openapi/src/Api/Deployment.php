@@ -13,12 +13,13 @@ use SDKWork\Web\AppSdk\Models\SitesDeploymentsRollbackResponse;
 final class DeploymentApi extends BaseApi
 {
     /** 获取部署历史 */
-    public function sitesDeploymentsList(string $siteId, ?int $page = null, ?int $pageSize = null, ?int $status = null): ?SitesDeploymentsListResponse
+    public function sitesDeploymentsList(string $siteId, ?int $page = null, ?int $pageSize = null, ?string $cursor = null, ?int $status = null): ?SitesDeploymentsListResponse
     {
         $path = $this->interpolatePath('/app/v3/api/sites/{siteId}/deployments', ['siteId' => $this->serializePathParameter($siteId, new PathParameterSpec('siteId', 'simple', false))]);
         $query = $this->buildQueryString([
             new QueryParameterSpec('page', $page, 'form', true, false, null),
             new QueryParameterSpec('page_size', $pageSize, 'form', true, false, null),
+            new QueryParameterSpec('cursor', $cursor, 'form', true, false, null),
             new QueryParameterSpec('status', $status, 'form', true, false, null),
         ]);
         $path = $this->appendQueryString($path, $query);

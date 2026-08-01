@@ -26,6 +26,28 @@ public class EnvVariableApi {
         return try await client.post(ApiPaths.appPath("/sites/\(serializePathParameter(siteId, PathParameterSpec(name: "siteId", style: "simple", explode: false)))/env_variables"), body: body, params: nil, headers: requestHeaders, contentType: "application/json", responseType: SitesEnvVariablesCreateResponse201.self)
     }
 
+    /// 轮换环境变量值
+    public func sitesEnvVariablesUpdate(siteId: String, variableId: String, body: UpdateEnvVariableRequest, idempotencyKey: String) async throws -> SitesEnvVariablesUpdateResponse? {
+        let requestHeaders = buildRequestHeaders(
+            [
+                "Idempotency-Key": HeaderParameterSpec(value: idempotencyKey, style: "simple", explode: false, contentType: nil),
+            ],
+            [:]
+        )
+        return try await client.patch(ApiPaths.appPath("/sites/\(serializePathParameter(siteId, PathParameterSpec(name: "siteId", style: "simple", explode: false)))/env_variables/\(serializePathParameter(variableId, PathParameterSpec(name: "variableId", style: "simple", explode: false)))"), body: body, params: nil, headers: requestHeaders, contentType: "application/json", responseType: SitesEnvVariablesUpdateResponse.self)
+    }
+
+    /// 删除环境变量
+    public func sitesEnvVariablesDelete(siteId: String, variableId: String, idempotencyKey: String) async throws -> Void {
+        let requestHeaders = buildRequestHeaders(
+            [
+                "Idempotency-Key": HeaderParameterSpec(value: idempotencyKey, style: "simple", explode: false, contentType: nil),
+            ],
+            [:]
+        )
+        _ = try await client.delete(ApiPaths.appPath("/sites/\(serializePathParameter(siteId, PathParameterSpec(name: "siteId", style: "simple", explode: false)))/env_variables/\(serializePathParameter(variableId, PathParameterSpec(name: "variableId", style: "simple", explode: false)))"), params: nil, headers: requestHeaders)
+    }
+
     private struct PathParameterSpec {
         let name: String
         let style: String

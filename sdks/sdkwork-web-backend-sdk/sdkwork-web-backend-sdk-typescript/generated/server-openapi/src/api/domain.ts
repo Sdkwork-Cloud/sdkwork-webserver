@@ -21,7 +21,7 @@ export class DomainApplicationBindingApi {
 
 
 /** Bind a tenant custom domain to an application */
-  async update(domainId: string, body: UpdateDomainApplicationBindingRequest, params: DomainApplicationBindingUpdateParams, requestOptions?: ApiRequestOptions): Promise<ApplicationDomainResponse> {
+  async update(domainId: string | number, body: UpdateDomainApplicationBindingRequest, params: DomainApplicationBindingUpdateParams, requestOptions?: ApiRequestOptions): Promise<ApplicationDomainResponse> {
     const requestHeaders = buildRequestHeaders(
       {
         'Idempotency-Key': { value: params.idempotencyKey, style: 'simple', explode: false },
@@ -32,7 +32,7 @@ export class DomainApplicationBindingApi {
   }
 
 /** Unbind a tenant custom domain from its application */
-  async delete(domainId: string, params: DomainApplicationBindingDeleteParams, requestOptions?: ApiRequestOptions): Promise<void> {
+  async delete(domainId: string | number, params: DomainApplicationBindingDeleteParams, requestOptions?: ApiRequestOptions): Promise<void> {
     const requestHeaders = buildRequestHeaders(
       {
         'Idempotency-Key': { value: params.idempotencyKey, style: 'simple', explode: false },
@@ -195,7 +195,7 @@ export class DomainApi {
   }
 
 /** Delete an unbound tenant custom domain asset */
-  async delete(domainId: string, params: DomainDeleteParams, requestOptions?: ApiRequestOptions): Promise<void> {
+  async delete(domainId: string | number, params: DomainDeleteParams, requestOptions?: ApiRequestOptions): Promise<void> {
     const requestHeaders = buildRequestHeaders(
       {
         'Idempotency-Key': { value: params.idempotencyKey, style: 'simple', explode: false },
@@ -206,7 +206,7 @@ export class DomainApi {
   }
 
 /** Create or check a tenant custom-domain ownership challenge */
-  async verify(domainId: string, params: DomainVerifyParams, requestOptions?: ApiRequestOptions): Promise<DomainVerifyResponse> {
+  async verify(domainId: string | number, params: DomainVerifyParams, requestOptions?: ApiRequestOptions): Promise<DomainVerifyResponse> {
     const requestHeaders = buildRequestHeaders(
       {
         'Idempotency-Key': { value: params.idempotencyKey, style: 'simple', explode: false },
