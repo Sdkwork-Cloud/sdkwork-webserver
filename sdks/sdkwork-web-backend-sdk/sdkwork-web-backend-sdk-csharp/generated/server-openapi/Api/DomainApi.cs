@@ -140,7 +140,7 @@ namespace SDKWork.Web.BackendSdk.Api
         }
 
         /// <summary>
-        /// Verify a tenant custom domain asset
+        /// Create or check a tenant custom-domain ownership challenge
         /// </summary>
         public async Task<SDKWork.Web.BackendSdk.Models.DomainsVerifyResponse?> DomainsVerifyAsync(string domainId, string idempotencyKey)
         {

@@ -151,7 +151,7 @@ module Sdkwork
             result
           end
 
-          # Verify a tenant custom domain asset
+          # Create or check a tenant custom-domain ownership challenge
           def domains_verify(domain_id, idempotency_key)
             path = interpolate_path('/backend/v3/api/domains/{domainId}/verify', domainId: serialize_path_parameter(domain_id, PathParameterSpec.new('domainId', 'simple', false)))
             request_headers = build_request_headers(

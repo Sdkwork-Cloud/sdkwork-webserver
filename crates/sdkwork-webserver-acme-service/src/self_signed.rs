@@ -107,10 +107,23 @@ pub(crate) fn certificate_evidence_from_pem(
     let cert = pem
         .parse_x509()
         .map_err(|error| AcmeServiceError::Internal(error.to_string()))?;
-    let san_list = cert
+    let subject_alternative_name = cert
         .subject_alternative_name()
         .map_err(|error| AcmeServiceError::Internal(error.to_string()))?
-        .ok_or_else(|| AcmeServiceError::Internal("certificate has no SAN extension".to_string()))?
+        .ok_or_else(|| {
+            AcmeServiceError::Internal("certificate has no SAN extension".to_string())
+        })?;
+    if subject_alternative_name
+        .value
+        .general_names
+        .iter()
+        .any(|name| !matches!(name, x509_parser::extensions::GeneralName::DNSName(_)))
+    {
+        return Err(AcmeServiceError::Internal(
+            "certificate contains a non-DNS SAN identifier".to_string(),
+        ));
+    }
+    let san_list = subject_alternative_name
         .value
         .general_names
         .iter()

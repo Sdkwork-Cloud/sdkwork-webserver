@@ -96,7 +96,7 @@ public class DomainApi {
         _ = try await client.delete(ApiPaths.backendPath("/domains/\(serializePathParameter(domainId, PathParameterSpec(name: "domainId", style: "simple", explode: false)))"), params: nil, headers: requestHeaders)
     }
 
-    /// Verify a tenant custom domain asset
+    /// Create or check a tenant custom-domain ownership challenge
     public func domainsVerify(domainId: String, idempotencyKey: String) async throws -> DomainsVerifyResponse? {
         let requestHeaders = buildRequestHeaders(
             [

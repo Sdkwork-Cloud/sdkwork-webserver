@@ -287,7 +287,7 @@ class DomainSitesDomainsApi:
         return self._client.delete(f"/app/v3/api/sites/{serialize_path_parameter(site_id, {'name': 'siteId', 'style': 'simple', 'explode': False})}/domains/{serialize_path_parameter(domain_id, {'name': 'domainId', 'style': 'simple', 'explode': False})}")
 
     def verify(self, site_id: str, domain_id: str, idempotency_key: str) -> SitesDomainsVerifyResponse:
-        """验证域名所有权"""
+        """创建或检查域名所有权验证挑战"""
         request_headers = build_request_headers(
             {
                 'Idempotency-Key': {'value': idempotency_key, 'style': 'simple', 'explode': False},

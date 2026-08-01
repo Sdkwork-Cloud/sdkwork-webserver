@@ -1,7 +1,18 @@
 # SDKWork Web Server Certificate Worker Specs
 
-`component.spec.json` declares the renewal scheduler binary and its service/repository runtime dependencies.
+`component.spec.json` declares the durable certificate operation worker and its service/repository
+runtime dependencies.
 
-The worker owns scheduling only. Certificate selection, issuance, persistence, and edge materialization remain in their declared provider/service components.
+The worker periodically schedules due managed renewals and executes bounded `ISSUE` and `RENEW`
+operations from `web_certificate_operation`. Repository claims use expiring leases, fencing tokens,
+bounded attempts, and retry timestamps so concurrent workers cannot finalize stale work. The
+service owns issuance orchestration and aggregate transitions; ACME, protected material, and edge
+activation remain in their declared providers.
 
-Verify from the repository root with the worker Cargo tests and strict component-port validation.
+`SDKWORK_WEB_CERT_OPERATION_POLL_INTERVAL_SECS` controls operation polling,
+`SDKWORK_WEB_CERT_RENEW_SCAN_INTERVAL_SECS` controls renewal scheduling, and
+`SDKWORK_WEB_CERT_WORKER_ID` identifies the lease owner. Each worker instance requires a distinct,
+stable ID. Shutdown stops before another polling delay and lets the active bounded cycle finish.
+
+Verify from the repository root with the worker Cargo tests, repository operation tests, and strict
+component-port validation.

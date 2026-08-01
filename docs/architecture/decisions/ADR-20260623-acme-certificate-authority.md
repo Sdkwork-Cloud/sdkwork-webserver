@@ -22,7 +22,7 @@ SDKWork Web Server 需要在控制面内嵌 **免费 TLS 证书自动签发与�
 1. **默认 CA**：生产使用 [Let's Encrypt](https://letsencrypt.org/)（免费、ACME、ISRG 根）；开发/联调使用 Let's Encrypt **Staging** 目录 URL。
 2. **ACME 客户端库**：控制面采用 **[instant-acme](https://github.com/djc/instant-acme)**（async、纯 Rust、RFC 8555，MIT/Apache-2.0）。
 3. **自签名（开发/内网）**：采用 **[rcgen](https://github.com/rustls/rcgen)** 生成 `certType=3` 证书，不触网。
-4. **TLS 信任链与存储格式**：链路与节点落地使用 PEM；校验与指纹提取可选 **x509-parser**（与 instant-acme `x509-parser` feature 对齐）。
+4. **TLS 信任链与存储格式**：链路与节点落地使用 PEM；所有签发路径在统一出口使用 **x509-parser** 重新解析叶证书，并验证请求 SAN/算法、当前有效期、PKCS#8 私钥与叶证书 SPKI 配对以及返回元数据一致性后才允许持久化。
 5. **V1 验证方式**：优先 **HTTP-01**（agent/nginx 暴露 `/.well-known/acme-challenge/`）；DNS-01 与 wildcard 延后至 Phase 3。
 6. **不引入 Certbot/acme.sh 运行时依赖** 作为 V1 默认路径；若治理批准，可作为灾备运维工具，但不写入产品默认架构。
 
@@ -44,9 +44,9 @@ SDKWork Web Server 需要在控制面内嵌 **免费 TLS 证书自动签发与�
 ## Consequences
 
 - Cargo workspace 新增 `instant-acme`、`rcgen` 依赖；需在 `SUPPLY_CHAIN_SECURITY_SPEC.md` 流程中登记 license 与版本 pin。
-- `certificates.create` 触发异步 ACME 订单；API 返回 `status=待处理`，完成后更新 `web_certificate` 并触发分发。
+- `certificates.issue` 持久化异步 ACME 操作并返回 HTTP `202` 标准异步数据；完成后写入不可变证书版本、更新 `web_certificate` 聚合并触发分发。
 - HTTP-01 要求 agent 或临时 nginx location 在验证窗口内可达公网。
-- 续期默认在到期前 30 天启动；失败写入 `renewal_status=3` 并告警。
+- ACME 证书自动续期默认在到期前 30 天启动；失败写入 `renewal_status=3` 并告警。自签名证书仅支持显式手动重签，不进入自动续期扫描。
 - Staging CA 签发证书不受浏览器信任，仅用于联调；生产 profile 必须显式指向 LE 生产目录。
 
 ## Verification

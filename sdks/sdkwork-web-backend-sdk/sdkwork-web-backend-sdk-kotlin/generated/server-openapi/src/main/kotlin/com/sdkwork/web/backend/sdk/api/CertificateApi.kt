@@ -53,15 +53,21 @@ class CertificateApi(private val client: HttpClient) {
     }
 
     /** Issue a canonical certificate */
-    suspend fun certificatesCreate(body: CreateCertificateRequest, idempotencyKey: String): CertificatesCreateResponse201? {
+    suspend fun certificatesIssue(body: IssueCertificateRequest, idempotencyKey: String): CertificatesIssueResponse202? {
         val requestHeaders = buildRequestHeaders(
             mapOf(
                 "Idempotency-Key" to HeaderParameterSpec(idempotencyKey, "simple", false, null),
             ),
             emptyMap()
         )
-        val raw = client.post(ApiPaths.backendPath("/certificates"), body, null, requestHeaders, "application/json")
-        return client.convertValue(raw, object : TypeReference<CertificatesCreateResponse201>() {})
+        val raw = client.post(ApiPaths.backendPath("/certificates/issue"), body, null, requestHeaders, "application/json")
+        return client.convertValue(raw, object : TypeReference<CertificatesIssueResponse202>() {})
+    }
+
+    /** Retrieve a certificate operation */
+    suspend fun certificatesOperationsRetrieve(operationId: String): CertificatesOperationsRetrieveResponse? {
+        val raw = client.get(ApiPaths.backendPath("/certificates/operations/${serializePathParameter(operationId, PathParameterSpec("operationId", "simple", false))}"))
+        return client.convertValue(raw, object : TypeReference<CertificatesOperationsRetrieveResponse>() {})
     }
 
     /** Update certificate automatic renewal policy */
@@ -77,7 +83,7 @@ class CertificateApi(private val client: HttpClient) {
     }
 
     /** Renew a canonical certificate now */
-    suspend fun certificatesRenew(certificateId: String, idempotencyKey: String): CertificatesRenewResponse? {
+    suspend fun certificatesRenew(certificateId: String, idempotencyKey: String): CertificatesRenewResponse202? {
         val requestHeaders = buildRequestHeaders(
             mapOf(
                 "Idempotency-Key" to HeaderParameterSpec(idempotencyKey, "simple", false, null),
@@ -85,7 +91,7 @@ class CertificateApi(private val client: HttpClient) {
             emptyMap()
         )
         val raw = client.post(ApiPaths.backendPath("/certificates/${serializePathParameter(certificateId, PathParameterSpec("certificateId", "simple", false))}/renew"), null, null, requestHeaders)
-        return client.convertValue(raw, object : TypeReference<CertificatesRenewResponse>() {})
+        return client.convertValue(raw, object : TypeReference<CertificatesRenewResponse202>() {})
     }
 
     private data class PathParameterSpec(val name: String, val style: String, val explode: Boolean)

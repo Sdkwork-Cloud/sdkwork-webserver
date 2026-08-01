@@ -59,7 +59,7 @@ final class DomainApi extends BaseApi
         return $result;
     }
 
-    /** 验证域名所有权 */
+    /** 创建或检查域名所有权验证挑战 */
     public function sitesDomainsVerify(string $siteId, string $domainId, string $idempotencyKey): ?SitesDomainsVerifyResponse
     {
         $path = $this->interpolatePath('/app/v3/api/sites/{siteId}/domains/{domainId}/verify', ['siteId' => $this->serializePathParameter($siteId, new PathParameterSpec('siteId', 'simple', false)), 'domainId' => $this->serializePathParameter($domainId, new PathParameterSpec('domainId', 'simple', false))]);

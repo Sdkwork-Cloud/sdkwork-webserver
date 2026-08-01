@@ -162,7 +162,7 @@ const client = {
       };
     },
   },
-  certificate: { create: async () => ({}) },
+  certificate: { issue: async () => ({}) },
   domain: {
     applicationBinding: { delete: async () => undefined, update: async () => ({}) },
     delete: async () => undefined,

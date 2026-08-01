@@ -6,12 +6,13 @@ namespace SDKWork\Web\BackendSdk\Api;
 
 use SDKWork\Web\BackendSdk\Models\ApplicationsDomainsListenerCertificateBindingsCreateResponse201;
 use SDKWork\Web\BackendSdk\Models\ApplicationsDomainsListenerCertificateBindingsListResponse;
-use SDKWork\Web\BackendSdk\Models\CertificatesCreateResponse201;
+use SDKWork\Web\BackendSdk\Models\CertificatesIssueResponse202;
 use SDKWork\Web\BackendSdk\Models\CertificatesListResponse;
-use SDKWork\Web\BackendSdk\Models\CertificatesRenewResponse;
+use SDKWork\Web\BackendSdk\Models\CertificatesOperationsRetrieveResponse;
+use SDKWork\Web\BackendSdk\Models\CertificatesRenewResponse202;
 use SDKWork\Web\BackendSdk\Models\CertificatesUpdateResponse;
-use SDKWork\Web\BackendSdk\Models\CreateCertificateRequest;
 use SDKWork\Web\BackendSdk\Models\CreateListenerCertificateBindingRequest;
+use SDKWork\Web\BackendSdk\Models\IssueCertificateRequest;
 use SDKWork\Web\BackendSdk\Models\UpdateCertificateRequest;
 
 final class CertificateApi extends BaseApi
@@ -78,10 +79,10 @@ final class CertificateApi extends BaseApi
     }
 
     /** Issue a canonical certificate */
-    public function certificatesCreate(array|CreateCertificateRequest $body, string $idempotencyKey): ?CertificatesCreateResponse201
+    public function certificatesIssue(array|IssueCertificateRequest $body, string $idempotencyKey): ?CertificatesIssueResponse202
     {
-        $path = '/backend/v3/api/certificates';
-        $payload = $body instanceof CreateCertificateRequest ? $body->toArray() : $body;
+        $path = '/backend/v3/api/certificates/issue';
+        $payload = $body instanceof IssueCertificateRequest ? $body->toArray() : $body;
         $requestHeaders = $this->buildRequestHeaders(
             [
                 'Idempotency-Key' => new HeaderParameterSpec($idempotencyKey, 'simple', false, null),
@@ -92,7 +93,15 @@ final class CertificateApi extends BaseApi
             'headers' => $requestHeaders,
             'json' => $payload,
         ]);
-        return is_array($result) ? CertificatesCreateResponse201::fromArray($result) : null;
+        return is_array($result) ? CertificatesIssueResponse202::fromArray($result) : null;
+    }
+
+    /** Retrieve a certificate operation */
+    public function certificatesOperationsRetrieve(string $operationId): ?CertificatesOperationsRetrieveResponse
+    {
+        $path = $this->interpolatePath('/backend/v3/api/certificates/operations/{operationId}', ['operationId' => $this->serializePathParameter($operationId, new PathParameterSpec('operationId', 'simple', false))]);
+        $result = $this->client->request('GET', $path, []);
+        return is_array($result) ? CertificatesOperationsRetrieveResponse::fromArray($result) : null;
     }
 
     /** Update certificate automatic renewal policy */
@@ -114,7 +123,7 @@ final class CertificateApi extends BaseApi
     }
 
     /** Renew a canonical certificate now */
-    public function certificatesRenew(string $certificateId, string $idempotencyKey): ?CertificatesRenewResponse
+    public function certificatesRenew(string $certificateId, string $idempotencyKey): ?CertificatesRenewResponse202
     {
         $path = $this->interpolatePath('/backend/v3/api/certificates/{certificateId}/renew', ['certificateId' => $this->serializePathParameter($certificateId, new PathParameterSpec('certificateId', 'simple', false))]);
         $requestHeaders = $this->buildRequestHeaders(
@@ -126,7 +135,7 @@ final class CertificateApi extends BaseApi
         $result = $this->client->request('POST', $path, [
             'headers' => $requestHeaders,
         ]);
-        return is_array($result) ? CertificatesRenewResponse::fromArray($result) : null;
+        return is_array($result) ? CertificatesRenewResponse202::fromArray($result) : null;
     }
 
     private function buildRequestHeaders(array $headers, array $cookies): array

@@ -41,7 +41,7 @@ class DomainApi(private val client: HttpClient) {
         client.delete(ApiPaths.appPath("/sites/${serializePathParameter(siteId, PathParameterSpec("siteId", "simple", false))}/domains/${serializePathParameter(domainId, PathParameterSpec("domainId", "simple", false))}"))
     }
 
-    /** 验证域名所有权 */
+    /** 创建或检查域名所有权验证挑战 */
     suspend fun sitesDomainsVerify(siteId: String, domainId: String, idempotencyKey: String): SitesDomainsVerifyResponse? {
         val requestHeaders = buildRequestHeaders(
             mapOf(

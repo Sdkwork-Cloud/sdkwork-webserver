@@ -49,14 +49,19 @@ public class CertificateApi {
     }
 
     /// Issue a canonical certificate
-    public func certificatesCreate(body: CreateCertificateRequest, idempotencyKey: String) async throws -> CertificatesCreateResponse201? {
+    public func certificatesIssue(body: IssueCertificateRequest, idempotencyKey: String) async throws -> CertificatesIssueResponse202? {
         let requestHeaders = buildRequestHeaders(
             [
                 "Idempotency-Key": HeaderParameterSpec(value: idempotencyKey, style: "simple", explode: false, contentType: nil),
             ],
             [:]
         )
-        return try await client.post(ApiPaths.backendPath("/certificates"), body: body, params: nil, headers: requestHeaders, contentType: "application/json", responseType: CertificatesCreateResponse201.self)
+        return try await client.post(ApiPaths.backendPath("/certificates/issue"), body: body, params: nil, headers: requestHeaders, contentType: "application/json", responseType: CertificatesIssueResponse202.self)
+    }
+
+    /// Retrieve a certificate operation
+    public func certificatesOperationsRetrieve(operationId: String) async throws -> CertificatesOperationsRetrieveResponse? {
+        return try await client.get(ApiPaths.backendPath("/certificates/operations/\(serializePathParameter(operationId, PathParameterSpec(name: "operationId", style: "simple", explode: false)))"), responseType: CertificatesOperationsRetrieveResponse.self)
     }
 
     /// Update certificate automatic renewal policy
@@ -71,14 +76,14 @@ public class CertificateApi {
     }
 
     /// Renew a canonical certificate now
-    public func certificatesRenew(certificateId: String, idempotencyKey: String) async throws -> CertificatesRenewResponse? {
+    public func certificatesRenew(certificateId: String, idempotencyKey: String) async throws -> CertificatesRenewResponse202? {
         let requestHeaders = buildRequestHeaders(
             [
                 "Idempotency-Key": HeaderParameterSpec(value: idempotencyKey, style: "simple", explode: false, contentType: nil),
             ],
             [:]
         )
-        return try await client.post(ApiPaths.backendPath("/certificates/\(serializePathParameter(certificateId, PathParameterSpec(name: "certificateId", style: "simple", explode: false)))/renew"), body: nil, params: nil, headers: requestHeaders, responseType: CertificatesRenewResponse.self)
+        return try await client.post(ApiPaths.backendPath("/certificates/\(serializePathParameter(certificateId, PathParameterSpec(name: "certificateId", style: "simple", explode: false)))/renew"), body: nil, params: nil, headers: requestHeaders, responseType: CertificatesRenewResponse202.self)
     }
 
     private struct PathParameterSpec {

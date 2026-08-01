@@ -50,7 +50,7 @@ impl DomainApi {
         self.client.delete(&path, None, None).await
     }
 
-    /// 验证域名所有权
+    /// 创建或检查域名所有权验证挑战
     pub async fn sites_domains_verify(&self, site_id: &str, domain_id: &str, idempotency_key: &str) -> Result<DomainVerifyResponse, SdkworkError> {
         let path = app_path(&format!("/sites/{}/domains/{}/verify", serialize_path_parameter(site_id, PathParameterSpec::new("siteId", "simple", false)), serialize_path_parameter(domain_id, PathParameterSpec::new("domainId", "simple", false))));
         let headers = build_request_headers(

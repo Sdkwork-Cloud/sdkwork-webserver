@@ -48,7 +48,7 @@
     },
     {
       "path": "src/api/certificate.rs",
-      "sha256": "64e24e3000e3e1e1ebdb19d31199be5f776151e83b4a2d955fcce0b905db87dd"
+      "sha256": "0091539a43dd7b469aaaa6e85a1ae9b75a21c01c41d5433738c822632f21a55a"
     },
     {
       "path": "src/api/deployment.rs",
@@ -56,7 +56,7 @@
     },
     {
       "path": "src/api/domain.rs",
-      "sha256": "3b9077ec7471d46c714e40610e7e880dccd65d1e660d7f1b21d44e3e95373e7a"
+      "sha256": "b961d38ceb128e805e12c6b2a308db061ae20d4a4422d1b286fa0d0e046d1bb3"
     },
     {
       "path": "src/api/env_variable.rs",
@@ -107,6 +107,10 @@
       "sha256": "34ba782244920c9f95b766bc72fe0ca5a0744f763fe485f2044e5deeb970a259"
     },
     {
+      "path": "src/models/certificate_operation_response.rs",
+      "sha256": "8919d7056b87fac507fdc16d4aa7b26871b8042f945c6d611adf862f1127ac10"
+    },
+    {
       "path": "src/models/certificate_page.rs",
       "sha256": "644bdf780d909542b35b45b18a32f9b0a51825c26666fd1519d02064b61c7a03"
     },
@@ -115,20 +119,20 @@
       "sha256": "58bfc9c3fc4afcd57a1af78da37868d4d591c0339c8d8df2047107603aa4e2aa"
     },
     {
-      "path": "src/models/certificates_create_response201.rs",
-      "sha256": "daee77cac60e2daeae6c81cb4b452b278683c139d0d156cc8f3a6f6ac72b3995"
+      "path": "src/models/certificates_issue_response202.rs",
+      "sha256": "09ada74d96200d8638eab712b2db832bc139b2e583346b2c2d675395dd621e35"
     },
     {
       "path": "src/models/certificates_list_response.rs",
       "sha256": "2547f6caf273bcd0e63973a7a36960c1d44bef7cf910260c0b3657688ca558ce"
     },
     {
-      "path": "src/models/common.rs",
-      "sha256": "fce0239d85066b1c42435ab8c96676ea2d5300e5dcb87c52fd3e33d29a603a5e"
+      "path": "src/models/certificates_operations_retrieve_response.rs",
+      "sha256": "ab50e8871c9514d3d8d31f65f312b6a966e3b3475c1faec04709536f05ea647d"
     },
     {
-      "path": "src/models/create_certificate_request.rs",
-      "sha256": "45fa9154ffe953eea85a94380cfda7048e053b51c32f5bd8fccb213c8831791d"
+      "path": "src/models/common.rs",
+      "sha256": "fce0239d85066b1c42435ab8c96676ea2d5300e5dcb87c52fd3e33d29a603a5e"
     },
     {
       "path": "src/models/create_deployment_request.rs",
@@ -176,7 +180,7 @@
     },
     {
       "path": "src/models/domain_verify_response.rs",
-      "sha256": "d545b72f1faab0fd21c7d0e22178dcdea5b23c52fcd0f3becbc29f53f09d6360"
+      "sha256": "523e0ff2f7b03e3215e1677491275ec67c76c1636326651b2641826e65570320"
     },
     {
       "path": "src/models/env_variable_page.rs",
@@ -203,6 +207,10 @@
       "sha256": "d7904ab015539d74fea4b5901ab137e801b935db604995935ea68fc3277fd023"
     },
     {
+      "path": "src/models/issue_certificate_request.rs",
+      "sha256": "b64ad933e1f825637157c1d3b2e448ddd8d87f08008d1b9dc3c57705fc67d842"
+    },
+    {
       "path": "src/models/listener_certificate_binding_response.rs",
       "sha256": "9da5af95f87de8ccf510fc0f96745a15335a3151645ece8eb4bf15f99cfa4bfa"
     },
@@ -220,7 +228,7 @@
     },
     {
       "path": "src/models/mod.rs",
-      "sha256": "07dff0356fa6b7055649c4cf4b78259fccdd20f6e577a297c7b058f1462232dd"
+      "sha256": "1380d375840347beb38c673a1a0a32c0b3f27819a3376322271fca2f6fc25bb1"
     },
     {
       "path": "src/models/page_info.rs",
@@ -233,6 +241,10 @@
     {
       "path": "src/models/sdk_work_api_response.rs",
       "sha256": "e5fd3b922322a1cd1b1b6a82810b0fc8222ca9bf54dd9438152e2db940d591ef"
+    },
+    {
+      "path": "src/models/sdk_work_async_data.rs",
+      "sha256": "1cf6de55121da19656711ce6919cb16acf4c20fb00684d094a73b0561bead380"
     },
     {
       "path": "src/models/sdk_work_command_data.rs",

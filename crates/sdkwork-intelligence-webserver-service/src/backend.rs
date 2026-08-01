@@ -2,11 +2,11 @@
 
 use async_trait::async_trait;
 use sdkwork_webserver_contract::{
-    CreateCertificateRequest, CreateDeploymentRequest, CreateDomainRequest,
-    CreateListenerCertificateBindingRequest, CreateManagedDomainRequest, CreateNginxConfigRequest,
-    CreateRootDomainHostnameRequest, CreateRootDomainRequest, CreateServerRequest,
-    CreateSiteRequest, CreateSourceVersionRequest, ImportGitSourceVersionRequest,
-    ListNginxConfigsQuery, ListRootDomainsQuery, ListSitesQuery, UpdateCertificateRequest,
+    CreateDeploymentRequest, CreateDomainRequest, CreateListenerCertificateBindingRequest,
+    CreateManagedDomainRequest, CreateNginxConfigRequest, CreateRootDomainHostnameRequest,
+    CreateRootDomainRequest, CreateServerRequest, CreateSiteRequest, CreateSourceVersionRequest,
+    ImportGitSourceVersionRequest, IssueCertificateRequest, ListNginxConfigsQuery,
+    ListRootDomainsQuery, ListSitesQuery, UpdateCertificateRequest,
     UpdateDomainApplicationBindingRequest, UpdateNginxConfigRequest, UpdateSiteRequest, WebAppApi,
     WebAppRequestContext, WebAppResourceScope, WebBackendApi, WebBackendRequestContext,
     WebServiceError, WebServiceResult,
@@ -412,9 +412,12 @@ impl WebBackendApi for WebService {
         domain_id: &str,
     ) -> WebServiceResult<sdkwork_webserver_contract::DomainVerifyResponse> {
         let tenant_id = Self::require_backend_tenant(context)?;
-        let verification = self
+        let challenge = self
             .repository
-            .verify_managed_domain(tenant_id, domain_id)
+            .prepare_managed_domain_verification(tenant_id, domain_id)
+            .await?;
+        let verification = self
+            .execute_domain_verification(tenant_id, challenge)
             .await?;
         self.audit_backend_action(context, "domains.verify", "domain", domain_id)
             .await;
@@ -552,13 +555,42 @@ impl WebBackendApi for WebService {
         WebAppApi::list_certificates(self, &app_context, None, domain_id, page, page_size).await
     }
 
-    async fn create_managed_certificate(
+    async fn issue_managed_certificate(
         &self,
         context: &WebBackendRequestContext,
-        request: &CreateCertificateRequest,
-    ) -> WebServiceResult<sdkwork_webserver_contract::CertificateResponse> {
-        let app_context = Self::backend_app_context(context)?;
-        WebAppApi::create_certificate(self, &app_context, request).await
+        request: &IssueCertificateRequest,
+    ) -> WebServiceResult<sdkwork_webserver_contract::CertificateOperationAcceptedResponse> {
+        Self::validate_certificate_issue_request(request)?;
+        let tenant_id = Self::require_backend_tenant(context)?;
+        let operation = self
+            .repository
+            .enqueue_certificate_issue(
+                tenant_id,
+                None,
+                context.operator_id,
+                request,
+                context.idempotency_key.as_deref(),
+            )
+            .await?;
+        self.audit_backend_action(
+            context,
+            "certificates.issue.requested",
+            "certificate_operation",
+            &operation.operation_id,
+        )
+        .await;
+        Ok(operation)
+    }
+
+    async fn retrieve_managed_certificate_operation(
+        &self,
+        context: &WebBackendRequestContext,
+        operation_id: &str,
+    ) -> WebServiceResult<sdkwork_webserver_contract::CertificateOperationResponse> {
+        let tenant_id = Self::require_backend_tenant(context)?;
+        self.repository
+            .retrieve_certificate_operation(tenant_id, None, operation_id)
+            .await
     }
 
     async fn update_managed_certificate(
@@ -586,21 +618,25 @@ impl WebBackendApi for WebService {
         &self,
         context: &WebBackendRequestContext,
         certificate_id: &str,
-    ) -> WebServiceResult<sdkwork_webserver_contract::CertificateResponse> {
+    ) -> WebServiceResult<sdkwork_webserver_contract::CertificateOperationAcceptedResponse> {
         let tenant_id = Self::require_backend_tenant(context)?;
-        let candidate = self
+        let operation = self
             .repository
-            .retrieve_certificate_renewal_candidate(tenant_id, certificate_id)
+            .enqueue_certificate_renewal(
+                tenant_id,
+                certificate_id,
+                context.operator_id,
+                context.idempotency_key.as_deref(),
+            )
             .await?;
-        let certificate = self.renew_certificate(&candidate, false).await?;
         self.audit_backend_action(
             context,
-            "certificates.renew.manual",
-            "certificate",
-            certificate_id,
+            "certificates.renew.requested",
+            "certificate_operation",
+            &operation.operation_id,
         )
         .await;
-        Ok(certificate)
+        Ok(operation)
     }
 
     async fn list_application_listener_certificate_bindings(

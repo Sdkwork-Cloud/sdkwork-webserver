@@ -1,14 +1,15 @@
 import type { WebserverAdminSdkClient } from "@sdkwork/webserver-pc-admin-core";
 import {
   normalizeWebserverPage,
+  pollWebserverOperation,
+  webserverOperationRequestOptions,
   type WebserverResourceAction,
   type WebserverResourceActionContext,
   type WebserverResourceDataSource,
-  type WebserverResourceFieldOption,
   type WebserverResourceRegistry,
 } from "@sdkwork/webserver-pc-commons";
 
-type CertificateCreateRequest = Parameters<WebserverAdminSdkClient["certificate"]["create"]>[0];
+type CertificateIssueRequest = Parameters<WebserverAdminSdkClient["certificate"]["issue"]>[0];
 type CertificateUpdateRequest = Parameters<WebserverAdminSdkClient["certificate"]["update"]>[1];
 
 export function createWebserverAdminCertificateRegistry(client: WebserverAdminSdkClient): WebserverResourceRegistry {
@@ -17,14 +18,49 @@ export function createWebserverAdminCertificateRegistry(client: WebserverAdminSd
       (query) => client.certificate.list({ page: query.page, pageSize: query.pageSize }),
       [
         action(
-          "create",
+          "issue",
           "Issue certificate",
           { domainIds: [], certType: 1, keyAlgorithm: "ECDSA", autoRenew: true },
-          async (context) => client.certificate.create(createCertificateRequest(context.body), idempotencyParams(context)),
+          async (context) => {
+            const accepted = await client.certificate.issue(
+              issueCertificateRequest(context.body),
+              idempotencyParams(context),
+              webserverOperationRequestOptions(context.signal),
+            );
+            return pollWebserverOperation(
+              accepted.operationId,
+              (operationId, options) => client.certificate.operations.retrieve(operationId, options),
+              { signal: context.signal },
+            );
+          },
           {
+            dismissibleWhileBusy: true,
             fieldOptions: { domainIds: [], certType: [1, 3], keyAlgorithm: ["ECDSA", "RSA"] },
-            loadFieldOptions: async () => ({ domainIds: await domainOptions(client) }),
+            fieldSelectionLimits: { domainIds: 8 },
+            loadFieldOptionPage: async (field, context) => {
+              if (field !== "domainIds") throw new Error(`Unsupported paginated field: ${field}`);
+              const response = await client.domain.list(
+                { page: context.page, pageSize: context.pageSize },
+                webserverOperationRequestOptions(context.signal),
+              );
+              return {
+                options: response.items.flatMap((domain) => (
+                  domain.isVerified === true && typeof domain.id === "string"
+                    ? [{
+                        label: `${domain.hostname} - ${domain.applicationName ?? "Unbound"}`,
+                        value: domain.id,
+                      }]
+                    : []
+                )),
+                pageInfo: {
+                  hasMore: response.pageInfo.hasMore === true,
+                  page: response.pageInfo.page ?? context.page,
+                  pageSize: response.pageInfo.pageSize ?? context.pageSize,
+                },
+              };
+            },
             multipleFields: ["domainIds"],
+            paginatedFields: ["domainIds"],
             permission: "web.certificates.write",
             requiredFields: ["domainIds"],
           },
@@ -34,14 +70,34 @@ export function createWebserverAdminCertificateRegistry(client: WebserverAdminSd
           "Update automatic renewal",
           { autoRenew: true },
           async (context) => client.certificate.update(selectedId(context), updateCertificateRequest(context.body), idempotencyParams(context)),
-          { requiresSelection: true, permission: "web.certificates.write" },
+          {
+            availableWhen: ({ selectedItem }) => selectedItem?.certType === 1,
+            requiresSelection: true,
+            permission: "web.certificates.write",
+          },
         ),
         action(
           "renew",
           "Renew now",
           {},
-          (context) => client.certificate.renew(selectedId(context), idempotencyParams(context)),
-          { dangerous: true, requiresSelection: true, permission: "web.certificates.write" },
+          async (context) => {
+            const accepted = await client.certificate.renew(
+              selectedId(context),
+              idempotencyParams(context),
+              webserverOperationRequestOptions(context.signal),
+            );
+            return pollWebserverOperation(
+              accepted.operationId,
+              (operationId, options) => client.certificate.operations.retrieve(operationId, options),
+              { signal: context.signal },
+            );
+          },
+          {
+            dangerous: true,
+            dismissibleWhileBusy: true,
+            permission: "web.certificates.write",
+            requiresSelection: true,
+          },
         ),
       ],
     ),
@@ -50,24 +106,6 @@ export function createWebserverAdminCertificateRegistry(client: WebserverAdminSd
       [],
     ),
   };
-}
-
-async function domainOptions(
-  client: WebserverAdminSdkClient,
-): Promise<WebserverResourceFieldOption[]> {
-  const options: WebserverResourceFieldOption[] = [];
-  let page = 1;
-  let hasMore = true;
-  while (hasMore) {
-    const response = await client.domain.list({ page, pageSize: 100 });
-    options.push(...response.items.map((domain) => ({
-      label: `${domain.hostname} - ${domain.applicationName ?? "Unbound"}`,
-      value: domain.id,
-    })));
-    hasMore = response.pageInfo.hasMore === true;
-    page += 1;
-  }
-  return options;
 }
 
 function source(
@@ -99,7 +137,7 @@ function idempotencyParams(context: WebserverResourceActionContext): { idempoten
   return { idempotencyKey };
 }
 
-function createCertificateRequest(body: Readonly<Record<string, unknown>>): CertificateCreateRequest {
+function issueCertificateRequest(body: Readonly<Record<string, unknown>>): CertificateIssueRequest {
   const certType = certificateType(body.certType);
   const autoRenew = optionalBoolean(body.autoRenew, "Automatic renewal");
   if (certType === 3 && autoRenew === true) {

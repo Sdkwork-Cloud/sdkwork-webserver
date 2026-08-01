@@ -4,7 +4,7 @@ use crate::api::base::{RequestHeaders};
 use crate::api::paths::backend_path;
 use crate::api::paths::append_query_string;
 use crate::http::{SdkworkError, SdkworkHttpClient};
-use crate::models::{CertificateResponse, CreateCertificateRequest, CreateListenerCertificateBindingRequest, ListenerCertificateBindingResponse, UpdateCertificateRequest};
+use crate::models::{CertificateOperationResponse, CertificateResponse, CreateListenerCertificateBindingRequest, IssueCertificateRequest, ListenerCertificateBindingResponse, SdkWorkAsyncData, UpdateCertificateRequest};
 
 #[derive(Clone)]
 pub struct CertificateApi {
@@ -62,8 +62,8 @@ impl CertificateApi {
     }
 
     /// Issue a canonical certificate
-    pub async fn certificates_create(&self, body: &CreateCertificateRequest, idempotency_key: &str) -> Result<CertificateResponse, SdkworkError> {
-        let path = backend_path(&"/certificates".to_string());
+    pub async fn certificates_issue(&self, body: &IssueCertificateRequest, idempotency_key: &str) -> Result<SdkWorkAsyncData, SdkworkError> {
+        let path = backend_path(&"/certificates/issue".to_string());
         let headers = build_request_headers(
             &[
                 ("Idempotency-Key", HeaderParameterSpec::new(idempotency_key, "simple", false, None)),
@@ -71,6 +71,12 @@ impl CertificateApi {
             &[],
         );
         self.client.post(&path, Some(body), None, headers.as_ref(), Some("application/json")).await
+    }
+
+    /// Retrieve a certificate operation
+    pub async fn certificates_operations_retrieve(&self, operation_id: &str) -> Result<CertificateOperationResponse, SdkworkError> {
+        let path = backend_path(&format!("/certificates/operations/{}", serialize_path_parameter(operation_id, PathParameterSpec::new("operationId", "simple", false))));
+        self.client.get(&path, None, None).await
     }
 
     /// Update certificate automatic renewal policy
@@ -86,7 +92,7 @@ impl CertificateApi {
     }
 
     /// Renew a canonical certificate now
-    pub async fn certificates_renew(&self, certificate_id: &str, idempotency_key: &str) -> Result<CertificateResponse, SdkworkError> {
+    pub async fn certificates_renew(&self, certificate_id: &str, idempotency_key: &str) -> Result<SdkWorkAsyncData, SdkworkError> {
         let path = backend_path(&format!("/certificates/{}/renew", serialize_path_parameter(certificate_id, PathParameterSpec::new("certificateId", "simple", false))));
         let headers = build_request_headers(
             &[

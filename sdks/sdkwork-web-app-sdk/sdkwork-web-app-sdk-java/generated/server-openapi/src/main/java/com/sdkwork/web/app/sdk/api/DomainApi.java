@@ -45,7 +45,7 @@ public class DomainApi {
         return null;
     }
 
-    /** 验证域名所有权 */
+    /** 创建或检查域名所有权验证挑战 */
     public SitesDomainsVerifyResponse sitesDomainsVerify(String siteId, String domainId, String idempotencyKey) throws Exception {
         Map<String, String> requestHeaders = buildRequestHeaders(
                 Map.of("Idempotency-Key", new HeaderParameterSpec(idempotencyKey, "simple", false, null)),

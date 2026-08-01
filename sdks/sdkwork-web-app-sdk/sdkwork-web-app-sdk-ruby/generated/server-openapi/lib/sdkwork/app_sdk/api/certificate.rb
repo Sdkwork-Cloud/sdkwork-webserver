@@ -1,8 +1,9 @@
 require_relative 'base_api'
-require_relative '../models/certificates_create_response201'
+require_relative '../models/certificates_issue_response202'
 require_relative '../models/certificates_list_response'
-require_relative '../models/create_certificate_request'
+require_relative '../models/certificates_operations_retrieve_response'
 require_relative '../models/create_listener_certificate_binding_request'
+require_relative '../models/issue_certificate_request'
 require_relative '../models/sites_domains_listener_certificate_bindings_create_response201'
 require_relative '../models/sites_domains_listener_certificate_bindings_list_response'
 
@@ -73,8 +74,8 @@ module Sdkwork
           end
 
           # 申请证书
-          def certificates_create(idempotency_key, body: nil)
-            path = '/app/v3/api/certificates'
+          def certificates_issue(idempotency_key, body: nil)
+            path = '/app/v3/api/certificates/issue'
             payload = body.respond_to?(:to_hash) ? body.to_hash : body
             request_headers = build_request_headers(
               {
@@ -86,7 +87,16 @@ module Sdkwork
             options[:headers] = request_headers unless request_headers.empty?
             options[:json] = payload unless payload.nil?
             result = @client.request('POST', path, **options)
-            result.is_a?(Hash) ? Models::CertificatesCreateResponse201.from_hash(result) : nil
+            result.is_a?(Hash) ? Models::CertificatesIssueResponse202.from_hash(result) : nil
+          end
+
+          # 获取证书异步操作状态
+          def certificates_operations_retrieve(operation_id)
+            path = interpolate_path('/app/v3/api/certificates/operations/{operationId}', operationId: serialize_path_parameter(operation_id, PathParameterSpec.new('operationId', 'simple', false)))
+            options = {}
+
+            result = @client.request('GET', path, **options)
+            result.is_a?(Hash) ? Models::CertificatesOperationsRetrieveResponse.from_hash(result) : nil
           end
 
         private

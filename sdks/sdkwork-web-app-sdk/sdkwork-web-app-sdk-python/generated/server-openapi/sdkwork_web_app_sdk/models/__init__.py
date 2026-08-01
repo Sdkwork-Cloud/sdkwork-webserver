@@ -23,9 +23,10 @@ from .deployment_page import DeploymentPage
 from .create_env_variable_request import CreateEnvVariableRequest
 from .env_variable_response import EnvVariableResponse
 from .env_variable_page import EnvVariablePage
-from .create_certificate_request import CreateCertificateRequest
+from .issue_certificate_request import IssueCertificateRequest
 from .certificate_identifier_response import CertificateIdentifierResponse
 from .certificate_response import CertificateResponse
+from .certificate_operation_response import CertificateOperationResponse
 from .create_listener_certificate_binding_request import CreateListenerCertificateBindingRequest
 from .listener_certificate_binding_response import ListenerCertificateBindingResponse
 from .listener_certificate_summary_response import ListenerCertificateSummaryResponse
@@ -37,6 +38,7 @@ from .sdk_work_api_response import SdkWorkApiResponse
 from .sdk_work_resource_data import SdkWorkResourceData
 from .sdk_work_page_data import SdkWorkPageData
 from .sdk_work_command_data import SdkWorkCommandData
+from .sdk_work_async_data import SdkWorkAsyncData
 from .page_info import PageInfo
 from .field_error import FieldError
 from .sdk_work_resource_response import SdkWorkResourceResponse
@@ -65,8 +67,9 @@ from .sites_deployments_rollback_response import SitesDeploymentsRollbackRespons
 from .sites_env_variables_list_response import SitesEnvVariablesListResponse
 from .sites_env_variables_create_response201 import SitesEnvVariablesCreateResponse201
 from .certificates_list_response import CertificatesListResponse
-from .certificates_create_response201 import CertificatesCreateResponse201
+from .certificates_issue_response202 import CertificatesIssueResponse202
+from .certificates_operations_retrieve_response import CertificatesOperationsRetrieveResponse
 from .sites_health_checks_list_response import SitesHealthChecksListResponse
 from .sites_health_checks_create_response201 import SitesHealthChecksCreateResponse201
 
-__all__ = ['ProblemDetail', 'MediaChecksum', 'MediaResource', 'ApplicationStoreListing', 'CreateSiteRequest', 'UpdateSiteRequest', 'SiteResponse', 'SitePage', 'CreateDomainRequest', 'DomainResponse', 'DomainPage', 'DomainVerifyResponse', 'SourceVersionConfigSnapshot', 'CreateSourceVersionRequest', 'ImportGitSourceVersionRequest', 'SourceVersionResponse', 'SourceVersionPage', 'CreateDeploymentRequest', 'DeploymentResponse', 'DeploymentPage', 'CreateEnvVariableRequest', 'EnvVariableResponse', 'EnvVariablePage', 'CreateCertificateRequest', 'CertificateIdentifierResponse', 'CertificateResponse', 'CreateListenerCertificateBindingRequest', 'ListenerCertificateBindingResponse', 'ListenerCertificateSummaryResponse', 'CertificatePage', 'CreateHealthCheckRequest', 'HealthCheckResponse', 'HealthCheckPage', 'SdkWorkApiResponse', 'SdkWorkResourceData', 'SdkWorkPageData', 'SdkWorkCommandData', 'PageInfo', 'FieldError', 'SdkWorkResourceResponse', 'SdkWorkListResponse', 'SdkWorkCommandResponse', 'SitesListResponse', 'SitesCreateResponse201', 'SitesRetrieveResponse', 'SitesUpdateResponse', 'SitesActivateResponse', 'SitesPauseResponse', 'SitesDomainsListResponse', 'SitesDomainsCreateResponse201', 'SitesDomainsRetrieveResponse', 'SitesDomainsVerifyResponse', 'SitesDomainsListenerCertificateBindingsListResponse', 'SitesDomainsListenerCertificateBindingsCreateResponse201', 'SitesSourceVersionsListResponse', 'SitesSourceVersionsCreateResponse201', 'SitesSourceVersionsGitImportCreateResponse201', 'SitesSourceVersionsRetrieveResponse', 'SitesDeploymentsListResponse', 'SitesDeploymentsCreateResponse201', 'SitesDeploymentsRetrieveResponse', 'SitesDeploymentsRollbackResponse', 'SitesEnvVariablesListResponse', 'SitesEnvVariablesCreateResponse201', 'CertificatesListResponse', 'CertificatesCreateResponse201', 'SitesHealthChecksListResponse', 'SitesHealthChecksCreateResponse201']
+__all__ = ['ProblemDetail', 'MediaChecksum', 'MediaResource', 'ApplicationStoreListing', 'CreateSiteRequest', 'UpdateSiteRequest', 'SiteResponse', 'SitePage', 'CreateDomainRequest', 'DomainResponse', 'DomainPage', 'DomainVerifyResponse', 'SourceVersionConfigSnapshot', 'CreateSourceVersionRequest', 'ImportGitSourceVersionRequest', 'SourceVersionResponse', 'SourceVersionPage', 'CreateDeploymentRequest', 'DeploymentResponse', 'DeploymentPage', 'CreateEnvVariableRequest', 'EnvVariableResponse', 'EnvVariablePage', 'IssueCertificateRequest', 'CertificateIdentifierResponse', 'CertificateResponse', 'CertificateOperationResponse', 'CreateListenerCertificateBindingRequest', 'ListenerCertificateBindingResponse', 'ListenerCertificateSummaryResponse', 'CertificatePage', 'CreateHealthCheckRequest', 'HealthCheckResponse', 'HealthCheckPage', 'SdkWorkApiResponse', 'SdkWorkResourceData', 'SdkWorkPageData', 'SdkWorkCommandData', 'SdkWorkAsyncData', 'PageInfo', 'FieldError', 'SdkWorkResourceResponse', 'SdkWorkListResponse', 'SdkWorkCommandResponse', 'SitesListResponse', 'SitesCreateResponse201', 'SitesRetrieveResponse', 'SitesUpdateResponse', 'SitesActivateResponse', 'SitesPauseResponse', 'SitesDomainsListResponse', 'SitesDomainsCreateResponse201', 'SitesDomainsRetrieveResponse', 'SitesDomainsVerifyResponse', 'SitesDomainsListenerCertificateBindingsListResponse', 'SitesDomainsListenerCertificateBindingsCreateResponse201', 'SitesSourceVersionsListResponse', 'SitesSourceVersionsCreateResponse201', 'SitesSourceVersionsGitImportCreateResponse201', 'SitesSourceVersionsRetrieveResponse', 'SitesDeploymentsListResponse', 'SitesDeploymentsCreateResponse201', 'SitesDeploymentsRetrieveResponse', 'SitesDeploymentsRollbackResponse', 'SitesEnvVariablesListResponse', 'SitesEnvVariablesCreateResponse201', 'CertificatesListResponse', 'CertificatesIssueResponse202', 'CertificatesOperationsRetrieveResponse', 'SitesHealthChecksListResponse', 'SitesHealthChecksCreateResponse201']

@@ -38,7 +38,7 @@ public class ApplicationDomainApi {
         _ = try await client.delete(ApiPaths.backendPath("/applications/\(serializePathParameter(applicationId, PathParameterSpec(name: "applicationId", style: "simple", explode: false)))/domains/\(serializePathParameter(domainId, PathParameterSpec(name: "domainId", style: "simple", explode: false)))"), params: nil, headers: requestHeaders)
     }
 
-    /// Verify an application public domain
+    /// Create or check an application-domain ownership challenge
     public func applicationsDomainsVerify(applicationId: String, domainId: String, idempotencyKey: String) async throws -> ApplicationsDomainsVerifyResponse? {
         let requestHeaders = buildRequestHeaders(
             [

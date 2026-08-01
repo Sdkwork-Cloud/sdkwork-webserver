@@ -159,7 +159,8 @@ impl WebRepository {
             .map_err(|error| store_error("record web_server heartbeat", error))?;
 
         if !request.certificate_observations.is_empty() {
-            self.record_certificate_observations(
+            let recorded = self
+                .record_certificate_observations(
                 agent,
                 &request.certificate_observations,
                 desired_manifest.as_ref().ok_or_else(|| {
@@ -167,10 +168,12 @@ impl WebRepository {
                         "desired node manifest missing for certificate observations".to_string(),
                     )
                 })?,
-            )
+                )
                 .await?;
-            self.promote_converged_listener_certificate_bindings(agent.tenant_id)
-                .await?;
+            if recorded {
+                self.promote_converged_listener_certificate_bindings(agent.tenant_id)
+                    .await?;
+            }
         }
 
         Ok(AgentHeartbeatResponse {
@@ -531,7 +534,7 @@ impl WebRepository {
                  AND c.id = l.certificate_id AND c.status = 1 AND c.deleted_at IS NULL
              INNER JOIN web_certificate_version v ON v.tenant_id = l.tenant_id
                  AND v.id = l.desired_version_id AND v.certificate_id = c.id
-                 AND v.status = 'ACTIVE'
+                  AND v.status IN ('ACTIVE', 'SUPERSEDED')
              INNER JOIN web_certificate_secret_bundle sb ON sb.tenant_id = v.tenant_id
                  AND sb.certificate_version_id = v.id
              WHERE l.tenant_id = $1 AND s.uuid = ANY($2)

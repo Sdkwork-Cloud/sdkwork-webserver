@@ -54,15 +54,21 @@ class CertificateApi(private val client: HttpClient) {
     }
 
     /** 申请证书 */
-    suspend fun certificatesCreate(body: CreateCertificateRequest, idempotencyKey: String): CertificatesCreateResponse201? {
+    suspend fun certificatesIssue(body: IssueCertificateRequest, idempotencyKey: String): CertificatesIssueResponse202? {
         val requestHeaders = buildRequestHeaders(
             mapOf(
                 "Idempotency-Key" to HeaderParameterSpec(idempotencyKey, "simple", false, null),
             ),
             emptyMap()
         )
-        val raw = client.post(ApiPaths.appPath("/certificates"), body, null, requestHeaders, "application/json")
-        return client.convertValue(raw, object : TypeReference<CertificatesCreateResponse201>() {})
+        val raw = client.post(ApiPaths.appPath("/certificates/issue"), body, null, requestHeaders, "application/json")
+        return client.convertValue(raw, object : TypeReference<CertificatesIssueResponse202>() {})
+    }
+
+    /** 获取证书异步操作状态 */
+    suspend fun certificatesOperationsRetrieve(operationId: String): CertificatesOperationsRetrieveResponse? {
+        val raw = client.get(ApiPaths.appPath("/certificates/operations/${serializePathParameter(operationId, PathParameterSpec("operationId", "simple", false))}"))
+        return client.convertValue(raw, object : TypeReference<CertificatesOperationsRetrieveResponse>() {})
     }
 
     private data class PathParameterSpec(val name: String, val style: String, val explode: Boolean)

@@ -1,7 +1,7 @@
 import { backendApiPath } from './paths';
 import type { ApiRequestOptions, HttpClient } from '../http/client';
 
-import type { ApplicationDomainResponse, ApplicationDomainVerifyResponse, CreateApplicationDomainRequest, PageInfo } from '../types';
+import type { ApplicationDomainResponse, CreateApplicationDomainRequest, DomainVerifyResponse, PageInfo } from '../types';
 
 
 export interface ApplicationDomainApplicationsDomainsListParams {
@@ -60,15 +60,15 @@ export class ApplicationDomainApplicationsDomainsApi {
     return this.client.request<void>(backendApiPath(`/applications/${serializePathParameter(applicationId, { name: 'applicationId', style: 'simple', explode: false })}/domains/${serializePathParameter(domainId, { name: 'domainId', style: 'simple', explode: false })}`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'DELETE' as any, headers: requestHeaders });
   }
 
-/** Verify an application public domain */
-  async verify(applicationId: string, domainId: string, params: ApplicationDomainApplicationsDomainsVerifyParams, requestOptions?: ApiRequestOptions): Promise<ApplicationDomainVerifyResponse> {
+/** Create or check an application-domain ownership challenge */
+  async verify(applicationId: string, domainId: string, params: ApplicationDomainApplicationsDomainsVerifyParams, requestOptions?: ApiRequestOptions): Promise<DomainVerifyResponse> {
     const requestHeaders = buildRequestHeaders(
       {
         'Idempotency-Key': { value: params.idempotencyKey, style: 'simple', explode: false },
       },
       {}
     );
-    return this.client.request<ApplicationDomainVerifyResponse>(backendApiPath(`/applications/${serializePathParameter(applicationId, { name: 'applicationId', style: 'simple', explode: false })}/domains/${serializePathParameter(domainId, { name: 'domainId', style: 'simple', explode: false })}/verify`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, headers: requestHeaders, sdkworkUnwrapKind: 'item' });
+    return this.client.request<DomainVerifyResponse>(backendApiPath(`/applications/${serializePathParameter(applicationId, { name: 'applicationId', style: 'simple', explode: false })}/domains/${serializePathParameter(domainId, { name: 'domainId', style: 'simple', explode: false })}/verify`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, headers: requestHeaders, sdkworkUnwrapKind: 'item' });
   }
 }
 

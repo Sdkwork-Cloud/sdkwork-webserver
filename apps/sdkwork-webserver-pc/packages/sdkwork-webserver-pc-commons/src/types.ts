@@ -114,21 +114,38 @@ export type WebserverResourceFieldOptions = Readonly<
   Record<string, readonly WebserverResourceFieldOptionValue[]>
 >;
 
+export interface WebserverResourceFieldOptionPageContext extends WebserverResourceActionContext {
+  page: number;
+  pageSize: number;
+}
+
+export interface WebserverResourceFieldOptionPage {
+  options: readonly WebserverResourceFieldOptionValue[];
+  pageInfo: WebserverPageInfo;
+}
+
 export interface WebserverResourceAction {
   acceptedFileTypes?: string;
   applicationSubmission?: "create" | "update";
   availableWhen?(context: WebserverResourceActionContext): boolean;
   bodyTemplate: Record<string, unknown>;
   dangerous?: boolean;
+  dismissibleWhileBusy?: boolean;
   execute(context: WebserverResourceActionContext): Promise<unknown>;
   fieldOptions?: WebserverResourceFieldOptions;
+  fieldSelectionLimits?: Readonly<Record<string, number>>;
   id: string;
   label: string;
+  loadFieldOptionPage?(
+    field: string,
+    context: WebserverResourceFieldOptionPageContext,
+  ): Promise<WebserverResourceFieldOptionPage>;
   loadFieldOptions?(context: WebserverResourceActionContext): Promise<WebserverResourceFieldOptions>;
   loadSourceInputDefaults?(
     context: WebserverResourceActionContext,
   ): Promise<ApplicationDeploymentSourceDefaults>;
   multipleFields?: readonly string[];
+  paginatedFields?: readonly string[];
   permission?: string;
   readOnlyFields?: readonly string[];
   requiredFields?: readonly string[];

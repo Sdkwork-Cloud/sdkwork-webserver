@@ -76,17 +76,27 @@ func (a *CertificateApi) CertificatesList(page *int, pageSize *int, siteId *stri
 }
 
 // 申请证书
-func (a *CertificateApi) CertificatesCreate(body sdktypes.CreateCertificateRequest, idempotencyKey string) (sdktypes.CertificatesCreateResponse201, error) {
+func (a *CertificateApi) CertificatesIssue(body sdktypes.IssueCertificateRequest, idempotencyKey string) (sdktypes.CertificatesIssueResponse202, error) {
     headers := BuildRequestHeaders(
         map[string]ParameterSpec{"Idempotency-Key": ParameterSpec{Value: idempotencyKey, Style: "simple", Explode: false},},
         map[string]ParameterSpec{},
     )
-    raw, err := a.client.Post(AppApiPath("/certificates"), body, nil, headers, "application/json")
+    raw, err := a.client.Post(AppApiPath("/certificates/issue"), body, nil, headers, "application/json")
     if err != nil {
-        var zero sdktypes.CertificatesCreateResponse201
+        var zero sdktypes.CertificatesIssueResponse202
         return zero, err
     }
-    return decodeResult[sdktypes.CertificatesCreateResponse201](raw)
+    return decodeResult[sdktypes.CertificatesIssueResponse202](raw)
+}
+
+// 获取证书异步操作状态
+func (a *CertificateApi) CertificatesOperationsRetrieve(operationId string) (sdktypes.CertificatesOperationsRetrieveResponse, error) {
+    raw, err := a.client.Get(AppApiPath(fmt.Sprintf("/certificates/operations/%s", SerializePathParameter(operationId, PathParameterSpec{Name: "operationId", Style: "simple", Explode: false}))), nil, nil)
+    if err != nil {
+        var zero sdktypes.CertificatesOperationsRetrieveResponse
+        return zero, err
+    }
+    return decodeResult[sdktypes.CertificatesOperationsRetrieveResponse](raw)
 }
 
 type PathParameterSpec struct {

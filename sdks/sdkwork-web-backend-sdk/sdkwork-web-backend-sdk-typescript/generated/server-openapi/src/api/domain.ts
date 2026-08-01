@@ -1,7 +1,7 @@
 import { backendApiPath } from './paths';
 import type { ApiRequestOptions, HttpClient } from '../http/client';
 
-import type { ApplicationDomainResponse, ApplicationDomainVerifyResponse, CreateManagedDomainRequest, CreateRootDomainHostnameRequest, CreateRootDomainRequest, PageInfo, RootDomainResponse, UpdateDomainApplicationBindingRequest } from '../types';
+import type { ApplicationDomainResponse, CreateManagedDomainRequest, CreateRootDomainHostnameRequest, CreateRootDomainRequest, DomainVerifyResponse, PageInfo, RootDomainResponse, UpdateDomainApplicationBindingRequest } from '../types';
 
 
 export interface DomainApplicationBindingUpdateParams {
@@ -205,15 +205,15 @@ export class DomainApi {
     return this.client.request<void>(backendApiPath(`/domains/${serializePathParameter(domainId, { name: 'domainId', style: 'simple', explode: false })}`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'DELETE' as any, headers: requestHeaders });
   }
 
-/** Verify a tenant custom domain asset */
-  async verify(domainId: string, params: DomainVerifyParams, requestOptions?: ApiRequestOptions): Promise<ApplicationDomainVerifyResponse> {
+/** Create or check a tenant custom-domain ownership challenge */
+  async verify(domainId: string, params: DomainVerifyParams, requestOptions?: ApiRequestOptions): Promise<DomainVerifyResponse> {
     const requestHeaders = buildRequestHeaders(
       {
         'Idempotency-Key': { value: params.idempotencyKey, style: 'simple', explode: false },
       },
       {}
     );
-    return this.client.request<ApplicationDomainVerifyResponse>(backendApiPath(`/domains/${serializePathParameter(domainId, { name: 'domainId', style: 'simple', explode: false })}/verify`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, headers: requestHeaders, sdkworkUnwrapKind: 'item' });
+    return this.client.request<DomainVerifyResponse>(backendApiPath(`/domains/${serializePathParameter(domainId, { name: 'domainId', style: 'simple', explode: false })}/verify`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, headers: requestHeaders, sdkworkUnwrapKind: 'item' });
   }
 }
 

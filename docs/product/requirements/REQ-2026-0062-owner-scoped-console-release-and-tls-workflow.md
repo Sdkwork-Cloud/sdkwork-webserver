@@ -6,7 +6,7 @@ title: Publish owner-scoped, Drive-backed application source versions with domai
 owner: sdkwork-web-server
 status: in-progress
 source: user
-problem: Authenticated app users can enter the Web Server Console, but a page-level IAM denial blocks normal workflows and the existing deployment form does not upload an immutable package. Certificate creation also requires a raw domain id, and tenant-level certificate queries risk exposing another user's resources. Administrators and normal users need separate product surfaces without hiding the shared Console shell or sign-out command.
+problem: Authenticated app users can enter the Web Server Console, but a page-level IAM denial blocks normal workflows and the existing deployment form does not upload an immutable package. Certificate workflows must expose verified owned domains through a bounded selector without hiding later pages or leaking another user's resources. Administrators and normal users need separate product surfaces without hiding the shared Console shell or sign-out command.
 goals:
   - Keep the complete Console shell and sign-out command visible for every authenticated account, with resource-level unauthorized states for unavailable capabilities.
   - List and mutate only sites owned by the authenticated app user, including configuration, domains, deployments, and certificates.
@@ -18,7 +18,7 @@ goals:
   - Apply one bounded application-source policy to browser directory packages and uploaded ZIP archives before Drive extraction.
   - Keep source preparation, upload, archive inspection, and extraction cancellable or fail-closed without allowing duplicate UI submission.
   - Persist a stable Drive resource URI, package size, lowercase SHA-256 digest, source type, original source reference, environment, version metadata, and idempotency key without storing signed URLs, object keys, or provider credentials.
-  - Select certificate domains from the currently selected owned application and filter certificate queries by that application at the repository boundary.
+  - Select 1..8 verified certificate domains from the currently selected owned application through server pagination, preserve selections across pages, and filter certificate queries by that application at the repository boundary.
   - Show deployment history and asynchronous status truthfully, and permit rollback only from a successful deployment while preserving artifact identity.
   - Route Web Server administrators to the isolated `/admin` surface and normal app users to `/console`.
 non_goals:
@@ -34,7 +34,8 @@ users:
 acceptance_criteria:
   - An app user sees only their own applications; a second user in the same tenant cannot list or mutate the first user's applications, domains, deployments, or certificates.
   - Certificate list accepts an optional siteId, verifies owner access, and performs owner plus site filtering in SQL.
-  - Certificate creation rejects a domain owned by another app user in the same tenant.
+  - Certificate issuance rejects a domain owned by another app user in the same tenant.
+  - The certificate domain selector requests one bounded page at a time through the generated App SDK, excludes unverified domains, preserves selected ids and labels across page changes, and exposes loading, empty, failure, and retry states.
   - For ZIP and directory sources, the Console release action requires a non-empty archive, reports upload progress, computes SHA-256, uploads through Drive, and submits the stable Drive URI and artifact metadata through the generated Web App SDK.
   - Application creation and redeployment offer ZIP archive, local directory, and Git repository as mutually exclusive source modes; all three modes create a ready source-version record with a stable Drive URI before release creation.
   - Git repository input accepts only an absolute HTTPS URL with a non-root repository path, rejects embedded credentials, query parameters, fragments, HTTP URLs, and values longer than 500 characters, and reports source-specific validation errors without invalidating a populated version.
@@ -59,7 +60,7 @@ acceptance_criteria:
 non_functional_requirements:
   security: Owner scope is enforced by service and repository boundaries, not by frontend filtering. Drive and Web SDK clients share the IAM bootstrap TokenManager.
   privacy: Cross-owner data is not returned even when users share a tenant.
-  performance: Application, domain, deployment, and certificate lists remain store-paginated; browser uploads use the Drive multipart uploader; raw directory selection and archive path depth are bounded; repeated ancestor ignore checks are cached.
+  performance: Application, domain, deployment, certificate, and certificate-option queries remain store-paginated without browser-side all-page aggregation; browser uploads use the Drive multipart uploader; raw directory selection and archive path depth are bounded; repeated ancestor ignore checks are cached.
   reliability: Deployment state remains pending until an execution authority advances it; retries use an idempotency key and content fingerprint, incomplete extraction fails closed, source versions are immutable, and rollbacks preserve immutable artifact provenance.
 affected_surfaces:
   - api

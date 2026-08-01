@@ -4,14 +4,14 @@ use async_trait::async_trait;
 use sdkwork_webserver_contract::WebServiceResult;
 use sdkwork_webserver_contract::{
     AgentHeartbeatRequest, AgentHeartbeatResponse, AgentSyncResponse, AuditLogPage,
-    CertificateDistributionPage, CertificateIssueUpdate, CertificatePage,
-    CertificateRenewalCandidate, CertificateResponse, CreateCertificateRequest,
+    CertificateDistributionPage, CertificateIssueUpdate, CertificateOperationAcceptedResponse,
+    CertificateOperationLease, CertificateOperationResponse, CertificatePage, CertificateResponse,
     CreateDeploymentRequest, CreateDomainRequest, CreateEnvVariableRequest,
     CreateHealthCheckRequest, CreateListenerCertificateBindingRequest, CreateManagedDomainRequest,
     CreateNginxConfigRequest, CreateRootDomainHostnameRequest, CreateRootDomainRequest,
     CreateServerRequest, CreateServerResponse, CreateSiteRequest, CreateSourceVersionRequest,
-    DeploymentPage, DeploymentResponse, DomainPage, DomainResponse, DomainVerifyResponse,
-    EnvVariablePage, EnvVariableResponse, HealthCheckPage, HealthCheckResponse,
+    DeploymentPage, DeploymentResponse, DomainPage, DomainResponse, EnvVariablePage,
+    EnvVariableResponse, HealthCheckPage, HealthCheckResponse, IssueCertificateRequest,
     ListNginxConfigsQuery, ListRootDomainsQuery, ListSitesQuery, ListenerCertificateBindingPage,
     ListenerCertificateBindingResponse, NginxConfigPage, NginxConfigResponse, NginxReloadResponse,
     NginxStatusResponse, NginxValidateResponse, RootDomainPage, RootDomainResponse,
@@ -53,6 +53,28 @@ pub struct RuntimeObservationWrite {
     pub node_version: Option<String>,
     pub reason_code: Option<String>,
     pub detail: Option<String>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct DomainVerificationChallenge {
+    pub challenge_id: String,
+    pub hostname: String,
+    pub method: String,
+    pub record_name: String,
+    pub proof_sha256: String,
+    pub status: String,
+    pub attempt_count: i32,
+    pub expires_at: String,
+    pub next_attempt_at: Option<String>,
+    pub checked_at: Option<String>,
+    pub failure_code: Option<String>,
+    pub ready_for_check: bool,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct DomainVerificationObservation {
+    pub observed_sha256: Option<String>,
+    pub failure_code: Option<String>,
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -145,12 +167,19 @@ pub trait WebRepositoryPort: Send + Sync {
         domain_id: &str,
     ) -> WebServiceResult<()>;
 
-    async fn verify_domain(
+    async fn prepare_domain_verification(
         &self,
         tenant_id: i64,
         site_id: &str,
         domain_id: &str,
-    ) -> WebServiceResult<DomainVerifyResponse>;
+    ) -> WebServiceResult<DomainVerificationChallenge>;
+
+    async fn record_domain_verification_observation(
+        &self,
+        tenant_id: i64,
+        challenge_id: &str,
+        observation: &DomainVerificationObservation,
+    ) -> WebServiceResult<DomainVerificationChallenge>;
 
     async fn list_root_domains(
         &self,
@@ -219,11 +248,11 @@ pub trait WebRepositoryPort: Send + Sync {
         domain_id: &str,
     ) -> WebServiceResult<DomainResponse>;
 
-    async fn verify_managed_domain(
+    async fn prepare_managed_domain_verification(
         &self,
         tenant_id: i64,
         domain_id: &str,
-    ) -> WebServiceResult<DomainVerifyResponse>;
+    ) -> WebServiceResult<DomainVerificationChallenge>;
 
     async fn list_source_versions(
         &self,
@@ -318,12 +347,42 @@ pub trait WebRepositoryPort: Send + Sync {
         page_size: i32,
     ) -> WebServiceResult<CertificatePage>;
 
-    async fn create_certificate(
+    async fn enqueue_certificate_issue(
         &self,
         tenant_id: i64,
         owner_id: Option<i64>,
-        request: &CreateCertificateRequest,
-    ) -> WebServiceResult<CertificateResponse>;
+        requested_by: Option<i64>,
+        request: &IssueCertificateRequest,
+        idempotency_key: Option<&str>,
+    ) -> WebServiceResult<CertificateOperationAcceptedResponse>;
+
+    async fn enqueue_certificate_renewal(
+        &self,
+        tenant_id: i64,
+        certificate_id: &str,
+        requested_by: Option<i64>,
+        idempotency_key: Option<&str>,
+    ) -> WebServiceResult<CertificateOperationAcceptedResponse>;
+
+    async fn retrieve_certificate_operation(
+        &self,
+        tenant_id: i64,
+        owner_id: Option<i64>,
+        operation_id: &str,
+    ) -> WebServiceResult<CertificateOperationResponse>;
+
+    async fn schedule_due_certificate_renewals(
+        &self,
+        renew_before_days: u32,
+        limit: i32,
+    ) -> WebServiceResult<usize>;
+
+    async fn claim_certificate_operations(
+        &self,
+        lease_owner: &str,
+        lease_seconds: i64,
+        limit: i32,
+    ) -> WebServiceResult<Vec<CertificateOperationLease>>;
 
     async fn list_listener_certificate_bindings(
         &self,
@@ -350,58 +409,19 @@ pub trait WebRepositoryPort: Send + Sync {
         binding_id: &str,
     ) -> WebServiceResult<()>;
 
-    async fn insert_certificate_pending(
+    async fn finalize_certificate_operation(
         &self,
-        tenant_id: i64,
-        owner_id: Option<i64>,
-        domain_ids: &[String],
-        cert_type: i32,
-        key_algorithm: &str,
-        auto_renew: bool,
-    ) -> WebServiceResult<(String, Vec<String>)>;
-
-    async fn finalize_certificate(
-        &self,
-        tenant_id: i64,
-        certificate_id: &str,
+        lease: &CertificateOperationLease,
         update: &CertificateIssueUpdate,
-        expected_renewal_version: Option<i64>,
     ) -> WebServiceResult<CertificateResponse>;
 
-    async fn fail_certificate(
+    async fn fail_certificate_operation(
         &self,
-        tenant_id: i64,
-        certificate_id: &str,
-        reason: &str,
-    ) -> WebServiceResult<()>;
-
-    async fn list_certificates_due_for_renewal(
-        &self,
-        renew_before_days: u32,
-        claim_expired_before: &str,
-        limit: i32,
-    ) -> WebServiceResult<Vec<sdkwork_webserver_contract::CertificateRenewalCandidate>>;
-
-    async fn claim_certificate_renewal(
-        &self,
-        tenant_id: i64,
-        certificate_id: &str,
-        claim_expired_before: &str,
-    ) -> WebServiceResult<Option<i64>>;
-
-    async fn fail_certificate_renewal(
-        &self,
-        tenant_id: i64,
-        certificate_id: &str,
-        expected_renewal_version: i64,
-        reason: &str,
-    ) -> WebServiceResult<()>;
-
-    async fn retrieve_certificate_renewal_candidate(
-        &self,
-        tenant_id: i64,
-        certificate_id: &str,
-    ) -> WebServiceResult<CertificateRenewalCandidate>;
+        lease: &CertificateOperationLease,
+        failure_code: &str,
+        retry_at: &str,
+        terminal_retry_at: &str,
+    ) -> WebServiceResult<CertificateOperationResponse>;
 
     async fn update_certificate_auto_renew(
         &self,

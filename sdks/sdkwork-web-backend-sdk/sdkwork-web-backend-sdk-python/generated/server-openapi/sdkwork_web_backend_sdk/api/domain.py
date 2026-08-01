@@ -275,7 +275,7 @@ class DomainApi:
         return self._client.delete(f"/backend/v3/api/domains/{serialize_path_parameter(domain_id, {'name': 'domainId', 'style': 'simple', 'explode': False})}", headers=request_headers)
 
     def create_verify(self, domain_id: str, idempotency_key: str) -> DomainsVerifyResponse:
-        """Verify a tenant custom domain asset"""
+        """Create or check a tenant custom-domain ownership challenge"""
         request_headers = build_request_headers(
             {
                 'Idempotency-Key': {'value': idempotency_key, 'style': 'simple', 'explode': False},

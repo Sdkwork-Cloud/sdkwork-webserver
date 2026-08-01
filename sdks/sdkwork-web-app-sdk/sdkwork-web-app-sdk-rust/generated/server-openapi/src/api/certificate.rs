@@ -4,7 +4,7 @@ use crate::api::base::{RequestHeaders};
 use crate::api::paths::app_path;
 use crate::api::paths::append_query_string;
 use crate::http::{SdkworkError, SdkworkHttpClient};
-use crate::models::{CertificateResponse, CreateCertificateRequest, CreateListenerCertificateBindingRequest, ListenerCertificateBindingResponse};
+use crate::models::{CertificateOperationResponse, CreateListenerCertificateBindingRequest, IssueCertificateRequest, ListenerCertificateBindingResponse, SdkWorkAsyncData};
 
 #[derive(Clone)]
 pub struct CertificateApi {
@@ -63,8 +63,8 @@ impl CertificateApi {
     }
 
     /// 申请证书
-    pub async fn certificates_create(&self, body: &CreateCertificateRequest, idempotency_key: &str) -> Result<CertificateResponse, SdkworkError> {
-        let path = app_path(&"/certificates".to_string());
+    pub async fn certificates_issue(&self, body: &IssueCertificateRequest, idempotency_key: &str) -> Result<SdkWorkAsyncData, SdkworkError> {
+        let path = app_path(&"/certificates/issue".to_string());
         let headers = build_request_headers(
             &[
                 ("Idempotency-Key", HeaderParameterSpec::new(idempotency_key, "simple", false, None)),
@@ -72,6 +72,12 @@ impl CertificateApi {
             &[],
         );
         self.client.post(&path, Some(body), None, headers.as_ref(), Some("application/json")).await
+    }
+
+    /// 获取证书异步操作状态
+    pub async fn certificates_operations_retrieve(&self, operation_id: &str) -> Result<CertificateOperationResponse, SdkworkError> {
+        let path = app_path(&format!("/certificates/operations/{}", serialize_path_parameter(operation_id, PathParameterSpec::new("operationId", "simple", false))));
+        self.client.get(&path, None, None).await
     }
 
 }

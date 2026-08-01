@@ -1,12 +1,13 @@
 require_relative 'base_api'
 require_relative '../models/applications_domains_listener_certificate_bindings_create_response201'
 require_relative '../models/applications_domains_listener_certificate_bindings_list_response'
-require_relative '../models/certificates_create_response201'
+require_relative '../models/certificates_issue_response202'
 require_relative '../models/certificates_list_response'
-require_relative '../models/certificates_renew_response'
+require_relative '../models/certificates_operations_retrieve_response'
+require_relative '../models/certificates_renew_response202'
 require_relative '../models/certificates_update_response'
-require_relative '../models/create_certificate_request'
 require_relative '../models/create_listener_certificate_binding_request'
+require_relative '../models/issue_certificate_request'
 require_relative '../models/update_certificate_request'
 
 module Sdkwork
@@ -75,8 +76,8 @@ module Sdkwork
           end
 
           # Issue a canonical certificate
-          def certificates_create(idempotency_key, body: nil)
-            path = '/backend/v3/api/certificates'
+          def certificates_issue(idempotency_key, body: nil)
+            path = '/backend/v3/api/certificates/issue'
             payload = body.respond_to?(:to_hash) ? body.to_hash : body
             request_headers = build_request_headers(
               {
@@ -88,7 +89,16 @@ module Sdkwork
             options[:headers] = request_headers unless request_headers.empty?
             options[:json] = payload unless payload.nil?
             result = @client.request('POST', path, **options)
-            result.is_a?(Hash) ? Models::CertificatesCreateResponse201.from_hash(result) : nil
+            result.is_a?(Hash) ? Models::CertificatesIssueResponse202.from_hash(result) : nil
+          end
+
+          # Retrieve a certificate operation
+          def certificates_operations_retrieve(operation_id)
+            path = interpolate_path('/backend/v3/api/certificates/operations/{operationId}', operationId: serialize_path_parameter(operation_id, PathParameterSpec.new('operationId', 'simple', false)))
+            options = {}
+
+            result = @client.request('GET', path, **options)
+            result.is_a?(Hash) ? Models::CertificatesOperationsRetrieveResponse.from_hash(result) : nil
           end
 
           # Update certificate automatic renewal policy
@@ -120,7 +130,7 @@ module Sdkwork
             options = {}
             options[:headers] = request_headers unless request_headers.empty?
             result = @client.request('POST', path, **options)
-            result.is_a?(Hash) ? Models::CertificatesRenewResponse.from_hash(result) : nil
+            result.is_a?(Hash) ? Models::CertificatesRenewResponse202.from_hash(result) : nil
           end
 
         private

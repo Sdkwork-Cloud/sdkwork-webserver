@@ -1,6 +1,8 @@
 import type { WebserverAdminSdkClient } from "@sdkwork/webserver-pc-admin-core";
 import {
   normalizeWebserverPage,
+  pollWebserverOperation,
+  webserverOperationRequestOptions,
   type WebserverResourceAction,
   type WebserverResourceActionContext,
   type WebserverResourceDataSource,
@@ -10,7 +12,7 @@ import {
 
 type CreateDomainRequest = Parameters<WebserverAdminSdkClient["domain"]["create"]>[0];
 type BindDomainRequest = Parameters<WebserverAdminSdkClient["domain"]["applicationBinding"]["update"]>[1];
-type CreateCertificateRequest = Parameters<WebserverAdminSdkClient["certificate"]["create"]>[0];
+type IssueCertificateRequest = Parameters<WebserverAdminSdkClient["certificate"]["issue"]>[0];
 
 export function createWebserverAdminDomainRegistry(
   client: WebserverAdminSdkClient,
@@ -50,6 +52,7 @@ export function createWebserverAdminDomainRegistry(
           {
             availableWhen: ({ selectedItem }) => selectedItem?.isVerified !== true,
             permission: "web.sites.write",
+            resultFields: ["status", "recordName", "recordValue", "attemptCount", "expiresAt", "nextAttemptAt", "failureCode"],
             requiresSelection: true,
           },
         ),
@@ -89,11 +92,20 @@ export function createWebserverAdminDomainRegistry(
           "issue-certificate",
           "Issue certificate",
           { certType: 1, keyAlgorithm: "ECDSA", autoRenew: true },
-          (context) => client.certificate.create(
-            createCertificateRequest(selectedId(context), context.body),
-            idempotencyParams(context),
-          ),
+          async (context) => {
+            const accepted = await client.certificate.issue(
+              issueCertificateRequest(selectedId(context), context.body),
+              idempotencyParams(context),
+              webserverOperationRequestOptions(context.signal),
+            );
+            return pollWebserverOperation(
+              accepted.operationId,
+              (operationId, options) => client.certificate.operations.retrieve(operationId, options),
+              { signal: context.signal },
+            );
+          },
           {
+            dismissibleWhileBusy: true,
             fieldOptions: { certType: [1, 3], keyAlgorithm: ["ECDSA", "RSA"] },
             permission: "web.certificates.write",
             requiresSelection: true,
@@ -179,10 +191,10 @@ function bindDomainRequest(body: Readonly<Record<string, unknown>>): BindDomainR
   };
 }
 
-function createCertificateRequest(
+function issueCertificateRequest(
   domainId: string,
   body: Readonly<Record<string, unknown>>,
-): CreateCertificateRequest {
+): IssueCertificateRequest {
   const certType = certificateType(body.certType);
   const autoRenew = requiredBoolean(body.autoRenew, "Automatic renewal");
   if (certType === 3 && autoRenew) {

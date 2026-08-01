@@ -2,10 +2,10 @@
 
 use async_trait::async_trait;
 use sdkwork_webserver_contract::{
-    ApplicationStoreListing, CreateCertificateRequest, CreateDeploymentRequest,
-    CreateDomainRequest, CreateEnvVariableRequest, CreateHealthCheckRequest,
-    CreateListenerCertificateBindingRequest, CreateSiteRequest, CreateSourceVersionRequest,
-    ImportGitSourceVersionRequest, ListSitesQuery, MediaResource, UpdateSiteRequest, WebAppApi,
+    ApplicationStoreListing, CreateDeploymentRequest, CreateDomainRequest,
+    CreateEnvVariableRequest, CreateHealthCheckRequest, CreateListenerCertificateBindingRequest,
+    CreateSiteRequest, CreateSourceVersionRequest, ImportGitSourceVersionRequest,
+    IssueCertificateRequest, ListSitesQuery, MediaResource, UpdateSiteRequest, WebAppApi,
     WebAppRequestContext, WebAppResourceScope, WebServiceResult,
 };
 use std::collections::HashSet;
@@ -411,8 +411,8 @@ impl WebService {
         Ok(())
     }
 
-    pub(crate) fn validate_certificate_request(
-        request: &CreateCertificateRequest,
+    pub(crate) fn validate_certificate_issue_request(
+        request: &IssueCertificateRequest,
     ) -> WebServiceResult<()> {
         if !matches!(request.cert_type, 1 | 3) {
             return Err(sdkwork_webserver_contract::WebServiceError::validation(
@@ -970,9 +970,11 @@ impl WebAppApi for WebService {
         domain_id: &str,
     ) -> WebServiceResult<sdkwork_webserver_contract::DomainVerifyResponse> {
         let tenant_id = self.require_site_access(context, site_id).await?;
-        self.repository
-            .verify_domain(tenant_id, site_id, domain_id)
-            .await
+        let challenge = self
+            .repository
+            .prepare_domain_verification(tenant_id, site_id, domain_id)
+            .await?;
+        self.execute_domain_verification(tenant_id, challenge).await
     }
 
     async fn list_source_versions(
@@ -1224,12 +1226,24 @@ impl WebAppApi for WebService {
             .await
     }
 
-    async fn create_certificate(
+    async fn issue_certificate(
         &self,
         context: &WebAppRequestContext,
-        request: &CreateCertificateRequest,
-    ) -> WebServiceResult<sdkwork_webserver_contract::CertificateResponse> {
-        self.issue_certificate(context, request).await
+        request: &IssueCertificateRequest,
+    ) -> WebServiceResult<sdkwork_webserver_contract::CertificateOperationAcceptedResponse> {
+        self.enqueue_certificate_issue(context, request).await
+    }
+
+    async fn retrieve_certificate_operation(
+        &self,
+        context: &WebAppRequestContext,
+        operation_id: &str,
+    ) -> WebServiceResult<sdkwork_webserver_contract::CertificateOperationResponse> {
+        let tenant_id = Self::require_tenant(context)?;
+        let owner_id = Self::owner_filter(context)?;
+        self.repository
+            .retrieve_certificate_operation(tenant_id, owner_id, operation_id)
+            .await
     }
 
     async fn list_listener_certificate_bindings(
@@ -1314,8 +1328,8 @@ impl WebAppApi for WebService {
 mod tests {
     use super::{WebService, MAX_DEPLOYMENT_ARTIFACT_BYTES, MAX_ENV_VARIABLE_VALUE_BYTES};
     use sdkwork_webserver_contract::{
-        ApplicationStoreListing, CreateCertificateRequest, CreateDeploymentRequest,
-        CreateDomainRequest, CreateEnvVariableRequest, CreateHealthCheckRequest, MediaResource,
+        ApplicationStoreListing, CreateDeploymentRequest, CreateDomainRequest,
+        CreateEnvVariableRequest, CreateHealthCheckRequest, IssueCertificateRequest, MediaResource,
     };
 
     #[test]
@@ -1598,7 +1612,7 @@ mod tests {
         );
 
         assert!(
-            WebService::validate_certificate_request(&CreateCertificateRequest {
+            WebService::validate_certificate_issue_request(&IssueCertificateRequest {
                 domain_ids: vec!["domain-1".to_owned(), "domain-2".to_owned()],
                 cert_type: 1,
                 key_algorithm: "ECDSA".to_owned(),
@@ -1607,7 +1621,7 @@ mod tests {
             .is_ok()
         );
         assert!(
-            WebService::validate_certificate_request(&CreateCertificateRequest {
+            WebService::validate_certificate_issue_request(&IssueCertificateRequest {
                 domain_ids: vec!["domain-1".to_owned()],
                 cert_type: 3,
                 key_algorithm: "RSA".to_owned(),

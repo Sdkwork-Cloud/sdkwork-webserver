@@ -155,7 +155,7 @@ final class DomainApi extends BaseApi
         return $result;
     }
 
-    /** Verify a tenant custom domain asset */
+    /** Create or check a tenant custom-domain ownership challenge */
     public function domainsVerify(string $domainId, string $idempotencyKey): ?DomainsVerifyResponse
     {
         $path = $this->interpolatePath('/backend/v3/api/domains/{domainId}/verify', ['domainId' => $this->serializePathParameter($domainId, new PathParameterSpec('domainId', 'simple', false))]);

@@ -1,8 +1,22 @@
 import { backendApiPath } from './paths';
 import type { ApiRequestOptions, HttpClient } from '../http/client';
 
-import type { CertificateResponse, CreateCertificateRequest, CreateListenerCertificateBindingRequest, ListenerCertificateBindingResponse, PageInfo, UpdateCertificateRequest } from '../types';
+import type { CertificateOperationResponse, CertificateResponse, CreateListenerCertificateBindingRequest, IssueCertificateRequest, ListenerCertificateBindingResponse, PageInfo, SdkWorkAsyncData, UpdateCertificateRequest } from '../types';
 
+
+export class CertificateOperationsApi {
+  private client: HttpClient;
+
+  constructor(client: HttpClient) {
+    this.client = client;
+  }
+
+
+/** Retrieve a certificate operation */
+  async retrieve(operationId: string, requestOptions?: ApiRequestOptions): Promise<CertificateOperationResponse> {
+    return this.client.request<CertificateOperationResponse>(backendApiPath(`/certificates/operations/${serializePathParameter(operationId, { name: 'operationId', style: 'simple', explode: false })}`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any, sdkworkUnwrapKind: 'item' });
+  }
+}
 
 export interface CertificateApplicationsDomainsListenerCertificateBindingsListParams {
   page?: number;
@@ -85,7 +99,7 @@ export interface CertificateListParams {
   domainId?: string;
 }
 
-export interface CertificateCreateParams {
+export interface CertificateIssueParams {
   idempotencyKey: string;
 }
 
@@ -100,10 +114,12 @@ export interface CertificateRenewParams {
 export class CertificateApi {
   private client: HttpClient;
   public readonly applications: CertificateApplicationsApi;
+  public readonly operations: CertificateOperationsApi;
 
   constructor(client: HttpClient) {
     this.client = client;
     this.applications = new CertificateApplicationsApi(client);
+    this.operations = new CertificateOperationsApi(client);
   }
 
 
@@ -118,14 +134,14 @@ export class CertificateApi {
   }
 
 /** Issue a canonical certificate */
-  async create(body: CreateCertificateRequest, params: CertificateCreateParams, requestOptions?: ApiRequestOptions): Promise<CertificateResponse> {
+  async issue(body: IssueCertificateRequest, params: CertificateIssueParams, requestOptions?: ApiRequestOptions): Promise<SdkWorkAsyncData> {
     const requestHeaders = buildRequestHeaders(
       {
         'Idempotency-Key': { value: params.idempotencyKey, style: 'simple', explode: false },
       },
       {}
     );
-    return this.client.request<CertificateResponse>(backendApiPath(`/certificates`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, body, headers: requestHeaders, contentType: 'application/json', sdkworkUnwrapKind: 'item' });
+    return this.client.request<SdkWorkAsyncData>(backendApiPath(`/certificates/issue`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, body, headers: requestHeaders, contentType: 'application/json', sdkworkUnwrapKind: 'command' });
   }
 
 /** Update certificate automatic renewal policy */
@@ -140,14 +156,14 @@ export class CertificateApi {
   }
 
 /** Renew a canonical certificate now */
-  async renew(certificateId: string, params: CertificateRenewParams, requestOptions?: ApiRequestOptions): Promise<CertificateResponse> {
+  async renew(certificateId: string, params: CertificateRenewParams, requestOptions?: ApiRequestOptions): Promise<SdkWorkAsyncData> {
     const requestHeaders = buildRequestHeaders(
       {
         'Idempotency-Key': { value: params.idempotencyKey, style: 'simple', explode: false },
       },
       {}
     );
-    return this.client.request<CertificateResponse>(backendApiPath(`/certificates/${serializePathParameter(certificateId, { name: 'certificateId', style: 'simple', explode: false })}/renew`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, headers: requestHeaders, sdkworkUnwrapKind: 'item' });
+    return this.client.request<SdkWorkAsyncData>(backendApiPath(`/certificates/${serializePathParameter(certificateId, { name: 'certificateId', style: 'simple', explode: false })}/renew`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, headers: requestHeaders, sdkworkUnwrapKind: 'command' });
   }
 }
 

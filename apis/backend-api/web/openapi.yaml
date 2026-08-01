@@ -390,7 +390,7 @@ paths:
     - $ref: '#/components/parameters/DomainIdParam'
     post:
       operationId: applications.domains.verify
-      summary: Verify an application public domain
+      summary: Create or check an application-domain ownership challenge
       tags: [applicationDomain]
       security:
       - AuthToken: []
@@ -406,7 +406,7 @@ paths:
       x-sdkwork-owner: sdkwork-web
       responses:
         '200':
-          description: Application domain verification result returned successfully.
+          description: Domain ownership challenge and latest external observation returned successfully.
           content:
             application/json:
               schema:
@@ -419,7 +419,7 @@ paths:
                       required: [item]
                       properties:
                         item:
-                          $ref: '#/components/schemas/ApplicationDomainVerifyResponse'
+                          $ref: '#/components/schemas/DomainVerifyResponse'
   /backend/v3/api/applications/{applicationId}/domains/{domainId}/listener_certificate_bindings:
     parameters:
       - $ref: '#/components/parameters/ApplicationIdParam'
@@ -883,7 +883,7 @@ paths:
     - $ref: '#/components/parameters/DomainIdParam'
     post:
       operationId: domains.verify
-      summary: Verify a tenant custom domain asset
+      summary: Create or check a tenant custom-domain ownership challenge
       tags: [domain]
       security:
       - AuthToken: []
@@ -899,7 +899,7 @@ paths:
         - $ref: '#/components/parameters/IdempotencyKey'
       responses:
         '200':
-          description: Tenant custom domain verification result returned successfully.
+          description: Domain ownership challenge and latest external observation returned successfully.
           content:
             application/json:
               schema:
@@ -912,7 +912,7 @@ paths:
                       required: [item]
                       properties:
                         item:
-                          $ref: '#/components/schemas/ApplicationDomainVerifyResponse'
+                          $ref: '#/components/schemas/DomainVerifyResponse'
         '404':
           $ref: '#/components/responses/NotFound'
   /backend/v3/api/domains/{domainId}/application_binding:
@@ -1316,8 +1316,9 @@ paths:
                             $ref: '#/components/schemas/CertificateResponse'
                         pageInfo:
                           $ref: '#/components/schemas/PageInfo'
+  /backend/v3/api/certificates/issue:
     post:
-      operationId: certificates.create
+      operationId: certificates.issue
       summary: Issue a canonical certificate
       tags: [certificate]
       security:
@@ -1338,23 +1339,60 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateCertificateRequest'
+              $ref: '#/components/schemas/IssueCertificateRequest'
       responses:
-        '201':
-          description: Canonical certificate issued successfully.
+        '202':
+          description: Certificate issuance was accepted for asynchronous processing.
           content:
             application/json:
               schema:
                 allOf:
                 - $ref: '#/components/schemas/SdkWorkApiResponse'
                 - type: object
+                  required: [data]
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/SdkWorkAsyncData'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  /backend/v3/api/certificates/operations/{operationId}:
+    parameters:
+    - $ref: '#/components/parameters/CertificateOperationIdParam'
+    get:
+      operationId: certificates.operations.retrieve
+      summary: Retrieve a certificate operation
+      tags: [certificate]
+      security:
+      - AuthToken: []
+        AccessToken: []
+      x-sdkwork-api-surface: backend-api
+      x-sdkwork-api-authority: sdkwork-web.backend
+      x-sdkwork-request-context: WebRequestContext
+      x-sdkwork-auth-mode: dual-token
+      x-sdkwork-permission: web.certificates.read
+      x-sdkwork-owner: sdkwork-web
+      responses:
+        '200':
+          description: Certificate operation returned successfully.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SdkWorkApiResponse'
+                - type: object
+                  required: [data]
                   properties:
                     data:
                       type: object
+                      additionalProperties: false
                       required: [item]
                       properties:
                         item:
-                          $ref: '#/components/schemas/CertificateResponse'
+                          $ref: '#/components/schemas/CertificateOperationResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
   /backend/v3/api/certificates/{certificateId}:
     parameters:
     - $ref: '#/components/parameters/CertificateIdParam'
@@ -1417,21 +1455,22 @@ paths:
       x-sdkwork-rate-limit-tier: auth-critical
       x-sdkwork-owner: sdkwork-web
       responses:
-        '200':
-          description: Canonical certificate renewed successfully.
+        '202':
+          description: Certificate renewal was accepted for asynchronous processing.
           content:
             application/json:
               schema:
                 allOf:
                 - $ref: '#/components/schemas/SdkWorkApiResponse'
                 - type: object
+                  required: [data]
                   properties:
                     data:
-                      type: object
-                      required: [item]
-                      properties:
-                        item:
-                          $ref: '#/components/schemas/CertificateResponse'
+                      $ref: '#/components/schemas/SdkWorkAsyncData'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/ValidationError'
   /backend/v3/api/certificate_distribution:
     get:
       operationId: certificates.distribution.list
@@ -2125,6 +2164,13 @@ components:
       schema:
         type: string
         format: uuid
+    CertificateOperationIdParam:
+      name: operationId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
     ListenerCertificateBindingIdParam:
       name: bindingId
       in: path
@@ -2610,15 +2656,45 @@ components:
         updatedAt:
           type: string
           format: date-time
-    ApplicationDomainVerifyResponse:
+    DomainVerifyResponse:
       type: object
       additionalProperties: false
-      required: [verified]
+      required: [verified, status, method, recordName, recordValue, attemptCount, expiresAt]
       properties:
         verified:
           type: boolean
-        verifyToken:
+        status:
           type: string
+          enum: [PENDING, VERIFIED, FAILED, EXPIRED]
+        method:
+          type: string
+          enum: [DNS_TXT]
+        recordName:
+          type: string
+          minLength: 1
+          maxLength: 253
+        recordValue:
+          type: string
+          minLength: 1
+          maxLength: 128
+        attemptCount:
+          type: integer
+          minimum: 0
+          maximum: 20
+        expiresAt:
+          type: string
+          format: date-time
+        nextAttemptAt:
+          type: string
+          format: date-time
+        checkedAt:
+          type: string
+          format: date-time
+        failureCode:
+          type: string
+          minLength: 1
+          maxLength: 64
+          pattern: '^[A-Z0-9_]+$'
     ApplicationSourceVersionConfigSnapshot:
       type: object
       additionalProperties: false
@@ -2838,7 +2914,7 @@ components:
         createdAt:
           type: string
           format: date-time
-    CreateCertificateRequest:
+    IssueCertificateRequest:
       type: object
       additionalProperties: false
       required: [domainIds, certType]
@@ -2930,6 +3006,44 @@ components:
           type: string
           enum: [PENDING, ISSUED, FAILED, EXPIRED, REVOKED, ARCHIVED]
         createdAt:
+          type: string
+          format: date-time
+    CertificateOperationResponse:
+      type: object
+      additionalProperties: false
+      required: [id, certificateId, operationType, status, attemptCount, maxAttempts, nextAttemptAt, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        certificateId:
+          type: string
+          format: uuid
+        operationType:
+          type: string
+          enum: [ISSUE, RENEW]
+        status:
+          type: string
+          enum: [PENDING, RUNNING, SUCCEEDED, FAILED]
+        attemptCount:
+          type: integer
+          minimum: 0
+        maxAttempts:
+          type: integer
+          minimum: 1
+        nextAttemptAt:
+          type: string
+          format: date-time
+        failureCode:
+          type: string
+          pattern: '^[A-Z0-9_]{1,64}$'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        completedAt:
           type: string
           format: date-time
     CreateListenerCertificateBindingRequest:
@@ -3229,6 +3343,7 @@ components:
             description: Bootstrap agent credential; returned once at registration.
     AgentHeartbeatRequest:
       type: object
+      additionalProperties: false
       properties:
         agentVersion:
           type: string
@@ -3492,6 +3607,23 @@ components:
           type: string
         status:
           type: string
+    SdkWorkAsyncData:
+      type: object
+      additionalProperties: false
+      required: [accepted, operationId, status]
+      properties:
+        accepted:
+          type: boolean
+          const: true
+        operationId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [pending, running, succeeded, failed, cancelled]
+        pollUrl:
+          type: string
+          format: uri-reference
     PageInfo:
       type: object
       additionalProperties: false

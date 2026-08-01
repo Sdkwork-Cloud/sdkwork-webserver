@@ -56,7 +56,7 @@
     },
     {
       "path": "src/api/certificate.ts",
-      "sha256": "9a79ccdfff8219583c4d751180dd4d129f46a2b64223eaeae61d9f2109da2734"
+      "sha256": "15e05203398801c37eb5b7a8be65c5f752ccce2126459851ae493eaadaa7e629"
     },
     {
       "path": "src/api/deployment.ts",
@@ -64,7 +64,7 @@
     },
     {
       "path": "src/api/domain.ts",
-      "sha256": "80280c29e78a743b7565a22679b0cf2538aa25e59c599f46652cb69d62826681"
+      "sha256": "8694ee43e50a010b27a1d752ddb9d456222e3891e4e902b663e3211f9001e904"
     },
     {
       "path": "src/api/env-variable.ts",
@@ -119,6 +119,10 @@
       "sha256": "a0fea23b578fae454b8ee7189439df62fcbda528ea9426de867d4d31f60a1023"
     },
     {
+      "path": "src/types/certificate-operation-response.ts",
+      "sha256": "a3067818ce82cb18dafac6bee875c62e99d3180be2f5db4d3bbb2ad862578103"
+    },
+    {
       "path": "src/types/certificate-page.ts",
       "sha256": "65fb9dc8d4d47b891c1ef206e3c28cbe4db69ea398d33ad2c06d9feb04d9ba4a"
     },
@@ -127,20 +131,20 @@
       "sha256": "787a49b889ad93aea125b12d843a4b114300a8f3114118139ab2626b6e84c740"
     },
     {
-      "path": "src/types/certificates-create-response201.ts",
-      "sha256": "fd86ebe9d39ad4dd0a78afba86c7196e72c0a8cd76344b7a771f022aa4d4f99a"
+      "path": "src/types/certificates-issue-response202.ts",
+      "sha256": "49b1ec128603f913d023293a70b81c7346c6e78a03374b64e6661ea1beeaee79"
     },
     {
       "path": "src/types/certificates-list-response.ts",
       "sha256": "b18af31ac02a1b55e3504058ae01af55ce286ef66ce49739db5d91ab26f4d167"
     },
     {
-      "path": "src/types/common.ts",
-      "sha256": "d2506be8c4bdbe8e7059393467e6e71d75ef1d8c018dbf997bb0ab2a77b6c7b6"
+      "path": "src/types/certificates-operations-retrieve-response.ts",
+      "sha256": "cb3ba76e348b850e33a4896a83ddc099fefbcea2b9c3588641f5d8ee84b1e107"
     },
     {
-      "path": "src/types/create-certificate-request.ts",
-      "sha256": "f7c8677bb86847c5fdb5bd2d6e4e1f9575fb9f65e59d18a601069606bee00168"
+      "path": "src/types/common.ts",
+      "sha256": "d2506be8c4bdbe8e7059393467e6e71d75ef1d8c018dbf997bb0ab2a77b6c7b6"
     },
     {
       "path": "src/types/create-deployment-request.ts",
@@ -188,7 +192,7 @@
     },
     {
       "path": "src/types/domain-verify-response.ts",
-      "sha256": "60f829d7bd92079dc6bce6e23dd378b1830832a4fbbe559210e761173acce366"
+      "sha256": "f31f1b21c650aeadf24ebb3644de121203e52c46a7daba3e7816bfb5f3dcfda5"
     },
     {
       "path": "src/types/env-variable-page.ts",
@@ -216,7 +220,11 @@
     },
     {
       "path": "src/types/index.ts",
-      "sha256": "864aa1028b3790f62defbf18f841495e05a60ca83ced93903d0d969fa913ce1a"
+      "sha256": "d72223dd18fb974977c7d622df6e4358adda809715ef374b69375bf89f53f664"
+    },
+    {
+      "path": "src/types/issue-certificate-request.ts",
+      "sha256": "03268bdf0a9b945fd20a429463f7b127924b4e057e8ce25f9168734669e5f740"
     },
     {
       "path": "src/types/listener-certificate-binding-response.ts",
@@ -245,6 +253,10 @@
     {
       "path": "src/types/sdk-work-api-response.ts",
       "sha256": "79cef2c8e584ba8b8e96c6c77ccf6bda087b0c68cbed63cb97d5fb1ff3e47e1a"
+    },
+    {
+      "path": "src/types/sdk-work-async-data.ts",
+      "sha256": "267c1ea711035ddb7877054c87c1bbe2258ef58cb24c47fd652fbeb127fb46d7"
     },
     {
       "path": "src/types/sdk-work-command-data.ts",

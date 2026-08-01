@@ -968,7 +968,7 @@
       ],
       "post": {
         "operationId": "sites.domains.verify",
-        "summary": "验证域名所有权",
+        "summary": "创建或检查域名所有权验证挑战",
         "tags": [
           "domain"
         ],
@@ -993,7 +993,7 @@
         "x-sdkwork-rate-limit-tier": "auth-critical",
         "responses": {
           "200": {
-            "description": "验证成功",
+            "description": "返回域名所有权验证挑战及最新外部观测状态",
             "content": {
               "application/json": {
                 "schema": {
@@ -2237,9 +2237,11 @@
           }
         },
         "x-sdkwork-route-auth": "dual-token"
-      },
+      }
+    },
+    "/app/v3/api/certificates/issue": {
       "post": {
-        "operationId": "certificates.create",
+        "operationId": "certificates.issue",
         "summary": "申请证书",
         "tags": [
           "certificate"
@@ -2268,14 +2270,88 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateCertificateRequest"
+                "$ref": "#/components/schemas/IssueCertificateRequest"
               }
             }
           }
         },
         "responses": {
-          "201": {
-            "description": "证书申请已触发",
+          "202": {
+            "description": "证书申请已接受并进入异步处理队列",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SdkWorkApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "required": [
+                        "data"
+                      ],
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/SdkWorkAsyncData"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "资源冲突",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "校验错误",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        },
+        "x-sdkwork-route-auth": "dual-token"
+      }
+    },
+    "/app/v3/api/certificates/operations/{operationId}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/CertificateOperationIdParam"
+        }
+      ],
+      "get": {
+        "operationId": "certificates.operations.retrieve",
+        "summary": "获取证书异步操作状态",
+        "tags": [
+          "certificate"
+        ],
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-api-surface": "app-api",
+        "x-sdkwork-api-authority": "sdkwork-web.app",
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-permission": "web.certificates.read",
+        "x-sdkwork-owner": "sdkwork-web",
+        "responses": {
+          "200": {
+            "description": "证书异步操作状态返回成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -2291,18 +2367,29 @@
                       "properties": {
                         "data": {
                           "type": "object",
+                          "additionalProperties": false,
                           "required": [
                             "item"
                           ],
                           "properties": {
                             "item": {
-                              "$ref": "#/components/schemas/CertificateResponse"
+                              "$ref": "#/components/schemas/CertificateOperationResponse"
                             }
                           }
                         }
                       }
                     }
                   ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "资源不存在",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -2513,6 +2600,15 @@
       },
       "DomainIdParam": {
         "name": "domainId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "CertificateOperationIdParam": {
+        "name": "operationId",
         "in": "path",
         "required": true,
         "schema": {
@@ -3031,15 +3127,67 @@
       },
       "DomainVerifyResponse": {
         "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "verified",
+          "status",
+          "method",
+          "recordName",
+          "recordValue",
+          "attemptCount",
+          "expiresAt"
+        ],
         "properties": {
           "verified": {
             "type": "boolean"
           },
-          "method": {
-            "type": "string"
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "VERIFIED",
+              "FAILED",
+              "EXPIRED"
+            ]
           },
-          "token": {
-            "type": "string"
+          "method": {
+            "type": "string",
+            "enum": [
+              "DNS_TXT"
+            ]
+          },
+          "recordName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 253
+          },
+          "recordValue": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "attemptCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 20
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "nextAttemptAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "checkedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "failureCode": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[A-Z0-9_]+$"
           }
         }
       },
@@ -3494,7 +3642,7 @@
           }
         }
       },
-      "CreateCertificateRequest": {
+      "IssueCertificateRequest": {
         "type": "object",
         "additionalProperties": false,
         "required": [
@@ -3643,6 +3791,75 @@
             ]
           },
           "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CertificateOperationResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "certificateId",
+          "operationType",
+          "status",
+          "attemptCount",
+          "maxAttempts",
+          "nextAttemptAt",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "certificateId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "operationType": {
+            "type": "string",
+            "enum": [
+              "ISSUE",
+              "RENEW"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "RUNNING",
+              "SUCCEEDED",
+              "FAILED"
+            ]
+          },
+          "attemptCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "maxAttempts": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "nextAttemptAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "failureCode": {
+            "type": "string",
+            "pattern": "^[A-Z0-9_]{1,64}$"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completedAt": {
             "type": "string",
             "format": "date-time"
           }
@@ -4011,6 +4228,39 @@
           },
           "status": {
             "type": "string"
+          }
+        }
+      },
+      "SdkWorkAsyncData": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "accepted",
+          "operationId",
+          "status"
+        ],
+        "properties": {
+          "accepted": {
+            "type": "boolean",
+            "const": true
+          },
+          "operationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "running",
+              "succeeded",
+              "failed",
+              "cancelled"
+            ]
+          },
+          "pollUrl": {
+            "type": "string",
+            "format": "uri-reference"
           }
         }
       },

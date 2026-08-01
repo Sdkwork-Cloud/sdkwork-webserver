@@ -17,9 +17,9 @@ impl WebRepository {
         agent: &AuthenticatedAgent,
         observations: &[AgentCertificateObservation],
         manifest: &AgentSyncResponse,
-    ) -> WebServiceResult<()> {
+    ) -> WebServiceResult<bool> {
         if observations.is_empty() {
-            return Ok(());
+            return Ok(false);
         }
         let expected = manifest
             .certificates
@@ -36,13 +36,15 @@ impl WebRepository {
             .begin()
             .await
             .map_err(|error| store_error("begin certificate node observation", error))?;
+        let mut recorded = false;
         for observation in observations {
-            if observation.sync_version != manifest.sync_version
-                || !expected.contains(&(
+            if observation.sync_version != manifest.sync_version {
+                continue;
+            }
+            if !expected.contains(&(
                     observation.certificate_id.as_str(),
                     observation.fingerprint.as_str(),
-                ))
-            {
+                )) {
                 return Err(WebServiceError::conflict(
                     "certificate observation is not part of the current node manifest",
                 ));
@@ -97,12 +99,13 @@ impl WebRepository {
                     "observed certificate is no longer the desired version",
                 ));
             }
+            recorded = true;
         }
         transaction
             .commit()
             .await
             .map_err(|error| store_error("commit certificate node observations", error))?;
-        Ok(())
+        Ok(recorded)
     }
 
     pub(super) async fn promote_converged_listener_certificate_bindings(

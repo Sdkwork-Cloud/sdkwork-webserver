@@ -2,21 +2,22 @@
 
 use async_trait::async_trait;
 use sdkwork_intelligence_webserver_service::{
-    AuditLogWrite, RuntimeAssignmentTarget, RuntimeAssignmentWrite, RuntimeObservationWrite,
-    WebRepositoryPort,
+    AuditLogWrite, DomainVerificationChallenge, DomainVerificationObservation,
+    RuntimeAssignmentTarget, RuntimeAssignmentWrite, RuntimeObservationWrite, WebRepositoryPort,
 };
 use sdkwork_webserver_contract::{
     AgentHeartbeatRequest, AgentHeartbeatResponse, AgentSyncResponse, AuditLogPage,
-    CertificateDistributionPage, CertificateIssueUpdate, CertificatePage,
-    CertificateRenewalCandidate, CertificateResponse, CreateCertificateRequest,
+    CertificateDistributionPage, CertificateIssueUpdate, CertificateOperationAcceptedResponse,
+    CertificateOperationLease, CertificateOperationResponse, CertificatePage,
+    CertificateResponse, IssueCertificateRequest,
     CreateDeploymentRequest, CreateDomainRequest, CreateEnvVariableRequest,
     CreateHealthCheckRequest, CreateManagedDomainRequest, CreateNginxConfigRequest,
     CreateListenerCertificateBindingRequest, ListenerCertificateBindingPage,
     ListenerCertificateBindingResponse,
     CreateRootDomainHostnameRequest, CreateRootDomainRequest, CreateServerRequest,
     CreateServerResponse, CreateSiteRequest, CreateSourceVersionRequest, DeploymentPage,
-    DeploymentResponse, DomainPage, DomainResponse, DomainVerifyResponse, EnvVariablePage,
-    EnvVariableResponse, HealthCheckPage, HealthCheckResponse, ListNginxConfigsQuery,
+    DeploymentResponse, DomainPage, DomainResponse, EnvVariablePage, EnvVariableResponse,
+    HealthCheckPage, HealthCheckResponse, ListNginxConfigsQuery,
     ListRootDomainsQuery, ListSitesQuery, NginxConfigPage, NginxConfigResponse,
     NginxReloadResponse, NginxStatusResponse, NginxValidateResponse, RootDomainPage,
     RootDomainResponse, RuntimeAssignment, RuntimeAssignmentDelivery, RuntimeObservation,
@@ -133,13 +134,24 @@ impl WebRepositoryPort for WebRepository {
         self.delete_domain_repo(tenant_id, site_id, domain_id).await
     }
 
-    async fn verify_domain(
+    async fn prepare_domain_verification(
         &self,
         tenant_id: i64,
         site_id: &str,
         domain_id: &str,
-    ) -> WebServiceResult<DomainVerifyResponse> {
-        self.verify_domain_repo(tenant_id, site_id, domain_id).await
+    ) -> WebServiceResult<DomainVerificationChallenge> {
+        self.prepare_domain_verification_repo(tenant_id, site_id, domain_id)
+            .await
+    }
+
+    async fn record_domain_verification_observation(
+        &self,
+        tenant_id: i64,
+        challenge_id: &str,
+        observation: &DomainVerificationObservation,
+    ) -> WebServiceResult<DomainVerificationChallenge> {
+        self.record_domain_verification_observation_repo(tenant_id, challenge_id, observation)
+            .await
     }
 
     async fn list_root_domains(
@@ -238,12 +250,13 @@ impl WebRepositoryPort for WebRepository {
             .await
     }
 
-    async fn verify_managed_domain(
+    async fn prepare_managed_domain_verification(
         &self,
         tenant_id: i64,
         domain_id: &str,
-    ) -> WebServiceResult<DomainVerifyResponse> {
-        self.verify_managed_domain_repo(tenant_id, domain_id).await
+    ) -> WebServiceResult<DomainVerificationChallenge> {
+        self.prepare_managed_domain_verification_repo(tenant_id, domain_id)
+            .await
     }
 
     async fn list_source_versions(
@@ -357,13 +370,66 @@ impl WebRepositoryPort for WebRepository {
             .await
     }
 
-    async fn create_certificate(
+    async fn enqueue_certificate_issue(
         &self,
         tenant_id: i64,
         owner_id: Option<i64>,
-        request: &CreateCertificateRequest,
-    ) -> WebServiceResult<CertificateResponse> {
-        self.create_certificate_repo(tenant_id, owner_id, request)
+        requested_by: Option<i64>,
+        request: &IssueCertificateRequest,
+        idempotency_key: Option<&str>,
+    ) -> WebServiceResult<CertificateOperationAcceptedResponse> {
+        self.enqueue_certificate_issue_repo(
+            tenant_id,
+            owner_id,
+            requested_by,
+            request,
+            idempotency_key,
+        )
+        .await
+    }
+
+    async fn enqueue_certificate_renewal(
+        &self,
+        tenant_id: i64,
+        certificate_id: &str,
+        requested_by: Option<i64>,
+        idempotency_key: Option<&str>,
+    ) -> WebServiceResult<CertificateOperationAcceptedResponse> {
+        self.enqueue_certificate_renewal_repo(
+            tenant_id,
+            certificate_id,
+            requested_by,
+            idempotency_key,
+        )
+        .await
+    }
+
+    async fn retrieve_certificate_operation(
+        &self,
+        tenant_id: i64,
+        owner_id: Option<i64>,
+        operation_id: &str,
+    ) -> WebServiceResult<CertificateOperationResponse> {
+        self.retrieve_certificate_operation_repo(tenant_id, owner_id, operation_id)
+            .await
+    }
+
+    async fn schedule_due_certificate_renewals(
+        &self,
+        renew_before_days: u32,
+        limit: i32,
+    ) -> WebServiceResult<usize> {
+        self.schedule_due_certificate_renewals_repo(renew_before_days, limit)
+            .await
+    }
+
+    async fn claim_certificate_operations(
+        &self,
+        lease_owner: &str,
+        lease_seconds: i64,
+        limit: i32,
+    ) -> WebServiceResult<Vec<CertificateOperationLease>> {
+        self.claim_certificate_operations_repo(lease_owner, lease_seconds, limit)
             .await
     }
 
@@ -407,89 +473,28 @@ impl WebRepositoryPort for WebRepository {
             .await
     }
 
-    async fn insert_certificate_pending(
+    async fn finalize_certificate_operation(
         &self,
-        tenant_id: i64,
-        owner_id: Option<i64>,
-        domain_ids: &[String],
-        cert_type: i32,
-        key_algorithm: &str,
-        auto_renew: bool,
-    ) -> WebServiceResult<(String, Vec<String>)> {
-        self.insert_certificate_pending_repo(
-            tenant_id,
-            owner_id,
-            domain_ids,
-            cert_type,
-            key_algorithm,
-            auto_renew,
-        )
-        .await
-    }
-
-    async fn finalize_certificate(
-        &self,
-        tenant_id: i64,
-        certificate_id: &str,
+        lease: &CertificateOperationLease,
         update: &CertificateIssueUpdate,
-        expected_renewal_version: Option<i64>,
     ) -> WebServiceResult<CertificateResponse> {
-        self.finalize_certificate_repo(tenant_id, certificate_id, update, expected_renewal_version)
+        self.finalize_certificate_operation_repo(lease, update)
             .await
     }
 
-    async fn fail_certificate(
+    async fn fail_certificate_operation(
         &self,
-        tenant_id: i64,
-        certificate_id: &str,
-        reason: &str,
-    ) -> WebServiceResult<()> {
-        self.fail_certificate_repo(tenant_id, certificate_id, reason)
-            .await
-    }
-
-    async fn list_certificates_due_for_renewal(
-        &self,
-        renew_before_days: u32,
-        claim_expired_before: &str,
-        limit: i32,
-    ) -> WebServiceResult<Vec<sdkwork_webserver_contract::CertificateRenewalCandidate>> {
-        self.list_certificates_due_for_renewal_repo(renew_before_days, claim_expired_before, limit)
-            .await
-    }
-
-    async fn claim_certificate_renewal(
-        &self,
-        tenant_id: i64,
-        certificate_id: &str,
-        claim_expired_before: &str,
-    ) -> WebServiceResult<Option<i64>> {
-        self.claim_certificate_renewal_repo(tenant_id, certificate_id, claim_expired_before)
-            .await
-    }
-
-    async fn fail_certificate_renewal(
-        &self,
-        tenant_id: i64,
-        certificate_id: &str,
-        expected_renewal_version: i64,
-        reason: &str,
-    ) -> WebServiceResult<()> {
-        self.fail_certificate_renewal_repo(
-            tenant_id,
-            certificate_id,
-            expected_renewal_version,
-            reason,
+        lease: &CertificateOperationLease,
+        failure_code: &str,
+        retry_at: &str,
+        terminal_retry_at: &str,
+    ) -> WebServiceResult<CertificateOperationResponse> {
+        self.fail_certificate_operation_repo(
+            lease,
+            failure_code,
+            retry_at,
+            terminal_retry_at,
         )
-        .await
-    }
-
-    async fn retrieve_certificate_renewal_candidate(
-        &self,
-        tenant_id: i64,
-        certificate_id: &str,
-    ) -> WebServiceResult<CertificateRenewalCandidate> {
-        self.retrieve_certificate_renewal_candidate_repo(tenant_id, certificate_id)
             .await
     }
 

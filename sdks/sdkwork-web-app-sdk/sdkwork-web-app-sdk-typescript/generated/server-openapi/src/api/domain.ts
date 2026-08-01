@@ -55,7 +55,7 @@ export class DomainSitesDomainsApi {
     return this.client.request<void>(appApiPath(`/sites/${serializePathParameter(siteId, { name: 'siteId', style: 'simple', explode: false })}/domains/${serializePathParameter(domainId, { name: 'domainId', style: 'simple', explode: false })}`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'DELETE' as any });
   }
 
-/** 验证域名所有权 */
+/** 创建或检查域名所有权验证挑战 */
   async verify(siteId: string, domainId: string, params: DomainSitesDomainsVerifyParams, requestOptions?: ApiRequestOptions): Promise<DomainVerifyResponse> {
     const requestHeaders = buildRequestHeaders(
       {

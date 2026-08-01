@@ -59,7 +59,7 @@ describe("root-domain management", () => {
     });
     const sdk = {
       application: { list: vi.fn().mockResolvedValue({ items: [], pageInfo: { mode: "offset" } }) },
-      certificate: { create: vi.fn() },
+      certificate: { issue: vi.fn() },
       domain: {
         applicationBinding: { delete: unbind, update: vi.fn() },
         delete: vi.fn(),
@@ -131,7 +131,7 @@ describe("root-domain management", () => {
     });
     const sdk = {
       application: { list: listApplications },
-      certificate: { create: vi.fn() },
+      certificate: { issue: vi.fn() },
       domain: {
         applicationBinding: { delete: vi.fn(), update: vi.fn() },
         delete: vi.fn(),
@@ -212,8 +212,15 @@ describe("root-domain management", () => {
       certificateFixture("certificate-rsa", "example.com RSA", "RSA"),
     ]));
     const issueCertificate = vi.fn().mockResolvedValue({
-      ...certificateFixture("certificate-pending", "example.com RSA renewal", "RSA"),
-      status: "PENDING",
+      accepted: true,
+      operationId: "operation-rsa-issue",
+      status: "pending",
+    });
+    const retrieveOperation = vi.fn().mockResolvedValue({
+      certificateId: "certificate-rsa",
+      id: "operation-rsa-issue",
+      operationType: "ISSUE",
+      status: "SUCCEEDED",
     });
     const bindCertificate = vi.fn().mockResolvedValue(rsaBinding);
     const removeBinding = vi.fn().mockResolvedValue(undefined);
@@ -228,8 +235,9 @@ describe("root-domain management", () => {
             },
           },
         },
-        create: issueCertificate,
+        issue: issueCertificate,
         list: listCertificates,
+        operations: { retrieve: retrieveOperation },
       },
       rootDomain,
       subdomains: [domain],
@@ -264,6 +272,11 @@ describe("root-domain management", () => {
         keyAlgorithm: "RSA",
       },
       { idempotencyKey: expect.any(String) },
+      expect.objectContaining({ signal: expect.any(AbortSignal), timeout: 30_000 }),
+    ));
+    await waitFor(() => expect(retrieveOperation).toHaveBeenCalledWith(
+      "operation-rsa-issue",
+      expect.objectContaining({ signal: expect.any(AbortSignal), timeout: 30_000 }),
     ));
 
     fireEvent.click(screen.getByRole("radio", { name: /example\.com RSA/ }));
@@ -309,7 +322,7 @@ describe("root-domain management", () => {
             },
           },
         },
-        create: vi.fn(),
+        issue: vi.fn(),
         list: vi.fn().mockResolvedValue(pageOf([
           certificateFixture("certificate-ecdsa", "example.com ECDSA", "ECDSA"),
         ])),
@@ -346,7 +359,7 @@ describe("root-domain management", () => {
             },
           },
         },
-        create: vi.fn(),
+        issue: vi.fn(),
         list: vi.fn().mockResolvedValue(pageOf(certificates)),
       },
       rootDomain: rootDomainFixture(),
@@ -371,6 +384,55 @@ describe("root-domain management", () => {
     expect(screen.queryByText("No active certificates cover this hostname")).toBeNull();
   });
 
+  it("reserves a key algorithm while its listener binding is not archived", async () => {
+    const pendingBinding = {
+      ...listenerBindingFixture({
+        certificateId: "certificate-pending-binding",
+        certificateName: "Pending listener certificate",
+        id: "binding-pending",
+        keyAlgorithm: "ECDSA",
+      }),
+      activatedAt: undefined,
+      currentCertificate: undefined,
+      currentCertificateVersionId: undefined,
+      status: "PENDING",
+    };
+    const candidate = certificateFixture(
+      "certificate-candidate",
+      "Candidate ECDSA certificate",
+      "ECDSA",
+    );
+    const sdk = domainSdk({
+      certificate: {
+        applications: {
+          domains: {
+            listenerCertificateBindings: {
+              create: vi.fn(),
+              delete: vi.fn(),
+              list: vi.fn().mockResolvedValue(pageOf([pendingBinding])),
+            },
+          },
+        },
+        issue: vi.fn(),
+        list: vi.fn().mockResolvedValue(pageOf([candidate])),
+      },
+      rootDomain: rootDomainFixture(),
+      subdomains: [subdomainFixture()],
+    });
+
+    renderRootDomain(sdk, [
+      "web.sites.read",
+      "web.certificates.read",
+      "web.certificates.write",
+    ]);
+    fireEvent.click(await screen.findByRole("button", { name: "Manage certificates" }));
+
+    const candidateControl = await screen.findByRole("radio", {
+      name: /Candidate ECDSA certificate/i,
+    });
+    expect((candidateControl as HTMLInputElement).disabled).toBe(true);
+  });
+
   it("issues a certificate for a verified hostname before an application is bound", async () => {
     const domain = {
       ...subdomainFixture(),
@@ -382,7 +444,17 @@ describe("root-domain management", () => {
     const certificate = certificateFixture("certificate-ecdsa", "example.com ECDSA", "ECDSA");
     const listBindings = vi.fn().mockResolvedValue(pageOf([]));
     const listCertificates = vi.fn().mockResolvedValue(pageOf([certificate]));
-    const issueCertificate = vi.fn().mockResolvedValue(certificate);
+    const issueCertificate = vi.fn().mockResolvedValue({
+      accepted: true,
+      operationId: "operation-domain-issue-1",
+      status: "pending",
+    });
+    const retrieveOperation = vi.fn().mockResolvedValue({
+      certificateId: certificate.id,
+      id: "operation-domain-issue-1",
+      operationType: "ISSUE",
+      status: "SUCCEEDED",
+    });
     const sdk = domainSdk({
       certificate: {
         applications: {
@@ -394,8 +466,9 @@ describe("root-domain management", () => {
             },
           },
         },
-        create: issueCertificate,
+        issue: issueCertificate,
         list: listCertificates,
+        operations: { retrieve: retrieveOperation },
       },
       rootDomain: rootDomainFixture(),
       subdomains: [domain],
@@ -430,13 +503,18 @@ describe("root-domain management", () => {
         keyAlgorithm: "ECDSA",
       },
       { idempotencyKey: expect.any(String) },
+      expect.objectContaining({ signal: expect.any(AbortSignal), timeout: 30_000 }),
+    ));
+    await waitFor(() => expect(retrieveOperation).toHaveBeenCalledWith(
+      "operation-domain-issue-1",
+      expect.objectContaining({ signal: expect.any(AbortSignal), timeout: 30_000 }),
     ));
     expect(listBindings).not.toHaveBeenCalled();
   });
 
   it("localizes SDK failures without exposing raw permission diagnostics", async () => {
     const sdk = domainSdk({
-      certificate: { create: vi.fn(), list: vi.fn().mockResolvedValue(pageOf([])) },
+      certificate: { issue: vi.fn(), list: vi.fn().mockResolvedValue(pageOf([])) },
       rootDomain: rootDomainFixture(),
       subdomains: [],
     });

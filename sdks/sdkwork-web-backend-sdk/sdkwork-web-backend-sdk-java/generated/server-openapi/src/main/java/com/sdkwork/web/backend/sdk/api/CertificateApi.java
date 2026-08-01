@@ -55,13 +55,19 @@ public class CertificateApi {
     }
 
     /** Issue a canonical certificate */
-    public CertificatesCreateResponse201 certificatesCreate(CreateCertificateRequest body, String idempotencyKey) throws Exception {
+    public CertificatesIssueResponse202 certificatesIssue(IssueCertificateRequest body, String idempotencyKey) throws Exception {
         Map<String, String> requestHeaders = buildRequestHeaders(
                 Map.of("Idempotency-Key", new HeaderParameterSpec(idempotencyKey, "simple", false, null)),
                 Map.of()
         );
-        Object raw = client.post(ApiPaths.backendPath("/certificates"), body, null, requestHeaders, "application/json");
-        return client.convertValue(raw, new TypeReference<CertificatesCreateResponse201>() {});
+        Object raw = client.post(ApiPaths.backendPath("/certificates/issue"), body, null, requestHeaders, "application/json");
+        return client.convertValue(raw, new TypeReference<CertificatesIssueResponse202>() {});
+    }
+
+    /** Retrieve a certificate operation */
+    public CertificatesOperationsRetrieveResponse certificatesOperationsRetrieve(String operationId) throws Exception {
+        Object raw = client.get(ApiPaths.backendPath("/certificates/operations/" + serializePathParameter(operationId, new PathParameterSpec("operationId", "simple", false)) + ""));
+        return client.convertValue(raw, new TypeReference<CertificatesOperationsRetrieveResponse>() {});
     }
 
     /** Update certificate automatic renewal policy */
@@ -75,13 +81,13 @@ public class CertificateApi {
     }
 
     /** Renew a canonical certificate now */
-    public CertificatesRenewResponse certificatesRenew(String certificateId, String idempotencyKey) throws Exception {
+    public CertificatesRenewResponse202 certificatesRenew(String certificateId, String idempotencyKey) throws Exception {
         Map<String, String> requestHeaders = buildRequestHeaders(
                 Map.of("Idempotency-Key", new HeaderParameterSpec(idempotencyKey, "simple", false, null)),
                 Map.of()
         );
         Object raw = client.post(ApiPaths.backendPath("/certificates/" + serializePathParameter(certificateId, new PathParameterSpec("certificateId", "simple", false)) + "/renew"), null, null, requestHeaders);
-        return client.convertValue(raw, new TypeReference<CertificatesRenewResponse>() {});
+        return client.convertValue(raw, new TypeReference<CertificatesRenewResponse202>() {});
     }
 
     private record PathParameterSpec(String name, String style, boolean explode) {}

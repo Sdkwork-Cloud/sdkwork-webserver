@@ -199,13 +199,20 @@ const HTTP_ROUTES: &[HttpRoute] = &[
     .with_required_permission("web.certificates.read"),
     HttpRoute::dual_token(
         HttpMethod::Post,
-        "/app/v3/api/certificates",
+        "/app/v3/api/certificates/issue",
         "certificate",
-        "certificates.create",
+        "certificates.issue",
     )
     .with_required_permission("web.certificates.write")
     .with_idempotent(true)
     .with_rate_limit_tier(RateLimitTier::AuthCritical),
+    HttpRoute::dual_token(
+        HttpMethod::Get,
+        "/app/v3/api/certificates/operations/{operationId}",
+        "certificate",
+        "certificates.operations.retrieve",
+    )
+    .with_required_permission("web.certificates.read"),
     HttpRoute::dual_token(
         HttpMethod::Get,
         "/app/v3/api/sites/{siteId}/health_checks",

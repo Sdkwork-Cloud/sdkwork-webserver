@@ -75,12 +75,7 @@
       }
     },
     "events": [],
-    "configKeys": [],
-    "permissions": [
-      "web.sites.read",
-      "web.sites.read",
-      "web.sites.read"
-    ]
+    "configKeys": []
   },
   "integration": {
     "authority": "Root SDKWork specs remain authoritative.",

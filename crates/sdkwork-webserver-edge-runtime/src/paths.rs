@@ -16,7 +16,7 @@ use crate::{CertificateBundleMaterial, EdgeRuntimeError, EdgeRuntimeResult};
 const MAX_CERTIFICATE_PEM_BYTES: usize = 1024 * 1024;
 const MAX_PRIVATE_KEY_PEM_BYTES: usize = 128 * 1024;
 const MAX_PROCESS_CERTIFICATE_ACTIVATIONS: usize = 8;
-const CERTIFICATE_ACTIVATION_LOCK_FILE: &str = ".certificate-activation.lock";
+pub(crate) const CERTIFICATE_ACTIVATION_LOCK_FILE: &str = ".certificate-activation.lock";
 static ACTIVE_CERTIFICATE_ACTIVATIONS: AtomicUsize = AtomicUsize::new(0);
 
 pub fn nginx_site_path(config: &EdgeRuntimeConfig, domain: &str) -> PathBuf {
@@ -103,7 +103,9 @@ where
     Ok(activation)
 }
 
-fn acquire_certificate_activation_lock(cert_live_root: &Path) -> EdgeRuntimeResult<File> {
+pub(crate) fn acquire_certificate_activation_lock(
+    cert_live_root: &Path,
+) -> EdgeRuntimeResult<File> {
     let lock_path = cert_live_root.join(CERTIFICATE_ACTIVATION_LOCK_FILE);
     if let Ok(metadata) = std::fs::symlink_metadata(&lock_path) {
         if metadata.file_type().is_symlink() || !metadata.is_file() {
@@ -229,7 +231,7 @@ impl Drop for CertificateBundleActivation {
     }
 }
 
-fn write_staged_bundle(
+pub(crate) fn write_staged_bundle(
     staged: &TempDir,
     material: &CertificateBundleMaterial,
 ) -> EdgeRuntimeResult<()> {
@@ -334,7 +336,7 @@ where
     })
 }
 
-fn validate_certificate_name(cert_name: &str) -> EdgeRuntimeResult<()> {
+pub(crate) fn validate_certificate_name(cert_name: &str) -> EdgeRuntimeResult<()> {
     if cert_name.is_empty()
         || cert_name.len() > 253
         || matches!(cert_name, "." | "..")
@@ -352,7 +354,10 @@ fn validate_certificate_name(cert_name: &str) -> EdgeRuntimeResult<()> {
     Ok(())
 }
 
-fn validate_certificate_material(cert_pem: &str, private_key_pem: &str) -> EdgeRuntimeResult<()> {
+pub(crate) fn validate_certificate_material(
+    cert_pem: &str,
+    private_key_pem: &str,
+) -> EdgeRuntimeResult<()> {
     if cert_pem.is_empty()
         || cert_pem.len() > MAX_CERTIFICATE_PEM_BYTES
         || !cert_pem.contains("-----BEGIN CERTIFICATE-----")
@@ -426,7 +431,7 @@ fn validate_certificate_material(cert_pem: &str, private_key_pem: &str) -> EdgeR
 }
 
 #[cfg(unix)]
-fn sync_directory(path: &Path) -> EdgeRuntimeResult<()> {
+pub(crate) fn sync_directory(path: &Path) -> EdgeRuntimeResult<()> {
     std::fs::File::open(path)
         .and_then(|directory| directory.sync_all())
         .map_err(|error| {
@@ -435,7 +440,7 @@ fn sync_directory(path: &Path) -> EdgeRuntimeResult<()> {
 }
 
 #[cfg(not(unix))]
-fn sync_directory(_path: &Path) -> EdgeRuntimeResult<()> {
+pub(crate) fn sync_directory(_path: &Path) -> EdgeRuntimeResult<()> {
     Ok(())
 }
 

@@ -1,8 +1,22 @@
 import { appApiPath } from './paths';
 import type { ApiRequestOptions, HttpClient } from '../http/client';
 
-import type { CertificateResponse, CreateCertificateRequest, CreateListenerCertificateBindingRequest, ListenerCertificateBindingResponse, PageInfo } from '../types';
+import type { CertificateOperationResponse, CertificateResponse, CreateListenerCertificateBindingRequest, IssueCertificateRequest, ListenerCertificateBindingResponse, PageInfo, SdkWorkAsyncData } from '../types';
 
+
+export class CertificateOperationsApi {
+  private client: HttpClient;
+
+  constructor(client: HttpClient) {
+    this.client = client;
+  }
+
+
+/** 获取证书异步操作状态 */
+  async retrieve(operationId: string, requestOptions?: ApiRequestOptions): Promise<CertificateOperationResponse> {
+    return this.client.request<CertificateOperationResponse>(appApiPath(`/certificates/operations/${serializePathParameter(operationId, { name: 'operationId', style: 'simple', explode: false })}`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any, sdkworkUnwrapKind: 'item' });
+  }
+}
 
 export interface CertificateSitesDomainsListenerCertificateBindingsListParams {
   page?: number;
@@ -86,17 +100,19 @@ export interface CertificateListParams {
   domainId?: string;
 }
 
-export interface CertificateCreateParams {
+export interface CertificateIssueParams {
   idempotencyKey: string;
 }
 
 export class CertificateApi {
   private client: HttpClient;
   public readonly sites: CertificateSitesApi;
+  public readonly operations: CertificateOperationsApi;
 
   constructor(client: HttpClient) {
     this.client = client;
     this.sites = new CertificateSitesApi(client);
+    this.operations = new CertificateOperationsApi(client);
   }
 
 
@@ -112,14 +128,14 @@ export class CertificateApi {
   }
 
 /** 申请证书 */
-  async create(body: CreateCertificateRequest, params: CertificateCreateParams, requestOptions?: ApiRequestOptions): Promise<CertificateResponse> {
+  async issue(body: IssueCertificateRequest, params: CertificateIssueParams, requestOptions?: ApiRequestOptions): Promise<SdkWorkAsyncData> {
     const requestHeaders = buildRequestHeaders(
       {
         'Idempotency-Key': { value: params.idempotencyKey, style: 'simple', explode: false },
       },
       {}
     );
-    return this.client.request<CertificateResponse>(appApiPath(`/certificates`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, body, headers: requestHeaders, contentType: 'application/json', sdkworkUnwrapKind: 'item' });
+    return this.client.request<SdkWorkAsyncData>(appApiPath(`/certificates/issue`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, body, headers: requestHeaders, contentType: 'application/json', sdkworkUnwrapKind: 'command' });
   }
 }
 

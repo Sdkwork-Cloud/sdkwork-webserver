@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional
 from ..http_client import HttpClient
-from ..models import CertificatesCreateResponse201, CertificatesListResponse, CreateCertificateRequest, CreateListenerCertificateBindingRequest, SitesDomainsListenerCertificateBindingsCreateResponse201, SitesDomainsListenerCertificateBindingsListResponse
+from ..models import CertificatesIssueResponse202, CertificatesListResponse, CertificatesOperationsRetrieveResponse, CreateListenerCertificateBindingRequest, IssueCertificateRequest, SitesDomainsListenerCertificateBindingsCreateResponse201, SitesDomainsListenerCertificateBindingsListResponse
 
 def _append_query_string(path: str, raw_query_string: str) -> str:
     query = raw_query_string.lstrip('?')
@@ -243,6 +243,7 @@ class CertificateApi:
     def __init__(self, client: HttpClient):
         self._client = client
         self.sites = CertificateSitesApi(client)
+        self.operations = CertificateOperationsApi(client)
 
 
     def list(self, page: Optional[int] = None, page_size: Optional[int] = None, site_id: Optional[str] = None, domain_id: Optional[str] = None) -> CertificatesListResponse:
@@ -255,7 +256,7 @@ class CertificateApi:
         ])
         return self._client.get(_append_query_string(f"/app/v3/api/certificates", query))
 
-    def create(self, body: CreateCertificateRequest, idempotency_key: str) -> CertificatesCreateResponse201:
+    def create_issue(self, body: IssueCertificateRequest, idempotency_key: str) -> CertificatesIssueResponse202:
         """申请证书"""
         request_headers = build_request_headers(
             {
@@ -263,7 +264,7 @@ class CertificateApi:
             },
             {}
         )
-        return self._client.post(f"/app/v3/api/certificates", json=body, headers=request_headers)
+        return self._client.post(f"/app/v3/api/certificates/issue", json=body, headers=request_headers)
 
 class CertificateSitesApi:
     """certificate certificate.sites API client."""
@@ -315,3 +316,14 @@ class CertificateSitesDomainsListenerCertificateBindingsApi:
             {}
         )
         return self._client.delete(f"/app/v3/api/sites/{serialize_path_parameter(site_id, {'name': 'siteId', 'style': 'simple', 'explode': False})}/domains/{serialize_path_parameter(domain_id, {'name': 'domainId', 'style': 'simple', 'explode': False})}/listener_certificate_bindings/{serialize_path_parameter(binding_id, {'name': 'bindingId', 'style': 'simple', 'explode': False})}", headers=request_headers)
+
+class CertificateOperationsApi:
+    """certificate certificates.operations API client."""
+
+    def __init__(self, client: HttpClient):
+        self._client = client
+
+
+    def retrieve(self, operation_id: str) -> CertificatesOperationsRetrieveResponse:
+        """获取证书异步操作状态"""
+        return self._client.get(f"/app/v3/api/certificates/operations/{serialize_path_parameter(operation_id, {'name': 'operationId', 'style': 'simple', 'explode': False})}")

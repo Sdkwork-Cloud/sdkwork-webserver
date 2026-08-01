@@ -119,7 +119,9 @@ impl WebRepository {
                  AND (($4 IS NULL AND v.id = c.current_version_id)
                       OR ($4 IS NOT NULL AND v.uuid = $4))
              WHERE c.tenant_id = $1 AND c.uuid = $2 AND c.status = 1
-               AND c.deleted_at IS NULL AND v.status = 'ACTIVE'
+               AND c.deleted_at IS NULL
+               AND (($4 IS NULL AND v.status = 'ACTIVE')
+                    OR ($4 IS NOT NULL AND v.status IN ('ACTIVE', 'SUPERSEDED')))
                AND v.not_after > NOW()",
         )
         .bind(tenant_id)
@@ -143,6 +145,27 @@ impl WebRepository {
         let key_algorithm: String = version
             .try_get("key_algorithm")
             .map_err(|error| store_error("map listener certificate key algorithm", error))?;
+
+        let algorithm_occupied = sqlx::query(
+            "SELECT 1
+             FROM web_listener_certificate_binding
+             WHERE tenant_id = $1 AND site_binding_id = $2 AND key_algorithm = $3
+               AND certificate_id <> $4 AND status <> 'ARCHIVED' AND deleted_at IS NULL
+             LIMIT 1",
+        )
+        .bind(tenant_id)
+        .bind(site_binding_id)
+        .bind(&key_algorithm)
+        .bind(certificate_id)
+        .fetch_optional(&mut *tx)
+        .await
+        .map_err(|error| store_error("check listener certificate key algorithm", error))?
+        .is_some();
+        if algorithm_occupied {
+            return Err(WebServiceError::conflict(format!(
+                "listener already has a certificate binding for key algorithm {key_algorithm}"
+            )));
+        }
 
         let now = now_rfc3339();
         if request.is_default {
@@ -175,17 +198,36 @@ impl WebRepository {
              )
              ON CONFLICT ON CONSTRAINT uk_web_listener_certificate_binding_certificate
              DO UPDATE SET desired_version_id = EXCLUDED.desired_version_id,
+                 current_version_id = CASE
+                     WHEN web_listener_certificate_binding.status = 'ARCHIVED'
+                          OR web_listener_certificate_binding.deleted_at IS NOT NULL
+                         THEN NULL
+                     ELSE web_listener_certificate_binding.current_version_id
+                 END,
                  key_algorithm = EXCLUDED.key_algorithm, priority = EXCLUDED.priority,
                  is_default = EXCLUDED.is_default,
                  status = CASE
+                     WHEN web_listener_certificate_binding.status = 'ARCHIVED'
+                          OR web_listener_certificate_binding.deleted_at IS NOT NULL
+                         THEN 'PENDING'
+                     WHEN web_listener_certificate_binding.desired_version_id = EXCLUDED.desired_version_id
+                         THEN web_listener_certificate_binding.status
+                     WHEN web_listener_certificate_binding.status = 'PAUSED'
+                         THEN 'PAUSED'
                      WHEN web_listener_certificate_binding.current_version_id = EXCLUDED.desired_version_id
                          THEN 'ACTIVE'
                      ELSE 'PENDING'
                  END,
+                 activated_at = CASE
+                     WHEN web_listener_certificate_binding.status = 'ARCHIVED'
+                          OR web_listener_certificate_binding.deleted_at IS NOT NULL
+                         THEN NULL
+                     ELSE web_listener_certificate_binding.activated_at
+                 END,
                  updated_at = EXCLUDED.updated_at,
                  deleted_at = NULL,
                  version = web_listener_certificate_binding.version + 1
-             RETURNING uuid",
+             RETURNING uuid, status",
         )
         .bind(binding_id)
         .bind(&binding_uuid)
@@ -203,6 +245,22 @@ impl WebRepository {
         let binding_uuid: String = row
             .try_get("uuid")
             .map_err(|error| store_error("map listener certificate binding id", error))?;
+        let binding_status: String = row
+            .try_get("status")
+            .map_err(|error| store_error("map listener certificate rollout status", error))?;
+        if binding_status != "ACTIVE" {
+            sqlx::query(
+                "DELETE FROM web_certificate_node_state
+                 WHERE tenant_id = $1 AND certificate_id = $2
+                   AND certificate_version_id = $3",
+            )
+            .bind(tenant_id)
+            .bind(certificate_id)
+            .bind(certificate_version_id)
+            .execute(&mut *tx)
+            .await
+            .map_err(|error| store_error("invalidate listener certificate observations", error))?;
+        }
         tx.commit()
             .await
             .map_err(|error| store_error("commit listener certificate binding", error))?;
@@ -322,10 +380,12 @@ fn map_listener_binding_row(
     let identifiers = serde_json::from_str::<Vec<CertificateIdentifierResponse>>(&identifiers_json)
         .map_err(|error| sqlx::Error::Decode(Box::new(error)))?;
     let certificate_name: String = row.try_get("certificate_name")?;
-    let certificate_status = super::certificates::certificate_asset_status(
-        row.try_get("certificate_status")?,
-        row.try_get("certificate_renewal_status")?,
-    );
+    let certificate_status: i32 = row.try_get("certificate_status")?;
+    let certificate_renewal_status: i32 = row.try_get("certificate_renewal_status")?;
+    let desired_not_after =
+        super::support::optional_instant_from_row(row, "desired_certificate_not_after")?;
+    let current_not_after =
+        super::support::optional_instant_from_row(row, "current_certificate_not_after")?;
     let current_certificate_version_id: Option<String> =
         row.try_get("current_certificate_version_id")?;
     let current_certificate = if current_certificate_version_id.is_some() {
@@ -334,11 +394,12 @@ fn map_listener_binding_row(
             identifiers: identifiers.clone(),
             issuer: row.try_get("current_certificate_issuer")?,
             fingerprint: row.try_get("current_certificate_fingerprint")?,
-            not_after: super::support::optional_instant_from_row(
-                row,
-                "current_certificate_not_after",
-            )?,
-            status: certificate_status.clone(),
+            not_after: current_not_after.clone(),
+            status: super::certificates::certificate_asset_status(
+                certificate_status,
+                certificate_renewal_status,
+                current_not_after.as_deref(),
+            ),
         })
     } else {
         None
@@ -355,11 +416,12 @@ fn map_listener_binding_row(
             identifiers,
             issuer: row.try_get("desired_certificate_issuer")?,
             fingerprint: row.try_get("desired_certificate_fingerprint")?,
-            not_after: super::support::optional_instant_from_row(
-                row,
-                "desired_certificate_not_after",
-            )?,
-            status: certificate_status,
+            not_after: desired_not_after.clone(),
+            status: super::certificates::certificate_asset_status(
+                certificate_status,
+                certificate_renewal_status,
+                desired_not_after.as_deref(),
+            ),
         },
         current_certificate,
         key_algorithm: row.try_get("key_algorithm")?,

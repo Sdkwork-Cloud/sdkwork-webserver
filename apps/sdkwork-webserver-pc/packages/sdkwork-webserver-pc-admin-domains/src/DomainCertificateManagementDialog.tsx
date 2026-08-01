@@ -14,7 +14,9 @@ import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } fro
 import type { WebserverAdminSdkClient } from "@sdkwork/webserver-pc-admin-core";
 import {
   formatWebserverErrorMessage,
+  pollWebserverOperation,
   translateWebserver,
+  webserverOperationRequestOptions,
   type WebserverLocale,
 } from "@sdkwork/webserver-pc-commons";
 
@@ -71,6 +73,14 @@ export function DomainCertificateManagementDialog({
   const [pendingRemoval, setPendingRemoval] = useState<Binding>();
   const bindingLoadSequence = useRef(0);
   const certificateLoadSequence = useRef(0);
+  const operationAbortController = useRef<AbortController | undefined>(undefined);
+
+  const closeDialog = useCallback(() => {
+    if (actionBusy && actionBusy !== "issue") return;
+    operationAbortController.current?.abort();
+    if (actionBusy === "issue") onChanged();
+    onClose();
+  }, [actionBusy, onChanged, onClose]);
 
   const loadCertificates = useCallback(async (targetPage: number) => {
     const sequence = ++certificateLoadSequence.current;
@@ -134,18 +144,20 @@ export function DomainCertificateManagementDialog({
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent): void {
-      if (event.key === "Escape" && !actionBusy) onClose();
+      if (event.key === "Escape" && (!actionBusy || actionBusy === "issue")) closeDialog();
     }
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [actionBusy, onClose]);
+  }, [actionBusy, closeDialog]);
+
+  useEffect(() => () => operationAbortController.current?.abort(), []);
 
   const boundCertificateIds = useMemo(
     () => new Set(bindings.map((binding) => binding.certificateId)),
     [bindings],
   );
   const boundAlgorithms = useMemo(
-    () => new Set(bindings.filter((binding) => binding.status === "ACTIVE").map((binding) => binding.keyAlgorithm)),
+    () => new Set(bindings.filter((binding) => binding.status !== "ARCHIVED").map((binding) => binding.keyAlgorithm)),
     [bindings],
   );
   const selectedCertificate = certificates.find((certificate) => certificate.id === selectedCertificateId);
@@ -190,8 +202,10 @@ export function DomainCertificateManagementDialog({
     if (!domain.isVerified) return;
     setActionBusy("issue");
     setActionError(undefined);
+    const abortController = new AbortController();
+    operationAbortController.current = abortController;
     try {
-      const certificate = await client.certificate.create(
+      const accepted = await client.certificate.issue(
         {
           autoRenew: true,
           certType: 1,
@@ -199,14 +213,23 @@ export function DomainCertificateManagementDialog({
           keyAlgorithm,
         },
         { idempotencyKey: idempotencyKey("certificate-issue") },
+        webserverOperationRequestOptions(abortController.signal),
+      );
+      const operation = await pollWebserverOperation(
+        accepted.operationId,
+        (operationId, options) => client.certificate.operations.retrieve(operationId, options),
+        { signal: abortController.signal },
       );
       setCertificatePage(1);
-      setSelectedCertificateId(certificate.status === "ISSUED" ? certificate.id : "");
+      setSelectedCertificateId(operation.certificateId);
       await loadCertificates(1);
       onChanged();
     } catch (cause) {
       setActionError(errorMessage(cause, locale));
     } finally {
+      if (operationAbortController.current === abortController) {
+        operationAbortController.current = undefined;
+      }
       setActionBusy("");
     }
   }
@@ -240,7 +263,7 @@ export function DomainCertificateManagementDialog({
             <span>{copy.manageCertificates}</span>
             <h2>{domain.hostname}</h2>
           </div>
-          <button aria-label={copy.close} className="icon-button" disabled={Boolean(actionBusy)} onClick={onClose} title={copy.close} type="button">
+          <button aria-label={copy.close} className="icon-button" disabled={Boolean(actionBusy && actionBusy !== "issue")} onClick={closeDialog} title={copy.close} type="button">
             <X aria-hidden="true" size={17} />
           </button>
         </header>

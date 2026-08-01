@@ -29,6 +29,13 @@ seed process, or deployed-service worker.
 `agent/development.env.example` and `SDKWORK_WEB_AGENT_*` remain wire/runtime compatibility aliases
 for the v3 Agent contract; conflicting canonical and compatibility values fail startup.
 
+`worker/development.env.example` configures the durable certificate operation worker. API issue and
+renew commands persist work before returning `202`; the worker claims that work with an expiring
+lease and fencing token, executes bounded ACME/material activation through the service, and writes
+the terminal aggregate state transactionally. Each replica uses a distinct stable
+`SDKWORK_WEB_CERT_WORKER_ID`. Browser polling cancellation only stops the client query loop and does
+not cancel persisted server work.
+
 ## Runtime And Secrets
 
 Tracked files contain no access tokens, Node Tokens, passwords, private keys, or database

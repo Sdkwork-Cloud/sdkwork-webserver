@@ -68,10 +68,7 @@
       }
     },
     "events": [],
-    "configKeys": [],
-    "permissions": [
-      "web.nginx.write"
-    ]
+    "configKeys": []
   },
   "integration": {
     "authority": "Root SDKWork specs remain authoritative.",

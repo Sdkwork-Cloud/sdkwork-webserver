@@ -548,6 +548,38 @@ mod tests {
     }
 
     #[test]
+    fn certificate_observations_survive_restart_and_follow_the_desired_generation() {
+        let directory = TempDir::new().expect("state tempdir");
+        let path = directory.path().join("agent-state.json");
+        let desired = version('f');
+        let observation = AgentCertificateObservation {
+            certificate_id: "certificate-1".to_string(),
+            fingerprint: "a".repeat(64),
+            sync_version: desired.clone(),
+            state: "SERVED".to_string(),
+            observed_at: "2026-07-31T00:00:00Z".to_string(),
+            failure_code: None,
+        };
+        let state = NodeDaemonState::default()
+            .with_desired(&desired)
+            .unwrap()
+            .with_certificate_observations(vec![observation.clone()])
+            .unwrap()
+            .with_observed(&desired)
+            .unwrap();
+        state.save(&path).unwrap();
+
+        let recovered = NodeDaemonState::load(&path).unwrap();
+        assert_eq!(recovered.certificate_observations(), &[observation]);
+        assert!(recovered
+            .with_certificate_observations(vec![AgentCertificateObservation {
+                sync_version: version('e'),
+                ..recovered.certificate_observations()[0].clone()
+            }])
+            .is_err());
+    }
+
+    #[test]
     fn state_checksum_corruption_and_invalid_transitions_fail_closed() {
         let directory = TempDir::new().expect("state tempdir");
         let path = directory.path().join("agent-state.json");

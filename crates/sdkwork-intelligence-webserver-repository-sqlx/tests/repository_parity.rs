@@ -6,30 +6,129 @@ use sdkwork_database_id::SnowflakeIdGenerator;
 use sdkwork_database_sqlx::create_pool_from_config;
 use sdkwork_intelligence_webserver_repository_sqlx::PostgresWebRepository;
 use sdkwork_intelligence_webserver_service::{
-    AuditLogWrite, RuntimeAssignmentTarget, RuntimeAssignmentWrite, RuntimeObservationWrite,
-    WebRepositoryPort, WebService,
+    AuditLogWrite, DomainVerificationChallenge, DomainVerificationObservation,
+    RuntimeAssignmentTarget, RuntimeAssignmentWrite, RuntimeObservationWrite, WebRepositoryPort,
 };
-use sdkwork_webserver_acme_service::{AcmeConfig, CertificateIssuer};
 use sdkwork_webserver_contract::{
     AgentCertificateObservation, AgentHeartbeatRequest, ApplicationStoreListing,
-    CertificateIssueUpdate, CreateCertificateRequest, CreateDeploymentRequest, CreateDomainRequest,
-    CreateEnvVariableRequest, CreateHealthCheckRequest, CreateListenerCertificateBindingRequest,
-    CreateManagedDomainRequest, CreateNginxConfigRequest, CreateRootDomainHostnameRequest,
-    CreateRootDomainRequest, CreateServerRequest, CreateSiteRequest, CreateSourceVersionRequest,
-    ListNginxConfigsQuery, ListRootDomainsQuery, ListSitesQuery, MediaResource,
-    RuntimeObservationState, SourceVersionConfigSnapshot, UpdateDomainApplicationBindingRequest,
-    UpdateNginxConfigRequest, UpdateSiteRequest, WebAppRequestContext, WebAppResourceScope,
-    WebServiceErrorKind, WebsiteRuntimeSetSnapshot,
+    CertificateIssueUpdate, CertificateOperationLease, CreateDeploymentRequest,
+    CreateDomainRequest, CreateEnvVariableRequest, CreateHealthCheckRequest,
+    CreateListenerCertificateBindingRequest, CreateManagedDomainRequest, CreateNginxConfigRequest,
+    CreateRootDomainHostnameRequest, CreateRootDomainRequest, CreateServerRequest,
+    CreateSiteRequest, CreateSourceVersionRequest, IssueCertificateRequest, ListNginxConfigsQuery,
+    ListRootDomainsQuery, ListSitesQuery, MediaResource, RuntimeObservationState,
+    SourceVersionConfigSnapshot, UpdateDomainApplicationBindingRequest, UpdateNginxConfigRequest,
+    UpdateSiteRequest, WebServiceErrorKind, WebsiteRuntimeSetSnapshot,
 };
 use sdkwork_webserver_core::website_runtime::website_runtime_set_snapshot_sha256;
 use sdkwork_webserver_database_host::bootstrap_web_database;
-use sdkwork_webserver_edge_runtime::{EdgeRuntime, EdgeRuntimeConfig};
 use sqlx::{PgPool, Row};
-use tempfile::TempDir;
 
 const POSTGRES_TEST_URL_ENV: &str = "SDKWORK_DATABASE_TEST_POSTGRES_URL";
 const TENANT_A: i64 = 410_001;
 const TENANT_B: i64 = 410_002;
+
+async fn verify_site_domain_with_evidence(
+    repository: &Arc<dyn WebRepositoryPort>,
+    tenant_id: i64,
+    site_id: &str,
+    domain_id: &str,
+) -> DomainVerificationChallenge {
+    let challenge = repository
+        .prepare_domain_verification(tenant_id, site_id, domain_id)
+        .await
+        .expect("prepare domain verification challenge");
+    repository
+        .record_domain_verification_observation(
+            tenant_id,
+            &challenge.challenge_id,
+            &DomainVerificationObservation {
+                observed_sha256: Some(challenge.proof_sha256.clone()),
+                failure_code: None,
+            },
+        )
+        .await
+        .expect("record matching domain verification evidence")
+}
+
+async fn verify_managed_domain_with_evidence(
+    repository: &Arc<dyn WebRepositoryPort>,
+    tenant_id: i64,
+    domain_id: &str,
+) -> DomainVerificationChallenge {
+    let challenge = repository
+        .prepare_managed_domain_verification(tenant_id, domain_id)
+        .await
+        .expect("prepare managed domain verification challenge");
+    repository
+        .record_domain_verification_observation(
+            tenant_id,
+            &challenge.challenge_id,
+            &DomainVerificationObservation {
+                observed_sha256: Some(challenge.proof_sha256.clone()),
+                failure_code: None,
+            },
+        )
+        .await
+        .expect("record matching managed domain verification evidence")
+}
+
+async fn enqueue_and_claim_certificate(
+    repository: &Arc<dyn WebRepositoryPort>,
+    tenant_id: i64,
+    owner_id: Option<i64>,
+    requested_by: Option<i64>,
+    request: &IssueCertificateRequest,
+    idempotency_key: &str,
+    lease_owner: &str,
+) -> CertificateOperationLease {
+    let operation = repository
+        .enqueue_certificate_issue(
+            tenant_id,
+            owner_id,
+            requested_by,
+            request,
+            Some(idempotency_key),
+        )
+        .await
+        .expect("enqueue certificate operation");
+    repository
+        .claim_certificate_operations(lease_owner, 60, 32)
+        .await
+        .expect("claim certificate operation")
+        .into_iter()
+        .find(|lease| lease.operation_id == operation.operation_id)
+        .expect("enqueued certificate operation must be claimable")
+}
+
+fn test_certificate_update(
+    cert_name: &str,
+    cert_type: i32,
+    key_algorithm: &str,
+    hash_marker: char,
+    auto_renew: bool,
+) -> CertificateIssueUpdate {
+    CertificateIssueUpdate {
+        cert_name: cert_name.to_string(),
+        cert_type,
+        issuer: "SDKWork Test CA".to_string(),
+        subject: format!("CN={cert_name}"),
+        serial_sha256: hash_marker.to_string().repeat(64),
+        fingerprint_sha256: hash_marker.to_string().repeat(64),
+        spki_sha256: hash_marker.to_string().repeat(64),
+        chain_sha256: hash_marker.to_string().repeat(64),
+        key_algorithm: key_algorithm.to_string(),
+        fullchain_pem: format!(
+            "-----BEGIN CERTIFICATE-----\n{cert_name}\n-----END CERTIFICATE-----\n"
+        ),
+        private_key_pem: format!(
+            "-----BEGIN PRIVATE KEY-----\n{cert_name}\n-----END PRIVATE KEY-----\n"
+        ),
+        not_before: "2026-01-01T00:00:00Z".to_string(),
+        not_after: "2027-01-01T00:00:00Z".to_string(),
+        auto_renew,
+    }
+}
 
 struct EnvironmentVariableGuard {
     key: &'static str,
@@ -121,58 +220,47 @@ async fn verify_certificate_activation_compensation(context: &TestContext) {
         )
         .await
         .expect("create certificate compensation domain");
-    context
-        .repository
-        .verify_domain(TENANT_A, &site.id, &domain.id)
-        .await
-        .expect("verify certificate compensation domain");
+    verify_site_domain_with_evidence(&context.repository, TENANT_A, &site.id, &domain.id).await;
 
-    install_certificate_finalize_failure_trigger(&context.pool).await;
-    let runtime_directory = TempDir::new().expect("create certificate runtime directory");
-    let issuer = CertificateIssuer::new(
-        AcmeConfig::new(
-            "https://acme-staging-v02.api.letsencrypt.org/directory".to_string(),
-            "admin@example.test".to_string(),
-            30,
-            None,
-            false,
-        )
-        .expect("build test ACME config"),
-        runtime_directory.path().to_string_lossy(),
-    )
-    .expect("build test certificate issuer");
-    let edge_runtime = EdgeRuntime::new(EdgeRuntimeConfig {
-        nginx_enabled: false,
-        nginx_binary: "nginx".to_string(),
-        nginx_main_config: runtime_directory.path().join("nginx.conf"),
-        nginx_sites_root: runtime_directory.path().join("sites"),
-        cert_live_root: runtime_directory.path().join("certificates"),
-        site_family: "sdkwork".to_string(),
-        nginx_command_timeout_ms: 10_000,
-        tls_verify_address: "127.0.0.1:443".parse().unwrap(),
-        tls_verify_timeout_ms: 5_000,
-    });
-    let service = WebService::new(
-        context.repository.clone(),
-        Arc::new(issuer),
-        Arc::new(edge_runtime),
-    );
-    let result = service
-        .issue_certificate(
-            &WebAppRequestContext {
-                tenant_id: TENANT_A,
-                actor_id: Some(93),
-                organization_id: None,
-                session_id: Some("certificate-compensation-session".to_string()),
-                idempotency_key: Some("certificate-compensation".to_string()),
-                resource_scope: WebAppResourceScope::Owner,
-            },
-            &CreateCertificateRequest {
+    let operation = context
+        .repository
+        .enqueue_certificate_issue(
+            TENANT_A,
+            Some(93),
+            Some(93),
+            &IssueCertificateRequest {
                 domain_ids: vec![domain.id],
                 cert_type: 3,
                 key_algorithm: "ECDSA".to_string(),
                 auto_renew: false,
             },
+            Some("certificate-compensation"),
+        )
+        .await
+        .expect("enqueue compensation certificate operation");
+    sqlx::query(
+        "UPDATE web_certificate_operation SET max_attempts = 1 WHERE tenant_id = $1 AND uuid = $2",
+    )
+    .bind(TENANT_A)
+    .bind(&operation.operation_id)
+    .execute(&context.pool)
+    .await
+    .expect("bound compensation operation retry budget");
+    let lease = context
+        .repository
+        .claim_certificate_operations("repository-compensation", 60, 1)
+        .await
+        .expect("claim compensation certificate operation")
+        .into_iter()
+        .next()
+        .expect("compensation operation must be claimable");
+
+    install_certificate_finalize_failure_trigger(&context.pool).await;
+    let result = context
+        .repository
+        .finalize_certificate_operation(
+            &lease,
+            &test_certificate_update("compensation.example.test", 3, "ECDSA", 'a', false),
         )
         .await;
     assert_eq!(
@@ -182,20 +270,36 @@ async fn verify_certificate_activation_compensation(context: &TestContext) {
         WebServiceErrorKind::Internal
     );
 
-    let generation_count = std::fs::read_dir(runtime_directory.path().join("certificates"))
-        .expect("read certificate runtime root")
-        .filter_map(Result::ok)
-        .filter(|entry| entry.file_type().is_ok_and(|file_type| file_type.is_dir()))
-        .count();
-    assert_eq!(
-        generation_count, 0,
-        "failed database finalization must remove the uncommitted certificate generation"
-    );
-    let row = sqlx::query(
-        "SELECT status, renewal_status, CAST(metadata AS TEXT) AS metadata
-         FROM web_certificate WHERE tenant_id = $1 ORDER BY id DESC LIMIT 1",
+    let version_count: i64 = sqlx::query_scalar(
+        "SELECT COUNT(*) FROM web_certificate_version version
+         INNER JOIN web_certificate certificate ON certificate.id = version.certificate_id
+         WHERE certificate.tenant_id = $1 AND certificate.uuid = $2",
     )
     .bind(TENANT_A)
+    .bind(&lease.certificate_id)
+    .fetch_one(&context.pool)
+    .await
+    .expect("count rolled-back certificate versions");
+    assert_eq!(
+        version_count, 0,
+        "certificate version and operation completion must roll back together"
+    );
+    context
+        .repository
+        .fail_certificate_operation(
+            &lease,
+            "CERTIFICATE_FINALIZATION_FAILED",
+            "2099-01-01T00:00:00Z",
+            "2099-01-02T00:00:00Z",
+        )
+        .await
+        .expect("persist bounded terminal compensation failure");
+    let row = sqlx::query(
+        "SELECT status, renewal_status, CAST(metadata AS TEXT) AS metadata
+         FROM web_certificate WHERE tenant_id = $1 AND uuid = $2",
+    )
+    .bind(TENANT_A)
+    .bind(&lease.certificate_id)
     .fetch_one(&context.pool)
     .await
     .expect("load compensated certificate row");
@@ -206,7 +310,7 @@ async fn verify_certificate_activation_compensation(context: &TestContext) {
         3
     );
     let metadata: String = row.try_get("metadata").expect("failure metadata");
-    assert!(metadata.contains("certificate database finalization failed"));
+    assert!(metadata.contains("CERTIFICATE_FINALIZATION_FAILED"));
     assert!(!metadata.contains("forced certificate finalize failure"));
     remove_certificate_finalize_failure_trigger(&context.pool).await;
 }
@@ -545,10 +649,7 @@ async fn verify_root_domain_zone_contract(context: &TestContext, site_id: &str) 
         .expect("create unbound root-domain hostname");
     assert_eq!(www.hostname, "www.zone-contract.example");
 
-    repository
-        .verify_managed_domain(TENANT_A, &apex.id)
-        .await
-        .expect("verify root-domain apex hostname");
+    verify_managed_domain_with_evidence(repository, TENANT_A, &apex.id).await;
     let deployment = repository
         .create_deployment(
             TENANT_A,
@@ -859,12 +960,11 @@ async fn verify_public_repository_surface(context: &TestContext, site_id: &str) 
             .total,
         1
     );
-    assert!(
-        repository
-            .verify_domain(TENANT_A, site_id, &domain.id)
+    assert_eq!(
+        verify_site_domain_with_evidence(repository, TENANT_A, site_id, &domain.id)
             .await
-            .expect("verify domain timestamp")
-            .verified
+            .status,
+        "VERIFIED"
     );
 
     let detached_domain = repository
@@ -882,12 +982,30 @@ async fn verify_public_repository_surface(context: &TestContext, site_id: &str) 
         .expect("create detached managed domain");
     assert!(detached_domain.application_id.is_none());
     assert_eq!(detached_domain.certificate_count, 0);
-    assert!(
-        repository
-            .verify_managed_domain(TENANT_A, &detached_domain.id)
+    assert_eq!(
+        verify_managed_domain_with_evidence(repository, TENANT_A, &detached_domain.id)
             .await
-            .expect("verify detached managed domain")
-            .verified
+            .status,
+        "VERIFIED"
+    );
+    let self_signed_issue_auto_renew_error = repository
+        .enqueue_certificate_issue(
+            TENANT_A,
+            None,
+            Some(91),
+            &IssueCertificateRequest {
+                domain_ids: vec![detached_domain.id.clone()],
+                cert_type: 3,
+                key_algorithm: "ECDSA".to_string(),
+                auto_renew: true,
+            },
+            Some("detached-self-signed-auto-renew"),
+        )
+        .await
+        .expect_err("self-signed issue must reject automatic renewal at the repository boundary");
+    assert_eq!(
+        self_signed_issue_auto_renew_error.kind(),
+        WebServiceErrorKind::Validation
     );
     assert_eq!(
         repository
@@ -906,64 +1024,63 @@ async fn verify_public_repository_surface(context: &TestContext, site_id: &str) 
         0
     );
 
+    let detached_lease = enqueue_and_claim_certificate(
+        repository,
+        TENANT_A,
+        None,
+        Some(91),
+        &IssueCertificateRequest {
+            domain_ids: vec![detached_domain.id.clone()],
+            cert_type: 3,
+            key_algorithm: "ECDSA".to_string(),
+            auto_renew: false,
+        },
+        "detached-certificate-ecdsa",
+        "repository-detached-ecdsa",
+    )
+    .await;
     let detached_certificate = repository
-        .create_certificate(
-            TENANT_A,
-            None,
-            &CreateCertificateRequest {
-                domain_ids: vec![detached_domain.id.clone()],
-                cert_type: 3,
-                key_algorithm: "ECDSA".to_string(),
-                auto_renew: false,
-            },
+        .finalize_certificate_operation(
+            &detached_lease,
+            &test_certificate_update("detached.example.test", 3, "ECDSA", '1', false),
         )
         .await
-        .expect("create certificate for detached domain");
+        .expect("finalize certificate for detached domain");
+    let self_signed_auto_renew_error = repository
+        .update_certificate_auto_renew(TENANT_A, &detached_certificate.id, true)
+        .await
+        .expect_err("self-signed certificates must not enable automatic renewal");
+    assert_eq!(
+        self_signed_auto_renew_error.kind(),
+        WebServiceErrorKind::Validation
+    );
     assert_eq!(
         detached_certificate.identifiers[0].domain_id.as_str(),
         detached_domain.id.as_str()
     );
+    let replacement_lease = enqueue_and_claim_certificate(
+        repository,
+        TENANT_A,
+        None,
+        Some(91),
+        &IssueCertificateRequest {
+            domain_ids: vec![detached_domain.id.clone()],
+            cert_type: 3,
+            key_algorithm: "RSA".to_string(),
+            auto_renew: false,
+        },
+        "detached-certificate-rsa",
+        "repository-detached-rsa",
+    )
+    .await;
     let replacement_certificate = repository
-        .create_certificate(
-            TENANT_A,
-            None,
-            &CreateCertificateRequest {
-                domain_ids: vec![detached_domain.id.clone()],
-                cert_type: 3,
-                key_algorithm: "RSA".to_string(),
-                auto_renew: false,
-            },
+        .finalize_certificate_operation(
+            &replacement_lease,
+            &test_certificate_update("detached.example.test", 3, "RSA", '2', false),
         )
         .await
-        .expect("create a second certificate for the detached domain");
+        .expect("finalize a second certificate for the detached domain");
     assert_ne!(replacement_certificate.id, detached_certificate.id);
-    repository
-        .finalize_certificate(
-            TENANT_A,
-            &detached_certificate.id,
-            &CertificateIssueUpdate {
-                cert_name: "detached.example.test".to_string(),
-                cert_type: 3,
-                issuer: "SDKWork Detached Test CA".to_string(),
-                subject: "CN=detached.example.test".to_string(),
-                serial_sha256: "1".repeat(64),
-                fingerprint_sha256: "2".repeat(64),
-                spki_sha256: "3".repeat(64),
-                chain_sha256: "4".repeat(64),
-                key_algorithm: "ECDSA".to_string(),
-                fullchain_pem: "-----BEGIN CERTIFICATE-----\ndetached\n-----END CERTIFICATE-----\n"
-                    .to_string(),
-                private_key_pem:
-                    "-----BEGIN PRIVATE KEY-----\ndetached\n-----END PRIVATE KEY-----\n"
-                        .to_string(),
-                not_before: "2026-01-01T00:00:00Z".to_string(),
-                not_after: "2027-01-01T00:00:00Z".to_string(),
-                auto_renew: false,
-            },
-            None,
-        )
-        .await
-        .expect("activate a certificate while its domain is detached");
     assert_eq!(
         repository
             .list_managed_domains(TENANT_A, 1, 20)
@@ -1219,32 +1336,27 @@ async fn verify_public_repository_surface(context: &TestContext, site_id: &str) 
         .expect("atomically activate nginx config through global backend scope");
     verify_nginx_activation_rollback(context, site_id, &nginx.id).await;
 
-    let (certificate_id, _) = repository
-        .insert_certificate_pending(TENANT_A, None, &[domain.id.clone()], 1, "ECDSA", true)
-        .await
-        .expect("insert pending certificate timestamps");
-    let certificate_update = CertificateIssueUpdate {
-        cert_name: "parity.example.test".to_string(),
-        cert_type: 1,
-        issuer: "SDKWork Test CA".to_string(),
-        subject: "CN=parity.example.test".to_string(),
-        serial_sha256: "5".repeat(64),
-        fingerprint_sha256: "6".repeat(64),
-        spki_sha256: "7".repeat(64),
-        chain_sha256: "8".repeat(64),
-        key_algorithm: "ECDSA".to_string(),
-        fullchain_pem: "-----BEGIN CERTIFICATE-----\nparity\n-----END CERTIFICATE-----\n"
-            .to_string(),
-        private_key_pem: "-----BEGIN PRIVATE KEY-----\nparity\n-----END PRIVATE KEY-----\n"
-            .to_string(),
-        not_before: "2026-01-01T00:00:00Z".to_string(),
-        not_after: "2027-01-01T00:00:00Z".to_string(),
-        auto_renew: true,
-    };
+    let certificate_lease = enqueue_and_claim_certificate(
+        repository,
+        TENANT_A,
+        Some(91),
+        Some(91),
+        &IssueCertificateRequest {
+            domain_ids: vec![domain.id.clone()],
+            cert_type: 1,
+            key_algorithm: "ECDSA".to_string(),
+            auto_renew: true,
+        },
+        "parity-certificate-issue",
+        "repository-parity-issue",
+    )
+    .await;
+    let certificate_id = certificate_lease.certificate_id.clone();
+    let certificate_update = test_certificate_update("parity.example.test", 1, "ECDSA", '5', true);
     let certificate = repository
-        .finalize_certificate(TENANT_A, &certificate_id, &certificate_update, None)
+        .finalize_certificate_operation(&certificate_lease, &certificate_update)
         .await
-        .expect("finalize certificate JSON and timestamps");
+        .expect("finalize certificate operation and version atomically");
     assert_eq!(certificate.status, "ISSUED");
     let listener_binding = repository
         .bind_listener_certificate(
@@ -1312,7 +1424,18 @@ async fn verify_public_repository_surface(context: &TestContext, site_id: &str) 
         .items
         .is_empty());
     repository
-        .insert_certificate_pending(TENANT_A, Some(92), &[domain.id.clone()], 1, "ECDSA", true)
+        .enqueue_certificate_issue(
+            TENANT_A,
+            Some(92),
+            Some(92),
+            &IssueCertificateRequest {
+                domain_ids: vec![domain.id.clone()],
+                cert_type: 1,
+                key_algorithm: "ECDSA".to_string(),
+                auto_renew: true,
+            },
+            Some("parity-wrong-owner-issue"),
+        )
         .await
         .expect_err("another user cannot issue a certificate for an owned application domain");
     let disabled_certificate = repository
@@ -1321,21 +1444,60 @@ async fn verify_public_repository_surface(context: &TestContext, site_id: &str) 
         .expect("disable certificate automatic renewal");
     assert_eq!(disabled_certificate.id, certificate_id);
     assert_eq!(disabled_certificate.auto_renew, Some(false));
-    assert!(!repository
-        .list_certificates_due_for_renewal(3650, "2020-01-01T00:00:00Z", 20)
-        .await
-        .expect("exclude disabled certificate from renewal scan")
-        .iter()
-        .any(|candidate| candidate.certificate_id == certificate_id));
+    assert_eq!(
+        repository
+            .schedule_due_certificate_renewals(365, 20)
+            .await
+            .expect("exclude disabled certificate from renewal schedule"),
+        0
+    );
     repository
-        .retrieve_certificate_renewal_candidate(TENANT_B, &certificate_id)
+        .enqueue_certificate_renewal(
+            TENANT_B,
+            &certificate_id,
+            Some(91),
+            Some("parity-wrong-tenant-renewal"),
+        )
         .await
-        .expect_err("certificate renewal candidate must remain tenant isolated");
-    let manual_candidate = repository
-        .retrieve_certificate_renewal_candidate(TENANT_A, &certificate_id)
+        .expect_err("certificate renewal operation must remain tenant isolated");
+    let manual_renewal = repository
+        .enqueue_certificate_renewal(
+            TENANT_A,
+            &certificate_id,
+            Some(91),
+            Some("parity-manual-renewal-disabled-policy"),
+        )
         .await
-        .expect("load disabled certificate for manual renewal");
-    assert!(!manual_candidate.auto_renew);
+        .expect("manual renewal is independent of the automatic renewal policy");
+    let manual_lease = repository
+        .claim_certificate_operations("repository-manual-renewal", 60, 32)
+        .await
+        .expect("claim manual renewal")
+        .into_iter()
+        .find(|lease| lease.operation_id == manual_renewal.operation_id)
+        .expect("manual renewal must be claimable");
+    assert!(!manual_lease.auto_renew);
+    repository
+        .finalize_certificate_operation(
+            &manual_lease,
+            &test_certificate_update("parity.example.test", 1, "ECDSA", '6', false),
+        )
+        .await
+        .expect("finalize manual renewal while automatic renewal is disabled");
+    let manual_renewal_replay = repository
+        .enqueue_certificate_renewal(
+            TENANT_A,
+            &certificate_id,
+            Some(91),
+            Some("parity-manual-renewal-disabled-policy"),
+        )
+        .await
+        .expect("replay completed renewal with the original idempotency key");
+    assert_eq!(
+        manual_renewal_replay.operation_id,
+        manual_renewal.operation_id
+    );
+    assert_eq!(manual_renewal_replay.status, "SUCCEEDED");
     let enabled_certificate = repository
         .update_certificate_auto_renew(TENANT_A, &certificate_id, true)
         .await
@@ -1349,88 +1511,114 @@ async fn verify_public_repository_surface(context: &TestContext, site_id: &str) 
             .total,
         3
     );
+    let same_algorithm_lease = enqueue_and_claim_certificate(
+        repository,
+        TENANT_A,
+        Some(91),
+        Some(91),
+        &IssueCertificateRequest {
+            domain_ids: vec![domain.id.clone()],
+            cert_type: 3,
+            key_algorithm: "ECDSA".to_string(),
+            auto_renew: false,
+        },
+        "parity-listener-same-algorithm",
+        "repository-listener-same-algorithm",
+    )
+    .await;
+    let same_algorithm_certificate = repository
+        .finalize_certificate_operation(
+            &same_algorithm_lease,
+            &test_certificate_update("parity.example.test", 3, "ECDSA", 'e', false),
+        )
+        .await
+        .expect("finalize a second ECDSA certificate for the listener domain");
+    let same_algorithm_error = repository
+        .bind_listener_certificate(
+            TENANT_A,
+            site_id,
+            &domain.id,
+            &CreateListenerCertificateBindingRequest {
+                certificate_id: same_algorithm_certificate.id,
+                certificate_version_id: None,
+                priority: 200,
+                is_default: false,
+            },
+        )
+        .await
+        .expect_err("one listener cannot bind two active ECDSA certificates");
+    assert_eq!(same_algorithm_error.kind(), WebServiceErrorKind::Conflict);
+    assert!(same_algorithm_error
+        .to_string()
+        .contains("key algorithm ECDSA"));
+    assert_eq!(
+        repository
+            .schedule_due_certificate_renewals(365, 20)
+            .await
+            .expect("schedule due certificate renewal"),
+        1
+    );
+    repository
+        .update_certificate_auto_renew(TENANT_A, &certificate_id, false)
+        .await
+        .expect_err("automatic renewal policy cannot invalidate a pending operation");
+    let first_renewal_lease = repository
+        .claim_certificate_operations("repository-scheduled-renewal-a", 60, 32)
+        .await
+        .expect("claim scheduled certificate renewal")
+        .into_iter()
+        .find(|lease| lease.certificate_id == certificate_id)
+        .expect("scheduled certificate renewal must be claimable");
+    assert_eq!(first_renewal_lease.operation_type, "RENEW");
     assert!(repository
-        .list_certificates_due_for_renewal(3650, "2020-01-01T00:00:00Z", 20)
+        .claim_certificate_operations("repository-scheduled-renewal-b", 60, 32)
         .await
-        .expect("list renewal timestamp projections")
-        .iter()
-        .any(|candidate| candidate.certificate_id == certificate_id));
-    let first_claim_version = repository
-        .claim_certificate_renewal(TENANT_A, &certificate_id, "2020-01-01T00:00:00Z")
-        .await
-        .expect("claim certificate renewal")
-        .expect("idle certificate must be claimable");
-    assert!(repository
-        .list_certificates_due_for_renewal(3650, "2020-01-01T00:00:00Z", 20)
-        .await
-        .expect("active renewal claim must not be scanned")
-        .iter()
-        .all(|candidate| candidate.certificate_id != certificate_id));
-    assert!(repository
-        .claim_certificate_renewal(TENANT_A, &certificate_id, "2020-01-01T00:00:00Z",)
-        .await
-        .expect("reject active certificate renewal claim")
-        .is_none());
+        .expect("active operation is not claimable before lease expiry")
+        .is_empty());
     repository
         .update_certificate_auto_renew(TENANT_A, &certificate_id, false)
         .await
         .expect_err("automatic renewal policy cannot invalidate an active claim");
 
-    let stale_timestamp_update =
-        "UPDATE web_certificate SET updated_at = CAST($1 AS TIMESTAMPTZ) WHERE tenant_id = $2 AND uuid = $3";
-    sqlx::query(stale_timestamp_update)
-        .bind("2019-12-31T23:59:59Z")
-        .bind(TENANT_A)
-        .bind(&certificate_id)
-        .execute(&context.pool)
+    sqlx::query(
+        "UPDATE web_certificate_operation SET lease_expires_at = NOW() - INTERVAL '1 second'
+         WHERE tenant_id = $1 AND uuid = $2",
+    )
+    .bind(TENANT_A)
+    .bind(&first_renewal_lease.operation_id)
+    .execute(&context.pool)
+    .await
+    .expect("expire scheduled certificate operation lease");
+    let replacement_renewal_lease = repository
+        .claim_certificate_operations("repository-scheduled-renewal-b", 60, 32)
         .await
-        .expect("age certificate renewal claim");
-    assert!(repository
-        .list_certificates_due_for_renewal(3650, "2020-01-01T00:00:00Z", 20)
-        .await
-        .expect("stale renewal claim must return to the bounded scan")
-        .iter()
-        .any(|candidate| candidate.certificate_id == certificate_id));
-    let replacement_claim_version = repository
-        .claim_certificate_renewal(TENANT_A, &certificate_id, "2020-01-01T00:00:00Z")
-        .await
-        .expect("reclaim stale certificate renewal")
-        .expect("stale certificate renewal must be claimable");
-    assert!(replacement_claim_version > first_claim_version);
-    let mut renewed_certificate_update = certificate_update.clone();
-    renewed_certificate_update.serial_sha256 = "9".repeat(64);
-    renewed_certificate_update.fingerprint_sha256 = "a".repeat(64);
-    renewed_certificate_update.spki_sha256 = "b".repeat(64);
-    renewed_certificate_update.chain_sha256 = "c".repeat(64);
+        .expect("reclaim stale certificate operation")
+        .into_iter()
+        .find(|lease| lease.operation_id == first_renewal_lease.operation_id)
+        .expect("expired certificate operation must be reclaimed");
+    assert!(replacement_renewal_lease.fencing_token > first_renewal_lease.fencing_token);
+    assert!(replacement_renewal_lease.attempt_count > first_renewal_lease.attempt_count);
+    let renewed_certificate_update =
+        test_certificate_update("parity.example.test", 1, "ECDSA", '7', true);
 
     let stale_finalize = repository
-        .finalize_certificate(
-            TENANT_A,
-            &certificate_id,
-            &renewed_certificate_update,
-            Some(first_claim_version),
-        )
+        .finalize_certificate_operation(&first_renewal_lease, &renewed_certificate_update)
         .await
         .expect_err("stale renewal worker must not finalize over a replacement claim");
     assert_eq!(stale_finalize.kind(), WebServiceErrorKind::Conflict);
     let stale_failure = repository
-        .fail_certificate_renewal(
-            TENANT_A,
-            &certificate_id,
-            first_claim_version,
-            "stale worker failure",
+        .fail_certificate_operation(
+            &first_renewal_lease,
+            "STALE_WORKER_FAILURE",
+            "2099-01-01T00:00:00Z",
+            "2099-01-02T00:00:00Z",
         )
         .await
         .expect_err("stale renewal worker must not fail a replacement claim");
     assert_eq!(stale_failure.kind(), WebServiceErrorKind::Conflict);
 
     repository
-        .finalize_certificate(
-            TENANT_A,
-            &certificate_id,
-            &renewed_certificate_update,
-            Some(replacement_claim_version),
-        )
+        .finalize_certificate_operation(&replacement_renewal_lease, &renewed_certificate_update)
         .await
         .expect("current renewal claim finalizes successfully");
     let rotated_listener = repository
@@ -1445,41 +1633,106 @@ async fn verify_public_repository_surface(context: &TestContext, site_id: &str) 
         rotated_listener.desired_certificate_version_id,
         initial_listener_version_id
     );
-    let failure_claim_version = repository
-        .claim_certificate_renewal(TENANT_A, &certificate_id, "2020-01-01T00:00:00Z")
-        .await
-        .expect("claim certificate renewal failure path")
-        .expect("finalized certificate returns to idle renewal state");
-    repository
-        .fail_certificate_renewal(
+    let exhausted_operation = repository
+        .enqueue_certificate_renewal(
             TENANT_A,
             &certificate_id,
-            failure_claim_version,
-            "synthetic parity failure",
+            Some(91),
+            Some("parity-exhausted-renewal"),
         )
         .await
-        .expect("merge certificate JSON metadata");
-    let failed_certificate = repository
-        .create_certificate(
+        .expect("enqueue renewal for exhausted lease recovery");
+    let mut exhausted_lease = repository
+        .claim_certificate_operations("repository-exhausted-renewal", 60, 32)
+        .await
+        .expect("claim renewal for exhausted lease recovery")
+        .into_iter()
+        .find(|lease| lease.operation_id == exhausted_operation.operation_id)
+        .expect("exhausted renewal must be claimable");
+    for _ in 1..exhausted_lease.max_attempts {
+        let operation = repository
+            .fail_certificate_operation(
+                &exhausted_lease,
+                "SYNTHETIC_RETRYABLE_FAILURE",
+                "2000-01-01T00:00:00Z",
+                "2099-01-02T00:00:00Z",
+            )
+            .await
+            .expect("persist retryable certificate operation failure");
+        assert_eq!(operation.status, "PENDING");
+        exhausted_lease = repository
+            .claim_certificate_operations("repository-exhausted-renewal", 60, 32)
+            .await
+            .expect("reclaim retryable certificate operation")
+            .into_iter()
+            .find(|lease| lease.operation_id == exhausted_operation.operation_id)
+            .expect("retryable certificate operation must be claimable");
+    }
+    assert_eq!(exhausted_lease.attempt_count, exhausted_lease.max_attempts);
+    sqlx::query(
+        "UPDATE web_certificate_operation SET lease_expires_at = NOW() - INTERVAL '1 second'
+         WHERE tenant_id = $1 AND uuid = $2",
+    )
+    .bind(TENANT_A)
+    .bind(&exhausted_operation.operation_id)
+    .execute(&context.pool)
+    .await
+    .expect("expire retry-exhausted certificate operation lease");
+    assert!(repository
+        .claim_certificate_operations("repository-exhausted-reaper", 60, 32)
+        .await
+        .expect("reap retry-exhausted certificate operation")
+        .is_empty());
+    let exhausted_status = repository
+        .retrieve_certificate_operation(TENANT_A, None, &exhausted_operation.operation_id)
+        .await
+        .expect("retrieve reaped certificate operation");
+    assert_eq!(exhausted_status.status, "FAILED");
+    assert_eq!(
+        exhausted_status.failure_code.as_deref(),
+        Some("CERTIFICATE_OPERATION_LEASE_EXPIRED")
+    );
+
+    let failed_issue = repository
+        .enqueue_certificate_issue(
             TENANT_A,
             None,
-            &CreateCertificateRequest {
+            Some(91),
+            &IssueCertificateRequest {
                 domain_ids: vec![domain.id.clone()],
                 cert_type: 1,
                 key_algorithm: "ECDSA".to_string(),
                 auto_renew: false,
             },
+            Some("parity-terminal-issuance-failure"),
         )
         .await
-        .expect("create certificate through public wrapper");
-    repository
-        .fail_certificate(
-            TENANT_A,
-            &failed_certificate.id,
-            "synthetic issuance failure",
+        .expect("enqueue certificate for terminal issuance failure");
+    sqlx::query(
+        "UPDATE web_certificate_operation SET max_attempts = 1 WHERE tenant_id = $1 AND uuid = $2",
+    )
+    .bind(TENANT_A)
+    .bind(&failed_issue.operation_id)
+    .execute(&context.pool)
+    .await
+    .expect("bound failed issuance retry budget");
+    let failed_issue_lease = repository
+        .claim_certificate_operations("repository-failed-issuance", 60, 32)
+        .await
+        .expect("claim failed issuance operation")
+        .into_iter()
+        .find(|lease| lease.operation_id == failed_issue.operation_id)
+        .expect("failed issuance operation must be claimable");
+    let failed_issue_status = repository
+        .fail_certificate_operation(
+            &failed_issue_lease,
+            "SYNTHETIC_ISSUANCE_FAILURE",
+            "2099-01-01T00:00:00Z",
+            "2099-01-02T00:00:00Z",
         )
         .await
-        .expect("write certificate failure JSON and timestamp");
+        .expect("write terminal certificate issuance failure");
+    assert_eq!(failed_issue_status.status, "FAILED");
 
     let server = repository
         .create_server(
@@ -1639,6 +1892,32 @@ async fn verify_public_repository_surface(context: &TestContext, site_id: &str) 
             .total,
         0
     );
+    let rebound_listener = repository
+        .bind_listener_certificate(
+            TENANT_A,
+            site_id,
+            &domain.id,
+            &CreateListenerCertificateBindingRequest {
+                certificate_id: certificate_id.clone(),
+                certificate_version_id: Some(initial_listener_version_id.clone()),
+                priority: 100,
+                is_default: true,
+            },
+        )
+        .await
+        .expect("rebind a still-valid superseded certificate version");
+    assert_eq!(rebound_listener.status, "PENDING");
+    assert_eq!(
+        rebound_listener.desired_certificate_version_id,
+        initial_listener_version_id
+    );
+    assert!(rebound_listener.current_certificate_version_id.is_none());
+    assert!(rebound_listener.current_certificate.is_none());
+    assert!(rebound_listener.activated_at.is_none());
+    repository
+        .unbind_listener_certificate(TENANT_A, site_id, &domain.id, &rebound_listener.id)
+        .await
+        .expect("remove rebound listener certificate before deleting the domain");
 
     repository
         .delete_domain(TENANT_A, site_id, &domain.id)

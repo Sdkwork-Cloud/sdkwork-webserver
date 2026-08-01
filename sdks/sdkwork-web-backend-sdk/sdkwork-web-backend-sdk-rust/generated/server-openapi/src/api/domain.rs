@@ -4,7 +4,7 @@ use crate::api::base::{RequestHeaders};
 use crate::api::paths::backend_path;
 use crate::api::paths::append_query_string;
 use crate::http::{SdkworkError, SdkworkHttpClient};
-use crate::models::{ApplicationDomainResponse, ApplicationDomainVerifyResponse, CreateManagedDomainRequest, CreateRootDomainHostnameRequest, CreateRootDomainRequest, RootDomainResponse, UpdateDomainApplicationBindingRequest};
+use crate::models::{ApplicationDomainResponse, CreateManagedDomainRequest, CreateRootDomainHostnameRequest, CreateRootDomainRequest, DomainVerifyResponse, RootDomainResponse, UpdateDomainApplicationBindingRequest};
 
 #[derive(Clone)]
 pub struct DomainApi {
@@ -114,8 +114,8 @@ impl DomainApi {
         self.client.delete(&path, None, headers.as_ref()).await
     }
 
-    /// Verify a tenant custom domain asset
-    pub async fn domains_verify(&self, domain_id: &str, idempotency_key: &str) -> Result<ApplicationDomainVerifyResponse, SdkworkError> {
+    /// Create or check a tenant custom-domain ownership challenge
+    pub async fn domains_verify(&self, domain_id: &str, idempotency_key: &str) -> Result<DomainVerifyResponse, SdkworkError> {
         let path = backend_path(&format!("/domains/{}/verify", serialize_path_parameter(domain_id, PathParameterSpec::new("domainId", "simple", false))));
         let headers = build_request_headers(
             &[

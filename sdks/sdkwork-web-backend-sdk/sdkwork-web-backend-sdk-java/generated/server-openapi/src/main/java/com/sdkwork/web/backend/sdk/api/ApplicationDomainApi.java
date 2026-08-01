@@ -43,7 +43,7 @@ public class ApplicationDomainApi {
         return null;
     }
 
-    /** Verify an application public domain */
+    /** Create or check an application-domain ownership challenge */
     public ApplicationsDomainsVerifyResponse applicationsDomainsVerify(String applicationId, String domainId, String idempotencyKey) throws Exception {
         Map<String, String> requestHeaders = buildRequestHeaders(
                 Map.of("Idempotency-Key", new HeaderParameterSpec(idempotencyKey, "simple", false, null)),

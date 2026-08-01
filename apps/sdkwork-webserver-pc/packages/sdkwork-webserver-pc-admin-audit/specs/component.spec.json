@@ -68,10 +68,7 @@
       }
     },
     "events": [],
-    "configKeys": [],
-    "permissions": [
-      "web.auditLogs.read"
-    ]
+    "configKeys": []
   },
   "integration": {
     "authority": "Root SDKWork specs remain authoritative.",

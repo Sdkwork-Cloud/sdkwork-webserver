@@ -411,11 +411,21 @@ impl WebAppApi for StubAppApi {
         ))
     }
 
-    async fn create_certificate(
+    async fn issue_certificate(
         &self,
         _context: &WebAppRequestContext,
-        _request: &sdkwork_webserver_contract::CreateCertificateRequest,
-    ) -> WebServiceResult<sdkwork_webserver_contract::CertificateResponse> {
+        _request: &sdkwork_webserver_contract::IssueCertificateRequest,
+    ) -> WebServiceResult<sdkwork_webserver_contract::CertificateOperationAcceptedResponse> {
+        Err(sdkwork_webserver_contract::WebServiceError::Internal(
+            "not implemented".into(),
+        ))
+    }
+
+    async fn retrieve_certificate_operation(
+        &self,
+        _context: &WebAppRequestContext,
+        _operation_id: &str,
+    ) -> WebServiceResult<sdkwork_webserver_contract::CertificateOperationResponse> {
         Err(sdkwork_webserver_contract::WebServiceError::Internal(
             "not implemented".into(),
         ))

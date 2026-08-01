@@ -12,6 +12,8 @@ goals:
   - Bound directory URL, contact email, renewal window, webroot, secret material, operation duration, provider response bytes, active challenges, token bytes, key-authorization bytes, authorization count, PEM bytes, and certificate names.
   - Remove HTTP-01 memory and filesystem state on success, provider failure, timeout, or future cancellation.
   - Derive validity and SHA-256 fingerprint from the actual leaf X.509 certificate DER.
+  - Reject issued material unless requested SANs and algorithm, current validity, leaf/private-key
+    pairing, and returned metadata all match independently parsed X.509 evidence.
   - Stage certificate and private-key material together and restore the prior bundle when activation fails.
   - Keep blocking certificate filesystem activation off async service executor threads.
 non_goals:
@@ -32,6 +34,10 @@ acceptance_criteria:
   - Challenge files are atomically staged below .well-known/acme-challenge, path traversal is rejected, and an RAII lease removes memory/file state on every completion or cancellation path.
   - Self-signed certificate parameters explicitly set validity; returned notBefore/notAfter are RFC3339 values parsed from the actual leaf certificate.
   - ACME and self-signed fingerprints are lowercase SHA-256 of leaf DER, not PEM or the complete chain text.
+  - Before issuance returns, ACME and self-signed material is re-parsed at the common issuer
+    boundary. Normalized DNS SANs and key algorithm equal the request, the validity interval contains
+    the current time, the PKCS#8 public-key hash equals the leaf SPKI hash, and returned certificate
+    metadata equals freshly parsed evidence.
   - Certificate names and PEM material are bounded and parsed before mutation; the chain contains certificates only, the key contains exactly one supported private key, and Rustls verifies the leaf/key pair before the bundle is staged.
   - Replacement activation restores the previous bundle when the staged generation cannot be activated and leaves no shared fixed temporary path.
   - Certificate activation has one non-queuing permit per EdgeRuntime before spawn_blocking and a fixed-memory process-wide eight-operation atomic limit; exhausted capacity fails immediately instead of retaining certificate/private-key copies in an unbounded blocking-task queue.
@@ -64,7 +70,7 @@ verification:
   - cargo clippy -p sdkwork-webserver-acme-service --all-targets -- -D warnings
   - cargo clippy -p sdkwork-webserver-edge-runtime --all-targets -- -D warnings
   - cargo clippy -p sdkwork-intelligence-webserver-repository-sqlx --all-targets -- -D warnings
-  - cargo fmt --all -- --check
+  - cargo fmt -- --check
   - git diff --check
   - pnpm.cmd verify
 ```
@@ -87,17 +93,26 @@ This requirement accepts deterministic local implementation and test evidence on
 - HTTP-01 state reserves one of 64 bounded entries without holding a lock across async I/O. A generation-bound lease owns the memory entry and atomically staged webroot file, and cleanup is serialized against reuse of the same token so an old lease cannot delete a newer challenge.
 - The whole account/order/authorization/challenge/finalize/certificate flow runs under one 10000..600000 ms deadline. At most eight authorizations and challenge leases are retained for an order.
 - Self-signed validity is assigned to rcgen parameters and then read back from the generated X.509 leaf. Both provider and self-signed paths store RFC3339 validity and SHA-256 of leaf DER.
+- The common CertificateIssuer return boundary re-parses provider and self-signed material, compares
+  normalized DNS SAN sets and algorithms to the request, verifies current validity and private-key
+  SPKI equality, and rejects any returned metadata that differs from fresh leaf evidence without
+  logging certificate or private-key material.
 - Certificate activation rejects unsafe names, over-1-MiB chains, over-128-KiB keys, non-certificate chain items, multiple/non-key key items, and leaf/private-key mismatch through Rustls `CertifiedKey`. It admits one task per runtime before `spawn_blocking`, uses a fixed process-wide eight-operation atomic limit without a waiter queue, stages and syncs both files, applies Unix `0600` before activation, restores the prior directory after injected activation failure, and retains a backup path if restoration itself fails.
 - Business-service activation encrypts the private key before filesystem mutation and runs blocking activation in `spawn_blocking`. New certificate bundles use the globally unique certificate record id instead of a lossy hostname transformation.
 
 ## Verification Evidence
 
-- `cargo test -p sdkwork-webserver-acme-service` passes 13/13 tests covering typed bounds, encryption, X.509 evidence, response-body limits, issuance admission, challenge capacity/path/failure cleanup, and scoped cleanup.
+- `cargo test -p sdkwork-webserver-acme-service` passes 18/18 tests covering typed bounds, X.509
+  evidence, response-body limits, issuance admission, challenge capacity/path/failure cleanup,
+  scoped cleanup, requested SAN/algorithm enforcement, leaf/private-key matching, and metadata
+  tamper rejection.
 - `cargo test -p sdkwork-webserver-edge-runtime` passes 11/11 tests covering non-queuing async activation admission, real certificate/key parsing, mismatch/size/path rejection, complete replacement, injected rollback, Nginx candidate validation, failure propagation, and child timeout.
 - Strict all-target Clippy passes with `-D warnings` for ACME service, edge runtime, business service, and SQLx Repository.
 - Strict component-port binding, application-layering, route-collision, and repository-document validators pass.
 - The environment-independent `pnpm.cmd verify` checks passed the complete Rust workspace, 19 Node contract tests, API materialization consistency, repository composition, API envelope, topology, database-framework, and cloud-gateway validation. PostgreSQL repository and lifecycle tests were not executed or claimed by this ACME requirement; REQ-2026-0004/0049 own that evidence.
-- `cargo fmt --all -- --check` and `git diff --check` pass.
+- The repository-owned `cargo fmt -- --check` command and `git diff --check` pass. Generated Rust
+  SDK path dependencies remain generator-owned and are verified by `pnpm sdk:generate:check` rather
+  than being rewritten through `cargo fmt --all`.
 
 ## Remaining Boundary
 

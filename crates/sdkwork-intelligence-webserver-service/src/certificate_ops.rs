@@ -1,80 +1,78 @@
-//! Certificate issuance orchestration using instant-acme/rcgen and edge runtime materialization.
+//! Certificate command submission. Certificate issuance is executed by the worker.
 
 use sdkwork_webserver_contract::{
-    CertificateResponse, CreateCertificateRequest, WebAppRequestContext, WebServiceError,
-    WebServiceResult,
+    CertificateOperationAcceptedResponse, IssueCertificateRequest, WebAppRequestContext,
+    WebServiceError, WebServiceResult,
 };
 
-use crate::WebService;
+use crate::{AuditLogWrite, WebService};
 
 impl WebService {
-    pub async fn issue_certificate(
+    pub async fn enqueue_certificate_issue(
         &self,
         context: &WebAppRequestContext,
-        request: &CreateCertificateRequest,
-    ) -> WebServiceResult<CertificateResponse> {
-        Self::validate_certificate_request(request)?;
-        let tenant_id = context.tenant_id;
-        if tenant_id <= 0 {
+        request: &IssueCertificateRequest,
+    ) -> WebServiceResult<CertificateOperationAcceptedResponse> {
+        Self::validate_certificate_issue_request(request)?;
+        if context.tenant_id <= 0 {
             return Err(WebServiceError::Forbidden);
         }
         let owner_id = Self::owner_filter(context)?;
-
-        let (certificate_id, hostnames) = self
+        let operation = self
             .repository
-            .insert_certificate_pending(
-                tenant_id,
+            .enqueue_certificate_issue(
+                context.tenant_id,
                 owner_id,
-                &request.domain_ids,
-                request.cert_type,
-                &request.key_algorithm,
-                request.auto_renew,
+                context.actor_id,
+                request,
+                context.idempotency_key.as_deref(),
             )
             .await?;
-
-        let cert_name = certificate_id.clone();
-
-        let issue_result = self
-            .certificate_issuer
-            .issue(
-                request.cert_type,
-                &hostnames,
-                &cert_name,
-                &request.key_algorithm,
-            )
-            .await;
-
-        let material = match issue_result {
-            Ok(material) => material,
-            Err(error) => {
-                tracing::error!(
-                    tenant_id,
-                    certificate_id = %certificate_id,
-                    error = ?error,
-                    "certificate issuance provider failed"
-                );
-                self.record_certificate_operation_failure(
-                    tenant_id,
-                    &certificate_id,
-                    true,
-                    None,
-                    "certificate issuer failed",
-                )
-                .await;
-                return Err(WebServiceError::Internal(
-                    "certificate issuance failed".to_string(),
-                ));
-            }
-        };
-
-        self.persist_issued_certificate(
-            tenant_id,
-            &certificate_id,
-            request.auto_renew,
-            material,
-            "certificates.issue",
-            None,
+        self.audit_certificate_command(
+            context.tenant_id,
+            context.organization_id.unwrap_or(0),
+            context.actor_id.unwrap_or(0),
+            "USER",
+            "certificates.issue.requested",
+            &operation.operation_id,
         )
-        .await
+        .await;
+        Ok(operation)
+    }
+
+    pub(crate) async fn audit_certificate_command(
+        &self,
+        tenant_id: i64,
+        organization_id: i64,
+        operator_id: i64,
+        operator_type: &'static str,
+        action: &'static str,
+        operation_id: &str,
+    ) {
+        if let Err(error) = self
+            .repository
+            .insert_audit_log(AuditLogWrite {
+                tenant_id,
+                organization_id,
+                operator_id,
+                operator_type,
+                action,
+                target_type: "certificate_operation",
+                target_id: None,
+                target_uuid: Some(operation_id),
+                request_id: None,
+                metadata_json: "{}",
+            })
+            .await
+        {
+            tracing::error!(
+                tenant_id,
+                operator_id,
+                action,
+                operation_id,
+                error = ?error,
+                "failed to persist certificate command audit"
+            );
+        }
     }
 }

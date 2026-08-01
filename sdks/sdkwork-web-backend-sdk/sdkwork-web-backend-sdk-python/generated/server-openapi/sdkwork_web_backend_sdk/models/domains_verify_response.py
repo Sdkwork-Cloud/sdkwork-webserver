@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Optional, List, Dict, Any
 
 if TYPE_CHECKING:
-    from .application_domain_verify_response import ApplicationDomainVerifyResponse
+    from .domain_verify_response import DomainVerifyResponse
 
 
 @dataclass

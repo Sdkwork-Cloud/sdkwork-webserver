@@ -68,10 +68,7 @@
       }
     },
     "events": [],
-    "configKeys": [],
-    "permissions": [
-      "web.servers.read"
-    ]
+    "configKeys": []
   },
   "integration": {
     "authority": "Root SDKWork specs remain authoritative.",

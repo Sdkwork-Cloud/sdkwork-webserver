@@ -54,7 +54,7 @@ module Sdkwork
             result
           end
 
-          # Verify an application public domain
+          # Create or check an application-domain ownership challenge
           def applications_domains_verify(application_id, domain_id, idempotency_key)
             path = interpolate_path('/backend/v3/api/applications/{applicationId}/domains/{domainId}/verify', applicationId: serialize_path_parameter(application_id, PathParameterSpec.new('applicationId', 'simple', false)), domainId: serialize_path_parameter(domain_id, PathParameterSpec.new('domainId', 'simple', false)))
             request_headers = build_request_headers(

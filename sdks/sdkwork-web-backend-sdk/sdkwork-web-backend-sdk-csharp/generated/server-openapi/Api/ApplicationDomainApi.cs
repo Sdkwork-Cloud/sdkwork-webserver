@@ -59,7 +59,7 @@ namespace SDKWork.Web.BackendSdk.Api
         }
 
         /// <summary>
-        /// Verify an application public domain
+        /// Create or check an application-domain ownership challenge
         /// </summary>
         public async Task<SDKWork.Web.BackendSdk.Models.ApplicationsDomainsVerifyResponse?> ApplicationsDomainsVerifyAsync(string applicationId, string domainId, string idempotencyKey)
         {

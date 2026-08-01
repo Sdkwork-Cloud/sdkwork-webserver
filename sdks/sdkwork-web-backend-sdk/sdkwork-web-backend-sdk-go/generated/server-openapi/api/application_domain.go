@@ -59,7 +59,7 @@ func (a *ApplicationDomainApi) ApplicationsDomainsDelete(applicationId string, d
     return decodeResult[struct{}](raw)
 }
 
-// Verify an application public domain
+// Create or check an application-domain ownership challenge
 func (a *ApplicationDomainApi) ApplicationsDomainsVerify(applicationId string, domainId string, idempotencyKey string) (sdktypes.ApplicationsDomainsVerifyResponse, error) {
     headers := BuildRequestHeaders(
         map[string]ParameterSpec{"Idempotency-Key": ParameterSpec{Value: idempotencyKey, Style: "simple", Explode: false},},

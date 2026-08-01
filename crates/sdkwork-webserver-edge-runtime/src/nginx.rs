@@ -1,5 +1,5 @@
 use std::ffi::{OsStr, OsString};
-use std::fs::File;
+use std::fs::{File, OpenOptions};
 use std::io::{Read, Seek, SeekFrom, Write};
 use std::path::Path;
 use std::process::{Command, Stdio};
@@ -15,28 +15,71 @@ use crate::{EdgeRuntimeError, EdgeRuntimeResult};
 const MAX_NGINX_CONFIG_BYTES: usize = 1_048_576;
 const MAX_NGINX_DIAGNOSTIC_BYTES: u64 = 8_192;
 const PROCESS_POLL_INTERVAL: Duration = Duration::from_millis(10);
+const NGINX_DEPLOYMENT_LOCK_FILE: &str = ".nginx-deployment.lock";
 
 pub fn deploy_nginx_config(
     config: &EdgeRuntimeConfig,
     domain: &str,
     config_content: &str,
 ) -> EdgeRuntimeResult<()> {
-    require_nginx_enabled(config)?;
-    validate_domain_file_name(domain)?;
-    validate_candidate_content(config_content)?;
-
+    let staged = stage_nginx_config(config, domain, config_content)?;
+    let _lock = acquire_nginx_deployment_lock(config)?;
     let target = nginx_site_path(config, domain);
     let parent = target.parent().ok_or_else(|| {
         EdgeRuntimeError::Filesystem("nginx site target has no parent directory".to_string())
     })?;
-    std::fs::create_dir_all(parent).map_err(|error| {
+    staged.persist(&target).map_err(|error| {
+        EdgeRuntimeError::Filesystem(format!("activate nginx config: {}", error.error))
+    })?;
+    sync_directory(parent)?;
+    Ok(())
+}
+
+pub(crate) fn acquire_nginx_deployment_lock(config: &EdgeRuntimeConfig) -> EdgeRuntimeResult<File> {
+    std::fs::create_dir_all(&config.nginx_sites_root).map_err(|error| {
         EdgeRuntimeError::Filesystem(format!("create nginx sites directory: {error}"))
     })?;
+    let lock_path = config.nginx_sites_root.join(NGINX_DEPLOYMENT_LOCK_FILE);
+    if let Ok(metadata) = std::fs::symlink_metadata(&lock_path) {
+        if metadata.file_type().is_symlink() || !metadata.is_file() {
+            return Err(EdgeRuntimeError::Filesystem(
+                "Nginx deployment lock must be a real file".to_string(),
+            ));
+        }
+    }
+    let lock = OpenOptions::new()
+        .create(true)
+        .truncate(false)
+        .read(true)
+        .write(true)
+        .open(&lock_path)
+        .map_err(|error| {
+            EdgeRuntimeError::Filesystem(format!("open Nginx deployment lock: {error}"))
+        })?;
+    lock.try_lock().map_err(|error| {
+        EdgeRuntimeError::Filesystem(format!(
+            "Nginx deployment capacity exhausted by another process: {error}"
+        ))
+    })?;
+    Ok(lock)
+}
 
+pub(crate) fn stage_nginx_config(
+    config: &EdgeRuntimeConfig,
+    domain: &str,
+    config_content: &str,
+) -> EdgeRuntimeResult<tempfile::NamedTempFile> {
+    require_nginx_enabled(config)?;
+    validate_domain_file_name(domain)?;
+    validate_candidate_content(config_content)?;
+
+    std::fs::create_dir_all(&config.nginx_sites_root).map_err(|error| {
+        EdgeRuntimeError::Filesystem(format!("create nginx sites directory: {error}"))
+    })?;
     let mut staged = Builder::new()
         .prefix(".sdkwork-nginx-")
         .suffix(".conf")
-        .tempfile_in(parent)
+        .tempfile_in(&config.nginx_sites_root)
         .map_err(|error| {
             EdgeRuntimeError::Filesystem(format!("create staged nginx config: {error}"))
         })?;
@@ -46,11 +89,7 @@ pub fn deploy_nginx_config(
         "staged nginx config",
     )?;
     validate_nginx_file(config, staged.path())?;
-    staged.persist(&target).map_err(|error| {
-        EdgeRuntimeError::Filesystem(format!("activate nginx config: {}", error.error))
-    })?;
-    sync_directory(parent)?;
-    Ok(())
+    Ok(staged)
 }
 
 pub fn validate_nginx_config(
@@ -129,6 +168,20 @@ pub fn reload_nginx(config: &EdgeRuntimeConfig) -> EdgeRuntimeResult<()> {
         [
             OsString::from("-s"),
             OsString::from("reload"),
+            OsString::from("-c"),
+            config.nginx_main_config.as_os_str().to_owned(),
+        ],
+    )
+}
+
+pub fn validate_active_nginx_config(config: &EdgeRuntimeConfig) -> EdgeRuntimeResult<()> {
+    require_nginx_enabled(config)?;
+    run_nginx_command(
+        config,
+        "active configuration validation",
+        [
+            OsString::from("-t"),
+            OsString::from("-q"),
             OsString::from("-c"),
             config.nginx_main_config.as_os_str().to_owned(),
         ],
@@ -274,7 +327,7 @@ fn read_bounded_diagnostic(file: &mut File) -> String {
 }
 
 #[cfg(unix)]
-fn sync_directory(path: &Path) -> EdgeRuntimeResult<()> {
+pub(crate) fn sync_directory(path: &Path) -> EdgeRuntimeResult<()> {
     File::open(path)
         .and_then(|directory| directory.sync_all())
         .map_err(|error| {
@@ -283,15 +336,19 @@ fn sync_directory(path: &Path) -> EdgeRuntimeResult<()> {
 }
 
 #[cfg(not(unix))]
-fn sync_directory(_path: &Path) -> EdgeRuntimeResult<()> {
+pub(crate) fn sync_directory(_path: &Path) -> EdgeRuntimeResult<()> {
     Ok(())
 }
 
 #[cfg(test)]
 mod tests {
+    use std::sync::Mutex;
+
     use tempfile::TempDir;
 
     use super::*;
+
+    static NGINX_PROCESS_TEST_LOCK: Mutex<()> = Mutex::new(());
 
     fn config(root: &Path, nginx_binary: String) -> EdgeRuntimeConfig {
         EdgeRuntimeConfig {
@@ -359,6 +416,7 @@ mod tests {
 
     #[test]
     fn nginx_command_timeout_kills_the_child() {
+        let _guard = NGINX_PROCESS_TEST_LOCK.lock().unwrap();
         let root = TempDir::new().unwrap();
         let mut config = config(root.path(), timeout_command().0.to_string());
         config.nginx_command_timeout_ms = 100;
@@ -371,6 +429,7 @@ mod tests {
 
     #[test]
     fn real_nginx_validates_exact_candidate_and_preserves_target_on_failure() {
+        let _guard = NGINX_PROCESS_TEST_LOCK.lock().unwrap();
         let Some(binary) = installed_nginx() else {
             eprintln!("nginx unavailable; real edge validation evidence skipped");
             return;
@@ -393,9 +452,13 @@ mod tests {
             .expect("replace with a second valid candidate");
         assert_eq!(std::fs::read_to_string(&target).unwrap(), replacement);
         assert_eq!(
-            std::fs::read_dir(&config.nginx_sites_root).unwrap().count(),
+            std::fs::read_dir(&config.nginx_sites_root)
+                .unwrap()
+                .filter_map(Result::ok)
+                .filter(|entry| entry.path().extension() == Some(std::ffi::OsStr::new("conf")))
+                .count(),
             1,
-            "validation runtime files must not leak into the sites directory"
+            "only the activated site configuration may remain in the sites directory"
         );
     }
 

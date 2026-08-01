@@ -20,7 +20,7 @@
     },
     {
       "path": "Api/CertificateApi.cs",
-      "sha256": "a5b2ca00a6f4f0507bee292894635272e00cb404bb003eea3f263ac221e2a087"
+      "sha256": "1899cd9614294703d705c2244c7638612b3f8d3056dafa530c82f2429fdfb5b8"
     },
     {
       "path": "Api/DeploymentApi.cs",
@@ -28,7 +28,7 @@
     },
     {
       "path": "Api/DomainApi.cs",
-      "sha256": "34ebf25c7ee40f4d10e28de1fb6085bf3ac0a8ce942f520d300f6545836b938d"
+      "sha256": "75a8720e8883023099088afbcb91549cbe7d58a8eb25c24a7cc463773185c834"
     },
     {
       "path": "Api/EnvVariableApi.cs",
@@ -79,6 +79,10 @@
       "sha256": "8df90067704bb6fd6b9f0b027322b472ddb85a6fefe48c80d1dc23a09b22c454"
     },
     {
+      "path": "Models/CertificateOperationResponse.cs",
+      "sha256": "d4141b4feb06b2914d42ff61549524f3901cdb61d16b44d12bc2570a0a351576"
+    },
+    {
       "path": "Models/CertificatePage.cs",
       "sha256": "8eb2af39714e5a4bc1820d2e49934d2e730151939e9beecfbedff5b111ae404c"
     },
@@ -87,16 +91,16 @@
       "sha256": "5116f081b0244f17589a9fec9caa7eae0c1e6add508e6acbd058d2c48925dccd"
     },
     {
-      "path": "Models/CertificatesCreateResponse201.cs",
-      "sha256": "0955e6cd9c2c1024f5e33639d89553c03df5fb1864d9c17fca0ef5d6496d9bc3"
+      "path": "Models/CertificatesIssueResponse202.cs",
+      "sha256": "7772cd83d4f6c1cdc1b9ee6ae00ab8812bdb5987a3c9e14d4ebd13708c23fd9d"
     },
     {
       "path": "Models/CertificatesListResponse.cs",
       "sha256": "f3c5d11a6e438f1f43fcfe732eab635b6b33d452edbbd30af58aefe5f09eba75"
     },
     {
-      "path": "Models/CreateCertificateRequest.cs",
-      "sha256": "a7e964a23adb4372fee7f4c1736868d2e406e8c47b4d2d6a85aea4f439f95367"
+      "path": "Models/CertificatesOperationsRetrieveResponse.cs",
+      "sha256": "1ffc850ebd0e04e4b3322d1105496929b1a44f109691043f9604bbd789c00442"
     },
     {
       "path": "Models/CreateDeploymentRequest.cs",
@@ -144,7 +148,7 @@
     },
     {
       "path": "Models/DomainVerifyResponse.cs",
-      "sha256": "6c551d1f58a631ad597f7e64c448974ac8db7ec11bebdab8b4c36a50abdc98a1"
+      "sha256": "3d3c8f8bd1f5eacdd20ca7a39db795549ad48f82115ca0dffe85b315e71ed924"
     },
     {
       "path": "Models/EnvVariablePage.cs",
@@ -169,6 +173,10 @@
     {
       "path": "Models/ImportGitSourceVersionRequest.cs",
       "sha256": "6e1e58dcc04cf33d7b6d6e0634305a5206963f3573a2df387e31c18f9fc039e6"
+    },
+    {
+      "path": "Models/IssueCertificateRequest.cs",
+      "sha256": "3c9ced099a0eeadb48cd2b2e953763c07d1522472e1c381de4b03fdcdf1ae2e3"
     },
     {
       "path": "Models/ListenerCertificateBindingResponse.cs",
@@ -197,6 +205,10 @@
     {
       "path": "Models/SdkWorkApiResponse.cs",
       "sha256": "5e21486528c865f611b8fefe29d2368ba01d60e3abea54fdc036ccb4c8e49620"
+    },
+    {
+      "path": "Models/SdkWorkAsyncData.cs",
+      "sha256": "bb0369b42707d9b99b04fa724cfa77d5a2111919e32bbc5302256a30e9152c68"
     },
     {
       "path": "Models/SdkWorkCommandData.cs",

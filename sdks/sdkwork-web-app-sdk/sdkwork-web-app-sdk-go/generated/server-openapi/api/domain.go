@@ -65,7 +65,7 @@ func (a *DomainApi) SitesDomainsDelete(siteId string, domainId string) (struct{}
     return decodeResult[struct{}](raw)
 }
 
-// 验证域名所有权
+// 创建或检查域名所有权验证挑战
 func (a *DomainApi) SitesDomainsVerify(siteId string, domainId string, idempotencyKey string) (sdktypes.SitesDomainsVerifyResponse, error) {
     headers := BuildRequestHeaders(
         map[string]ParameterSpec{"Idempotency-Key": ParameterSpec{Value: idempotencyKey, Style: "simple", Explode: false},},

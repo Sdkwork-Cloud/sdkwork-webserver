@@ -95,8 +95,7 @@
       }
     },
     "events": [],
-    "configKeys": [],
-    "permissions": []
+    "configKeys": []
   },
   "integration": {
     "authority": "Root SDKWork specs remain authoritative.",

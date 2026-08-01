@@ -1,13 +1,16 @@
-//! Background certificate renewal worker: scans autoRenew certificates and re-issues before expiry.
+//! Durable certificate operation worker.
 
-use std::time::Duration;
+use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use sdkwork_intelligence_webserver_repository_sqlx::bootstrap_web_runtime_from_env;
 use tracing::{info, warn};
 
-const DEFAULT_SCAN_INTERVAL_SECS: u64 = 3_600;
-const MIN_SCAN_INTERVAL_SECS: u64 = 60;
-const MAX_SCAN_INTERVAL_SECS: u64 = 86_400;
+const DEFAULT_OPERATION_POLL_INTERVAL_SECS: u64 = 5;
+const MIN_OPERATION_POLL_INTERVAL_SECS: u64 = 1;
+const MAX_OPERATION_POLL_INTERVAL_SECS: u64 = 60;
+const DEFAULT_RENEWAL_SCHEDULE_INTERVAL_SECS: u64 = 3_600;
+const MIN_RENEWAL_SCHEDULE_INTERVAL_SECS: u64 = 60;
+const MAX_RENEWAL_SCHEDULE_INTERVAL_SECS: u64 = 86_400;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -17,11 +20,30 @@ async fn main() -> anyhow::Result<()> {
         .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
         .init();
 
-    let interval_value = std::env::var("SDKWORK_WEB_CERT_RENEW_SCAN_INTERVAL_SECS").ok();
-    let interval_secs = parse_scan_interval_secs(interval_value.as_deref())?;
+    let poll_interval_secs = parse_bounded_interval(
+        "SDKWORK_WEB_CERT_OPERATION_POLL_INTERVAL_SECS",
+        std::env::var("SDKWORK_WEB_CERT_OPERATION_POLL_INTERVAL_SECS")
+            .ok()
+            .as_deref(),
+        DEFAULT_OPERATION_POLL_INTERVAL_SECS,
+        MIN_OPERATION_POLL_INTERVAL_SECS,
+        MAX_OPERATION_POLL_INTERVAL_SECS,
+    )?;
+    let renewal_schedule_interval_secs = parse_bounded_interval(
+        "SDKWORK_WEB_CERT_RENEW_SCAN_INTERVAL_SECS",
+        std::env::var("SDKWORK_WEB_CERT_RENEW_SCAN_INTERVAL_SECS")
+            .ok()
+            .as_deref(),
+        DEFAULT_RENEWAL_SCHEDULE_INTERVAL_SECS,
+        MIN_RENEWAL_SCHEDULE_INTERVAL_SECS,
+        MAX_RENEWAL_SCHEDULE_INTERVAL_SECS,
+    )?;
+    let worker_id = resolve_worker_id(std::env::var("SDKWORK_WEB_CERT_WORKER_ID").ok())?;
 
     info!(
-        interval_secs,
+        worker_id,
+        poll_interval_secs,
+        renewal_schedule_interval_secs,
         "sdkwork-webserver-certificate-worker started"
     );
 
@@ -29,22 +51,34 @@ async fn main() -> anyhow::Result<()> {
         .await
         .map_err(|error| anyhow::anyhow!(error))?;
     let mut shutdown_task = tokio::spawn(shutdown_signal());
+    let mut next_renewal_schedule = Instant::now();
     tokio::task::yield_now().await;
 
     loop {
-        match runtime.service.run_certificate_renewal_cycle().await {
+        let schedule_renewals = Instant::now() >= next_renewal_schedule;
+        match runtime
+            .service
+            .run_certificate_operation_cycle(&worker_id, schedule_renewals)
+            .await
+        {
             Ok(report) => {
-                if report.scanned > 0 {
+                if schedule_renewals {
+                    next_renewal_schedule =
+                        Instant::now() + Duration::from_secs(renewal_schedule_interval_secs);
+                }
+                if report.scheduled > 0 || report.claimed > 0 {
                     info!(
-                        scanned = report.scanned,
-                        renewed = report.renewed,
+                        scheduled = report.scheduled,
+                        claimed = report.claimed,
+                        succeeded = report.succeeded,
+                        retried = report.retried,
                         failed = report.failed,
-                        "certificate renewal cycle completed"
+                        "certificate operation cycle completed"
                     );
                 }
             }
             Err(error) => {
-                warn!(error = %error, "certificate renewal cycle failed");
+                warn!(error = %error, "certificate operation cycle failed");
             }
         }
         tokio::select! {
@@ -52,31 +86,54 @@ async fn main() -> anyhow::Result<()> {
                 result
                     .map_err(|error| anyhow::anyhow!("certificate worker shutdown task failed: {error}"))?
                     .map_err(|error| anyhow::anyhow!("certificate worker shutdown listener failed: {error}"))?;
-                info!("certificate renewal worker stopped after completing the active cycle");
+                info!("certificate operation worker stopped after completing the active cycle");
                 break;
             }
-            () = tokio::time::sleep(Duration::from_secs(interval_secs)) => {}
+            () = tokio::time::sleep(Duration::from_secs(poll_interval_secs)) => {}
         }
     }
 
     Ok(())
 }
 
-fn parse_scan_interval_secs(value: Option<&str>) -> anyhow::Result<u64> {
+fn parse_bounded_interval(
+    key: &str,
+    value: Option<&str>,
+    default: u64,
+    minimum: u64,
+    maximum: u64,
+) -> anyhow::Result<u64> {
     let interval = match value {
-        None => DEFAULT_SCAN_INTERVAL_SECS,
+        None => default,
         Some(value) => value.parse::<u64>().map_err(|_| {
-            anyhow::anyhow!(
-                "SDKWORK_WEB_CERT_RENEW_SCAN_INTERVAL_SECS must be an integer between {MIN_SCAN_INTERVAL_SECS} and {MAX_SCAN_INTERVAL_SECS}"
-            )
+            anyhow::anyhow!("{key} must be an integer between {minimum} and {maximum}")
         })?,
     };
-    if !(MIN_SCAN_INTERVAL_SECS..=MAX_SCAN_INTERVAL_SECS).contains(&interval) {
-        anyhow::bail!(
-            "SDKWORK_WEB_CERT_RENEW_SCAN_INTERVAL_SECS must be between {MIN_SCAN_INTERVAL_SECS} and {MAX_SCAN_INTERVAL_SECS}"
-        );
+    if !(minimum..=maximum).contains(&interval) {
+        anyhow::bail!("{key} must be between {minimum} and {maximum}");
     }
     Ok(interval)
+}
+
+fn resolve_worker_id(configured: Option<String>) -> anyhow::Result<String> {
+    let worker_id = configured.unwrap_or_else(|| {
+        let epoch_nanos = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_nanos();
+        format!("certificate-worker:{}:{epoch_nanos}", std::process::id())
+    });
+    if worker_id.is_empty()
+        || worker_id.len() > 128
+        || !worker_id
+            .bytes()
+            .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'-' | b'_' | b'.' | b':'))
+    {
+        anyhow::bail!(
+            "SDKWORK_WEB_CERT_WORKER_ID must contain 1..128 ASCII letters, digits, '-', '_', '.', or ':'"
+        );
+    }
+    Ok(worker_id)
 }
 
 async fn shutdown_signal() -> std::io::Result<()> {
@@ -100,22 +157,41 @@ async fn shutdown_signal() -> std::io::Result<()> {
 
 #[cfg(test)]
 mod tests {
-    use super::{parse_scan_interval_secs, DEFAULT_SCAN_INTERVAL_SECS};
+    use super::{parse_bounded_interval, resolve_worker_id, DEFAULT_OPERATION_POLL_INTERVAL_SECS};
 
     #[test]
-    fn scan_interval_defaults_and_accepts_bounded_values() {
+    fn operation_interval_defaults_and_accepts_bounded_values() {
         assert_eq!(
-            parse_scan_interval_secs(None).expect("default interval"),
-            DEFAULT_SCAN_INTERVAL_SECS
+            parse_bounded_interval("TEST", None, DEFAULT_OPERATION_POLL_INTERVAL_SECS, 1, 60)
+                .expect("default interval"),
+            DEFAULT_OPERATION_POLL_INTERVAL_SECS
         );
-        assert_eq!(parse_scan_interval_secs(Some("60")).unwrap(), 60);
-        assert_eq!(parse_scan_interval_secs(Some("86400")).unwrap(), 86_400);
+        assert_eq!(
+            parse_bounded_interval("TEST", Some("1"), 5, 1, 60).unwrap(),
+            1
+        );
+        assert_eq!(
+            parse_bounded_interval("TEST", Some("60"), 5, 1, 60).unwrap(),
+            60
+        );
     }
 
     #[test]
-    fn scan_interval_rejects_hot_loops_overflow_and_invalid_text() {
-        for value in ["0", "59", "86401", "18446744073709551616", "one-hour"] {
-            assert!(parse_scan_interval_secs(Some(value)).is_err(), "{value}");
+    fn bounded_interval_rejects_hot_loops_overflow_and_invalid_text() {
+        for value in ["0", "61", "18446744073709551616", "five"] {
+            assert!(parse_bounded_interval("TEST", Some(value), 5, 1, 60).is_err());
         }
+    }
+
+    #[test]
+    fn worker_id_is_unique_by_default_and_rejects_unsafe_values() {
+        assert!(resolve_worker_id(None)
+            .unwrap()
+            .starts_with("certificate-worker:"));
+        assert_eq!(
+            resolve_worker_id(Some("worker-1:primary".to_string())).unwrap(),
+            "worker-1:primary"
+        );
+        assert!(resolve_worker_id(Some("worker/1".to_string())).is_err());
     }
 }

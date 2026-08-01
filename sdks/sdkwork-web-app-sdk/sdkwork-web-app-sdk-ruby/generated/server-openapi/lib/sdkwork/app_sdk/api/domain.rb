@@ -58,7 +58,7 @@ module Sdkwork
             result
           end
 
-          # 验证域名所有权
+          # 创建或检查域名所有权验证挑战
           def sites_domains_verify(site_id, domain_id, idempotency_key)
             path = interpolate_path('/app/v3/api/sites/{siteId}/domains/{domainId}/verify', siteId: serialize_path_parameter(site_id, PathParameterSpec.new('siteId', 'simple', false)), domainId: serialize_path_parameter(domain_id, PathParameterSpec.new('domainId', 'simple', false)))
             request_headers = build_request_headers(

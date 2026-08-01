@@ -5,14 +5,16 @@ pub mod app;
 pub mod backend;
 pub mod certificate_ops;
 pub mod certificate_renewal_ops;
+pub mod domain_verification;
 pub mod nginx_ops;
 pub mod repository;
 pub mod runtime_assignment_ops;
 pub mod source_import;
 
+pub use domain_verification::{DnsTxtDomainOwnershipVerifier, DomainOwnershipVerifier};
 pub use repository::{
-    AuditLogWrite, RuntimeAssignmentTarget, RuntimeAssignmentWrite, RuntimeObservationWrite,
-    WebRepositoryPort,
+    AuditLogWrite, DomainVerificationChallenge, DomainVerificationObservation,
+    RuntimeAssignmentTarget, RuntimeAssignmentWrite, RuntimeObservationWrite, WebRepositoryPort,
 };
 pub use source_import::{
     ApplicationSourceImporter, GitSourceImportRequest, ImportedApplicationSource,
@@ -30,6 +32,7 @@ pub struct WebService {
     pub(crate) certificate_issuer: Arc<CertificateIssuer>,
     pub(crate) edge_runtime: Arc<EdgeRuntime>,
     pub(crate) source_importer: Arc<dyn ApplicationSourceImporter>,
+    pub(crate) domain_ownership_verifier: Arc<dyn DomainOwnershipVerifier>,
 }
 
 impl WebService {
@@ -52,11 +55,28 @@ impl WebService {
         edge_runtime: Arc<EdgeRuntime>,
         source_importer: Arc<dyn ApplicationSourceImporter>,
     ) -> Self {
+        Self::new_with_dependencies(
+            repository,
+            certificate_issuer,
+            edge_runtime,
+            source_importer,
+            Arc::new(DnsTxtDomainOwnershipVerifier::new()),
+        )
+    }
+
+    pub fn new_with_dependencies(
+        repository: Arc<dyn WebRepositoryPort>,
+        certificate_issuer: Arc<CertificateIssuer>,
+        edge_runtime: Arc<EdgeRuntime>,
+        source_importer: Arc<dyn ApplicationSourceImporter>,
+        domain_ownership_verifier: Arc<dyn DomainOwnershipVerifier>,
+    ) -> Self {
         Self {
             repository,
             certificate_issuer,
             edge_runtime,
             source_importer,
+            domain_ownership_verifier,
         }
     }
 

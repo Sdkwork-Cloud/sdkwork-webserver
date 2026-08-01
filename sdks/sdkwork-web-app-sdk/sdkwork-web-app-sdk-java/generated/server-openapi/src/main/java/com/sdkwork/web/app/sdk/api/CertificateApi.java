@@ -56,13 +56,19 @@ public class CertificateApi {
     }
 
     /** 申请证书 */
-    public CertificatesCreateResponse201 certificatesCreate(CreateCertificateRequest body, String idempotencyKey) throws Exception {
+    public CertificatesIssueResponse202 certificatesIssue(IssueCertificateRequest body, String idempotencyKey) throws Exception {
         Map<String, String> requestHeaders = buildRequestHeaders(
                 Map.of("Idempotency-Key", new HeaderParameterSpec(idempotencyKey, "simple", false, null)),
                 Map.of()
         );
-        Object raw = client.post(ApiPaths.appPath("/certificates"), body, null, requestHeaders, "application/json");
-        return client.convertValue(raw, new TypeReference<CertificatesCreateResponse201>() {});
+        Object raw = client.post(ApiPaths.appPath("/certificates/issue"), body, null, requestHeaders, "application/json");
+        return client.convertValue(raw, new TypeReference<CertificatesIssueResponse202>() {});
+    }
+
+    /** 获取证书异步操作状态 */
+    public CertificatesOperationsRetrieveResponse certificatesOperationsRetrieve(String operationId) throws Exception {
+        Object raw = client.get(ApiPaths.appPath("/certificates/operations/" + serializePathParameter(operationId, new PathParameterSpec("operationId", "simple", false)) + ""));
+        return client.convertValue(raw, new TypeReference<CertificatesOperationsRetrieveResponse>() {});
     }
 
     private record PathParameterSpec(String name, String style, boolean explode) {}

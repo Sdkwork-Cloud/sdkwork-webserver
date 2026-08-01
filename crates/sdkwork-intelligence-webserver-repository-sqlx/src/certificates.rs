@@ -1,15 +1,12 @@
-use chrono::{DateTime, Duration, Utc};
-use serde_json::json;
 use sdkwork_webserver_contract::{
-    CertificateIdentifierResponse, CertificateIssueUpdate, CertificatePage,
-    CertificateRenewalCandidate, CertificateResponse, CreateCertificateRequest, WebServiceError,
-    WebServiceResult,
+    CertificateIdentifierResponse, CertificateIssueUpdate, CertificateOperationLease,
+    CertificatePage, CertificateResponse, WebServiceError, WebServiceResult,
 };
 use sqlx::Row;
 
 use super::support::{
-    bool_from_row, instant_from_row, instant_write_expression, new_uuid, next_id, now_rfc3339,
-    optional_instant_from_row, pagination, store_error,
+    bool_from_row, instant_from_row, new_uuid, next_id, optional_instant_from_row, pagination,
+    store_error,
 };
 use super::certificate_secrets::{
     certificate_secret_ref, encrypt_certificate_secret_bundle,
@@ -101,324 +98,72 @@ impl WebRepository {
         Ok(CertificatePage { items, total })
     }
 
-    pub(super) async fn insert_certificate_pending_repo(
-        &self,
-        tenant_id: i64,
-        owner_id: Option<i64>,
-        domain_uuids: &[String],
-        cert_type: i32,
-        key_algorithm: &str,
-        auto_renew: bool,
-    ) -> WebServiceResult<(String, Vec<String>)> {
-        if domain_uuids.is_empty() || domain_uuids.len() > 8 {
-            return Err(WebServiceError::validation(
-                "domainIds must contain between 1 and 8 identifiers",
-            ));
-        }
-        let unique_domain_count = domain_uuids.iter().collect::<std::collections::HashSet<_>>().len();
-        if unique_domain_count != domain_uuids.len() {
-            return Err(WebServiceError::validation("domainIds must be unique"));
-        }
-        if !matches!(key_algorithm, "ECDSA" | "RSA") {
-            return Err(WebServiceError::validation(
-                "keyAlgorithm must be ECDSA or RSA",
-            ));
-        }
-        let domains = sqlx::query(
-            "SELECT d.id, d.user_id, d.hostname, d.hostname_type, requested.position
-             FROM UNNEST($2::text[]) WITH ORDINALITY requested(uuid, position)
-             INNER JOIN web_domain d ON d.tenant_id = $1 AND d.uuid = requested.uuid
-             WHERE d.deleted_at IS NULL
-               AND d.verification_status = 'VERIFIED'
-               AND ($3 IS NULL OR d.user_id = $3)
-             ORDER BY requested.position ASC",
-        )
-        .bind(tenant_id)
-        .bind(domain_uuids)
-        .bind(owner_id)
-        .fetch_all(&self.pool)
-        .await
-        .map_err(|error| store_error("resolve verified certificate domains", error))?;
-        if domains.len() != domain_uuids.len() {
-            return Err(WebServiceError::validation(
-                "one or more verified certificate domains are unavailable",
-            ));
-        }
-        let asset_owner_id: Option<i64> = domains[0]
-            .try_get("user_id")
-            .map_err(|error| store_error("map certificate domain owner", error))?;
-        for domain in &domains[1..] {
-            let domain_owner_id: Option<i64> = domain
-                .try_get("user_id")
-                .map_err(|error| store_error("map certificate domain owner", error))?;
-            if domain_owner_id != asset_owner_id {
-                return Err(WebServiceError::validation(
-                    "certificate domains must share the same asset owner",
-                ));
-            }
-        }
-        let id = next_id(self.id_generator())?;
-        let uuid = new_uuid();
-        let now = now_rfc3339();
-        let engine = self.database_engine().await?;
-        let now_expression = instant_write_expression(engine, "$10");
-        let certificate_sql = format!(
-            "INSERT INTO web_certificate (
-                id, uuid, tenant_id, user_id, cert_name, cert_type, ca_profile,
-                preferred_key_algorithm, auto_renew, renewal_status, status, metadata,
-                created_at, updated_at, version
-             ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 0, 0, '{{}}',
-                       {now_expression}, {now_expression}, 0)"
-        );
-        let mut tx = self
-            .pool
-            .begin()
-            .await
-            .map_err(|error| store_error("begin pending certificate", error))?;
-        sqlx::query(&certificate_sql)
-            .bind(id)
-            .bind(&uuid)
-            .bind(tenant_id)
-            .bind(asset_owner_id)
-            .bind(&uuid)
-            .bind(cert_type)
-            .bind(match cert_type {
-                1 => "LETS_ENCRYPT_PRODUCTION",
-                2 => "CUSTOM",
-                _ => "SELF_SIGNED",
-            })
-            .bind(key_algorithm)
-            .bind(auto_renew)
-            .bind(&now)
-            .execute(&mut *tx)
-            .await
-            .map_err(|error| store_error("insert pending web_certificate", error))?;
-        let mut hostnames = Vec::with_capacity(domains.len());
-        for (position, domain) in domains.iter().enumerate() {
-            let identifier_id = next_id(self.id_generator())?;
-            let identifier_uuid = new_uuid();
-            let domain_id: i64 = domain
-                .try_get("id")
-                .map_err(|error| store_error("map certificate domain id", error))?;
-            let hostname: String = domain
-                .try_get("hostname")
-                .map_err(|error| store_error("map certificate hostname", error))?;
-            let hostname_type: String = domain
-                .try_get("hostname_type")
-                .map_err(|error| store_error("map certificate hostname type", error))?;
-            let identifier_time = instant_write_expression(engine, "$9");
-            let identifier_sql = format!(
-                "INSERT INTO web_certificate_identifier (
-                    id, uuid, tenant_id, certificate_id, domain_id, identifier_type,
-                    hostname, position, created_at
-                 ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, {identifier_time})"
-            );
-            sqlx::query(&identifier_sql)
-                .bind(identifier_id)
-                .bind(identifier_uuid)
-                .bind(tenant_id)
-                .bind(id)
-                .bind(domain_id)
-                .bind(hostname_type)
-                .bind(&hostname)
-                .bind(position as i32)
-                .bind(&now)
-                .execute(&mut *tx)
-                .await
-                .map_err(|error| store_error("insert certificate identifier", error))?;
-            hostnames.push(hostname);
-        }
-        tx.commit()
-            .await
-            .map_err(|error| store_error("commit pending certificate", error))?;
-        Ok((uuid, hostnames))
-    }
-
-    pub(super) async fn list_certificates_due_for_renewal_repo(
-        &self,
-        renew_before_days: u32,
-        claim_expired_before: &str,
-        limit: i32,
-    ) -> WebServiceResult<Vec<CertificateRenewalCandidate>> {
-        let limit = limit.clamp(1, 100);
-        let rows = sqlx::query(
-            "SELECT c.tenant_id, c.uuid, c.cert_type, c.cert_name, c.auto_renew,
-                    c.preferred_key_algorithm,
-                    CAST(v.not_after AS TEXT) AS not_after, identifier.hostnames
-             FROM web_certificate c
-             INNER JOIN web_certificate_version v
-                 ON v.id = c.current_version_id
-                 AND v.certificate_id = c.id
-             INNER JOIN LATERAL (
-                 SELECT CAST(jsonb_agg(ci.hostname ORDER BY ci.position) AS TEXT) AS hostnames
-                 FROM web_certificate_identifier ci
-                 WHERE ci.tenant_id = c.tenant_id AND ci.certificate_id = c.id
-             ) identifier ON TRUE
-             WHERE c.auto_renew = TRUE AND c.status = 1 AND c.deleted_at IS NULL
-               AND (c.renewal_status IN (0, 3)
-                    OR (c.renewal_status = 1 AND c.updated_at < CAST($1 AS TIMESTAMPTZ)))
-               AND c.cert_type IN (1, 3)
-             ORDER BY v.not_after ASC, c.id ASC LIMIT $2",
-        )
-        .bind(claim_expired_before)
-        .bind(limit)
-        .fetch_all(&self.pool)
-        .await
-        .map_err(|error| store_error("list certificate renewal candidates", error))?;
-        let mut items = Vec::with_capacity(rows.len());
-        for row in rows {
-            let not_after: String = row.try_get("not_after").map_err(|error| {
-                WebServiceError::Internal(format!("renewal candidate expiry: {error}"))
-            })?;
-            if !certificate_due_for_renewal(&not_after, renew_before_days).ok_or_else(|| {
-                WebServiceError::Internal("active certificate has invalid expiry".to_string())
-            })? {
-                continue;
-            }
-            items.push(CertificateRenewalCandidate {
-                tenant_id: row.try_get("tenant_id").map_err(map_candidate_error)?,
-                certificate_id: row.try_get("uuid").map_err(map_candidate_error)?,
-                cert_type: row.try_get("cert_type").map_err(map_candidate_error)?,
-                cert_name: row.try_get("cert_name").map_err(map_candidate_error)?,
-                hostnames: hostnames_from_row(&row)?,
-                key_algorithm: row
-                    .try_get("preferred_key_algorithm")
-                    .map_err(map_candidate_error)?,
-                auto_renew: bool_from_row(&row, "auto_renew").map_err(map_candidate_error)?,
-                not_after,
-            });
-        }
-        Ok(items)
-    }
-
-    pub(super) async fn claim_certificate_renewal_repo(
-        &self,
-        tenant_id: i64,
-        certificate_uuid: &str,
-        claim_expired_before: &str,
-    ) -> WebServiceResult<Option<i64>> {
-        let row = sqlx::query(
-            "UPDATE web_certificate
-             SET renewal_status = 1, updated_at = NOW(), version = version + 1
-             WHERE tenant_id = $1 AND uuid = $2 AND status = 1 AND deleted_at IS NULL
-               AND (renewal_status IN (0, 3)
-                    OR (renewal_status = 1 AND updated_at < CAST($3 AS TIMESTAMPTZ)))
-             RETURNING version",
-        )
-        .bind(tenant_id)
-        .bind(certificate_uuid)
-        .bind(claim_expired_before)
-        .fetch_optional(&self.pool)
-        .await
-        .map_err(|error| store_error("claim certificate renewal", error))?;
-        row.map(|row| row.try_get("version").map_err(|error| store_error("map renewal version", error)))
-            .transpose()
-    }
-
-    pub(super) async fn fail_certificate_renewal_repo(
-        &self,
-        tenant_id: i64,
-        certificate_uuid: &str,
-        expected_renewal_version: i64,
-        reason: &str,
-    ) -> WebServiceResult<()> {
-        let metadata = json!({ "renewalFailureReason": reason });
-        let result = sqlx::query(
-            "UPDATE web_certificate
-             SET renewal_status = 3, metadata = CAST($4 AS JSONB), updated_at = NOW(),
-                 version = version + 1
-             WHERE tenant_id = $1 AND uuid = $2 AND status = 1
-               AND renewal_status = 1 AND version = $3 AND deleted_at IS NULL",
-        )
-        .bind(tenant_id)
-        .bind(certificate_uuid)
-        .bind(expected_renewal_version)
-        .bind(metadata.to_string())
-        .execute(&self.pool)
-        .await
-        .map_err(|error| store_error("fail certificate renewal", error))?;
-        if result.rows_affected() == 0 {
-            return Err(WebServiceError::conflict(
-                "certificate renewal claim is no longer current",
-            ));
-        }
-        Ok(())
-    }
-
-    pub(super) async fn retrieve_certificate_renewal_candidate_repo(
-        &self,
-        tenant_id: i64,
-        certificate_uuid: &str,
-    ) -> WebServiceResult<CertificateRenewalCandidate> {
-        let row = sqlx::query(
-            "SELECT c.tenant_id, c.uuid, c.cert_type, c.cert_name, c.auto_renew,
-                    c.preferred_key_algorithm,
-                    CAST(v.not_after AS TEXT) AS not_after, identifier.hostnames
-             FROM web_certificate c
-             INNER JOIN web_certificate_version v
-                 ON v.id = c.current_version_id
-                 AND v.certificate_id = c.id
-             INNER JOIN LATERAL (
-                 SELECT CAST(jsonb_agg(ci.hostname ORDER BY ci.position) AS TEXT) AS hostnames
-                 FROM web_certificate_identifier ci
-                 WHERE ci.tenant_id = c.tenant_id AND ci.certificate_id = c.id
-             ) identifier ON TRUE
-             WHERE c.tenant_id = $1 AND c.uuid = $2 AND c.status = 1
-               AND c.deleted_at IS NULL",
-        )
-        .bind(tenant_id)
-        .bind(certificate_uuid)
-        .fetch_optional(&self.pool)
-        .await
-        .map_err(|error| store_error("retrieve renewal candidate", error))?
-        .ok_or_else(|| WebServiceError::not_found("active certificate not found"))?;
-        Ok(CertificateRenewalCandidate {
-            tenant_id: row.try_get("tenant_id").map_err(map_candidate_error)?,
-            certificate_id: row.try_get("uuid").map_err(map_candidate_error)?,
-            cert_type: row.try_get("cert_type").map_err(map_candidate_error)?,
-            cert_name: row.try_get("cert_name").map_err(map_candidate_error)?,
-            hostnames: hostnames_from_row(&row)?,
-            key_algorithm: row
-                .try_get("preferred_key_algorithm")
-                .map_err(map_candidate_error)?,
-            auto_renew: bool_from_row(&row, "auto_renew").map_err(map_candidate_error)?,
-            not_after: row.try_get("not_after").map_err(map_candidate_error)?,
-        })
-    }
-
     pub(super) async fn update_certificate_auto_renew_repo(
         &self,
         tenant_id: i64,
         certificate_uuid: &str,
         auto_renew: bool,
     ) -> WebServiceResult<CertificateResponse> {
-        let result = sqlx::query(
-            "UPDATE web_certificate
-             SET auto_renew = $3, updated_at = NOW(), version = version + 1
-             WHERE tenant_id = $1 AND uuid = $2 AND status = 1
-               AND renewal_status <> 1 AND ($3 = FALSE OR cert_type IN (1, 3))
-               AND deleted_at IS NULL",
+        let mut tx = self
+            .pool
+            .begin()
+            .await
+            .map_err(|error| store_error("begin certificate renewal policy update", error))?;
+        let certificate = sqlx::query(
+            "SELECT id, cert_type, status, renewal_status
+             FROM web_certificate
+             WHERE tenant_id = $1 AND uuid = $2 AND deleted_at IS NULL
+             FOR UPDATE",
         )
         .bind(tenant_id)
         .bind(certificate_uuid)
-        .bind(auto_renew)
-        .execute(&self.pool)
+        .fetch_optional(&mut *tx)
         .await
-        .map_err(|error| store_error("update certificate renewal policy", error))?;
-        if result.rows_affected() == 0 {
+        .map_err(|error| store_error("resolve certificate renewal policy", error))?
+        .ok_or_else(|| WebServiceError::not_found("certificate not found"))?;
+        let certificate_id: i64 = certificate
+            .try_get("id")
+            .map_err(|error| store_error("map certificate renewal policy id", error))?;
+        let cert_type: i32 = certificate
+            .try_get("cert_type")
+            .map_err(|error| store_error("map certificate renewal policy type", error))?;
+        let status: i32 = certificate
+            .try_get("status")
+            .map_err(|error| store_error("map certificate renewal policy status", error))?;
+        let renewal_status: i32 = certificate
+            .try_get("renewal_status")
+            .map_err(|error| store_error("map certificate renewal state", error))?;
+        if auto_renew && cert_type != 1 {
+            return Err(WebServiceError::validation(
+                "automatic renewal is supported only for ACME certificates",
+            ));
+        }
+        if status != 1 || matches!(renewal_status, 1 | 2) {
             return Err(WebServiceError::conflict(
                 "certificate is unavailable or renewal is in progress",
             ));
         }
+        sqlx::query(
+            "UPDATE web_certificate
+             SET auto_renew = $3, updated_at = NOW(), version = version + 1
+             WHERE tenant_id = $1 AND id = $2",
+        )
+        .bind(tenant_id)
+        .bind(certificate_id)
+        .bind(auto_renew)
+        .execute(&mut *tx)
+        .await
+        .map_err(|error| store_error("update certificate renewal policy", error))?;
+        tx.commit()
+            .await
+            .map_err(|error| store_error("commit certificate renewal policy update", error))?;
         self.retrieve_certificate_repo(tenant_id, certificate_uuid).await
     }
 
-    pub(super) async fn finalize_certificate_repo(
+    pub(super) async fn finalize_certificate_operation_repo(
         &self,
-        tenant_id: i64,
-        certificate_uuid: &str,
+        lease: &CertificateOperationLease,
         update: &CertificateIssueUpdate,
-        expected_renewal_version: Option<i64>,
     ) -> WebServiceResult<CertificateResponse> {
         let mut tx = self
             .pool
@@ -426,32 +171,42 @@ impl WebRepository {
             .await
             .map_err(|error| store_error("begin finalize certificate", error))?;
         let aggregate = sqlx::query(
-            "SELECT id, current_version_id, renewal_status, version
-             FROM web_certificate
-             WHERE tenant_id = $1 AND uuid = $2 AND deleted_at IS NULL FOR UPDATE",
+            "SELECT operation.id AS operation_internal_id, operation.status,
+                    operation.lease_owner, operation.fencing_token,
+                    operation.lease_expires_at > NOW() AS lease_current,
+                    operation.operation_type,
+                    certificate.id, certificate.uuid AS certificate_uuid,
+                    certificate.current_version_id, certificate.renewal_status,
+                    certificate.version
+             FROM web_certificate_operation operation
+             INNER JOIN web_certificate certificate
+               ON certificate.tenant_id = operation.tenant_id
+              AND certificate.id = operation.certificate_id
+             WHERE operation.tenant_id = $1 AND operation.uuid = $2
+               AND certificate.deleted_at IS NULL
+             FOR UPDATE OF operation, certificate",
         )
-        .bind(tenant_id)
-        .bind(certificate_uuid)
+        .bind(lease.tenant_id)
+        .bind(&lease.operation_id)
         .fetch_optional(&mut *tx)
         .await
-        .map_err(|error| store_error("lock certificate aggregate", error))?
-        .ok_or_else(|| WebServiceError::not_found("certificate not found"))?;
+        .map_err(|error| store_error("lock certificate operation for finalization", error))?
+        .ok_or_else(|| WebServiceError::not_found("certificate operation not found"))?;
+        super::certificate_operations::validate_operation_lease(&aggregate, lease)?;
+        let operation_type: String = aggregate
+            .try_get("operation_type")
+            .map_err(|error| store_error("map certificate operation type", error))?;
+        if operation_type != lease.operation_type {
+            return Err(WebServiceError::conflict(
+                "certificate operation type changed concurrently",
+            ));
+        }
+        let operation_internal_id: i64 = aggregate
+            .try_get("operation_internal_id")
+            .map_err(|error| store_error("map certificate operation id", error))?;
         let certificate_id: i64 = aggregate
             .try_get("id")
             .map_err(|error| store_error("map certificate aggregate id", error))?;
-        let aggregate_version: i64 = aggregate
-            .try_get("version")
-            .map_err(|error| store_error("map certificate aggregate version", error))?;
-        let renewal_status: i32 = aggregate
-            .try_get("renewal_status")
-            .map_err(|error| store_error("map certificate renewal status", error))?;
-        if expected_renewal_version
-            .is_some_and(|expected| aggregate_version != expected || renewal_status != 1)
-        {
-            return Err(WebServiceError::conflict(
-                "certificate renewal claim is no longer current",
-            ));
-        }
         let current_version_id: Option<i64> = aggregate
             .try_get("current_version_id")
             .map_err(|error| store_error("map current certificate version", error))?;
@@ -459,7 +214,7 @@ impl WebRepository {
             "SELECT COALESCE(MAX(version_no), 0) + 1 FROM web_certificate_version
              WHERE tenant_id = $1 AND certificate_id = $2",
         )
-        .bind(tenant_id)
+        .bind(lease.tenant_id)
         .bind(certificate_id)
         .fetch_one(&mut *tx)
         .await
@@ -470,7 +225,7 @@ impl WebRepository {
                  WHERE tenant_id = $1 AND certificate_id = $2 AND id = $3
                    AND status = 'ACTIVE'",
             )
-            .bind(tenant_id)
+            .bind(lease.tenant_id)
             .bind(certificate_id)
             .bind(current_version_id)
             .execute(&mut *tx)
@@ -482,7 +237,7 @@ impl WebRepository {
         let secret_bundle_ref = certificate_secret_ref(&version_uuid);
         let bundle_encrypted = encrypt_certificate_secret_bundle(
             self.secret_key(),
-            tenant_id,
+            lease.tenant_id,
             &version_uuid,
             &update.fullchain_pem,
             &update.private_key_pem,
@@ -499,7 +254,7 @@ impl WebRepository {
         sqlx::query(version_sql)
             .bind(version_id)
             .bind(version_uuid)
-            .bind(tenant_id)
+            .bind(lease.tenant_id)
             .bind(certificate_id)
             .bind(version_no)
             .bind(&update.serial_sha256)
@@ -523,7 +278,7 @@ impl WebRepository {
         )
         .bind(next_id(self.id_generator())?)
         .bind(new_uuid())
-        .bind(tenant_id)
+        .bind(lease.tenant_id)
         .bind(version_id)
         .bind(CERTIFICATE_SECRET_ENCRYPTION_ALGORITHM)
         .bind(bundle_encrypted)
@@ -538,8 +293,8 @@ impl WebRepository {
                  metadata = '{}', updated_at = NOW(), version = version + 1
              WHERE tenant_id = $1 AND uuid = $2 AND deleted_at IS NULL",
         )
-        .bind(tenant_id)
-        .bind(certificate_uuid)
+        .bind(lease.tenant_id)
+        .bind(&lease.certificate_id)
         .bind(&update.cert_name)
         .bind(update.cert_type)
         .bind(&update.key_algorithm)
@@ -561,38 +316,49 @@ impl WebRepository {
              WHERE tenant_id = $1 AND certificate_id = $2
                AND status <> 'ARCHIVED' AND deleted_at IS NULL",
         )
-        .bind(tenant_id)
+        .bind(lease.tenant_id)
         .bind(certificate_id)
         .bind(version_id)
         .bind(&update.key_algorithm)
         .execute(&mut *tx)
         .await
         .map_err(|error| store_error("stage listener certificate versions", error))?;
+        sqlx::query(
+            "DELETE FROM web_certificate_node_state
+             WHERE tenant_id = $1 AND certificate_id = $2
+               AND certificate_version_id = $3",
+        )
+        .bind(lease.tenant_id)
+        .bind(certificate_id)
+        .bind(version_id)
+        .execute(&mut *tx)
+        .await
+        .map_err(|error| store_error("invalidate renewed certificate observations", error))?;
+        let operation_result = sqlx::query(
+            "UPDATE web_certificate_operation
+             SET status = 'SUCCEEDED', next_attempt_at = NOW(), lease_owner = NULL,
+                 lease_expires_at = NULL, failure_code = NULL, completed_at = NOW(),
+                 updated_at = NOW()
+             WHERE id = $1 AND tenant_id = $2 AND status = 'RUNNING'
+               AND lease_owner = $3 AND fencing_token = $4",
+        )
+        .bind(operation_internal_id)
+        .bind(lease.tenant_id)
+        .bind(&lease.lease_owner)
+        .bind(lease.fencing_token)
+        .execute(&mut *tx)
+        .await
+        .map_err(|error| store_error("complete certificate operation", error))?;
+        if operation_result.rows_affected() != 1 {
+            return Err(WebServiceError::conflict(
+                "certificate operation lease is no longer current",
+            ));
+        }
         tx.commit()
             .await
             .map_err(|error| store_error("commit certificate version", error))?;
-        self.retrieve_certificate_repo(tenant_id, certificate_uuid).await
-    }
-
-    pub(super) async fn fail_certificate_repo(
-        &self,
-        tenant_id: i64,
-        certificate_uuid: &str,
-        reason: &str,
-    ) -> WebServiceResult<()> {
-        let metadata = json!({ "failureReason": reason });
-        sqlx::query(
-            "UPDATE web_certificate SET renewal_status = 3, status = 0,
-                    metadata = CAST($3 AS JSONB), updated_at = NOW(), version = version + 1
-             WHERE tenant_id = $1 AND uuid = $2 AND deleted_at IS NULL",
-        )
-        .bind(tenant_id)
-        .bind(certificate_uuid)
-        .bind(metadata.to_string())
-        .execute(&self.pool)
-        .await
-        .map_err(|error| store_error("fail certificate aggregate", error))?;
-        Ok(())
+        self.retrieve_certificate_repo(lease.tenant_id, &lease.certificate_id)
+            .await
     }
 
     pub(super) async fn retrieve_certificate_repo(
@@ -613,24 +379,6 @@ impl WebRepository {
             .map_err(|error| WebServiceError::Internal(format!("map certificate: {error}")))
     }
 
-    pub(super) async fn create_certificate_repo(
-        &self,
-        tenant_id: i64,
-        owner_id: Option<i64>,
-        request: &CreateCertificateRequest,
-    ) -> WebServiceResult<CertificateResponse> {
-        let (uuid, _) = self
-            .insert_certificate_pending_repo(
-                tenant_id,
-                owner_id,
-                &request.domain_ids,
-                request.cert_type,
-                &request.key_algorithm,
-                request.auto_renew,
-            )
-            .await?;
-        self.retrieve_certificate_repo(tenant_id, &uuid).await
-    }
 }
 
 fn certificate_select(predicate: &str) -> String {
@@ -666,6 +414,8 @@ fn map_certificate_row(row: &EngineRow) -> Result<CertificateResponse, sqlx::Err
     let identifiers_json: String = row.try_get("identifiers")?;
     let identifiers = serde_json::from_str::<Vec<CertificateIdentifierResponse>>(&identifiers_json)
         .map_err(|error| sqlx::Error::Decode(Box::new(error)))?;
+    let not_before = optional_instant_from_row(row, "not_before")?;
+    let not_after = optional_instant_from_row(row, "not_after")?;
     Ok(CertificateResponse {
         id: row.try_get("uuid")?,
         cert_name: row.try_get("cert_name")?,
@@ -674,19 +424,36 @@ fn map_certificate_row(row: &EngineRow) -> Result<CertificateResponse, sqlx::Err
         issuer: row.try_get("issuer")?,
         fingerprint: row.try_get("fingerprint")?,
         key_algorithm: row.try_get("key_algorithm")?,
-        not_before: optional_instant_from_row(row, "not_before")?,
-        not_after: optional_instant_from_row(row, "not_after")?,
+        not_before,
+        not_after: not_after.clone(),
         auto_renew: Some(bool_from_row(row, "auto_renew")?),
         renewal_status: Some(certificate_renewal_status(row.try_get("renewal_status")?)),
         status: certificate_asset_status(
             row.try_get("status")?,
             row.try_get("renewal_status")?,
+            not_after.as_deref(),
         ),
         created_at: instant_from_row(row, "created_at")?,
     })
 }
 
-pub(super) fn certificate_asset_status(status: i32, renewal_status: i32) -> String {
+pub(super) fn certificate_asset_status(
+    status: i32,
+    renewal_status: i32,
+    not_after: Option<&str>,
+) -> String {
+    if status == 1
+        && not_after
+            .and_then(|value| sdkwork_utils_rust::datetime::parse_datetime(value, None))
+            .is_some_and(|expires_at| {
+                !sdkwork_utils_rust::datetime::is_after(
+                    expires_at,
+                    sdkwork_utils_rust::datetime::now(),
+                )
+            })
+    {
+        return "EXPIRED".to_string();
+    }
     match (status, renewal_status) {
         (0, 3) => "FAILED",
         (0, _) => "PENDING",
@@ -699,6 +466,27 @@ pub(super) fn certificate_asset_status(status: i32, renewal_status: i32) -> Stri
     .to_string()
 }
 
+#[cfg(test)]
+mod tests {
+    use super::certificate_asset_status;
+
+    #[test]
+    fn issued_certificate_status_is_projected_from_immutable_version_expiry() {
+        assert_eq!(
+            certificate_asset_status(1, 0, Some("2000-01-01T00:00:00.000Z")),
+            "EXPIRED"
+        );
+        assert_eq!(
+            certificate_asset_status(1, 0, Some("2099-01-01T00:00:00.000Z")),
+            "ISSUED"
+        );
+        assert_eq!(
+            certificate_asset_status(3, 0, Some("2099-01-01T00:00:00.000Z")),
+            "REVOKED"
+        );
+    }
+}
+
 fn certificate_renewal_status(status: i32) -> String {
     match status {
         0 => "IDLE",
@@ -708,46 +496,4 @@ fn certificate_renewal_status(status: i32) -> String {
         _ => "FAILED",
     }
     .to_string()
-}
-
-fn map_candidate_error(error: sqlx::Error) -> WebServiceError {
-    WebServiceError::Internal(format!("map certificate renewal candidate: {error}"))
-}
-
-fn hostnames_from_row(row: &EngineRow) -> WebServiceResult<Vec<String>> {
-    let value: String = row.try_get("hostnames").map_err(map_candidate_error)?;
-    let hostnames = serde_json::from_str::<Vec<String>>(&value).map_err(|error| {
-        WebServiceError::Internal(format!("map certificate renewal identifiers: {error}"))
-    })?;
-    if hostnames.is_empty() {
-        return Err(WebServiceError::Internal(
-            "active certificate has no identifiers".to_string(),
-        ));
-    }
-    Ok(hostnames)
-}
-
-fn certificate_due_for_renewal(not_after: &str, renew_before_days: u32) -> Option<bool> {
-    let not_after = parse_database_instant(not_after)?;
-    let threshold = Utc::now() + Duration::days(i64::from(renew_before_days));
-    Some(not_after.with_timezone(&Utc) <= threshold)
-}
-
-fn parse_database_instant(value: &str) -> Option<DateTime<chrono::FixedOffset>> {
-    DateTime::parse_from_rfc3339(value)
-        .or_else(|_| DateTime::parse_from_str(value, "%Y-%m-%d %H:%M:%S%.f%#z"))
-        .ok()
-}
-
-#[cfg(test)]
-mod tests {
-    use super::parse_database_instant;
-
-    #[test]
-    fn database_instant_parser_accepts_postgres_text_projections() {
-        assert!(parse_database_instant("2027-01-01T00:00:00Z").is_some());
-        assert!(parse_database_instant("2027-01-01 00:00:00+00").is_some());
-        assert!(parse_database_instant("not-an-instant").is_none());
-    }
-
 }

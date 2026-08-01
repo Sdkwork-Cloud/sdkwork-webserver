@@ -74,6 +74,7 @@ import type {
   WebserverResourceAction,
   WebserverResourceActionContext,
   WebserverResourceDataSource,
+  WebserverResourceFieldOptionPage,
   WebserverResourceFieldOptionValue,
   WebserverResourceFieldOptions,
   WebserverResourceKey,
@@ -95,6 +96,8 @@ export interface WebserverWorkspaceProps {
 }
 
 type ApplicationWizardStep = 0 | 1 | 2 | 3 | 4;
+
+const FIELD_OPTION_PAGE_SIZE = 20;
 
 export function WebserverWorkspace({
   locale,
@@ -727,6 +730,15 @@ function ActionDialog({
     "spaFallback",
   ];
 
+  function closeDialog(): void {
+    if (busy && !action.dismissibleWhileBusy) return;
+    if (busy) {
+      abortControllerRef.current?.abort();
+      onRefresh();
+    }
+    onClose();
+  }
+
   const sourceInputError = (): WebserverMessageKey | undefined => {
     if (!sourceInputRequired) return undefined;
     if (sourceInputMode === "git") {
@@ -746,26 +758,51 @@ function ActionDialog({
       : "dialog.sourceRequired";
   };
 
+  const renderField = (name: string, value: unknown, required = false) => {
+    const commonProps = {
+      locale,
+      name,
+      onChange: (next: unknown, relatedValues?: Readonly<Record<string, number | string>>) => setBody((current) => ({
+        ...current,
+        [name]: next,
+        ...relatedValues,
+      })),
+      readOnly: action.readOnlyFields?.includes(name),
+      required,
+      value,
+    };
+    if (action.loadFieldOptionPage && action.paginatedFields?.includes(name)) {
+      return (
+        <PaginatedField
+          {...commonProps}
+          actionBody={body}
+          key={name}
+          loadPage={action.loadFieldOptionPage}
+          maximumSelections={action.fieldSelectionLimits?.[name]}
+          multiple={action.multipleFields?.includes(name)}
+          scopeId={scopeId}
+          selectedItem={selected}
+        />
+      );
+    }
+    return (
+      <Field
+        {...commonProps}
+        key={name}
+        multiple={action.multipleFields?.includes(name)}
+        options={fieldOptions[name]}
+      />
+    );
+  };
+
   const renderFields = (fields?: readonly string[], className?: string) => {
     const names = (fields ?? Object.keys(body)).filter((name) => applicationCreationWizard || name in body);
     return (
       <div className={`form-grid${className ? ` ${className}` : ""}`}>
-        {names.map((name) => (
-          <Field
-            key={name}
-            locale={locale}
-            name={name}
-            onChange={(next, relatedValues) => setBody((current) => ({
-              ...current,
-              [name]: next,
-              ...relatedValues,
-            }))}
-            multiple={action.multipleFields?.includes(name)}
-            options={fieldOptions[name]}
-            readOnly={action.readOnlyFields?.includes(name)}
-            required={applicationCreationWizard && applicationRequiredFields.includes(name)}
-            value={body[name]}
-          />
+        {names.map((name) => renderField(
+          name,
+          body[name],
+          applicationCreationWizard && applicationRequiredFields.includes(name),
         ))}
       </div>
     );
@@ -858,13 +895,13 @@ function ActionDialog({
 
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
-      if (event.key !== "Escape" || busy) return;
+      if (event.key !== "Escape" || (busy && !action.dismissibleWhileBusy)) return;
       event.preventDefault();
-      onClose();
+      closeDialog();
     };
     document.addEventListener("keydown", handleEscape);
     return () => document.removeEventListener("keydown", handleEscape);
-  }, [busy, onClose]);
+  }, [action.dismissibleWhileBusy, busy, onClose, onRefresh]);
 
   useEffect(() => () => abortControllerRef.current?.abort(), []);
 
@@ -972,7 +1009,7 @@ function ActionDialog({
     <div
       className={`dialog-backdrop${applicationDrawer ? " application-creation-drawer-backdrop" : ""}`}
       onMouseDown={(event) => {
-        if (!busy && event.currentTarget === event.target) onClose();
+        if (event.currentTarget === event.target) closeDialog();
       }}
       role="presentation"
     >
@@ -1002,8 +1039,8 @@ function ActionDialog({
           <button
             aria-label={t("dialog.close")}
             className="icon-button"
-            disabled={busy}
-            onClick={onClose}
+            disabled={busy && !action.dismissibleWhileBusy}
+            onClick={closeDialog}
             title={t("dialog.close")}
             type="button"
           >
@@ -1213,21 +1250,10 @@ function ActionDialog({
           </div>
         ) : null}
         {!result && !applicationDrawer ? <div className="form-grid">
-          {Object.entries(body).map(([name, value]) => (
-            <Field
-              key={name}
-              locale={locale}
-              name={name}
-              onChange={(next, relatedValues) => setBody((current) => ({
-                ...current,
-                [name]: next,
-                ...relatedValues,
-              }))}
-              multiple={action.multipleFields?.includes(name)}
-              options={fieldOptions[name]}
-              readOnly={action.readOnlyFields?.includes(name)}
-              value={value}
-            />
+          {Object.entries(body).map(([name, value]) => renderField(
+            name,
+            value,
+            action.requiredFields?.includes(name),
           ))}
         </div> : null}
         {!result && !applicationDrawer && action.applicationSubmission ? (
@@ -1286,11 +1312,11 @@ function ActionDialog({
         {!applicationDrawer && error ? <div className="error-banner" role="alert">{error}</div> : null}
         {result ? (
           <footer>
-            <button className="command-button" onClick={onClose} type="button">{t("dialog.close")}</button>
+            <button className="command-button" onClick={closeDialog} type="button">{t("dialog.close")}</button>
           </footer>
         ) : applicationCreationWizard ? (
           <footer className="application-wizard-footer">
-            <button className="secondary-button" disabled={busy} onClick={onClose} type="button">{t("dialog.cancel")}</button>
+            <button className="secondary-button" disabled={busy && !action.dismissibleWhileBusy} onClick={closeDialog} type="button">{t("dialog.cancel")}</button>
             <div className="application-wizard-navigation">
               {applicationStep > 0 ? (
                 <button
@@ -1322,7 +1348,7 @@ function ActionDialog({
                     || !applicationStepReady(1)
                     || !applicationStepReady(2)
                     || !applicationStepReady(3)
-                    || hasUnavailableOptions(body, fieldOptions)}
+                    || hasUnavailableOptions(body, fieldOptions, action.paginatedFields)}
                   type="submit"
                 >
                   {busy ? t("dialog.submitting") : t("dialog.createApplication")}
@@ -1332,21 +1358,21 @@ function ActionDialog({
           </footer>
         ) : applicationEditDrawer ? (
           <footer className="application-edit-drawer-footer">
-            <button className="secondary-button" disabled={busy} onClick={onClose} type="button">{t("dialog.cancel")}</button>
+            <button className="secondary-button" disabled={busy && !action.dismissibleWhileBusy} onClick={closeDialog} type="button">{t("dialog.cancel")}</button>
             <button
               className="command-button"
               disabled={busy
                 || optionsBusy
                 || !applicationSubmissionReady(applicationSubmission, mediaError)
                 || hasMissingRequiredFields(body, action.requiredFields)
-                || hasUnavailableOptions(body, fieldOptions)}
+                || hasUnavailableOptions(body, fieldOptions, action.paginatedFields)}
               type="submit"
             >
               {busy ? t("dialog.submitting") : t("dialog.confirm")}
             </button>
           </footer>
         ) : <footer>
-          <button className="secondary-button" disabled={busy} onClick={onClose} type="button">{t("dialog.cancel")}</button>
+          <button className="secondary-button" disabled={busy && !action.dismissibleWhileBusy} onClick={closeDialog} type="button">{t("dialog.cancel")}</button>
           <button
             className={action.dangerous ? "danger-button" : "command-button"}
             disabled={busy
@@ -1356,7 +1382,7 @@ function ActionDialog({
               || Boolean(sourceInputError())
               || Boolean(action.applicationSubmission && !applicationSubmissionReady(applicationSubmission, mediaError))
               || hasMissingRequiredFields(body, action.requiredFields)
-              || hasUnavailableOptions(body, fieldOptions)}
+              || hasUnavailableOptions(body, fieldOptions, action.paginatedFields)}
             type="submit"
           >
             {busy ? t("dialog.submitting") : sourceUpdateAction ? (
@@ -2210,6 +2236,219 @@ function trapDialogFocus(event: ReactKeyboardEvent<HTMLFormElement>): void {
   }
 }
 
+function PaginatedField({
+  actionBody,
+  loadPage,
+  locale,
+  maximumSelections,
+  multiple = false,
+  name,
+  onChange,
+  readOnly = false,
+  required = false,
+  scopeId,
+  selectedItem,
+  value,
+}: {
+  actionBody: Record<string, unknown>;
+  loadPage: NonNullable<WebserverResourceAction["loadFieldOptionPage"]>;
+  locale: WebserverLocale;
+  maximumSelections?: number;
+  multiple?: boolean;
+  name: string;
+  onChange(value: unknown, relatedValues?: Readonly<Record<string, number | string>>): void;
+  readOnly?: boolean;
+  required?: boolean;
+  scopeId?: string;
+  selectedItem?: Record<string, unknown>;
+  value: unknown;
+}) {
+  const t = (key: WebserverMessageKey, values: Record<string, string | number> = {}) => (
+    translateWebserver(locale, key, values)
+  );
+  const inputId = useId();
+  const [page, setPage] = useState(1);
+  const [requestVersion, setRequestVersion] = useState(0);
+  const [busy, setBusy] = useState(true);
+  const [error, setError] = useState<string>();
+  const [optionPage, setOptionPage] = useState<WebserverResourceFieldOptionPage>({
+    options: [],
+    pageInfo: { hasMore: false, page: 1, pageSize: FIELD_OPTION_PAGE_SIZE },
+  });
+  const [selectedOptions, setSelectedOptions] = useState<Readonly<Record<string, WebserverResourceFieldOptionValue>>>({});
+  const contextRef = useRef({ actionBody, scopeId, selectedItem });
+  contextRef.current = { actionBody, scopeId, selectedItem };
+  const selectedValues = useMemo(() => [...new Set(
+    (Array.isArray(value) ? value : value === undefined || value === null || value === "" ? [] : [value])
+      .map((item) => String(item)),
+  )], [value]);
+  const selectedValueKey = JSON.stringify(selectedValues);
+
+  useEffect(() => {
+    const abortController = new AbortController();
+    let active = true;
+    setBusy(true);
+    setError(undefined);
+    setOptionPage((current) => ({
+      options: [],
+      pageInfo: { ...current.pageInfo, hasMore: false, page, pageSize: FIELD_OPTION_PAGE_SIZE },
+    }));
+    const context = contextRef.current;
+    void loadPage(name, {
+      body: context.actionBody,
+      page,
+      pageSize: FIELD_OPTION_PAGE_SIZE,
+      scopeId: context.scopeId,
+      selectedItem: context.selectedItem,
+      signal: abortController.signal,
+    }).then((loaded) => {
+      if (!active) return;
+      setOptionPage({
+        options: loaded.options,
+        pageInfo: {
+          ...loaded.pageInfo,
+          page: loaded.pageInfo.page > 0 ? loaded.pageInfo.page : page,
+          pageSize: loaded.pageInfo.pageSize > 0 ? loaded.pageInfo.pageSize : FIELD_OPTION_PAGE_SIZE,
+        },
+      });
+    }).catch((caught) => {
+      if (!active || abortController.signal.aborted) return;
+      setError(formatWebserverErrorMessage(caught, t, { fallbackKey: "error.options" }));
+    }).finally(() => {
+      if (active) setBusy(false);
+    });
+    return () => {
+      active = false;
+      abortController.abort();
+    };
+  }, [loadPage, name, page, requestVersion, scopeId, selectedItem]);
+
+  useEffect(() => {
+    const selectedSet = new Set(selectedValues);
+    setSelectedOptions((current) => {
+      const next: Record<string, WebserverResourceFieldOptionValue> = {};
+      for (const selectedValue of selectedValues) {
+        if (current[selectedValue] !== undefined) next[selectedValue] = current[selectedValue];
+      }
+      for (const option of optionPage.options) {
+        const key = String(optionValue(option));
+        if (selectedSet.has(key)) next[key] = option;
+      }
+      return next;
+    });
+  }, [optionPage.options, selectedValueKey]);
+
+  const displayedOptions = useMemo(() => {
+    const currentValues = new Set(optionPage.options.map((option) => String(optionValue(option))));
+    return [
+      ...selectedValues.flatMap((selectedValue) => {
+        const option = selectedOptions[selectedValue];
+        return option !== undefined && !currentValues.has(selectedValue) ? [option] : [];
+      }),
+      ...optionPage.options,
+    ];
+  }, [optionPage.options, selectedOptions, selectedValueKey]);
+  const selectedSet = new Set(selectedValues);
+  const selectionFull = maximumSelections !== undefined && selectedValues.length >= maximumSelections;
+  const stateMessage = busy
+    ? t("dialog.optionsLoading")
+    : error
+      ? error
+      : optionPage.options.length === 0
+        ? t("dialog.optionsEmpty")
+        : t("dialog.optionsPage", { page: optionPage.pageInfo.page });
+
+  return (
+    <div className="paginated-option-field" data-field={name}>
+      <label className="field-label-row" htmlFor={inputId}>
+        <span>{fieldLabel(name, locale)}</span>
+        {required ? <small aria-hidden="true" className="field-required" data-label={locale === "zh-CN" ? "必填" : "Required"} /> : null}
+      </label>
+      <select
+        aria-label={fieldLabel(name, locale)}
+        aria-required={required}
+        disabled={readOnly || (displayedOptions.length === 0 && (busy || Boolean(error) || optionPage.options.length === 0))}
+        id={inputId}
+        multiple={multiple}
+        onChange={(event) => {
+          if (multiple) {
+            const nextValues = Array.from(event.target.selectedOptions).map((selected) => {
+              const option = displayedOptions.find((candidate) => String(optionValue(candidate)) === selected.value)
+                ?? selected.value;
+              return optionValue(option);
+            });
+            if (maximumSelections !== undefined && nextValues.length > maximumSelections) return;
+            const optionLookup = new Map(displayedOptions.map((option) => [String(optionValue(option)), option]));
+            setSelectedOptions(Object.fromEntries(nextValues.flatMap((nextValue) => {
+              const option = optionLookup.get(String(nextValue));
+              return option === undefined ? [] : [[String(nextValue), option]];
+            })));
+            onChange(nextValues);
+            return;
+          }
+          const selectedOption = displayedOptions.find((option) => String(optionValue(option)) === event.target.value)
+            ?? event.target.value;
+          onChange(optionValue(selectedOption), optionRelatedValues(selectedOption));
+        }}
+        size={multiple ? 6 : undefined}
+        value={multiple ? selectedValues : selectedValues[0] ?? ""}
+      >
+        {displayedOptions.length === 0 ? <option value="">-</option> : null}
+        {displayedOptions.map((option) => {
+          const optionKey = String(optionValue(option));
+          return (
+            <option disabled={selectionFull && !selectedSet.has(optionKey)} key={optionKey} value={optionKey}>
+              {optionLabel(option, name, locale)}
+            </option>
+          );
+        })}
+      </select>
+      <div className="paginated-option-footer">
+        <span aria-live="polite" className={error ? "paginated-option-error" : undefined} role={error ? "alert" : "status"}>
+          {busy ? <LoaderCircle aria-hidden="true" className="is-spinning" size={14} /> : null}
+          {stateMessage}
+        </span>
+        {maximumSelections === undefined ? null : (
+          <span>{t("dialog.optionsSelected", { count: selectedValues.length, limit: maximumSelections })}</span>
+        )}
+        <div className="paginated-option-controls">
+          {error ? (
+            <button
+              aria-label={t("dialog.optionsRetry")}
+              className="icon-button"
+              onClick={() => setRequestVersion((current) => current + 1)}
+              title={t("dialog.optionsRetry")}
+              type="button"
+            >
+              <RefreshCw aria-hidden="true" size={16} />
+            </button>
+          ) : null}
+          <button
+            aria-label={t("pagination.previous")}
+            className="icon-button"
+            disabled={busy || page <= 1}
+            onClick={() => setPage((current) => Math.max(1, current - 1))}
+            title={t("pagination.previous")}
+            type="button"
+          >
+            <ChevronLeft aria-hidden="true" size={16} />
+          </button>
+          <button
+            aria-label={t("pagination.next")}
+            className="icon-button"
+            disabled={busy || !optionPage.pageInfo.hasMore}
+            onClick={() => setPage((current) => current + 1)}
+            title={t("pagination.next")}
+            type="button"
+          >
+            <ChevronRight aria-hidden="true" size={16} />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function Field({
   locale,
   multiple = false,
@@ -2545,6 +2784,13 @@ function fieldLabel(value: string, locale: WebserverLocale): string {
       operatorType: "Operator type",
       notAfter: "Expires at",
       notBefore: "Valid from",
+      attemptCount: "Verification attempts",
+      checkedAt: "Last checked at",
+      expiresAt: "Expires at",
+      failureCode: "Failure code",
+      nextAttemptAt: "Next check at",
+      recordName: "DNS TXT record name",
+      recordValue: "DNS TXT record value",
       renewalStatus: "Renewal status",
       rollbackFromDeploymentId: "Restored from",
       retryCount: "Retry count",
@@ -2633,6 +2879,13 @@ function fieldLabel(value: string, locale: WebserverLocale): string {
       operatorType: "操作人类型",
       notAfter: "到期时间",
       notBefore: "生效时间",
+      attemptCount: "验证次数",
+      checkedAt: "最后检查时间",
+      expiresAt: "过期时间",
+      failureCode: "失败代码",
+      nextAttemptAt: "下次检查时间",
+      recordName: "DNS TXT 记录名称",
+      recordValue: "DNS TXT 记录值",
       renewalStatus: "续期状态",
       rollbackFromDeploymentId: "还原来源版本",
       retryCount: "重试次数",
@@ -2787,8 +3040,13 @@ function certificateRenewalStatus(value: unknown, locale: WebserverLocale): stri
 function hasUnavailableOptions(
   body: Record<string, unknown>,
   fieldOptions: WebserverResourceFieldOptions,
+  paginatedFields: readonly string[] | undefined,
 ): boolean {
-  return Object.entries(fieldOptions).some(([name, options]) => name in body && options.length === 0);
+  return Object.entries(fieldOptions).some(([name, options]) => (
+    name in body
+    && !paginatedFields?.includes(name)
+    && options.length === 0
+  ));
 }
 
 function hasMissingRequiredFields(

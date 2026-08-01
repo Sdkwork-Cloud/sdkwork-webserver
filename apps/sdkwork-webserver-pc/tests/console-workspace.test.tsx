@@ -672,14 +672,17 @@ describe("console release controls", () => {
     })).rejects.toThrow("every validated");
   });
 
-  it("scopes certificate listing and domain choices to the selected application", async () => {
+  it("scopes certificate listing and verified domain pages to the selected application", async () => {
     const listCertificates = vi.fn().mockResolvedValue({
       items: [],
       pageInfo: { page: 1, pageSize: 20, hasMore: false },
     });
     const listDomains = vi.fn().mockResolvedValue({
-      items: [{ id: "domain-1", hostname: "app.example.com" }],
-      pageInfo: { page: 1, pageSize: 100, hasMore: false },
+      items: [
+        { id: "domain-1", hostname: "app.example.com", isVerified: true },
+        { id: "domain-2", hostname: "pending.example.com", isVerified: false },
+      ],
+      pageInfo: { page: 2, pageSize: 20, hasMore: true },
     });
     const registry = createWebserverConsoleRegistry({
       drive: {},
@@ -690,37 +693,94 @@ describe("console release controls", () => {
     } as unknown as WebserverConsoleSdkClients);
 
     await registry.certificates?.load({ page: 1, pageSize: 20, scopeId: "site-1" });
-    const options = await registry.certificates?.actions[0]?.loadFieldOptions?.({
+    const abortController = new AbortController();
+    const optionPage = await registry.certificates?.actions[0]?.loadFieldOptionPage?.("domainIds", {
       body: {},
+      page: 2,
+      pageSize: 20,
       scopeId: "site-1",
+      signal: abortController.signal,
     });
 
     expect(listCertificates).toHaveBeenCalledWith({ page: 1, pageSize: 20, siteId: "site-1" });
-    expect(listDomains).toHaveBeenCalledWith("site-1", { page: 1, pageSize: 100 });
-    expect(options?.domainIds).toEqual([{ value: "domain-1", label: "app.example.com" }]);
+    expect(listDomains).toHaveBeenCalledWith(
+      "site-1",
+      { page: 2, pageSize: 20 },
+      { signal: abortController.signal, timeout: 30_000 },
+    );
+    expect(optionPage).toEqual({
+      options: [{ value: "domain-1", label: "app.example.com" }],
+      pageInfo: { hasMore: true, page: 2, pageSize: 20 },
+    });
     expect(registry.certificates?.actions[0]?.fieldOptions?.certType).toEqual([1, 3]);
     expect(registry.certificates?.actions[0]?.fieldOptions?.keyAlgorithm).toEqual(["ECDSA", "RSA"]);
+    expect(registry.certificates?.actions[0]?.fieldSelectionLimits).toEqual({ domainIds: 8 });
     expect(registry.certificates?.actions[0]?.multipleFields).toEqual(["domainIds"]);
+    expect(registry.certificates?.actions[0]?.paginatedFields).toEqual(["domainIds"]);
+  });
+
+  it("waits for app certificate issuance through the generated operation API", async () => {
+    const issueCertificate = vi.fn().mockResolvedValue({
+      accepted: true,
+      operationId: "operation-console-1",
+      status: "pending",
+    });
+    const retrieveOperation = vi.fn().mockResolvedValue({
+      certificateId: "certificate-console-1",
+      id: "operation-console-1",
+      operationType: "ISSUE",
+      status: "SUCCEEDED",
+    });
+    const registry = createWebserverConsoleRegistry({
+      drive: {},
+      web: {
+        certificate: {
+          issue: issueCertificate,
+          operations: { retrieve: retrieveOperation },
+        },
+      },
+    } as unknown as WebserverConsoleSdkClients);
+    const issue = registry.certificates?.actions.find((candidate) => candidate.id === "issue");
+    if (!issue) throw new Error("console certificate action is unavailable");
+    const abortController = new AbortController();
+
+    await expect(issue.execute({
+      body: { domainIds: ["domain-1"], certType: 1, keyAlgorithm: "ECDSA", autoRenew: true },
+      idempotencyKey: "console-certificate-1",
+      scopeId: "site-1",
+      signal: abortController.signal,
+    })).resolves.toMatchObject({ id: "operation-console-1", status: "SUCCEEDED" });
+
+    expect(issueCertificate).toHaveBeenCalledWith(
+      { domainIds: ["domain-1"], certType: 1, keyAlgorithm: "ECDSA", autoRenew: true },
+      { idempotencyKey: "console-certificate-1" },
+      { signal: abortController.signal, timeout: 30_000 },
+    );
+    expect(retrieveOperation).toHaveBeenCalledWith(
+      "operation-console-1",
+      expect.objectContaining({ signal: expect.any(AbortSignal), timeout: 30_000 }),
+    );
+    expect(issue.dismissibleWhileBusy).toBe(true);
   });
 
   it("rejects invalid configuration inputs before app SDK calls", async () => {
     const createVariable = vi.fn();
     const createHealthCheck = vi.fn();
     const createDomain = vi.fn();
-    const createCertificate = vi.fn();
+    const issueCertificate = vi.fn();
     const registry = createWebserverConsoleRegistry({
       drive: {},
       web: {
         envVariable: { sites: { envVariables: { create: createVariable } } },
         monitor: { sites: { healthChecks: { create: createHealthCheck } } },
         domain: { sites: { domains: { create: createDomain } } },
-        certificate: { create: createCertificate },
+        certificate: { issue: issueCertificate },
       },
     } as unknown as WebserverConsoleSdkClients);
     const variable = registry.configuration?.actions.find((candidate) => candidate.id === "create-variable");
     const healthCheck = registry.configuration?.actions.find((candidate) => candidate.id === "create-check");
     const domain = registry.domains?.actions.find((candidate) => candidate.id === "create");
-    const certificate = registry.certificates?.actions.find((candidate) => candidate.id === "create");
+    const certificate = registry.certificates?.actions.find((candidate) => candidate.id === "issue");
     if (!variable || !healthCheck || !domain || !certificate) {
       throw new Error("console configuration actions are unavailable");
     }
@@ -749,7 +809,7 @@ describe("console release controls", () => {
     expect(createVariable).not.toHaveBeenCalled();
     expect(createHealthCheck).not.toHaveBeenCalled();
     expect(createDomain).not.toHaveBeenCalled();
-    expect(createCertificate).not.toHaveBeenCalled();
+    expect(issueCertificate).not.toHaveBeenCalled();
   });
 });
 

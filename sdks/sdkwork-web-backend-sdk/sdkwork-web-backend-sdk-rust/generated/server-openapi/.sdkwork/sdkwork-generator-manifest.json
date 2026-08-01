@@ -52,7 +52,7 @@
     },
     {
       "path": "src/api/application_domain.rs",
-      "sha256": "99fee515ae6e01f570156135db7ee6a3a86fa1b6c274f9161c0385eb83bd8b1d"
+      "sha256": "642130bf50405ca15e8e182e04e34b078dbee434e6f0d7bbc5b7bbea34bf9e4a"
     },
     {
       "path": "src/api/application_source_version.rs",
@@ -76,11 +76,11 @@
     },
     {
       "path": "src/api/certificate.rs",
-      "sha256": "1c946874499c059867489eab9c42f2c5b5a7eceb39769e48e955d46b48dda33b"
+      "sha256": "2c32c8c6e68ba31cc7d306f0353f3bc0aaca79a48a10c4d338cdc32fadacbd07"
     },
     {
       "path": "src/api/domain.rs",
-      "sha256": "5db89885a67a9511b1c1e71f78b93edffc2e703d10620c6bce8a2ff9b8c50cb7"
+      "sha256": "a177badeaf3282cb1ebbb801918fbd336ff561e634ccb27bc4ab038b82d049da"
     },
     {
       "path": "src/api/mod.rs",
@@ -145,10 +145,6 @@
     {
       "path": "src/models/application_domain_response.rs",
       "sha256": "4e4dbdd1da9fb358da9a1e4dc00e285ff9e7fad5b35060d2d7002428c74d7dff"
-    },
-    {
-      "path": "src/models/application_domain_verify_response.rs",
-      "sha256": "a207ec7c346a2dc65f3fdf8961bd6a0dbb4e7da2262a61b94bf09297dc7c1065"
     },
     {
       "path": "src/models/application_response.rs",
@@ -259,24 +255,32 @@
       "sha256": "34ba782244920c9f95b766bc72fe0ca5a0744f763fe485f2044e5deeb970a259"
     },
     {
-      "path": "src/models/certificate_response.rs",
-      "sha256": "58bfc9c3fc4afcd57a1af78da37868d4d591c0339c8d8df2047107603aa4e2aa"
+      "path": "src/models/certificate_operation_response.rs",
+      "sha256": "8919d7056b87fac507fdc16d4aa7b26871b8042f945c6d611adf862f1127ac10"
     },
     {
-      "path": "src/models/certificates_create_response201.rs",
-      "sha256": "daee77cac60e2daeae6c81cb4b452b278683c139d0d156cc8f3a6f6ac72b3995"
+      "path": "src/models/certificate_response.rs",
+      "sha256": "58bfc9c3fc4afcd57a1af78da37868d4d591c0339c8d8df2047107603aa4e2aa"
     },
     {
       "path": "src/models/certificates_distribution_list_response.rs",
       "sha256": "3b9e4b0c839655f9c301eb6c02079f36a1930a02e8af2601b1758ed3e3e1ff80"
     },
     {
+      "path": "src/models/certificates_issue_response202.rs",
+      "sha256": "09ada74d96200d8638eab712b2db832bc139b2e583346b2c2d675395dd621e35"
+    },
+    {
       "path": "src/models/certificates_list_response.rs",
       "sha256": "2547f6caf273bcd0e63973a7a36960c1d44bef7cf910260c0b3657688ca558ce"
     },
     {
-      "path": "src/models/certificates_renew_response.rs",
-      "sha256": "2acc9cb9d0b48a3025983f428b653dabdd6e78f353ade2cf432c5bce95c2e3ed"
+      "path": "src/models/certificates_operations_retrieve_response.rs",
+      "sha256": "ab50e8871c9514d3d8d31f65f312b6a966e3b3475c1faec04709536f05ea647d"
+    },
+    {
+      "path": "src/models/certificates_renew_response202.rs",
+      "sha256": "e8418852fc27ee2d8c3fb97a7569397e2e9ca00b3a6b36fe94a56440ae2271ee"
     },
     {
       "path": "src/models/certificates_update_response.rs",
@@ -327,10 +331,6 @@
       "sha256": "fbd57d41cac15b2ff86aab287aadbc0e3a5f78eb5c442eba64f4b6109af26a94"
     },
     {
-      "path": "src/models/create_certificate_request.rs",
-      "sha256": "cad6ea02613b2058d4e03d158de3de900aa5dc29abf0c8d02aa0f3b96a0e8532"
-    },
-    {
       "path": "src/models/create_listener_certificate_binding_request.rs",
       "sha256": "67788613c8d8c2b1c937825723cabf6e0f73931bfbe6e08ccaae38cd087d7e91"
     },
@@ -363,6 +363,10 @@
       "sha256": "d494fb6518299e01cd316b6278bad6ffa4f1ca565a664bec64e4a701a2eef4b8"
     },
     {
+      "path": "src/models/domain_verify_response.rs",
+      "sha256": "523e0ff2f7b03e3215e1677491275ec67c76c1636326651b2641826e65570320"
+    },
+    {
       "path": "src/models/domains_application_binding_update_response.rs",
       "sha256": "e596e779b5dbb706d182d715f5bdd522c2f1e2099bf7dd395ee70c4a58d8911f"
     },
@@ -391,6 +395,10 @@
       "sha256": "deee29ce48d4aa848ca3c0cc9bf28dbb41ad5fd56d812c4d80bf405973befb14"
     },
     {
+      "path": "src/models/issue_certificate_request.rs",
+      "sha256": "811aae6b9b3073d015c39e4c11bc99e65a28439dd1e0b541a041644c5e02ef90"
+    },
+    {
       "path": "src/models/listener_certificate_binding_response.rs",
       "sha256": "9da5af95f87de8ccf510fc0f96745a15335a3151645ece8eb4bf15f99cfa4bfa"
     },
@@ -408,7 +416,7 @@
     },
     {
       "path": "src/models/mod.rs",
-      "sha256": "b0f593be8bb46e5e700a1969308a905cce6b532ded79044680b84abffcf0b014"
+      "sha256": "1e5e5c448b9de780c5ff54998edc32b50fe2b28bcf5bc58845127868e6665e41"
     },
     {
       "path": "src/models/nginx_config_page.rs",
@@ -477,6 +485,10 @@
     {
       "path": "src/models/sdk_work_api_response.rs",
       "sha256": "e5fd3b922322a1cd1b1b6a82810b0fc8222ca9bf54dd9438152e2db940d591ef"
+    },
+    {
+      "path": "src/models/sdk_work_async_data.rs",
+      "sha256": "1cf6de55121da19656711ce6919cb16acf4c20fb00684d094a73b0561bead380"
     },
     {
       "path": "src/models/sdk_work_command_data.rs",

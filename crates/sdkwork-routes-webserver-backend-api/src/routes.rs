@@ -5,11 +5,11 @@ use axum::{
     Extension, Json, Router,
 };
 use sdkwork_webserver_contract::{
-    CreateCertificateRequest, CreateDeploymentRequest, CreateDomainRequest,
-    CreateListenerCertificateBindingRequest, CreateManagedDomainRequest, CreateNginxConfigRequest,
-    CreateRootDomainHostnameRequest, CreateRootDomainRequest, CreateServerRequest,
-    CreateSiteRequest, CreateSourceVersionRequest, ImportGitSourceVersionRequest,
-    ListNginxConfigsQuery, ListRootDomainsQuery, ListSitesQuery, UpdateCertificateRequest,
+    CreateDeploymentRequest, CreateDomainRequest, CreateListenerCertificateBindingRequest,
+    CreateManagedDomainRequest, CreateNginxConfigRequest, CreateRootDomainHostnameRequest,
+    CreateRootDomainRequest, CreateServerRequest, CreateSiteRequest, CreateSourceVersionRequest,
+    ImportGitSourceVersionRequest, IssueCertificateRequest, ListNginxConfigsQuery,
+    ListRootDomainsQuery, ListSitesQuery, UpdateCertificateRequest,
     UpdateDomainApplicationBindingRequest, UpdateNginxConfigRequest, UpdateSiteRequest,
     WebBackendApi, WebBackendRequestContext,
 };
@@ -18,10 +18,10 @@ use std::sync::Arc;
 
 use crate::{agent_routes, auth::require_backend_context, paths};
 use sdkwork_routes_webserver_common::{
-    created_resource, no_content, ok_audit_log_page, ok_certificate_distribution_page,
-    ok_certificate_page, ok_deployment_page, ok_domain_page, ok_listener_certificate_binding_page,
-    ok_nginx_config_page, ok_resource, ok_root_domain_page, ok_server_page, ok_site_page,
-    ok_source_version_page, WebApiError,
+    accepted_async, created_resource, no_content, ok_audit_log_page,
+    ok_certificate_distribution_page, ok_certificate_page, ok_deployment_page, ok_domain_page,
+    ok_listener_certificate_binding_page, ok_nginx_config_page, ok_resource, ok_root_domain_page,
+    ok_server_page, ok_site_page, ok_source_version_page, WebApiError,
 };
 
 #[derive(Clone)]
@@ -114,9 +114,11 @@ pub fn build_router_with_shared_backend_api(api: Arc<dyn WebBackendApi>) -> Rout
             paths::APPLICATION_DEPLOYMENT_ROLLBACK,
             post(rollback_application_deployment),
         )
+        .route(paths::CERTIFICATES, get(list_managed_certificates))
+        .route(paths::CERTIFICATES_ISSUE, post(issue_managed_certificate))
         .route(
-            paths::CERTIFICATES,
-            get(list_managed_certificates).post(create_managed_certificate),
+            paths::CERTIFICATE_OPERATION,
+            get(retrieve_managed_certificate_operation),
         )
         .route(
             paths::CERTIFICATE,
@@ -617,16 +619,30 @@ async fn list_managed_certificates(
     )
 }
 
-async fn create_managed_certificate(
+async fn issue_managed_certificate(
     State(state): State<BackendState>,
     context: Option<Extension<WebBackendRequestContext>>,
-    Json(request): Json<CreateCertificateRequest>,
+    Json(request): Json<IssueCertificateRequest>,
 ) -> Result<Response, WebApiError> {
     let context = require_backend_context(context)?;
-    created_resource(
+    accepted_async(
         state
             .api
-            .create_managed_certificate(&context, &request)
+            .issue_managed_certificate(&context, &request)
+            .await,
+    )
+}
+
+async fn retrieve_managed_certificate_operation(
+    State(state): State<BackendState>,
+    context: Option<Extension<WebBackendRequestContext>>,
+    Path(operation_id): Path<String>,
+) -> Result<Response, WebApiError> {
+    let context = require_backend_context(context)?;
+    ok_resource(
+        state
+            .api
+            .retrieve_managed_certificate_operation(&context, &operation_id)
             .await,
     )
 }
@@ -709,7 +725,7 @@ async fn renew_managed_certificate(
     Path(certificate_id): Path<String>,
 ) -> Result<Response, WebApiError> {
     let context = require_backend_context(context)?;
-    ok_resource(
+    accepted_async(
         state
             .api
             .renew_managed_certificate(&context, &certificate_id)

@@ -174,6 +174,7 @@ web_root_domain 1 -> N web_domain
 web_site 1 -> N web_site_binding N -> 1 web_domain
 web_certificate N <-> N web_domain through web_certificate_identifier
 web_certificate 1 -> N web_certificate_version
+web_certificate 1 -> N web_certificate_operation
 web_site_binding 1 -> N web_listener_certificate_binding
 web_site 1 -> N web_deployment
 ```
@@ -182,6 +183,19 @@ Backend certificate listing and issuance use verified domain identifiers and rem
 before `web_site_binding` exists. Application identity enters only at
 `web_listener_certificate_binding`, where hostname coverage, usable version, key algorithm, and
 listener conflicts are checked before activation intent is accepted.
+
+Issue and renew routes persist `web_certificate_operation` and return HTTP `202` standard async
+data. App and backend generated SDKs retrieve operation status; the PC polls that generated method
+with a bounded client deadline and can stop observing without cancelling server work. The
+certificate worker schedules due renewals and claims both issue and renew operations with
+`FOR UPDATE SKIP LOCKED`, expiring leases, bounded retries, and fencing tokens. Finalization updates
+the immutable certificate version and canonical aggregate in the same PostgreSQL transaction;
+stale or exhausted work cannot overwrite a newer result.
+
+Only ACME certificate aggregates may enable automatic renewal or enter the scheduled scan.
+Self-signed aggregates remain eligible for explicit manual reissuance. Every provider result passes
+the common issuer boundary's SAN, algorithm, current-validity, leaf/private-key SPKI, and parsed
+metadata checks before a worker can finalize an immutable version.
 
 `sdkwork-web` owns the mutable Zone, hostname, verification, route, certificate, listener, and Web
 deployment intent. `sdkwork-deploy` is being aligned to immutable rollout, distribution, snapshot,

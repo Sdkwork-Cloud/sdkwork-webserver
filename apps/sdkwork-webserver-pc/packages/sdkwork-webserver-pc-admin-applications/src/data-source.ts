@@ -229,6 +229,7 @@ export function createWebserverAdminApplicationRegistry(
           (context) => client.applicationDomain.applications.domains.verify(requiredApplicationId(context.scopeId), selectedId(context), idempotencyParams(context)),
           {
             availableWhen: ({ selectedItem }) => selectedItem?.isVerified !== true,
+            resultFields: ["status", "recordName", "recordValue", "attemptCount", "expiresAt", "nextAttemptAt", "failureCode"],
             requiresScope: true,
             requiresSelection: true,
             permission: "web.sites.write",

@@ -54,7 +54,7 @@ class DomainApi {
     await _client.delete(ApiPaths.appPath('/sites/${serializePathParameter(siteId, const PathParameterSpec('siteId', 'simple', false))}/domains/${serializePathParameter(domainId, const PathParameterSpec('domainId', 'simple', false))}'));
   }
 
-  /// 验证域名所有权
+  /// 创建或检查域名所有权验证挑战
   Future<SitesDomainsVerifyResponse?> sitesDomainsVerify(String siteId, String domainId, String idempotencyKey) async {
     final requestHeaders = buildRequestHeaders(
       <String, HeaderParameterSpec>{

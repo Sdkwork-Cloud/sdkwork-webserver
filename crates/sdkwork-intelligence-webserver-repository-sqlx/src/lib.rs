@@ -74,6 +74,9 @@ macro_rules! repository_engine {
             mod certificates {
                 include!("certificates.rs");
             }
+            mod certificate_operations {
+                include!("certificate_operations.rs");
+            }
             mod certificate_secrets {
                 include!("certificate_secrets.rs");
             }

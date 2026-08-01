@@ -239,11 +239,17 @@ pub trait WebAppApi: Send + Sync {
         page_size: i32,
     ) -> WebServiceResult<CertificatePage>;
 
-    async fn create_certificate(
+    async fn issue_certificate(
         &self,
         context: &WebAppRequestContext,
-        request: &CreateCertificateRequest,
-    ) -> WebServiceResult<CertificateResponse>;
+        request: &IssueCertificateRequest,
+    ) -> WebServiceResult<CertificateOperationAcceptedResponse>;
+
+    async fn retrieve_certificate_operation(
+        &self,
+        context: &WebAppRequestContext,
+        operation_id: &str,
+    ) -> WebServiceResult<CertificateOperationResponse>;
 
     async fn list_listener_certificate_bindings(
         &self,
@@ -495,11 +501,17 @@ pub trait WebBackendApi: Send + Sync {
         page_size: i32,
     ) -> WebServiceResult<CertificatePage>;
 
-    async fn create_managed_certificate(
+    async fn issue_managed_certificate(
         &self,
         context: &WebBackendRequestContext,
-        request: &CreateCertificateRequest,
-    ) -> WebServiceResult<CertificateResponse>;
+        request: &IssueCertificateRequest,
+    ) -> WebServiceResult<CertificateOperationAcceptedResponse>;
+
+    async fn retrieve_managed_certificate_operation(
+        &self,
+        context: &WebBackendRequestContext,
+        operation_id: &str,
+    ) -> WebServiceResult<CertificateOperationResponse>;
 
     async fn update_managed_certificate(
         &self,
@@ -512,7 +524,7 @@ pub trait WebBackendApi: Send + Sync {
         &self,
         context: &WebBackendRequestContext,
         certificate_id: &str,
-    ) -> WebServiceResult<CertificateResponse>;
+    ) -> WebServiceResult<CertificateOperationAcceptedResponse>;
 
     async fn list_application_listener_certificate_bindings(
         &self,

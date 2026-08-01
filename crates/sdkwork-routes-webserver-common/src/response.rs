@@ -71,6 +71,13 @@ pub fn created_resource<T: Serialize>(
     }
 }
 
+pub fn accepted_async<T: Serialize>(result: WebServiceResult<T>) -> Result<Response, WebApiError> {
+    match result {
+        Ok(operation) => Ok(envelope(StatusCode::ACCEPTED, operation)),
+        Err(error) => Err(error.into()),
+    }
+}
+
 pub fn ok_site_page(result: WebServiceResult<SitePage>) -> Result<Response, WebApiError> {
     match result {
         Ok(page) => Ok(envelope(
@@ -249,10 +256,11 @@ pub fn no_content(result: WebServiceResult<()>) -> Result<Response, WebApiError>
 #[cfg(test)]
 mod tests {
     use axum::body::to_bytes;
+    use axum::http::StatusCode;
     use sdkwork_utils_rust::{SdkWorkApiResponse, SdkWorkResourceData, SDKWORK_SUCCESS_CODE};
-    use sdkwork_webserver_contract::AgentSyncResponse;
+    use sdkwork_webserver_contract::{AgentSyncResponse, CertificateOperationAcceptedResponse};
 
-    use super::ok_resource;
+    use super::{accepted_async, ok_resource};
 
     #[tokio::test]
     async fn agent_sync_resource_uses_the_canonical_sdkwork_envelope() {
@@ -275,5 +283,24 @@ mod tests {
         assert!(!decoded.trace_id.is_empty());
         assert_eq!(decoded.data.item.server_id, "server-1");
         assert!(decoded.data.item.unchanged);
+    }
+
+    #[tokio::test]
+    async fn async_accept_uses_202_and_the_canonical_async_payload() {
+        let response = accepted_async(Ok(CertificateOperationAcceptedResponse {
+            accepted: true,
+            operation_id: "operation-1".to_string(),
+            status: "pending".to_string(),
+        }))
+        .expect("async response");
+        assert_eq!(response.status(), StatusCode::ACCEPTED);
+        let body = to_bytes(response.into_body(), 1024 * 1024)
+            .await
+            .expect("bounded response body");
+        let decoded: SdkWorkApiResponse<CertificateOperationAcceptedResponse> =
+            serde_json::from_slice(&body).expect("canonical async envelope");
+        assert_eq!(decoded.code, SDKWORK_SUCCESS_CODE);
+        assert!(decoded.data.accepted);
+        assert_eq!(decoded.data.operation_id, "operation-1");
     }
 }

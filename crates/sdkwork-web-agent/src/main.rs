@@ -1,4 +1,4 @@
-//! SDKWork Web Node Daemon using the legacy v3 Agent API compatibility contract.
+//! SDKWork Web Node Daemon control-plane synchronization runtime.
 
 #[path = "state.rs"]
 mod state;
@@ -18,7 +18,9 @@ use sdkwork_webserver_contract::{
     AgentCertificateBundle, AgentCertificateObservation, AgentHeartbeatResponse,
     AgentNginxConfigBundle, AgentSyncResponse,
 };
-use sdkwork_webserver_edge_runtime::{CertificateBundleMaterial, EdgeRuntime};
+use sdkwork_webserver_edge_runtime::{
+    CertificateBundleMaterial, EdgeRuntime, NginxSiteConfigMaterial, PendingEdgeDeployment,
+};
 use state::{resolve_state_path, NodeDaemonLock, NodeDaemonState};
 use tracing::{info, warn};
 
@@ -164,85 +166,130 @@ async fn sync_once(
         "node sync manifest received"
     );
 
-    for config in &manifest.nginx_configs {
-        if let Err(error) = edge.deploy_site_config(&config.domain, &config.config_content) {
-            persist_certificate_observations(
+    let (nginx_configs, certificates) = deployment_materials(&manifest);
+    let deployment = match edge
+        .activate_deployment_async(&nginx_configs, &certificates)
+        .await
+    {
+        Ok(deployment) => deployment,
+        Err(error) => {
+            let failure = record_deployment_failure(
                 state_path,
                 local_state,
-                certificate_observations(&manifest, "FAILED", Some("NGINX_CONFIG_STAGE_FAILED")),
-            )?;
-            report_observation_failure(edge, clients, local_state).await;
-            return Err(anyhow::anyhow!(
-                "deploy nginx site {}: {error}",
-                config.domain
+                &manifest,
+                "EDGE_DEPLOYMENT_STAGE_FAILED",
+                edge,
+                clients,
+            )
+            .await;
+            return Err(append_error(
+                anyhow::anyhow!("stage edge deployment: {error}"),
+                "persist deployment failure",
+                failure,
             ));
         }
-    }
-
-    for certificate in &manifest.certificates {
-        if let Err(error) = apply_certificate_bundle(edge, certificate) {
-            persist_certificate_observations(
-                state_path,
-                local_state,
-                certificate_observations(&manifest, "FAILED", Some("CERTIFICATE_STAGE_FAILED")),
-            )?;
-            report_observation_failure(edge, clients, local_state).await;
-            return Err(error);
-        }
-    }
+    };
 
     if !manifest.certificates.is_empty() {
-        persist_certificate_observations(
+        if let Err(error) = persist_certificate_observations(
             state_path,
             local_state,
             certificate_observations(&manifest, "STAGED", None),
-        )?;
-        report_heartbeat(edge, clients, local_state).await?;
+        ) {
+            return Err(rollback_deployment(edge, deployment, false, error).await);
+        }
+        if let Err(error) = report_heartbeat(edge, clients, local_state).await {
+            return Err(rollback_deployment(edge, deployment, false, error).await);
+        }
     }
 
-    if let Err(error) = edge.reload() {
-        persist_certificate_observations(
+    if let Err(error) = edge.validate_active_config() {
+        let failure = record_deployment_failure(
             state_path,
             local_state,
-            certificate_observations(&manifest, "FAILED", Some("NGINX_RELOAD_FAILED")),
-        )?;
-        report_observation_failure(edge, clients, local_state).await;
-        return Err(anyhow::anyhow!("reload nginx after node sync: {error}"));
+            &manifest,
+            "NGINX_CONFIG_VALIDATION_FAILED",
+            edge,
+            clients,
+        )
+        .await;
+        let error = append_error(
+            anyhow::anyhow!("validate active Nginx configuration: {error}"),
+            "persist deployment failure",
+            failure,
+        );
+        return Err(rollback_deployment(edge, deployment, false, error).await);
+    }
+    if let Err(error) = edge.reload() {
+        let failure = record_deployment_failure(
+            state_path,
+            local_state,
+            &manifest,
+            "NGINX_RELOAD_FAILED",
+            edge,
+            clients,
+        )
+        .await;
+        let error = append_error(
+            anyhow::anyhow!("reload Nginx after node sync: {error}"),
+            "persist deployment failure",
+            failure,
+        );
+        return Err(rollback_deployment(edge, deployment, true, error).await);
     }
 
     if !manifest.certificates.is_empty() {
-        persist_certificate_observations(
+        if let Err(error) = persist_certificate_observations(
             state_path,
             local_state,
             certificate_observations(&manifest, "ACTIVE", None),
-        )?;
-        report_heartbeat(edge, clients, local_state).await?;
+        ) {
+            return Err(rollback_deployment(edge, deployment, true, error).await);
+        }
+        if let Err(error) = report_heartbeat(edge, clients, local_state).await {
+            return Err(rollback_deployment(edge, deployment, true, error).await);
+        }
 
         for certificate in &manifest.certificates {
             for hostname in &certificate.hostnames {
                 if let Err(error) =
                     edge.verify_served_certificate(hostname, &certificate.fingerprint)
                 {
-                    persist_certificate_observations(
+                    let failure = record_deployment_failure(
                         state_path,
                         local_state,
-                        certificate_observations(&manifest, "FAILED", Some("TLS_SNI_PROBE_FAILED")),
-                    )?;
-                    report_observation_failure(edge, clients, local_state).await;
-                    return Err(anyhow::anyhow!(
-                        "verify served certificate {} for {hostname}: {error}",
-                        certificate.certificate_id
-                    ));
+                        &manifest,
+                        "TLS_SNI_PROBE_FAILED",
+                        edge,
+                        clients,
+                    )
+                    .await;
+                    let error = append_error(
+                        anyhow::anyhow!(
+                            "verify served certificate {} for {hostname}: {error}",
+                            certificate.certificate_id
+                        ),
+                        "persist deployment failure",
+                        failure,
+                    );
+                    return Err(rollback_deployment(edge, deployment, true, error).await);
                 }
             }
         }
 
-        persist_certificate_observations(
+        if let Err(error) = persist_certificate_observations(
             state_path,
             local_state,
             certificate_observations(&manifest, "SERVED", None),
-        )?;
+        ) {
+            return Err(rollback_deployment(edge, deployment, true, error).await);
+        }
     }
+
+    deployment
+        .commit()
+        .await
+        .map_err(|error| anyhow::anyhow!("commit edge deployment: {error}"))?;
 
     let observed_state = local_state.with_observed(&manifest.sync_version)?;
     observed_state.save(state_path)?;
@@ -327,6 +374,79 @@ fn certificate_observations(
             failure_code: failure_code.map(str::to_string),
         })
         .collect()
+}
+
+fn deployment_materials(
+    manifest: &AgentSyncResponse,
+) -> (Vec<NginxSiteConfigMaterial>, Vec<CertificateBundleMaterial>) {
+    let nginx_configs = manifest
+        .nginx_configs
+        .iter()
+        .map(|config| NginxSiteConfigMaterial {
+            domain: config.domain.clone(),
+            config_content: config.config_content.clone(),
+        })
+        .collect();
+    let certificates = manifest
+        .certificates
+        .iter()
+        .map(|certificate| CertificateBundleMaterial {
+            bundle_name: certificate.cert_name.clone(),
+            fullchain_pem: certificate.fullchain_pem.clone(),
+            private_key_pem: certificate.privkey_pem.clone(),
+        })
+        .collect();
+    (nginx_configs, certificates)
+}
+
+async fn record_deployment_failure(
+    state_path: &std::path::Path,
+    local_state: &mut NodeDaemonState,
+    manifest: &AgentSyncResponse,
+    failure_code: &str,
+    edge: &EdgeRuntime,
+    clients: &NodeDaemonSdkClients,
+) -> Option<anyhow::Error> {
+    match persist_certificate_observations(
+        state_path,
+        local_state,
+        certificate_observations(manifest, "FAILED", Some(failure_code)),
+    ) {
+        Ok(()) => {
+            report_observation_failure(edge, clients, local_state).await;
+            None
+        }
+        Err(error) => Some(error),
+    }
+}
+
+async fn rollback_deployment(
+    edge: &EdgeRuntime,
+    deployment: PendingEdgeDeployment,
+    reload_previous: bool,
+    primary: anyhow::Error,
+) -> anyhow::Error {
+    let rollback_error = deployment.rollback().await.err().map(anyhow::Error::from);
+    let mut error = append_error(primary, "roll back edge deployment", rollback_error);
+    if reload_previous {
+        error = append_error(
+            error,
+            "reload restored Nginx configuration",
+            edge.reload().err().map(anyhow::Error::from),
+        );
+    }
+    error
+}
+
+fn append_error(
+    primary: anyhow::Error,
+    operation: &str,
+    secondary: Option<anyhow::Error>,
+) -> anyhow::Error {
+    match secondary {
+        Some(secondary) => anyhow::anyhow!("{primary}; {operation}: {secondary}"),
+        None => primary,
+    }
 }
 
 fn map_heartbeat_response(
@@ -512,19 +632,6 @@ fn parse_sync_interval(value: &str) -> anyhow::Result<u64> {
         );
     }
     Ok(interval)
-}
-
-fn apply_certificate_bundle(
-    edge: &EdgeRuntime,
-    certificate: &AgentCertificateBundle,
-) -> anyhow::Result<()> {
-    let material = CertificateBundleMaterial {
-        bundle_name: certificate.cert_name.clone(),
-        fullchain_pem: certificate.fullchain_pem.clone(),
-        private_key_pem: certificate.privkey_pem.clone(),
-    };
-    edge.write_certificate_bundle(&material)
-        .map_err(|error| anyhow::anyhow!("write certificate {}: {error}", certificate.cert_name))
 }
 
 #[cfg(test)]

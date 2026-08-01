@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace SDKWork\Web\AppSdk\Api;
 
-use SDKWork\Web\AppSdk\Models\CertificatesCreateResponse201;
+use SDKWork\Web\AppSdk\Models\CertificatesIssueResponse202;
 use SDKWork\Web\AppSdk\Models\CertificatesListResponse;
-use SDKWork\Web\AppSdk\Models\CreateCertificateRequest;
+use SDKWork\Web\AppSdk\Models\CertificatesOperationsRetrieveResponse;
 use SDKWork\Web\AppSdk\Models\CreateListenerCertificateBindingRequest;
+use SDKWork\Web\AppSdk\Models\IssueCertificateRequest;
 use SDKWork\Web\AppSdk\Models\SitesDomainsListenerCertificateBindingsCreateResponse201;
 use SDKWork\Web\AppSdk\Models\SitesDomainsListenerCertificateBindingsListResponse;
 
@@ -76,10 +77,10 @@ final class CertificateApi extends BaseApi
     }
 
     /** 申请证书 */
-    public function certificatesCreate(array|CreateCertificateRequest $body, string $idempotencyKey): ?CertificatesCreateResponse201
+    public function certificatesIssue(array|IssueCertificateRequest $body, string $idempotencyKey): ?CertificatesIssueResponse202
     {
-        $path = '/app/v3/api/certificates';
-        $payload = $body instanceof CreateCertificateRequest ? $body->toArray() : $body;
+        $path = '/app/v3/api/certificates/issue';
+        $payload = $body instanceof IssueCertificateRequest ? $body->toArray() : $body;
         $requestHeaders = $this->buildRequestHeaders(
             [
                 'Idempotency-Key' => new HeaderParameterSpec($idempotencyKey, 'simple', false, null),
@@ -90,7 +91,15 @@ final class CertificateApi extends BaseApi
             'headers' => $requestHeaders,
             'json' => $payload,
         ]);
-        return is_array($result) ? CertificatesCreateResponse201::fromArray($result) : null;
+        return is_array($result) ? CertificatesIssueResponse202::fromArray($result) : null;
+    }
+
+    /** 获取证书异步操作状态 */
+    public function certificatesOperationsRetrieve(string $operationId): ?CertificatesOperationsRetrieveResponse
+    {
+        $path = $this->interpolatePath('/app/v3/api/certificates/operations/{operationId}', ['operationId' => $this->serializePathParameter($operationId, new PathParameterSpec('operationId', 'simple', false))]);
+        $result = $this->client->request('GET', $path, []);
+        return is_array($result) ? CertificatesOperationsRetrieveResponse::fromArray($result) : null;
     }
 
     private function buildRequestHeaders(array $headers, array $cookies): array

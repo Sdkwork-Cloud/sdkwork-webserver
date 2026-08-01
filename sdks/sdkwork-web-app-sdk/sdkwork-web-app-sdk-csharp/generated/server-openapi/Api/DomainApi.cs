@@ -60,7 +60,7 @@ namespace SDKWork.Web.AppSdk.Api
         }
 
         /// <summary>
-        /// 验证域名所有权
+        /// 创建或检查域名所有权验证挑战
         /// </summary>
         public async Task<SDKWork.Web.AppSdk.Models.SitesDomainsVerifyResponse?> SitesDomainsVerifyAsync(string siteId, string domainId, string idempotencyKey)
         {

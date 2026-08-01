@@ -51,7 +51,7 @@ class ApplicationDomainApi {
     await _client.delete(ApiPaths.backendPath('/applications/${serializePathParameter(applicationId, const PathParameterSpec('applicationId', 'simple', false))}/domains/${serializePathParameter(domainId, const PathParameterSpec('domainId', 'simple', false))}'), headers: requestHeaders);
   }
 
-  /// Verify an application public domain
+  /// Create or check an application-domain ownership challenge
   Future<ApplicationsDomainsVerifyResponse?> applicationsDomainsVerify(String applicationId, String domainId, String idempotencyKey) async {
     final requestHeaders = buildRequestHeaders(
       <String, HeaderParameterSpec>{

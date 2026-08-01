@@ -104,7 +104,7 @@ class DomainApi(private val client: HttpClient) {
         client.delete(ApiPaths.backendPath("/domains/${serializePathParameter(domainId, PathParameterSpec("domainId", "simple", false))}"), null, requestHeaders)
     }
 
-    /** Verify a tenant custom domain asset */
+    /** Create or check a tenant custom-domain ownership challenge */
     suspend fun domainsVerify(domainId: String, idempotencyKey: String): DomainsVerifyResponse? {
         val requestHeaders = buildRequestHeaders(
             mapOf(

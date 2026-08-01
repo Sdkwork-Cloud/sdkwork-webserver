@@ -26,12 +26,14 @@ users:
 acceptance_criteria:
   - A hostname exists independently of application routing and certificates.
   - An application may own multiple active hostname routes through web_site_binding.
-  - Certificate creation accepts 1..8 unique verified domainIds and an RSA or ECDSA key algorithm.
+  - The certificate issue command accepts 1..8 unique verified domainIds and an RSA or ECDSA key algorithm.
+  - Backend certificate selection loads one bounded hostname page at a time, excludes unverified assets, preserves selected ids and labels across pages, and keeps verified unbound hostnames eligible.
   - Backend certificate listing and issuance are filtered by domainIds and do not require a web_site_binding or applicationId.
+  - Certificate issuance and renewal persist a durable operation and return HTTP 202 asynchronous data; generated SDK operation retrieval, not the acceptance payload, supplies terminal status.
   - Certificate identifiers are ordered relational rows with foreign keys to both certificate and hostname.
   - Authorized operators can repeatedly issue certificates and can list certificates by domain without downloading the tenant inventory.
   - Authorized operators can list, bind, and unbind listener certificates for a bound hostname.
-  - Binding rejects a certificate that does not cover the hostname, has no usable version, has a mismatched algorithm, or conflicts with an active algorithm binding.
+  - Binding rejects a certificate that does not cover the hostname, has no usable version, has a mismatched algorithm, or conflicts with an active algorithm binding; occupied algorithms return a standard conflict instead of an internal database error.
   - One active RSA and one active ECDSA listener binding may coexist; only one active listener binding is default.
   - Listener responses expose certificate name, SANs, issuer, fingerprint, expiry, key algorithm, certificate status, and binding status, but no protected material.
   - Unbinding an application route does not delete hostname or certificate lifecycle records.
@@ -42,7 +44,7 @@ acceptance_criteria:
 non_functional_requirements:
   security: Subject scope comes from WebRequestContext; private material remains behind secret references; ownership and coverage fail closed.
   privacy: APIs expose operational certificate metadata only and never private keys or provider secrets.
-  performance: Domain filtering and pagination execute in PostgreSQL using indexed predicates; SAN cardinality is bounded to eight at API, service, ACME, and database layers.
+  performance: Domain filtering and pagination execute in PostgreSQL using indexed predicates; interactive selectors never aggregate all pages; SAN cardinality is bounded to eight at UI, API, service, ACME, and database layers.
   reliability: Deployment, certificate lifecycle, listener intent, distribution, and target observation remain distinct truthful states.
 affected_surfaces:
   - database
@@ -94,6 +96,7 @@ The canonical relationship is:
 web_site 1 -> N web_site_binding N -> 1 web_domain
 web_certificate N <-> N web_domain through web_certificate_identifier
 web_certificate 1 -> N web_certificate_version
+web_certificate 1 -> N web_certificate_operation
 web_site_binding 1 -> N web_listener_certificate_binding
 ```
 
@@ -111,3 +114,5 @@ that does not make the application the certificate owner or a backend-admin issu
 - 2026-07-31: Replaced the prelaunch direct domain/certificate column model with the implemented
   certificate-identifier, certificate-version, site-route, and listener-binding relationships;
   clarified that verified-domain issuance precedes and does not depend on application routing.
+- 2026-07-31: Made issue and renew durable asynchronous operations with generated SDK status
+  retrieval, bounded worker leases/retries, and fenced transactional finalization.

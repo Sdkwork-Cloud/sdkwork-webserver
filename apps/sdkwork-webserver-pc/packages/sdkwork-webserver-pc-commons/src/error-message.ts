@@ -1,5 +1,6 @@
 import type { WebserverMessageKey } from "./i18n/index.ts";
 import { isRecord } from "./normalize.ts";
+import { WebserverOperationError } from "./operation-polling.ts";
 import { WebserverActionError } from "./types.ts";
 
 export type WebserverErrorTranslate = (
@@ -114,6 +115,15 @@ export function formatWebserverErrorMessage(
     const actionMessage = translate(ACTION_ERROR_KEYS[error.code], { ...error.details });
     const causeMessage = structuredErrorMessage(error.cause, translate);
     return joinDistinctMessages(actionMessage, causeMessage);
+  }
+
+  if (error instanceof WebserverOperationError) {
+    const key = error.kind === "timeout"
+      ? "error.asyncOperationTimeout"
+      : error.kind === "cancelled"
+        ? "error.asyncOperationCancelled"
+        : "error.asyncOperationFailed";
+    return translate(key, { failureCode: error.failureCode });
   }
 
   return structuredErrorMessage(error, translate)

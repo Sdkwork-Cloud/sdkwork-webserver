@@ -131,7 +131,7 @@ class DomainApi {
     await _client.delete(ApiPaths.backendPath('/domains/${serializePathParameter(domainId, const PathParameterSpec('domainId', 'simple', false))}'), headers: requestHeaders);
   }
 
-  /// Verify a tenant custom domain asset
+  /// Create or check a tenant custom-domain ownership challenge
   Future<DomainsVerifyResponse?> domainsVerify(String domainId, String idempotencyKey) async {
     final requestHeaders = buildRequestHeaders(
       <String, HeaderParameterSpec>{

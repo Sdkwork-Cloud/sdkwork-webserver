@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional
 from ..http_client import HttpClient
-from ..models import ApplicationsDomainsListenerCertificateBindingsCreateResponse201, ApplicationsDomainsListenerCertificateBindingsListResponse, CertificatesCreateResponse201, CertificatesListResponse, CertificatesRenewResponse, CertificatesUpdateResponse, CreateCertificateRequest, CreateListenerCertificateBindingRequest, UpdateCertificateRequest
+from ..models import ApplicationsDomainsListenerCertificateBindingsCreateResponse201, ApplicationsDomainsListenerCertificateBindingsListResponse, CertificatesIssueResponse202, CertificatesListResponse, CertificatesOperationsRetrieveResponse, CertificatesRenewResponse202, CertificatesUpdateResponse, CreateListenerCertificateBindingRequest, IssueCertificateRequest, UpdateCertificateRequest
 
 def _append_query_string(path: str, raw_query_string: str) -> str:
     query = raw_query_string.lstrip('?')
@@ -243,6 +243,7 @@ class CertificateApi:
     def __init__(self, client: HttpClient):
         self._client = client
         self.applications = CertificateApplicationsApi(client)
+        self.operations = CertificateOperationsApi(client)
 
 
     def list(self, page: Optional[int] = None, page_size: Optional[int] = None, domain_id: Optional[str] = None) -> CertificatesListResponse:
@@ -254,7 +255,7 @@ class CertificateApi:
         ])
         return self._client.get(_append_query_string(f"/backend/v3/api/certificates", query))
 
-    def create(self, body: CreateCertificateRequest, idempotency_key: str) -> CertificatesCreateResponse201:
+    def create_issue(self, body: IssueCertificateRequest, idempotency_key: str) -> CertificatesIssueResponse202:
         """Issue a canonical certificate"""
         request_headers = build_request_headers(
             {
@@ -262,7 +263,7 @@ class CertificateApi:
             },
             {}
         )
-        return self._client.post(f"/backend/v3/api/certificates", json=body, headers=request_headers)
+        return self._client.post(f"/backend/v3/api/certificates/issue", json=body, headers=request_headers)
 
     def update(self, certificate_id: str, body: UpdateCertificateRequest, idempotency_key: str) -> CertificatesUpdateResponse:
         """Update certificate automatic renewal policy"""
@@ -274,7 +275,7 @@ class CertificateApi:
         )
         return self._client.put(f"/backend/v3/api/certificates/{serialize_path_parameter(certificate_id, {'name': 'certificateId', 'style': 'simple', 'explode': False})}", json=body, headers=request_headers)
 
-    def create_renew(self, certificate_id: str, idempotency_key: str) -> CertificatesRenewResponse:
+    def create_renew(self, certificate_id: str, idempotency_key: str) -> CertificatesRenewResponse202:
         """Renew a canonical certificate now"""
         request_headers = build_request_headers(
             {
@@ -334,3 +335,14 @@ class CertificateApplicationsDomainsListenerCertificateBindingsApi:
             {}
         )
         return self._client.delete(f"/backend/v3/api/applications/{serialize_path_parameter(application_id, {'name': 'applicationId', 'style': 'simple', 'explode': False})}/domains/{serialize_path_parameter(domain_id, {'name': 'domainId', 'style': 'simple', 'explode': False})}/listener_certificate_bindings/{serialize_path_parameter(binding_id, {'name': 'bindingId', 'style': 'simple', 'explode': False})}", headers=request_headers)
+
+class CertificateOperationsApi:
+    """certificate certificates.operations API client."""
+
+    def __init__(self, client: HttpClient):
+        self._client = client
+
+
+    def retrieve(self, operation_id: str) -> CertificatesOperationsRetrieveResponse:
+        """Retrieve a certificate operation"""
+        return self._client.get(f"/backend/v3/api/certificates/operations/{serialize_path_parameter(operation_id, {'name': 'operationId', 'style': 'simple', 'explode': False})}")

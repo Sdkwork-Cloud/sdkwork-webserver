@@ -67,7 +67,7 @@ class CertificateApi {
   }
 
   /// 申请证书
-  Future<CertificatesCreateResponse201?> certificatesCreate(CreateCertificateRequest body, String idempotencyKey) async {
+  Future<CertificatesIssueResponse202?> certificatesIssue(IssueCertificateRequest body, String idempotencyKey) async {
     final requestHeaders = buildRequestHeaders(
       <String, HeaderParameterSpec>{
         'Idempotency-Key': HeaderParameterSpec(idempotencyKey, 'simple', false, null),
@@ -75,10 +75,19 @@ class CertificateApi {
       <String, HeaderParameterSpec>{},
     );
     final payload = body.toJson();
-    final response = await _client.post(ApiPaths.appPath('/certificates'), body: payload, headers: requestHeaders, contentType: 'application/json');
+    final response = await _client.post(ApiPaths.appPath('/certificates/issue'), body: payload, headers: requestHeaders, contentType: 'application/json');
     return (() {
       final map = sdkworkResponseAsMap(response);
-      return map == null ? null : CertificatesCreateResponse201.fromJson(map);
+      return map == null ? null : CertificatesIssueResponse202.fromJson(map);
+    })();
+  }
+
+  /// 获取证书异步操作状态
+  Future<CertificatesOperationsRetrieveResponse?> certificatesOperationsRetrieve(String operationId) async {
+    final response = await _client.get(ApiPaths.appPath('/certificates/operations/${serializePathParameter(operationId, const PathParameterSpec('operationId', 'simple', false))}'));
+    return (() {
+      final map = sdkworkResponseAsMap(response);
+      return map == null ? null : CertificatesOperationsRetrieveResponse.fromJson(map);
     })();
   }
 }

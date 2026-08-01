@@ -44,13 +44,20 @@ Listener activation fails when its TLS policy has no valid certificate candidate
   by `web_site_binding`; certificates never own or copy an application id.
 - Managed certificate inventory and issuance are addressed by verified hostname identifiers. A
   `web_site_binding` is not an issuance prerequisite; it is required only for listener assignment.
+- Certificate issue forms load eligible hostname choices through standard server pagination, keep
+  selections stable across page changes, and never aggregate the tenant hostname inventory in the
+  browser. Only `isVerified = true` assets are selectable; verified unbound assets remain eligible.
 - A certificate covers 1..8 ordered exact or wildcard hostnames through
-  `web_certificate_identifier`. A hostname may participate in several certificate lifecycles.
+  `web_certificate_identifier`. The UI and API both enforce this limit before issuance. A hostname
+  may participate in several certificate lifecycles.
 - Listener selection intent is represented by `web_listener_certificate_binding`, not by copying a
   certificate id onto a hostname or application row.
 - Certificate names support exact DNS names, standards-compliant wildcards, and SAN coverage. Regex certificate names are forbidden.
 - The engine selects certificates by normalized SNI name and declared priority, then by compatible signature algorithm and client capabilities.
 - Multiple certificate types, such as ECDSA and RSA, may serve the same names when deterministic selection and fallback are tested.
+- One listener has at most one non-archived binding for each key algorithm. Rebinding the same
+  certificate may advance its desired immutable version; binding a different certificate for an
+  occupied algorithm returns a standard conflict and never leaks a database constraint error.
 - A listener may define one explicit default certificate. Unknown SNI may use that certificate only when the listener policy permits it; strict listeners reject the handshake.
 - HTTP `Host` routing is validated against SNI policy to prevent unintended cross-host service, while still respecting that SNI and HTTP authority are distinct protocol fields.
 - Internationalized names use one declared IDNA normalization policy consistently for domain verification, issuance, SNI, and HTTP routing.
@@ -75,6 +82,9 @@ Logical certificate entries reference one of these sources:
 | Secret manager or KMS | Configuration stores only a versioned resource identity; authorized workers resolve key material at activation. |
 | Protected standalone file | Allowed for standalone deployments through canonical access-controlled paths outside source control. |
 | Development self-signed | Allowed only for explicit local development and visibly marked untrusted; never promoted to production. |
+
+Automatic renewal is available only for ACME-managed certificates. Development self-signed
+certificates may be reissued manually, but they cannot enable the automatic renewal scheduler.
 
 PEM, PKCS#8, PKCS#12, passwords, ACME account keys, DNS provider credentials, KMS data keys, and other secrets are forbidden in app manifests, Web Server authored configuration, API responses, logs, metrics, traces, diagnostics, and generated support bundles.
 
@@ -103,7 +113,10 @@ The managed ACME workflow supports:
 4. Observe challenge propagation from controlled vantage points before requesting validation.
 5. Poll authorization and order states with bounded exponential backoff, jitter, deadlines, and ACME rate-limit awareness.
 6. Generate or resolve the private key according to policy and submit the CSR.
-7. Download, validate, and store the full certificate chain with issuer and expiry metadata.
+7. Download the full certificate chain and independently parse the leaf before persistence. The
+   normalized DNS SAN set and key algorithm must equal the request, the leaf must be currently
+   valid, the PKCS#8 private key must match the leaf SPKI, and all returned hashes, validity values,
+   SANs, issuer, subject, and algorithm metadata must equal freshly parsed evidence.
 8. Remove challenge material after success, terminal failure, or expiry.
 9. Distribute and activate the new certificate revision, then verify a served handshake.
 
@@ -126,7 +139,10 @@ pending -> authorizing -> issuing -> valid -> renewing -> rotating -> valid
 
 Each transition records the operation, actor or worker identity, policy revision, certificate fingerprint, reason, timestamps, lease/fencing token, and redacted evidence. Retriable failure is distinguished from terminal failure. A stale worker cannot overwrite a newer state or certificate revision.
 
-Renewal begins at a policy-defined window with jitter to avoid cluster-wide synchronization. The system retains and serves the last valid certificate while renewal is retried, alerts before the safety threshold, and never replaces a valid certificate with an invalid candidate.
+Automatic ACME renewal begins at a policy-defined window with jitter to avoid cluster-wide
+synchronization. Manual reissuance remains available for supported certificate types independently
+of that policy. The system retains and serves the last valid certificate while renewal is retried,
+alerts before the safety threshold, and never replaces a valid certificate with an invalid candidate.
 
 ## 10. Private-Key Security
 
@@ -209,6 +225,16 @@ Alerts include configurable 30-day, 14-day, 7-day, 72-hour, and 24-hour expiry t
 ## 17. APIs, SDKs, Persistence, And Transactions
 
 - Certificate, domain, challenge, issuance, renewal, rotation, revocation, status, event, and audit APIs follow SDKWork response envelopes, problem details, IAM, idempotency, optimistic concurrency, and asynchronous operation semantics.
+- Certificate issue and manual renewal return HTTP `202` with `SdkWorkAsyncData`; they never return
+  a certificate resource as proof that external issuance completed. App and backend generated SDKs
+  retrieve the tenant/owner-scoped operation by `operationId` until a terminal state is observed.
+- `web_certificate_operation` persists `ISSUE` and `RENEW` intent independently of browser or API
+  process lifetime. Claims use `FOR UPDATE SKIP LOCKED`, expiring leases, monotonically increasing
+  fencing tokens, bounded attempts, and retry timestamps. Stale workers cannot finalize newer work,
+  and exhausted leases become terminal failures with a stable non-secret `failureCode`.
+- PC clients poll at a bounded cadence with a ten-minute client deadline. Closing the dialog aborts
+  only browser HTTP polling, refreshes the certificate inventory to expose pending state, and never
+  deletes or cancels the durable server operation.
 - Growing certificate, domain, operation, event, node-status, and audit collections use store-level cursor/keyset pagination with bounded `page_size` and standard `pageInfo`.
 - PostgreSQL is the only cloud and standalone authoritative server database and uses transactional row claims, leases, fencing, unique constraints, and outbox/event delivery for state transitions that cross process boundaries.
 - Database commits never claim external ACME, DNS, KMS, node activation, or public probe success. External effects use durable operations and verified state transitions.
@@ -226,7 +252,7 @@ Release verification includes:
 | Lifecycle | Import, issuance, HTTP-01, DNS-01, propagation delay, renewal, key rotation, revocation, challenge cleanup, clock skew, rate limit, and issuer outage tests. |
 | Runtime | Atomic reload, concurrent reload fencing, existing-connection survival, served fingerprint probe, rollback, node restart, offline reconciliation, and rolling upgrade tests. |
 | Scale | Handshake throughput/latency, many SNI names, node-scoped delta sync, bounded caches/queues, 24-hour soak, and no-OOM fault injection. |
-| Persistence | PostgreSQL transaction rollback, duplicate worker, lease expiry, stale fencing token, migration, backup/restore, failover, and crash recovery. |
+| Persistence | PostgreSQL transaction rollback, idempotency replay/conflict, duplicate worker, lease reclaim/exhaustion, stale fencing token, migration, backup/restore, failover, and crash recovery. |
 
 ## 19. Acceptance Criteria
 

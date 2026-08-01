@@ -347,14 +347,30 @@ public struct ApplicationDomainResponse: Codable {
     }
 }
 
-public struct ApplicationDomainVerifyResponse: Codable {
+public struct DomainVerifyResponse: Codable {
     public let verified: Bool?
-    public let verifyToken: String?
+    public let status: String?
+    public let method: String?
+    public let recordName: String?
+    public let recordValue: String?
+    public let attemptCount: Int?
+    public let expiresAt: String?
+    public let nextAttemptAt: String?
+    public let checkedAt: String?
+    public let failureCode: String?
 
 
-    public init(verified: Bool? = nil, verifyToken: String? = nil) {
+    public init(verified: Bool? = nil, status: String? = nil, method: String? = nil, recordName: String? = nil, recordValue: String? = nil, attemptCount: Int? = nil, expiresAt: String? = nil, nextAttemptAt: String? = nil, checkedAt: String? = nil, failureCode: String? = nil) {
         self.verified = verified
-        self.verifyToken = verifyToken
+        self.status = status
+        self.method = method
+        self.recordName = recordName
+        self.recordValue = recordValue
+        self.attemptCount = attemptCount
+        self.expiresAt = expiresAt
+        self.nextAttemptAt = nextAttemptAt
+        self.checkedAt = checkedAt
+        self.failureCode = failureCode
     }
 }
 
@@ -508,7 +524,7 @@ public struct ApplicationDeploymentResponse: Codable {
     }
 }
 
-public struct CreateCertificateRequest: Codable {
+public struct IssueCertificateRequest: Codable {
     public let domainIds: [String]?
     public let certType: Int?
     public let keyAlgorithm: String?
@@ -577,6 +593,35 @@ public struct CertificateResponse: Codable {
         self.renewalStatus = renewalStatus
         self.status = status
         self.createdAt = createdAt
+    }
+}
+
+public struct CertificateOperationResponse: Codable {
+    public let id: String?
+    public let certificateId: String?
+    public let operationType: String?
+    public let status: String?
+    public let attemptCount: Int?
+    public let maxAttempts: Int?
+    public let nextAttemptAt: String?
+    public let failureCode: String?
+    public let createdAt: String?
+    public let updatedAt: String?
+    public let completedAt: String?
+
+
+    public init(id: String? = nil, certificateId: String? = nil, operationType: String? = nil, status: String? = nil, attemptCount: Int? = nil, maxAttempts: Int? = nil, nextAttemptAt: String? = nil, failureCode: String? = nil, createdAt: String? = nil, updatedAt: String? = nil, completedAt: String? = nil) {
+        self.id = id
+        self.certificateId = certificateId
+        self.operationType = operationType
+        self.status = status
+        self.attemptCount = attemptCount
+        self.maxAttempts = maxAttempts
+        self.nextAttemptAt = nextAttemptAt
+        self.failureCode = failureCode
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
+        self.completedAt = completedAt
     }
 }
 
@@ -1030,6 +1075,21 @@ public struct SdkWorkCommandData: Codable {
     }
 }
 
+public struct SdkWorkAsyncData: Codable {
+    public let accepted: Bool?
+    public let operationId: String?
+    public let status: String?
+    public let pollUrl: String?
+
+
+    public init(accepted: Bool? = nil, operationId: String? = nil, status: String? = nil, pollUrl: String? = nil) {
+        self.accepted = accepted
+        self.operationId = operationId
+        self.status = status
+        self.pollUrl = pollUrl
+    }
+}
+
 public struct PageInfo: Codable {
     public let mode: String?
     public let page: Int?
@@ -1467,7 +1527,20 @@ public struct CertificatesListResponse: Codable {
     }
 }
 
-public struct CertificatesCreateResponse201: Codable {
+public struct CertificatesIssueResponse202: Codable {
+    public let code: Int?
+    public let data: Any?
+    public let traceId: String?
+
+
+    public init(code: Int? = nil, data: Any? = nil, traceId: String? = nil) {
+        self.code = code
+        self.data = data
+        self.traceId = traceId
+    }
+}
+
+public struct CertificatesOperationsRetrieveResponse: Codable {
     public let code: Int?
     public let data: Any?
     public let traceId: String?
@@ -1493,7 +1566,7 @@ public struct CertificatesUpdateResponse: Codable {
     }
 }
 
-public struct CertificatesRenewResponse: Codable {
+public struct CertificatesRenewResponse202: Codable {
     public let code: Int?
     public let data: Any?
     public let traceId: String?

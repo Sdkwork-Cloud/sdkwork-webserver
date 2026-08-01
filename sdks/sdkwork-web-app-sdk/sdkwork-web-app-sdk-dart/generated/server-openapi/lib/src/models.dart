@@ -589,28 +589,56 @@ class DomainPage {
 
 class DomainVerifyResponse {
   final bool? verified;
+  final String? status;
   final String? method;
-  final String? token;
+  final String? recordName;
+  final String? recordValue;
+  final int? attemptCount;
+  final String? expiresAt;
+  final String? nextAttemptAt;
+  final String? checkedAt;
+  final String? failureCode;
 
   DomainVerifyResponse({
     this.verified,
+    this.status,
     this.method,
-    this.token
+    this.recordName,
+    this.recordValue,
+    this.attemptCount,
+    this.expiresAt,
+    this.nextAttemptAt,
+    this.checkedAt,
+    this.failureCode
   });
 
   factory DomainVerifyResponse.fromJson(Map<String, dynamic> json) {
     return DomainVerifyResponse(
       verified: json['verified'] is bool ? json['verified'] : null,
+      status: json['status']?.toString(),
       method: json['method']?.toString(),
-      token: json['token']?.toString()
+      recordName: json['recordName']?.toString(),
+      recordValue: json['recordValue']?.toString(),
+      attemptCount: json['attemptCount'] is int ? json['attemptCount'] : null,
+      expiresAt: json['expiresAt']?.toString(),
+      nextAttemptAt: json['nextAttemptAt']?.toString(),
+      checkedAt: json['checkedAt']?.toString(),
+      failureCode: json['failureCode']?.toString()
     );
   }
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
       'verified': verified,
+      'status': status,
       'method': method,
-      'token': token,
+      'recordName': recordName,
+      'recordValue': recordValue,
+      'attemptCount': attemptCount,
+      'expiresAt': expiresAt,
+      'nextAttemptAt': nextAttemptAt,
+      'checkedAt': checkedAt,
+      'failureCode': failureCode,
     };
   }
 }
@@ -1109,21 +1137,21 @@ class EnvVariablePage {
   }
 }
 
-class CreateCertificateRequest {
+class IssueCertificateRequest {
   final List<String>? domainIds;
   final int? certType;
   final String? keyAlgorithm;
   final bool? autoRenew;
 
-  CreateCertificateRequest({
+  IssueCertificateRequest({
     this.domainIds,
     this.certType,
     this.keyAlgorithm,
     this.autoRenew
   });
 
-  factory CreateCertificateRequest.fromJson(Map<String, dynamic> json) {
-    return CreateCertificateRequest(
+  factory IssueCertificateRequest.fromJson(Map<String, dynamic> json) {
+    return IssueCertificateRequest(
       domainIds: (() {
         final list = _sdkworkAsList(json['domainIds']);
         if (list == null) {
@@ -1258,6 +1286,66 @@ class CertificateResponse {
       'renewalStatus': renewalStatus,
       'status': status,
       'createdAt': createdAt,
+    };
+  }
+}
+
+class CertificateOperationResponse {
+  final String? id;
+  final String? certificateId;
+  final String? operationType;
+  final String? status;
+  final int? attemptCount;
+  final int? maxAttempts;
+  final String? nextAttemptAt;
+  final String? failureCode;
+  final String? createdAt;
+  final String? updatedAt;
+  final String? completedAt;
+
+  CertificateOperationResponse({
+    this.id,
+    this.certificateId,
+    this.operationType,
+    this.status,
+    this.attemptCount,
+    this.maxAttempts,
+    this.nextAttemptAt,
+    this.failureCode,
+    this.createdAt,
+    this.updatedAt,
+    this.completedAt
+  });
+
+  factory CertificateOperationResponse.fromJson(Map<String, dynamic> json) {
+    return CertificateOperationResponse(
+      id: json['id']?.toString(),
+      certificateId: json['certificateId']?.toString(),
+      operationType: json['operationType']?.toString(),
+      status: json['status']?.toString(),
+      attemptCount: json['attemptCount'] is int ? json['attemptCount'] : null,
+      maxAttempts: json['maxAttempts'] is int ? json['maxAttempts'] : null,
+      nextAttemptAt: json['nextAttemptAt']?.toString(),
+      failureCode: json['failureCode']?.toString(),
+      createdAt: json['createdAt']?.toString(),
+      updatedAt: json['updatedAt']?.toString(),
+      completedAt: json['completedAt']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'id': id,
+      'certificateId': certificateId,
+      'operationType': operationType,
+      'status': status,
+      'attemptCount': attemptCount,
+      'maxAttempts': maxAttempts,
+      'nextAttemptAt': nextAttemptAt,
+      'failureCode': failureCode,
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
+      'completedAt': completedAt,
     };
   }
 }
@@ -1692,6 +1780,38 @@ class SdkWorkCommandData {
       'accepted': accepted,
       'resourceId': resourceId,
       'status': status,
+    };
+  }
+}
+
+class SdkWorkAsyncData {
+  final bool? accepted;
+  final String? operationId;
+  final String? status;
+  final String? pollUrl;
+
+  SdkWorkAsyncData({
+    this.accepted,
+    this.operationId,
+    this.status,
+    this.pollUrl
+  });
+
+  factory SdkWorkAsyncData.fromJson(Map<String, dynamic> json) {
+    return SdkWorkAsyncData(
+      accepted: json['accepted'] is bool ? json['accepted'] : null,
+      operationId: json['operationId']?.toString(),
+      status: json['status']?.toString(),
+      pollUrl: json['pollUrl']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'accepted': accepted,
+      'operationId': operationId,
+      'status': status,
+      'pollUrl': pollUrl,
     };
   }
 }
@@ -2496,19 +2616,47 @@ class CertificatesListResponse {
   }
 }
 
-class CertificatesCreateResponse201 {
+class CertificatesIssueResponse202 {
   final int? code;
   final dynamic data;
   final String? traceId;
 
-  CertificatesCreateResponse201({
+  CertificatesIssueResponse202({
     this.code,
     this.data,
     this.traceId
   });
 
-  factory CertificatesCreateResponse201.fromJson(Map<String, dynamic> json) {
-    return CertificatesCreateResponse201(
+  factory CertificatesIssueResponse202.fromJson(Map<String, dynamic> json) {
+    return CertificatesIssueResponse202(
+      code: json['code'] is int ? json['code'] : null,
+      data: json['data'],
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class CertificatesOperationsRetrieveResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  CertificatesOperationsRetrieveResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory CertificatesOperationsRetrieveResponse.fromJson(Map<String, dynamic> json) {
+    return CertificatesOperationsRetrieveResponse(
       code: json['code'] is int ? json['code'] : null,
       data: _sdkworkAsMap(json['data']),
       traceId: json['traceId']?.toString()

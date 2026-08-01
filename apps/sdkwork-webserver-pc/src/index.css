@@ -223,6 +223,15 @@ body.application-drawer-open { overflow: hidden; }
 .form-grid input[readonly], .form-grid textarea[readonly] { color: var(--sdk-color-text-secondary); background: var(--sdk-color-surface-elevated); cursor: default; }
 .form-grid textarea { min-height: 104px; font-family: inherit; font-size: 13px; line-height: 1.45; }
 .form-grid label:has(textarea) { grid-column: 1 / -1; }
+.paginated-option-field { min-width: 0; display: grid; align-content: start; gap: 7px; }
+.paginated-option-field > label { min-width: 0; margin: 0; font-size: 13px; font-weight: 650; }
+.paginated-option-field > select { width: 100%; height: 132px; min-height: 132px; padding: 6px; color: var(--sdk-color-text-primary); background: var(--sdk-color-surface-panel-muted); border: 1px solid var(--sdk-color-border-strong); border-radius: 5px; }
+.paginated-option-field > select option { min-height: 24px; padding: 4px 6px; }
+.paginated-option-footer { min-width: 0; min-height: 30px; display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 8px; color: var(--sdk-color-text-muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+.paginated-option-footer > span { min-width: 0; display: inline-flex; align-items: center; gap: 5px; overflow-wrap: anywhere; }
+.paginated-option-error { color: var(--webserver-color-danger-text); }
+.paginated-option-controls { display: flex; align-items: center; gap: 4px; }
+.paginated-option-controls .icon-button { width: 28px; min-width: 28px; min-height: 28px; }
 .field-character-limit { justify-self: end; color: var(--sdk-color-text-muted); font-size: 11px; font-variant-numeric: tabular-nums; }
 .checkbox-field, .confirm-check { display: flex !important; grid-template-columns: none; align-items: center; gap: 9px !important; }
 .checkbox-field input, .confirm-check input { width: 16px; height: 16px; margin: 0; accent-color: var(--sdk-color-brand-primary); }
@@ -633,6 +642,9 @@ html[data-sdk-color-mode="dark"] .webserver-auth-page {
   .filter-actions { grid-column: auto; }
   .table-frame { min-height: 0; }
   .form-grid { grid-template-columns: 1fr; }
+  .paginated-option-footer { grid-template-columns: minmax(0, 1fr) auto; }
+  .paginated-option-footer > span:nth-child(2) { grid-column: 1; }
+  .paginated-option-controls { grid-column: 2; grid-row: 1 / span 2; }
   .form-grid label:has(textarea) { grid-column: auto; }
   .application-media-field { grid-template-columns: 1fr; }
   .default-icon-preview, .stored-media-state, .media-file-input { grid-column: 1; }

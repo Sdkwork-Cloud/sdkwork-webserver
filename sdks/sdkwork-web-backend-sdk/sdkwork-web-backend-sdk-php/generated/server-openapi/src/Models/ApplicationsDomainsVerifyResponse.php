@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace SDKWork\Web\BackendSdk\Models;
 
-use SDKWork\Web\BackendSdk\Models\ApplicationDomainVerifyResponse;
+use SDKWork\Web\BackendSdk\Models\DomainVerifyResponse;
 
 final class ApplicationsDomainsVerifyResponse
 {

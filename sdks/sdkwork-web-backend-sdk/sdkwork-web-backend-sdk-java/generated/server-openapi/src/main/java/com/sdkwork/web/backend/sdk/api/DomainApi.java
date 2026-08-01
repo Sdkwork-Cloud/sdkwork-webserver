@@ -101,7 +101,7 @@ public class DomainApi {
         return null;
     }
 
-    /** Verify a tenant custom domain asset */
+    /** Create or check a tenant custom-domain ownership challenge */
     public DomainsVerifyResponse domainsVerify(String domainId, String idempotencyKey) throws Exception {
         Map<String, String> requestHeaders = buildRequestHeaders(
                 Map.of("Idempotency-Key", new HeaderParameterSpec(idempotencyKey, "simple", false, null)),

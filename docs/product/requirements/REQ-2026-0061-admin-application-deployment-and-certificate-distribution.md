@@ -29,7 +29,10 @@ acceptance_criteria:
   - Application creation and redeployment offer ZIP archive, local directory, and Git repository as mutually exclusive source modes; Git submissions use deployType 2 and persist the repository URL as sourceRef without artifact fields.
   - Git repository input accepts only an absolute HTTPS URL with a non-root repository path, rejects embedded credentials, query parameters, fragments, HTTP URLs, and values longer than 500 characters, and reports source-specific validation errors without invalidating a populated version.
   - Git deployment creation does not package local files or call Drive storage, while ZIP and directory sources continue through the existing archive validation and artifact upload workflow.
-  - Backend OpenAPI and the generated Backend SDK expose certificate list/create/update/renew and certificate-distribution list operations.
+  - Backend OpenAPI and the generated Backend SDK expose certificate list/issue/update/renew and certificate-distribution list operations.
+  - Certificate issuance and renewal commands return HTTP 202 standard asynchronous data; the generated Backend SDK retrieves the durable operation until SUCCEEDED or FAILED, and the PC never treats command acceptance as an issued certificate.
+  - The certificate worker executes persisted ISSUE and RENEW operations with bounded claims, expiring leases, fencing tokens, retries, and stable terminal failure codes.
+  - Certificate issue choices are loaded one server page at a time, contain only verified hostname assets, preserve selected hostnames across pages, allow verified unbound assets, and enforce the 1..8 SAN limit before submission.
   - Automatic renewal updates the existing canonical certificate record and changes the tenant Node Sync Manifest version when the leaf fingerprint changes.
   - Every registered server reports its last applied manifest version, and admin distribution status compares that observation with one current desired manifest version.
   - The PC backend-admin surface contains independent Applications and Certificates capability packages and calls only the generated Backend SDK through admin-core injection.
@@ -38,8 +41,8 @@ acceptance_criteria:
 non_functional_requirements:
   security: Tenant context and backend permissions are mandatory; private keys remain encrypted at rest and are decrypted only while producing the authenticated bounded Node Sync Manifest.
   privacy: No new personal data is introduced.
-  performance: All interactive lists use bounded SQL pagination; Node Sync Manifest bounds remain unchanged.
-  reliability: Canonical certificate update, versioned distribution, atomic node activation, real reload, and observed-version heartbeat remain fail-closed.
+  performance: All interactive lists and certificate option selectors use bounded server pagination without browser-side all-page aggregation; Node Sync Manifest bounds remain unchanged.
+  reliability: Durable issuance/renewal operations, canonical certificate version update, versioned distribution, atomic node activation, real reload, and observed-version heartbeat remain fail-closed.
 affected_surfaces:
   - api
   - sdk

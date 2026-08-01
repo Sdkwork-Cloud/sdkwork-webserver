@@ -56,7 +56,7 @@
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/api/CertificateApi.kt",
-      "sha256": "8bfacb672db3b142bee4dc835cb764adf384ab6e731ad794d7ed387d1ef9a83a"
+      "sha256": "7fa62b51e7700a2ec622b69b6ffd856ae0d529cd41eb4c9c4bfd16acd5a265db"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/api/DeploymentApi.kt",
@@ -64,7 +64,7 @@
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/api/DomainApi.kt",
-      "sha256": "7776757fa7b3ec14fbd0c514c3d2b7dbaffe13905cbdac9e677709fd4f640ec5"
+      "sha256": "9324a7f1709f0b6317d11377c854351dfe265df87324af8e39b0be3ff35fa0b2"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/api/EnvVariableApi.kt",
@@ -91,6 +91,10 @@
       "sha256": "d0ea4c4242e679ebdabb3690a8e187c086ff39d031d1960c87414e21ef5f7f31"
     },
     {
+      "path": "src/main/kotlin/com/sdkwork/web/app/sdk/CertificateOperationResponse.kt",
+      "sha256": "c37a12b1a29dd7fd9fa47b60672bdb8f90fc81f59e80fe3f45c100bc378230fe"
+    },
+    {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatePage.kt",
       "sha256": "4a9158a119410bcf4e239c0eaa9ee14736c5aef81b154fc51e80ff3928631848"
     },
@@ -99,16 +103,16 @@
       "sha256": "05f2aa295c0c426d609b60c1a345444c73b49b670126c203adc6fe0d748dc3fc"
     },
     {
-      "path": "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatesCreateResponse201.kt",
-      "sha256": "5c762121a151238dcd98bdc50496c222f2dcfb900b1a07740783ae724d437fd1"
+      "path": "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatesIssueResponse202.kt",
+      "sha256": "033737bfabacad66d76c7ef91fff2f0225f567b80fcebc45b89e9be04782ffb0"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatesListResponse.kt",
       "sha256": "78b6b27fe734909a2e84531045eb13876b7c914a37c81555c4c2605d14490a9a"
     },
     {
-      "path": "src/main/kotlin/com/sdkwork/web/app/sdk/CreateCertificateRequest.kt",
-      "sha256": "1f99852556e11eca2f324fea7cb205b1f00e29854c87d41e5f1bf17668077ced"
+      "path": "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatesOperationsRetrieveResponse.kt",
+      "sha256": "9aef158a1793b7befb2e67f2ed50425bb9db16d09207a90bfdf95b5f9e59dfa0"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/CreateDeploymentRequest.kt",
@@ -156,7 +160,7 @@
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/DomainVerifyResponse.kt",
-      "sha256": "eb4a4e1f31b1ce4f0ce56fa9addc1f5cba91edd5bb25360255080ba8dc90d178"
+      "sha256": "b3b0a58b3a2d61bac0f8455d507927bd8d02ee5b2089027cd7406bb9133a003b"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/EnvVariablePage.kt",
@@ -185,6 +189,10 @@
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/ImportGitSourceVersionRequest.kt",
       "sha256": "0d42a5c318320206aa42c2cb44801017febe2afbaf3c8d2a42cc7cd77437a0d3"
+    },
+    {
+      "path": "src/main/kotlin/com/sdkwork/web/app/sdk/IssueCertificateRequest.kt",
+      "sha256": "e7ee92103f5d36ba4f900655140ab89dfea786ef259d8242226d4141006840c4"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/ListenerCertificateBindingResponse.kt",
@@ -217,6 +225,10 @@
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/SdkworkAppClient.kt",
       "sha256": "286952117e18db0bd3ec394a8c45d681d72e95fc572fea3e6f7d003ba2ac2489"
+    },
+    {
+      "path": "src/main/kotlin/com/sdkwork/web/app/sdk/SdkWorkAsyncData.kt",
+      "sha256": "fa52793efc3a0ab8d03a03cd1ae22cc46e62b1c74886ece4bf1bbf8e506d3c22"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/SdkWorkCommandData.kt",

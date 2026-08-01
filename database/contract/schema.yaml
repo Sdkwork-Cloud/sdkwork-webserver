@@ -420,6 +420,9 @@ tables:
     indexes:
       - { name: uk_web_certificate_secret_bundle_uuid, columns: [uuid], unique: true }
       - { name: uk_web_certificate_secret_bundle_version, columns: [tenant_id, certificate_version_id], unique: true }
+  - name: web_certificate_operation
+    lifecycle_status: active
+    owner: web-platform
   - name: web_listener_certificate_binding
     lifecycle_status: active
     owner: web-platform

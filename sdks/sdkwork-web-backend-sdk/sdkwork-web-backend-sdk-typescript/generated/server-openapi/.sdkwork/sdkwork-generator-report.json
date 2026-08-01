@@ -10,121 +10,37 @@
   },
   "status": "ok",
   "mode": "apply",
-  "hasChanges": true,
+  "hasChanges": false,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "a68fdd71d69d90db2e9fcc17ae574acb27f90fa3f5251ce4ff7c98e1bf226d93",
+  "changeFingerprint": "5933f88420ca293b52afc7ed120714cbe513dbab87efeb8d1b8075a888f1479b",
   "changeImpact": {
     "schemaVersion": 1,
-    "areas": [
-      "models"
-    ],
-    "details": [
-      {
-        "area": "models",
-        "paths": [
-          "src/types/agent-certificate-observation.ts",
-          "src/types/agent-heartbeat-request.ts"
-        ]
-      }
-    ],
-    "requiresVerification": true,
-    "summary": "Detected impact areas: models. Verification is required."
+    "areas": [],
+    "details": [],
+    "requiresVerification": false,
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "medium",
-    "nextAction": "verify",
+    "riskLevel": "low",
+    "nextAction": "skip",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
-    "summary": "Changes have been applied. Run the required verification plan now.",
+    "summary": "No actionable changes were detected. No apply or verification step is required.",
     "reasons": [
-      "verification-required"
+      "no-actionable-changes"
     ]
   },
   "executionHandoff": {
     "schemaVersion": 1,
-    "summary": "Run the required verification commands now.",
-    "steps": [
-      {
-        "id": "verify-check",
-        "title": "Unified package check",
-        "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
-        "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-typescript\\generated\\server-openapi",
-        "command": "node",
-        "args": [
-          "./bin/publish-core.mjs",
-          "--language",
-          "typescript",
-          "--project-dir",
-          ".",
-          "--action",
-          "check"
-        ],
-        "displayCommand": "node ./bin/publish-core.mjs --language typescript --project-dir . --action check"
-      },
-      {
-        "id": "verify-build",
-        "title": "Unified package build",
-        "required": true,
-        "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: models.",
-        "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-typescript\\generated\\server-openapi",
-        "command": "node",
-        "args": [
-          "./bin/publish-core.mjs",
-          "--language",
-          "typescript",
-          "--project-dir",
-          ".",
-          "--action",
-          "build"
-        ],
-        "displayCommand": "node ./bin/publish-core.mjs --language typescript --project-dir . --action build"
-      }
-    ]
+    "summary": "No further commands are required.",
+    "steps": []
   },
   "verificationPlan": {
-    "shouldRun": true,
-    "runPhase": "now",
-    "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
-    "steps": [
-      {
-        "id": "check",
-        "title": "Unified package check",
-        "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
-        "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-typescript\\generated\\server-openapi",
-        "command": "node",
-        "args": [
-          "./bin/publish-core.mjs",
-          "--language",
-          "typescript",
-          "--project-dir",
-          ".",
-          "--action",
-          "check"
-        ],
-        "displayCommand": "node ./bin/publish-core.mjs --language typescript --project-dir . --action check"
-      },
-      {
-        "id": "build",
-        "title": "Unified package build",
-        "required": true,
-        "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: models.",
-        "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-typescript\\generated\\server-openapi",
-        "command": "node",
-        "args": [
-          "./bin/publish-core.mjs",
-          "--language",
-          "typescript",
-          "--project-dir",
-          ".",
-          "--action",
-          "build"
-        ],
-        "displayCommand": "node ./bin/publish-core.mjs --language typescript --project-dir . --action build"
-      }
-    ]
+    "shouldRun": false,
+    "runPhase": "skip",
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
+    "steps": []
   },
   "sdk": {
     "name": "sdkwork-web-backend-sdk",
@@ -140,27 +56,24 @@
     "localVersions": []
   },
   "stats": {
-    "totalFiles": 140,
-    "models": 106,
+    "totalFiles": 143,
+    "models": 109,
     "apis": 11,
-    "types": 108
+    "types": 111
   },
   "warnings": [],
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 2,
+    "writtenFiles": 0,
     "skippedScaffoldFiles": 2,
-    "skippedUnchangedGeneratedFiles": 136,
+    "skippedUnchangedGeneratedFiles": 141,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "a68fdd71d69d90db2e9fcc17ae574acb27f90fa3f5251ce4ff7c98e1bf226d93",
+    "changeFingerprint": "5933f88420ca293b52afc7ed120714cbe513dbab87efeb8d1b8075a888f1479b",
     "changes": {
       "createdGeneratedFiles": [],
-      "updatedGeneratedFiles": [
-        "src/types/agent-certificate-observation.ts",
-        "src/types/agent-heartbeat-request.ts"
-      ],
+      "updatedGeneratedFiles": [],
       "unchangedGeneratedFiles": [
         "bin/publish-core.mjs",
         "bin/publish.ps1",
@@ -192,12 +105,13 @@
         "src/index.ts",
         "src/sdk.ts",
         "src/types/agent-certificate-bundle.ts",
+        "src/types/agent-certificate-observation.ts",
+        "src/types/agent-heartbeat-request.ts",
         "src/types/agent-heartbeat-response.ts",
         "src/types/agent-nginx-config-bundle.ts",
         "src/types/agent-sync-response.ts",
         "src/types/application-deployment-response.ts",
         "src/types/application-domain-response.ts",
-        "src/types/application-domain-verify-response.ts",
         "src/types/application-response.ts",
         "src/types/application-source-version-config-snapshot.ts",
         "src/types/application-source-version-response.ts",
@@ -225,11 +139,13 @@
         "src/types/audit-logs-list-response.ts",
         "src/types/certificate-distribution-response.ts",
         "src/types/certificate-identifier-response.ts",
+        "src/types/certificate-operation-response.ts",
         "src/types/certificate-response.ts",
-        "src/types/certificates-create-response201.ts",
         "src/types/certificates-distribution-list-response.ts",
+        "src/types/certificates-issue-response202.ts",
         "src/types/certificates-list-response.ts",
-        "src/types/certificates-renew-response.ts",
+        "src/types/certificates-operations-retrieve-response.ts",
+        "src/types/certificates-renew-response202.ts",
         "src/types/certificates-update-response.ts",
         "src/types/common.ts",
         "src/types/configs-create-response201.ts",
@@ -242,7 +158,6 @@
         "src/types/create-application-domain-request.ts",
         "src/types/create-application-request.ts",
         "src/types/create-application-source-version-request.ts",
-        "src/types/create-certificate-request.ts",
         "src/types/create-listener-certificate-binding-request.ts",
         "src/types/create-managed-domain-request.ts",
         "src/types/create-nginx-config-request.ts",
@@ -251,6 +166,7 @@
         "src/types/create-server-request.ts",
         "src/types/create-server-response.ts",
         "src/types/domain-deployment-response.ts",
+        "src/types/domain-verify-response.ts",
         "src/types/domains-application-binding-update-response.ts",
         "src/types/domains-create-response201.ts",
         "src/types/domains-list-response.ts",
@@ -260,6 +176,7 @@
         "src/types/import-application-git-source-version-request.ts",
         "src/types/index.ts",
         "src/types/int64-string.ts",
+        "src/types/issue-certificate-request.ts",
         "src/types/listener-certificate-binding-response.ts",
         "src/types/listener-certificate-summary-response.ts",
         "src/types/media-checksum.ts",
@@ -281,6 +198,7 @@
         "src/types/root-domains-subdomains-create-response201.ts",
         "src/types/root-domains-subdomains-list-response.ts",
         "src/types/sdk-work-api-response.ts",
+        "src/types/sdk-work-async-data.ts",
         "src/types/sdk-work-command-data.ts",
         "src/types/sdk-work-command-response.ts",
         "src/types/sdk-work-list-response.ts",
@@ -309,73 +227,26 @@
     },
     "impact": {
       "schemaVersion": 1,
-      "areas": [
-        "models"
-      ],
-      "details": [
-        {
-          "area": "models",
-          "paths": [
-            "src/types/agent-certificate-observation.ts",
-            "src/types/agent-heartbeat-request.ts"
-          ]
-        }
-      ],
-      "requiresVerification": true,
-      "summary": "Detected impact areas: models. Verification is required."
+      "areas": [],
+      "details": [],
+      "requiresVerification": false,
+      "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
     },
     "verificationPlan": {
-      "shouldRun": true,
-      "runPhase": "now",
-      "summary": "Detected impact areas: models. Verification is required. Run the required verification commands now against the generated SDK output.",
-      "steps": [
-        {
-          "id": "check",
-          "title": "Unified package check",
-          "required": true,
-          "rationale": "Validate the generated package with the unified publish helper. Triggered by: models.",
-          "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-typescript\\generated\\server-openapi",
-          "command": "node",
-          "args": [
-            "./bin/publish-core.mjs",
-            "--language",
-            "typescript",
-            "--project-dir",
-            ".",
-            "--action",
-            "check"
-          ],
-          "displayCommand": "node ./bin/publish-core.mjs --language typescript --project-dir . --action check"
-        },
-        {
-          "id": "build",
-          "title": "Unified package build",
-          "required": true,
-          "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: models.",
-          "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-typescript\\generated\\server-openapi",
-          "command": "node",
-          "args": [
-            "./bin/publish-core.mjs",
-            "--language",
-            "typescript",
-            "--project-dir",
-            ".",
-            "--action",
-            "build"
-          ],
-          "displayCommand": "node ./bin/publish-core.mjs --language typescript --project-dir . --action build"
-        }
-      ]
+      "shouldRun": false,
+      "runPhase": "skip",
+      "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
+      "steps": []
     },
     "executionDecision": {
       "schemaVersion": 1,
-      "riskLevel": "medium",
-      "nextAction": "verify",
+      "riskLevel": "low",
+      "nextAction": "skip",
       "requiresManualReview": false,
       "applyRequiresExpectedFingerprint": false,
-      "summary": "Changes have been applied. Run the required verification plan now.",
+      "summary": "No actionable changes were detected. No apply or verification step is required.",
       "reasons": [
-        "verification-required"
+        "no-actionable-changes"
       ]
     },
     "backedUpFiles": [],

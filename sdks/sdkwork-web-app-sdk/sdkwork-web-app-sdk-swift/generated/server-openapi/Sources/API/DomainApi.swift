@@ -37,7 +37,7 @@ public class DomainApi {
         _ = try await client.delete(ApiPaths.appPath("/sites/\(serializePathParameter(siteId, PathParameterSpec(name: "siteId", style: "simple", explode: false)))/domains/\(serializePathParameter(domainId, PathParameterSpec(name: "domainId", style: "simple", explode: false)))"))
     }
 
-    /// 验证域名所有权
+    /// 创建或检查域名所有权验证挑战
     public func sitesDomainsVerify(siteId: String, domainId: String, idempotencyKey: String) async throws -> SitesDomainsVerifyResponse? {
         let requestHeaders = buildRequestHeaders(
             [

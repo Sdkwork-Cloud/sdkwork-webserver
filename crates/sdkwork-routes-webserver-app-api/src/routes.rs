@@ -5,19 +5,20 @@ use axum::{
     Extension, Json, Router,
 };
 use sdkwork_webserver_contract::{
-    CreateCertificateRequest, CreateDeploymentRequest, CreateDomainRequest,
-    CreateEnvVariableRequest, CreateHealthCheckRequest, CreateListenerCertificateBindingRequest,
-    CreateSiteRequest, CreateSourceVersionRequest, ImportGitSourceVersionRequest, ListSitesQuery,
-    UpdateSiteRequest, WebAppApi, WebAppRequestContext,
+    CreateDeploymentRequest, CreateDomainRequest, CreateEnvVariableRequest,
+    CreateHealthCheckRequest, CreateListenerCertificateBindingRequest, CreateSiteRequest,
+    CreateSourceVersionRequest, ImportGitSourceVersionRequest, IssueCertificateRequest,
+    ListSitesQuery, UpdateSiteRequest, WebAppApi, WebAppRequestContext,
 };
 use serde::Deserialize;
 use std::sync::Arc;
 
 use crate::{auth::require_app_context, paths};
 use sdkwork_routes_webserver_common::{
-    created_resource, no_content, ok_certificate_page, ok_deployment_page, ok_domain_page,
-    ok_env_variable_page, ok_health_check_page, ok_listener_certificate_binding_page, ok_resource,
-    ok_site_page, ok_source_version_page, WebApiError,
+    accepted_async, created_resource, no_content, ok_certificate_page, ok_deployment_page,
+    ok_domain_page, ok_env_variable_page, ok_health_check_page,
+    ok_listener_certificate_binding_page, ok_resource, ok_site_page, ok_source_version_page,
+    WebApiError,
 };
 
 #[derive(Clone)]
@@ -74,9 +75,11 @@ pub fn build_router_with_shared_app_api(api: Arc<dyn WebAppApi>) -> Router {
             paths::SITE_ENV_VARIABLES,
             get(list_env_variables).post(create_env_variable),
         )
+        .route(paths::CERTIFICATES, get(list_certificates))
+        .route(paths::CERTIFICATES_ISSUE, post(issue_certificate))
         .route(
-            paths::CERTIFICATES,
-            get(list_certificates).post(create_certificate),
+            paths::CERTIFICATE_OPERATION,
+            get(retrieve_certificate_operation),
         )
         .route(
             paths::SITE_HEALTH_CHECKS,
@@ -435,13 +438,27 @@ async fn list_certificates(
     )
 }
 
-async fn create_certificate(
+async fn issue_certificate(
     State(state): State<AppState>,
     context: Option<Extension<WebAppRequestContext>>,
-    Json(request): Json<CreateCertificateRequest>,
+    Json(request): Json<IssueCertificateRequest>,
 ) -> Result<Response, WebApiError> {
     let context = require_app_context(context)?;
-    created_resource(state.api.create_certificate(&context, &request).await)
+    accepted_async(state.api.issue_certificate(&context, &request).await)
+}
+
+async fn retrieve_certificate_operation(
+    State(state): State<AppState>,
+    context: Option<Extension<WebAppRequestContext>>,
+    Path(operation_id): Path<String>,
+) -> Result<Response, WebApiError> {
+    let context = require_app_context(context)?;
+    ok_resource(
+        state
+            .api
+            .retrieve_certificate_operation(&context, &operation_id)
+            .await,
+    )
 }
 
 async fn list_listener_certificate_bindings(

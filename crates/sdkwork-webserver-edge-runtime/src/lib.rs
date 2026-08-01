@@ -2,6 +2,7 @@
 
 mod certificate_material;
 mod config;
+mod deployment;
 mod error;
 mod nginx;
 mod paths;
@@ -9,8 +10,11 @@ mod tls_probe;
 
 pub use certificate_material::CertificateBundleMaterial;
 pub use config::EdgeRuntimeConfig;
+pub use deployment::NginxSiteConfigMaterial;
 pub use error::{EdgeRuntimeError, EdgeRuntimeResult};
-pub use nginx::{deploy_nginx_config, reload_nginx, validate_nginx_config};
+pub use nginx::{
+    deploy_nginx_config, reload_nginx, validate_active_nginx_config, validate_nginx_config,
+};
 pub use paths::{cert_bundle_paths, nginx_site_path};
 pub use tls_probe::verify_served_certificate;
 
@@ -20,6 +24,37 @@ use tokio::sync::{OwnedSemaphorePermit, Semaphore};
 pub struct PendingCertificateBundleActivation {
     activation: paths::CertificateBundleActivation,
     permit: OwnedSemaphorePermit,
+}
+
+pub struct PendingEdgeDeployment {
+    activation: deployment::EdgeDeploymentActivation,
+    permit: OwnedSemaphorePermit,
+}
+
+impl PendingEdgeDeployment {
+    pub async fn commit(self) -> Result<(), EdgeRuntimeError> {
+        let Self { activation, permit } = self;
+        tokio::task::spawn_blocking(move || {
+            let _permit = permit;
+            activation.commit()
+        })
+        .await
+        .map_err(|error| {
+            EdgeRuntimeError::Filesystem(format!("edge deployment commit task failed: {error}"))
+        })?
+    }
+
+    pub async fn rollback(self) -> Result<(), EdgeRuntimeError> {
+        let Self { activation, permit } = self;
+        tokio::task::spawn_blocking(move || {
+            let _permit = permit;
+            activation.rollback()
+        })
+        .await
+        .map_err(|error| {
+            EdgeRuntimeError::Filesystem(format!("edge deployment rollback task failed: {error}"))
+        })?
+    }
 }
 
 impl PendingCertificateBundleActivation {
@@ -52,14 +87,14 @@ impl PendingCertificateBundleActivation {
 
 pub struct EdgeRuntime {
     config: EdgeRuntimeConfig,
-    certificate_activation_admission: Arc<Semaphore>,
+    filesystem_activation_admission: Arc<Semaphore>,
 }
 
 impl EdgeRuntime {
     pub fn new(config: EdgeRuntimeConfig) -> Self {
         Self {
             config,
-            certificate_activation_admission: Arc::new(Semaphore::new(1)),
+            filesystem_activation_admission: Arc::new(Semaphore::new(1)),
         }
     }
 
@@ -93,7 +128,7 @@ impl EdgeRuntime {
         material: &CertificateBundleMaterial,
     ) -> Result<PendingCertificateBundleActivation, EdgeRuntimeError> {
         let permit = self
-            .certificate_activation_admission
+            .filesystem_activation_admission
             .clone()
             .try_acquire_owned()
             .map_err(|_| {
@@ -113,6 +148,33 @@ impl EdgeRuntime {
         Ok(PendingCertificateBundleActivation { activation, permit })
     }
 
+    pub async fn activate_deployment_async(
+        &self,
+        nginx_configs: &[NginxSiteConfigMaterial],
+        certificates: &[CertificateBundleMaterial],
+    ) -> Result<PendingEdgeDeployment, EdgeRuntimeError> {
+        let permit = self
+            .filesystem_activation_admission
+            .clone()
+            .try_acquire_owned()
+            .map_err(|_| {
+                EdgeRuntimeError::Filesystem(
+                    "edge deployment activation capacity exhausted".to_string(),
+                )
+            })?;
+        let config = self.config.clone();
+        let nginx_configs = nginx_configs.to_vec();
+        let certificates = certificates.to_vec();
+        let activation = tokio::task::spawn_blocking(move || {
+            deployment::activate_edge_deployment(&config, &nginx_configs, &certificates)
+        })
+        .await
+        .map_err(|error| {
+            EdgeRuntimeError::Filesystem(format!("edge deployment task failed: {error}"))
+        })??;
+        Ok(PendingEdgeDeployment { activation, permit })
+    }
+
     pub fn deploy_site_config(
         &self,
         domain: &str,
@@ -127,6 +189,10 @@ impl EdgeRuntime {
 
     pub fn reload(&self) -> Result<(), EdgeRuntimeError> {
         reload_nginx(&self.config)
+    }
+
+    pub fn validate_active_config(&self) -> Result<(), EdgeRuntimeError> {
+        validate_active_nginx_config(&self.config)
     }
 
     pub fn verify_served_certificate(
@@ -161,7 +227,7 @@ mod tests {
             tls_verify_timeout_ms: 5_000,
         });
         let permit = runtime
-            .certificate_activation_admission
+            .filesystem_activation_admission
             .clone()
             .try_acquire_owned()
             .expect("permit");

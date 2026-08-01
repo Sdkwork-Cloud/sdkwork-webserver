@@ -289,7 +289,7 @@ class ApplicationDomainApplicationsDomainsApi:
         return self._client.delete(f"/backend/v3/api/applications/{serialize_path_parameter(application_id, {'name': 'applicationId', 'style': 'simple', 'explode': False})}/domains/{serialize_path_parameter(domain_id, {'name': 'domainId', 'style': 'simple', 'explode': False})}", headers=request_headers)
 
     def verify(self, application_id: str, domain_id: str, idempotency_key: str) -> ApplicationsDomainsVerifyResponse:
-        """Verify an application public domain"""
+        """Create or check an application-domain ownership challenge"""
         request_headers = build_request_headers(
             {
                 'Idempotency-Key': {'value': idempotency_key, 'style': 'simple', 'explode': False},

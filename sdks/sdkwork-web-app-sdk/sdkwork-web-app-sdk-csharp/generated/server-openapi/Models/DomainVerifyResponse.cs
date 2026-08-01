@@ -6,8 +6,15 @@ namespace SDKWork.Web.AppSdk.Models
 {
     public class DomainVerifyResponse
     {
-        public bool? Verified { get; set; }
-        public string? Method { get; set; }
-        public string? Token { get; set; }
+        public bool Verified { get; set; }
+        public string Status { get; set; }
+        public string Method { get; set; }
+        public string RecordName { get; set; }
+        public string RecordValue { get; set; }
+        public int AttemptCount { get; set; }
+        public string ExpiresAt { get; set; }
+        public string? NextAttemptAt { get; set; }
+        public string? CheckedAt { get; set; }
+        public string? FailureCode { get; set; }
     }
 }

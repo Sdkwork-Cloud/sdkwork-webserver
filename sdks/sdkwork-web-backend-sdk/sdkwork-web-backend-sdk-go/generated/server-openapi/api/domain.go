@@ -141,7 +141,7 @@ func (a *DomainApi) DomainsDelete(domainId string, idempotencyKey string) (struc
     return decodeResult[struct{}](raw)
 }
 
-// Verify a tenant custom domain asset
+// Create or check a tenant custom-domain ownership challenge
 func (a *DomainApi) DomainsVerify(domainId string, idempotencyKey string) (sdktypes.DomainsVerifyResponse, error) {
     headers := BuildRequestHeaders(
         map[string]ParameterSpec{"Idempotency-Key": ParameterSpec{Value: idempotencyKey, Style: "simple", Explode: false},},

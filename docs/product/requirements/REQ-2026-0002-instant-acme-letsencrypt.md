@@ -8,8 +8,9 @@ status: draft
 source: platform
 problem: 租户站点需要免费 TLS 证书自动签发与续期，且控制面需统一状态机，不能依赖 Certbot 等外部进程作为默认路径。
 goals:
-  - certificates.create 触发 instant-acme 向 LE（staging/prod）申请 DV 证书
+  - certificates.issue 触发 instant-acme 向 LE（staging/prod）申请 DV 证书
   - certType=3 使用 rcgen 自签，无需触网
+  - 自动续期仅适用于 certType=1 ACME 证书；自签名证书仅支持显式手动重签
   - web_certificate 状态与 renewal_status 正确流转
   - PEM 落地路径对齐 NGINX_SPEC.md
   - API 响应不含私钥
@@ -22,6 +23,8 @@ users:
 acceptance_criteria:
   - LE staging 环境下 HTTP-01 完成签发并写入 web_certificate
   - rcgen 自签 certType=3 在 dev  profile 可用
+  - certType=3 开启自动续期返回标准校验错误，自动续期扫描只调度 certType=1
+  - 签发结果的 SAN、算法、有效期、私钥配对及元数据必须与实际 X.509 叶证书一致
   - 签发失败 renewal_status=3 且可审计
   - TECH_ARCHITECTURE §2.1 开源栈与 ADR-20260623-acme-certificate-authority 一致
 non_functional_requirements:

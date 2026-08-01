@@ -9,12 +9,10 @@
     "protocol": "http",
     "packageName": "com.sdkwork:sdkwork-web-app-sdk"
   },
-  "changeFingerprint": "a9bbf34cf47656376f78aacabc57f6024a3ec9522c6946b01bd6355dbe98cbb4",
+  "changeFingerprint": "c112f00f3ff22da77f10b3d8cee37f62e0d21f35ed0d2c2dadcd0fb6374f144c",
   "changes": {
     "createdGeneratedFiles": [],
-    "updatedGeneratedFiles": [
-      "src/main/kotlin/com/sdkwork/web/app/sdk/ListenerCertificateBindingResponse.kt"
-    ],
+    "updatedGeneratedFiles": [],
     "unchangedGeneratedFiles": [
       "bin/publish-core.mjs",
       "bin/publish.ps1",
@@ -36,11 +34,12 @@
       "src/main/kotlin/com/sdkwork/web/app/sdk/api/SourceVersionApi.kt",
       "src/main/kotlin/com/sdkwork/web/app/sdk/ApplicationStoreListing.kt",
       "src/main/kotlin/com/sdkwork/web/app/sdk/CertificateIdentifierResponse.kt",
+      "src/main/kotlin/com/sdkwork/web/app/sdk/CertificateOperationResponse.kt",
       "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatePage.kt",
       "src/main/kotlin/com/sdkwork/web/app/sdk/CertificateResponse.kt",
-      "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatesCreateResponse201.kt",
+      "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatesIssueResponse202.kt",
       "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatesListResponse.kt",
-      "src/main/kotlin/com/sdkwork/web/app/sdk/CreateCertificateRequest.kt",
+      "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatesOperationsRetrieveResponse.kt",
       "src/main/kotlin/com/sdkwork/web/app/sdk/CreateDeploymentRequest.kt",
       "src/main/kotlin/com/sdkwork/web/app/sdk/CreateDomainRequest.kt",
       "src/main/kotlin/com/sdkwork/web/app/sdk/CreateEnvVariableRequest.kt",
@@ -60,6 +59,8 @@
       "src/main/kotlin/com/sdkwork/web/app/sdk/HealthCheckResponse.kt",
       "src/main/kotlin/com/sdkwork/web/app/sdk/http/HttpClient.kt",
       "src/main/kotlin/com/sdkwork/web/app/sdk/ImportGitSourceVersionRequest.kt",
+      "src/main/kotlin/com/sdkwork/web/app/sdk/IssueCertificateRequest.kt",
+      "src/main/kotlin/com/sdkwork/web/app/sdk/ListenerCertificateBindingResponse.kt",
       "src/main/kotlin/com/sdkwork/web/app/sdk/ListenerCertificateSummaryResponse.kt",
       "src/main/kotlin/com/sdkwork/web/app/sdk/MediaChecksum.kt",
       "src/main/kotlin/com/sdkwork/web/app/sdk/MediaResource.kt",
@@ -67,6 +68,7 @@
       "src/main/kotlin/com/sdkwork/web/app/sdk/ProblemDetail.kt",
       "src/main/kotlin/com/sdkwork/web/app/sdk/SdkWorkApiResponse.kt",
       "src/main/kotlin/com/sdkwork/web/app/sdk/SdkworkAppClient.kt",
+      "src/main/kotlin/com/sdkwork/web/app/sdk/SdkWorkAsyncData.kt",
       "src/main/kotlin/com/sdkwork/web/app/sdk/SdkWorkCommandData.kt",
       "src/main/kotlin/com/sdkwork/web/app/sdk/SdkWorkCommandResponse.kt",
       "src/main/kotlin/com/sdkwork/web/app/sdk/SdkWorkListResponse.kt",
@@ -113,56 +115,26 @@
   },
   "impact": {
     "schemaVersion": 1,
-    "areas": [
-      "unknown"
-    ],
-    "details": [
-      {
-        "area": "unknown",
-        "paths": [
-          "src/main/kotlin/com/sdkwork/web/app/sdk/ListenerCertificateBindingResponse.kt"
-        ]
-      }
-    ],
-    "requiresVerification": true,
-    "summary": "Detected impact areas: unknown. Verification is required."
+    "areas": [],
+    "details": [],
+    "requiresVerification": false,
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
   },
   "verificationPlan": {
-    "shouldRun": true,
-    "runPhase": "now",
-    "summary": "Detected impact areas: unknown. Verification is required. Run the required verification commands now against the generated SDK output.",
-    "steps": [
-      {
-        "id": "check",
-        "title": "Unified package check",
-        "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: unknown.",
-        "workingDirectory": "E:\\sdkwork-space\\sdkwork-web-server\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-kotlin\\generated\\server-openapi",
-        "command": "node",
-        "args": [
-          "./bin/publish-core.mjs",
-          "--language",
-          "kotlin",
-          "--project-dir",
-          ".",
-          "--action",
-          "check"
-        ],
-        "displayCommand": "node ./bin/publish-core.mjs --language kotlin --project-dir . --action check"
-      }
-    ]
+    "shouldRun": false,
+    "runPhase": "skip",
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
+    "steps": []
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "high",
-    "nextAction": "verify",
+    "riskLevel": "low",
+    "nextAction": "skip",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
-    "summary": "Changes have been applied. Run the required verification plan now.",
+    "summary": "No actionable changes were detected. No apply or verification step is required.",
     "reasons": [
-      "manual-review-required",
-      "unknown-impact",
-      "verification-required"
+      "no-actionable-changes"
     ]
   },
   "preservedLegacyFiles": false

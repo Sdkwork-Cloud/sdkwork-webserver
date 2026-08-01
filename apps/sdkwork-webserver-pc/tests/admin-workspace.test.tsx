@@ -6,7 +6,7 @@ import { createWebserverAdminSdkClient, type WebserverAdminSdkClient } from "@sd
 import { createWebserverAdminDomainRegistry, webserverModule as domainsModule } from "@sdkwork/webserver-pc-admin-domains";
 import { WebserverWorkspace, type ApplicationMediaStorage, type ApplicationSourceStorage } from "@sdkwork/webserver-pc-commons";
 import { createTokenManager } from "@sdkwork/sdk-common";
-import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -71,11 +71,18 @@ describe("admin workspace certificate controls", () => {
   });
 
   it("submits multiple SAN domains and an explicit key algorithm", async () => {
-    const create = vi.fn().mockResolvedValue({ id: "certificate-1" });
+    const create = vi.fn().mockResolvedValue({ accepted: true, operationId: "operation-1", status: "pending" });
+    const retrieveOperation = vi.fn().mockResolvedValue({
+      certificateId: "certificate-1",
+      id: "operation-1",
+      operationType: "ISSUE",
+      status: "SUCCEEDED",
+    });
     const registry = createWebserverAdminCertificateRegistry({
       certificate: {
-        create,
+        issue: create,
         list: vi.fn().mockResolvedValue({ items: [], pageInfo: { hasMore: false, page: 1, pageSize: 20 } }),
+        operations: { retrieve: retrieveOperation },
       },
       certificateDistribution: {
         certificates: {
@@ -87,10 +94,10 @@ describe("admin workspace certificate controls", () => {
       domain: {
         list: vi.fn().mockResolvedValue({
           items: [
-            { applicationName: "Public API", hostname: "api.example.com", id: "domain-1" },
-            { applicationName: "Public API", hostname: "www.example.com", id: "domain-2" },
+            { applicationName: "Public API", hostname: "api.example.com", id: "domain-1", isVerified: true },
+            { applicationName: "Public API", hostname: "www.example.com", id: "domain-2", isVerified: true },
           ],
-          pageInfo: { hasMore: false, page: 1, pageSize: 100 },
+          pageInfo: { hasMore: false, page: 1, pageSize: 20 },
         }),
       },
     } as unknown as WebserverAdminSdkClient);
@@ -113,7 +120,203 @@ describe("admin workspace certificate controls", () => {
         keyAlgorithm: "RSA",
       },
       { idempotencyKey: expect.any(String) },
+      expect.objectContaining({ signal: expect.any(AbortSignal), timeout: 30_000 }),
     ));
+    await waitFor(() => expect(retrieveOperation).toHaveBeenCalledWith(
+      "operation-1",
+      expect.objectContaining({ signal: expect.any(AbortSignal), timeout: 30_000 }),
+    ));
+  });
+
+  it("paginates verified domain options, preserves selections, and enforces the SAN limit", async () => {
+    const listDomains = vi.fn().mockImplementation(async (params: { page?: number }) => (
+      params.page === 2
+        ? {
+            items: [{ hostname: "page-two.example.com", id: "domain-9", isVerified: true }],
+            pageInfo: { hasMore: false, page: 2, pageSize: 20 },
+          }
+        : {
+            items: [
+              ...Array.from({ length: 8 }, (_, index) => ({
+                hostname: `verified-${index + 1}.example.com`,
+                id: `domain-${index + 1}`,
+                isVerified: true,
+              })),
+              { hostname: "pending.example.com", id: "domain-pending", isVerified: false },
+            ],
+            pageInfo: { hasMore: true, page: 1, pageSize: 20 },
+          }
+    ));
+    const registry = createWebserverAdminCertificateRegistry({
+      certificate: {
+        issue: vi.fn(),
+        list: vi.fn().mockResolvedValue({ items: [], pageInfo: { hasMore: false, page: 1, pageSize: 20 } }),
+      },
+      certificateDistribution: {
+        certificates: {
+          distribution: {
+            list: vi.fn().mockResolvedValue({ items: [], pageInfo: { hasMore: false, page: 1, pageSize: 20 } }),
+          },
+        },
+      },
+      domain: { list: listDomains },
+    } as unknown as WebserverAdminSdkClient);
+    renderCertificateWorkspace(registry);
+
+    fireEvent.click(await screen.findByRole("button", { name: "Issue certificate" }));
+    await screen.findByRole("option", { name: "verified-1.example.com - Unbound" });
+    expect(screen.queryByRole("option", { name: "pending.example.com - Unbound" })).toBeNull();
+
+    const firstPageSelect = screen.getByLabelText("Certificate domains") as HTMLSelectElement;
+    Array.from(firstPageSelect.options).forEach((option) => {
+      option.selected = true;
+    });
+    fireEvent.change(firstPageSelect);
+    expect(await screen.findByText("8 of 8 selected")).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "Next page" }));
+    const pageTwoOption = await screen.findByRole("option", { name: "page-two.example.com - Unbound" }) as HTMLOptionElement;
+    const pageTwoSelect = screen.getByLabelText("Certificate domains") as HTMLSelectElement;
+    expect(Array.from(pageTwoSelect.selectedOptions).map((option) => option.value)).toEqual([
+      "domain-1",
+      "domain-2",
+      "domain-3",
+      "domain-4",
+      "domain-5",
+      "domain-6",
+      "domain-7",
+      "domain-8",
+    ]);
+    expect(pageTwoOption.disabled).toBe(true);
+    expect(listDomains).toHaveBeenNthCalledWith(
+      2,
+      { page: 2, pageSize: 20 },
+      expect.objectContaining({ signal: expect.any(AbortSignal), timeout: 30_000 }),
+    );
+  });
+
+  it("shows loading, error, retry, and empty states for certificate domain pages", async () => {
+    let rejectFirstRequest: ((reason?: unknown) => void) | undefined;
+    const listDomains = vi.fn()
+      .mockImplementationOnce(() => new Promise((_resolve, reject) => {
+        rejectFirstRequest = reject;
+      }))
+      .mockResolvedValueOnce({
+        items: [],
+        pageInfo: { hasMore: false, page: 1, pageSize: 20 },
+      });
+    const registry = createWebserverAdminCertificateRegistry({
+      certificate: {
+        issue: vi.fn(),
+        list: vi.fn().mockResolvedValue({ items: [], pageInfo: { hasMore: false, page: 1, pageSize: 20 } }),
+      },
+      certificateDistribution: {
+        certificates: {
+          distribution: {
+            list: vi.fn().mockResolvedValue({ items: [], pageInfo: { hasMore: false, page: 1, pageSize: 20 } }),
+          },
+        },
+      },
+      domain: { list: listDomains },
+    } as unknown as WebserverAdminSdkClient);
+    renderCertificateWorkspace(registry);
+
+    fireEvent.click(await screen.findByRole("button", { name: "Issue certificate" }));
+    expect(await screen.findByText("Loading available options...")).toBeTruthy();
+    act(() => rejectFirstRequest?.(new Error("domain options unavailable")));
+    expect(await screen.findByText("The available options could not be loaded. Refresh and try again.")).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "Retry loading options" }));
+    expect(await screen.findByText("No eligible options on this page.")).toBeTruthy();
+    expect(listDomains).toHaveBeenCalledTimes(2);
+  });
+
+  it("aborts an in-flight certificate domain page when the dialog closes", async () => {
+    let optionRequestSignal: AbortSignal | undefined;
+    const listDomains = vi.fn((
+      _params: unknown,
+      options: { signal: AbortSignal },
+    ) => {
+      optionRequestSignal = options.signal;
+      return new Promise((_resolve, reject) => {
+        options.signal.addEventListener("abort", () => reject(options.signal.reason), { once: true });
+      });
+    });
+    const registry = createWebserverAdminCertificateRegistry({
+      certificate: {
+        issue: vi.fn(),
+        list: vi.fn().mockResolvedValue({ items: [], pageInfo: { hasMore: false, page: 1, pageSize: 20 } }),
+      },
+      certificateDistribution: {
+        certificates: {
+          distribution: {
+            list: vi.fn().mockResolvedValue({ items: [], pageInfo: { hasMore: false, page: 1, pageSize: 20 } }),
+          },
+        },
+      },
+      domain: { list: listDomains },
+    } as unknown as WebserverAdminSdkClient);
+    renderCertificateWorkspace(registry);
+
+    fireEvent.click(await screen.findByRole("button", { name: "Issue certificate" }));
+    expect(await screen.findByText("Loading available options...")).toBeTruthy();
+    expect(optionRequestSignal?.aborted).toBe(false);
+
+    fireEvent.click(screen.getByRole("button", { name: "Close" }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    expect(optionRequestSignal?.aborted).toBe(true);
+  });
+
+  it("allows a certificate dialog to close while polling without cancelling the server operation", async () => {
+    const create = vi.fn().mockResolvedValue({ accepted: true, operationId: "operation-pending-1", status: "pending" });
+    const listCertificates = vi.fn().mockResolvedValue({
+      items: [],
+      pageInfo: { hasMore: false, page: 1, pageSize: 20 },
+    });
+    const retrieveOperation = vi.fn((
+      _operationId: string,
+      options: { signal: AbortSignal },
+    ) => new Promise((_resolve, reject) => {
+      options.signal.addEventListener("abort", () => reject(options.signal.reason), { once: true });
+    }));
+    const registry = createWebserverAdminCertificateRegistry({
+      certificate: {
+        issue: create,
+        list: listCertificates,
+        operations: { retrieve: retrieveOperation },
+      },
+      certificateDistribution: {
+        certificates: {
+          distribution: {
+            list: vi.fn().mockResolvedValue({ items: [], pageInfo: { hasMore: false, page: 1, pageSize: 20 } }),
+          },
+        },
+      },
+      domain: {
+        list: vi.fn().mockResolvedValue({
+          items: [{ hostname: "api.example.com", id: "domain-1", isVerified: true }],
+          pageInfo: { hasMore: false, page: 1, pageSize: 20 },
+        }),
+      },
+    } as unknown as WebserverAdminSdkClient);
+    renderCertificateWorkspace(registry);
+
+    fireEvent.click(await screen.findByRole("button", { name: "Issue certificate" }));
+    const domains = await screen.findByLabelText("Certificate domains") as HTMLSelectElement;
+    domains.options[0].selected = true;
+    fireEvent.change(domains);
+    fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
+    await waitFor(() => expect(retrieveOperation).toHaveBeenCalledOnce());
+    const pollingSignal = retrieveOperation.mock.calls[0]?.[1].signal;
+
+    const close = screen.getByRole("button", { name: "Close" });
+    expect((close as HTMLButtonElement).disabled).toBe(false);
+    fireEvent.click(close);
+
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    expect(pollingSignal?.aborted).toBe(true);
+    await waitFor(() => expect(listCertificates).toHaveBeenCalledTimes(2));
+    expect(create).toHaveBeenCalledTimes(1);
   });
 });
 

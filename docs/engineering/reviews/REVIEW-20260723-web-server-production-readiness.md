@@ -500,8 +500,9 @@ mock-only happy paths:
    UI and service. Domain inputs use the same safe ASCII DNS shape required by the current ACME
    issuer.
 5. Certificate requests now expose only implemented types 1 (Let's Encrypt) and 3 (self-signed).
-   Self-signed requests cannot claim automatic renewal because the current renewal selector only
-   processes type 1. Unsupported requests fail before a pending certificate row or provider call.
+   Self-signed requests cannot claim automatic renewal because UI request validation and the
+   transactional repository policy both reject it, while the scheduler independently selects only
+   type 1. Unsupported requests fail before a pending certificate row or provider call.
 6. The certificate worker rejects scan intervals outside `60..=86400` seconds and handles
    SIGINT/SIGTERM/Ctrl-C without abandoning an in-flight renewal cycle after it has claimed work.
 7. The file runtime-set watcher clears its accepted fingerprint after transient provider

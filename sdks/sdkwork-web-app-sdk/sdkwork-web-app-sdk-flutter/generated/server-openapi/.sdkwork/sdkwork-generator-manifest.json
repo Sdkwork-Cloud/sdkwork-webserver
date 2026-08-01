@@ -40,7 +40,7 @@
     },
     {
       "path": "lib/src/api/certificate.dart",
-      "sha256": "bfe546869049b35f140cd2f9cac3934abe0ad52e9aa0ceecbea28ce46f37f1d9"
+      "sha256": "a81e9972175d86457084637a842981dd548bfe73192587272c01cb436950b9ea"
     },
     {
       "path": "lib/src/api/deployment.dart",
@@ -48,7 +48,7 @@
     },
     {
       "path": "lib/src/api/domain.dart",
-      "sha256": "27cfe48f50aa8db840c7b9261a69431e3d10ebdebf13c97ceda5b63fc57cd8c2"
+      "sha256": "e6e705e518dece528c83b366ffac7e2230a81516e99e7d5c1ed36fec280ba825"
     },
     {
       "path": "lib/src/api/env_variable.dart",
@@ -80,7 +80,7 @@
     },
     {
       "path": "lib/src/models.dart",
-      "sha256": "9367b1a6a95e4f789fc2b46fb82fd95a73f5cf320b32d07e3de00dbb99ad229a"
+      "sha256": "54a7e41037979e597c52c57364f04e3f4566d5c05ff89300bcdd7b0d2abf7e8b"
     },
     {
       "path": "LICENSE",

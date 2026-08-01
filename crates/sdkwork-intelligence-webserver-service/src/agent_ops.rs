@@ -11,7 +11,6 @@ use crate::WebService;
 
 const MAX_NODE_SYNC_RESPONSE_BYTES: usize = 15 * 1024 * 1024;
 const MAX_CERTIFICATE_OBSERVATIONS: usize = 2_048;
-const MAX_OBSERVATION_AGE_HOURS: i64 = 24;
 const MAX_OBSERVATION_CLOCK_SKEW_MINUTES: i64 = 5;
 
 impl WebService {
@@ -68,7 +67,6 @@ fn validate_certificate_observations(
         )));
     }
     let now = Utc::now();
-    let oldest = now - Duration::hours(MAX_OBSERVATION_AGE_HOURS);
     let latest = now + Duration::minutes(MAX_OBSERVATION_CLOCK_SKEW_MINUTES);
     let mut certificate_ids = HashSet::with_capacity(observations.len());
     for observation in observations {
@@ -118,9 +116,9 @@ fn validate_certificate_observations(
                 WebServiceError::validation("certificate observation observedAt must be RFC 3339")
             })?
             .with_timezone(&Utc);
-        if observed_at < oldest || observed_at > latest {
+        if observed_at > latest {
             return Err(WebServiceError::validation(
-                "certificate observation observedAt is outside the accepted time window",
+                "certificate observation observedAt exceeds the accepted clock skew",
             ));
         }
     }
@@ -173,9 +171,10 @@ fn validate_node_sync_response_size(
 
 #[cfg(test)]
 mod tests {
-    use sdkwork_webserver_contract::AgentSyncResponse;
+    use chrono::{Duration, Utc};
+    use sdkwork_webserver_contract::{AgentCertificateObservation, AgentSyncResponse};
 
-    use super::validate_node_sync_response_size;
+    use super::{validate_certificate_observations, validate_node_sync_response_size};
 
     #[test]
     fn node_sync_response_size_is_bounded_after_materialization() {
@@ -191,5 +190,30 @@ mod tests {
 
         validate_node_sync_response_size(&manifest, encoded.len()).unwrap();
         assert!(validate_node_sync_response_size(&manifest, encoded.len() - 1).is_err());
+    }
+
+    #[test]
+    fn certificate_observations_are_current_bounded_and_state_specific() {
+        let valid = AgentCertificateObservation {
+            certificate_id: "certificate-1".to_string(),
+            fingerprint: "a".repeat(64),
+            sync_version: format!("sv1:{}", "b".repeat(64)),
+            state: "SERVED".to_string(),
+            observed_at: (Utc::now() - Duration::days(30)).to_rfc3339(),
+            failure_code: None,
+        };
+        validate_certificate_observations(std::slice::from_ref(&valid)).unwrap();
+
+        let mut duplicate = vec![valid.clone(), valid.clone()];
+        assert!(validate_certificate_observations(&duplicate).is_err());
+
+        duplicate.truncate(1);
+        duplicate[0].state = "FAILED".to_string();
+        assert!(validate_certificate_observations(&duplicate).is_err());
+        duplicate[0].failure_code = Some("TLS_SNI_PROBE_FAILED".to_string());
+        validate_certificate_observations(&duplicate).unwrap();
+
+        duplicate[0].observed_at = (Utc::now() + Duration::minutes(10)).to_rfc3339();
+        assert!(validate_certificate_observations(&duplicate).is_err());
     }
 }

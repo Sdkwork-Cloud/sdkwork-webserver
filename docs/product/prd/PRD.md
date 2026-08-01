@@ -122,7 +122,12 @@ An application developer selects the `static-spa` profile. The generated configu
 
 ### 6.2 Publish A Domain With HTTPS
 
-An operator binds a verified domain, selects a managed certificate policy, validates the complete listener/host/route/TLS plan, and starts an asynchronous publication. The system obtains or imports the certificate, distributes only the assigned certificate to each selected node, activates the new revision atomically, verifies public readiness over HTTPS, and records an audit trail.
+An operator registers and verifies a hostname, then starts certificate issuance before any
+application route is required. The API durably accepts the operation and the client observes its
+terminal state. The operator later binds a compatible immutable certificate version to an
+application listener, validates the complete listener/host/route/TLS plan, and starts asynchronous
+publication. The system distributes only the assigned version to selected nodes, activates it
+atomically, verifies public readiness over HTTPS, and records an audit trail.
 
 ### 6.3 Reverse Proxy An API
 
@@ -134,7 +139,12 @@ An operator imports an Nginx site file. The compiler resolves includes within an
 
 ### 6.5 Rotate A Certificate Without Downtime
 
-The certificate worker renews a certificate before expiry, validates the chain and hostname coverage, encrypts and distributes the new material, switches TLS contexts atomically, keeps existing connections alive, verifies the new fingerprint, and retains a bounded rollback window.
+The certificate worker schedules renewal before expiry and claims the durable renewal operation
+with an expiring lease and fencing token. It validates the new chain and hostname coverage, stores
+an immutable version through the protected material boundary, and advances the canonical aggregate
+only after issuance succeeds. Distribution and runtime activation then switch TLS contexts
+atomically, keep existing connections alive, verify the new fingerprint, and retain a bounded
+rollback window.
 
 ### 6.6 Roll Back A Failed Revision
 
@@ -180,6 +190,8 @@ Health or SLO checks detect a failed canary. The control plane stops rollout, re
 - `PRD-FR-036`: Root domains are explicit tenant-owned Zones. Every apex or subdomain hostname belongs to one Zone and application routing is represented by `web_site_binding`, never a direct application column on the hostname.
 - `PRD-FR-037`: Certificates cover 1..8 unique hostnames through relational identifiers. A hostname may participate in multiple certificate lifecycles, and one listener may activate one RSA and one ECDSA binding with one explicit default.
 - `PRD-FR-038`: Hostname deployment visibility is projected from the bound application. Domain, certificate, listener, deployment, distribution, and target observation states remain separate and truthful.
+- `PRD-FR-039`: Certificate issuance and manual renewal must return HTTP `202` with standard asynchronous data, persist an owner-scoped operation before acknowledgement, and expose its state through generated App and Backend SDK operation retrieval APIs.
+- `PRD-FR-040`: Certificate workers must use bounded claims, lease expiry, fencing, retries, stable terminal failure codes, and transactional aggregate updates. Closing a PC polling dialog stops only browser observation and must not cancel durable server work.
 
 ## 8. Non-Functional Requirements
 

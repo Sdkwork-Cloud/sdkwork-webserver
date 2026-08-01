@@ -58,7 +58,7 @@ final class ApplicationDomainApi extends BaseApi
         return $result;
     }
 
-    /** Verify an application public domain */
+    /** Create or check an application-domain ownership challenge */
     public function applicationsDomainsVerify(string $applicationId, string $domainId, string $idempotencyKey): ?ApplicationsDomainsVerifyResponse
     {
         $path = $this->interpolatePath('/backend/v3/api/applications/{applicationId}/domains/{domainId}/verify', ['applicationId' => $this->serializePathParameter($applicationId, new PathParameterSpec('applicationId', 'simple', false)), 'domainId' => $this->serializePathParameter($domainId, new PathParameterSpec('domainId', 'simple', false))]);

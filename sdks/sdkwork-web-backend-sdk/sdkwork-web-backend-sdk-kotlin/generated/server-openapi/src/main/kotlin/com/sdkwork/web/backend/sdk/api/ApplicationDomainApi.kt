@@ -41,7 +41,7 @@ class ApplicationDomainApi(private val client: HttpClient) {
         client.delete(ApiPaths.backendPath("/applications/${serializePathParameter(applicationId, PathParameterSpec("applicationId", "simple", false))}/domains/${serializePathParameter(domainId, PathParameterSpec("domainId", "simple", false))}"), null, requestHeaders)
     }
 
-    /** Verify an application public domain */
+    /** Create or check an application-domain ownership challenge */
     suspend fun applicationsDomainsVerify(applicationId: String, domainId: String, idempotencyKey: String): ApplicationsDomainsVerifyResponse? {
         val requestHeaders = buildRequestHeaders(
             mapOf(

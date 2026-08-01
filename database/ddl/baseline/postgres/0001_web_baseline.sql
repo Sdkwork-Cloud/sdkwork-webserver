@@ -460,6 +460,71 @@ CREATE TABLE web_certificate_secret_bundle (
     )
 );
 
+CREATE TABLE web_certificate_operation (
+    id                   BIGINT       NOT NULL,
+    uuid                 VARCHAR(64)  NOT NULL,
+    tenant_id            BIGINT       NOT NULL,
+    certificate_id       BIGINT       NOT NULL,
+    requested_by         BIGINT,
+    operation_type       VARCHAR(16)  NOT NULL,
+    status               VARCHAR(16)  NOT NULL DEFAULT 'PENDING',
+    attempt_count        INTEGER      NOT NULL DEFAULT 0,
+    max_attempts         INTEGER      NOT NULL DEFAULT 5,
+    next_attempt_at      TIMESTAMPTZ  NOT NULL,
+    lease_owner          VARCHAR(128),
+    lease_expires_at     TIMESTAMPTZ,
+    fencing_token        BIGINT       NOT NULL DEFAULT 0,
+    failure_code         VARCHAR(64),
+    idempotency_key_hash VARCHAR(64),
+    request_sha256       VARCHAR(64)  NOT NULL,
+    created_at           TIMESTAMPTZ  NOT NULL,
+    updated_at           TIMESTAMPTZ  NOT NULL,
+    completed_at         TIMESTAMPTZ,
+    PRIMARY KEY (id),
+    CONSTRAINT uk_web_certificate_operation_uuid UNIQUE (uuid),
+    CONSTRAINT uk_web_certificate_operation_tenant_id UNIQUE (tenant_id, id),
+    CONSTRAINT fk_web_certificate_operation_certificate FOREIGN KEY (tenant_id, certificate_id)
+        REFERENCES web_certificate(tenant_id, id),
+    CONSTRAINT chk_web_certificate_operation_type CHECK (operation_type IN ('ISSUE', 'RENEW')),
+    CONSTRAINT chk_web_certificate_operation_status CHECK (status IN ('PENDING', 'RUNNING', 'SUCCEEDED', 'FAILED')),
+    CONSTRAINT chk_web_certificate_operation_attempts CHECK (
+        max_attempts BETWEEN 1 AND 10
+        AND attempt_count BETWEEN 0 AND max_attempts
+    ),
+    CONSTRAINT chk_web_certificate_operation_fencing CHECK (fencing_token >= 0),
+    CONSTRAINT chk_web_certificate_operation_hashes CHECK (
+        request_sha256 ~ '^[0-9a-f]{64}$'
+        AND (idempotency_key_hash IS NULL OR idempotency_key_hash ~ '^[0-9a-f]{64}$')
+    ),
+    CONSTRAINT chk_web_certificate_operation_lease CHECK (
+        (status = 'RUNNING' AND lease_owner IS NOT NULL AND lease_expires_at IS NOT NULL)
+        OR (status <> 'RUNNING' AND lease_owner IS NULL AND lease_expires_at IS NULL)
+    ),
+    CONSTRAINT chk_web_certificate_operation_completion CHECK (
+        (status IN ('SUCCEEDED', 'FAILED') AND completed_at IS NOT NULL)
+        OR (status IN ('PENDING', 'RUNNING') AND completed_at IS NULL)
+    )
+);
+
+COMMENT ON TABLE web_certificate_operation IS 'Durable certificate issuance and renewal operation with lease fencing and bounded retry';
+COMMENT ON COLUMN web_certificate_operation.idempotency_key_hash IS 'SHA-256 of the tenant, actor, operation scope, and raw Idempotency-Key; raw keys are never stored';
+COMMENT ON COLUMN web_certificate_operation.request_sha256 IS 'Canonical request fingerprint used to reject conflicting idempotency-key replay';
+
+CREATE UNIQUE INDEX uk_web_certificate_operation_idempotency
+    ON web_certificate_operation (tenant_id, idempotency_key_hash)
+    WHERE idempotency_key_hash IS NOT NULL;
+
+CREATE UNIQUE INDEX uk_web_certificate_operation_active_certificate
+    ON web_certificate_operation (tenant_id, certificate_id)
+    WHERE status IN ('PENDING', 'RUNNING');
+
+CREATE INDEX idx_web_certificate_operation_claim
+    ON web_certificate_operation (next_attempt_at, id)
+    WHERE status IN ('PENDING', 'RUNNING');
+
+CREATE INDEX idx_web_certificate_operation_certificate_history
+    ON web_certificate_operation (tenant_id, certificate_id, created_at DESC, id DESC);
+
 ALTER TABLE web_certificate
     ADD CONSTRAINT fk_web_certificate_current_version
         FOREIGN KEY (id, current_version_id) REFERENCES web_certificate_version(certificate_id, id);

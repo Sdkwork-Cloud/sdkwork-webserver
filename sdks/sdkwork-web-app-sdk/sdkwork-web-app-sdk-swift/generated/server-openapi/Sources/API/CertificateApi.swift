@@ -50,14 +50,19 @@ public class CertificateApi {
     }
 
     /// 申请证书
-    public func certificatesCreate(body: CreateCertificateRequest, idempotencyKey: String) async throws -> CertificatesCreateResponse201? {
+    public func certificatesIssue(body: IssueCertificateRequest, idempotencyKey: String) async throws -> CertificatesIssueResponse202? {
         let requestHeaders = buildRequestHeaders(
             [
                 "Idempotency-Key": HeaderParameterSpec(value: idempotencyKey, style: "simple", explode: false, contentType: nil),
             ],
             [:]
         )
-        return try await client.post(ApiPaths.appPath("/certificates"), body: body, params: nil, headers: requestHeaders, contentType: "application/json", responseType: CertificatesCreateResponse201.self)
+        return try await client.post(ApiPaths.appPath("/certificates/issue"), body: body, params: nil, headers: requestHeaders, contentType: "application/json", responseType: CertificatesIssueResponse202.self)
+    }
+
+    /// 获取证书异步操作状态
+    public func certificatesOperationsRetrieve(operationId: String) async throws -> CertificatesOperationsRetrieveResponse? {
+        return try await client.get(ApiPaths.appPath("/certificates/operations/\(serializePathParameter(operationId, PathParameterSpec(name: "operationId", style: "simple", explode: false)))"), responseType: CertificatesOperationsRetrieveResponse.self)
     }
 
     private struct PathParameterSpec {

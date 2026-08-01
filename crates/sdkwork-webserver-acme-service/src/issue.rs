@@ -1,3 +1,7 @@
+use chrono::{DateTime, Utc};
+use rcgen::KeyPair;
+use sdkwork_utils_rust::crypto::sha256_hash;
+use std::collections::BTreeSet;
 use std::sync::Arc;
 use std::time::Duration;
 use tokio::sync::Semaphore;
@@ -6,7 +10,7 @@ use crate::challenge_store::ChallengeStore;
 use crate::config::AcmeConfig;
 use crate::lets_encrypt::issue_lets_encrypt;
 use crate::model::IssuedCertificateMaterial;
-use crate::self_signed::issue_self_signed;
+use crate::self_signed::{certificate_evidence_from_pem, issue_self_signed};
 use crate::{AcmeServiceError, AcmeServiceResult};
 use crate::{
     DEFAULT_ACME_OPERATION_TIMEOUT_MS, MAX_ACME_OPERATION_TIMEOUT_MS, MIN_ACME_OPERATION_TIMEOUT_MS,
@@ -85,12 +89,12 @@ impl CertificateIssuer {
                 "certificate identifiers must contain 1..{MAX_CERTIFICATE_IDENTIFIERS} hostnames"
             )));
         }
-        let mut unique_hostnames = std::collections::HashSet::with_capacity(hostnames.len());
+        let mut unique_hostnames = BTreeSet::new();
         for hostname in hostnames {
             validate_hostname(hostname)?;
-            if !unique_hostnames.insert(hostname.as_str()) {
+            if !unique_hostnames.insert(hostname.to_ascii_lowercase()) {
                 return Err(AcmeServiceError::validation(
-                    "certificate identifiers must be unique",
+                    "certificate identifiers must be unique ignoring ASCII case",
                 ));
             }
         }
@@ -105,7 +109,7 @@ impl CertificateIssuer {
                 "certificate issuance capacity exhausted; maximum concurrent operations: {MAX_CONCURRENT_CERTIFICATE_ISSUANCE}"
             ))
         })?;
-        match cert_type {
+        let material = match cert_type {
             1 => {
                 issue_lets_encrypt(
                     &self.config,
@@ -122,8 +126,97 @@ impl CertificateIssuer {
             other => Err(AcmeServiceError::validation(format!(
                 "unsupported certType {other}; supported: 1 (Let's Encrypt), 3 (self-signed)"
             ))),
+        }?;
+        validate_issued_material(material, cert_type, hostnames, cert_name, key_algorithm)
+    }
+}
+
+fn validate_issued_material(
+    material: IssuedCertificateMaterial,
+    expected_cert_type: i32,
+    expected_hostnames: &[String],
+    expected_cert_name: &str,
+    expected_key_algorithm: &str,
+) -> AcmeServiceResult<IssuedCertificateMaterial> {
+    let evidence = certificate_evidence_from_pem(&material.cert_pem)
+        .map_err(|_| AcmeServiceError::provider("issued certificate leaf evidence is invalid"))?;
+    let expected_sans = normalized_san_set(expected_hostnames)?;
+    let actual_sans = normalized_san_set(&evidence.san_list).map_err(|_| {
+        AcmeServiceError::provider("issued certificate contains an invalid DNS SAN")
+    })?;
+    if actual_sans != expected_sans {
+        return Err(AcmeServiceError::provider(
+            "issued certificate DNS SANs do not match the requested identifiers",
+        ));
+    }
+    if evidence.key_algorithm != expected_key_algorithm {
+        return Err(AcmeServiceError::provider(
+            "issued certificate key algorithm does not match the request",
+        ));
+    }
+
+    let key_pair = KeyPair::from_pem(&material.private_key_pem)
+        .map_err(|_| AcmeServiceError::provider("issued certificate private key is invalid"))?;
+    if sha256_hash(&key_pair.public_key_der()) != evidence.spki_sha256 {
+        return Err(AcmeServiceError::provider(
+            "issued certificate private key does not match the leaf certificate",
+        ));
+    }
+    match (expected_cert_type, material.chain_pem.as_deref()) {
+        (1, Some(chain)) if chain == material.cert_pem.as_str() => {}
+        (3, None) => {}
+        _ => {
+            return Err(AcmeServiceError::provider(
+                "issued certificate chain material is inconsistent",
+            ));
         }
     }
+
+    let not_before = parse_certificate_timestamp(&evidence.not_before)?;
+    let not_after = parse_certificate_timestamp(&evidence.not_after)?;
+    let now = Utc::now();
+    if not_before > now || now >= not_after {
+        return Err(AcmeServiceError::provider(
+            "issued certificate is not currently valid",
+        ));
+    }
+
+    if material.cert_type != expected_cert_type
+        || material.cert_name != expected_cert_name
+        || material.issuer != evidence.issuer
+        || material.subject != evidence.subject
+        || normalized_san_set(&material.san_list).map_err(|_| {
+            AcmeServiceError::provider("issued certificate metadata contains an invalid DNS SAN")
+        })? != actual_sans
+        || material.serial_sha256 != evidence.serial_sha256
+        || material.fingerprint_sha256 != evidence.fingerprint_sha256
+        || material.spki_sha256 != evidence.spki_sha256
+        || material.chain_sha256 != evidence.chain_sha256
+        || material.key_algorithm != evidence.key_algorithm
+        || material.not_before != evidence.not_before
+        || material.not_after != evidence.not_after
+    {
+        return Err(AcmeServiceError::provider(
+            "issued certificate metadata does not match the leaf certificate",
+        ));
+    }
+    Ok(material)
+}
+
+fn normalized_san_set(hostnames: &[String]) -> AcmeServiceResult<BTreeSet<String>> {
+    hostnames
+        .iter()
+        .map(|hostname| {
+            validate_hostname(hostname)?;
+            Ok(hostname.to_ascii_lowercase())
+        })
+        .collect()
+}
+
+fn parse_certificate_timestamp(value: &str) -> AcmeServiceResult<DateTime<Utc>> {
+    DateTime::parse_from_rfc3339(value)
+        .map(|timestamp| timestamp.with_timezone(&Utc))
+        .map_err(|_| AcmeServiceError::provider("issued certificate validity is invalid"))
 }
 
 fn validate_hostname(hostname: &str) -> AcmeServiceResult<()> {
@@ -170,6 +263,17 @@ fn validate_certificate_name(cert_name: &str) -> AcmeServiceResult<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::self_signed::generate_key_pair;
+
+    fn self_signed_material() -> IssuedCertificateMaterial {
+        issue_self_signed(
+            &["dev.localhost".to_string()],
+            "dev-localhost",
+            "/tmp/certs/live",
+            "ECDSA",
+        )
+        .expect("self-signed material")
+    }
 
     #[tokio::test]
     async fn issues_self_signed_certificate() {
@@ -189,6 +293,76 @@ mod tests {
         assert_eq!(material.cert_type, 3);
         assert!(material.cert_pem.contains("BEGIN CERTIFICATE"));
         assert!(material.private_key_pem.contains("BEGIN PRIVATE KEY"));
+    }
+
+    #[test]
+    fn validates_issued_certificate_material() {
+        validate_issued_material(
+            self_signed_material(),
+            3,
+            &["dev.localhost".to_string()],
+            "dev-localhost",
+            "ECDSA",
+        )
+        .expect("valid issued material");
+    }
+
+    #[test]
+    fn rejects_issued_certificate_with_unrequested_san() {
+        let error = validate_issued_material(
+            self_signed_material(),
+            3,
+            &["other.localhost".to_string()],
+            "dev-localhost",
+            "ECDSA",
+        )
+        .expect_err("SAN mismatch must fail closed");
+        assert!(error.to_string().contains("SANs do not match"));
+    }
+
+    #[test]
+    fn rejects_issued_certificate_with_unrequested_key_algorithm() {
+        let error = validate_issued_material(
+            self_signed_material(),
+            3,
+            &["dev.localhost".to_string()],
+            "dev-localhost",
+            "RSA",
+        )
+        .expect_err("key algorithm mismatch must fail closed");
+        assert!(error.to_string().contains("algorithm does not match"));
+    }
+
+    #[test]
+    fn rejects_issued_certificate_with_mismatched_private_key() {
+        let mut material = self_signed_material();
+        material.private_key_pem = generate_key_pair("ECDSA")
+            .expect("replacement key")
+            .serialize_pem();
+        let error = validate_issued_material(
+            material,
+            3,
+            &["dev.localhost".to_string()],
+            "dev-localhost",
+            "ECDSA",
+        )
+        .expect_err("certificate and key mismatch must fail closed");
+        assert!(error.to_string().contains("does not match the leaf"));
+    }
+
+    #[test]
+    fn rejects_issued_certificate_with_tampered_metadata() {
+        let mut material = self_signed_material();
+        material.fingerprint_sha256 = "0".repeat(64);
+        let error = validate_issued_material(
+            material,
+            3,
+            &["dev.localhost".to_string()],
+            "dev-localhost",
+            "ECDSA",
+        )
+        .expect_err("metadata mismatch must fail closed");
+        assert!(error.to_string().contains("metadata does not match"));
     }
 
     #[test]

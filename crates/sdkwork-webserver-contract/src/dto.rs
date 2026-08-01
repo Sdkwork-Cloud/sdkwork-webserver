@@ -328,10 +328,25 @@ pub(crate) fn default_page_size() -> i32 {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct DomainVerifyResponse {
     pub verified: bool,
-    #[serde(rename = "verifyToken", skip_serializing_if = "Option::is_none")]
-    pub verify_token: Option<String>,
+    pub status: String,
+    pub method: String,
+    #[serde(rename = "recordName")]
+    pub record_name: String,
+    #[serde(rename = "recordValue")]
+    pub record_value: String,
+    #[serde(rename = "attemptCount")]
+    pub attempt_count: i32,
+    #[serde(rename = "expiresAt")]
+    pub expires_at: String,
+    #[serde(rename = "nextAttemptAt", skip_serializing_if = "Option::is_none")]
+    pub next_attempt_at: Option<String>,
+    #[serde(rename = "checkedAt", skip_serializing_if = "Option::is_none")]
+    pub checked_at: Option<String>,
+    #[serde(rename = "failureCode", skip_serializing_if = "Option::is_none")]
+    pub failure_code: Option<String>,
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
@@ -604,6 +619,32 @@ pub struct CertificateResponse {
     pub created_at: String,
 }
 
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CertificateOperationAcceptedResponse {
+    pub accepted: bool,
+    pub operation_id: String,
+    pub status: String,
+}
+
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CertificateOperationResponse {
+    pub id: String,
+    pub certificate_id: String,
+    pub operation_type: String,
+    pub status: String,
+    pub attempt_count: i32,
+    pub max_attempts: i32,
+    pub next_attempt_at: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub failure_code: Option<String>,
+    pub created_at: String,
+    pub updated_at: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub completed_at: Option<String>,
+}
+
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct CertificatePage {
     pub items: Vec<CertificateResponse>,
@@ -613,7 +654,7 @@ pub struct CertificatePage {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct CreateCertificateRequest {
+pub struct IssueCertificateRequest {
     #[serde(rename = "domainIds")]
     pub domain_ids: Vec<String>,
     #[serde(rename = "certType")]
@@ -941,13 +982,33 @@ pub struct CertificateRenewalCandidate {
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
-pub struct CertificateRenewalCycleReport {
-    pub scanned: usize,
-    pub renewed: usize,
+pub struct CertificateOperationCycleReport {
+    pub scheduled: usize,
+    pub claimed: usize,
+    pub succeeded: usize,
+    pub retried: usize,
     pub failed: usize,
 }
 
+#[derive(Clone, Debug)]
+pub struct CertificateOperationLease {
+    pub tenant_id: i64,
+    pub operation_id: String,
+    pub certificate_id: String,
+    pub operation_type: String,
+    pub cert_type: i32,
+    pub cert_name: String,
+    pub hostnames: Vec<String>,
+    pub key_algorithm: String,
+    pub auto_renew: bool,
+    pub attempt_count: i32,
+    pub max_attempts: i32,
+    pub lease_owner: String,
+    pub fencing_token: i64,
+}
+
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct AgentHeartbeatRequest {
     #[serde(rename = "agentVersion", skip_serializing_if = "Option::is_none")]
     pub agent_version: Option<String>,

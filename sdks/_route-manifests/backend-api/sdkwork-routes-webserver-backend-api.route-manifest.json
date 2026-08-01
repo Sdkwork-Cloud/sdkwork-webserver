@@ -901,8 +901,8 @@
     },
     {
       "method": "POST",
-      "path": "/backend/v3/api/certificates",
-      "operationId": "certificates.create",
+      "path": "/backend/v3/api/certificates/issue",
+      "operationId": "certificates.issue",
       "tags": [
         "certificate"
       ],
@@ -924,6 +924,32 @@
       "permission": "web.certificates.write",
       "idempotent": true,
       "rateLimitTier": "auth-critical"
+    },
+    {
+      "method": "GET",
+      "path": "/backend/v3/api/certificates/operations/{operationId}",
+      "operationId": "certificates.operations.retrieve",
+      "tags": [
+        "certificate"
+      ],
+      "auth": {
+        "mode": "dual-token",
+        "required": true
+      },
+      "routeAuth": "dual-token",
+      "handler": {
+        "module": "crate::routes",
+        "name": null
+      },
+      "ownership": {
+        "owner": "sdkwork-web",
+        "apiAuthority": "sdkwork-web.backend"
+      },
+      "requestContext": "WebRequestContext",
+      "apiSurface": "backend-api",
+      "permission": "web.certificates.read",
+      "idempotent": false,
+      "rateLimitTier": null
     },
     {
       "method": "PUT",
