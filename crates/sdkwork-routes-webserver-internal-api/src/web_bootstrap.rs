@@ -254,13 +254,7 @@ mod tests {
                 "/internal/v3/api/web/runtime_assignments/current",
                 get(|| async { StatusCode::OK }),
             ),
-            build_web_internal_api_framework_layer(
-                MachineCredentialResolverDecorator::new(
-                    resolver,
-                    std::sync::Arc::new(NoopMachineAuthenticator),
-                ),
-                None,
-            ),
+            build_web_internal_api_framework_layer(resolver, None),
         );
         app.oneshot(
             Request::builder()
