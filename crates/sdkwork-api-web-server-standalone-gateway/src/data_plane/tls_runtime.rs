@@ -391,16 +391,23 @@ impl TlsRecoveryStore {
         let slot = RecoverySlot::inactive_after(self.active_slot);
         let target = self.directory.join(slot.filename());
         validate_recovery_target(&target)?;
-        let mut file = fs::OpenOptions::new()
-            .create(true)
-            .truncate(true)
-            .write(true)
-            .open(&target)
-            .map_err(|_| FileTlsRuntimeError::Recovery)?;
-        use std::io::Write;
-        file.write_all(&candidate.bytes)
-            .and_then(|_| file.sync_all())
-            .map_err(|_| FileTlsRuntimeError::Recovery)?;
+        // Atomic commit via temporary sibling + rename (see website
+        // runtime recovery): a crash never leaves a truncated slot.
+        let temp = self.directory.join(format!("{}.tmp", slot.filename()));
+        validate_recovery_target(&temp)?;
+        {
+            let mut file = fs::OpenOptions::new()
+                .create(true)
+                .truncate(true)
+                .write(true)
+                .open(&temp)
+                .map_err(|_| FileTlsRuntimeError::Recovery)?;
+            use std::io::Write;
+            file.write_all(&candidate.bytes)
+                .and_then(|_| file.sync_all())
+                .map_err(|_| FileTlsRuntimeError::Recovery)?;
+        }
+        fs::rename(&temp, &target).map_err(|_| FileTlsRuntimeError::Recovery)?;
         sync_recovery_directory(&self.directory)?;
         self.active_slot = Some(slot);
         self.generation = Some(candidate.generation);

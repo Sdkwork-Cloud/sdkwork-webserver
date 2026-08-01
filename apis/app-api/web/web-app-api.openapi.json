@@ -1308,6 +1308,7 @@
       "get": {
         "operationId": "sites.sourceVersions.list",
         "summary": "获取应用源码版本",
+        "x-sdkwork-pagination-mode": "cursor",
         "tags": [
           "sourceVersion"
         ],
@@ -1325,10 +1326,10 @@
         "x-sdkwork-owner": "sdkwork-web",
         "parameters": [
           {
-            "$ref": "#/components/parameters/PageParam"
+            "$ref": "#/components/parameters/PageSizeParam"
           },
           {
-            "$ref": "#/components/parameters/PageSizeParam"
+            "$ref": "#/components/parameters/CursorParam"
           }
         ],
         "responses": {
@@ -1666,11 +1667,8 @@
         "x-sdkwork-auth-mode": "dual-token",
         "x-sdkwork-permission": "web.sites.write",
         "x-sdkwork-owner": "sdkwork-web",
-        "x-sdkwork-pagination-mode": "cursor-offset",
+        "x-sdkwork-pagination-mode": "cursor",
         "parameters": [
-          {
-            "$ref": "#/components/parameters/PageParam"
-          },
           {
             "$ref": "#/components/parameters/PageSizeParam"
           },

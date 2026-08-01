@@ -17,9 +17,8 @@ impl DeploymentApi {
     }
 
     /// 获取部署历史
-    pub async fn sites_deployments_list(&self, site_id: &str, page: Option<i64>, page_size: Option<i64>, cursor: Option<&str>, status: Option<i64>) -> Result<serde_json::Value, SdkworkError> {
+    pub async fn sites_deployments_list(&self, site_id: &str, page_size: Option<i64>, cursor: Option<&str>, status: Option<i64>) -> Result<serde_json::Value, SdkworkError> {
         let query = build_query_string(&[
-            QueryParameterSpec::new("page", page, "form", true, false, None),
             QueryParameterSpec::new("page_size", page_size, "form", true, false, None),
             QueryParameterSpec::new("cursor", cursor, "form", true, false, None),
             QueryParameterSpec::new("status", status, "form", true, false, None),

@@ -407,6 +407,13 @@ pub struct SourceVersionPage {
     pub total: i64,
     pub page: i32,
     pub page_size: i32,
+    /// Opaque keyset continuation for cursor mode; `None` in offset mode or on
+    /// the last page.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub next_cursor: Option<String>,
+    /// Exact page continuation flag for cursor mode; `None` in offset mode.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -968,6 +975,13 @@ pub struct ServerPage {
     pub items: Vec<ServerResponse>,
     #[serde(with = "sdkwork_utils_rust::serde_int64")]
     pub total: i64,
+    /// Opaque keyset continuation for cursor mode; `None` in offset mode or on
+    /// the last page.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub next_cursor: Option<String>,
+    /// Exact page continuation flag for cursor mode; `None` in offset mode.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_more: Option<bool>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

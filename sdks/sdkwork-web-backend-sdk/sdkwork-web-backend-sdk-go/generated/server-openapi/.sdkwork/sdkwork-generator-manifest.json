@@ -16,7 +16,7 @@
     },
     {
       "path": "api/application_deployment.go",
-      "sha256": "6e9f887b7e6b9cc24da5243bda8487ef7ace671dc5f7159884ebeb0be770f233"
+      "sha256": "f4e444ec5fd21248499e4dd22bbb7a826c40333f6a4b5d527a833d7d25de5a67"
     },
     {
       "path": "api/application_domain.go",
@@ -24,7 +24,7 @@
     },
     {
       "path": "api/application_source_version.go",
-      "sha256": "2571f0a18bdeb1c394aa56e4973dd02f3648cc76c7a5a705b09ea1422bff06de"
+      "sha256": "c4292683b4c320ec611b9d52b902299b906e301ce106ca035dbe9c55e0f882cc"
     },
     {
       "path": "api/application.go",
@@ -32,7 +32,7 @@
     },
     {
       "path": "api/audit.go",
-      "sha256": "ed1e27a39be63675dc3c4b01032c9e7e4963e430077400149968f8395596317e"
+      "sha256": "db486f908180865cf434e730cbfc982fcc03c2f10e941353e8dbbfedffb042c6"
     },
     {
       "path": "api/base.go",
@@ -64,7 +64,7 @@
     },
     {
       "path": "api/server.go",
-      "sha256": "dbd980113a5189372e879d239a6f44b9430a8c82d6a1f42bf23821e417aa2655"
+      "sha256": "c3c8a9843a4e337939fd2e070add9b00b7cb7800a97e7fddf7b81ba17a56b1db"
     },
     {
       "path": "bin/publish-core.mjs",
@@ -104,7 +104,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "3689ca03a1e90e123f352d6264fba00cd125061866e8671569aec4c1acc0b5b7"
+      "sha256": "18a6d977657af663f1b3f1e3050bb9acb329383de8378bc427e8c2d11a2f65bf"
     },
     {
       "path": "sdk.go",

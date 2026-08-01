@@ -131,8 +131,8 @@ System.out.println(result);
 // List immutable application source versions
 String applicationId = "1";
 Map<String, Object> params = new LinkedHashMap<>();
-params.put("page", 1);
-params.put("page_size", 2);
+params.put("page_size", 1);
+params.put("cursor", "cursor");
 ApplicationsSourceVersionsListResponse result = client.getApplicationSourceVersion().applicationsSourceVersionsList(applicationId, params);
 System.out.println(result);
 ```
@@ -143,10 +143,9 @@ System.out.println(result);
 // List application deployments
 String applicationId = "1";
 Map<String, Object> params = new LinkedHashMap<>();
-params.put("page", 1);
-params.put("page_size", 2);
+params.put("page_size", 1);
 params.put("cursor", "cursor");
-params.put("status", 4);
+params.put("status", 3);
 ApplicationsDeploymentsListResponse result = client.getApplicationDeployment().applicationsDeploymentsList(applicationId, params);
 System.out.println(result);
 ```
@@ -175,8 +174,8 @@ System.out.println(result);
 ```java
 // List managed servers
 Map<String, Object> params = new LinkedHashMap<>();
-params.put("page", 1);
-params.put("page_size", 2);
+params.put("page_size", 1);
+params.put("cursor", "cursor");
 ServersListResponse result = client.getServer().serversList(params);
 System.out.println(result);
 ```
@@ -196,8 +195,7 @@ System.out.println(result);
 ```java
 // List audit logs
 Map<String, Object> params = new LinkedHashMap<>();
-params.put("page", 1);
-params.put("page_size", 2);
+params.put("page_size", 1);
 params.put("cursor", "cursor");
 params.put("target_type", "target-type");
 params.put("action", "action");

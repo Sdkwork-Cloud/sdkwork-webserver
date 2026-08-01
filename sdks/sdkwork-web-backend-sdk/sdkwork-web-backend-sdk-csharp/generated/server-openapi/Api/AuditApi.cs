@@ -18,11 +18,10 @@ namespace SDKWork.Web.BackendSdk.Api
         /// <summary>
         /// List audit logs
         /// </summary>
-        public async Task<SDKWork.Web.BackendSdk.Models.AuditLogsListResponse?> LogsListAsync(int? page = null, int? pageSize = null, string? cursor = null, string? targetType = null, string? action = null, string? operatorId = null, string? startDate = null, string? endDate = null)
+        public async Task<SDKWork.Web.BackendSdk.Models.AuditLogsListResponse?> LogsListAsync(int? pageSize = null, string? cursor = null, string? targetType = null, string? action = null, string? operatorId = null, string? startDate = null, string? endDate = null)
         {
             var queryString = BuildQueryString(new[]
             {
-                new QueryParameterSpec("page", page, "form", true, false, null),
                 new QueryParameterSpec("page_size", pageSize, "form", true, false, null),
                 new QueryParameterSpec("cursor", cursor, "form", true, false, null),
                 new QueryParameterSpec("target_type", targetType, "form", true, false, null),

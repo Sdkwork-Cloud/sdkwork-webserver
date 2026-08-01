@@ -15,9 +15,8 @@ impl AuditApi {
     }
 
     /// List audit logs
-    pub async fn logs_list(&self, page: Option<i64>, page_size: Option<i64>, cursor: Option<&str>, target_type: Option<&str>, action: Option<&str>, operator_id: Option<&str>, start_date: Option<&str>, end_date: Option<&str>) -> Result<serde_json::Value, SdkworkError> {
+    pub async fn logs_list(&self, page_size: Option<i64>, cursor: Option<&str>, target_type: Option<&str>, action: Option<&str>, operator_id: Option<&str>, start_date: Option<&str>, end_date: Option<&str>) -> Result<serde_json::Value, SdkworkError> {
         let query = build_query_string(&[
-            QueryParameterSpec::new("page", page, "form", true, false, None),
             QueryParameterSpec::new("page_size", page_size, "form", true, false, None),
             QueryParameterSpec::new("cursor", cursor, "form", true, false, None),
             QueryParameterSpec::new("target_type", target_type, "form", true, false, None),

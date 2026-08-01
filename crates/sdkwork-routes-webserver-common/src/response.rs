@@ -98,7 +98,11 @@ pub fn ok_deployment_page(
 ) -> Result<Response, WebApiError> {
     match result {
         Ok(page) => {
-            let payload = if let Some(next_cursor) = page.next_cursor {
+            // `has_more` is `Some` exactly in cursor mode, including the
+            // last page; the cursor contract must never fall back to offset
+            // `pageInfo` (which would report a misleading `page=0` and
+            // `totalItems="0"` on the final page).
+            let payload = if page.has_more.is_some() {
                 SdkWorkPageData {
                     items: page.items,
                     page_info: PageInfo {
@@ -107,7 +111,7 @@ pub fn ok_deployment_page(
                         page_size: Some(page.page_size),
                         total_items: None,
                         total_pages: None,
-                        next_cursor: Some(next_cursor),
+                        next_cursor: page.next_cursor,
                         has_more: page.has_more,
                     },
                 }
@@ -124,10 +128,27 @@ pub fn ok_source_version_page(
     result: WebServiceResult<SourceVersionPage>,
 ) -> Result<Response, WebApiError> {
     match result {
-        Ok(page) => Ok(envelope(
-            StatusCode::OK,
-            build_page_data(page.items, page.page, page.page_size, page.total),
-        )),
+        Ok(page) => {
+            // Cursor mode (including the last page) is identified by
+            // `has_more: Some`; see `ok_deployment_page`.
+            let payload = if page.has_more.is_some() {
+                SdkWorkPageData {
+                    items: page.items,
+                    page_info: PageInfo {
+                        mode: PageMode::Cursor,
+                        page: None,
+                        page_size: Some(page.page_size),
+                        total_items: None,
+                        total_pages: None,
+                        next_cursor: page.next_cursor,
+                        has_more: page.has_more,
+                    },
+                }
+            } else {
+                build_page_data(page.items, page.page, page.page_size, page.total)
+            };
+            Ok(envelope(StatusCode::OK, payload))
+        }
         Err(error) => Err(error.into()),
     }
 }
@@ -147,7 +168,9 @@ pub fn ok_nginx_config_page(
 pub fn ok_audit_log_page(result: WebServiceResult<AuditLogPage>) -> Result<Response, WebApiError> {
     match result {
         Ok(page) => {
-            let payload = if let Some(next_cursor) = page.next_cursor {
+            // See `ok_deployment_page`: cursor mode (including the last page)
+            // is identified by `has_more: Some`, never by `next_cursor`.
+            let payload = if page.has_more.is_some() {
                 SdkWorkPageData {
                     items: page.items,
                     page_info: PageInfo {
@@ -156,7 +179,7 @@ pub fn ok_audit_log_page(result: WebServiceResult<AuditLogPage>) -> Result<Respo
                         page_size: Some(page.page_size),
                         total_items: None,
                         total_pages: None,
-                        next_cursor: Some(next_cursor),
+                        next_cursor: page.next_cursor,
                         has_more: page.has_more,
                     },
                 }
@@ -283,10 +306,28 @@ pub fn ok_server_page(
     page_size: i32,
 ) -> Result<Response, WebApiError> {
     match result {
-        Ok(page_data) => Ok(envelope(
-            StatusCode::OK,
-            build_page_data(page_data.items, page, page_size, page_data.total),
-        )),
+        Ok(page_data) => {
+            // Cursor mode (including the last page) is identified by
+            // `has_more: Some`, never by `next_cursor`; see
+            // `ok_deployment_page`.
+            let payload = if page_data.has_more.is_some() {
+                SdkWorkPageData {
+                    items: page_data.items,
+                    page_info: PageInfo {
+                        mode: PageMode::Cursor,
+                        page: None,
+                        page_size: Some(page_size),
+                        total_items: None,
+                        total_pages: None,
+                        next_cursor: page_data.next_cursor,
+                        has_more: page_data.has_more,
+                    },
+                }
+            } else {
+                build_page_data(page_data.items, page, page_size, page_data.total)
+            };
+            Ok(envelope(StatusCode::OK, payload))
+        }
         Err(error) => Err(error.into()),
     }
 }

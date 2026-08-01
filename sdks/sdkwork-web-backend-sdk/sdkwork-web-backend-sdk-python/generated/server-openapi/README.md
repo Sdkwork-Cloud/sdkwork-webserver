@@ -122,8 +122,8 @@ print(result)
 # List immutable application source versions
 application_id = '1'
 params = {
-    'page': 1,
-    'page_size': 2,
+    'page_size': 1,
+    'cursor': 'cursor',
 }
 result = client.application_source_version.applications.source_versions.list(application_id, params)
 print(result)
@@ -135,10 +135,9 @@ print(result)
 # List application deployments
 application_id = '1'
 params = {
-    'page': 1,
-    'page_size': 2,
+    'page_size': 1,
     'cursor': 'cursor',
-    'status': 4,
+    'status': 3,
 }
 result = client.application_deployment.applications.deployments.list(application_id, params)
 print(result)
@@ -169,8 +168,8 @@ print(result)
 ```python
 # List managed servers
 params = {
-    'page': 1,
-    'page_size': 2,
+    'page_size': 1,
+    'cursor': 'cursor',
 }
 result = client.server.list(params)
 print(result)
@@ -192,8 +191,7 @@ print(result)
 ```python
 # List audit logs
 params = {
-    'page': 1,
-    'page_size': 2,
+    'page_size': 1,
     'cursor': 'cursor',
     'target_type': 'target_type',
     'action': 'action',

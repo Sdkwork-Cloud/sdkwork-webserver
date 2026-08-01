@@ -116,8 +116,8 @@ const result = await client.certificate.list(params);
 // 获取应用源码版本
 const siteId = '1';
 const params = {
-  page: 1,
-  page_size: 2,
+  page_size: 1,
+  cursor: 'cursor',
 };
 const result = await client.sourceVersion.sites.sourceVersions.list(siteId, params);
 ```
@@ -128,8 +128,7 @@ const result = await client.sourceVersion.sites.sourceVersions.list(siteId, para
 // 获取部署历史
 const siteId = '1';
 const params = {
-  page: 1,
-  page_size: 2,
+  page_size: 1,
   cursor: 'cursor',
   status: 0,
 };

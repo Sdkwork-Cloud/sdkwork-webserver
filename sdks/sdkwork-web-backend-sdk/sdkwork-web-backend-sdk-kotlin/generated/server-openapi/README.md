@@ -127,8 +127,8 @@ println(result)
 // List immutable application source versions
 val applicationId = "1"
 val params = linkedMapOf<String, Any>(
-    "page" to 1,
-    "page_size" to 2
+    "page_size" to 1,
+    "cursor" to "cursor"
 )
 val result = client.applicationSourceVersion.applicationsSourceVersionsList(applicationId, params)
 println(result)
@@ -140,10 +140,9 @@ println(result)
 // List application deployments
 val applicationId = "1"
 val params = linkedMapOf<String, Any>(
-    "page" to 1,
-    "page_size" to 2,
+    "page_size" to 1,
     "cursor" to "cursor",
-    "status" to 4
+    "status" to 3
 )
 val result = client.applicationDeployment.applicationsDeploymentsList(applicationId, params)
 println(result)
@@ -174,8 +173,8 @@ println(result)
 ```kotlin
 // List managed servers
 val params = linkedMapOf<String, Any>(
-    "page" to 1,
-    "page_size" to 2
+    "page_size" to 1,
+    "cursor" to "cursor"
 )
 val result = client.server.serversList(params)
 println(result)
@@ -197,8 +196,7 @@ println(result)
 ```kotlin
 // List audit logs
 val params = linkedMapOf<String, Any>(
-    "page" to 1,
-    "page_size" to 2,
+    "page_size" to 1,
     "cursor" to "cursor",
     "target_type" to "target-type",
     "action" to "action",

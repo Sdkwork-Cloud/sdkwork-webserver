@@ -14,12 +14,12 @@ use SDKWork\Web\BackendSdk\Models\ImportApplicationGitSourceVersionRequest;
 final class ApplicationSourceVersionApi extends BaseApi
 {
     /** List immutable application source versions */
-    public function applicationsSourceVersionsList(string $applicationId, ?int $page = null, ?int $pageSize = null): ?ApplicationsSourceVersionsListResponse
+    public function applicationsSourceVersionsList(string $applicationId, ?int $pageSize = null, ?string $cursor = null): ?ApplicationsSourceVersionsListResponse
     {
         $path = $this->interpolatePath('/backend/v3/api/applications/{applicationId}/source_versions', ['applicationId' => $this->serializePathParameter($applicationId, new PathParameterSpec('applicationId', 'simple', false))]);
         $query = $this->buildQueryString([
-            new QueryParameterSpec('page', $page, 'form', true, false, null),
             new QueryParameterSpec('page_size', $pageSize, 'form', true, false, null),
+            new QueryParameterSpec('cursor', $cursor, 'form', true, false, null),
         ]);
         $path = $this->appendQueryString($path, $query);
         $result = $this->client->request('GET', $path, []);

@@ -141,8 +141,8 @@ fmt.Println(result)
 // List immutable application source versions
 applicationId := "1"
 params := map[string]interface{}{
-    "page": 1,
-    "page_size": 2,
+    "page_size": 1,
+    "cursor": "cursor",
 }
 result, err := client.ApplicationSourceVersion.ApplicationsSourceVersionsList(applicationId, params)
 if err != nil {
@@ -157,10 +157,9 @@ fmt.Println(result)
 // List application deployments
 applicationId := "1"
 params := map[string]interface{}{
-    "page": 1,
-    "page_size": 2,
+    "page_size": 1,
     "cursor": "cursor",
-    "status": 4,
+    "status": 3,
 }
 result, err := client.ApplicationDeployment.ApplicationsDeploymentsList(applicationId, params)
 if err != nil {
@@ -200,8 +199,8 @@ fmt.Println(result)
 ```go
 // List managed servers
 params := map[string]interface{}{
-    "page": 1,
-    "page_size": 2,
+    "page_size": 1,
+    "cursor": "cursor",
 }
 result, err := client.Server.ServersList(params)
 if err != nil {
@@ -229,8 +228,7 @@ fmt.Println(result)
 ```go
 // List audit logs
 params := map[string]interface{}{
-    "page": 1,
-    "page_size": 2,
+    "page_size": 1,
     "cursor": "cursor",
     "target_type": "target_type",
     "action": "action",

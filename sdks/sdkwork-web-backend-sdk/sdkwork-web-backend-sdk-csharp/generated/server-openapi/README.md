@@ -129,8 +129,8 @@ Console.WriteLine(result);
 var applicationId = "1";
 var query = new Dictionary<string, object>
 {
-    ["page"] = 1,
-    ["page_size"] = 2,
+    ["page_size"] = 1,
+    ["cursor"] = "cursor",
 };
 var result = await client.ApplicationSourceVersion.ApplicationsSourceVersionsListAsync(applicationId, query);
 Console.WriteLine(result);
@@ -143,10 +143,9 @@ Console.WriteLine(result);
 var applicationId = "1";
 var query = new Dictionary<string, object>
 {
-    ["page"] = 1,
-    ["page_size"] = 2,
+    ["page_size"] = 1,
     ["cursor"] = "cursor",
-    ["status"] = 4,
+    ["status"] = 3,
 };
 var result = await client.ApplicationDeployment.ApplicationsDeploymentsListAsync(applicationId, query);
 Console.WriteLine(result);
@@ -179,8 +178,8 @@ Console.WriteLine(result);
 // List managed servers
 var query = new Dictionary<string, object>
 {
-    ["page"] = 1,
-    ["page_size"] = 2,
+    ["page_size"] = 1,
+    ["cursor"] = "cursor",
 };
 var result = await client.Server.ServersListAsync(query);
 Console.WriteLine(result);
@@ -204,8 +203,7 @@ Console.WriteLine(result);
 // List audit logs
 var query = new Dictionary<string, object>
 {
-    ["page"] = 1,
-    ["page_size"] = 2,
+    ["page_size"] = 1,
     ["cursor"] = "cursor",
     ["target_type"] = "target-type",
     ["action"] = "action",

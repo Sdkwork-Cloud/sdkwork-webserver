@@ -9,25 +9,23 @@
     "protocol": "http",
     "packageName": "github.com/sdkwork/sdkwork-web-app-sdk"
   },
-  "changeFingerprint": "019a6ed550a21c7d02511ec128b7bbfe32bbf3719b466608a1651b5ea03d719f",
+  "changeFingerprint": "4a5347f910cb18fcc38bd5fad978be631e82198b0347e3f70183f81e93765dd0",
   "changes": {
-    "createdGeneratedFiles": [
-      "types/sites_env_variables_update_response.go",
-      "types/update_env_variable_request.go"
-    ],
+    "createdGeneratedFiles": [],
     "updatedGeneratedFiles": [
-      "api/env_variable.go"
+      "api/deployment.go",
+      "api/source_version.go",
+      "README.md"
     ],
     "unchangedGeneratedFiles": [
       "api/base.go",
       "api/certificate.go",
-      "api/deployment.go",
       "api/doc.go",
       "api/domain.go",
+      "api/env_variable.go",
       "api/monitor.go",
       "api/paths.go",
       "api/site.go",
-      "api/source_version.go",
       "bin/publish-core.mjs",
       "bin/publish.ps1",
       "bin/publish.sh",
@@ -37,7 +35,6 @@
       "http/client.go",
       "http/doc.go",
       "LICENSE",
-      "README.md",
       "sdk.go",
       "sdkwork-sdk.json",
       "types/application_store_listing.go",
@@ -100,6 +97,7 @@
       "types/sites_domains_verify_response.go",
       "types/sites_env_variables_create_response201.go",
       "types/sites_env_variables_list_response.go",
+      "types/sites_env_variables_update_response.go",
       "types/sites_health_checks_create_response201.go",
       "types/sites_health_checks_list_response.go",
       "types/sites_list_response.go",
@@ -113,6 +111,7 @@
       "types/source_version_config_snapshot.go",
       "types/source_version_page.go",
       "types/source_version_response.go",
+      "types/update_env_variable_request.go",
       "types/update_site_request.go"
     ],
     "deletedGeneratedFiles": [],
@@ -126,36 +125,36 @@
     "schemaVersion": 1,
     "areas": [
       "api-surface",
-      "models"
+      "documentation"
     ],
     "details": [
       {
         "area": "api-surface",
         "paths": [
-          "api/env_variable.go"
+          "api/deployment.go",
+          "api/source_version.go"
         ]
       },
       {
-        "area": "models",
+        "area": "documentation",
         "paths": [
-          "types/sites_env_variables_update_response.go",
-          "types/update_env_variable_request.go"
+          "README.md"
         ]
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, models. Verification is required."
+    "summary": "Detected impact areas: api-surface, documentation. Verification is required."
   },
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: api-surface, documentation. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, documentation.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-webserver\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-go\\generated\\server-openapi",
         "command": "node",
         "args": [

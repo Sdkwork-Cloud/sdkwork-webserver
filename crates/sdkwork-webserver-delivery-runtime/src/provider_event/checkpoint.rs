@@ -426,17 +426,25 @@ async fn write_checkpoint(
     if bytes.is_empty() || bytes.len() as u64 > MAXIMUM_CHECKPOINT_BYTES {
         return Err(WebsiteProviderEventCheckpointError::Corrupt);
     }
-    let mut file = tokio_fs::OpenOptions::new()
-        .create(true)
-        .truncate(true)
-        .write(true)
-        .open(&path)
-        .await
-        .map_err(|_| WebsiteProviderEventCheckpointError::Io)?;
-    file.write_all(&bytes)
-        .await
-        .map_err(|_| WebsiteProviderEventCheckpointError::Io)?;
-    file.sync_all()
+    // Atomic commit via temporary sibling + rename: a crash never leaves a
+    // truncated checkpoint.
+    let temp_path = path.with_extension("tmp");
+    {
+        let mut file = tokio_fs::OpenOptions::new()
+            .create(true)
+            .truncate(true)
+            .write(true)
+            .open(&temp_path)
+            .await
+            .map_err(|_| WebsiteProviderEventCheckpointError::Io)?;
+        file.write_all(&bytes)
+            .await
+            .map_err(|_| WebsiteProviderEventCheckpointError::Io)?;
+        file.sync_all()
+            .await
+            .map_err(|_| WebsiteProviderEventCheckpointError::Io)?;
+    }
+    tokio_fs::rename(&temp_path, &path)
         .await
         .map_err(|_| WebsiteProviderEventCheckpointError::Io)?;
     sync_directory(directory).await?;

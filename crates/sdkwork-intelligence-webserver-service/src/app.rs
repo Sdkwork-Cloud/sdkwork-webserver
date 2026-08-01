@@ -479,9 +479,8 @@ impl WebService {
         target_uuid: &str,
     ) {
         let operator_id = context.actor_id.unwrap_or(0);
-        if let Err(error) = self
-            .repository
-            .insert_audit_log(AuditLogWrite {
+        let _ = self
+            .record_audit_log(AuditLogWrite {
                 tenant_id: context.tenant_id,
                 organization_id: context.organization_id.unwrap_or(0),
                 operator_id,
@@ -493,17 +492,7 @@ impl WebService {
                 request_id: None,
                 metadata_json: "{}",
             })
-            .await
-        {
-            tracing::error!(
-                tenant_id = context.tenant_id,
-                operator_id,
-                action,
-                target_uuid,
-                error = ?error,
-                "failed to persist site business audit"
-            );
-        }
+            .await;
     }
 }
 
@@ -1005,10 +994,11 @@ impl WebAppApi for WebService {
         site_id: &str,
         page: i32,
         page_size: i32,
+        cursor: Option<&str>,
     ) -> WebServiceResult<sdkwork_webserver_contract::SourceVersionPage> {
         let tenant_id = self.require_site_access(context, site_id).await?;
         self.repository
-            .list_source_versions(tenant_id, site_id, page, page_size)
+            .list_source_versions(tenant_id, site_id, page, page_size, cursor)
             .await
     }
 

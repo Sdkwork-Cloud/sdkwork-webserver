@@ -8,9 +8,8 @@ public class ApplicationDeploymentApi {
     }
 
     /// List application deployments
-    public func applicationsDeploymentsList(applicationId: String, page: Int? = nil, pageSize: Int? = nil, cursor: String? = nil, status: Int? = nil) async throws -> ApplicationsDeploymentsListResponse? {
+    public func applicationsDeploymentsList(applicationId: String, pageSize: Int? = nil, cursor: String? = nil, status: Int? = nil) async throws -> ApplicationsDeploymentsListResponse? {
         let query = buildQueryString([
-            QueryParameterSpec(name: "page", value: page, style: "form", explode: true, allowReserved: false, contentType: nil),
             QueryParameterSpec(name: "page_size", value: pageSize, style: "form", explode: true, allowReserved: false, contentType: nil),
             QueryParameterSpec(name: "cursor", value: cursor, style: "form", explode: true, allowReserved: false, contentType: nil),
             QueryParameterSpec(name: "status", value: status, style: "form", explode: true, allowReserved: false, contentType: nil)

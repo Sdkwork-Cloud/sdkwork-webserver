@@ -40,7 +40,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "222bf80a7c581e32064bb07fa8ed23c232d68b4b10885b5c04466051db33536c"
+      "sha256": "1cc5120ea5969041901115fc0e90b7167b64d3e9d2978bf2e33bdb344d8e4bfa"
     },
     {
       "path": "requirements.txt",
@@ -60,7 +60,7 @@
     },
     {
       "path": "sdkwork_web_backend_sdk/api/application_deployment.py",
-      "sha256": "622c2ce4c9e3495498608d9028260e4a71c4260244528db0ec1bff0254b9e551"
+      "sha256": "d218ddf630903aadd75a247ad433f7c239960735eb5340ade136400360bddfcc"
     },
     {
       "path": "sdkwork_web_backend_sdk/api/application_domain.py",
@@ -68,7 +68,7 @@
     },
     {
       "path": "sdkwork_web_backend_sdk/api/application_source_version.py",
-      "sha256": "9eba337d71f1add98e66c451820857ba9a42cc1abae0dfc77fb34fe3503813ff"
+      "sha256": "8a9d510547d4463cd2c6df5a74a98b70d1f48a9963fa0e89f2c8cba8207f8a3f"
     },
     {
       "path": "sdkwork_web_backend_sdk/api/application.py",
@@ -76,7 +76,7 @@
     },
     {
       "path": "sdkwork_web_backend_sdk/api/audit.py",
-      "sha256": "ecab8c40b610ce9d52fe74b2e27745022a74c17a6eb7db1f413dc84b974af3b0"
+      "sha256": "491e3112269d07a883daed1113469af37b0925873edee81381d45f65e2bcfe49"
     },
     {
       "path": "sdkwork_web_backend_sdk/api/certificate_distribution.py",
@@ -96,7 +96,7 @@
     },
     {
       "path": "sdkwork_web_backend_sdk/api/server.py",
-      "sha256": "e2b4051e1f603100e8fd20181e763b62093094a52f8fa1b3fc057300a398b459"
+      "sha256": "f578fb57bddda840e9df87ade11e7a77e18363c139c1874e26dbbf74189f7468"
     },
     {
       "path": "sdkwork_web_backend_sdk/client.py",

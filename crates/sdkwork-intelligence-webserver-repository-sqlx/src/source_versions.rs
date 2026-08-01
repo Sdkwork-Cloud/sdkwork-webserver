@@ -1,3 +1,4 @@
+use crate::audited_sql;
 use super::{EngineRow, WebRepository};
 use sdkwork_webserver_contract::{
     CreateSourceVersionRequest, SourceVersionPage,
@@ -6,8 +7,8 @@ use sdkwork_webserver_contract::{
 use sqlx::Row;
 
 use super::support::{
-    instant_from_row, json_from_row, new_uuid, next_id, now_rfc3339, pagination,
-    resolve_site_internal_id, store_error,
+    decode_keyset_cursor, encode_keyset_cursor, instant_from_row, json_from_row, new_uuid,
+    next_id, now_rfc3339, pagination, resolve_site_internal_id, store_error,
 };
 
 impl WebRepository {
@@ -17,8 +18,22 @@ impl WebRepository {
         site_id: &str,
         page: i32,
         page_size: i32,
+        cursor: Option<&str>,
     ) -> WebServiceResult<SourceVersionPage> {
         let site_internal_id = resolve_site_internal_id(&self.pool, tenant_id, site_id).await?;
+        if let Some(cursor) = cursor {
+            return self
+                .list_source_versions_cursor_repo(tenant_id, site_id, page_size, cursor)
+                .await;
+        }
+        // Offset mode remains only for internal single-page lookups (page 1).
+        // Deep OFFSET on this growing revision collection is rejected; clients
+        // must use cursor pagination (PRD-FR-011, PAGINATION_SPEC §6/§12).
+        if page > 1 {
+            return Err(WebServiceError::validation(
+                "cursor is required beyond the first page of source versions; offset pagination is not supported on this growing collection",
+            ));
+        }
         let (page, page_size, offset) = pagination(page, page_size)?;
         let count_row = sqlx::query(
             "SELECT COUNT(*) AS total FROM web_source_version
@@ -58,6 +73,73 @@ impl WebRepository {
             total,
             page,
             page_size,
+            next_cursor: None,
+            has_more: None,
+        })
+    }
+
+    /// Keyset page over `(created_at DESC, id DESC)` with an opaque cursor;
+    /// fetches `page_size + 1` rows so `has_more` is exact and no COUNT runs.
+    async fn list_source_versions_cursor_repo(
+        &self,
+        tenant_id: i64,
+        site_id: &str,
+        page_size: i32,
+        cursor: &str,
+    ) -> WebServiceResult<SourceVersionPage> {
+        let site_internal_id = resolve_site_internal_id(&self.pool, tenant_id, site_id).await?;
+        if !(1..=200).contains(&page_size) {
+            return Err(WebServiceError::validation(
+                "page_size must be between 1 and 200",
+            ));
+        }
+        let (cursor_created_at, cursor_id) = decode_keyset_cursor(cursor)
+            .ok_or_else(|| WebServiceError::validation("cursor is invalid"))?;
+        let sql = format!(
+            "SELECT uuid, version_tag, source_type, source_ref, commit_hash, artifact_path,
+                    artifact_size, artifact_hash, CAST(config_snapshot AS TEXT) AS config_snapshot,
+                    status, CAST(created_at AS TEXT) AS created_at
+             FROM web_source_version
+             WHERE tenant_id = $1 AND site_id = $2
+               AND (created_at, id) < ($3, $4)
+             ORDER BY created_at DESC, id DESC LIMIT $5"
+        );
+        let fetch_size = i64::from(page_size) + 1;
+        let rows = sqlx::query(audited_sql(&sql))
+            .bind(tenant_id)
+            .bind(site_internal_id)
+            .bind(&cursor_created_at)
+            .bind(cursor_id)
+            .bind(fetch_size)
+            .fetch_all(&self.pool)
+            .await
+            .map_err(|error| store_error("list web_source_version cursor", error))?;
+        let has_more = rows.len() > page_size as usize;
+        let page_rows = rows.into_iter().take(page_size as usize).collect::<Vec<_>>();
+        let items = page_rows
+            .iter()
+            .map(|row| map_source_version_row(row, site_id))
+            .collect::<Result<Vec<_>, _>>()
+            .map_err(|error| WebServiceError::Internal(format!("map web_source_version: {error}")))?;
+        let next_cursor = has_more
+            .then(|| {
+                let last = page_rows.last().expect("non-empty page when has_more");
+                let created_at: String = last
+                    .try_get("created_at")
+                    .map_err(|error| store_error("map web_source_version cursor instant", error))?;
+                let id: i64 = last
+                    .try_get("id")
+                    .map_err(|error| store_error("map web_source_version cursor id", error))?;
+                Ok::<_, WebServiceError>(encode_keyset_cursor(&created_at, id))
+            })
+            .transpose()?;
+        Ok(SourceVersionPage {
+            items,
+            total: 0,
+            page: 0,
+            page_size,
+            next_cursor,
+            has_more: Some(has_more),
         })
     }
 

@@ -267,8 +267,9 @@ impl WebRepositoryPort for WebRepository {
         site_id: &str,
         page: i32,
         page_size: i32,
+        cursor: Option<&str>,
     ) -> WebServiceResult<SourceVersionPage> {
-        self.list_source_versions_repo(tenant_id, site_id, page, page_size)
+        self.list_source_versions_repo(tenant_id, site_id, page, page_size, cursor)
             .await
     }
 
@@ -639,6 +640,15 @@ impl WebRepositoryPort for WebRepository {
             .await
     }
 
+    async fn load_active_nginx_config_content(
+        &self,
+        tenant_id: i64,
+        site_id: &str,
+    ) -> WebServiceResult<Option<String>> {
+        self.load_active_nginx_config_content_repo(tenant_id, site_id)
+            .await
+    }
+
     async fn web_nginx_config(
         &self,
         tenant_id: Option<i64>,
@@ -663,8 +673,10 @@ impl WebRepositoryPort for WebRepository {
         tenant_id: i64,
         page: i32,
         page_size: i32,
+        cursor: Option<&str>,
     ) -> WebServiceResult<ServerPage> {
-        self.list_servers_repo(tenant_id, page, page_size).await
+        self.list_servers_repo(tenant_id, page, page_size, cursor)
+            .await
     }
 
     async fn create_server(

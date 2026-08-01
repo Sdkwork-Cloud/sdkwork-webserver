@@ -114,7 +114,10 @@ pub async fn run() -> anyhow::Result<()> {
 
     // Randomize the startup phase so a fleet of nodes does not synchronize in
     // lockstep against the control plane.
-    tokio::time::sleep(Duration::from_millis(jitter_millis(runtime.interval_secs * 1_000))).await;
+    tokio::time::sleep(Duration::from_millis(jitter_millis(
+        runtime.interval_secs * 1_000,
+    )))
+    .await;
 
     let mut consecutive_failures: u32 = 0;
     loop {
@@ -132,8 +135,8 @@ pub async fn run() -> anyhow::Result<()> {
         } else {
             runtime.interval_secs
         };
-        let delay = Duration::from_secs(base_secs)
-            + Duration::from_millis(jitter_millis(base_secs * 500));
+        let delay =
+            Duration::from_secs(base_secs) + Duration::from_millis(jitter_millis(base_secs * 500));
         tokio::time::sleep(delay).await;
     }
 }
@@ -287,8 +290,9 @@ async fn sync_once(
 
         for certificate in &manifest.certificates {
             for hostname in &certificate.hostnames {
-                if let Err(error) =
-                    edge.verify_served_certificate(hostname, &certificate.fingerprint)
+                if let Err(error) = edge
+                    .verify_served_certificate_async(hostname, &certificate.fingerprint)
+                    .await
                 {
                     let failure = record_deployment_failure(
                         state_path,

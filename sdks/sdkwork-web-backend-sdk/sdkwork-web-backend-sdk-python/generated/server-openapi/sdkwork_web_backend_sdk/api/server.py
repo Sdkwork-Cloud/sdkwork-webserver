@@ -183,11 +183,11 @@ class ServerApi:
         self._client = client
 
 
-    def list(self, page: Optional[int] = None, page_size: Optional[int] = None) -> ServersListResponse:
+    def list(self, page_size: Optional[int] = None, cursor: Optional[str] = None) -> ServersListResponse:
         """List managed servers"""
         query = build_query_string([
-            {'name': 'page', 'value': page, 'style': 'form', 'explode': True, 'allow_reserved': False},
             {'name': 'page_size', 'value': page_size, 'style': 'form', 'explode': True, 'allow_reserved': False},
+            {'name': 'cursor', 'value': cursor, 'style': 'form', 'explode': True, 'allow_reserved': False},
         ])
         return self._client.get(_append_query_string(f"/backend/v3/api/servers", query))
 

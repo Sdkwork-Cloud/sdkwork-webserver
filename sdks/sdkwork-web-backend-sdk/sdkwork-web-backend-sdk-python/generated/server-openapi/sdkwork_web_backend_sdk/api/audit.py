@@ -138,10 +138,9 @@ class AuditAuditLogsApi:
         self._client = client
 
 
-    def list(self, page: Optional[int] = None, page_size: Optional[int] = None, cursor: Optional[str] = None, target_type: Optional[str] = None, action: Optional[str] = None, operator_id: Optional[str] = None, start_date: Optional[str] = None, end_date: Optional[str] = None) -> AuditLogsListResponse:
+    def list(self, page_size: Optional[int] = None, cursor: Optional[str] = None, target_type: Optional[str] = None, action: Optional[str] = None, operator_id: Optional[str] = None, start_date: Optional[str] = None, end_date: Optional[str] = None) -> AuditLogsListResponse:
         """List audit logs"""
         query = build_query_string([
-            {'name': 'page', 'value': page, 'style': 'form', 'explode': True, 'allow_reserved': False},
             {'name': 'page_size', 'value': page_size, 'style': 'form', 'explode': True, 'allow_reserved': False},
             {'name': 'cursor', 'value': cursor, 'style': 'form', 'explode': True, 'allow_reserved': False},
             {'name': 'target_type', 'value': target_type, 'style': 'form', 'explode': True, 'allow_reserved': False},

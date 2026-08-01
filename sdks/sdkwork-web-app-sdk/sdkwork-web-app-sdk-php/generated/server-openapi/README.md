@@ -102,7 +102,7 @@ var_dump($result);
 
 // 获取应用源码版本
 $siteId = '1';
-$params = ['page' => 1, 'page_size' => 2];
+$params = ['page_size' => 1, 'cursor' => 'cursor'];
 $result = $client->sourceVersion->sitesSourceVersionsList($siteId, $params);
 var_dump($result);
 ```
@@ -114,7 +114,7 @@ var_dump($result);
 
 // 获取部署历史
 $siteId = '1';
-$params = ['page' => 1, 'page_size' => 2, 'cursor' => 'cursor', 'status' => 0];
+$params = ['page_size' => 1, 'cursor' => 'cursor', 'status' => 0];
 $result = $client->deployment->sitesDeploymentsList($siteId, $params);
 var_dump($result);
 ```

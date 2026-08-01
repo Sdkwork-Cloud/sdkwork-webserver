@@ -261,11 +261,11 @@ class SourceVersionSitesSourceVersionsApi:
         self.git_import = SourceVersionSitesSourceVersionsGitImportApi(client)
 
 
-    def list(self, site_id: str, page: Optional[int] = None, page_size: Optional[int] = None) -> SitesSourceVersionsListResponse:
+    def list(self, site_id: str, page_size: Optional[int] = None, cursor: Optional[str] = None) -> SitesSourceVersionsListResponse:
         """获取应用源码版本"""
         query = build_query_string([
-            {'name': 'page', 'value': page, 'style': 'form', 'explode': True, 'allow_reserved': False},
             {'name': 'page_size', 'value': page_size, 'style': 'form', 'explode': True, 'allow_reserved': False},
+            {'name': 'cursor', 'value': cursor, 'style': 'form', 'explode': True, 'allow_reserved': False},
         ])
         return self._client.get(_append_query_string(f"/app/v3/api/sites/{serialize_path_parameter(site_id, {'name': 'siteId', 'style': 'simple', 'explode': False})}/source_versions", query))
 

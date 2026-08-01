@@ -113,8 +113,8 @@ print(result);
 // List immutable application source versions
 final applicationId = '1';
 final params = <String, dynamic>{
-  'page': 1,
-  'page_size': 2,
+  'page_size': 1,
+  'cursor': 'cursor',
 };
 final result = await client.applicationSourceVersion.applicationsSourceVersionsList(applicationId, params);
 print(result);
@@ -125,10 +125,9 @@ print(result);
 // List application deployments
 final applicationId = '1';
 final params = <String, dynamic>{
-  'page': 1,
-  'page_size': 2,
+  'page_size': 1,
   'cursor': 'cursor',
-  'status': 4,
+  'status': 3,
 };
 final result = await client.applicationDeployment.applicationsDeploymentsList(applicationId, params);
 print(result);
@@ -156,8 +155,8 @@ print(result);
 ```dart
 // List managed servers
 final params = <String, dynamic>{
-  'page': 1,
-  'page_size': 2,
+  'page_size': 1,
+  'cursor': 'cursor',
 };
 final result = await client.server.serversList(params);
 print(result);
@@ -177,8 +176,7 @@ print(result);
 ```dart
 // List audit logs
 final params = <String, dynamic>{
-  'page': 1,
-  'page_size': 2,
+  'page_size': 1,
   'cursor': 'cursor',
   'target_type': 'target-type',
   'action': 'action',

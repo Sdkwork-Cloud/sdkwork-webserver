@@ -261,11 +261,11 @@ class ApplicationSourceVersionApplicationsSourceVersionsApi:
         self.git_import = ApplicationSourceVersionApplicationsSourceVersionsGitImportApi(client)
 
 
-    def list(self, application_id: str, page: Optional[int] = None, page_size: Optional[int] = None) -> ApplicationsSourceVersionsListResponse:
+    def list(self, application_id: str, page_size: Optional[int] = None, cursor: Optional[str] = None) -> ApplicationsSourceVersionsListResponse:
         """List immutable application source versions"""
         query = build_query_string([
-            {'name': 'page', 'value': page, 'style': 'form', 'explode': True, 'allow_reserved': False},
             {'name': 'page_size', 'value': page_size, 'style': 'form', 'explode': True, 'allow_reserved': False},
+            {'name': 'cursor', 'value': cursor, 'style': 'form', 'explode': True, 'allow_reserved': False},
         ])
         return self._client.get(_append_query_string(f"/backend/v3/api/applications/{serialize_path_parameter(application_id, {'name': 'applicationId', 'style': 'simple', 'explode': False})}/source_versions", query))
 

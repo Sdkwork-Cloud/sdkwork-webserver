@@ -12,13 +12,13 @@ use sdkwork_webserver_contract::{
     CreateServerRequest, CreateServerResponse, CreateSiteRequest, CreateSourceVersionRequest,
     DeploymentPage, DeploymentResponse, DomainPage, DomainResponse, EnvVariablePage,
     EnvVariableResponse, HealthCheckPage, HealthCheckResponse, IssueCertificateRequest,
-    ListAuditLogsQuery, ListNginxConfigsQuery, ListRootDomainsQuery, ListSitesQuery, ListenerCertificateBindingPage,
-    ListenerCertificateBindingResponse, NginxConfigPage, NginxConfigResponse, NginxReloadResponse,
-    NginxStatusResponse, NginxValidateResponse, RootDomainPage, RootDomainResponse,
-    RuntimeAssignment, RuntimeAssignmentDelivery, RuntimeObservation, RuntimeObservationState,
-    ServerPage, SitePage, SiteResponse, SourceVersionPage, SourceVersionResponse,
-    UpdateDomainApplicationBindingRequest, UpdateEnvVariableRequest, UpdateNginxConfigRequest,
-    UpdateSiteRequest,
+    ListAuditLogsQuery, ListNginxConfigsQuery, ListRootDomainsQuery, ListSitesQuery,
+    ListenerCertificateBindingPage, ListenerCertificateBindingResponse, NginxConfigPage,
+    NginxConfigResponse, NginxReloadResponse, NginxStatusResponse, NginxValidateResponse,
+    RootDomainPage, RootDomainResponse, RuntimeAssignment, RuntimeAssignmentDelivery,
+    RuntimeObservation, RuntimeObservationState, ServerPage, SitePage, SiteResponse,
+    SourceVersionPage, SourceVersionResponse, UpdateDomainApplicationBindingRequest,
+    UpdateEnvVariableRequest, UpdateNginxConfigRequest, UpdateSiteRequest,
 };
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -261,6 +261,7 @@ pub trait WebRepositoryPort: Send + Sync {
         _site_id: &str,
         _page: i32,
         _page_size: i32,
+        _cursor: Option<&str>,
     ) -> WebServiceResult<SourceVersionPage> {
         Err(sdkwork_webserver_contract::WebServiceError::Internal(
             "source versions are unavailable".to_string(),
@@ -517,6 +518,19 @@ pub trait WebRepositoryPort: Send + Sync {
         config_id: &str,
     ) -> WebServiceResult<String>;
 
+    /// Loads the content of the currently active Nginx configuration for a
+    /// site, if one exists. Used to roll the edge back when a new activation
+    /// succeeds at the edge but fails in the control plane.
+    async fn load_active_nginx_config_content(
+        &self,
+        _tenant_id: i64,
+        _site_id: &str,
+    ) -> WebServiceResult<Option<String>> {
+        Err(sdkwork_webserver_contract::WebServiceError::Internal(
+            "active nginx config content is unavailable".to_string(),
+        ))
+    }
+
     async fn resolve_site_primary_hostname(
         &self,
         tenant_id: i64,
@@ -541,6 +555,7 @@ pub trait WebRepositoryPort: Send + Sync {
         tenant_id: i64,
         page: i32,
         page_size: i32,
+        cursor: Option<&str>,
     ) -> WebServiceResult<ServerPage>;
 
     async fn create_server(

@@ -1,3 +1,4 @@
+use crate::audited_sql;
 use sdkwork_webserver_contract::{
     CreateHealthCheckRequest, HealthCheckPage, HealthCheckResponse, WebServiceError,
     WebServiceResult,
@@ -79,8 +80,8 @@ impl WebRepository {
         let id = next_id(self.id_generator())?;
         let uuid = new_uuid();
         let now = now_rfc3339();
-        let engine = self.database_engine().await?;
-        let now_expression = instant_write_expression(engine, "$10");
+
+        let now_expression = instant_write_expression("$10");
         let insert_sql = format!(
             "INSERT INTO web_health_check (
                 id, uuid, tenant_id, site_id, check_type, check_url, check_interval,
@@ -131,7 +132,7 @@ impl WebRepository {
             ));
         }
 
-        sqlx::query(&insert_sql)
+        sqlx::query(audited_sql(&insert_sql))
             .bind(id)
             .bind(&uuid)
             .bind(tenant_id)

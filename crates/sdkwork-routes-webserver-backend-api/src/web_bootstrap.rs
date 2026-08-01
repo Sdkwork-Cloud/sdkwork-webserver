@@ -92,6 +92,51 @@ pub async fn wrap_router_with_web_framework_from_env_and_metrics(
         .await
 }
 
+/// Wraps the Web Node agent router in a machine-only framework layer.
+///
+/// Agent routes authenticate `X-SDKWork-Agent-Token` through the shared
+/// api-key path, so the resolver must never fall back to IAM user API keys;
+/// only `wagent_`-prefixed machine credentials are accepted on this surface.
+pub async fn wrap_agent_router_with_web_framework_from_env(
+    router: Router,
+    service: Arc<WebService>,
+) -> Router {
+    let machine_authenticator: Arc<dyn MachineCredentialAuthenticator> = service.clone();
+    let correlated = with_problem_correlation(router).layer(Extension(service));
+    match web_auth_mode_from_env().await {
+        WebAuthMode::DevInline => with_web_request_context(
+            correlated,
+            build_web_backend_api_framework_layer(
+                MachineCredentialResolverDecorator::new_machine_only(
+                    DefaultWebRequestContextResolver::default(),
+                    machine_authenticator,
+                ),
+                None,
+            ),
+        ),
+        WebAuthMode::ProductionFailClosed => with_web_request_context(
+            correlated,
+            build_web_backend_api_framework_layer(
+                MachineCredentialResolverDecorator::new_machine_only(
+                    ProductionFailClosedResolver,
+                    machine_authenticator,
+                ),
+                None,
+            ),
+        ),
+        WebAuthMode::IamDatabase(resolver) => with_web_request_context(
+            correlated,
+            build_web_backend_api_framework_layer(
+                MachineCredentialResolverDecorator::new_machine_only(
+                    resolver,
+                    machine_authenticator,
+                ),
+                None,
+            ),
+        ),
+    }
+}
+
 async fn wrap_router_with_web_framework_from_env_and_optional_metrics(
     router: Router,
     service: Arc<WebService>,

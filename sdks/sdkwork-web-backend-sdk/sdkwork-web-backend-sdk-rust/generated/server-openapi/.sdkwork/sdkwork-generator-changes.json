@@ -9,10 +9,16 @@
     "protocol": "http",
     "packageName": "sdkwork-web-backend-sdk"
   },
-  "changeFingerprint": "56e4b573e9396d27203d26fc24c8846d8e05d7dae3b0c9c8f5e6f006890c36af",
+  "changeFingerprint": "e531db1e968b0f5d5255fe9e72862b52554dfb6e5956033c14e0fa06a1837e69",
   "changes": {
     "createdGeneratedFiles": [],
-    "updatedGeneratedFiles": [],
+    "updatedGeneratedFiles": [
+      "README.md",
+      "src/api/application_deployment.rs",
+      "src/api/application_source_version.rs",
+      "src/api/audit.rs",
+      "src/api/server.rs"
+    ],
     "unchangedGeneratedFiles": [
       "bin/publish-core.mjs",
       "bin/publish.ps1",
@@ -20,14 +26,10 @@
       "Cargo.toml",
       "CHANGELOG.md",
       "LICENSE",
-      "README.md",
       "sdkwork-sdk.json",
       "src/api/agent.rs",
-      "src/api/application_deployment.rs",
       "src/api/application_domain.rs",
-      "src/api/application_source_version.rs",
       "src/api/application.rs",
-      "src/api/audit.rs",
       "src/api/base.rs",
       "src/api/certificate_distribution.rs",
       "src/api/certificate.rs",
@@ -35,7 +37,6 @@
       "src/api/mod.rs",
       "src/api/nginx.rs",
       "src/api/paths.rs",
-      "src/api/server.rs",
       "src/client.rs",
       "src/http/client.rs",
       "src/http/mod.rs",
@@ -159,26 +160,82 @@
   },
   "impact": {
     "schemaVersion": 1,
-    "areas": [],
-    "details": [],
-    "requiresVerification": false,
-    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
+    "areas": [
+      "api-surface",
+      "documentation"
+    ],
+    "details": [
+      {
+        "area": "api-surface",
+        "paths": [
+          "src/api/application_deployment.rs",
+          "src/api/application_source_version.rs",
+          "src/api/audit.rs",
+          "src/api/server.rs"
+        ]
+      },
+      {
+        "area": "documentation",
+        "paths": [
+          "README.md"
+        ]
+      }
+    ],
+    "requiresVerification": true,
+    "summary": "Detected impact areas: api-surface, documentation. Verification is required."
   },
   "verificationPlan": {
-    "shouldRun": false,
-    "runPhase": "skip",
-    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
-    "steps": []
+    "shouldRun": true,
+    "runPhase": "now",
+    "summary": "Detected impact areas: api-surface, documentation. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "steps": [
+      {
+        "id": "check",
+        "title": "Unified package check",
+        "required": true,
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, documentation.",
+        "workingDirectory": "E:\\sdkwork-space\\sdkwork-webserver\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-rust\\generated\\server-openapi",
+        "command": "node",
+        "args": [
+          "./bin/publish-core.mjs",
+          "--language",
+          "rust",
+          "--project-dir",
+          ".",
+          "--action",
+          "check"
+        ],
+        "displayCommand": "node ./bin/publish-core.mjs --language rust --project-dir . --action check"
+      },
+      {
+        "id": "build",
+        "title": "Unified package build",
+        "required": true,
+        "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: api-surface, documentation.",
+        "workingDirectory": "E:\\sdkwork-space\\sdkwork-webserver\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-rust\\generated\\server-openapi",
+        "command": "node",
+        "args": [
+          "./bin/publish-core.mjs",
+          "--language",
+          "rust",
+          "--project-dir",
+          ".",
+          "--action",
+          "build"
+        ],
+        "displayCommand": "node ./bin/publish-core.mjs --language rust --project-dir . --action build"
+      }
+    ]
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "low",
-    "nextAction": "skip",
+    "riskLevel": "medium",
+    "nextAction": "verify",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
-    "summary": "No actionable changes were detected. No apply or verification step is required.",
+    "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
-      "no-actionable-changes"
+      "verification-required"
     ]
   },
   "preservedLegacyFiles": false

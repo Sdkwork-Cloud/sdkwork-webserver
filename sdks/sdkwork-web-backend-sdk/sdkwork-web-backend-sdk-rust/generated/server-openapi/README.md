@@ -118,8 +118,8 @@ use std::collections::HashMap;
 // List immutable application source versions
 let application_id = "1";
 let mut query = HashMap::new();
-query.insert("page".to_string(), serde_json::json!(1));
-query.insert("page_size".to_string(), serde_json::json!(2));
+query.insert("page_size".to_string(), serde_json::json!(1));
+query.insert("cursor".to_string(), serde_json::json!("cursor"));
 let result = client.application_source_version().applications_source_versions_list(application_id, Some(&query)).await?;
 println!("{result:?}");
 ```
@@ -131,10 +131,9 @@ use std::collections::HashMap;
 // List application deployments
 let application_id = "1";
 let mut query = HashMap::new();
-query.insert("page".to_string(), serde_json::json!(1));
-query.insert("page_size".to_string(), serde_json::json!(2));
+query.insert("page_size".to_string(), serde_json::json!(1));
 query.insert("cursor".to_string(), serde_json::json!("cursor"));
-query.insert("status".to_string(), serde_json::json!(4));
+query.insert("status".to_string(), serde_json::json!(3));
 let result = client.application_deployment().applications_deployments_list(application_id, Some(&query)).await?;
 println!("{result:?}");
 ```
@@ -165,8 +164,8 @@ println!("{result:?}");
 use std::collections::HashMap;
 // List managed servers
 let mut query = HashMap::new();
-query.insert("page".to_string(), serde_json::json!(1));
-query.insert("page_size".to_string(), serde_json::json!(2));
+query.insert("page_size".to_string(), serde_json::json!(1));
+query.insert("cursor".to_string(), serde_json::json!("cursor"));
 let result = client.server().servers_list(Some(&query)).await?;
 println!("{result:?}");
 ```
@@ -188,8 +187,7 @@ println!("{result:?}");
 use std::collections::HashMap;
 // List audit logs
 let mut query = HashMap::new();
-query.insert("page".to_string(), serde_json::json!(1));
-query.insert("page_size".to_string(), serde_json::json!(2));
+query.insert("page_size".to_string(), serde_json::json!(1));
 query.insert("cursor".to_string(), serde_json::json!("cursor"));
 query.insert("target_type".to_string(), serde_json::json!("target-type"));
 query.insert("action".to_string(), serde_json::json!("action"));

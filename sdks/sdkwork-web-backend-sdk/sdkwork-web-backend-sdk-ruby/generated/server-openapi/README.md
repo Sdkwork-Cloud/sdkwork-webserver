@@ -98,7 +98,7 @@ puts result.inspect
 ```ruby
 # List immutable application source versions
 application_id = '1'
-params = { 'page' => 1, 'page_size' => 2 }
+params = { 'page_size' => 1, 'cursor' => 'cursor' }
 result = client.application_source_version.applications_source_versions_list(application_id, params: params)
 puts result.inspect
 ```
@@ -108,7 +108,7 @@ puts result.inspect
 ```ruby
 # List application deployments
 application_id = '1'
-params = { 'page' => 1, 'page_size' => 2, 'cursor' => 'cursor', 'status' => 4 }
+params = { 'page_size' => 1, 'cursor' => 'cursor', 'status' => 3 }
 result = client.application_deployment.applications_deployments_list(application_id, params: params)
 puts result.inspect
 ```
@@ -134,7 +134,7 @@ puts result.inspect
 
 ```ruby
 # List managed servers
-params = { 'page' => 1, 'page_size' => 2 }
+params = { 'page_size' => 1, 'cursor' => 'cursor' }
 result = client.server.servers_list(params: params)
 puts result.inspect
 ```
@@ -152,7 +152,7 @@ puts result.inspect
 
 ```ruby
 # List audit logs
-params = { 'page' => 1, 'page_size' => 2, 'cursor' => 'cursor', 'target_type' => 'target-type', 'action' => 'action', 'operator_id' => '1', 'start_date' => '2026-04-10T00:00:00Z', 'end_date' => '2026-04-10T00:00:00Z' }
+params = { 'page_size' => 1, 'cursor' => 'cursor', 'target_type' => 'target-type', 'action' => 'action', 'operator_id' => '1', 'start_date' => '2026-04-10T00:00:00Z', 'end_date' => '2026-04-10T00:00:00Z' }
 result = client.audit.logs_list(params: params)
 puts result.inspect
 ```

@@ -14,10 +14,10 @@ public class ServerApi {
     }
 
     /** List managed servers */
-    public ServersListResponse serversList(Integer page, Integer pageSize) throws Exception {
+    public ServersListResponse serversList(Integer pageSize, String cursor) throws Exception {
         String query = buildQueryString(List.of(
-            new QueryParameterSpec("page", page, "form", true, false, null),
-            new QueryParameterSpec("page_size", pageSize, "form", true, false, null)
+            new QueryParameterSpec("page_size", pageSize, "form", true, false, null),
+            new QueryParameterSpec("cursor", cursor, "form", true, false, null)
         ));
         Object raw = client.get(ApiPaths.appendQueryString(ApiPaths.backendPath("/servers"), query));
         return client.convertValue(raw, new TypeReference<ServersListResponse>() {});

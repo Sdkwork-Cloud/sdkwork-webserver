@@ -8,11 +8,11 @@ module Sdkwork
     module Api
       class ServerApi < BaseApi
           # List managed servers
-          def servers_list(page: nil, page_size: nil)
+          def servers_list(page_size: nil, cursor: nil)
             path = '/backend/v3/api/servers'
             query = build_query_string([
-              QueryParameterSpec.new('page', page, 'form', true, false, nil),
               QueryParameterSpec.new('page_size', page_size, 'form', true, false, nil),
+              QueryParameterSpec.new('cursor', cursor, 'form', true, false, nil),
             ])
             path = append_query_string(path, query)
             options = {}

@@ -36,7 +36,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "a4961ce86d5a5c08087a482118b87f3d945b1385518949b419f3ff6d1ac73f26"
+      "sha256": "514d31f891a42985b322aadb13e8f1719f390c6de8d6bb81ce01f5fa74616838"
     },
     {
       "path": "sdkwork-sdk.json",
@@ -52,7 +52,7 @@
     },
     {
       "path": "src/main/java/com/sdkwork/web/app/sdk/api/DeploymentApi.java",
-      "sha256": "80421b22d21dc5b6364918f960b59f8b2662ca325793aafa05499f17af782442"
+      "sha256": "9fb29a748f0430eb46bd6289def2d2b4057f2d99a63250d52eafde73e1b36619"
     },
     {
       "path": "src/main/java/com/sdkwork/web/app/sdk/api/DomainApi.java",
@@ -76,7 +76,7 @@
     },
     {
       "path": "src/main/java/com/sdkwork/web/app/sdk/api/SourceVersionApi.java",
-      "sha256": "defdcae447f345ea48958988d9c751254109d8d55f5e6273ab9cd413de1e9c02"
+      "sha256": "db06745a8dd452f1ed8de1b0466dd2c75cd42e103757d09ab02fe809e503aefe"
     },
     {
       "path": "src/main/java/com/sdkwork/web/app/sdk/http/HttpClient.java",

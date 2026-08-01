@@ -9,15 +9,13 @@
     "protocol": "http",
     "packageName": "@sdkwork/web-app-sdk"
   },
-  "changeFingerprint": "fe294dc9305972bcae0e284a98aed90e292cb8cc09737c4b814f244e936a2ec7",
+  "changeFingerprint": "815e6421ebd61b9e002ea15c002e04022fdbb8ca96915efb5fb2fbdb39384602",
   "changes": {
-    "createdGeneratedFiles": [
-      "src/types/sites-env-variables-update-response.ts",
-      "src/types/update-env-variable-request.ts"
-    ],
+    "createdGeneratedFiles": [],
     "updatedGeneratedFiles": [
-      "src/api/env-variable.ts",
-      "src/types/index.ts"
+      "README.md",
+      "src/api/deployment.ts",
+      "src/api/source-version.ts"
     ],
     "unchangedGeneratedFiles": [
       "bin/publish-core.mjs",
@@ -28,17 +26,15 @@
       "CHANGELOG.md",
       "LICENSE",
       "package.json",
-      "README.md",
       "sdkwork-sdk.json",
       "src/api/base.ts",
       "src/api/certificate.ts",
-      "src/api/deployment.ts",
       "src/api/domain.ts",
+      "src/api/env-variable.ts",
       "src/api/index.ts",
       "src/api/monitor.ts",
       "src/api/paths.ts",
       "src/api/site.ts",
-      "src/api/source-version.ts",
       "src/auth/index.ts",
       "src/http/client.ts",
       "src/http/index.ts",
@@ -71,6 +67,7 @@
       "src/types/health-check-page.ts",
       "src/types/health-check-response.ts",
       "src/types/import-git-source-version-request.ts",
+      "src/types/index.ts",
       "src/types/issue-certificate-request.ts",
       "src/types/listener-certificate-binding-response.ts",
       "src/types/listener-certificate-summary-response.ts",
@@ -103,6 +100,7 @@
       "src/types/sites-domains-verify-response.ts",
       "src/types/sites-env-variables-create-response201.ts",
       "src/types/sites-env-variables-list-response.ts",
+      "src/types/sites-env-variables-update-response.ts",
       "src/types/sites-health-checks-create-response201.ts",
       "src/types/sites-health-checks-list-response.ts",
       "src/types/sites-list-response.ts",
@@ -116,6 +114,7 @@
       "src/types/source-version-config-snapshot.ts",
       "src/types/source-version-page.ts",
       "src/types/source-version-response.ts",
+      "src/types/update-env-variable-request.ts",
       "src/types/update-site-request.ts",
       "tsconfig.json"
     ],
@@ -131,37 +130,36 @@
     "schemaVersion": 1,
     "areas": [
       "api-surface",
-      "models"
+      "documentation"
     ],
     "details": [
       {
         "area": "api-surface",
         "paths": [
-          "src/api/env-variable.ts"
+          "src/api/deployment.ts",
+          "src/api/source-version.ts"
         ]
       },
       {
-        "area": "models",
+        "area": "documentation",
         "paths": [
-          "src/types/index.ts",
-          "src/types/sites-env-variables-update-response.ts",
-          "src/types/update-env-variable-request.ts"
+          "README.md"
         ]
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, models. Verification is required."
+    "summary": "Detected impact areas: api-surface, documentation. Verification is required."
   },
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: api-surface, documentation. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, documentation.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-webserver\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-typescript\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -179,7 +177,7 @@
         "id": "build",
         "title": "Unified package build",
         "required": true,
-        "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: api-surface, models.",
+        "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: api-surface, documentation.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-webserver\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-typescript\\generated\\server-openapi",
         "command": "node",
         "args": [

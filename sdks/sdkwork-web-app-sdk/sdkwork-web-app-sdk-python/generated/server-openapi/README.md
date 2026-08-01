@@ -113,8 +113,8 @@ print(result)
 # 获取应用源码版本
 site_id = '1'
 params = {
-    'page': 1,
-    'page_size': 2,
+    'page_size': 1,
+    'cursor': 'cursor',
 }
 result = client.source_version.sites.source_versions.list(site_id, params)
 print(result)
@@ -126,8 +126,7 @@ print(result)
 # 获取部署历史
 site_id = '1'
 params = {
-    'page': 1,
-    'page_size': 2,
+    'page_size': 1,
     'cursor': 'cursor',
     'status': 0,
 }

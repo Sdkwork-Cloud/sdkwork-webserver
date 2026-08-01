@@ -5,8 +5,8 @@ import type { CreateServerRequest, CreateServerResponse, PageInfo, ServerRespons
 
 
 export interface ServerListParams {
-  page?: number;
   pageSize?: number;
+  cursor?: string;
 }
 
 export interface ServerCreateParams {
@@ -24,8 +24,8 @@ export class ServerApi {
 /** List managed servers */
   async list(params?: ServerListParams, requestOptions?: ApiRequestOptions): Promise<{ items: ServerResponse[]; pageInfo: PageInfo; }> {
     const query = buildQueryString([
-      { name: 'page', value: params?.page, style: 'form', explode: true, allowReserved: false },
       { name: 'page_size', value: params?.pageSize, style: 'form', explode: true, allowReserved: false },
+      { name: 'cursor', value: params?.cursor, style: 'form', explode: true, allowReserved: false },
     ]);
     return this.client.request<{ items: ServerResponse[]; pageInfo: PageInfo; }>(appendQueryString(backendApiPath(`/servers`), query), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any, sdkworkUnwrapKind: 'page' });
   }

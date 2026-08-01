@@ -9,14 +9,13 @@
     "protocol": "http",
     "packageName": "sdkwork/web-app-sdk"
   },
-  "changeFingerprint": "4c1c09bbb58a1ee3f8b22eda957bc5f264bbe80b4dd9c07c6f468ce16080cd68",
+  "changeFingerprint": "ab1d0b4c5c6b8c0e1121fd8f389ca89e2c9103f4932965e8498ee84f6656fdb8",
   "changes": {
-    "createdGeneratedFiles": [
-      "src/Models/SitesEnvVariablesUpdateResponse.php",
-      "src/Models/UpdateEnvVariableRequest.php"
-    ],
+    "createdGeneratedFiles": [],
     "updatedGeneratedFiles": [
-      "src/Api/EnvVariable.php"
+      "README.md",
+      "src/Api/Deployment.php",
+      "src/Api/SourceVersion.php"
     ],
     "unchangedGeneratedFiles": [
       "bin/publish-core.mjs",
@@ -25,15 +24,13 @@
       "CHANGELOG.md",
       "composer.json",
       "LICENSE",
-      "README.md",
       "sdkwork-sdk.json",
       "src/Api/BaseApi.php",
       "src/Api/Certificate.php",
-      "src/Api/Deployment.php",
       "src/Api/Domain.php",
+      "src/Api/EnvVariable.php",
       "src/Api/Monitor.php",
       "src/Api/Site.php",
-      "src/Api/SourceVersion.php",
       "src/Http/HttpClient.php",
       "src/Models/ApplicationStoreListing.php",
       "src/Models/CertificateIdentifierResponse.php",
@@ -92,6 +89,7 @@
       "src/Models/SitesDomainsVerifyResponse.php",
       "src/Models/SitesEnvVariablesCreateResponse201.php",
       "src/Models/SitesEnvVariablesListResponse.php",
+      "src/Models/SitesEnvVariablesUpdateResponse.php",
       "src/Models/SitesHealthChecksCreateResponse201.php",
       "src/Models/SitesHealthChecksListResponse.php",
       "src/Models/SitesListResponse.php",
@@ -105,6 +103,7 @@
       "src/Models/SourceVersionConfigSnapshot.php",
       "src/Models/SourceVersionPage.php",
       "src/Models/SourceVersionResponse.php",
+      "src/Models/UpdateEnvVariableRequest.php",
       "src/Models/UpdateSiteRequest.php",
       "src/SdkConfig.php",
       "src/SdkworkAppClient.php"
@@ -120,36 +119,36 @@
     "schemaVersion": 1,
     "areas": [
       "api-surface",
-      "models"
+      "documentation"
     ],
     "details": [
       {
         "area": "api-surface",
         "paths": [
-          "src/Api/EnvVariable.php"
+          "src/Api/Deployment.php",
+          "src/Api/SourceVersion.php"
         ]
       },
       {
-        "area": "models",
+        "area": "documentation",
         "paths": [
-          "src/Models/SitesEnvVariablesUpdateResponse.php",
-          "src/Models/UpdateEnvVariableRequest.php"
+          "README.md"
         ]
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, models. Verification is required."
+    "summary": "Detected impact areas: api-surface, documentation. Verification is required."
   },
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: api-surface, documentation. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, documentation.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-webserver\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-php\\generated\\server-openapi",
         "command": "node",
         "args": [

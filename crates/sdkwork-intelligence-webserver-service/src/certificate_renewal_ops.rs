@@ -227,12 +227,12 @@ fn spawn_certificate_lease_heartbeat(
     repository: Arc<dyn WebRepositoryPort>,
     lease: CertificateOperationLease,
 ) -> tokio::task::JoinHandle<()> {
-    let heartbeat_interval_secs = (CERTIFICATE_OPERATION_LEASE_SECS
-        / CERTIFICATE_LEASE_HEARTBEAT_DIVISOR)
-        .max(60);
+    let heartbeat_interval_secs =
+        (CERTIFICATE_OPERATION_LEASE_SECS / CERTIFICATE_LEASE_HEARTBEAT_DIVISOR).max(60);
     tokio::spawn(async move {
-        let mut interval =
-            tokio::time::interval(std::time::Duration::from_secs(heartbeat_interval_secs as u64));
+        let mut interval = tokio::time::interval(std::time::Duration::from_secs(
+            heartbeat_interval_secs as u64,
+        ));
         interval.tick().await;
         loop {
             interval.tick().await;

@@ -8,10 +8,10 @@ public class SourceVersionApi {
     }
 
     /// 获取应用源码版本
-    public func sitesSourceVersionsList(siteId: String, page: Int? = nil, pageSize: Int? = nil) async throws -> SitesSourceVersionsListResponse? {
+    public func sitesSourceVersionsList(siteId: String, pageSize: Int? = nil, cursor: String? = nil) async throws -> SitesSourceVersionsListResponse? {
         let query = buildQueryString([
-            QueryParameterSpec(name: "page", value: page, style: "form", explode: true, allowReserved: false, contentType: nil),
-            QueryParameterSpec(name: "page_size", value: pageSize, style: "form", explode: true, allowReserved: false, contentType: nil)
+            QueryParameterSpec(name: "page_size", value: pageSize, style: "form", explode: true, allowReserved: false, contentType: nil),
+            QueryParameterSpec(name: "cursor", value: cursor, style: "form", explode: true, allowReserved: false, contentType: nil)
         ])
         return try await client.get(ApiPaths.appendQueryString(ApiPaths.appPath("/sites/\(serializePathParameter(siteId, PathParameterSpec(name: "siteId", style: "simple", explode: false)))/source_versions"), query), responseType: SitesSourceVersionsListResponse.self)
     }

@@ -109,8 +109,8 @@ use std::collections::HashMap;
 // 获取应用源码版本
 let site_id = "1";
 let mut query = HashMap::new();
-query.insert("page".to_string(), serde_json::json!(1));
-query.insert("page_size".to_string(), serde_json::json!(2));
+query.insert("page_size".to_string(), serde_json::json!(1));
+query.insert("cursor".to_string(), serde_json::json!("cursor"));
 let result = client.source_version().sites_source_versions_list(site_id, Some(&query)).await?;
 println!("{result:?}");
 ```
@@ -122,8 +122,7 @@ use std::collections::HashMap;
 // 获取部署历史
 let site_id = "1";
 let mut query = HashMap::new();
-query.insert("page".to_string(), serde_json::json!(1));
-query.insert("page_size".to_string(), serde_json::json!(2));
+query.insert("page_size".to_string(), serde_json::json!(1));
 query.insert("cursor".to_string(), serde_json::json!("cursor"));
 query.insert("status".to_string(), serde_json::json!(0));
 let result = client.deployment().sites_deployments_list(site_id, Some(&query)).await?;

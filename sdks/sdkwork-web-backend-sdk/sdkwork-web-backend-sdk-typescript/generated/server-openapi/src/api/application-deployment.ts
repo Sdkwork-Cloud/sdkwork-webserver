@@ -5,7 +5,6 @@ import type { ApplicationDeploymentResponse, CreateApplicationDeploymentRequest,
 
 
 export interface ApplicationDeploymentApplicationsDeploymentsListParams {
-  page?: number;
   pageSize?: number;
   cursor?: string;
   status?: number;
@@ -30,7 +29,6 @@ export class ApplicationDeploymentApplicationsDeploymentsApi {
 /** List application deployments */
   async list(applicationId: string, params?: ApplicationDeploymentApplicationsDeploymentsListParams, requestOptions?: ApiRequestOptions): Promise<{ items: ApplicationDeploymentResponse[]; pageInfo: PageInfo; }> {
     const query = buildQueryString([
-      { name: 'page', value: params?.page, style: 'form', explode: true, allowReserved: false },
       { name: 'page_size', value: params?.pageSize, style: 'form', explode: true, allowReserved: false },
       { name: 'cursor', value: params?.cursor, style: 'form', explode: true, allowReserved: false },
       { name: 'status', value: params?.status, style: 'form', explode: true, allowReserved: false },

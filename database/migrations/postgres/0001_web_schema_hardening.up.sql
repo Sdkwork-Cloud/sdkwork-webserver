@@ -1,11 +1,15 @@
--- Migration: 0001_web_schema_hardening
--- Description: Schema hardening for production readiness:
---   * soft-deleted sites release their tenant slug (partial unique index)
---   * tenant-scoped list indexes for nginx configs and audit logs
---   * GIN index for Web Node credential (metadata agentTokenHash) lookups
---   * referential integrity for environment variables and health results
--- Author: SDKWork Web Server
--- Date: 2026-08-01
+-- sdkwork:migration
+-- version: 0001
+-- engine: postgres
+-- module: web
+-- description: Schema hardening for production readiness: partial slug uniqueness,
+--   tenant list indexes, Web Node credential GIN index, and referential integrity.
+-- reversible: true
+-- rollback: down-migration
+-- transactional: true
+-- lock: access-exclusive
+-- lock_timeout: 30s
+-- statement_timeout: 120s
 
 -- Active slugs are unique per tenant; soft-deleted sites release their slug.
 DROP INDEX IF EXISTS uk_web_site_slug;

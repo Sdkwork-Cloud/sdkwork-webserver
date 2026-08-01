@@ -5,7 +5,6 @@ import type { CreateDeploymentRequest, DeploymentResponse, PageInfo } from '../t
 
 
 export interface DeploymentSitesDeploymentsListParams {
-  page?: number;
   pageSize?: number;
   cursor?: string;
   status?: 0 | 1 | 2 | 3 | 4 | 5;
@@ -30,7 +29,6 @@ export class DeploymentSitesDeploymentsApi {
 /** 获取部署历史 */
   async list(siteId: string | number, params?: DeploymentSitesDeploymentsListParams, requestOptions?: ApiRequestOptions): Promise<{ items: DeploymentResponse[]; pageInfo: PageInfo; }> {
     const query = buildQueryString([
-      { name: 'page', value: params?.page, style: 'form', explode: true, allowReserved: false },
       { name: 'page_size', value: params?.pageSize, style: 'form', explode: true, allowReserved: false },
       { name: 'cursor', value: params?.cursor, style: 'form', explode: true, allowReserved: false },
       { name: 'status', value: params?.status, style: 'form', explode: true, allowReserved: false },

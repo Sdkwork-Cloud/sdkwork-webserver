@@ -1,4 +1,3 @@
-use sdkwork_database_config::DatabaseEngine;
 use sdkwork_database_id::SnowflakeIdGenerator;
 use sqlx::{Database, Pool};
 
@@ -6,13 +5,23 @@ mod runtime;
 
 pub use runtime::{bootstrap_web_runtime_from_env, WebRuntime};
 
+/// Marks a dynamically assembled SQL statement as audited for sqlx 0.9's
+/// compile-time injection check (`SqlSafeStr`).
+///
+/// Repository statements are assembled exclusively from fixed clauses and
+/// validated enum constants; every request-controlled value enters through
+/// `$N` bind parameters. Call sites keep this contract: never interpolate a
+/// value derived from request input into the SQL text itself.
+pub(crate) fn audited_sql(sql: &str) -> sqlx::AssertSqlSafe<&str> {
+    sqlx::AssertSqlSafe(sql)
+}
+
 /// AES-256 key used to protect environment-variable secrets at rest.
 pub type SecretEncryptionKey = [u8; 32];
 
 #[derive(Clone)]
 pub struct TypedWebRepository<DB: Database> {
     pool: Pool<DB>,
-    database_engine: DatabaseEngine,
     id_generator: SnowflakeIdGenerator,
     secret_key: SecretEncryptionKey,
 }
@@ -20,13 +29,11 @@ pub struct TypedWebRepository<DB: Database> {
 impl<DB: Database> TypedWebRepository<DB> {
     pub fn new(
         pool: Pool<DB>,
-        database_engine: DatabaseEngine,
         id_generator: SnowflakeIdGenerator,
         secret_key: SecretEncryptionKey,
     ) -> Self {
         Self {
             pool,
-            database_engine,
             id_generator,
             secret_key,
         }
@@ -42,12 +49,6 @@ impl<DB: Database> TypedWebRepository<DB> {
 
     pub fn secret_key(&self) -> &SecretEncryptionKey {
         &self.secret_key
-    }
-
-    pub(crate) async fn database_engine(
-        &self,
-    ) -> Result<DatabaseEngine, sdkwork_webserver_contract::WebServiceError> {
-        Ok(self.database_engine)
     }
 }
 

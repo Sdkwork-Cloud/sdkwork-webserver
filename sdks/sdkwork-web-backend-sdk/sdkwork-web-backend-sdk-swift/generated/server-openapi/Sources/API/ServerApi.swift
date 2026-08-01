@@ -8,10 +8,10 @@ public class ServerApi {
     }
 
     /// List managed servers
-    public func serversList(page: Int? = nil, pageSize: Int? = nil) async throws -> ServersListResponse? {
+    public func serversList(pageSize: Int? = nil, cursor: String? = nil) async throws -> ServersListResponse? {
         let query = buildQueryString([
-            QueryParameterSpec(name: "page", value: page, style: "form", explode: true, allowReserved: false, contentType: nil),
-            QueryParameterSpec(name: "page_size", value: pageSize, style: "form", explode: true, allowReserved: false, contentType: nil)
+            QueryParameterSpec(name: "page_size", value: pageSize, style: "form", explode: true, allowReserved: false, contentType: nil),
+            QueryParameterSpec(name: "cursor", value: cursor, style: "form", explode: true, allowReserved: false, contentType: nil)
         ])
         return try await client.get(ApiPaths.appendQueryString(ApiPaths.backendPath("/servers"), query), responseType: ServersListResponse.self)
     }

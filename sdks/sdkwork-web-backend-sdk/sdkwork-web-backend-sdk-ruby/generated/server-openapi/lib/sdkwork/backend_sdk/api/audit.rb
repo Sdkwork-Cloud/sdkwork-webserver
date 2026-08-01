@@ -6,10 +6,9 @@ module Sdkwork
     module Api
       class AuditApi < BaseApi
           # List audit logs
-          def logs_list(page: nil, page_size: nil, cursor: nil, target_type: nil, action: nil, operator_id: nil, start_date: nil, end_date: nil)
+          def logs_list(page_size: nil, cursor: nil, target_type: nil, action: nil, operator_id: nil, start_date: nil, end_date: nil)
             path = '/backend/v3/api/audit_logs'
             query = build_query_string([
-              QueryParameterSpec.new('page', page, 'form', true, false, nil),
               QueryParameterSpec.new('page_size', page_size, 'form', true, false, nil),
               QueryParameterSpec.new('cursor', cursor, 'form', true, false, nil),
               QueryParameterSpec.new('target_type', target_type, 'form', true, false, nil),

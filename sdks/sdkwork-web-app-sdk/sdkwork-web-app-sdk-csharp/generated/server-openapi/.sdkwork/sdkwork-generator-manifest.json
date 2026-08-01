@@ -24,7 +24,7 @@
     },
     {
       "path": "Api/DeploymentApi.cs",
-      "sha256": "3c976daa77f32035ff99427bf3269155bcaaed906fc0d46fb4d3508670a9c63b"
+      "sha256": "0ea4297c1bd06659d461c0e123e2efbd6bfa7c5385142a24d305732dbae0b3dd"
     },
     {
       "path": "Api/DomainApi.cs",
@@ -44,7 +44,7 @@
     },
     {
       "path": "Api/SourceVersionApi.cs",
-      "sha256": "3ce16e1c46a625432e34f08625d1347211622f1d94b376848b9f39c296973ebb"
+      "sha256": "aad061a3aa9ebe5db42de8b2ea41b0a4a2645ca775b5e98bb7d57cb772550ccb"
     },
     {
       "path": "bin/publish-core.mjs",
@@ -364,7 +364,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "64a3ba4f94dc33b0b24082c9ae8226d26f2459a923e86214c37be3590c48a7a9"
+      "sha256": "7d4017d2c35827119a3978be568326749d2737e9441d0a21b2794f5278b2df85"
     },
     {
       "path": "sdkwork-sdk.json",

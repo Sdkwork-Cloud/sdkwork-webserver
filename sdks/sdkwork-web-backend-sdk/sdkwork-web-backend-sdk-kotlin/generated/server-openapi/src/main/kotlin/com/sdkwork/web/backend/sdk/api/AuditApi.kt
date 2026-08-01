@@ -9,9 +9,8 @@ import com.sdkwork.web.backend.sdk.http.HttpClient
 class AuditApi(private val client: HttpClient) {
 
     /** List audit logs */
-    suspend fun logsList(page: Int? = null, pageSize: Int? = null, cursor: String? = null, targetType: String? = null, action: String? = null, operatorId: String? = null, startDate: String? = null, endDate: String? = null): AuditLogsListResponse? {
+    suspend fun logsList(pageSize: Int? = null, cursor: String? = null, targetType: String? = null, action: String? = null, operatorId: String? = null, startDate: String? = null, endDate: String? = null): AuditLogsListResponse? {
         val query = buildQueryString(listOf(
-            QueryParameterSpec("page", page, "form", true, false, null),
             QueryParameterSpec("page_size", pageSize, "form", true, false, null),
             QueryParameterSpec("cursor", cursor, "form", true, false, null),
             QueryParameterSpec("target_type", targetType, "form", true, false, null),

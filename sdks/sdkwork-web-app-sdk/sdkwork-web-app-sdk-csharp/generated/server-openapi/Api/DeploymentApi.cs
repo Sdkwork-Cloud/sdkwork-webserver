@@ -18,11 +18,10 @@ namespace SDKWork.Web.AppSdk.Api
         /// <summary>
         /// 获取部署历史
         /// </summary>
-        public async Task<SDKWork.Web.AppSdk.Models.SitesDeploymentsListResponse?> SitesDeploymentsListAsync(string siteId, int? page = null, int? pageSize = null, string? cursor = null, int? status = null)
+        public async Task<SDKWork.Web.AppSdk.Models.SitesDeploymentsListResponse?> SitesDeploymentsListAsync(string siteId, int? pageSize = null, string? cursor = null, int? status = null)
         {
             var queryString = BuildQueryString(new[]
             {
-                new QueryParameterSpec("page", page, "form", true, false, null),
                 new QueryParameterSpec("page_size", pageSize, "form", true, false, null),
                 new QueryParameterSpec("cursor", cursor, "form", true, false, null),
                 new QueryParameterSpec("status", status, "form", true, false, null),

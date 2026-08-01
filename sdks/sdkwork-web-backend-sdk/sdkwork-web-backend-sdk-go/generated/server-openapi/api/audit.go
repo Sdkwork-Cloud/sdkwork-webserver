@@ -18,9 +18,8 @@ func NewAuditApi(client *sdkhttp.Client) *AuditApi {
 }
 
 // List audit logs
-func (a *AuditApi) LogsList(page *int, pageSize *int, cursor *string, targetType *string, action *string, operatorId *string, startDate *string, endDate *string) (sdktypes.AuditLogsListResponse, error) {
+func (a *AuditApi) LogsList(pageSize *int, cursor *string, targetType *string, action *string, operatorId *string, startDate *string, endDate *string) (sdktypes.AuditLogsListResponse, error) {
     query := BuildQueryString([]QueryParameterSpec{
-        {Name: "page", Value: func() interface{} { if page == nil { return nil }; return *page }(), Style: "form", Explode: true, AllowReserved: false},
         {Name: "page_size", Value: func() interface{} { if pageSize == nil { return nil }; return *pageSize }(), Style: "form", Explode: true, AllowReserved: false},
         {Name: "cursor", Value: func() interface{} { if cursor == nil { return nil }; return *cursor }(), Style: "form", Explode: true, AllowReserved: false},
         {Name: "target_type", Value: func() interface{} { if targetType == nil { return nil }; return *targetType }(), Style: "form", Explode: true, AllowReserved: false},

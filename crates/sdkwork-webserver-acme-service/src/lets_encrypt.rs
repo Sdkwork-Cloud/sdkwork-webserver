@@ -7,6 +7,7 @@ use instant_acme::{
 };
 use rcgen::{CertificateParams, DistinguishedName};
 
+use crate::account_store::AcmeAccountStore;
 use crate::challenge_store::ChallengeStore;
 use crate::http_client::BoundedAcmeHttpClient;
 use crate::model::IssuedCertificateMaterial;
@@ -18,6 +19,7 @@ const MAX_AUTHORIZATIONS_PER_ORDER: usize = 8;
 pub async fn issue_lets_encrypt(
     config: &AcmeConfig,
     challenge_store: &ChallengeStore,
+    account_store: &dyn AcmeAccountStore,
     hostnames: &[String],
     cert_name: &str,
     cert_root: &str,
@@ -29,6 +31,7 @@ pub async fn issue_lets_encrypt(
         issue_lets_encrypt_inner(
             config,
             challenge_store,
+            account_store,
             hostnames,
             cert_name,
             cert_root,
@@ -49,6 +52,7 @@ pub async fn issue_lets_encrypt(
 async fn issue_lets_encrypt_inner(
     config: &AcmeConfig,
     challenge_store: &ChallengeStore,
+    account_store: &dyn AcmeAccountStore,
     hostnames: &[String],
     cert_name: &str,
     cert_root: &str,
@@ -62,19 +66,33 @@ async fn issue_lets_encrypt_inner(
     })?;
 
     let contact = format!("mailto:{}", config.contact_email);
-    let (account, _credentials) =
+    // Restore the durable CA account when one exists; otherwise create one
+    // account and persist it. Reusing one account avoids the CA account
+    // creation rate limit and preserves account identity across renewals.
+    let account = if let Some(credentials) = account_store.load(&config.directory_url).await? {
         Account::builder_with_http(Box::new(BoundedAcmeHttpClient::new()?))
-            .create(
-                &NewAccount {
-                    contact: &[&contact],
-                    terms_of_service_agreed: true,
-                    only_return_existing: false,
-                },
-                config.directory_url.clone(),
-                None,
-            )
+            .from_credentials(credentials)
             .await
-            .map_err(|error| AcmeServiceError::provider(error.to_string()))?;
+            .map_err(|error| AcmeServiceError::provider(format!("restore ACME account: {error}")))?
+    } else {
+        let (account, credentials) =
+            Account::builder_with_http(Box::new(BoundedAcmeHttpClient::new()?))
+                .create(
+                    &NewAccount {
+                        contact: &[&contact],
+                        terms_of_service_agreed: true,
+                        only_return_existing: false,
+                    },
+                    config.directory_url.clone(),
+                    None,
+                )
+                .await
+                .map_err(|error| AcmeServiceError::provider(error.to_string()))?;
+        account_store
+            .save(&config.directory_url, &credentials)
+            .await?;
+        account
+    };
 
     if hostnames.iter().any(|hostname| hostname.starts_with("*.")) {
         return Err(AcmeServiceError::validation(
@@ -138,7 +156,12 @@ async fn issue_lets_encrypt_inner(
     let mut params = CertificateParams::new(hostnames.to_vec())
         .map_err(|error| AcmeServiceError::Internal(error.to_string()))?;
     params.distinguished_name = DistinguishedName::new();
-    let key_pair = generate_key_pair(key_algorithm)?;
+    // RSA-2048 key generation is CPU-bound (100-500 ms); never run it on the
+    // async executor.
+    let key_algorithm_owned = key_algorithm.to_owned();
+    let key_pair = tokio::task::spawn_blocking(move || generate_key_pair(&key_algorithm_owned))
+        .await
+        .map_err(|error| AcmeServiceError::Internal(format!("join key generation: {error}")))??;
     let csr = params
         .serialize_request(&key_pair)
         .map_err(|error| AcmeServiceError::Internal(error.to_string()))?;

@@ -142,7 +142,6 @@ pub async fn bootstrap_web_runtime_from_env() -> Result<WebRuntime, String> {
         .ok_or_else(|| "web runtime requires a PostgreSQL database pool".to_string())?;
     let repository = Arc::new(PostgresWebRepository::new(
         pool.clone(),
-        sdkwork_database_config::DatabaseEngine::Postgres,
         id_generator,
         secret_key,
     )) as Arc<dyn WebRepositoryPort>;

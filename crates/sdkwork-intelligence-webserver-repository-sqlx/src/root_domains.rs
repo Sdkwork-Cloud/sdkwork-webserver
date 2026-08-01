@@ -1,3 +1,4 @@
+use crate::audited_sql;
 use super::{EngineRow, WebRepository};
 use sdkwork_webserver_contract::{
     CreateRootDomainHostnameRequest, CreateRootDomainRequest, DomainDeploymentResponse, DomainPage,
@@ -110,14 +111,14 @@ impl WebRepository {
         let id = next_id(self.id_generator())?;
         let uuid = new_uuid();
         let now = now_rfc3339();
-        let engine = self.database_engine().await?;
-        let now_expression = instant_write_expression(engine, "$6");
+
+        let now_expression = instant_write_expression("$6");
         let sql = format!(
             "INSERT INTO web_root_domain (
                 id, uuid, tenant_id, hostname, status, metadata, created_at, updated_at, version
              ) VALUES ($1, $2, $3, $4, $5, '{{}}', {now_expression}, {now_expression}, 0)"
         );
-        sqlx::query(&sql)
+        sqlx::query(audited_sql(&sql))
             .bind(id)
             .bind(&uuid)
             .bind(tenant_id)
@@ -216,15 +217,15 @@ impl WebRepository {
         }
 
         let now = now_rfc3339();
-        let engine = self.database_engine().await?;
-        let now_expression = instant_write_expression(engine, "$3");
+
+        let now_expression = instant_write_expression("$3");
         let sql = format!(
             "UPDATE web_root_domain
              SET deleted_at = {now_expression}, updated_at = {now_expression},
                  version = version + 1
              WHERE tenant_id = $1 AND uuid = $2 AND deleted_at IS NULL"
         );
-        let result = sqlx::query(&sql)
+        let result = sqlx::query(audited_sql(&sql))
             .bind(tenant_id)
             .bind(root_domain_id)
             .bind(&now)
@@ -258,10 +259,10 @@ impl WebRepository {
         .await
         .map_err(|error| store_error("count root domain hostnames", error))?;
 
-        let rows = sqlx::query(&root_domain_hostname_select(
+        let rows = sqlx::query(audited_sql(&root_domain_hostname_select(
             "d.tenant_id = $1 AND d.root_domain_id = $2 AND d.deleted_at IS NULL
              ORDER BY d.updated_at DESC, d.id DESC LIMIT $3 OFFSET $4",
-        ))
+        )))
         .bind(tenant_id)
         .bind(root_internal_id)
         .bind(page_size)
@@ -330,7 +331,7 @@ impl WebRepository {
         let id = next_id(self.id_generator())?;
         let uuid = new_uuid();
         let now = now_rfc3339();
-        let engine = self.database_engine().await?;
+
         let mut tx = self
             .pool
             .begin()
@@ -354,14 +355,14 @@ impl WebRepository {
             if locked.rows_affected() != 1 {
                 return Err(WebServiceError::not_found("site not found"));
             }
-            let clear_time = instant_write_expression(engine, "$3");
+            let clear_time = instant_write_expression("$3");
             let clear_sql = format!(
                 "UPDATE web_site_binding SET is_primary = FALSE, updated_at = {clear_time},
                         version = version + 1
                  WHERE tenant_id = $1 AND site_id = $2 AND environment = 'production'
                    AND deleted_at IS NULL"
             );
-            sqlx::query(&clear_sql)
+            sqlx::query(audited_sql(&clear_sql))
                 .bind(tenant_id)
                 .bind(site_internal_id)
                 .bind(&now)
@@ -370,7 +371,7 @@ impl WebRepository {
                 .map_err(|error| store_error("clear primary domain for root hostname", error))?;
         }
 
-        let insert_time = instant_write_expression(engine, "$9");
+        let insert_time = instant_write_expression("$9");
         let insert_sql = format!(
             "INSERT INTO web_domain (
                 id, uuid, tenant_id, user_id, root_domain_id, hostname, hostname_type,
@@ -381,7 +382,7 @@ impl WebRepository {
                 {insert_time}, {insert_time}, 0
              )"
         );
-        sqlx::query(&insert_sql)
+        sqlx::query(audited_sql(&insert_sql))
             .bind(id)
             .bind(&uuid)
             .bind(tenant_id)
@@ -398,7 +399,7 @@ impl WebRepository {
         if let Some(site_internal_id) = site_internal_id {
             let binding_id = next_id(self.id_generator())?;
             let binding_uuid = new_uuid();
-            let binding_time = instant_write_expression(engine, "$7");
+            let binding_time = instant_write_expression("$7");
             let binding_sql = format!(
                 "INSERT INTO web_site_binding (
                     id, uuid, tenant_id, site_id, domain_id, environment, path_prefix,
@@ -408,7 +409,7 @@ impl WebRepository {
                     {binding_time}, {binding_time}, 0
                  )"
             );
-            sqlx::query(&binding_sql)
+            sqlx::query(audited_sql(&binding_sql))
                 .bind(binding_id)
                 .bind(binding_uuid)
                 .bind(tenant_id)
@@ -423,7 +424,7 @@ impl WebRepository {
             if request.ssl_enabled {
                 let policy_id = next_id(self.id_generator())?;
                 let policy_uuid = new_uuid();
-                let policy_time = instant_write_expression(engine, "$6");
+                let policy_time = instant_write_expression("$6");
                 let policy_sql = format!(
                     "INSERT INTO web_tls_policy (
                         id, uuid, tenant_id, site_binding_id, certificate_source,
@@ -435,7 +436,7 @@ impl WebRepository {
                     Some("none") => "EXTERNAL",
                     _ => "MANAGED",
                 };
-                sqlx::query(&policy_sql)
+                sqlx::query(audited_sql(&policy_sql))
                     .bind(policy_id)
                     .bind(policy_uuid)
                     .bind(tenant_id)
@@ -461,10 +462,10 @@ impl WebRepository {
         root_domain_id: &str,
         domain_id: &str,
     ) -> WebServiceResult<DomainResponse> {
-        let row = sqlx::query(&root_domain_hostname_select(
+        let row = sqlx::query(audited_sql(&root_domain_hostname_select(
             "d.tenant_id = $1 AND r.uuid = $2 AND d.uuid = $3
              AND d.deleted_at IS NULL AND r.deleted_at IS NULL",
-        ))
+        )))
         .bind(tenant_id)
         .bind(root_domain_id)
         .bind(domain_id)

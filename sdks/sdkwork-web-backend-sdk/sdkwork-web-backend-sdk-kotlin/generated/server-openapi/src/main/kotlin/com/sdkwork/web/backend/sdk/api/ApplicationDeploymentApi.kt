@@ -9,9 +9,8 @@ import com.sdkwork.web.backend.sdk.http.HttpClient
 class ApplicationDeploymentApi(private val client: HttpClient) {
 
     /** List application deployments */
-    suspend fun applicationsDeploymentsList(applicationId: String, page: Int? = null, pageSize: Int? = null, cursor: String? = null, status: Int? = null): ApplicationsDeploymentsListResponse? {
+    suspend fun applicationsDeploymentsList(applicationId: String, pageSize: Int? = null, cursor: String? = null, status: Int? = null): ApplicationsDeploymentsListResponse? {
         val query = buildQueryString(listOf(
-            QueryParameterSpec("page", page, "form", true, false, null),
             QueryParameterSpec("page_size", pageSize, "form", true, false, null),
             QueryParameterSpec("cursor", cursor, "form", true, false, null),
             QueryParameterSpec("status", status, "form", true, false, null)

@@ -166,6 +166,7 @@ pub trait WebAppApi: Send + Sync {
         _site_id: &str,
         _page: i32,
         _page_size: i32,
+        _cursor: Option<&str>,
     ) -> WebServiceResult<SourceVersionPage> {
         Err(crate::WebServiceError::Internal(
             "source versions are unavailable".to_string(),
@@ -482,6 +483,7 @@ pub trait WebBackendApi: Send + Sync {
         application_id: &str,
         page: i32,
         page_size: i32,
+        cursor: Option<&str>,
     ) -> WebServiceResult<SourceVersionPage>;
 
     async fn create_application_source_version(
@@ -652,6 +654,7 @@ pub trait WebBackendApi: Send + Sync {
         context: &WebBackendRequestContext,
         page: i32,
         page_size: i32,
+        cursor: Option<&str>,
     ) -> WebServiceResult<ServerPage>;
 
     async fn create_server(

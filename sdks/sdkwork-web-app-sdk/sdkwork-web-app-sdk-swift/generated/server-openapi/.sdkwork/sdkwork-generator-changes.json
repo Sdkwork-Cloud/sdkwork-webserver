@@ -9,12 +9,13 @@
     "protocol": "http",
     "packageName": "sdkwork-web-app-sdk"
   },
-  "changeFingerprint": "f0db333257ddfdb7653368d1d7226bd8267daa7ab91c314d78c01302b3290f83",
+  "changeFingerprint": "5ee0c1b4a7ceedb59dd9b2639816af5d961cba2fc2fa45ae99f4b52680c54b0d",
   "changes": {
     "createdGeneratedFiles": [],
     "updatedGeneratedFiles": [
-      "Sources/API/EnvVariableApi.swift",
-      "Sources/Models.swift"
+      "README.md",
+      "Sources/API/DeploymentApi.swift",
+      "Sources/API/SourceVersionApi.swift"
     ],
     "unchangedGeneratedFiles": [
       "bin/publish-core.mjs",
@@ -23,17 +24,16 @@
       "CHANGELOG.md",
       "LICENSE",
       "Package.swift",
-      "README.md",
       "sdkwork-sdk.json",
       "Sources/API/API.swift",
       "Sources/API/ApiPaths.swift",
       "Sources/API/CertificateApi.swift",
-      "Sources/API/DeploymentApi.swift",
       "Sources/API/DomainApi.swift",
+      "Sources/API/EnvVariableApi.swift",
       "Sources/API/MonitorApi.swift",
       "Sources/API/SiteApi.swift",
-      "Sources/API/SourceVersionApi.swift",
       "Sources/HTTP/HttpClient.swift",
+      "Sources/Models.swift",
       "Sources/SdkworkAppClient.swift"
     ],
     "deletedGeneratedFiles": [],
@@ -47,35 +47,36 @@
     "schemaVersion": 1,
     "areas": [
       "api-surface",
-      "models"
+      "documentation"
     ],
     "details": [
       {
         "area": "api-surface",
         "paths": [
-          "Sources/API/EnvVariableApi.swift"
+          "Sources/API/DeploymentApi.swift",
+          "Sources/API/SourceVersionApi.swift"
         ]
       },
       {
-        "area": "models",
+        "area": "documentation",
         "paths": [
-          "Sources/Models.swift"
+          "README.md"
         ]
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, models. Verification is required."
+    "summary": "Detected impact areas: api-surface, documentation. Verification is required."
   },
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: api-surface, documentation. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, documentation.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-webserver\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-swift\\generated\\server-openapi",
         "command": "node",
         "args": [

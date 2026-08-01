@@ -129,8 +129,8 @@ fmt.Println(result)
 // 获取应用源码版本
 siteId := "1"
 params := map[string]interface{}{
-    "page": 1,
-    "page_size": 2,
+    "page_size": 1,
+    "cursor": "cursor",
 }
 result, err := client.SourceVersion.SitesSourceVersionsList(siteId, params)
 if err != nil {
@@ -145,8 +145,7 @@ fmt.Println(result)
 // 获取部署历史
 siteId := "1"
 params := map[string]interface{}{
-    "page": 1,
-    "page_size": 2,
+    "page_size": 1,
     "cursor": "cursor",
     "status": 0,
 }

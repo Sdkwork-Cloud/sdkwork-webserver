@@ -1,3 +1,4 @@
+use crate::audited_sql;
 use super::{EngineRow, WebRepository};
 use sdkwork_webserver_contract::{
     CreateDeploymentRequest, DeploymentPage, DeploymentResponse, WebServiceError, WebServiceResult,
@@ -74,6 +75,15 @@ impl WebRepository {
                 .list_deployments_cursor_repo(tenant_id, site_id, page_size, status, cursor)
                 .await;
         }
+        // Offset mode remains only for internal single-page lookups (page 1,
+        // e.g. the latest-deployment status projection). Deep OFFSET on this
+        // growing collection is rejected; clients must use cursor pagination
+        // (PRD-FR-011, PAGINATION_SPEC §6/§12).
+        if page > 1 {
+            return Err(WebServiceError::validation(
+                "cursor is required beyond the first page of deployment history; offset pagination is not supported on this growing collection",
+            ));
+        }
         let (page, page_size, offset) = pagination(page, page_size)?;
 
         let (count_row, rows) = if let Some(status) = status {
@@ -88,13 +98,13 @@ impl WebRepository {
             .await
             .map_err(|error| store_error("count web_deployment", error))?;
 
-            let rows = sqlx::query(&format!(
+            let rows = sqlx::query(audited_sql(&format!(
                 "{DEPLOYMENT_LIST_SELECT}
                  WHERE deployment.tenant_id = $1
                    AND deployment.site_id = $2
                    AND deployment.status = $3
                  ORDER BY deployment.created_at DESC, deployment.id DESC LIMIT $4 OFFSET $5"
-            ))
+            )))
             .bind(tenant_id)
             .bind(site_internal_id)
             .bind(status)
@@ -116,11 +126,11 @@ impl WebRepository {
             .await
             .map_err(|error| store_error("count web_deployment", error))?;
 
-            let rows = sqlx::query(&format!(
+            let rows = sqlx::query(audited_sql(&format!(
                 "{DEPLOYMENT_LIST_SELECT}
                  WHERE deployment.tenant_id = $1 AND deployment.site_id = $2
                  ORDER BY deployment.created_at DESC, deployment.id DESC LIMIT $3 OFFSET $4"
-            ))
+            )))
             .bind(tenant_id)
             .bind(site_internal_id)
             .bind(page_size)
@@ -178,7 +188,7 @@ impl WebRepository {
              ORDER BY deployment.created_at DESC, deployment.id DESC LIMIT $6"
         );
         let fetch_size = i64::from(page_size) + 1;
-        let rows = sqlx::query(&sql)
+        let rows = sqlx::query(audited_sql(&sql))
             .bind(tenant_id)
             .bind(site_internal_id)
             .bind(status)
@@ -346,8 +356,8 @@ impl WebRepository {
         let id = next_id(self.id_generator())?;
         let uuid = new_uuid();
         let now = now_rfc3339();
-        let engine = self.database_engine().await?;
-        let now_expression = instant_write_expression(engine, "$16");
+
+        let now_expression = instant_write_expression("$16");
         let insert_sql = format!(
             "INSERT INTO web_deployment (
                 id, uuid, tenant_id, organization_id, user_id, site_id, source_version_id,
@@ -362,7 +372,7 @@ impl WebRepository {
                 {now_expression}, {now_expression}, 0
              )"
         );
-        let insert_result = sqlx::query(&insert_sql)
+        let insert_result = sqlx::query(audited_sql(&insert_sql))
             .bind(id)
             .bind(&uuid)
             .bind(tenant_id)
@@ -644,8 +654,8 @@ impl WebRepository {
         let now = now_rfc3339();
         let id = next_id(self.id_generator())?;
         let uuid = new_uuid();
-        let engine = self.database_engine().await?;
-        let rollback_insert_time = instant_write_expression(engine, "$17");
+
+        let rollback_insert_time = instant_write_expression("$17");
         let insert_sql = format!(
             "INSERT INTO web_deployment (
                 id, uuid, tenant_id, organization_id, user_id, site_id, source_version_id,
@@ -668,7 +678,7 @@ impl WebRepository {
             .await
             .map_err(|error| store_error("begin rollback web_deployment transaction", error))?;
 
-        let insert_result = sqlx::query(&insert_sql)
+        let insert_result = sqlx::query(audited_sql(&insert_sql))
             .bind(id)
             .bind(&uuid)
             .bind(tenant_id)

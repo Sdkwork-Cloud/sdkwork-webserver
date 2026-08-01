@@ -8,9 +8,8 @@ public class AuditApi {
     }
 
     /// List audit logs
-    public func logsList(page: Int? = nil, pageSize: Int? = nil, cursor: String? = nil, targetType: String? = nil, action: String? = nil, operatorId: String? = nil, startDate: String? = nil, endDate: String? = nil) async throws -> AuditLogsListResponse? {
+    public func logsList(pageSize: Int? = nil, cursor: String? = nil, targetType: String? = nil, action: String? = nil, operatorId: String? = nil, startDate: String? = nil, endDate: String? = nil) async throws -> AuditLogsListResponse? {
         let query = buildQueryString([
-            QueryParameterSpec(name: "page", value: page, style: "form", explode: true, allowReserved: false, contentType: nil),
             QueryParameterSpec(name: "page_size", value: pageSize, style: "form", explode: true, allowReserved: false, contentType: nil),
             QueryParameterSpec(name: "cursor", value: cursor, style: "form", explode: true, allowReserved: false, contentType: nil),
             QueryParameterSpec(name: "target_type", value: targetType, style: "form", explode: true, allowReserved: false, contentType: nil),

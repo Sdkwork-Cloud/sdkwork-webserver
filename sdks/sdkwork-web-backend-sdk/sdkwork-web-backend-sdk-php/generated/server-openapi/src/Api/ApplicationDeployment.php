@@ -12,11 +12,10 @@ use SDKWork\Web\BackendSdk\Models\CreateApplicationDeploymentRequest;
 final class ApplicationDeploymentApi extends BaseApi
 {
     /** List application deployments */
-    public function applicationsDeploymentsList(string $applicationId, ?int $page = null, ?int $pageSize = null, ?string $cursor = null, ?int $status = null): ?ApplicationsDeploymentsListResponse
+    public function applicationsDeploymentsList(string $applicationId, ?int $pageSize = null, ?string $cursor = null, ?int $status = null): ?ApplicationsDeploymentsListResponse
     {
         $path = $this->interpolatePath('/backend/v3/api/applications/{applicationId}/deployments', ['applicationId' => $this->serializePathParameter($applicationId, new PathParameterSpec('applicationId', 'simple', false))]);
         $query = $this->buildQueryString([
-            new QueryParameterSpec('page', $page, 'form', true, false, null),
             new QueryParameterSpec('page_size', $pageSize, 'form', true, false, null),
             new QueryParameterSpec('cursor', $cursor, 'form', true, false, null),
             new QueryParameterSpec('status', $status, 'form', true, false, null),

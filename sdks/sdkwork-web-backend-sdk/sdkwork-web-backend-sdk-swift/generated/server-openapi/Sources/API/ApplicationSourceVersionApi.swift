@@ -8,10 +8,10 @@ public class ApplicationSourceVersionApi {
     }
 
     /// List immutable application source versions
-    public func applicationsSourceVersionsList(applicationId: String, page: Int? = nil, pageSize: Int? = nil) async throws -> ApplicationsSourceVersionsListResponse? {
+    public func applicationsSourceVersionsList(applicationId: String, pageSize: Int? = nil, cursor: String? = nil) async throws -> ApplicationsSourceVersionsListResponse? {
         let query = buildQueryString([
-            QueryParameterSpec(name: "page", value: page, style: "form", explode: true, allowReserved: false, contentType: nil),
-            QueryParameterSpec(name: "page_size", value: pageSize, style: "form", explode: true, allowReserved: false, contentType: nil)
+            QueryParameterSpec(name: "page_size", value: pageSize, style: "form", explode: true, allowReserved: false, contentType: nil),
+            QueryParameterSpec(name: "cursor", value: cursor, style: "form", explode: true, allowReserved: false, contentType: nil)
         ])
         return try await client.get(ApiPaths.appendQueryString(ApiPaths.backendPath("/applications/\(serializePathParameter(applicationId, PathParameterSpec(name: "applicationId", style: "simple", explode: false)))/source_versions"), query), responseType: ApplicationsSourceVersionsListResponse.self)
     }

@@ -14,12 +14,12 @@ use SDKWork\Web\AppSdk\Models\SitesSourceVersionsRetrieveResponse;
 final class SourceVersionApi extends BaseApi
 {
     /** 获取应用源码版本 */
-    public function sitesSourceVersionsList(string $siteId, ?int $page = null, ?int $pageSize = null): ?SitesSourceVersionsListResponse
+    public function sitesSourceVersionsList(string $siteId, ?int $pageSize = null, ?string $cursor = null): ?SitesSourceVersionsListResponse
     {
         $path = $this->interpolatePath('/app/v3/api/sites/{siteId}/source_versions', ['siteId' => $this->serializePathParameter($siteId, new PathParameterSpec('siteId', 'simple', false))]);
         $query = $this->buildQueryString([
-            new QueryParameterSpec('page', $page, 'form', true, false, null),
             new QueryParameterSpec('page_size', $pageSize, 'form', true, false, null),
+            new QueryParameterSpec('cursor', $cursor, 'form', true, false, null),
         ]);
         $path = $this->appendQueryString($path, $query);
         $result = $this->client->request('GET', $path, []);

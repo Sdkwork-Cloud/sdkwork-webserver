@@ -9,10 +9,10 @@ import com.sdkwork.web.backend.sdk.http.HttpClient
 class ApplicationSourceVersionApi(private val client: HttpClient) {
 
     /** List immutable application source versions */
-    suspend fun applicationsSourceVersionsList(applicationId: String, page: Int? = null, pageSize: Int? = null): ApplicationsSourceVersionsListResponse? {
+    suspend fun applicationsSourceVersionsList(applicationId: String, pageSize: Int? = null, cursor: String? = null): ApplicationsSourceVersionsListResponse? {
         val query = buildQueryString(listOf(
-            QueryParameterSpec("page", page, "form", true, false, null),
-            QueryParameterSpec("page_size", pageSize, "form", true, false, null)
+            QueryParameterSpec("page_size", pageSize, "form", true, false, null),
+            QueryParameterSpec("cursor", cursor, "form", true, false, null)
         ))
         val raw = client.get(ApiPaths.appendQueryString(ApiPaths.backendPath("/applications/${serializePathParameter(applicationId, PathParameterSpec("applicationId", "simple", false))}/source_versions"), query))
         return client.convertValue(raw, object : TypeReference<ApplicationsSourceVersionsListResponse>() {})

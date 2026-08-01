@@ -12,10 +12,10 @@ class ServerApi {
   ServerApi(this._client);
 
   /// List managed servers
-  Future<ServersListResponse?> serversList([int? page, int? pageSize]) async {
+  Future<ServersListResponse?> serversList([int? pageSize, String? cursor]) async {
     final query = buildQueryString([
-      QueryParameterSpec('page', page, 'form', true, false, null),
-      QueryParameterSpec('page_size', pageSize, 'form', true, false, null)
+      QueryParameterSpec('page_size', pageSize, 'form', true, false, null),
+      QueryParameterSpec('cursor', cursor, 'form', true, false, null)
     ]);
     final response = await _client.get(ApiPaths.appendQueryString(ApiPaths.backendPath('/servers'), query));
     return (() {

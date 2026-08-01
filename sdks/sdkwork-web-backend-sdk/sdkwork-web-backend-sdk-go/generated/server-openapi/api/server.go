@@ -18,10 +18,10 @@ func NewServerApi(client *sdkhttp.Client) *ServerApi {
 }
 
 // List managed servers
-func (a *ServerApi) ServersList(page *int, pageSize *int) (sdktypes.ServersListResponse, error) {
+func (a *ServerApi) ServersList(pageSize *int, cursor *string) (sdktypes.ServersListResponse, error) {
     query := BuildQueryString([]QueryParameterSpec{
-        {Name: "page", Value: func() interface{} { if page == nil { return nil }; return *page }(), Style: "form", Explode: true, AllowReserved: false},
         {Name: "page_size", Value: func() interface{} { if pageSize == nil { return nil }; return *pageSize }(), Style: "form", Explode: true, AllowReserved: false},
+        {Name: "cursor", Value: func() interface{} { if cursor == nil { return nil }; return *cursor }(), Style: "form", Explode: true, AllowReserved: false},
     })
     raw, err := a.client.Get(AppendQueryString(BackendApiPath("/servers"), query), nil, nil)
     if err != nil {

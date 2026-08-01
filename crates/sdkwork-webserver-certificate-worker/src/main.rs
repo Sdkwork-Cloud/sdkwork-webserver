@@ -54,7 +54,10 @@ async fn main() -> anyhow::Result<()> {
     let mut next_renewal_schedule = Instant::now();
     // Randomize the startup phase so multiple worker replicas do not claim
     // operations in lockstep.
-    tokio::time::sleep(Duration::from_millis(jitter_millis(poll_interval_secs * 1_000))).await;
+    tokio::time::sleep(Duration::from_millis(jitter_millis(
+        poll_interval_secs * 1_000,
+    )))
+    .await;
 
     let mut consecutive_failures: u32 = 0;
     loop {

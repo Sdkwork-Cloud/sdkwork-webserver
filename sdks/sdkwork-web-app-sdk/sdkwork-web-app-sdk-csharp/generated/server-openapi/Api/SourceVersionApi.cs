@@ -18,12 +18,12 @@ namespace SDKWork.Web.AppSdk.Api
         /// <summary>
         /// 获取应用源码版本
         /// </summary>
-        public async Task<SDKWork.Web.AppSdk.Models.SitesSourceVersionsListResponse?> SitesSourceVersionsListAsync(string siteId, int? page = null, int? pageSize = null)
+        public async Task<SDKWork.Web.AppSdk.Models.SitesSourceVersionsListResponse?> SitesSourceVersionsListAsync(string siteId, int? pageSize = null, string? cursor = null)
         {
             var queryString = BuildQueryString(new[]
             {
-                new QueryParameterSpec("page", page, "form", true, false, null),
                 new QueryParameterSpec("page_size", pageSize, "form", true, false, null),
+                new QueryParameterSpec("cursor", cursor, "form", true, false, null),
             });
             return await _client.GetAsync<SDKWork.Web.AppSdk.Models.SitesSourceVersionsListResponse>(ApiPaths.AppendQueryString(ApiPaths.AppPath($"/sites/{SerializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false))}/source_versions"), queryString));
         }

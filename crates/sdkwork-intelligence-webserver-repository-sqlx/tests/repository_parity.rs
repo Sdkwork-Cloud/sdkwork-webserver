@@ -17,9 +17,8 @@ use sdkwork_webserver_contract::{
     CreateRootDomainHostnameRequest, CreateRootDomainRequest, CreateServerRequest,
     CreateSiteRequest, CreateSourceVersionRequest, IssueCertificateRequest, ListAuditLogsQuery,
     ListNginxConfigsQuery, ListRootDomainsQuery, ListSitesQuery, MediaResource,
-    RuntimeObservationState, SourceVersionConfigSnapshot,
-    UpdateDomainApplicationBindingRequest, UpdateNginxConfigRequest, UpdateSiteRequest,
-    WebServiceErrorKind, WebsiteRuntimeSetSnapshot,
+    RuntimeObservationState, SourceVersionConfigSnapshot, UpdateDomainApplicationBindingRequest,
+    UpdateNginxConfigRequest, UpdateSiteRequest, WebServiceErrorKind, WebsiteRuntimeSetSnapshot,
 };
 use sdkwork_webserver_core::website_runtime::website_runtime_set_snapshot_sha256;
 use sdkwork_webserver_database_host::bootstrap_web_database;
@@ -344,7 +343,6 @@ async fn prepare_database(config: DatabaseConfig) -> TestContext {
     let id_generator = SnowflakeIdGenerator::new(731).expect("create test Snowflake generator");
     let repository = Arc::new(PostgresWebRepository::new(
         pool.clone(),
-        database_engine,
         id_generator,
         [0x5a; 32],
     )) as Arc<dyn WebRepositoryPort>;
@@ -847,15 +845,16 @@ async fn verify_bounded_config_collections(
 async fn verify_public_repository_surface(context: &TestContext, site_id: &str) {
     let repository = &context.repository;
     let metadata_expression = "CAST($3 AS JSONB)";
-    sqlx::query(&format!(
+    let statement = format!(
         "UPDATE web_site SET metadata = {metadata_expression} WHERE tenant_id = $1 AND uuid = $2"
-    ))
-    .bind(TENANT_A)
-    .bind(site_id)
-    .bind(r#"{"system":{"retention":"managed"}}"#)
-    .execute(&context.pool)
-    .await
-    .expect("seed unrelated site metadata");
+    );
+    sqlx::query(sqlx::AssertSqlSafe(statement.as_str()))
+        .bind(TENANT_A)
+        .bind(site_id)
+        .bind(r#"{"system":{"retention":"managed"}}"#)
+        .execute(&context.pool)
+        .await
+        .expect("seed unrelated site metadata");
     let updated_site = repository
         .update_site(
             TENANT_A,
@@ -1770,7 +1769,7 @@ async fn verify_public_repository_surface(context: &TestContext, site_id: &str) 
         .await
         .expect("merge heartbeat JSON and timestamp");
     assert!(repository
-        .list_servers(TENANT_A, 1, 20)
+        .list_servers(TENANT_A, 1, 20, None)
         .await
         .expect("list server JSON and timestamp projections")
         .items
@@ -2596,7 +2595,7 @@ async fn verify_source_version_contract(
         );
     }
     let page = repository
-        .list_source_versions(TENANT_A, site_id, 1, i32::MAX)
+        .list_source_versions(TENANT_A, site_id, 1, i32::MAX, None)
         .await
         .expect_err("invalid page_size must be rejected");
     assert!(matches!(
@@ -2604,7 +2603,7 @@ async fn verify_source_version_contract(
         sdkwork_webserver_contract::WebServiceError::Validation(_)
     ));
     let page = repository
-        .list_source_versions(TENANT_A, site_id, 1, 200)
+        .list_source_versions(TENANT_A, site_id, 1, 200, None)
         .await
         .expect("list retained and pruned source versions");
     assert_eq!(page.total, 7);

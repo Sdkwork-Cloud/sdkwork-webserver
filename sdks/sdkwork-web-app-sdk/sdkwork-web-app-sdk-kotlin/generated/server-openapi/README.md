@@ -118,8 +118,8 @@ println(result)
 // 获取应用源码版本
 val siteId = "1"
 val params = linkedMapOf<String, Any>(
-    "page" to 1,
-    "page_size" to 2
+    "page_size" to 1,
+    "cursor" to "cursor"
 )
 val result = client.sourceVersion.sitesSourceVersionsList(siteId, params)
 println(result)
@@ -131,8 +131,7 @@ println(result)
 // 获取部署历史
 val siteId = "1"
 val params = linkedMapOf<String, Any>(
-    "page" to 1,
-    "page_size" to 2,
+    "page_size" to 1,
     "cursor" to "cursor",
     "status" to 0
 )

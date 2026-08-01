@@ -9,10 +9,10 @@ import com.sdkwork.web.backend.sdk.http.HttpClient
 class ServerApi(private val client: HttpClient) {
 
     /** List managed servers */
-    suspend fun serversList(page: Int? = null, pageSize: Int? = null): ServersListResponse? {
+    suspend fun serversList(pageSize: Int? = null, cursor: String? = null): ServersListResponse? {
         val query = buildQueryString(listOf(
-            QueryParameterSpec("page", page, "form", true, false, null),
-            QueryParameterSpec("page_size", pageSize, "form", true, false, null)
+            QueryParameterSpec("page_size", pageSize, "form", true, false, null),
+            QueryParameterSpec("cursor", cursor, "form", true, false, null)
         ))
         val raw = client.get(ApiPaths.appendQueryString(ApiPaths.backendPath("/servers"), query))
         return client.convertValue(raw, object : TypeReference<ServersListResponse>() {})

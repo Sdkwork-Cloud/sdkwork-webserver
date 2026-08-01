@@ -14,9 +14,8 @@ public class AuditApi {
     }
 
     /** List audit logs */
-    public AuditLogsListResponse logsList(Integer page, Integer pageSize, String cursor, String targetType, String action, String operatorId, String startDate, String endDate) throws Exception {
+    public AuditLogsListResponse logsList(Integer pageSize, String cursor, String targetType, String action, String operatorId, String startDate, String endDate) throws Exception {
         String query = buildQueryString(List.of(
-            new QueryParameterSpec("page", page, "form", true, false, null),
             new QueryParameterSpec("page_size", pageSize, "form", true, false, null),
             new QueryParameterSpec("cursor", cursor, "form", true, false, null),
             new QueryParameterSpec("target_type", targetType, "form", true, false, null),

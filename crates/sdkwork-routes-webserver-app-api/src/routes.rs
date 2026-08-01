@@ -8,8 +8,7 @@ use sdkwork_webserver_contract::{
     CreateDeploymentRequest, CreateDomainRequest, CreateEnvVariableRequest,
     CreateHealthCheckRequest, CreateListenerCertificateBindingRequest, CreateSiteRequest,
     CreateSourceVersionRequest, ImportGitSourceVersionRequest, IssueCertificateRequest,
-    ListSitesQuery, UpdateEnvVariableRequest, UpdateSiteRequest, WebAppApi,
-    WebAppRequestContext,
+    ListSitesQuery, UpdateEnvVariableRequest, UpdateSiteRequest, WebAppApi, WebAppRequestContext,
 };
 use serde::Deserialize;
 use std::sync::Arc;
@@ -100,6 +99,7 @@ struct PageQuery {
     page: i32,
     #[serde(default = "default_page_size")]
     page_size: i32,
+    cursor: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -302,7 +302,13 @@ async fn list_source_versions(
     ok_source_version_page(
         state
             .api
-            .list_source_versions(&context, &site_id, query.page, query.page_size)
+            .list_source_versions(
+                &context,
+                &site_id,
+                query.page,
+                query.page_size,
+                query.cursor.as_deref(),
+            )
             .await,
     )
 }

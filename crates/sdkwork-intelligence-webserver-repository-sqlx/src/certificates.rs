@@ -1,3 +1,4 @@
+use crate::audited_sql;
 use sdkwork_webserver_contract::{
     CertificateIdentifierResponse, CertificateIssueUpdate, CertificateOperationLease,
     CertificatePage, CertificateResponse, WebServiceError, WebServiceResult,
@@ -56,7 +57,7 @@ impl WebRepository {
         .await
         .map_err(|error| store_error("count web_certificate", error))?;
 
-        let rows = sqlx::query(&certificate_select(
+        let rows = sqlx::query(audited_sql(&certificate_select(
             "c.tenant_id = $1 AND c.deleted_at IS NULL
              AND ($2 IS NULL OR c.user_id = $2)
              AND ($3 IS NULL OR EXISTS (
@@ -80,7 +81,7 @@ impl WebRepository {
                    AND domain_d.uuid = $4 AND domain_d.deleted_at IS NULL
              ))
              ORDER BY c.updated_at DESC, c.id DESC LIMIT $5 OFFSET $6",
-        ))
+        )))
         .bind(tenant_id)
         .bind(owner_id)
         .bind(site_uuid)
@@ -453,9 +454,9 @@ impl WebRepository {
         tenant_id: i64,
         certificate_uuid: &str,
     ) -> WebServiceResult<CertificateResponse> {
-        let row = sqlx::query(&certificate_select(
+        let row = sqlx::query(audited_sql(&certificate_select(
             "c.tenant_id = $1 AND c.uuid = $2 AND c.deleted_at IS NULL",
-        ))
+        )))
         .bind(tenant_id)
         .bind(certificate_uuid)
         .fetch_optional(&self.pool)

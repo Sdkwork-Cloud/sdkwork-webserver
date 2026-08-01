@@ -16,6 +16,13 @@ fn default_max_request_body_bytes() -> u64 {
     10 * 1024 * 1024
 }
 
+/// Hard ceiling on a proxied upstream response body. Streaming is preserved,
+/// but an upstream that pushes beyond the configured budget fails as a
+/// bounded 502 target failure instead of occupying connections indefinitely.
+fn default_max_response_body_bytes() -> u64 {
+    256 * 1024 * 1024
+}
+
 fn default_request_timeout_ms() -> u64 {
     30_000
 }
@@ -451,6 +458,8 @@ impl Default for CompatibilityConfig {
 pub struct WebServerLimits {
     #[serde(default = "default_max_request_body_bytes")]
     pub max_request_body_bytes: u64,
+    #[serde(default = "default_max_response_body_bytes")]
+    pub max_response_body_bytes: u64,
     #[serde(default = "default_request_timeout_ms")]
     pub request_timeout_ms: u64,
     #[serde(default = "default_request_body_start_timeout_ms")]
@@ -543,6 +552,7 @@ impl Default for WebServerLimits {
     fn default() -> Self {
         Self {
             max_request_body_bytes: default_max_request_body_bytes(),
+            max_response_body_bytes: default_max_response_body_bytes(),
             request_timeout_ms: default_request_timeout_ms(),
             request_body_start_timeout_ms: default_request_body_start_timeout_ms(),
             request_body_idle_timeout_ms: default_request_body_idle_timeout_ms(),

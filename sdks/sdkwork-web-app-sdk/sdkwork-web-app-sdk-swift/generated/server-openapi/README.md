@@ -113,8 +113,8 @@ print(result)
 // 获取应用源码版本
 let siteId = "1"
 let params: [String: Any] = [
-    "page": 1,
-    "page_size": 2
+    "page_size": 1,
+    "cursor": "cursor"
 ]
 let result = try await client.sourceVersion.sitesSourceVersionsList(siteId: siteId, params: params)
 print(result)
@@ -126,8 +126,7 @@ print(result)
 // 获取部署历史
 let siteId = "1"
 let params: [String: Any] = [
-    "page": 1,
-    "page_size": 2,
+    "page_size": 1,
     "cursor": "cursor",
     "status": 0
 ]

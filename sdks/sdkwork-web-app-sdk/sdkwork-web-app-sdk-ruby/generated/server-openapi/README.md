@@ -85,7 +85,7 @@ puts result.inspect
 ```ruby
 # 获取应用源码版本
 site_id = '1'
-params = { 'page' => 1, 'page_size' => 2 }
+params = { 'page_size' => 1, 'cursor' => 'cursor' }
 result = client.source_version.sites_source_versions_list(site_id, params: params)
 puts result.inspect
 ```
@@ -95,7 +95,7 @@ puts result.inspect
 ```ruby
 # 获取部署历史
 site_id = '1'
-params = { 'page' => 1, 'page_size' => 2, 'cursor' => 'cursor', 'status' => 0 }
+params = { 'page_size' => 1, 'cursor' => 'cursor', 'status' => 0 }
 result = client.deployment.sites_deployments_list(site_id, params: params)
 puts result.inspect
 ```

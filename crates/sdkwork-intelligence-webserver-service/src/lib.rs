@@ -20,6 +20,7 @@ pub use source_import::{
     ApplicationSourceImporter, GitSourceImportRequest, ImportedApplicationSource,
 };
 
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
 
 use sdkwork_webserver_acme_service::CertificateIssuer;
@@ -33,6 +34,9 @@ pub struct WebService {
     pub(crate) edge_runtime: Arc<EdgeRuntime>,
     pub(crate) source_importer: Arc<dyn ApplicationSourceImporter>,
     pub(crate) domain_ownership_verifier: Arc<dyn DomainOwnershipVerifier>,
+    /// Count of audit log persistence failures so the audit gap stays
+    /// observable through health/readiness surfaces instead of being silent.
+    audit_persistence_failures: AtomicU64,
 }
 
 impl WebService {
@@ -77,6 +81,7 @@ impl WebService {
             edge_runtime,
             source_importer,
             domain_ownership_verifier,
+            audit_persistence_failures: AtomicU64::new(0),
         }
     }
 
@@ -84,7 +89,30 @@ impl WebService {
         self.repository.ready_check().await
     }
 
+    /// Persists an audit log entry. A persistence failure is counted and
+    /// surfaced through [`Self::audit_persistence_failures`] so the audit
+    /// gap is observable; business operations do not fail after their
+    /// durable effect has already been committed.
     pub async fn record_audit_log(&self, entry: AuditLogWrite<'_>) -> WebServiceResult<()> {
-        self.repository.insert_audit_log(entry).await
+        match self.repository.insert_audit_log(entry).await {
+            Ok(()) => Ok(()),
+            Err(error) => {
+                self.audit_persistence_failures
+                    .fetch_add(1, Ordering::Relaxed);
+                tracing::error!(
+                    error = ?error,
+                    "failed to persist audit log entry; audit persistence failures now {}",
+                    self.audit_persistence_failures()
+                );
+                Err(error)
+            }
+        }
+    }
+
+    /// Total audit log persistence failures since process start. Operators
+    /// must alert on a nonzero value; a silent audit gap violates the
+    /// commercial audit contract.
+    pub fn audit_persistence_failures(&self) -> u64 {
+        self.audit_persistence_failures.load(Ordering::Relaxed)
     }
 }

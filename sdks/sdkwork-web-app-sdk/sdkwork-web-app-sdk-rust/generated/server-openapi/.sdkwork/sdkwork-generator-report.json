@@ -12,31 +12,30 @@
   "mode": "apply",
   "hasChanges": true,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "c22d1f56b75fc24f8ce4a090891050bf1abebfce341b5a3b0bc76ce23f229114",
+  "changeFingerprint": "3b4e4febacd33cc3139936b2d8b49fe44ec8eab45656803d7d3957eab97e6595",
   "changeImpact": {
     "schemaVersion": 1,
     "areas": [
       "api-surface",
-      "models"
+      "documentation"
     ],
     "details": [
       {
         "area": "api-surface",
         "paths": [
-          "src/api/env_variable.rs"
+          "src/api/deployment.rs",
+          "src/api/source_version.rs"
         ]
       },
       {
-        "area": "models",
+        "area": "documentation",
         "paths": [
-          "src/models/mod.rs",
-          "src/models/sites_env_variables_update_response.rs",
-          "src/models/update_env_variable_request.rs"
+          "README.md"
         ]
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, models. Verification is required."
+    "summary": "Detected impact areas: api-surface, documentation. Verification is required."
   },
   "executionDecision": {
     "schemaVersion": 1,
@@ -57,7 +56,7 @@
         "id": "verify-check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, documentation.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-webserver\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-rust\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -75,7 +74,7 @@
         "id": "verify-build",
         "title": "Unified package build",
         "required": true,
-        "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: api-surface, models.",
+        "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: api-surface, documentation.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-webserver\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-rust\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -94,13 +93,13 @@
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: api-surface, documentation. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, documentation.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-webserver\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-rust\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -118,7 +117,7 @@
         "id": "build",
         "title": "Unified package build",
         "required": true,
-        "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: api-surface, models.",
+        "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: api-surface, documentation.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-webserver\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-rust\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -157,20 +156,18 @@
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 4,
+    "writtenFiles": 3,
     "skippedScaffoldFiles": 1,
-    "skippedUnchangedGeneratedFiles": 93,
+    "skippedUnchangedGeneratedFiles": 94,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "c22d1f56b75fc24f8ce4a090891050bf1abebfce341b5a3b0bc76ce23f229114",
+    "changeFingerprint": "3b4e4febacd33cc3139936b2d8b49fe44ec8eab45656803d7d3957eab97e6595",
     "changes": {
-      "createdGeneratedFiles": [
-        "src/models/sites_env_variables_update_response.rs",
-        "src/models/update_env_variable_request.rs"
-      ],
+      "createdGeneratedFiles": [],
       "updatedGeneratedFiles": [
-        "src/api/env_variable.rs",
-        "src/models/mod.rs"
+        "README.md",
+        "src/api/deployment.rs",
+        "src/api/source_version.rs"
       ],
       "unchangedGeneratedFiles": [
         "bin/publish-core.mjs",
@@ -179,17 +176,15 @@
         "Cargo.toml",
         "CHANGELOG.md",
         "LICENSE",
-        "README.md",
         "sdkwork-sdk.json",
         "src/api/base.rs",
         "src/api/certificate.rs",
-        "src/api/deployment.rs",
         "src/api/domain.rs",
+        "src/api/env_variable.rs",
         "src/api/mod.rs",
         "src/api/monitor.rs",
         "src/api/paths.rs",
         "src/api/site.rs",
-        "src/api/source_version.rs",
         "src/client.rs",
         "src/http/client.rs",
         "src/http/mod.rs",
@@ -226,6 +221,7 @@
         "src/models/listener_certificate_summary_response.rs",
         "src/models/media_checksum.rs",
         "src/models/media_resource.rs",
+        "src/models/mod.rs",
         "src/models/page_info.rs",
         "src/models/problem_detail.rs",
         "src/models/sdk_work_api_response.rs",
@@ -252,6 +248,7 @@
         "src/models/sites_domains_verify_response.rs",
         "src/models/sites_env_variables_create_response201.rs",
         "src/models/sites_env_variables_list_response.rs",
+        "src/models/sites_env_variables_update_response.rs",
         "src/models/sites_health_checks_create_response201.rs",
         "src/models/sites_health_checks_list_response.rs",
         "src/models/sites_list_response.rs",
@@ -265,6 +262,7 @@
         "src/models/source_version_config_snapshot.rs",
         "src/models/source_version_page.rs",
         "src/models/source_version_response.rs",
+        "src/models/update_env_variable_request.rs",
         "src/models/update_site_request.rs"
       ],
       "deletedGeneratedFiles": [],
@@ -278,37 +276,36 @@
       "schemaVersion": 1,
       "areas": [
         "api-surface",
-        "models"
+        "documentation"
       ],
       "details": [
         {
           "area": "api-surface",
           "paths": [
-            "src/api/env_variable.rs"
+            "src/api/deployment.rs",
+            "src/api/source_version.rs"
           ]
         },
         {
-          "area": "models",
+          "area": "documentation",
           "paths": [
-            "src/models/mod.rs",
-            "src/models/sites_env_variables_update_response.rs",
-            "src/models/update_env_variable_request.rs"
+            "README.md"
           ]
         }
       ],
       "requiresVerification": true,
-      "summary": "Detected impact areas: api-surface, models. Verification is required."
+      "summary": "Detected impact areas: api-surface, documentation. Verification is required."
     },
     "verificationPlan": {
       "shouldRun": true,
       "runPhase": "now",
-      "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
+      "summary": "Detected impact areas: api-surface, documentation. Verification is required. Run the required verification commands now against the generated SDK output.",
       "steps": [
         {
           "id": "check",
           "title": "Unified package check",
           "required": true,
-          "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
+          "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, documentation.",
           "workingDirectory": "E:\\sdkwork-space\\sdkwork-webserver\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-rust\\generated\\server-openapi",
           "command": "node",
           "args": [
@@ -326,7 +323,7 @@
           "id": "build",
           "title": "Unified package build",
           "required": true,
-          "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: api-surface, models.",
+          "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: api-surface, documentation.",
           "workingDirectory": "E:\\sdkwork-space\\sdkwork-webserver\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-rust\\generated\\server-openapi",
           "command": "node",
           "args": [

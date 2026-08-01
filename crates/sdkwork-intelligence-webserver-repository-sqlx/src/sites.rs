@@ -1,3 +1,4 @@
+use crate::audited_sql;
 use super::{EngineRow, WebRepository};
 use sdkwork_utils_rust::slugify;
 use sdkwork_webserver_contract::{
@@ -122,10 +123,10 @@ impl WebRepository {
             .unwrap_or_else(|| serde_json::json!({}));
         let org_id = organization_id.unwrap_or(0);
         let data_scope = if owner_id.is_some() { 3 } else { 1 };
-        let engine = self.database_engine().await?;
-        let runtime_config_expression = json_write_expression(engine, "$12");
-        let metadata_expression = json_write_expression(engine, "$13");
-        let now_expression = instant_write_expression(engine, "$14");
+
+        let runtime_config_expression = json_write_expression("$12");
+        let metadata_expression = json_write_expression("$13");
+        let now_expression = instant_write_expression("$14");
         let insert_sql = format!(
             "INSERT INTO web_site (
                 id, uuid, tenant_id, organization_id, data_scope, user_id, name, slug, description,
@@ -136,7 +137,7 @@ impl WebRepository {
              )"
         );
 
-        sqlx::query(&insert_sql)
+        sqlx::query(audited_sql(&insert_sql))
             .bind(id)
             .bind(&uuid)
             .bind(tenant_id)
@@ -204,25 +205,19 @@ impl WebRepository {
             .or(existing.runtime_config)
             .unwrap_or_else(|| serde_json::json!({}));
         let now = now_rfc3339();
-        let engine = self.database_engine().await?;
-        let runtime_config_expression = json_write_expression(engine, "$5");
+
+        let runtime_config_expression = json_write_expression("$5");
         let store_listing_json = request
             .store_listing
             .as_ref()
             .map(serde_json::to_string)
             .transpose()
             .map_err(|error| WebServiceError::Internal(format!("serialize store listing: {error}")))?;
-        let metadata_expression = match engine {
-            sdkwork_database_config::DatabaseEngine::Sqlite => {
-                "CASE WHEN $6 IS NULL THEN metadata ELSE json_set(metadata, '$.storeListing', json($6)) END"
-                    .to_string()
-            }
-            sdkwork_database_config::DatabaseEngine::Postgres => {
-                "CASE WHEN $6 IS NULL THEN metadata ELSE jsonb_set(metadata, '{storeListing}', CAST($6 AS JSONB), true) END"
-                    .to_string()
-            }
-        };
-        let now_expression = instant_write_expression(engine, "$7");
+        // PostgreSQL-only metadata expression (single authoritative engine).
+        let metadata_expression =
+            "CASE WHEN $6 IS NULL THEN metadata ELSE jsonb_set(metadata, '{storeListing}', CAST($6 AS JSONB), true) END"
+                .to_string();
+        let now_expression = instant_write_expression("$7");
         let update_sql = format!(
             "UPDATE web_site
              SET name = $3, description = $4, runtime_config = {runtime_config_expression},
@@ -231,7 +226,7 @@ impl WebRepository {
              WHERE tenant_id = $1 AND uuid = $2 AND deleted_at IS NULL AND version = $8"
         );
 
-        let updated = sqlx::query(&update_sql)
+        let updated = sqlx::query(audited_sql(&update_sql))
             .bind(tenant_id)
             .bind(site_id)
             .bind(name)
@@ -277,20 +272,20 @@ impl WebRepository {
 
         let site_internal_id = resolve_site_internal_id(&self.pool, tenant_id, site_id).await?;
         let now = now_rfc3339();
-        let engine = self.database_engine().await?;
-        let now_expression = instant_write_expression(engine, "$3");
+
+        let now_expression = instant_write_expression("$3");
         let mut tx = self
             .pool
             .begin()
             .await
             .map_err(|error| store_error("begin delete web_site transaction", error))?;
 
-        let site_update = sqlx::query(&format!(
+        let site_update = sqlx::query(audited_sql(&format!(
             "UPDATE web_site
              SET deleted_at = {now_expression}, deleted_by = $4,
                  updated_at = {now_expression}, version = version + 1
              WHERE tenant_id = $1 AND uuid = $2 AND deleted_at IS NULL AND status <> 1"
-        ))
+        )))
         .bind(tenant_id)
         .bind(site_id)
         .bind(&now)
@@ -310,19 +305,19 @@ impl WebRepository {
 
         // Archive the site's owned route surface so deleted applications never
         // keep occupying domain routes, TLS policies, or listener bindings.
-        sqlx::query(&format!(
+        sqlx::query(audited_sql(&format!(
             "UPDATE web_site_binding
              SET status = 'ARCHIVED', deleted_at = {now_expression},
                  updated_at = {now_expression}, version = version + 1
              WHERE tenant_id = $1 AND site_id = $2 AND deleted_at IS NULL"
-        ))
+        )))
         .bind(tenant_id)
         .bind(site_internal_id)
         .bind(&now)
         .execute(&mut *tx)
         .await
         .map_err(|error| store_error("archive web_site bindings", error))?;
-        sqlx::query(&format!(
+        sqlx::query(audited_sql(&format!(
             "UPDATE web_tls_policy policy
              SET status = 'ARCHIVED', deleted_at = {now_expression},
                  updated_at = {now_expression}, version = version + 1
@@ -331,14 +326,14 @@ impl WebRepository {
                AND binding.id = policy.site_binding_id
                AND binding.tenant_id = $1 AND binding.site_id = $2
                AND policy.deleted_at IS NULL"
-        ))
+        )))
         .bind(tenant_id)
         .bind(site_internal_id)
         .bind(&now)
         .execute(&mut *tx)
         .await
         .map_err(|error| store_error("archive web_site TLS policies", error))?;
-        sqlx::query(&format!(
+        sqlx::query(audited_sql(&format!(
             "UPDATE web_listener_certificate_binding listener
              SET status = 'ARCHIVED', deleted_at = {now_expression},
                  updated_at = {now_expression}, version = version + 1
@@ -347,7 +342,7 @@ impl WebRepository {
                AND binding.id = listener.site_binding_id
                AND binding.tenant_id = $1 AND binding.site_id = $2
                AND listener.deleted_at IS NULL"
-        ))
+        )))
         .bind(tenant_id)
         .bind(site_internal_id)
         .bind(&now)
@@ -355,22 +350,22 @@ impl WebRepository {
         .await
         .map_err(|error| store_error("archive web_site listener certificate bindings", error))?;
         // Deactivate the site's environment variables and health checks.
-        sqlx::query(&format!(
+        sqlx::query(audited_sql(&format!(
             "UPDATE web_env_variable
              SET status = 0, updated_at = {now_expression}, version = version + 1
              WHERE tenant_id = $1 AND site_id = $2 AND status = 1"
-        ))
+        )))
         .bind(tenant_id)
         .bind(site_internal_id)
         .bind(&now)
         .execute(&mut *tx)
         .await
         .map_err(|error| store_error("deactivate web_site environment variables", error))?;
-        sqlx::query(&format!(
+        sqlx::query(audited_sql(&format!(
             "UPDATE web_health_check
              SET status = 0, updated_at = {now_expression}, version = version + 1
              WHERE tenant_id = $1 AND site_id = $2 AND status = 1"
-        ))
+        )))
         .bind(tenant_id)
         .bind(site_internal_id)
         .bind(&now)
@@ -392,14 +387,14 @@ impl WebRepository {
     ) -> WebServiceResult<SiteResponse> {
         let current_version = self.retrieve_site_version_repo(tenant_id, site_id).await?;
         let now = now_rfc3339();
-        let engine = self.database_engine().await?;
-        let now_expression = instant_write_expression(engine, "$4");
+
+        let now_expression = instant_write_expression("$4");
         let update_sql = format!(
             "UPDATE web_site
              SET status = $3, updated_at = {now_expression}, version = version + 1
              WHERE tenant_id = $1 AND uuid = $2 AND deleted_at IS NULL AND version = $5"
         );
-        let result = sqlx::query(&update_sql)
+        let result = sqlx::query(audited_sql(&update_sql))
             .bind(tenant_id)
             .bind(site_id)
             .bind(status)

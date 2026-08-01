@@ -122,8 +122,7 @@ pub fn build_router_with_shared_backend_api(api: Arc<dyn WebBackendApi>) -> Rout
         )
         .route(
             paths::CERTIFICATE,
-            axum::routing::put(update_managed_certificate)
-                .delete(delete_managed_certificate),
+            axum::routing::put(update_managed_certificate).delete(delete_managed_certificate),
         )
         .route(paths::CERTIFICATE_RENEW, post(renew_managed_certificate))
         .route(
@@ -144,12 +143,20 @@ pub fn build_router_with_shared_backend_api(api: Arc<dyn WebBackendApi>) -> Rout
         .route(paths::NGINX_STATUS, get(retrieve_nginx_status))
         .route(paths::SERVERS, get(list_servers).post(create_server))
         .route(paths::AUDIT_LOGS, get(list_audit_logs))
-        // V3 Agent routes (C8-C9) retain their wire header and authenticate through
-        // WebFrameworkLayer + MachineCredentialResolverDecorator. Handlers retrieve
-        // Arc<WebService> and WebBackendRequestContext from Extension layers.
+        .layer(axum::middleware::from_fn(validate_pagination_query))
+        .with_state(BackendState { api })
+}
+
+/// Router containing only the Web Node agent routes (heartbeat/sync).
+///
+/// Agent routes authenticate `X-SDKWork-Agent-Token` through
+/// WebFrameworkLayer + MachineCredentialResolverDecorator; the assembly
+/// wraps this router in a machine-only framework layer so IAM user API keys
+/// can never impersonate node credentials.
+pub fn build_agent_router_with_shared_backend_api(api: Arc<dyn WebBackendApi>) -> Router {
+    Router::new()
         .route(paths::AGENT_HEARTBEAT, post(agent_routes::agent_heartbeat))
         .route(paths::AGENT_SYNC, get(agent_routes::agent_sync))
-        .layer(axum::middleware::from_fn(validate_pagination_query))
         .with_state(BackendState { api })
 }
 
@@ -159,6 +166,7 @@ struct PageQuery {
     page: i32,
     #[serde(default = "default_page_size")]
     page_size: i32,
+    cursor: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -502,6 +510,7 @@ async fn list_application_source_versions(
                 &application_id,
                 query.page,
                 query.page_size,
+                query.cursor.as_deref(),
             )
             .await,
     )
@@ -850,7 +859,12 @@ async fn list_servers(
     ok_server_page(
         state
             .api
-            .list_servers(&context, query.page, query.page_size)
+            .list_servers(
+                &context,
+                query.page,
+                query.page_size,
+                query.cursor.as_deref(),
+            )
             .await,
         query.page,
         query.page_size,

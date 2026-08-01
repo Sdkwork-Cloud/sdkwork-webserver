@@ -202,6 +202,26 @@ impl EdgeRuntime {
     ) -> Result<(), EdgeRuntimeError> {
         verify_served_certificate(&self.config, hostname, fingerprint_sha256)
     }
+
+    /// Async wrapper that runs the blocking TLS probe (up to
+    /// `tls_verify_timeout_ms` per hostname) off the async executor so a
+    /// slow or unreachable listener never stalls the agent loop.
+    pub async fn verify_served_certificate_async(
+        &self,
+        hostname: &str,
+        fingerprint_sha256: &str,
+    ) -> Result<(), EdgeRuntimeError> {
+        let config = self.config.clone();
+        let hostname = hostname.to_owned();
+        let fingerprint_sha256 = fingerprint_sha256.to_owned();
+        tokio::task::spawn_blocking(move || {
+            verify_served_certificate(&config, &hostname, &fingerprint_sha256)
+        })
+        .await
+        .map_err(|error| {
+            EdgeRuntimeError::Filesystem(format!("join served TLS verification: {error}"))
+        })?
+    }
 }
 
 #[cfg(test)]

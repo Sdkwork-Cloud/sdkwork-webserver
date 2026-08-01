@@ -9,10 +9,10 @@ import com.sdkwork.web.app.sdk.http.HttpClient
 class SourceVersionApi(private val client: HttpClient) {
 
     /** 获取应用源码版本 */
-    suspend fun sitesSourceVersionsList(siteId: String, page: Int? = null, pageSize: Int? = null): SitesSourceVersionsListResponse? {
+    suspend fun sitesSourceVersionsList(siteId: String, pageSize: Int? = null, cursor: String? = null): SitesSourceVersionsListResponse? {
         val query = buildQueryString(listOf(
-            QueryParameterSpec("page", page, "form", true, false, null),
-            QueryParameterSpec("page_size", pageSize, "form", true, false, null)
+            QueryParameterSpec("page_size", pageSize, "form", true, false, null),
+            QueryParameterSpec("cursor", cursor, "form", true, false, null)
         ))
         val raw = client.get(ApiPaths.appendQueryString(ApiPaths.appPath("/sites/${serializePathParameter(siteId, PathParameterSpec("siteId", "simple", false))}/source_versions"), query))
         return client.convertValue(raw, object : TypeReference<SitesSourceVersionsListResponse>() {})

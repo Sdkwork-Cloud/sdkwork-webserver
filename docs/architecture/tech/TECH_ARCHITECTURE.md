@@ -37,7 +37,8 @@ Current implemented baseline:
 - app-api and backend-api management surfaces;
 - `apps/sdkwork-webserver-pc`, with package-owned Console and backend-admin capabilities, one IAM/TokenManager bootstrap, generated SDK injection, and lazy backend-admin loading;
 - site, domain, deployment, certificate, Nginx, health-check, audit, environment, and Web Node workflows;
-- SQLx persistence through the SDKWork database framework;
+- SQLx 0.9 persistence through the SDKWork database framework with compile-time dynamic-SQL
+  injection audit (`audited_sql` wrapper) and PostgreSQL-only repository branches;
 - ACME/self-signed certificate services;
 - external Nginx artifact materialization and Web Node Daemon synchronization;
 - durable bounded Web Node Daemon desired/observed apply checkpoints with crash replay;
@@ -206,7 +207,9 @@ state. The cross-repository boundary remains proposed pending human review in
 
 ## 6. Security, Privacy, And Resource Boundaries
 
-- Protected management surfaces use SDKWork IAM and typed request context.
+- Protected management surfaces use SDKWork IAM and typed request context; the internal
+  distribution surface and Web Node agent routes are wrapped in machine-only framework layers
+  so IAM user API keys can never impersonate node credentials on any composed gateway.
 - Public application traffic uses explicit host/route policy and HTTPS requirements from the PRD.
 - Private keys and credentials remain references to protected runtime sources and are never serialized into app config or logs.
 - Static roots, upstream destinations, trusted proxy networks, headers, bodies, timeouts, connections, queues, and configuration size are validated and bounded.

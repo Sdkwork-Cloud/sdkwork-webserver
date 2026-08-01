@@ -12,10 +12,13 @@ const MAXIMUM_CURSOR_BYTES: usize = 512;
 
 /// Path patterns whose list operations declare cursor (keyset) pagination in
 /// their OpenAPI contract. `cursor` on any other endpoint fails closed.
-const CURSOR_PAGINATED_PATH_PATTERNS: [&str; 4] = [
+const CURSOR_PAGINATED_PATH_PATTERNS: [&str; 7] = [
     "/backend/v3/api/audit_logs",
     "/backend/v3/api/applications/{applicationId}/deployments",
+    "/backend/v3/api/applications/{applicationId}/source_versions",
+    "/backend/v3/api/servers",
     "/app/v3/api/sites/{siteId}/deployments",
+    "/app/v3/api/sites/{siteId}/source_versions",
     "/app/v3/api/audit_logs",
 ];
 
@@ -97,10 +100,12 @@ fn path_matches_cursor_patterns(path: &str) -> bool {
         let segments = pattern.split('/').collect::<Vec<_>>();
         let path_segments = path.split('/').collect::<Vec<_>>();
         segments.len() == path_segments.len()
-            && segments.iter().zip(path_segments.iter()).all(|(pattern, actual)| {
-                pattern.starts_with('{') && pattern.ends_with('}')
-                    || pattern == actual
-            })
+            && segments
+                .iter()
+                .zip(path_segments.iter())
+                .all(|(pattern, actual)| {
+                    pattern.starts_with('{') && pattern.ends_with('}') || pattern == actual
+                })
     })
 }
 
@@ -128,10 +133,19 @@ mod tests {
             "/backend/v3/api/applications/app-1/deployments"
         )
         .is_ok());
+        // Cursor-paginated growing collections (nodes, revisions) accept
+        // cursor after the keyset upgrade; other lists still fail closed.
+        assert!(validate_query(Some("cursor=opaque-token"), "/backend/v3/api/servers").is_ok());
         assert!(validate_query(
             Some("cursor=opaque-token"),
-            "/backend/v3/api/servers"
+            "/app/v3/api/sites/site-1/source_versions"
         )
-        .is_err());
+        .is_ok());
+        assert!(validate_query(
+            Some("cursor=opaque-token"),
+            "/backend/v3/api/applications/app-1/source_versions"
+        )
+        .is_ok());
+        assert!(validate_query(Some("cursor=opaque-token"), "/backend/v3/api/sites").is_err());
     }
 }

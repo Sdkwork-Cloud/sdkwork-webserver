@@ -5,7 +5,6 @@ import type { AuditLogResponse, PageInfo } from '../types';
 
 
 export interface AuditAuditLogsListParams {
-  page?: number;
   pageSize?: number;
   cursor?: string;
   targetType?: string;
@@ -26,7 +25,6 @@ export class AuditAuditLogsApi {
 /** List audit logs */
   async list(params?: AuditAuditLogsListParams, requestOptions?: ApiRequestOptions): Promise<{ items: AuditLogResponse[]; pageInfo: PageInfo; }> {
     const query = buildQueryString([
-      { name: 'page', value: params?.page, style: 'form', explode: true, allowReserved: false },
       { name: 'page_size', value: params?.pageSize, style: 'form', explode: true, allowReserved: false },
       { name: 'cursor', value: params?.cursor, style: 'form', explode: true, allowReserved: false },
       { name: 'target_type', value: params?.targetType, style: 'form', explode: true, allowReserved: false },

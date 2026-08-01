@@ -17,10 +17,10 @@ impl SourceVersionApi {
     }
 
     /// 获取应用源码版本
-    pub async fn sites_source_versions_list(&self, site_id: &str, page: Option<i64>, page_size: Option<i64>) -> Result<serde_json::Value, SdkworkError> {
+    pub async fn sites_source_versions_list(&self, site_id: &str, page_size: Option<i64>, cursor: Option<&str>) -> Result<serde_json::Value, SdkworkError> {
         let query = build_query_string(&[
-            QueryParameterSpec::new("page", page, "form", true, false, None),
             QueryParameterSpec::new("page_size", page_size, "form", true, false, None),
+            QueryParameterSpec::new("cursor", cursor, "form", true, false, None),
         ]);
         let path = append_query_string(app_path(&format!("/sites/{}/source_versions", serialize_path_parameter(site_id, PathParameterSpec::new("siteId", "simple", false)))), &query);
         self.client.get(&path, None, None).await

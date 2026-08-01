@@ -237,18 +237,23 @@ where
         )
     }
 
-    pub(super) fn response(inner: B, trailer_policy: ProxyTrailerPolicy) -> Self {
-        Self::new(inner, None, trailer_policy, None, None, None)
+    pub(super) fn response(
+        inner: B,
+        trailer_policy: ProxyTrailerPolicy,
+        maximum_body_bytes: Option<u64>,
+    ) -> Self {
+        Self::new(inner, maximum_body_bytes, trailer_policy, None, None, None)
     }
 
     pub(super) fn response_with_request_cancellation(
         inner: B,
         trailer_policy: ProxyTrailerPolicy,
         request_control: ProxyRequestBodyControl,
+        maximum_body_bytes: Option<u64>,
     ) -> Self {
         Self::new(
             inner,
-            None,
+            maximum_body_bytes,
             trailer_policy,
             None,
             None,
@@ -573,6 +578,7 @@ mod tests {
         let mut guarded = GuardedProxyBody::response(
             body,
             ProxyTrailerPolicy::new(64, 1, declared, HashSet::new()),
+            None,
         );
         let error = guarded
             .frame()

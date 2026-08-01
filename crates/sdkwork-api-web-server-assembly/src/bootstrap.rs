@@ -8,12 +8,13 @@ use sdkwork_routes_webserver_app_api::{
     web_app_domain_context_injectors,
 };
 use sdkwork_routes_webserver_backend_api::{
-    gateway_mount as mount_backend, gateway_route_manifest as backend_route_manifest,
-    web_backend_domain_context_injectors,
+    agent_gateway_mount, gateway_mount as mount_backend,
+    gateway_route_manifest as backend_route_manifest, web_backend_domain_context_injectors,
+    wrap_agent_router_with_web_framework_from_env,
 };
 use sdkwork_routes_webserver_internal_api::{
     gateway_mount as mount_internal, gateway_route_manifest as internal_route_manifest,
-    web_internal_domain_context_injectors,
+    web_internal_domain_context_injectors, wrap_router_with_web_framework_from_env,
 };
 use sdkwork_web_bootstrap::{ReadinessCheck, ReadinessFuture};
 use sdkwork_web_core::{
@@ -112,11 +113,30 @@ pub async fn assemble_business_routes(
     if context.includes_standalone_control_plane() {
         router = router
             .merge(mount_app(service.clone()))
-            .merge(mount_backend(service.clone()));
+            .merge(mount_backend(service.clone()))
+            // Web Node agent routes authenticate through the shared api-key
+            // path; wrap them in a machine-only framework layer so IAM user
+            // API keys can never impersonate node credentials.
+            .merge(
+                wrap_agent_router_with_web_framework_from_env(
+                    agent_gateway_mount(service.clone()),
+                    service.clone(),
+                )
+                .await,
+            );
         domain_context_injectors.extend(web_app_domain_context_injectors());
         domain_context_injectors.extend(web_backend_domain_context_injectors());
     }
-    router = router.merge(mount_internal(service.clone()));
+    // The internal (machine-to-machine) surface must remain machine-only on
+    // every composed surface, including the standalone gateway where the
+    // outer framework layer also accepts IAM user API keys. Wrapping the
+    // internal router in its own `new_machine_only` framework layer here
+    // guarantees that user API keys can never reach internal routes, and
+    // `wagent_`-prefixed credentials never fall back to user-key resolution.
+    router = router.merge(
+        wrap_router_with_web_framework_from_env(mount_internal(service.clone()), service.clone())
+            .await,
+    );
     domain_context_injectors.extend(web_internal_domain_context_injectors());
     let permission_catalog = permission_catalog(route_manifest.routes());
     let openapi = sdkwork_web_contract::build_openapi_document(

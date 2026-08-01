@@ -12,9 +12,8 @@ class DeploymentApi {
   DeploymentApi(this._client);
 
   /// 获取部署历史
-  Future<SitesDeploymentsListResponse?> sitesDeploymentsList(String siteId, [int? page, int? pageSize, String? cursor, int? status]) async {
+  Future<SitesDeploymentsListResponse?> sitesDeploymentsList(String siteId, [int? pageSize, String? cursor, int? status]) async {
     final query = buildQueryString([
-      QueryParameterSpec('page', page, 'form', true, false, null),
       QueryParameterSpec('page_size', pageSize, 'form', true, false, null),
       QueryParameterSpec('cursor', cursor, 'form', true, false, null),
       QueryParameterSpec('status', status, 'form', true, false, null)

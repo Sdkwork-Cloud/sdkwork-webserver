@@ -14,10 +14,10 @@ public class SourceVersionApi {
     }
 
     /** 获取应用源码版本 */
-    public SitesSourceVersionsListResponse sitesSourceVersionsList(String siteId, Integer page, Integer pageSize) throws Exception {
+    public SitesSourceVersionsListResponse sitesSourceVersionsList(String siteId, Integer pageSize, String cursor) throws Exception {
         String query = buildQueryString(List.of(
-            new QueryParameterSpec("page", page, "form", true, false, null),
-            new QueryParameterSpec("page_size", pageSize, "form", true, false, null)
+            new QueryParameterSpec("page_size", pageSize, "form", true, false, null),
+            new QueryParameterSpec("cursor", cursor, "form", true, false, null)
         ));
         Object raw = client.get(ApiPaths.appendQueryString(ApiPaths.appPath("/sites/" + serializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false)) + "/source_versions"), query));
         return client.convertValue(raw, new TypeReference<SitesSourceVersionsListResponse>() {});

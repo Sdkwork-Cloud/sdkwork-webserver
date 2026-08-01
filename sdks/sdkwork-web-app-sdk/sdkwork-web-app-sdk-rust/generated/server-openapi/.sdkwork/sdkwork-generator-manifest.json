@@ -36,7 +36,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "0d80c1a68cbcdace3f85ac16cd570425fe6367bb3ea73b0bac48099b4b3a9fe8"
+      "sha256": "102428d3aaeee81c82514ad6203e7559c8da16c6ea7880d4b0454eb02106d3c1"
     },
     {
       "path": "sdkwork-sdk.json",
@@ -52,7 +52,7 @@
     },
     {
       "path": "src/api/deployment.rs",
-      "sha256": "0fd724f7c2ce846a8071b2383ba943f51971bcc2a48e79873eb4aaf3d6feee85"
+      "sha256": "71da7bc7ed890de2f652a0c3ec0751618346634dc0b506920e3987550b43cc63"
     },
     {
       "path": "src/api/domain.rs",
@@ -80,7 +80,7 @@
     },
     {
       "path": "src/api/source_version.rs",
-      "sha256": "44e7ea48466577d846627ac28ca02877c82ed51b926bf5db31834f4268dea9a0"
+      "sha256": "04cdc9f21088ca7f0ad06899c4a0ea9cacc3edfcb284778453dbd2e8e7683d26"
     },
     {
       "path": "src/client.rs",

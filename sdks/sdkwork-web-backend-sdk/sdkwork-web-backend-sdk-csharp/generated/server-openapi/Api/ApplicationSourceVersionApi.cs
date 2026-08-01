@@ -18,12 +18,12 @@ namespace SDKWork.Web.BackendSdk.Api
         /// <summary>
         /// List immutable application source versions
         /// </summary>
-        public async Task<SDKWork.Web.BackendSdk.Models.ApplicationsSourceVersionsListResponse?> ApplicationsSourceVersionsListAsync(string applicationId, int? page = null, int? pageSize = null)
+        public async Task<SDKWork.Web.BackendSdk.Models.ApplicationsSourceVersionsListResponse?> ApplicationsSourceVersionsListAsync(string applicationId, int? pageSize = null, string? cursor = null)
         {
             var queryString = BuildQueryString(new[]
             {
-                new QueryParameterSpec("page", page, "form", true, false, null),
                 new QueryParameterSpec("page_size", pageSize, "form", true, false, null),
+                new QueryParameterSpec("cursor", cursor, "form", true, false, null),
             });
             return await _client.GetAsync<SDKWork.Web.BackendSdk.Models.ApplicationsSourceVersionsListResponse>(ApiPaths.AppendQueryString(ApiPaths.BackendPath($"/applications/{SerializePathParameter(applicationId, new PathParameterSpec("applicationId", "simple", false))}/source_versions"), queryString));
         }

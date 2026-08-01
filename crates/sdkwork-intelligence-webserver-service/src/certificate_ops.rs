@@ -49,9 +49,8 @@ impl WebService {
         action: &'static str,
         operation_id: &str,
     ) {
-        if let Err(error) = self
-            .repository
-            .insert_audit_log(AuditLogWrite {
+        let _ = self
+            .record_audit_log(AuditLogWrite {
                 tenant_id,
                 organization_id,
                 operator_id,
@@ -63,16 +62,6 @@ impl WebService {
                 request_id: None,
                 metadata_json: "{}",
             })
-            .await
-        {
-            tracing::error!(
-                tenant_id,
-                operator_id,
-                action,
-                operation_id,
-                error = ?error,
-                "failed to persist certificate command audit"
-            );
-        }
+            .await;
     }
 }

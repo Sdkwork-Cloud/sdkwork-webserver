@@ -1,3 +1,4 @@
+use crate::audited_sql;
 use futures_util::TryStreamExt;
 use sdkwork_webserver_contract::{
     AgentCertificateObservation, AgentSyncResponse, WebServiceError, WebServiceResult,
@@ -20,6 +21,13 @@ impl WebRepository {
     ) -> WebServiceResult<bool> {
         if observations.is_empty() {
             return Ok(false);
+        }
+        // The observation batch is bounded by the node manifest budget so a
+        // misbehaving agent cannot stretch the transaction or the lock hold.
+        if observations.len() > MAX_PENDING_LISTENER_BINDINGS {
+            return Err(WebServiceError::validation(format!(
+                "certificate observations exceed the maximum batch of {MAX_PENDING_LISTENER_BINDINGS}"
+            )));
         }
         let expected = manifest
             .certificates
@@ -112,11 +120,11 @@ impl WebRepository {
         &self,
         tenant_id: i64,
     ) -> WebServiceResult<()> {
-        let mut transaction = self
-            .pool
-            .begin()
-            .await
-            .map_err(|error| store_error("begin certificate convergence", error))?;
+        // Candidate discovery runs without row locks; each candidate is
+        // then processed in its own short transaction that re-locks the row
+        // with a status guard, so concurrent workers never block each other
+        // across a long transaction (each row holds its lock only for its own
+        // count + update statements).
         let sql = format!(
             "SELECT l.id AS binding_id, l.certificate_id,
                     l.desired_version_id AS desired_version_id
@@ -129,11 +137,10 @@ impl WebRepository {
                AND l.status IN ('PENDING', 'DEPLOYING', 'FAILED')
                AND l.deleted_at IS NULL
              ORDER BY l.id ASC
-             LIMIT {}
-             FOR UPDATE OF l",
+             LIMIT {}",
             MAX_PENDING_LISTENER_BINDINGS + 1
         );
-        let mut candidates = sqlx::query(&sql).bind(tenant_id).fetch(&mut *transaction);
+        let mut candidates = sqlx::query(audited_sql(&sql)).bind(tenant_id).fetch(&self.pool);
         let mut rows = Vec::new();
         while let Some(row) = candidates
             .try_next()
@@ -159,6 +166,37 @@ impl WebRepository {
             let desired_version_id: i64 = row
                 .try_get("desired_version_id")
                 .map_err(|error| store_error("map desired certificate version id", error))?;
+            // Short per-row transaction: lock the binding row with the same
+            // status guard used by the update statements. A concurrent
+            // worker that already advanced the row finds the guard empty and
+            // skips it, so convergence is idempotent and lock contention is
+            // bounded to one row at a time.
+            let mut transaction = self
+                .pool
+                .begin()
+                .await
+                .map_err(|error| store_error("begin listener certificate convergence row", error))?;
+            let lock_row = sqlx::query(
+                "SELECT 1
+                 FROM web_listener_certificate_binding
+                 WHERE tenant_id = $1 AND id = $2 AND desired_version_id = $3
+                   AND status IN ('PENDING', 'DEPLOYING', 'FAILED')
+                   AND deleted_at IS NULL
+                 FOR UPDATE",
+            )
+            .bind(tenant_id)
+            .bind(binding_id)
+            .bind(desired_version_id)
+            .fetch_optional(&mut *transaction)
+            .await
+            .map_err(|error| store_error("lock converging listener certificate binding", error))?;
+            if lock_row.is_none() {
+                transaction
+                    .rollback()
+                    .await
+                    .map_err(|error| store_error("rollback skipped convergence row", error))?;
+                continue;
+            }
             let counts = sqlx::query(
                 "WITH assigned_servers AS (
                     SELECT DISTINCT a.server_id
@@ -257,11 +295,11 @@ impl WebRepository {
                 .await
                 .map_err(|error| store_error("advance listener certificate rollout", error))?;
             }
+            transaction
+                .commit()
+                .await
+                .map_err(|error| store_error("commit certificate convergence row", error))?;
         }
-        transaction
-            .commit()
-            .await
-            .map_err(|error| store_error("commit certificate convergence", error))?;
         Ok(())
     }
 }

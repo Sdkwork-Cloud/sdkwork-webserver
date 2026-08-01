@@ -1,3 +1,4 @@
+use crate::audited_sql;
 use sdkwork_utils_rust::aes_gcm_encrypt;
 use sdkwork_webserver_contract::{
     CreateEnvVariableRequest, EnvVariablePage, EnvVariableResponse, UpdateEnvVariableRequest,
@@ -123,8 +124,8 @@ impl WebRepository {
         } else {
             request.value.clone()
         };
-        let engine = self.database_engine().await?;
-        let now_expression = instant_write_expression(engine, "$9");
+
+        let now_expression = instant_write_expression("$9");
         let insert_sql = format!(
             "INSERT INTO web_env_variable (
                 id, uuid, tenant_id, site_id, environment, key, value_encrypted, is_secret,
@@ -172,7 +173,7 @@ impl WebRepository {
             ));
         }
 
-        sqlx::query(&insert_sql)
+        sqlx::query(audited_sql(&insert_sql))
             .bind(id)
             .bind(&uuid)
             .bind(tenant_id)
@@ -239,15 +240,15 @@ impl WebRepository {
             request.value.clone()
         };
         let now = now_rfc3339();
-        let engine = self.database_engine().await?;
-        let now_expression = instant_write_expression(engine, "$5");
+
+        let now_expression = instant_write_expression("$5");
         let update_sql = format!(
             "UPDATE web_env_variable
              SET value_encrypted = $4, is_secret = $6,
                  updated_at = {now_expression}, version = version + 1
              WHERE tenant_id = $1 AND site_id = $2 AND uuid = $3 AND status = 1"
         );
-        let result = sqlx::query(&update_sql)
+        let result = sqlx::query(audited_sql(&update_sql))
             .bind(tenant_id)
             .bind(site_internal_id)
             .bind(variable_id)
@@ -282,14 +283,14 @@ impl WebRepository {
     ) -> WebServiceResult<()> {
         let site_internal_id = resolve_site_internal_id(&self.pool, tenant_id, site_id).await?;
         let now = now_rfc3339();
-        let engine = self.database_engine().await?;
-        let now_expression = instant_write_expression(engine, "$4");
+
+        let now_expression = instant_write_expression("$4");
         let update_sql = format!(
             "UPDATE web_env_variable
              SET status = 0, updated_at = {now_expression}, version = version + 1
              WHERE tenant_id = $1 AND site_id = $2 AND uuid = $3 AND status = 1"
         );
-        let result = sqlx::query(&update_sql)
+        let result = sqlx::query(audited_sql(&update_sql))
             .bind(tenant_id)
             .bind(site_internal_id)
             .bind(variable_id)

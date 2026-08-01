@@ -1,3 +1,4 @@
+use crate::audited_sql;
 use sdkwork_webserver_contract::{
     CreateNginxConfigRequest, ListNginxConfigsQuery, NginxConfigPage, NginxConfigResponse,
     NginxReloadResponse, NginxStatusResponse, NginxValidateResponse, UpdateNginxConfigRequest,
@@ -70,7 +71,7 @@ impl WebRepository {
             " ORDER BY config.updated_at DESC, config.id DESC LIMIT ${limit_index} OFFSET ${offset_index}"
         ));
 
-        let count_row = apply_binds(sqlx::query(&count_sql), &binds)
+        let count_row = apply_binds(sqlx::query(audited_sql(&count_sql)), &binds)
             .fetch_one(&self.pool)
             .await
             .map_err(|error| store_error("count web_nginx_config", error))?;
@@ -78,7 +79,7 @@ impl WebRepository {
             .try_get("total")
             .map_err(|error| store_error("map web_nginx_config count", error))?;
 
-        let mut list_query = apply_binds(sqlx::query(&list_sql), &binds);
+        let mut list_query = apply_binds(sqlx::query(audited_sql(&list_sql)), &binds);
         list_query = list_query.bind(page_size).bind(offset);
         let rows = list_query
             .fetch_all(&self.pool)
@@ -111,8 +112,8 @@ impl WebRepository {
         let uuid = new_uuid();
         let now = now_rfc3339();
         let config_hash = sha256_hex(&request.config_content);
-        let engine = self.database_engine().await?;
-        let now_expression = instant_write_expression(engine, "$9");
+
+        let now_expression = instant_write_expression("$9");
         let insert_sql = format!(
             "INSERT INTO web_nginx_config (
                 id, uuid, tenant_id, site_id, config_type, config_name, config_content, config_hash,
@@ -123,7 +124,7 @@ impl WebRepository {
              )"
         );
 
-        sqlx::query(&insert_sql)
+        sqlx::query(audited_sql(&insert_sql))
             .bind(id)
             .bind(&uuid)
             .bind(tenant_id)
@@ -227,9 +228,9 @@ impl WebRepository {
             .unwrap_or(stored_config_content);
         let config_hash = sha256_hex(&config_content);
         let now = now_rfc3339();
-        let engine = self.database_engine().await?;
-        let tenant_time = instant_write_expression(engine, "$6");
-        let global_time = instant_write_expression(engine, "$5");
+
+        let tenant_time = instant_write_expression("$6");
+        let global_time = instant_write_expression("$5");
         let tenant_update_sql = format!(
             "UPDATE web_nginx_config
              SET config_name = $3, config_content = $4, config_hash = $5,
@@ -244,7 +245,7 @@ impl WebRepository {
         );
 
         let result = if let Some(tenant_id) = tenant_id {
-            sqlx::query(&tenant_update_sql)
+            sqlx::query(audited_sql(&tenant_update_sql))
                 .bind(tenant_id)
                 .bind(config_id)
                 .bind(&config_name)
@@ -256,7 +257,7 @@ impl WebRepository {
                 .await
                 .map_err(|error| store_error("update web_nginx_config", error))?
         } else {
-            sqlx::query(&global_update_sql)
+            sqlx::query(audited_sql(&global_update_sql))
                 .bind(config_id)
                 .bind(&config_name)
                 .bind(&config_content)
@@ -337,6 +338,28 @@ impl WebRepository {
         })
     }
 
+    /// Content of the currently active config for a site (`None` when no
+    /// config is active yet). Used as the edge rollback target.
+    pub(super) async fn load_active_nginx_config_content_repo(
+        &self,
+        tenant_id: i64,
+        site_id: &str,
+    ) -> WebServiceResult<Option<String>> {
+        let site_internal_id =
+            resolve_site_internal_id(&self.pool, tenant_id, site_id).await?;
+        let row = sqlx::query(
+            "SELECT config_content FROM web_nginx_config
+             WHERE site_id = $1 AND is_active = TRUE AND status = 1",
+        )
+        .bind(site_internal_id)
+        .fetch_optional(&self.pool)
+        .await
+        .map_err(|error| store_error("load active web_nginx_config content", error))?;
+        row.map(|row| row.try_get("config_content"))
+            .transpose()
+            .map_err(|error| store_error("map active web_nginx_config content", error))
+    }
+
     pub(super) async fn web_nginx_config_repo(
         &self,
         tenant_id: Option<i64>,
@@ -364,10 +387,10 @@ impl WebRepository {
             .try_get("site_id")
             .map_err(|error| store_error("map web_nginx_config activation site", error))?;
         let now = now_rfc3339();
-        let engine = self.database_engine().await?;
-        let deactivate_time = instant_write_expression(engine, "$2");
-        let tenant_activate_time = instant_write_expression(engine, "$3");
-        let global_activate_time = instant_write_expression(engine, "$2");
+
+        let deactivate_time = instant_write_expression("$2");
+        let tenant_activate_time = instant_write_expression("$3");
+        let global_activate_time = instant_write_expression("$2");
         let deactivate_sql = format!(
             "UPDATE web_nginx_config SET is_active = FALSE, updated_at = {deactivate_time},
                     version = version + 1
@@ -394,7 +417,7 @@ impl WebRepository {
             .await
             .map_err(|error| store_error("begin deploy web_nginx_config transaction", error))?;
 
-        sqlx::query(&deactivate_sql)
+        sqlx::query(audited_sql(&deactivate_sql))
             .bind(site_internal_id)
             .bind(&now)
             .execute(&mut *tx)
@@ -402,7 +425,7 @@ impl WebRepository {
             .map_err(|error| store_error("deactivate web_nginx_config", error))?;
 
         let result = if let Some(tenant_id) = tenant_id {
-            sqlx::query(&tenant_activate_sql)
+            sqlx::query(audited_sql(&tenant_activate_sql))
                 .bind(tenant_id)
                 .bind(config_id)
                 .bind(&now)
@@ -410,7 +433,7 @@ impl WebRepository {
                 .await
                 .map_err(|error| store_error("Web web_nginx_config", error))?
         } else {
-            sqlx::query(&global_activate_sql)
+            sqlx::query(audited_sql(&global_activate_sql))
                 .bind(config_id)
                 .bind(&now)
                 .execute(&mut *tx)

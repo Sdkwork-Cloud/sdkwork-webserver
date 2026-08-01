@@ -6,6 +6,7 @@ use std::sync::Arc;
 use std::time::Duration;
 use tokio::sync::Semaphore;
 
+use crate::account_store::{AcmeAccountStore, MemoryAcmeAccountStore};
 use crate::challenge_store::ChallengeStore;
 use crate::config::AcmeConfig;
 use crate::lets_encrypt::issue_lets_encrypt;
@@ -22,6 +23,7 @@ const MAX_CERTIFICATE_IDENTIFIERS: usize = 8;
 pub struct CertificateIssuer {
     config: AcmeConfig,
     challenge_store: Arc<ChallengeStore>,
+    account_store: Arc<dyn AcmeAccountStore>,
     cert_root: String,
     operation_timeout: Duration,
     admission: Semaphore,
@@ -36,6 +38,24 @@ impl CertificateIssuer {
         config: AcmeConfig,
         cert_root: impl Into<String>,
         operation_timeout_ms: u64,
+    ) -> AcmeServiceResult<Self> {
+        Self::new_with_account_store(
+            config,
+            cert_root,
+            operation_timeout_ms,
+            Arc::new(MemoryAcmeAccountStore::default()),
+        )
+    }
+
+    /// Construct with a durable account store so issuance and renewal reuse
+    /// one CA account across process restarts. Without a durable store the
+    /// process-lifetime in-memory store still prevents per-operation account
+    /// creation within one process.
+    pub fn new_with_account_store(
+        config: AcmeConfig,
+        cert_root: impl Into<String>,
+        operation_timeout_ms: u64,
+        account_store: Arc<dyn AcmeAccountStore>,
     ) -> AcmeServiceResult<Self> {
         config.validate()?;
         let cert_root = cert_root.into();
@@ -59,6 +79,7 @@ impl CertificateIssuer {
         Ok(Self {
             config,
             challenge_store: Arc::new(ChallengeStore::default()),
+            account_store,
             cert_root,
             operation_timeout: Duration::from_millis(operation_timeout_ms),
             admission: Semaphore::new(MAX_CONCURRENT_CERTIFICATE_ISSUANCE),
@@ -114,6 +135,7 @@ impl CertificateIssuer {
                 issue_lets_encrypt(
                     &self.config,
                     self.challenge_store.as_ref(),
+                    self.account_store.as_ref(),
                     hostnames,
                     cert_name,
                     &self.cert_root,

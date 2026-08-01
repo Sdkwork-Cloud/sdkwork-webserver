@@ -124,8 +124,8 @@ const result = await client.domain.list(params);
 // List immutable application source versions
 const applicationId = '1';
 const params = {
-  page: 1,
-  page_size: 2,
+  page_size: 1,
+  cursor: 'cursor',
 };
 const result = await client.applicationSourceVersion.applications.sourceVersions.list(applicationId, params);
 ```
@@ -136,10 +136,9 @@ const result = await client.applicationSourceVersion.applications.sourceVersions
 // List application deployments
 const applicationId = '1';
 const params = {
-  page: 1,
-  page_size: 2,
+  page_size: 1,
   cursor: 'cursor',
-  status: 4,
+  status: 3,
 };
 const result = await client.applicationDeployment.applications.deployments.list(applicationId, params);
 ```
@@ -167,8 +166,8 @@ const result = await client.nginx.status.retrieve();
 ```typescript
 // List managed servers
 const params = {
-  page: 1,
-  page_size: 2,
+  page_size: 1,
+  cursor: 'cursor',
 };
 const result = await client.server.list(params);
 ```
@@ -188,8 +187,7 @@ const result = await client.agent.sync.list(params);
 ```typescript
 // List audit logs
 const params = {
-  page: 1,
-  page_size: 2,
+  page_size: 1,
   cursor: 'cursor',
   target_type: 'target_type',
   action: 'action',

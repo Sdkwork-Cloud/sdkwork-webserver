@@ -18,11 +18,10 @@ namespace SDKWork.Web.BackendSdk.Api
         /// <summary>
         /// List application deployments
         /// </summary>
-        public async Task<SDKWork.Web.BackendSdk.Models.ApplicationsDeploymentsListResponse?> ApplicationsDeploymentsListAsync(string applicationId, int? page = null, int? pageSize = null, string? cursor = null, int? status = null)
+        public async Task<SDKWork.Web.BackendSdk.Models.ApplicationsDeploymentsListResponse?> ApplicationsDeploymentsListAsync(string applicationId, int? pageSize = null, string? cursor = null, int? status = null)
         {
             var queryString = BuildQueryString(new[]
             {
-                new QueryParameterSpec("page", page, "form", true, false, null),
                 new QueryParameterSpec("page_size", pageSize, "form", true, false, null),
                 new QueryParameterSpec("cursor", cursor, "form", true, false, null),
                 new QueryParameterSpec("status", status, "form", true, false, null),

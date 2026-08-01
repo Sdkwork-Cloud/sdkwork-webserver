@@ -1974,6 +1974,7 @@
       "get": {
         "operationId": "applications.sourceVersions.list",
         "summary": "List immutable application source versions",
+        "x-sdkwork-pagination-mode": "cursor",
         "tags": [
           "applicationSourceVersion"
         ],
@@ -1991,10 +1992,10 @@
         "x-sdkwork-owner": "sdkwork-web",
         "parameters": [
           {
-            "$ref": "#/components/parameters/PageParam"
+            "$ref": "#/components/parameters/PageSizeParam"
           },
           {
-            "$ref": "#/components/parameters/PageSizeParam"
+            "$ref": "#/components/parameters/CursorParam"
           }
         ],
         "responses": {
@@ -2321,11 +2322,8 @@
         "x-sdkwork-auth-mode": "dual-token",
         "x-sdkwork-permission": "web.sites.read",
         "x-sdkwork-owner": "sdkwork-web",
-        "x-sdkwork-pagination-mode": "cursor-offset",
+        "x-sdkwork-pagination-mode": "cursor",
         "parameters": [
-          {
-            "$ref": "#/components/parameters/PageParam"
-          },
           {
             "$ref": "#/components/parameters/PageSizeParam"
           },
@@ -3655,6 +3653,7 @@
       "get": {
         "operationId": "servers.list",
         "summary": "List managed servers",
+        "x-sdkwork-pagination-mode": "cursor",
         "tags": [
           "server"
         ],
@@ -3672,10 +3671,10 @@
         "x-sdkwork-owner": "sdkwork-web",
         "parameters": [
           {
-            "$ref": "#/components/parameters/PageParam"
+            "$ref": "#/components/parameters/PageSizeParam"
           },
           {
-            "$ref": "#/components/parameters/PageSizeParam"
+            "$ref": "#/components/parameters/CursorParam"
           }
         ],
         "responses": {
@@ -3971,11 +3970,8 @@
         "x-sdkwork-auth-mode": "dual-token",
         "x-sdkwork-permission": "web.auditLogs.read",
         "x-sdkwork-owner": "sdkwork-web",
-        "x-sdkwork-pagination-mode": "cursor-offset",
+        "x-sdkwork-pagination-mode": "cursor",
         "parameters": [
-          {
-            "$ref": "#/components/parameters/PageParam"
-          },
           {
             "$ref": "#/components/parameters/PageSizeParam"
           },

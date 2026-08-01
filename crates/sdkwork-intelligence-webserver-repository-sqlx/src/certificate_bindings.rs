@@ -1,3 +1,4 @@
+use crate::audited_sql;
 use sdkwork_webserver_contract::{
     CertificateIdentifierResponse, CreateListenerCertificateBindingRequest,
     ListenerCertificateBindingPage, ListenerCertificateBindingResponse,
@@ -39,12 +40,12 @@ impl WebRepository {
         let total: i64 = count_row
             .try_get("total")
             .map_err(|error| store_error("map listener certificate binding count", error))?;
-        let rows = sqlx::query(&listener_binding_select(
+        let rows = sqlx::query(audited_sql(&listener_binding_select(
             "l.tenant_id = $1 AND s.uuid = $2 AND d.uuid = $3
              AND l.deleted_at IS NULL AND l.status <> 'ARCHIVED'
              ORDER BY l.is_default DESC, l.priority ASC, l.id ASC
              LIMIT $4 OFFSET $5",
-        ))
+        )))
         .bind(tenant_id)
         .bind(site_uuid)
         .bind(domain_uuid)
@@ -309,9 +310,9 @@ impl WebRepository {
         tenant_id: i64,
         binding_uuid: &str,
     ) -> WebServiceResult<ListenerCertificateBindingResponse> {
-        let row = sqlx::query(&listener_binding_select(
+        let row = sqlx::query(audited_sql(&listener_binding_select(
             "l.tenant_id = $1 AND l.uuid = $2 AND l.deleted_at IS NULL",
-        ))
+        )))
         .bind(tenant_id)
         .bind(binding_uuid)
         .fetch_optional(&self.pool)

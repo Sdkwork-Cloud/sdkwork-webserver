@@ -121,8 +121,8 @@ Console.WriteLine(result);
 var siteId = "1";
 var query = new Dictionary<string, object>
 {
-    ["page"] = 1,
-    ["page_size"] = 2,
+    ["page_size"] = 1,
+    ["cursor"] = "cursor",
 };
 var result = await client.SourceVersion.SitesSourceVersionsListAsync(siteId, query);
 Console.WriteLine(result);
@@ -135,8 +135,7 @@ Console.WriteLine(result);
 var siteId = "1";
 var query = new Dictionary<string, object>
 {
-    ["page"] = 1,
-    ["page_size"] = 2,
+    ["page_size"] = 1,
     ["cursor"] = "cursor",
     ["status"] = 0,
 };

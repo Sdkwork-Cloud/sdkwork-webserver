@@ -236,7 +236,7 @@ mod tests {
                 permissions: vec!["web.agent.read".to_owned()],
             })
             .await,
-            StatusCode::FORBIDDEN
+            StatusCode::UNPROCESSABLE_ENTITY
         );
         assert_eq!(
             call_current_assignment(TestResolver {
@@ -256,20 +256,21 @@ mod tests {
             ),
             build_web_internal_api_framework_layer(resolver, None),
         );
-        app.oneshot(
-            Request::builder()
-                .uri("/internal/v3/api/web/runtime_assignments/current")
-                .header("x-sdkwork-ingress-token", "ingress-test")
-                .header(
-                    "access-token",
-                    access_token_jwt("42", "7", "session-1", "web"),
-                )
-                .body(Body::empty())
-                .expect("valid internal request"),
-        )
-        .await
-        .expect("internal framework response")
-        .status()
+        let response = app
+            .oneshot(
+                Request::builder()
+                    .uri("/internal/v3/api/web/runtime_assignments/current")
+                    .header("x-sdkwork-ingress-token", "ingress-test")
+                    .header(
+                        "access-token",
+                        access_token_jwt("42", "7", "session-1", "web"),
+                    )
+                    .body(Body::empty())
+                    .expect("valid internal request"),
+            )
+            .await
+            .expect("internal framework response");
+        response.status()
     }
 
     #[tokio::test]

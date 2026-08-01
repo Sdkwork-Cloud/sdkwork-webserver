@@ -1,4 +1,3 @@
-use sdkwork_database_config::DatabaseEngine;
 use sdkwork_database_id::{uuid_v4, uuid_v4_with_prefix, SnowflakeIdGenerator};
 use sdkwork_utils_rust::crypto::sha256_hash;
 use sdkwork_webserver_contract::WebServiceError;
@@ -124,18 +123,15 @@ pub(crate) fn json_from_row(
         .transpose()
 }
 
-pub(crate) fn json_write_expression(engine: DatabaseEngine, placeholder: &str) -> String {
-    match engine {
-        DatabaseEngine::Sqlite => placeholder.to_string(),
-        DatabaseEngine::Postgres => format!("CAST({placeholder} AS JSONB)"),
-    }
+/// PostgreSQL-only JSONB write expression. The repository is instantiated
+/// exclusively with the PostgreSQL engine (PRD: PostgreSQL is the only
+/// authoritative server database), so no engine branching exists.
+pub(crate) fn json_write_expression(placeholder: &str) -> String {
+    format!("CAST({placeholder} AS JSONB)")
 }
 
-pub(crate) fn instant_write_expression(engine: DatabaseEngine, placeholder: &str) -> String {
-    match engine {
-        DatabaseEngine::Sqlite => placeholder.to_string(),
-        DatabaseEngine::Postgres => format!("CAST({placeholder} AS TIMESTAMPTZ)"),
-    }
+pub(crate) fn instant_write_expression(placeholder: &str) -> String {
+    format!("CAST({placeholder} AS TIMESTAMPTZ)")
 }
 
 pub(crate) fn instant_from_row(row: &EngineRow, column: &str) -> Result<String, SqlxError> {

@@ -260,10 +260,9 @@ class DeploymentSitesDeploymentsApi:
         self._client = client
 
 
-    def list(self, site_id: str, page: Optional[int] = None, page_size: Optional[int] = None, cursor: Optional[str] = None, status: Optional[int] = None) -> SitesDeploymentsListResponse:
+    def list(self, site_id: str, page_size: Optional[int] = None, cursor: Optional[str] = None, status: Optional[int] = None) -> SitesDeploymentsListResponse:
         """获取部署历史"""
         query = build_query_string([
-            {'name': 'page', 'value': page, 'style': 'form', 'explode': True, 'allow_reserved': False},
             {'name': 'page_size', 'value': page_size, 'style': 'form', 'explode': True, 'allow_reserved': False},
             {'name': 'cursor', 'value': cursor, 'style': 'form', 'explode': True, 'allow_reserved': False},
             {'name': 'status', 'value': status, 'style': 'form', 'explode': True, 'allow_reserved': False},

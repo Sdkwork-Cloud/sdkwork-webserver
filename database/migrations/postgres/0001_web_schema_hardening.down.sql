@@ -1,4 +1,13 @@
--- Rollback: 0001_web_schema_hardening
+-- sdkwork:migration
+-- version: 0001
+-- engine: postgres
+-- module: web
+-- reversible: true
+-- rollback: down-migration
+-- transactional: true
+-- lock: access-exclusive
+-- lock_timeout: 30s
+-- statement_timeout: 120s
 
 ALTER TABLE web_health_result
     DROP CONSTRAINT IF EXISTS fk_web_health_result_site;

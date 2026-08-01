@@ -64,9 +64,8 @@ impl WebService {
                 return;
             }
         };
-        if let Err(error) = self
-            .repository
-            .insert_audit_log(AuditLogWrite {
+        let _ = self
+            .record_audit_log(AuditLogWrite {
                 tenant_id,
                 organization_id: 0,
                 operator_id: context.operator_id.unwrap_or(0),
@@ -78,17 +77,7 @@ impl WebService {
                 request_id: None,
                 metadata_json: "{}",
             })
-            .await
-        {
-            tracing::error!(
-                tenant_id,
-                action,
-                target_type,
-                target_uuid,
-                error = ?error,
-                "failed to persist backend business audit"
-            );
-        }
+            .await;
     }
 
     fn normalize_root_domain_request(
@@ -475,9 +464,11 @@ impl WebBackendApi for WebService {
         application_id: &str,
         page: i32,
         page_size: i32,
+        cursor: Option<&str>,
     ) -> WebServiceResult<sdkwork_webserver_contract::SourceVersionPage> {
         let app_context = Self::backend_app_context(context)?;
-        WebAppApi::list_source_versions(self, &app_context, application_id, page, page_size).await
+        WebAppApi::list_source_versions(self, &app_context, application_id, page, page_size, cursor)
+            .await
     }
 
     async fn create_application_source_version(
@@ -818,12 +809,24 @@ impl WebBackendApi for WebService {
             .await?;
         self.validate_nginx_content(&content).await?;
 
-        let response = self
-            .repository
-            .web_nginx_config(Some(tenant_id), config_id)
-            .await?;
+        // Activate the edge first (deploy + reload), then record the
+        // activation in the control plane. If the database commit fails,
+        // roll the edge back to the previously active configuration so the
+        // edge never diverges silently from the control-plane state.
         self.deploy_nginx_site(&domain, &content).await?;
         self.reload_nginx_runtime().await?;
+        let response = match self
+            .repository
+            .web_nginx_config(Some(tenant_id), config_id)
+            .await
+        {
+            Ok(response) => response,
+            Err(error) => {
+                self.rollback_nginx_edge(tenant_id, &candidate.site_id, &domain)
+                    .await;
+                return Err(error);
+            }
+        };
 
         Ok(response)
     }
@@ -854,10 +857,11 @@ impl WebBackendApi for WebService {
         context: &WebBackendRequestContext,
         page: i32,
         page_size: i32,
+        cursor: Option<&str>,
     ) -> WebServiceResult<sdkwork_webserver_contract::ServerPage> {
         let tenant_id = Self::require_backend_tenant(context)?;
         self.repository
-            .list_servers(tenant_id, page, page_size)
+            .list_servers(tenant_id, page, page_size, cursor)
             .await
     }
 
@@ -897,10 +901,12 @@ impl WebBackendApi for WebService {
             }
         }
         if let (Some(start), Some(end)) = (query.start_date.as_deref(), query.end_date.as_deref()) {
-            let start = chrono::DateTime::parse_from_rfc3339(start)
-                .map_err(|_| sdkwork_webserver_contract::WebServiceError::validation("startDate is invalid"))?;
-            let end = chrono::DateTime::parse_from_rfc3339(end)
-                .map_err(|_| sdkwork_webserver_contract::WebServiceError::validation("endDate is invalid"))?;
+            let start = chrono::DateTime::parse_from_rfc3339(start).map_err(|_| {
+                sdkwork_webserver_contract::WebServiceError::validation("startDate is invalid")
+            })?;
+            let end = chrono::DateTime::parse_from_rfc3339(end).map_err(|_| {
+                sdkwork_webserver_contract::WebServiceError::validation("endDate is invalid")
+            })?;
             if start >= end {
                 return Err(sdkwork_webserver_contract::WebServiceError::validation(
                     "startDate must be earlier than endDate",
@@ -910,6 +916,44 @@ impl WebBackendApi for WebService {
         self.repository
             .list_audit_logs(Some(tenant_id), query)
             .await
+    }
+}
+
+impl WebService {
+    /// Rolls the deployed Nginx site back to the previously active
+    /// configuration after a control-plane activation failure. Best effort:
+    /// the original error is preserved and the rollback failure is logged.
+    async fn rollback_nginx_edge(&self, tenant_id: i64, site_id: &str, domain: &str) {
+        let previous = match self
+            .repository
+            .load_active_nginx_config_content(tenant_id, site_id)
+            .await
+        {
+            Ok(Some(content)) => content,
+            _ => {
+                tracing::error!(
+                    tenant_id,
+                    site_id,
+                    "nginx activation rollback skipped: no previous active configuration"
+                );
+                return;
+            }
+        };
+        if let Err(error) = self.deploy_nginx_site(domain, &previous).await {
+            tracing::error!(
+                tenant_id,
+                site_id,
+                "nginx activation rollback deploy failed: {error}"
+            );
+            return;
+        }
+        if let Err(error) = self.reload_nginx_runtime().await {
+            tracing::error!(
+                tenant_id,
+                site_id,
+                "nginx activation rollback reload failed: {error}"
+            );
+        }
     }
 }
 

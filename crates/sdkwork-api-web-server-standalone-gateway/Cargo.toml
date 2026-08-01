@@ -12,6 +12,7 @@ management = [
   "dep:sdkwork-database-sqlx",
   "dep:sdkwork-web-axum",
   "dep:sdkwork-web-contract",
+  "dep:sdkwork-web-store-sqlx",
   "dep:sdkwork-webserver-http-host",
 ]
 
@@ -83,6 +84,7 @@ sdkwork-web-internal-sdk.workspace = true
 sdkwork-web-bootstrap.workspace = true
 sdkwork-web-axum = { workspace = true, optional = true }
 sdkwork-web-contract = { workspace = true, optional = true }
+sdkwork-web-store-sqlx = { workspace = true, optional = true }
 sdkwork-utils-rust.workspace = true
 sdkwork-web-core.workspace = true
 sdkwork-iam-web-adapter.workspace = true

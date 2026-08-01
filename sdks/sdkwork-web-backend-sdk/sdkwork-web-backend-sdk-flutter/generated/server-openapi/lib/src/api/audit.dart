@@ -12,9 +12,8 @@ class AuditApi {
   AuditApi(this._client);
 
   /// List audit logs
-  Future<AuditLogsListResponse?> logsList([int? page, int? pageSize, String? cursor, String? targetType, String? action, String? operatorId, String? startDate, String? endDate]) async {
+  Future<AuditLogsListResponse?> logsList([int? pageSize, String? cursor, String? targetType, String? action, String? operatorId, String? startDate, String? endDate]) async {
     final query = buildQueryString([
-      QueryParameterSpec('page', page, 'form', true, false, null),
       QueryParameterSpec('page_size', pageSize, 'form', true, false, null),
       QueryParameterSpec('cursor', cursor, 'form', true, false, null),
       QueryParameterSpec('target_type', targetType, 'form', true, false, null),

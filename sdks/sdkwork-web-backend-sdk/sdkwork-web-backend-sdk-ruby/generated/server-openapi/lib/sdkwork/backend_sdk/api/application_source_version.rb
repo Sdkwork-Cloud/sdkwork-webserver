@@ -11,11 +11,11 @@ module Sdkwork
     module Api
       class ApplicationSourceVersionApi < BaseApi
           # List immutable application source versions
-          def applications_source_versions_list(application_id, page: nil, page_size: nil)
+          def applications_source_versions_list(application_id, page_size: nil, cursor: nil)
             path = interpolate_path('/backend/v3/api/applications/{applicationId}/source_versions', applicationId: serialize_path_parameter(application_id, PathParameterSpec.new('applicationId', 'simple', false)))
             query = build_query_string([
-              QueryParameterSpec.new('page', page, 'form', true, false, nil),
               QueryParameterSpec.new('page_size', page_size, 'form', true, false, nil),
+              QueryParameterSpec.new('cursor', cursor, 'form', true, false, nil),
             ])
             path = append_query_string(path, query)
             options = {}

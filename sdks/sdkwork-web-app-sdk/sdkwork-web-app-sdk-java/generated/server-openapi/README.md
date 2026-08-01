@@ -124,8 +124,8 @@ System.out.println(result);
 // 获取应用源码版本
 String siteId = "1";
 Map<String, Object> params = new LinkedHashMap<>();
-params.put("page", 1);
-params.put("page_size", 2);
+params.put("page_size", 1);
+params.put("cursor", "cursor");
 SitesSourceVersionsListResponse result = client.getSourceVersion().sitesSourceVersionsList(siteId, params);
 System.out.println(result);
 ```
@@ -136,8 +136,7 @@ System.out.println(result);
 // 获取部署历史
 String siteId = "1";
 Map<String, Object> params = new LinkedHashMap<>();
-params.put("page", 1);
-params.put("page_size", 2);
+params.put("page_size", 1);
 params.put("cursor", "cursor");
 params.put("status", 0);
 SitesDeploymentsListResponse result = client.getDeployment().sitesDeploymentsList(siteId, params);

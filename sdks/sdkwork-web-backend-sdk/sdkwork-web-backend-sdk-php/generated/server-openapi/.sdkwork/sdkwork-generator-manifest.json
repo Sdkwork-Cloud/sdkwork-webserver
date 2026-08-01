@@ -36,7 +36,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "21ed42466585fbe3f1c72dd9dd4e09fb574ffce34401fd66769cd4361f6cf6ac"
+      "sha256": "d47e6cb2f96738ebc19d764ea542e778306ca62419a7cf63bf8fa2831534bfaa"
     },
     {
       "path": "sdkwork-sdk.json",
@@ -52,7 +52,7 @@
     },
     {
       "path": "src/Api/ApplicationDeployment.php",
-      "sha256": "2a4aa55fcde8b33539c0ed78c86e017c1138ac960334a61fdd028f39a0599318"
+      "sha256": "e70a8863151ba4afbec31a19d29e6fcd419930caaec82d78fd29f800c9a37d8a"
     },
     {
       "path": "src/Api/ApplicationDomain.php",
@@ -60,11 +60,11 @@
     },
     {
       "path": "src/Api/ApplicationSourceVersion.php",
-      "sha256": "4d8f05ceab70ddc37bd079736ce9d020af27d35f1622df39a31fc6989a94fa4d"
+      "sha256": "42b13fe5d03079838e0766dd751af1ecf958e29ac141f7221b5b52e924bd2290"
     },
     {
       "path": "src/Api/Audit.php",
-      "sha256": "3a3860bb2f95e66e727790cd9d8eeafbe2cd638a2225ad0e943be6cf5f16ea99"
+      "sha256": "2c8ecbb4db5348ea14f90c108ae1d8f10ca9b8ca97a2e208326b47c4e5f81a34"
     },
     {
       "path": "src/Api/BaseApi.php",
@@ -88,7 +88,7 @@
     },
     {
       "path": "src/Api/Server.php",
-      "sha256": "7a8e2041bb9e0bd119ed89af12098b8ec460e815ff562d206b9d7978c51ddc10"
+      "sha256": "32c6c5f274d3edc00fd4d1701ce08ff7afa8a657c51ea8248d3467138b7e4475"
     },
     {
       "path": "src/Http/HttpClient.php",

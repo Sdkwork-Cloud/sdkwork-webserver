@@ -116,7 +116,7 @@ var_dump($result);
 
 // List immutable application source versions
 $applicationId = '1';
-$params = ['page' => 1, 'page_size' => 2];
+$params = ['page_size' => 1, 'cursor' => 'cursor'];
 $result = $client->applicationSourceVersion->applicationsSourceVersionsList($applicationId, $params);
 var_dump($result);
 ```
@@ -128,7 +128,7 @@ var_dump($result);
 
 // List application deployments
 $applicationId = '1';
-$params = ['page' => 1, 'page_size' => 2, 'cursor' => 'cursor', 'status' => 4];
+$params = ['page_size' => 1, 'cursor' => 'cursor', 'status' => 3];
 $result = $client->applicationDeployment->applicationsDeploymentsList($applicationId, $params);
 var_dump($result);
 ```
@@ -160,7 +160,7 @@ var_dump($result);
 <?php
 
 // List managed servers
-$params = ['page' => 1, 'page_size' => 2];
+$params = ['page_size' => 1, 'cursor' => 'cursor'];
 $result = $client->server->serversList($params);
 var_dump($result);
 ```
@@ -182,7 +182,7 @@ var_dump($result);
 <?php
 
 // List audit logs
-$params = ['page' => 1, 'page_size' => 2, 'cursor' => 'cursor', 'target_type' => 'target-type', 'action' => 'action', 'operator_id' => '1', 'start_date' => '2026-04-10T00:00:00Z', 'end_date' => '2026-04-10T00:00:00Z'];
+$params = ['page_size' => 1, 'cursor' => 'cursor', 'target_type' => 'target-type', 'action' => 'action', 'operator_id' => '1', 'start_date' => '2026-04-10T00:00:00Z', 'end_date' => '2026-04-10T00:00:00Z'];
 $result = $client->audit->logsList($params);
 var_dump($result);
 ```

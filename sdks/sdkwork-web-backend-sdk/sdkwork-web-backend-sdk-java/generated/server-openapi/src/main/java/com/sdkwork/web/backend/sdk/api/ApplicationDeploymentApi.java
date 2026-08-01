@@ -14,9 +14,8 @@ public class ApplicationDeploymentApi {
     }
 
     /** List application deployments */
-    public ApplicationsDeploymentsListResponse applicationsDeploymentsList(String applicationId, Integer page, Integer pageSize, String cursor, Integer status) throws Exception {
+    public ApplicationsDeploymentsListResponse applicationsDeploymentsList(String applicationId, Integer pageSize, String cursor, Integer status) throws Exception {
         String query = buildQueryString(List.of(
-            new QueryParameterSpec("page", page, "form", true, false, null),
             new QueryParameterSpec("page_size", pageSize, "form", true, false, null),
             new QueryParameterSpec("cursor", cursor, "form", true, false, null),
             new QueryParameterSpec("status", status, "form", true, false, null)

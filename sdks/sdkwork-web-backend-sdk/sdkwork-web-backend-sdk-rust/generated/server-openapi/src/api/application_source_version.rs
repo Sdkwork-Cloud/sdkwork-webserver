@@ -17,10 +17,10 @@ impl ApplicationSourceVersionApi {
     }
 
     /// List immutable application source versions
-    pub async fn applications_source_versions_list(&self, application_id: &str, page: Option<i64>, page_size: Option<i64>) -> Result<serde_json::Value, SdkworkError> {
+    pub async fn applications_source_versions_list(&self, application_id: &str, page_size: Option<i64>, cursor: Option<&str>) -> Result<serde_json::Value, SdkworkError> {
         let query = build_query_string(&[
-            QueryParameterSpec::new("page", page, "form", true, false, None),
             QueryParameterSpec::new("page_size", page_size, "form", true, false, None),
+            QueryParameterSpec::new("cursor", cursor, "form", true, false, None),
         ]);
         let path = append_query_string(backend_path(&format!("/applications/{}/source_versions", serialize_path_parameter(application_id, PathParameterSpec::new("applicationId", "simple", false)))), &query);
         self.client.get(&path, None, None).await

@@ -12,10 +12,10 @@ class SourceVersionApi {
   SourceVersionApi(this._client);
 
   /// 获取应用源码版本
-  Future<SitesSourceVersionsListResponse?> sitesSourceVersionsList(String siteId, [int? page, int? pageSize]) async {
+  Future<SitesSourceVersionsListResponse?> sitesSourceVersionsList(String siteId, [int? pageSize, String? cursor]) async {
     final query = buildQueryString([
-      QueryParameterSpec('page', page, 'form', true, false, null),
-      QueryParameterSpec('page_size', pageSize, 'form', true, false, null)
+      QueryParameterSpec('page_size', pageSize, 'form', true, false, null),
+      QueryParameterSpec('cursor', cursor, 'form', true, false, null)
     ]);
     final response = await _client.get(ApiPaths.appendQueryString(ApiPaths.appPath('/sites/${serializePathParameter(siteId, const PathParameterSpec('siteId', 'simple', false))}/source_versions'), query));
     return (() {

@@ -1,3 +1,4 @@
+use crate::audited_sql;
 use futures_util::TryStreamExt;
 use sdkwork_utils_rust::crypto::sha256_hash;
 use sdkwork_webserver_contract::{
@@ -139,8 +140,8 @@ impl WebRepository {
         });
 
         // Atomic JSONB merge so concurrent heartbeats never lose fields.
-        let engine = self.database_engine().await?;
-        let now_expression = instant_write_expression(engine, "$3");
+
+        let now_expression = instant_write_expression("$3");
         let update_sql = format!(
             "UPDATE web_server
              SET status = 1, metadata = metadata || CAST($2 AS JSONB),
@@ -148,7 +149,7 @@ impl WebRepository {
              WHERE tenant_id = $1 AND uuid = $4"
         );
 
-        sqlx::query(&update_sql)
+        sqlx::query(audited_sql(&update_sql))
             .bind(agent.tenant_id)
             .bind(metadata_patch.to_string())
             .bind(&now)
@@ -635,7 +636,7 @@ impl WebRepository {
              ORDER BY server_id, item_kind, component",
             MAX_NODE_SYNC_ITEMS + 1
         );
-        let mut rows = sqlx::query(&manifest_sql)
+        let mut rows = sqlx::query(audited_sql(&manifest_sql))
             .bind(tenant_id)
             .bind(server_ids)
             .fetch(&mut **transaction);
@@ -848,7 +849,7 @@ impl WebRepository {
              LIMIT {}",
             MAX_NODE_SYNC_ITEMS + 1
         );
-        let mut rows = sqlx::query(&sql)
+        let mut rows = sqlx::query(audited_sql(&sql))
             .bind(tenant_id)
             .bind(site_uuids)
             .fetch(&self.pool);
@@ -963,7 +964,7 @@ impl WebRepository {
              LIMIT {}",
             MAX_NODE_SYNC_ITEMS + 1
         );
-        let mut rows = sqlx::query(&sql)
+        let mut rows = sqlx::query(audited_sql(&sql))
             .bind(tenant_id)
             .bind(site_uuids)
             .fetch(&self.pool);

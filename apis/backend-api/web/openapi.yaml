@@ -991,6 +991,7 @@ paths:
     get:
       operationId: applications.sourceVersions.list
       summary: List immutable application source versions
+      x-sdkwork-pagination-mode: cursor
       tags: [applicationSourceVersion]
       security:
       - AuthToken: []
@@ -1002,8 +1003,8 @@ paths:
       x-sdkwork-permission: web.sites.read
       x-sdkwork-owner: sdkwork-web
       parameters:
-      - $ref: '#/components/parameters/PageParam'
       - $ref: '#/components/parameters/PageSizeParam'
+      - $ref: '#/components/parameters/CursorParam'
       responses:
         '200':
           description: Application source versions returned successfully.
@@ -1165,9 +1166,8 @@ paths:
       x-sdkwork-auth-mode: dual-token
       x-sdkwork-permission: web.sites.read
       x-sdkwork-owner: sdkwork-web
-      x-sdkwork-pagination-mode: cursor-offset
+      x-sdkwork-pagination-mode: cursor
       parameters:
-      - $ref: '#/components/parameters/PageParam'
       - $ref: '#/components/parameters/PageSizeParam'
       - $ref: '#/components/parameters/CursorParam'
       - name: status
@@ -1887,6 +1887,7 @@ paths:
     get:
       operationId: servers.list
       summary: List managed servers
+      x-sdkwork-pagination-mode: cursor
       tags:
       - server
       security:
@@ -1899,8 +1900,8 @@ paths:
       x-sdkwork-permission: web.servers.read
       x-sdkwork-owner: sdkwork-web
       parameters:
-      - $ref: '#/components/parameters/PageParam'
       - $ref: '#/components/parameters/PageSizeParam'
+      - $ref: '#/components/parameters/CursorParam'
       responses:
         '200':
           description: Managed server list returned successfully.
@@ -2071,9 +2072,8 @@ paths:
       x-sdkwork-auth-mode: dual-token
       x-sdkwork-permission: web.auditLogs.read
       x-sdkwork-owner: sdkwork-web
-      x-sdkwork-pagination-mode: cursor-offset
+      x-sdkwork-pagination-mode: cursor
       parameters:
-      - $ref: '#/components/parameters/PageParam'
       - $ref: '#/components/parameters/PageSizeParam'
       - $ref: '#/components/parameters/CursorParam'
       - name: target_type

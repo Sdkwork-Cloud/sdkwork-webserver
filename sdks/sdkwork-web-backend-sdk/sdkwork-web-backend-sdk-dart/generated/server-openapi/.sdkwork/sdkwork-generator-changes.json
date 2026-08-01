@@ -9,10 +9,16 @@
     "protocol": "http",
     "packageName": "sdkwork_web_backend_sdk"
   },
-  "changeFingerprint": "495d90cb512154af6075a2aa5701c1ac8a5aeed425e1d9d1932dcec9132458da",
+  "changeFingerprint": "f0e2e38b471b1550e2e612df560446dd37862c74fbda98f3acd2ba55e1a9a933",
   "changes": {
     "createdGeneratedFiles": [],
-    "updatedGeneratedFiles": [],
+    "updatedGeneratedFiles": [
+      "lib/src/api/application_deployment.dart",
+      "lib/src/api/application_source_version.dart",
+      "lib/src/api/audit.dart",
+      "lib/src/api/server.dart",
+      "README.md"
+    ],
     "unchangedGeneratedFiles": [
       "analysis_options.yaml",
       "bin/publish-core.mjs",
@@ -23,24 +29,19 @@
       "lib/sdkwork_web_backend_sdk.dart",
       "lib/src/api/agent.dart",
       "lib/src/api/api.dart",
-      "lib/src/api/application_deployment.dart",
       "lib/src/api/application_domain.dart",
-      "lib/src/api/application_source_version.dart",
       "lib/src/api/application.dart",
-      "lib/src/api/audit.dart",
       "lib/src/api/certificate_distribution.dart",
       "lib/src/api/certificate.dart",
       "lib/src/api/domain.dart",
       "lib/src/api/nginx.dart",
       "lib/src/api/paths.dart",
       "lib/src/api/response_helpers.dart",
-      "lib/src/api/server.dart",
       "lib/src/http/client.dart",
       "lib/src/http/sdk_config.dart",
       "lib/src/models.dart",
       "LICENSE",
       "pubspec.yaml",
-      "README.md",
       "sdkwork-sdk.json"
     ],
     "deletedGeneratedFiles": [],
@@ -52,26 +53,64 @@
   },
   "impact": {
     "schemaVersion": 1,
-    "areas": [],
-    "details": [],
-    "requiresVerification": false,
-    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
+    "areas": [
+      "api-surface",
+      "documentation"
+    ],
+    "details": [
+      {
+        "area": "api-surface",
+        "paths": [
+          "lib/src/api/application_deployment.dart",
+          "lib/src/api/application_source_version.dart",
+          "lib/src/api/audit.dart",
+          "lib/src/api/server.dart"
+        ]
+      },
+      {
+        "area": "documentation",
+        "paths": [
+          "README.md"
+        ]
+      }
+    ],
+    "requiresVerification": true,
+    "summary": "Detected impact areas: api-surface, documentation. Verification is required."
   },
   "verificationPlan": {
-    "shouldRun": false,
-    "runPhase": "skip",
-    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
-    "steps": []
+    "shouldRun": true,
+    "runPhase": "now",
+    "summary": "Detected impact areas: api-surface, documentation. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "steps": [
+      {
+        "id": "check",
+        "title": "Unified package check",
+        "required": true,
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, documentation.",
+        "workingDirectory": "E:\\sdkwork-space\\sdkwork-webserver\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-dart\\generated\\server-openapi",
+        "command": "node",
+        "args": [
+          "./bin/publish-core.mjs",
+          "--language",
+          "dart",
+          "--project-dir",
+          ".",
+          "--action",
+          "check"
+        ],
+        "displayCommand": "node ./bin/publish-core.mjs --language dart --project-dir . --action check"
+      }
+    ]
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "low",
-    "nextAction": "skip",
+    "riskLevel": "medium",
+    "nextAction": "verify",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
-    "summary": "No actionable changes were detected. No apply or verification step is required.",
+    "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
-      "no-actionable-changes"
+      "verification-required"
     ]
   },
   "preservedLegacyFiles": false

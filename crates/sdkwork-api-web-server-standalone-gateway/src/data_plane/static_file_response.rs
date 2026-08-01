@@ -38,7 +38,11 @@ pub(crate) async fn serve_opened_file(
         .unwrap_or_else(|| HeaderValue::from_static("application/octet-stream"));
     let mut builder = Response::builder()
         .header(header::CONTENT_TYPE, mime)
-        .header(header::ACCEPT_RANGES, "bytes");
+        .header(header::ACCEPT_RANGES, "bytes")
+        // Safe default: never cache without an explicit deployment-level
+        // policy. Fingerprinted immutable assets are served through the
+        // CDN/edge cache layer, which owns cache invalidation.
+        .header(header::CACHE_CONTROL, "public, no-cache");
     if let Some(modified) = modified {
         builder = builder.header(header::LAST_MODIFIED, modified.to_string());
     }
@@ -138,8 +142,7 @@ fn if_none_match_passes(headers: &HeaderMap, etag: Option<&str>) -> bool {
     }
     // Tag list is comma-separated; weak comparison strips the W/ prefix.
     condition.split(',').any(|candidate| {
-        candidate.trim() == etag
-            || candidate.trim().strip_prefix("W/") == etag.strip_prefix("W/")
+        candidate.trim() == etag || candidate.trim().strip_prefix("W/") == etag.strip_prefix("W/")
     })
 }
 

@@ -105,8 +105,8 @@ print(result);
 // 获取应用源码版本
 final siteId = '1';
 final params = <String, dynamic>{
-  'page': 1,
-  'page_size': 2,
+  'page_size': 1,
+  'cursor': 'cursor',
 };
 final result = await client.sourceVersion.sitesSourceVersionsList(siteId, params);
 print(result);
@@ -117,8 +117,7 @@ print(result);
 // 获取部署历史
 final siteId = '1';
 final params = <String, dynamic>{
-  'page': 1,
-  'page_size': 2,
+  'page_size': 1,
   'cursor': 'cursor',
   'status': 0,
 };

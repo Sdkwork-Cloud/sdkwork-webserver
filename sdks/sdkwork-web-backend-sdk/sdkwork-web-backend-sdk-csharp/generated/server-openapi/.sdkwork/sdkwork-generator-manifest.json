@@ -28,7 +28,7 @@
     },
     {
       "path": "Api/ApplicationDeploymentApi.cs",
-      "sha256": "39a1177cbf8fbc639999f4227d16a57b99685de37046fc4cca300738dd259fe2"
+      "sha256": "a28eeafad92e2370bfc2c66ed04ec0d4f79a487df3839f4f32564d414b5203b4"
     },
     {
       "path": "Api/ApplicationDomainApi.cs",
@@ -36,11 +36,11 @@
     },
     {
       "path": "Api/ApplicationSourceVersionApi.cs",
-      "sha256": "b97c186881c091d4c2e8d573f0f1058ad51a31bb85e6c4fd763fbcf67b3f40b3"
+      "sha256": "f6666db1f15f6d7e09ad0f4072c65a32a0836ae70a1facb293b340a1042477dd"
     },
     {
       "path": "Api/AuditApi.cs",
-      "sha256": "f0e71fca2b9ce3ecc80d83ef9f38ba644dda982bdd6da4e4a252ce7cfd04afe5"
+      "sha256": "f7f9a82ad6f18d6cbd3963fcde178dd921259d49599d09517dc06602167e7bd3"
     },
     {
       "path": "Api/CertificateApi.cs",
@@ -60,7 +60,7 @@
     },
     {
       "path": "Api/ServerApi.cs",
-      "sha256": "1a2c144b1b256fca4f809407bd28508892b8d26c93754296a14479eb9d0b62b3"
+      "sha256": "518ad32da1faf47f224e3640d0680b039f75a5c01f3723e5bf791e9e7398719b"
     },
     {
       "path": "bin/publish-core.mjs",
@@ -516,7 +516,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "4a7fe2fbc4c9555054e987be6509179f416868fcea654511ff9a372720847073"
+      "sha256": "ac0074296d21cf58c17ff41e0383b32eb4d673a531e39b36229f75be0c65ed7d"
     },
     {
       "path": "sdkwork-sdk.json",

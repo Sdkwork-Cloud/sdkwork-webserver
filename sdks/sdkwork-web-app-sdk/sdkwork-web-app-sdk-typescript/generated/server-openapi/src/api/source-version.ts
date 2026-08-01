@@ -29,8 +29,8 @@ export class SourceVersionSitesSourceVersionsGitImportApi {
 }
 
 export interface SourceVersionSitesSourceVersionsListParams {
-  page?: number;
   pageSize?: number;
+  cursor?: string;
 }
 
 export interface SourceVersionSitesSourceVersionsCreateParams {
@@ -50,8 +50,8 @@ export class SourceVersionSitesSourceVersionsApi {
 /** 获取应用源码版本 */
   async list(siteId: string | number, params?: SourceVersionSitesSourceVersionsListParams, requestOptions?: ApiRequestOptions): Promise<{ items: SourceVersionResponse[]; pageInfo: PageInfo; }> {
     const query = buildQueryString([
-      { name: 'page', value: params?.page, style: 'form', explode: true, allowReserved: false },
       { name: 'page_size', value: params?.pageSize, style: 'form', explode: true, allowReserved: false },
+      { name: 'cursor', value: params?.cursor, style: 'form', explode: true, allowReserved: false },
     ]);
     return this.client.request<{ items: SourceVersionResponse[]; pageInfo: PageInfo; }>(appendQueryString(appApiPath(`/sites/${serializePathParameter(siteId, { name: 'siteId', style: 'simple', explode: false })}/source_versions`), query), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any, sdkworkUnwrapKind: 'page' });
   }

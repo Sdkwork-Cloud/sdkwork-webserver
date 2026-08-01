@@ -1,3 +1,4 @@
+use crate::audited_sql;
 use sdkwork_intelligence_webserver_service::AuditLogWrite;
 use sdkwork_webserver_contract::{
     AuditLogPage, AuditLogResponse, ListAuditLogsQuery, WebServiceError, WebServiceResult,
@@ -7,7 +8,7 @@ use sqlx::Row;
 
 use super::support::{
     decode_keyset_cursor, encode_keyset_cursor, instant_from_row, instant_write_expression,
-    json_write_expression, new_uuid, next_id, now_rfc3339, pagination, store_error,
+    json_write_expression, new_uuid, next_id, now_rfc3339, store_error,
 };
 
 /// Strongly typed audit list filter value so PostgreSQL receives correctly
@@ -17,11 +18,33 @@ enum AuditBindValue {
     Text(String),
 }
 
-/// Appends the typed filter clauses and values shared by offset and cursor
-/// audit listing.
+/// One fully numbered SQL filter fragment with its typed bind values.
+/// Numbering is resolved at push time so the final statement needs no
+/// post-processing of placeholder fragments.
+struct AuditFilter {
+    sql: String,
+    bindings: Vec<AuditBindValue>,
+}
+
+impl AuditFilter {
+    fn push(
+        filters: &mut Vec<AuditFilter>,
+        next_index: &mut usize,
+        sql: &str,
+        bindings: Vec<AuditBindValue>,
+    ) {
+        let numbered = sql.replace('$', &format!("${next_index}"));
+        *next_index += bindings.len();
+        filters.push(AuditFilter { sql: numbered, bindings });
+    }
+}
+
+/// Appends the typed filter clauses shared by audit listing. `next_index` is
+/// the next free `$N` placeholder index and is advanced by the pushed values.
 fn push_audit_filters(
     query: &ListAuditLogsQuery,
-    push: &mut impl FnMut(&str, AuditBindValue),
+    filters: &mut Vec<AuditFilter>,
+    next_index: &mut usize,
 ) -> WebServiceResult<()> {
     if let Some(target_type) = query.target_type.as_deref() {
         let target_type = target_type.trim();
@@ -30,7 +53,12 @@ fn push_audit_filters(
                 "targetType must contain 1..64 trimmed characters",
             ));
         }
-        push("target_type = $", AuditBindValue::Text(target_type.to_string()));
+        AuditFilter::push(
+            filters,
+            next_index,
+            "target_type = $",
+            vec![AuditBindValue::Text(target_type.to_string())],
+        );
     }
     if let Some(action) = query.action.as_deref() {
         let action = action.trim();
@@ -39,17 +67,59 @@ fn push_audit_filters(
                 "action must contain 1..128 trimmed characters",
             ));
         }
-        push("action = $", AuditBindValue::Text(action.to_string()));
+        AuditFilter::push(
+            filters,
+            next_index,
+            "action = $",
+            vec![AuditBindValue::Text(action.to_string())],
+        );
     }
     if let Some(operator_id) = query.operator_id {
-        push("operator_id = $", AuditBindValue::Int(operator_id));
+        AuditFilter::push(
+            filters,
+            next_index,
+            "operator_id = $",
+            vec![AuditBindValue::Int(operator_id)],
+        );
     }
     if let Some(start_date) = query.start_date.as_deref() {
-        push("created_at >= $", AuditBindValue::Text(start_date.to_string()));
+        validate_audit_date_range(start_date, "startDate")?;
+        AuditFilter::push(
+            filters,
+            next_index,
+            "created_at >= $",
+            vec![AuditBindValue::Text(start_date.to_string())],
+        );
     }
     if let Some(end_date) = query.end_date.as_deref() {
-        push("created_at < $", AuditBindValue::Text(end_date.to_string()));
+        validate_audit_date_range(end_date, "endDate")?;
+        AuditFilter::push(
+            filters,
+            next_index,
+            "created_at < $",
+            vec![AuditBindValue::Text(end_date.to_string())],
+        );
     }
+    if let (Some(start_date), Some(end_date)) = (query.start_date.as_deref(), query.end_date.as_deref()) {
+        if start_date >= end_date {
+            return Err(WebServiceError::validation(
+                "startDate must be earlier than endDate",
+            ));
+        }
+    }
+    Ok(())
+}
+
+/// Validates an audit log date filter as an RFC 3339 timestamp so malformed
+/// values never reach the database comparison.
+fn validate_audit_date_range(value: &str, name: &str) -> WebServiceResult<()> {
+    if value.trim().is_empty() || value.len() > 64 {
+        return Err(WebServiceError::validation(format!(
+            "{name} must contain 1..64 characters"
+        )));
+    }
+    chrono::DateTime::parse_from_rfc3339(value)
+        .map_err(|_| WebServiceError::validation(format!("{name} must be an RFC 3339 timestamp")))?;
     Ok(())
 }
 
@@ -59,88 +129,16 @@ impl WebRepository {
         tenant_id: Option<i64>,
         query: &ListAuditLogsQuery,
     ) -> WebServiceResult<AuditLogPage> {
-        // Cursor mode (keyset on (created_at, id)) is the contract for this
-        // growing log table: no deep OFFSET and no full COUNT per request.
-        if let Some(cursor) = query.cursor.as_deref() {
-            return self
-                .list_audit_logs_cursor_repo(tenant_id, query, cursor)
-                .await;
-        }
-        let (page, page_size, offset) = pagination(query.page, query.page_size)?;
-
-        let mut clauses: Vec<String> = Vec::new();
-        let mut arguments: Vec<AuditBindValue> = Vec::new();
-        let mut push_filter = |sql: &str, value: AuditBindValue| {
-            clauses.push(sql.to_string());
-            arguments.push(value);
-        };
-        if let Some(tenant_id) = tenant_id {
-            push_filter("tenant_id = $", AuditBindValue::Int(tenant_id));
-        }
-        push_audit_filters(query, &mut push_filter)?;
-
-        let mut filter_sql = String::from(" WHERE 1=1");
-        for (index, clause) in clauses.iter().enumerate() {
-            filter_sql.push_str(" AND ");
-            filter_sql.push_str(clause);
-            filter_sql.push_str(&(index + 1).to_string());
-        }
-
-        let count_sql = format!("SELECT COUNT(*) AS total FROM web_audit_log{filter_sql}");
-        let list_sql = format!(
-            "SELECT id, uuid, action, target_type, CAST(created_at AS TEXT) AS created_at
-             FROM web_audit_log{filter_sql}
-             ORDER BY created_at DESC, id DESC LIMIT ${} OFFSET ${}",
-            clauses.len() + 1,
-            clauses.len() + 2
-        );
-
-        let mut count_query = sqlx::query(&count_sql);
-        let mut list_query = sqlx::query(&list_sql);
-        for value in &arguments {
-            match value {
-                AuditBindValue::Int(value) => {
-                    count_query = count_query.bind(*value);
-                    list_query = list_query.bind(*value);
-                }
-                AuditBindValue::Text(value) => {
-                    count_query = count_query.bind(value);
-                    list_query = list_query.bind(value);
-                }
-            }
-        }
-        let page_size_bind = page_size.to_string();
-        let offset_bind = offset.to_string();
-        list_query = list_query.bind(&page_size_bind).bind(&offset_bind);
-
-        let count_row = count_query
-            .fetch_one(&self.pool)
+        // Cursor mode (keyset on (created_at, id)) is the only contract for
+        // this growing log table (PAGINATION_SPEC §6/§12): no deep OFFSET and
+        // no full COUNT per request. Offset pagination is rejected.
+        let cursor = query.cursor.as_deref().ok_or_else(|| {
+            WebServiceError::validation(
+                "cursor is required for audit log listing; offset pagination is not supported on this growing collection",
+            )
+        })?;
+        self.list_audit_logs_cursor_repo(tenant_id, query, cursor)
             .await
-            .map_err(|error| store_error("count web_audit_log", error))?;
-        let total: i64 = count_row
-            .try_get("total")
-            .map_err(|error| store_error("map web_audit_log count", error))?;
-
-        let rows = list_query
-            .fetch_all(&self.pool)
-            .await
-            .map_err(|error| store_error("list web_audit_log", error))?;
-
-        let mut items = Vec::with_capacity(rows.len());
-        for row in &rows {
-            items.push(map_audit_log_row(row).map_err(|error| {
-                WebServiceError::Internal(format!("map web_audit_log row: {error}"))
-            })?);
-        }
-
-        Ok(AuditLogPage {
-            items,
-            total,
-            page,
-            page_size,
-            next_cursor: None,
-            has_more: None,
-        })
     }
 
     /// Keyset page over `(created_at DESC, id DESC)` with an opaque cursor.
@@ -161,48 +159,47 @@ impl WebRepository {
         let (cursor_created_at, cursor_id) = decode_keyset_cursor(cursor)
             .ok_or_else(|| WebServiceError::validation("cursor is invalid"))?;
 
-        let mut clauses: Vec<String> = Vec::new();
-        let mut arguments: Vec<AuditBindValue> = Vec::new();
-        let mut push_filter = |sql: &str, value: AuditBindValue| {
-            clauses.push(sql.to_string());
-            arguments.push(value);
-        };
+        let mut filters: Vec<AuditFilter> = Vec::new();
+        let mut next_index = 1_usize;
         if let Some(tenant_id) = tenant_id {
-            push_filter("tenant_id = $", AuditBindValue::Int(tenant_id));
+            AuditFilter::push(
+                &mut filters,
+                &mut next_index,
+                "tenant_id = $",
+                vec![AuditBindValue::Int(tenant_id)],
+            );
         }
-        push_audit_filters(query, &mut push_filter)?;
-        clauses.push("(created_at, id) < ($".to_string());
-        arguments.push(AuditBindValue::Text(cursor_created_at));
-        arguments.push(AuditBindValue::Int(cursor_id));
+        push_audit_filters(query, &mut filters, &mut next_index)?;
+        AuditFilter::push(
+            &mut filters,
+            &mut next_index,
+            "(created_at, id) < ($",
+            vec![
+                AuditBindValue::Text(cursor_created_at),
+                AuditBindValue::Int(cursor_id),
+            ],
+        );
 
         let mut filter_sql = String::from(" WHERE 1=1");
-        for (index, clause) in clauses.iter().enumerate() {
+        for filter in &filters {
             filter_sql.push_str(" AND ");
-            if clause.ends_with("($") {
-                filter_sql.push_str(&(index + 1).to_string());
-                filter_sql.push_str(", $");
-                filter_sql.push_str(&(index + 2).to_string());
-                filter_sql.push(')');
-            } else {
-                filter_sql.push_str(clause);
-                filter_sql.push_str(&(index + 1).to_string());
-            }
+            filter_sql.push_str(&filter.sql);
         }
-
         let list_sql = format!(
             "SELECT id, uuid, action, target_type, CAST(created_at AS TEXT) AS created_at
              FROM web_audit_log{filter_sql}
-             ORDER BY created_at DESC, id DESC LIMIT ${}",
-            clauses.len() + 1
+             ORDER BY created_at DESC, id DESC LIMIT ${next_index}"
         );
-        let mut list_query = sqlx::query(&list_sql);
-        for value in &arguments {
-            match value {
-                AuditBindValue::Int(value) => {
-                    list_query = list_query.bind(*value);
-                }
-                AuditBindValue::Text(value) => {
-                    list_query = list_query.bind(value);
+        let mut list_query = sqlx::query(audited_sql(&list_sql));
+        for filter in &filters {
+            for binding in &filter.bindings {
+                match binding {
+                    AuditBindValue::Int(value) => {
+                        list_query = list_query.bind(*value);
+                    }
+                    AuditBindValue::Text(value) => {
+                        list_query = list_query.bind(value);
+                    }
                 }
             }
         }
@@ -253,9 +250,9 @@ impl WebRepository {
         let id = next_id(self.id_generator())?;
         let uuid = new_uuid();
         let now = now_rfc3339();
-        let engine = self.database_engine().await?;
-        let now_expression = instant_write_expression(engine, "$13");
-        let metadata_expression = json_write_expression(engine, "$12");
+
+        let now_expression = instant_write_expression("$13");
+        let metadata_expression = json_write_expression("$12");
         let insert_sql = format!(
             "INSERT INTO web_audit_log (
                 id, uuid, tenant_id, organization_id, operator_id, operator_type, action,
@@ -266,7 +263,7 @@ impl WebRepository {
              )"
         );
 
-        sqlx::query(&insert_sql)
+        sqlx::query(audited_sql(&insert_sql))
             .bind(id)
             .bind(&uuid)
             .bind(entry.tenant_id)

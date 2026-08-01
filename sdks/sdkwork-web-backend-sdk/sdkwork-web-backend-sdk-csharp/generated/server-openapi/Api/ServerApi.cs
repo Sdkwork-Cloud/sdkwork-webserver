@@ -18,12 +18,12 @@ namespace SDKWork.Web.BackendSdk.Api
         /// <summary>
         /// List managed servers
         /// </summary>
-        public async Task<SDKWork.Web.BackendSdk.Models.ServersListResponse?> ServersListAsync(int? page = null, int? pageSize = null)
+        public async Task<SDKWork.Web.BackendSdk.Models.ServersListResponse?> ServersListAsync(int? pageSize = null, string? cursor = null)
         {
             var queryString = BuildQueryString(new[]
             {
-                new QueryParameterSpec("page", page, "form", true, false, null),
                 new QueryParameterSpec("page_size", pageSize, "form", true, false, null),
+                new QueryParameterSpec("cursor", cursor, "form", true, false, null),
             });
             return await _client.GetAsync<SDKWork.Web.BackendSdk.Models.ServersListResponse>(ApiPaths.AppendQueryString(ApiPaths.BackendPath("/servers"), queryString));
         }

@@ -11,12 +11,12 @@ use SDKWork\Web\BackendSdk\Models\ServersListResponse;
 final class ServerApi extends BaseApi
 {
     /** List managed servers */
-    public function serversList(?int $page = null, ?int $pageSize = null): ?ServersListResponse
+    public function serversList(?int $pageSize = null, ?string $cursor = null): ?ServersListResponse
     {
         $path = '/backend/v3/api/servers';
         $query = $this->buildQueryString([
-            new QueryParameterSpec('page', $page, 'form', true, false, null),
             new QueryParameterSpec('page_size', $pageSize, 'form', true, false, null),
+            new QueryParameterSpec('cursor', $cursor, 'form', true, false, null),
         ]);
         $path = $this->appendQueryString($path, $query);
         $result = $this->client->request('GET', $path, []);

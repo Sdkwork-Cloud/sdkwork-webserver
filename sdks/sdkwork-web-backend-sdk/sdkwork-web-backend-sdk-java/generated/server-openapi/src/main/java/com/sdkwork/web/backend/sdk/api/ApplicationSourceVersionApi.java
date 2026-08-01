@@ -14,10 +14,10 @@ public class ApplicationSourceVersionApi {
     }
 
     /** List immutable application source versions */
-    public ApplicationsSourceVersionsListResponse applicationsSourceVersionsList(String applicationId, Integer page, Integer pageSize) throws Exception {
+    public ApplicationsSourceVersionsListResponse applicationsSourceVersionsList(String applicationId, Integer pageSize, String cursor) throws Exception {
         String query = buildQueryString(List.of(
-            new QueryParameterSpec("page", page, "form", true, false, null),
-            new QueryParameterSpec("page_size", pageSize, "form", true, false, null)
+            new QueryParameterSpec("page_size", pageSize, "form", true, false, null),
+            new QueryParameterSpec("cursor", cursor, "form", true, false, null)
         ));
         Object raw = client.get(ApiPaths.appendQueryString(ApiPaths.backendPath("/applications/" + serializePathParameter(applicationId, new PathParameterSpec("applicationId", "simple", false)) + "/source_versions"), query));
         return client.convertValue(raw, new TypeReference<ApplicationsSourceVersionsListResponse>() {});

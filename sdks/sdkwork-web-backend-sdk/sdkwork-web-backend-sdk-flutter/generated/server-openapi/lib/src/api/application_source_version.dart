@@ -12,10 +12,10 @@ class ApplicationSourceVersionApi {
   ApplicationSourceVersionApi(this._client);
 
   /// List immutable application source versions
-  Future<ApplicationsSourceVersionsListResponse?> applicationsSourceVersionsList(String applicationId, [int? page, int? pageSize]) async {
+  Future<ApplicationsSourceVersionsListResponse?> applicationsSourceVersionsList(String applicationId, [int? pageSize, String? cursor]) async {
     final query = buildQueryString([
-      QueryParameterSpec('page', page, 'form', true, false, null),
-      QueryParameterSpec('page_size', pageSize, 'form', true, false, null)
+      QueryParameterSpec('page_size', pageSize, 'form', true, false, null),
+      QueryParameterSpec('cursor', cursor, 'form', true, false, null)
     ]);
     final response = await _client.get(ApiPaths.appendQueryString(ApiPaths.backendPath('/applications/${serializePathParameter(applicationId, const PathParameterSpec('applicationId', 'simple', false))}/source_versions'), query));
     return (() {

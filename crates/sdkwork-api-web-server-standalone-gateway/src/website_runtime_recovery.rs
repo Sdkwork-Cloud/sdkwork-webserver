@@ -191,17 +191,29 @@ impl WebsiteRuntimeSetRecoveryStore {
         validate_directory_async(&self.directory).await?;
         let target = self.directory.join(target_slot.filename());
         validate_slot_target(&target).await?;
-        let mut file = tokio_fs::OpenOptions::new()
-            .create(true)
-            .truncate(true)
-            .write(true)
-            .open(&target)
-            .await
-            .map_err(|_| WebsiteRuntimeSetRecoveryError::Io)?;
-        file.write_all(&candidate.bytes)
-            .await
-            .map_err(|_| WebsiteRuntimeSetRecoveryError::Io)?;
-        file.sync_all()
+        // Atomic commit: write the temporary sibling, fsync it, rename over
+        // the target, then fsync the directory so a crash never leaves a
+        // truncated or half-written recovery slot.
+        let temp = self
+            .directory
+            .join(format!("{}.tmp", target_slot.filename()));
+        validate_slot_target(&temp).await?;
+        {
+            let mut file = tokio_fs::OpenOptions::new()
+                .create(true)
+                .truncate(true)
+                .write(true)
+                .open(&temp)
+                .await
+                .map_err(|_| WebsiteRuntimeSetRecoveryError::Io)?;
+            file.write_all(&candidate.bytes)
+                .await
+                .map_err(|_| WebsiteRuntimeSetRecoveryError::Io)?;
+            file.sync_all()
+                .await
+                .map_err(|_| WebsiteRuntimeSetRecoveryError::Io)?;
+        }
+        tokio_fs::rename(&temp, &target)
             .await
             .map_err(|_| WebsiteRuntimeSetRecoveryError::Io)?;
         sync_directory(&self.directory).await?;

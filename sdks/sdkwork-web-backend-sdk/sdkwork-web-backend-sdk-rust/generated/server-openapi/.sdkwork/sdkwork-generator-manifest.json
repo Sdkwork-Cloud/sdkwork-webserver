@@ -36,7 +36,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "5f65fbc6b536c3a06dbde0a6c54c81661dea572dd7d7d68f68e3c13d4b8a1086"
+      "sha256": "a85741d19c920735ee2629e975e1703b1d25df3fd786e24191f56bedcdae8775"
     },
     {
       "path": "sdkwork-sdk.json",
@@ -48,7 +48,7 @@
     },
     {
       "path": "src/api/application_deployment.rs",
-      "sha256": "f574de2b982ec58ceebe9df149d61e6b66b445824822ec87e9fe9b6eebcade20"
+      "sha256": "3e9f720b08cb86198cc6e507d27201d37168b9362736d877f92aa20e10356cab"
     },
     {
       "path": "src/api/application_domain.rs",
@@ -56,7 +56,7 @@
     },
     {
       "path": "src/api/application_source_version.rs",
-      "sha256": "4f83872553bf1d84f44d3a0d9016f8c5100e35981f0dc3f2f4cdbbb762566365"
+      "sha256": "124b6d95b68118c7c66f6dbf3855646bdd04afd1ce71f1d34b9292347432a9b9"
     },
     {
       "path": "src/api/application.rs",
@@ -64,7 +64,7 @@
     },
     {
       "path": "src/api/audit.rs",
-      "sha256": "3c735b797197027248014911ee01ab77b5fdcd2321837c55e0d96cbc41d83b47"
+      "sha256": "4fc701f212fdf3e1adbe43b6f92a6fbdad7e0420343a55f16e2447dd6131c387"
     },
     {
       "path": "src/api/base.rs",
@@ -96,7 +96,7 @@
     },
     {
       "path": "src/api/server.rs",
-      "sha256": "a30094e4a24645be5967ebc5708ae8077f3db9426968b8780233bc5f3cdad961"
+      "sha256": "fd000a8313463bc7cd3a5469f4e4fc0ecc4bb9b671f69a9b0ef4362ad439d1c4"
     },
     {
       "path": "src/client.rs",

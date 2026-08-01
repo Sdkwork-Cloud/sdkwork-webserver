@@ -1,3 +1,4 @@
+use crate::audited_sql;
 use super::{EngineRow, WebRepository};
 use sdkwork_intelligence_webserver_service::{
     RuntimeAssignmentTarget, RuntimeAssignmentWrite, RuntimeObservationWrite,
@@ -116,9 +117,9 @@ impl WebRepository {
         let id = next_id(self.id_generator())?;
         let assignment_uuid = new_uuid();
         let assigned_at = now_rfc3339();
-        let engine = self.database_engine().await?;
-        let runtime_set_expression = json_write_expression(engine, "$9");
-        let assigned_at_expression = instant_write_expression(engine, "$12");
+
+        let runtime_set_expression = json_write_expression("$9");
+        let assigned_at_expression = instant_write_expression("$12");
         let insert_sql = format!(
             "INSERT INTO web_runtime_assignment (
                 id, uuid, tenant_id, server_id, environment, generation, snapshot_uuid,
@@ -129,7 +130,7 @@ impl WebRepository {
                 {assigned_at_expression}, {assigned_at_expression}, 0
              )"
         );
-        sqlx::query(&insert_sql)
+        sqlx::query(audited_sql(&insert_sql))
             .bind(id)
             .bind(&assignment_uuid)
             .bind(write.tenant_id)
@@ -336,8 +337,8 @@ impl WebRepository {
         let id = next_id(self.id_generator())?;
         let observation_uuid = new_uuid();
         let observed_at = now_rfc3339();
-        let engine = self.database_engine().await?;
-        let observed_at_expression = instant_write_expression(engine, "$10");
+
+        let observed_at_expression = instant_write_expression("$10");
         let insert_sql = format!(
             "INSERT INTO web_runtime_observation (
                 id, uuid, tenant_id, assignment_id, server_id, state, node_version,
@@ -347,7 +348,7 @@ impl WebRepository {
                 {observed_at_expression}, {observed_at_expression}, {observed_at_expression}, 0
              )"
         );
-        sqlx::query(&insert_sql)
+        sqlx::query(audited_sql(&insert_sql))
             .bind(id)
             .bind(&observation_uuid)
             .bind(write.tenant_id)

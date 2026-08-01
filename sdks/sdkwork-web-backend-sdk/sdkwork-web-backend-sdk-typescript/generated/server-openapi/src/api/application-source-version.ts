@@ -29,8 +29,8 @@ export class ApplicationSourceVersionApplicationsSourceVersionsGitImportApi {
 }
 
 export interface ApplicationSourceVersionApplicationsSourceVersionsListParams {
-  page?: number;
   pageSize?: number;
+  cursor?: string;
 }
 
 export interface ApplicationSourceVersionApplicationsSourceVersionsCreateParams {
@@ -50,8 +50,8 @@ export class ApplicationSourceVersionApplicationsSourceVersionsApi {
 /** List immutable application source versions */
   async list(applicationId: string, params?: ApplicationSourceVersionApplicationsSourceVersionsListParams, requestOptions?: ApiRequestOptions): Promise<{ items: ApplicationSourceVersionResponse[]; pageInfo: PageInfo; }> {
     const query = buildQueryString([
-      { name: 'page', value: params?.page, style: 'form', explode: true, allowReserved: false },
       { name: 'page_size', value: params?.pageSize, style: 'form', explode: true, allowReserved: false },
+      { name: 'cursor', value: params?.cursor, style: 'form', explode: true, allowReserved: false },
     ]);
     return this.client.request<{ items: ApplicationSourceVersionResponse[]; pageInfo: PageInfo; }>(appendQueryString(backendApiPath(`/applications/${serializePathParameter(applicationId, { name: 'applicationId', style: 'simple', explode: false })}/source_versions`), query), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any, sdkworkUnwrapKind: 'page' });
   }

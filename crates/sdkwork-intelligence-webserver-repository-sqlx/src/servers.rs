@@ -1,3 +1,4 @@
+use crate::audited_sql;
 use super::{EngineRow, WebRepository};
 use sdkwork_webserver_contract::{
     CreateServerRequest, CreateServerResponse, ServerPage, ServerResponse, WebServiceError,
@@ -8,8 +9,8 @@ use sqlx::Row;
 
 use super::agents::{generate_agent_token, hash_agent_token, parse_last_heartbeat_at};
 use super::support::{
-    instant_from_row, instant_write_expression, json_from_row, json_write_expression, new_uuid,
-    next_id, now_rfc3339, pagination, store_error,
+    decode_keyset_cursor, encode_keyset_cursor, instant_from_row, instant_write_expression,
+    json_from_row, json_write_expression, new_uuid, next_id, now_rfc3339, pagination, store_error,
 };
 
 impl WebRepository {
@@ -18,7 +19,19 @@ impl WebRepository {
         tenant_id: i64,
         page: i32,
         page_size: i32,
+        cursor: Option<&str>,
     ) -> WebServiceResult<ServerPage> {
+        if let Some(cursor) = cursor {
+            return self.list_servers_cursor_repo(tenant_id, page_size, cursor).await;
+        }
+        // Offset mode remains only for internal single-page lookups (page 1).
+        // Deep OFFSET on this growing node collection is rejected; clients
+        // must use cursor pagination (PRD-FR-011, PAGINATION_SPEC §6/§12).
+        if page > 1 {
+            return Err(WebServiceError::validation(
+                "cursor is required beyond the first page of servers; offset pagination is not supported on this growing collection",
+            ));
+        }
         let (_page, page_size, offset) = pagination(page, page_size)?;
 
         let count_row =
@@ -34,6 +47,7 @@ impl WebRepository {
         let rows = sqlx::query(
             "SELECT uuid, name, host, tenant_scope_hash, ssh_port, status,
                     CAST(metadata AS TEXT) AS metadata,
+                    CAST(updated_at AS TEXT) AS updated_at,
                     CAST(created_at AS TEXT) AS created_at
              FROM web_server
              WHERE tenant_id = $1
@@ -53,7 +67,74 @@ impl WebRepository {
             })?);
         }
 
-        Ok(ServerPage { items, total })
+        Ok(ServerPage {
+            items,
+            total,
+            next_cursor: None,
+            has_more: None,
+        })
+    }
+
+    /// Keyset page over `(updated_at DESC, id DESC)` with an opaque cursor;
+    /// fetches `page_size + 1` rows so `has_more` is exact and no COUNT runs.
+    async fn list_servers_cursor_repo(
+        &self,
+        tenant_id: i64,
+        page_size: i32,
+        cursor: &str,
+    ) -> WebServiceResult<ServerPage> {
+        if !(1..=200).contains(&page_size) {
+            return Err(WebServiceError::validation(
+                "page_size must be between 1 and 200",
+            ));
+        }
+        let (cursor_updated_at, cursor_id) = decode_keyset_cursor(cursor)
+            .ok_or_else(|| WebServiceError::validation("cursor is invalid"))?;
+        let sql = format!(
+            "SELECT uuid, name, host, tenant_scope_hash, ssh_port, status,
+                    CAST(metadata AS TEXT) AS metadata,
+                    CAST(updated_at AS TEXT) AS updated_at,
+                    CAST(created_at AS TEXT) AS created_at
+             FROM web_server
+             WHERE tenant_id = $1
+               AND (updated_at, id) < ($2, $3)
+             ORDER BY updated_at DESC, id DESC LIMIT $4"
+        );
+        let fetch_size = i64::from(page_size) + 1;
+        let rows = sqlx::query(audited_sql(&sql))
+            .bind(tenant_id)
+            .bind(&cursor_updated_at)
+            .bind(cursor_id)
+            .bind(fetch_size)
+            .fetch_all(&self.pool)
+            .await
+            .map_err(|error| store_error("list web_server cursor", error))?;
+        let has_more = rows.len() > page_size as usize;
+        let page_rows = rows.into_iter().take(page_size as usize).collect::<Vec<_>>();
+        let mut items = Vec::with_capacity(page_rows.len());
+        for row in &page_rows {
+            items.push(map_server_row(row).map_err(|error| {
+                WebServiceError::Internal(format!("map web_server row: {error}"))
+            })?);
+        }
+        let next_cursor = has_more
+            .then(|| {
+                let last = page_rows.last().expect("non-empty page when has_more");
+                let updated_at: String = last
+                    .try_get("updated_at")
+                    .map_err(|error| store_error("map web_server cursor instant", error))?;
+                let id: i64 = last
+                    .try_get("id")
+                    .map_err(|error| store_error("map web_server cursor id", error))?;
+                Ok::<_, WebServiceError>(encode_keyset_cursor(&updated_at, id))
+            })
+            .transpose()?;
+        Ok(ServerPage {
+            items,
+            total: 0,
+            next_cursor,
+            has_more: Some(has_more),
+        })
     }
 
     pub(super) async fn create_server_repo(
@@ -68,9 +149,9 @@ impl WebRepository {
         let metadata = json!({
             "agentTokenHash": hash_agent_token(&agent_token),
         });
-        let engine = self.database_engine().await?;
-        let metadata_expression = json_write_expression(engine, "$8");
-        let now_expression = instant_write_expression(engine, "$9");
+
+        let metadata_expression = json_write_expression("$8");
+        let now_expression = instant_write_expression("$9");
         let insert_sql = format!(
             "INSERT INTO web_server (
                 id, uuid, tenant_id, name, host, tenant_scope_hash, ssh_port, status, metadata,
@@ -81,7 +162,7 @@ impl WebRepository {
              )"
         );
 
-        sqlx::query(&insert_sql)
+        sqlx::query(audited_sql(&insert_sql))
             .bind(id)
             .bind(&uuid)
             .bind(tenant_id)

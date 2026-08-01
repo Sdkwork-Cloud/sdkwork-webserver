@@ -122,8 +122,8 @@ print(result)
 // List immutable application source versions
 let applicationId = "1"
 let params: [String: Any] = [
-    "page": 1,
-    "page_size": 2
+    "page_size": 1,
+    "cursor": "cursor"
 ]
 let result = try await client.applicationSourceVersion.applicationsSourceVersionsList(applicationId: applicationId, params: params)
 print(result)
@@ -135,10 +135,9 @@ print(result)
 // List application deployments
 let applicationId = "1"
 let params: [String: Any] = [
-    "page": 1,
-    "page_size": 2,
+    "page_size": 1,
     "cursor": "cursor",
-    "status": 4
+    "status": 3
 ]
 let result = try await client.applicationDeployment.applicationsDeploymentsList(applicationId: applicationId, params: params)
 print(result)
@@ -169,8 +168,8 @@ print(result)
 ```swift
 // List managed servers
 let params: [String: Any] = [
-    "page": 1,
-    "page_size": 2
+    "page_size": 1,
+    "cursor": "cursor"
 ]
 let result = try await client.server.serversList(params: params)
 print(result)
@@ -192,8 +191,7 @@ print(result)
 ```swift
 // List audit logs
 let params: [String: Any] = [
-    "page": 1,
-    "page_size": 2,
+    "page_size": 1,
     "cursor": "cursor",
     "target_type": "target-type",
     "action": "action",

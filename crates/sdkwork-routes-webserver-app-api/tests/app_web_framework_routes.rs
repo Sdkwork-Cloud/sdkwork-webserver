@@ -228,9 +228,13 @@ async fn app_router_records_requests_into_the_injected_bounded_registry() {
             .to_vec(),
     )
     .expect("metrics are UTF-8");
-    assert!(rendered.contains("sdkwork_http_requests_total 1"));
+    assert!(rendered.contains("sdkwork_http_requests_total{"));
+    assert!(
+        rendered.contains("sdkwork_http_requests_total{service=\"sdkwork-web-framework\"")
+            || rendered.contains("sdkwork_http_requests_total{service=")
+    );
     assert!(rendered.contains("route=\"/app/v3/api/sites\""));
-    assert!(rendered.contains("operationId=\"sites.list\""));
+    assert!(rendered.contains("operation_id=\"sites.list\""));
     assert!(rendered.contains("status=\"401\""));
 }
 
@@ -427,6 +431,29 @@ impl WebAppApi for StubAppApi {
         _site_id: &str,
         _request: &sdkwork_webserver_contract::CreateEnvVariableRequest,
     ) -> WebServiceResult<sdkwork_webserver_contract::EnvVariableResponse> {
+        Err(sdkwork_webserver_contract::WebServiceError::Internal(
+            "not implemented".into(),
+        ))
+    }
+
+    async fn update_env_variable(
+        &self,
+        _context: &WebAppRequestContext,
+        _site_id: &str,
+        _variable_id: &str,
+        _request: &sdkwork_webserver_contract::UpdateEnvVariableRequest,
+    ) -> WebServiceResult<sdkwork_webserver_contract::EnvVariableResponse> {
+        Err(sdkwork_webserver_contract::WebServiceError::Internal(
+            "not implemented".into(),
+        ))
+    }
+
+    async fn delete_env_variable(
+        &self,
+        _context: &WebAppRequestContext,
+        _site_id: &str,
+        _variable_id: &str,
+    ) -> WebServiceResult<()> {
         Err(sdkwork_webserver_contract::WebServiceError::Internal(
             "not implemented".into(),
         ))

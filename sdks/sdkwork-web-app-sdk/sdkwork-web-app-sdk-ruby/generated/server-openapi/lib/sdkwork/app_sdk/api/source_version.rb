@@ -11,11 +11,11 @@ module Sdkwork
     module Api
       class SourceVersionApi < BaseApi
           # 获取应用源码版本
-          def sites_source_versions_list(site_id, page: nil, page_size: nil)
+          def sites_source_versions_list(site_id, page_size: nil, cursor: nil)
             path = interpolate_path('/app/v3/api/sites/{siteId}/source_versions', siteId: serialize_path_parameter(site_id, PathParameterSpec.new('siteId', 'simple', false)))
             query = build_query_string([
-              QueryParameterSpec.new('page', page, 'form', true, false, nil),
               QueryParameterSpec.new('page_size', page_size, 'form', true, false, nil),
+              QueryParameterSpec.new('cursor', cursor, 'form', true, false, nil),
             ])
             path = append_query_string(path, query)
             options = {}

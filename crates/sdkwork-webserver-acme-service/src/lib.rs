@@ -1,5 +1,6 @@
 //! ACME certificate issuance (Let's Encrypt via instant-acme) and rcgen self-signed profiles.
 
+mod account_store;
 mod challenge_store;
 mod config;
 mod error;
@@ -9,6 +10,7 @@ mod lets_encrypt;
 mod model;
 mod self_signed;
 
+pub use account_store::{AcmeAccountStore, EncryptedFileAcmeAccountStore, MemoryAcmeAccountStore};
 pub use challenge_store::ChallengeStore;
 pub use config::{
     AcmeConfig, DEFAULT_ACME_OPERATION_TIMEOUT_MS, MAX_ACME_OPERATION_TIMEOUT_MS,

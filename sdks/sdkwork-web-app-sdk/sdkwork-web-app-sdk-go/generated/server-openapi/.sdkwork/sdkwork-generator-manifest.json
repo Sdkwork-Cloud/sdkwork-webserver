@@ -20,7 +20,7 @@
     },
     {
       "path": "api/deployment.go",
-      "sha256": "520da960f9cb39c788a8f58f916df24b9e254baa461ccc7856c2607c26704f58"
+      "sha256": "574325e8d335b6f40bba9829b1e1f72de43d0466ab44f8cbf1fc5c2f8b60c91f"
     },
     {
       "path": "api/doc.go",
@@ -48,7 +48,7 @@
     },
     {
       "path": "api/source_version.go",
-      "sha256": "557347c9f3be0cb3fca43d09999ebfa377e3024b45c61349af1165d168e03086"
+      "sha256": "8494c0b80ea018318d0a7015c4413859a53d0e321fa69d95f37f27af3440636d"
     },
     {
       "path": "bin/publish-core.mjs",
@@ -88,7 +88,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "348afcbfaeeb4704afcd2183cb3c6f4d267779b9a460802f5fc5d78b044b52bd"
+      "sha256": "ff062ed13a480767955ec88f8a81a50df71b52737ea38138e9cca997820c4497"
     },
     {
       "path": "sdk.go",

@@ -36,7 +36,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "0c992630ee396ea2dbd93b29831a2cfaba58a23d4bb5a0e18eb9630f77687a11"
+      "sha256": "1812b4ce6cba097dbfb2be1955d462e6c37c2be77c2018b4026a960439d95779"
     },
     {
       "path": "sdkwork-sdk.json",
@@ -56,7 +56,7 @@
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/api/ApplicationDeploymentApi.java",
-      "sha256": "c2d84cc22b042d28d4c47c6c3a181b1e6b420f2c42af94ee3c4aebc18def9630"
+      "sha256": "62b492b00df48fd812daf229a12a85be1c1d804bf95c38e64c74afea1b612c37"
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/api/ApplicationDomainApi.java",
@@ -64,11 +64,11 @@
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/api/ApplicationSourceVersionApi.java",
-      "sha256": "b2afd904b69f95e221d0015df1d7317873b9f3e6d7a5c22cfd96bb8bf236a771"
+      "sha256": "2a225c97d5f90555fef5babeefac96dec0313579e3c7ecc2e5612c5dedf94663"
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/api/AuditApi.java",
-      "sha256": "a4dfbd0a047ad7f1394004152b3efa6c9c802cdea6433fa52502731cab5e9f61"
+      "sha256": "1bbbd02341f9437d2da26bf90a88e30ad88d0956c904a5ad1183d1080ae45863"
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/api/CertificateApi.java",
@@ -92,7 +92,7 @@
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/api/ServerApi.java",
-      "sha256": "494e6864dbae3df2f1a616c547732fb0fa701d6c6a899291ab8df8d2770e339f"
+      "sha256": "fbcf052627f7ab1e897e1cbef8b1bdb87ddaacf44a797846cb9dee77bdd2175f"
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/http/HttpClient.java",

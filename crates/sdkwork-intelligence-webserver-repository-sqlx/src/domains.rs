@@ -1,3 +1,4 @@
+use crate::audited_sql;
 use super::{EngineRow, WebRepository};
 use chrono::{Duration, Utc};
 use sdkwork_intelligence_webserver_service::{
@@ -40,11 +41,11 @@ impl WebRepository {
         .await
         .map_err(|error| store_error("count application domain bindings", error))?;
 
-        let rows = sqlx::query(&domain_select(
+        let rows = sqlx::query(audited_sql(&domain_select(
             "d.tenant_id = $1 AND b.site_id = $2
              AND b.deleted_at IS NULL AND b.status <> 'ARCHIVED' AND d.deleted_at IS NULL
              ORDER BY b.updated_at DESC, b.id DESC LIMIT $3 OFFSET $4",
-        ))
+        )))
         .bind(tenant_id)
         .bind(site_internal_id)
         .bind(page_size)
@@ -90,10 +91,10 @@ impl WebRepository {
         .fetch_one(&self.pool)
         .await
         .map_err(|error| store_error("count managed web_domain", error))?;
-        let rows = sqlx::query(&domain_select(
+        let rows = sqlx::query(audited_sql(&domain_select(
             "d.tenant_id = $1 AND d.deleted_at IS NULL
              ORDER BY d.updated_at DESC, d.id DESC LIMIT $2 OFFSET $3",
-        ))
+        )))
         .bind(tenant_id)
         .bind(page_size)
         .bind(offset)
@@ -164,8 +165,8 @@ impl WebRepository {
         let id = next_id(self.id_generator())?;
         let uuid = new_uuid();
         let now = now_rfc3339();
-        let engine = self.database_engine().await?;
-        let insert_time = instant_write_expression(engine, "$9");
+
+        let insert_time = instant_write_expression("$9");
         let insert_sql = format!(
             "INSERT INTO web_domain (
                 id, uuid, tenant_id, user_id, root_domain_id, hostname, hostname_type,
@@ -178,7 +179,7 @@ impl WebRepository {
             .begin()
             .await
             .map_err(|error| store_error("begin create web_domain", error))?;
-        sqlx::query(&insert_sql)
+        sqlx::query(audited_sql(&insert_sql))
             .bind(id)
             .bind(&uuid)
             .bind(tenant_id)
@@ -218,10 +219,10 @@ impl WebRepository {
         domain_id: &str,
     ) -> WebServiceResult<DomainResponse> {
         let site_internal_id = resolve_site_internal_id(&self.pool, tenant_id, site_id).await?;
-        let row = sqlx::query(&domain_select(
+        let row = sqlx::query(audited_sql(&domain_select(
             "d.tenant_id = $1 AND d.uuid = $2 AND b.site_id = $3
              AND b.deleted_at IS NULL AND b.status <> 'ARCHIVED' AND d.deleted_at IS NULL",
-        ))
+        )))
         .bind(tenant_id)
         .bind(domain_id)
         .bind(site_internal_id)
@@ -238,9 +239,9 @@ impl WebRepository {
         tenant_id: i64,
         domain_id: &str,
     ) -> WebServiceResult<DomainResponse> {
-        let row = sqlx::query(&domain_select(
+        let row = sqlx::query(audited_sql(&domain_select(
             "d.tenant_id = $1 AND d.uuid = $2 AND d.deleted_at IS NULL",
-        ))
+        )))
         .bind(tenant_id)
         .bind(domain_id)
         .fetch_optional(&self.pool)
@@ -303,14 +304,14 @@ impl WebRepository {
             ));
         }
         let now = now_rfc3339();
-        let engine = self.database_engine().await?;
-        let now_expression = instant_write_expression(engine, "$3");
+
+        let now_expression = instant_write_expression("$3");
         let sql = format!(
             "UPDATE web_domain SET deleted_at = {now_expression}, updated_at = {now_expression},
                     version = version + 1
              WHERE tenant_id = $1 AND uuid = $2 AND deleted_at IS NULL"
         );
-        let result = sqlx::query(&sql)
+        let result = sqlx::query(audited_sql(&sql))
             .bind(tenant_id)
             .bind(domain_id)
             .bind(&now)
@@ -377,8 +378,8 @@ impl WebRepository {
             None => None,
         };
         let now = now_rfc3339();
-        let engine = self.database_engine().await?;
-        let now_expression = instant_write_expression(engine, "$4");
+
+        let now_expression = instant_write_expression("$4");
         let sql = format!(
             "UPDATE web_site_binding b
              SET status = 'ARCHIVED', deleted_at = {now_expression}, updated_at = {now_expression},
@@ -390,7 +391,7 @@ impl WebRepository {
                AND b.environment = 'production' AND b.deleted_at IS NULL
                AND b.status <> 'ARCHIVED'"
         );
-        let result = sqlx::query(&sql)
+        let result = sqlx::query(audited_sql(&sql))
             .bind(tenant_id)
             .bind(domain_id)
             .bind(expected_site_id)
@@ -431,7 +432,7 @@ impl WebRepository {
         expected_site_id: Option<i64>,
     ) -> WebServiceResult<DomainVerificationChallenge> {
         let now = now_rfc3339();
-        let engine = self.database_engine().await?;
+
         let mut tx = self
             .pool
             .begin()
@@ -465,7 +466,7 @@ impl WebRepository {
             .try_get("verification_status")
             .map_err(|error| WebServiceError::Internal(error.to_string()))?;
 
-        let expire_time = instant_write_expression(engine, "$3");
+        let expire_time = instant_write_expression("$3");
         let expire_sql = format!(
             "UPDATE web_domain_verification
              SET status = 'EXPIRED', failure_code = 'CHALLENGE_EXPIRED',
@@ -473,7 +474,7 @@ impl WebRepository {
              WHERE tenant_id = $1 AND domain_id = $2 AND status IN ('PENDING', 'CHECKING')
                AND expires_at <= {expire_time}"
         );
-        sqlx::query(&expire_sql)
+        sqlx::query(audited_sql(&expire_sql))
             .bind(tenant_id)
             .bind(domain_internal_id)
             .bind(&now)
@@ -491,9 +492,7 @@ impl WebRepository {
             tenant_id,
             domain_internal_id,
             reusable_status,
-            &now,
-            engine,
-        )
+            &now,        )
         .await?
         {
             tx.commit()
@@ -513,8 +512,8 @@ impl WebRepository {
         let proof_sha256 = sha256_hash(record_value.as_bytes());
         let expires_at = (Utc::now() + Duration::minutes(30)).to_rfc3339();
         let challenge_internal_id = next_id(self.id_generator())?;
-        let time = instant_write_expression(engine, "$8");
-        let expiry = instant_write_expression(engine, "$7");
+        let time = instant_write_expression("$8");
+        let expiry = instant_write_expression("$7");
         let insert_sql = format!(
             "INSERT INTO web_domain_verification (
                 id, uuid, tenant_id, domain_id, method, record_name, proof_sha256, status,
@@ -522,7 +521,7 @@ impl WebRepository {
              ) VALUES ($1, $2, $3, $4, 'DNS_TXT', $5, $6, 'PENDING', 0,
                        {time}, {expiry}, {time}, {time}, 0)"
         );
-        sqlx::query(&insert_sql)
+        sqlx::query(audited_sql(&insert_sql))
             .bind(challenge_internal_id)
             .bind(&challenge_id)
             .bind(tenant_id)
@@ -534,13 +533,13 @@ impl WebRepository {
             .execute(&mut *tx)
             .await
             .map_err(|error| store_error("insert domain verification challenge", error))?;
-        let pending_time = instant_write_expression(engine, "$3");
+        let pending_time = instant_write_expression("$3");
         let pending_sql = format!(
             "UPDATE web_domain SET verification_status = 'PENDING', verified_at = NULL,
                     status = 0, updated_at = {pending_time}, version = version + 1
              WHERE tenant_id = $1 AND id = $2"
         );
-        sqlx::query(&pending_sql)
+        sqlx::query(audited_sql(&pending_sql))
             .bind(tenant_id)
             .bind(domain_internal_id)
             .bind(&now)
@@ -574,7 +573,7 @@ impl WebRepository {
     ) -> WebServiceResult<DomainVerificationChallenge> {
         validate_domain_verification_observation(observation)?;
         let now = now_rfc3339();
-        let engine = self.database_engine().await?;
+
         let mut tx = self
             .pool
             .begin()
@@ -584,9 +583,7 @@ impl WebRepository {
             &mut tx,
             tenant_id,
             challenge_id,
-            &now,
-            engine,
-        )
+            &now,        )
         .await?
         .ok_or_else(|| WebServiceError::not_found("domain verification challenge not found"))?;
         let domain_internal_id: i64 = row
@@ -615,18 +612,14 @@ impl WebRepository {
                 current.attempt_count,
                 None,
                 Some("CHALLENGE_EXPIRED"),
-                &now,
-                engine,
-            )
+                &now,            )
             .await?;
             update_domain_verification_status(
                 &mut tx,
                 tenant_id,
                 domain_internal_id,
                 "EXPIRED",
-                &now,
-                engine,
-            )
+                &now,            )
             .await?;
             tx.commit()
                 .await
@@ -672,27 +665,21 @@ impl WebRepository {
             attempt_count,
             next_attempt_at.as_deref(),
             failure_code,
-            &now,
-            engine,
-        )
+            &now,        )
         .await?;
         update_domain_verification_status(
             &mut tx,
             tenant_id,
             domain_internal_id,
             status,
-            &now,
-            engine,
-        )
+            &now,        )
         .await?;
         if verified {
             activate_verified_domain_bindings(
                 &mut tx,
                 tenant_id,
                 domain_internal_id,
-                &now,
-                engine,
-            )
+                &now,            )
             .await?;
         }
         tx.commit()
@@ -734,7 +721,7 @@ impl WebRepository {
                 "domain is already bound to this application",
             ));
         }
-        let engine = self.database_engine().await?;
+
         if is_primary {
             // Serialize primary binding creation on the site row so concurrent
             // primary bindings cannot both pass the single-primary check and
@@ -751,14 +738,14 @@ impl WebRepository {
             if locked.rows_affected() != 1 {
                 return Err(WebServiceError::not_found("site not found"));
             }
-            let clear_time = instant_write_expression(engine, "$3");
+            let clear_time = instant_write_expression("$3");
             let clear_sql = format!(
                 "UPDATE web_site_binding SET is_primary = FALSE, updated_at = {clear_time},
                         version = version + 1
                  WHERE tenant_id = $1 AND site_id = $2 AND environment = 'production'
                    AND deleted_at IS NULL AND status <> 'ARCHIVED' AND is_primary = TRUE"
             );
-            sqlx::query(&clear_sql)
+            sqlx::query(audited_sql(&clear_sql))
                 .bind(tenant_id)
                 .bind(site_id)
                 .bind(now)
@@ -768,7 +755,7 @@ impl WebRepository {
         }
         let binding_id = next_id(self.id_generator())?;
         let binding_uuid = new_uuid();
-        let binding_time = instant_write_expression(engine, "$7");
+        let binding_time = instant_write_expression("$7");
         let binding_sql = format!(
             "INSERT INTO web_site_binding (
                 id, uuid, tenant_id, site_id, domain_id, is_primary, environment,
@@ -776,7 +763,7 @@ impl WebRepository {
              ) VALUES ($1, $2, $3, $4, $5, $6, 'production', '/', 'SERVE', 'PENDING',
                        {binding_time}, {binding_time}, 0)"
         );
-        sqlx::query(&binding_sql)
+        sqlx::query(audited_sql(&binding_sql))
             .bind(binding_id)
             .bind(binding_uuid)
             .bind(tenant_id)
@@ -791,7 +778,7 @@ impl WebRepository {
         if ssl_enabled {
             let policy_id = next_id(self.id_generator())?;
             let policy_uuid = new_uuid();
-            let policy_time = instant_write_expression(engine, "$6");
+            let policy_time = instant_write_expression("$6");
             let policy_sql = format!(
                 "INSERT INTO web_tls_policy (
                     id, uuid, tenant_id, site_binding_id, certificate_source,
@@ -803,7 +790,7 @@ impl WebRepository {
                 Some("none") => "EXTERNAL",
                 _ => "MANAGED",
             };
-            sqlx::query(&policy_sql)
+            sqlx::query(audited_sql(&policy_sql))
                 .bind(policy_id)
                 .bind(policy_uuid)
                 .bind(tenant_id)
@@ -824,9 +811,8 @@ async fn fetch_domain_verification_challenge(
     domain_id: i64,
     reusable_status: &str,
     now: &str,
-    engine: sdkwork_database_config::DatabaseEngine,
 ) -> WebServiceResult<Option<EngineRow>> {
-    let now_expression = instant_write_expression(engine, "$4");
+    let now_expression = instant_write_expression("$4");
     let sql = format!(
         "SELECT uuid, method, record_name, proof_sha256, status, attempt_count,
                 CAST(expires_at AS TEXT) AS expires_at,
@@ -839,7 +825,7 @@ async fn fetch_domain_verification_challenge(
                 OR ($3 = 'ACTIVE' AND status IN ('PENDING', 'CHECKING')))
          ORDER BY created_at DESC, id DESC LIMIT 1"
     );
-    sqlx::query(&sql)
+    sqlx::query(audited_sql(&sql))
         .bind(tenant_id)
         .bind(domain_id)
         .bind(reusable_status)
@@ -854,9 +840,8 @@ async fn fetch_domain_verification_challenge_for_update(
     tenant_id: i64,
     challenge_id: &str,
     now: &str,
-    engine: sdkwork_database_config::DatabaseEngine,
 ) -> WebServiceResult<Option<EngineRow>> {
-    let now_expression = instant_write_expression(engine, "$3");
+    let now_expression = instant_write_expression("$3");
     let sql = format!(
         "SELECT v.domain_id, d.hostname, v.uuid, v.method, v.record_name, v.proof_sha256,
                 v.status, v.attempt_count, CAST(v.expires_at AS TEXT) AS expires_at,
@@ -869,7 +854,7 @@ async fn fetch_domain_verification_challenge_for_update(
          WHERE v.tenant_id = $1 AND v.uuid = $2 AND d.deleted_at IS NULL
          FOR UPDATE OF v, d"
     );
-    sqlx::query(&sql)
+    sqlx::query(audited_sql(&sql))
         .bind(tenant_id)
         .bind(challenge_id)
         .bind(now)
@@ -889,10 +874,9 @@ async fn update_domain_verification_state(
     next_attempt_at: Option<&str>,
     failure_code: Option<&str>,
     now: &str,
-    engine: sdkwork_database_config::DatabaseEngine,
 ) -> WebServiceResult<EngineRow> {
-    let next_attempt = instant_write_expression(engine, "$6");
-    let checked = instant_write_expression(engine, "$8");
+    let next_attempt = instant_write_expression("$6");
+    let checked = instant_write_expression("$8");
     let sql = format!(
         "UPDATE web_domain_verification
          SET status = $3, observed_sha256 = $4, attempt_count = $5,
@@ -906,7 +890,7 @@ async fn update_domain_verification_state(
                    CAST(checked_at AS TEXT) AS checked_at, failure_code,
                    FALSE AS ready_for_check"
     );
-    sqlx::query(&sql)
+    sqlx::query(audited_sql(&sql))
         .bind(tenant_id)
         .bind(challenge_id)
         .bind(status)
@@ -926,7 +910,6 @@ async fn update_domain_verification_status(
     domain_id: i64,
     challenge_status: &str,
     now: &str,
-    engine: sdkwork_database_config::DatabaseEngine,
 ) -> WebServiceResult<()> {
     let domain_status = match challenge_status {
         "VERIFIED" => "VERIFIED",
@@ -934,7 +917,7 @@ async fn update_domain_verification_status(
         "EXPIRED" => "EXPIRED",
         _ => "PENDING",
     };
-    let time = instant_write_expression(engine, "$4");
+    let time = instant_write_expression("$4");
     let sql = format!(
         "UPDATE web_domain
          SET verification_status = $3,
@@ -943,7 +926,7 @@ async fn update_domain_verification_status(
              updated_at = {time}, version = version + 1
          WHERE tenant_id = $1 AND id = $2 AND deleted_at IS NULL"
     );
-    sqlx::query(&sql)
+    sqlx::query(audited_sql(&sql))
         .bind(tenant_id)
         .bind(domain_id)
         .bind(domain_status)
@@ -959,15 +942,14 @@ async fn activate_verified_domain_bindings(
     tenant_id: i64,
     domain_id: i64,
     now: &str,
-    engine: sdkwork_database_config::DatabaseEngine,
 ) -> WebServiceResult<()> {
-    let time = instant_write_expression(engine, "$3");
+    let time = instant_write_expression("$3");
     let sql = format!(
         "UPDATE web_site_binding
          SET status = 'ACTIVE', activated_at = {time}, updated_at = {time}, version = version + 1
          WHERE tenant_id = $1 AND domain_id = $2 AND status = 'PENDING' AND deleted_at IS NULL"
     );
-    sqlx::query(&sql)
+    sqlx::query(audited_sql(&sql))
         .bind(tenant_id)
         .bind(domain_id)
         .bind(now)

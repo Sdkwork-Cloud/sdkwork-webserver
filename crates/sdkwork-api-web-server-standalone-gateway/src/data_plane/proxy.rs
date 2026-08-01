@@ -390,6 +390,12 @@ async fn proxy_http_request(
         .config()
         .limits
         .max_request_body_bytes;
+    let maximum_response_body_bytes = context
+        .generation
+        .app
+        .config()
+        .limits
+        .max_response_body_bytes;
     let maximum_trailer_bytes = context.generation.app.config().limits.max_trailer_bytes;
     let maximum_trailers = context.generation.app.config().limits.max_trailers;
     let (headers, forbidden_request_trailers, declared_request_trailers) =
@@ -648,9 +654,14 @@ async fn proxy_http_request(
                 response_body,
                 response_trailer_policy,
                 request_control,
+                Some(maximum_response_body_bytes),
             )
         } else {
-            GuardedProxyBody::response(response_body, response_trailer_policy)
+            GuardedProxyBody::response(
+                response_body,
+                response_trailer_policy,
+                Some(maximum_response_body_bytes),
+            )
         };
         return hold_upstream_permit(
             Response::from_parts(response_parts, Body::new(guarded_body)),
@@ -863,6 +874,7 @@ fn forward_websocket_rejection(
             declared_trailers,
             forbidden_trailers,
         ),
+        None,
     );
     if upstream.status_is_failure(parts.status) {
         upstream.record_failure(selected);
