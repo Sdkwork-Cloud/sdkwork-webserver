@@ -88,7 +88,10 @@ async fn validated_target_retains_the_pinned_public_address() {
         .await
         .expect("allowlisted public target");
     assert_eq!(target.host_name, "8.8.8.8");
-    assert_eq!(target.resolved_addresses, vec!["8.8.8.8".parse().unwrap()]);
+    assert_eq!(
+        target.resolved_addresses,
+        vec!["8.8.8.8".parse::<IpAddr>().unwrap()]
+    );
 }
 
 #[test]
