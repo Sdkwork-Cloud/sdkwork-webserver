@@ -21,28 +21,33 @@ fn validate_query(query: Option<&str>) -> Result<(), String> {
     let Some(query) = query else {
         return Ok(());
     };
-    let mut page: Option<&str> = None;
-    let mut page_size: Option<&str> = None;
+    let mut page: Option<String> = None;
+    let mut page_size: Option<String> = None;
     let mut cursor = false;
-    for pair in query.split('&').filter(|pair| !pair.is_empty()) {
-        let (key, value) = pair.split_once('=').unwrap_or((pair, ""));
-        match key {
+    for (key, value) in url::form_urlencoded::parse(query.as_bytes()) {
+        match key.as_ref() {
             "page" => {
-                if page.replace(value).is_some() {
+                if page.replace(value.into_owned()).is_some() {
                     return Err("page must be specified at most once".to_string());
                 }
-                let parsed = value.parse::<i64>().map_err(|_| {
-                    "page must be an integer greater than or equal to 1".to_string()
-                })?;
+                let parsed = page
+                    .as_deref()
+                    .unwrap_or_default()
+                    .parse::<i64>()
+                    .map_err(|_| {
+                        "page must be an integer greater than or equal to 1".to_string()
+                    })?;
                 if parsed < 1 {
                     return Err("page must be greater than or equal to 1".to_string());
                 }
             }
             "page_size" => {
-                if page_size.replace(value).is_some() {
+                if page_size.replace(value.into_owned()).is_some() {
                     return Err("page_size must be specified at most once".to_string());
                 }
-                let parsed = value
+                let parsed = page_size
+                    .as_deref()
+                    .unwrap_or_default()
                     .parse::<i64>()
                     .map_err(|_| "page_size must be an integer between 1 and 200".to_string())?;
                 if !(1..=MAXIMUM_PAGE_SIZE).contains(&parsed) {
@@ -75,6 +80,7 @@ mod tests {
     fn accepts_canonical_values_and_rejects_aliases() {
         assert!(validate_query(Some("page=2&page_size=20")).is_ok());
         assert!(validate_query(Some("pageSize=20")).is_err());
+        assert!(validate_query(Some("%70ageSize=20")).is_err());
         assert!(validate_query(Some("page_size=201")).is_err());
         assert!(validate_query(Some("page=0")).is_err());
         assert!(validate_query(Some("page=1&page=2")).is_err());

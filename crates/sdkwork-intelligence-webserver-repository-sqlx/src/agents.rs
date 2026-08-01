@@ -6,8 +6,8 @@ use sdkwork_webserver_contract::{
     WebServiceError, WebServiceResult,
 };
 use serde_json::{json, Value};
-use std::collections::BTreeSet;
-use super::{EnginePool, EngineRow, WebRepository};
+use std::collections::{BTreeMap, BTreeSet};
+use super::{EngineDatabase, EnginePool, EngineRow, WebRepository};
 use sqlx::Row;
 
 use super::support::{
@@ -235,16 +235,31 @@ impl WebRepository {
         page_size: i32,
     ) -> WebServiceResult<CertificateDistributionPage> {
         let (page, page_size, offset) = pagination(page, page_size)?;
+        let mut transaction = self.pool.begin().await.map_err(|error| {
+            store_error(
+                "begin certificate distribution read transaction",
+                error,
+            )
+        })?;
+        sqlx::query("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY")
+            .execute(&mut *transaction)
+            .await
+            .map_err(|error| {
+                store_error(
+                    "configure certificate distribution read transaction",
+                    error,
+                )
+            })?;
         let count_row = sqlx::query("SELECT COUNT(*) AS total FROM web_server WHERE tenant_id = $1")
             .bind(tenant_id)
-            .fetch_one(&self.pool)
+            .fetch_one(&mut *transaction)
             .await
             .map_err(|error| store_error("count web_server certificate distribution", error))?;
         let total: i64 = count_row
             .try_get("total")
             .map_err(|error| store_error("map web_server sync count", error))?;
         let rows = sqlx::query(
-            "SELECT uuid, name, host, status, CAST(metadata AS TEXT) AS metadata
+            "SELECT id, uuid, name, host, status, CAST(metadata AS TEXT) AS metadata
              FROM web_server
              WHERE tenant_id = $1
              ORDER BY updated_at DESC, id DESC LIMIT $2 OFFSET $3",
@@ -252,32 +267,50 @@ impl WebRepository {
         .bind(tenant_id)
         .bind(page_size)
         .bind(offset)
-        .fetch_all(&self.pool)
+        .fetch_all(&mut *transaction)
         .await
         .map_err(|error| store_error("list web_server certificate distribution", error))?;
 
-        let mut items = Vec::with_capacity(page_size as usize);
-        for row in rows {
+        let mut server_ids = Vec::with_capacity(rows.len());
+        let mut server_uuids = BTreeMap::new();
+        for row in &rows {
+            let server_id: i64 = row.try_get("id").map_err(|error| {
+                WebServiceError::Internal(format!(
+                    "certificate distribution server database id: {error}"
+                ))
+            })?;
             let server_uuid: String = row.try_get("uuid").map_err(|error| {
                 WebServiceError::Internal(format!(
                     "certificate distribution server uuid: {error}"
                 ))
             })?;
-            let desired_agent = AuthenticatedAgent {
-                server_uuid: server_uuid.clone(),
+            server_ids.push(server_id);
+            server_uuids.insert(server_id, server_uuid);
+        }
+        let desired_sync_versions = self
+            .load_desired_sync_versions_for_servers(
+                &mut transaction,
                 tenant_id,
-            };
-            let assigned = self
-                .load_current_assigned_site_uuids(&desired_agent)
-                .await?
-                .is_some();
-            let desired_sync_version = if assigned {
-                self.build_agent_sync_manifest_repo(&desired_agent, None)
-                    .await?
-                    .sync_version
-            } else {
-                String::new()
-            };
+                &server_ids,
+                &server_uuids,
+            )
+            .await?;
+
+        let mut items = Vec::with_capacity(page_size as usize);
+        for row in rows {
+            let server_id: i64 = row.try_get("id").map_err(|error| {
+                WebServiceError::Internal(format!(
+                    "certificate distribution server database id: {error}"
+                ))
+            })?;
+            let server_uuid: String = row.try_get("uuid").map_err(|error| {
+                WebServiceError::Internal(format!(
+                    "certificate distribution server uuid: {error}"
+                ))
+            })?;
+            let desired_sync_version = desired_sync_versions.get(&server_id);
+            let assigned = desired_sync_version.is_some();
+            let desired_sync_version = desired_sync_version.cloned().unwrap_or_default();
             let metadata = json_from_row(&row, "metadata")
                 .map_err(|error| {
                     WebServiceError::Internal(format!(
@@ -319,6 +352,9 @@ impl WebRepository {
                 last_heartbeat_at,
             });
         }
+        transaction.commit().await.map_err(|error| {
+            store_error("commit certificate distribution read transaction", error)
+        })?;
 
         Ok(CertificateDistributionPage {
             items,
@@ -326,6 +362,376 @@ impl WebRepository {
             page,
             page_size,
         })
+    }
+
+    async fn load_desired_sync_versions_for_servers(
+        &self,
+        transaction: &mut sqlx::Transaction<'_, EngineDatabase>,
+        tenant_id: i64,
+        server_ids: &[i64],
+        server_uuids: &BTreeMap<i64, String>,
+    ) -> WebServiceResult<BTreeMap<i64, String>> {
+        if server_ids.is_empty() {
+            return Ok(BTreeMap::new());
+        }
+
+        let assignment_rows = sqlx::query(
+            "WITH current_assignments AS (
+                SELECT DISTINCT ON (a.server_id, a.environment)
+                       a.server_id, a.environment, a.runtime_set
+                FROM web_runtime_assignment a
+                WHERE a.tenant_id = $1 AND a.server_id = ANY($2)
+                ORDER BY a.server_id, a.environment, a.generation DESC
+             )
+             SELECT server_id, runtime_set ->> 'nodeUuid' AS node_uuid,
+                    jsonb_typeof(runtime_set -> 'descriptors') AS descriptors_kind,
+                    CASE WHEN jsonb_typeof(runtime_set -> 'descriptors') = 'array'
+                         THEN jsonb_array_length(runtime_set -> 'descriptors')
+                         ELSE NULL END AS descriptor_count
+             FROM current_assignments
+             ORDER BY server_id, environment",
+        )
+        .bind(tenant_id)
+        .bind(server_ids)
+        .fetch_all(&mut **transaction)
+        .await
+        .map_err(|error| {
+            store_error(
+                "validate current certificate distribution assignments",
+                error,
+            )
+        })?;
+
+        let mut assignment_counts = BTreeMap::<i64, usize>::new();
+        let mut descriptor_counts = BTreeMap::<i64, usize>::new();
+        for row in assignment_rows {
+            let server_id: i64 = row.try_get("server_id").map_err(|error| {
+                WebServiceError::Internal(format!(
+                    "certificate distribution assignment server id: {error}"
+                ))
+            })?;
+            let expected_uuid = server_uuids.get(&server_id).ok_or_else(|| {
+                WebServiceError::Internal(
+                    "certificate distribution assignment escaped the requested server scope"
+                        .to_string(),
+                )
+            })?;
+            let node_uuid: Option<String> = row.try_get("node_uuid").map_err(|error| {
+                WebServiceError::Internal(format!(
+                    "certificate distribution assignment node identity: {error}"
+                ))
+            })?;
+            if node_uuid.as_deref() != Some(expected_uuid.as_str()) {
+                return Err(WebServiceError::Internal(
+                    "stored node runtime assignment has an invalid node scope".to_string(),
+                ));
+            }
+            let descriptors_kind: Option<String> =
+                row.try_get("descriptors_kind").map_err(|error| {
+                    WebServiceError::Internal(format!(
+                        "certificate distribution assignment descriptor type: {error}"
+                    ))
+                })?;
+            if descriptors_kind.as_deref() != Some("array") {
+                return Err(WebServiceError::Internal(
+                    "stored node runtime assignment has no descriptors".to_string(),
+                ));
+            }
+            let descriptor_count: i32 = row.try_get("descriptor_count").map_err(|error| {
+                WebServiceError::Internal(format!(
+                    "certificate distribution assignment descriptor count: {error}"
+                ))
+            })?;
+            let descriptor_count = usize::try_from(descriptor_count).map_err(|_| {
+                WebServiceError::Internal(
+                    "stored node runtime assignment has an invalid descriptor count".to_string(),
+                )
+            })?;
+            let assignment_count = assignment_counts.entry(server_id).or_default();
+            *assignment_count += 1;
+            if *assignment_count > 4 {
+                return Err(WebServiceError::Internal(
+                    "node has more than four current runtime assignments".to_string(),
+                ));
+            }
+            let total_descriptors = descriptor_counts.entry(server_id).or_default();
+            *total_descriptors = total_descriptors
+                .checked_add(descriptor_count)
+                .ok_or_else(|| {
+                    WebServiceError::Internal(
+                        "node runtime assignment descriptor count overflow".to_string(),
+                    )
+                })?;
+            if *total_descriptors > MAX_NODE_SYNC_ITEMS {
+                return Err(WebServiceError::Internal(format!(
+                    "node runtime assignment exceeds {MAX_NODE_SYNC_ITEMS} descriptors"
+                )));
+            }
+        }
+
+        let mut desired_sync_versions = BTreeMap::new();
+        for server_id in assignment_counts.keys() {
+            desired_sync_versions.insert(*server_id, compute_agent_sync_version_from_parts(Vec::new()));
+        }
+
+        let manifest_sql = format!(
+            "WITH current_assignments AS (
+                SELECT DISTINCT ON (a.server_id, a.environment)
+                       a.server_id, a.runtime_set
+                FROM web_runtime_assignment a
+                WHERE a.tenant_id = $1 AND a.server_id = ANY($2)
+                ORDER BY a.server_id, a.environment, a.generation DESC
+             ),
+             expanded_sites AS (
+                SELECT a.server_id, descriptor.value AS descriptor,
+                       descriptor.value ->> 'siteUuid' AS site_uuid
+                FROM current_assignments a
+                CROSS JOIN LATERAL jsonb_array_elements(
+                    CASE WHEN jsonb_typeof(a.runtime_set -> 'descriptors') = 'array'
+                         THEN a.runtime_set -> 'descriptors' ELSE '[]'::jsonb END
+                ) AS descriptor(value)
+             ),
+             invalid_sites AS (
+                SELECT DISTINCT server_id, 1::INTEGER AS item_kind,
+                       NULL::TEXT AS component, 0::BIGINT AS hostname_count
+                FROM expanded_sites
+                WHERE jsonb_typeof(descriptor) <> 'object'
+                   OR site_uuid IS NULL OR site_uuid = ''
+                   OR octet_length(site_uuid) > 128
+                   OR site_uuid ~ '[[:cntrl:]]'
+             ),
+             site_scope AS (
+                SELECT DISTINCT server_id, site_uuid
+                FROM expanded_sites
+                WHERE jsonb_typeof(descriptor) = 'object'
+                  AND site_uuid IS NOT NULL AND site_uuid <> ''
+                  AND octet_length(site_uuid) <= 128
+                  AND site_uuid !~ '[[:cntrl:]]'
+             ),
+             nginx_candidates AS (
+                SELECT DISTINCT scope.server_id, nc.uuid, nc.config_hash, nc.version,
+                       OCTET_LENGTH(nc.config_content) AS config_content_bytes,
+                       (SELECT d.hostname FROM web_site_binding b
+                        INNER JOIN web_domain d
+                            ON d.tenant_id = b.tenant_id AND d.id = b.domain_id
+                        WHERE b.tenant_id = nc.tenant_id AND b.site_id = s.id
+                          AND b.environment = 'production' AND b.status = 'ACTIVE'
+                          AND b.deleted_at IS NULL AND d.deleted_at IS NULL
+                        ORDER BY b.is_primary DESC, b.created_at ASC
+                        LIMIT 1) AS domain
+                FROM site_scope scope
+                INNER JOIN web_site s
+                    ON s.tenant_id = $1 AND s.uuid = scope.site_uuid
+                   AND s.deleted_at IS NULL
+                INNER JOIN web_nginx_config nc
+                    ON nc.tenant_id = s.tenant_id AND nc.site_id = s.id
+                   AND nc.is_active = TRUE AND nc.status = 1
+             ),
+             nginx_parts AS (
+                SELECT server_id,
+                       CASE WHEN config_hash ~ '^[0-9a-f]{{64}}$'
+                                  AND config_content_bytes BETWEEN 0 AND {MAX_NODE_NGINX_CONFIG_BYTES}
+                                  AND domain IS NOT NULL AND domain <> ''
+                            THEN 2 ELSE 5 END AS item_kind,
+                       'n:' || uuid || ':' || config_hash || ':' || version::TEXT
+                           || ':' || COALESCE(domain, '') AS component,
+                       0::BIGINT AS hostname_count
+                FROM nginx_candidates
+             ),
+             certificate_targets AS (
+                SELECT DISTINCT scope.server_id, c.id AS certificate_id,
+                       c.uuid AS certificate_uuid, v.id AS certificate_version_id,
+                       v.uuid AS certificate_version_uuid,
+                       v.fingerprint_sha256 AS fingerprint, v.secret_bundle_ref,
+                       sb.encryption_algorithm, OCTET_LENGTH(sb.bundle_encrypted) AS encrypted_bytes
+                FROM site_scope scope
+                INNER JOIN web_site s
+                    ON s.tenant_id = $1 AND s.uuid = scope.site_uuid
+                   AND s.deleted_at IS NULL
+                INNER JOIN web_site_binding b
+                    ON b.tenant_id = s.tenant_id AND b.site_id = s.id
+                   AND b.status = 'ACTIVE' AND b.deleted_at IS NULL
+                INNER JOIN web_listener_certificate_binding l
+                    ON l.tenant_id = b.tenant_id AND l.site_binding_id = b.id
+                   AND l.status IN ('PENDING', 'DEPLOYING', 'ACTIVE', 'FAILED')
+                   AND l.deleted_at IS NULL
+                INNER JOIN web_certificate c
+                    ON c.tenant_id = l.tenant_id AND c.id = l.certificate_id
+                   AND c.status = 1 AND c.deleted_at IS NULL
+                INNER JOIN web_certificate_version v
+                    ON v.tenant_id = l.tenant_id AND v.id = l.desired_version_id
+                   AND v.certificate_id = c.id
+                   AND v.status IN ('ACTIVE', 'SUPERSEDED')
+                INNER JOIN web_certificate_secret_bundle sb
+                    ON sb.tenant_id = v.tenant_id AND sb.certificate_version_id = v.id
+             ),
+             certificate_hostnames AS (
+                SELECT DISTINCT target.server_id, target.certificate_id,
+                       target.certificate_uuid, target.certificate_version_id,
+                       target.certificate_version_uuid, target.fingerprint,
+                       target.secret_bundle_ref, target.encryption_algorithm,
+                       target.encrypted_bytes, listener_domain.hostname
+                FROM certificate_targets target
+                INNER JOIN web_listener_certificate_binding listener
+                    ON listener.tenant_id = $1
+                   AND listener.certificate_id = target.certificate_id
+                   AND listener.desired_version_id = target.certificate_version_id
+                   AND listener.status IN ('PENDING', 'DEPLOYING', 'ACTIVE', 'FAILED')
+                   AND listener.deleted_at IS NULL
+                INNER JOIN web_site_binding listener_route
+                    ON listener_route.tenant_id = listener.tenant_id
+                   AND listener_route.id = listener.site_binding_id
+                   AND listener_route.status = 'ACTIVE'
+                   AND listener_route.deleted_at IS NULL
+                INNER JOIN web_site listener_site
+                    ON listener_site.tenant_id = listener_route.tenant_id
+                   AND listener_site.id = listener_route.site_id
+                   AND listener_site.deleted_at IS NULL
+                INNER JOIN web_domain listener_domain
+                    ON listener_domain.tenant_id = listener_route.tenant_id
+                   AND listener_domain.id = listener_route.domain_id
+                   AND listener_domain.deleted_at IS NULL
+                INNER JOIN site_scope listener_scope
+                    ON listener_scope.server_id = target.server_id
+                   AND listener_scope.site_uuid = listener_site.uuid
+             ),
+             ranked_certificate_hostnames AS (
+                SELECT *, ROW_NUMBER() OVER (
+                    PARTITION BY server_id, certificate_id, certificate_version_id
+                    ORDER BY hostname
+                ) AS hostname_rank
+                FROM certificate_hostnames
+             ),
+             certificate_parts AS (
+                SELECT server_id,
+                       CASE WHEN COUNT(*) > 128 THEN 4
+                            WHEN fingerprint ~ '^[0-9a-f]{{64}}$'
+                             AND secret_bundle_ref = 'secret:' || certificate_version_uuid
+                             AND encryption_algorithm = 'AES_256_GCM_V1'
+                             AND encrypted_bytes BETWEEN 64 AND 2097152
+                            THEN 3 ELSE 6 END AS item_kind,
+                       'c:' || certificate_uuid || ':' || fingerprint || ':'
+                           || STRING_AGG(hostname, ',' ORDER BY hostname) AS component,
+                       COUNT(*) AS hostname_count
+                FROM ranked_certificate_hostnames
+                WHERE hostname_rank <= 129
+                GROUP BY server_id, certificate_id, certificate_uuid,
+                         certificate_version_id, certificate_version_uuid, fingerprint,
+                         secret_bundle_ref, encryption_algorithm, encrypted_bytes
+             ),
+             raw_items AS (
+                SELECT * FROM invalid_sites
+                UNION ALL SELECT * FROM nginx_parts
+                UNION ALL SELECT * FROM certificate_parts
+             ),
+             ranked_items AS (
+                SELECT *, ROW_NUMBER() OVER (
+                    PARTITION BY server_id ORDER BY item_kind, component
+                ) AS item_rank
+                FROM raw_items
+             )
+             SELECT server_id, item_kind, component, hostname_count
+             FROM ranked_items
+             WHERE item_rank <= {}
+             ORDER BY server_id, item_kind, component",
+            MAX_NODE_SYNC_ITEMS + 1
+        );
+        let mut rows = sqlx::query(&manifest_sql)
+            .bind(tenant_id)
+            .bind(server_ids)
+            .fetch(&mut **transaction);
+        let mut current_server_id = None;
+        let mut current_parts = Vec::new();
+        while let Some(row) = rows.try_next().await.map_err(|error| {
+            store_error(
+                "stream certificate distribution desired manifests",
+                error,
+            )
+        })? {
+            let server_id: i64 = row.try_get("server_id").map_err(|error| {
+                WebServiceError::Internal(format!(
+                    "certificate distribution manifest server id: {error}"
+                ))
+            })?;
+            if !server_uuids.contains_key(&server_id) {
+                return Err(WebServiceError::Internal(
+                    "certificate distribution manifest escaped the requested server scope"
+                        .to_string(),
+                ));
+            }
+            if current_server_id.is_some_and(|current| current != server_id) {
+                let completed_server_id = current_server_id.take().ok_or_else(|| {
+                    WebServiceError::Internal(
+                        "certificate distribution manifest grouping failed".to_string(),
+                    )
+                })?;
+                desired_sync_versions.insert(
+                    completed_server_id,
+                    compute_agent_sync_version_from_parts(std::mem::take(&mut current_parts)),
+                );
+            }
+            current_server_id = Some(server_id);
+            let item_kind: i32 = row.try_get("item_kind").map_err(|error| {
+                WebServiceError::Internal(format!(
+                    "certificate distribution manifest item kind: {error}"
+                ))
+            })?;
+            match item_kind {
+                1 => {
+                    return Err(WebServiceError::Internal(
+                        "stored node runtime assignment has an invalid Site identity".to_string(),
+                    ));
+                }
+                2 | 3 => {
+                    let component: String = row.try_get("component").map_err(|error| {
+                        WebServiceError::Internal(format!(
+                            "certificate distribution manifest component: {error}"
+                        ))
+                    })?;
+                    current_parts.push(component);
+                    if current_parts.len() > MAX_NODE_SYNC_ITEMS {
+                        return Err(WebServiceError::Internal(format!(
+                            "node sync manifest exceeds {MAX_NODE_SYNC_ITEMS} items"
+                        )));
+                    }
+                }
+                4 => {
+                    let hostname_count: i64 = row.try_get("hostname_count").map_err(|error| {
+                        WebServiceError::Internal(format!(
+                            "certificate distribution manifest hostname count: {error}"
+                        ))
+                    })?;
+                    return Err(WebServiceError::Internal(format!(
+                        "agent sync certificate targets {hostname_count} listener hostnames; maximum is 128"
+                    )));
+                }
+                5 => {
+                    return Err(WebServiceError::Internal(
+                        "active nginx configuration has invalid bounded manifest metadata"
+                            .to_string(),
+                    ));
+                }
+                6 => {
+                    return Err(WebServiceError::Internal(
+                        "active certificate has invalid bounded secret metadata".to_string(),
+                    ));
+                }
+                _ => {
+                    return Err(WebServiceError::Internal(
+                        "certificate distribution manifest returned an invalid item kind"
+                            .to_string(),
+                    ));
+                }
+            }
+        }
+        drop(rows);
+        if let Some(server_id) = current_server_id {
+            desired_sync_versions.insert(
+                server_id,
+                compute_agent_sync_version_from_parts(current_parts),
+            );
+        }
+        Ok(desired_sync_versions)
     }
 
     async fn load_current_assigned_site_uuids(
@@ -360,6 +766,7 @@ impl WebRepository {
         }
 
         let mut site_uuids = BTreeSet::new();
+        let mut descriptor_count = 0_usize;
         for row in rows {
             let raw: String = row.try_get("runtime_set").map_err(|error| {
                 WebServiceError::Internal(format!("node runtime assignment JSON: {error}"))
@@ -381,8 +788,18 @@ impl WebRepository {
                     WebServiceError::Internal(
                         "stored node runtime assignment has no descriptors".to_string(),
                     )
-                })?;
+            })?;
             for descriptor in descriptors {
+                descriptor_count = descriptor_count.checked_add(1).ok_or_else(|| {
+                    WebServiceError::Internal(
+                        "node runtime assignment descriptor count overflow".to_string(),
+                    )
+                })?;
+                if descriptor_count > MAX_NODE_SYNC_ITEMS {
+                    return Err(WebServiceError::Internal(format!(
+                        "node runtime assignment exceeds {MAX_NODE_SYNC_ITEMS} descriptors"
+                    )));
+                }
                 let site_uuid = descriptor
                     .get("siteUuid")
                     .and_then(Value::as_str)
@@ -398,11 +815,6 @@ impl WebRepository {
                         )
                     })?;
                 site_uuids.insert(site_uuid.to_string());
-                if site_uuids.len() > MAX_NODE_SYNC_ITEMS {
-                    return Err(WebServiceError::Internal(format!(
-                        "node runtime assignment exceeds {MAX_NODE_SYNC_ITEMS} Sites"
-                    )));
-                }
             }
         }
         Ok(Some(site_uuids.into_iter().collect()))
@@ -416,7 +828,7 @@ impl WebRepository {
     ) -> WebServiceResult<Vec<AgentNginxConfigBundle>> {
         let content_size = "CAST(OCTET_LENGTH(nc.config_content) AS BIGINT)";
         let sql = format!(
-            "SELECT nc.uuid,
+            "SELECT nc.uuid, nc.config_hash,
                     CASE WHEN {content_size} <= {MAX_NODE_NGINX_CONFIG_BYTES}
                          THEN nc.config_content ELSE NULL END AS config_content,
                     {content_size} AS config_content_bytes,
@@ -463,6 +875,14 @@ impl WebRepository {
             let config_content = config_content.ok_or_else(|| {
                 WebServiceError::Internal("active nginx configuration is unavailable".to_string())
             })?;
+            let config_hash: String = row.try_get("config_hash").map_err(|error| {
+                WebServiceError::Internal(format!("agent sync nginx config hash: {error}"))
+            })?;
+            if config_hash != sha256_hex(&config_content) {
+                return Err(WebServiceError::Internal(
+                    "active nginx configuration hash mismatch".to_string(),
+                ));
+            }
             let domain: Option<String> = row.try_get("domain").map_err(|error| {
                 WebServiceError::Internal(format!("agent sync nginx domain: {error}"))
             })?;
@@ -476,7 +896,7 @@ impl WebRepository {
                     WebServiceError::Internal(format!("agent sync nginx uuid: {error}"))
                 })?,
                 domain,
-                fingerprint: sha256_hex(&config_content),
+                fingerprint: config_hash,
                 config_content,
                 version: row.try_get("version").map_err(|error| {
                     WebServiceError::Internal(format!("agent sync nginx version: {error}"))
@@ -621,7 +1041,7 @@ impl WebRepository {
                 fullchain_pem: secret_bundle.fullchain_pem,
                 privkey_pem: secret_bundle.private_key_pem,
             };
-            budget.reserve(&item)?;
+            budget.reserve_with_additional_bytes(&item, bundle_encrypted.len())?;
             items.push(item);
         }
         Ok(items)
@@ -676,8 +1096,8 @@ pub(crate) fn compute_agent_sync_version(
     let mut parts = Vec::with_capacity(nginx_configs.len() + certificates.len());
     for config in nginx_configs {
         parts.push(format!(
-            "n:{}:{}:{}",
-            config.config_id, config.fingerprint, config.version
+            "n:{}:{}:{}:{}",
+            config.config_id, config.fingerprint, config.version, config.domain
         ));
     }
     for certificate in certificates {
@@ -688,6 +1108,10 @@ pub(crate) fn compute_agent_sync_version(
             certificate.hostnames.join(",")
         ));
     }
+    compute_agent_sync_version_from_parts(parts)
+}
+
+fn compute_agent_sync_version_from_parts(mut parts: Vec<String>) -> String {
     parts.sort_unstable();
     format!("sv1:{}", sha256_hash(parts.join("\n").as_bytes()))
 }
@@ -738,6 +1162,20 @@ mod tests {
             compute_agent_sync_version(&nginx, &certs_a),
             compute_agent_sync_version(&nginx, &certs_b)
         );
+    }
+
+    #[test]
+    fn sync_version_changes_when_nginx_domain_changes() {
+        let mut nginx_a = vec![AgentNginxConfigBundle {
+            config_id: "cfg-1".to_string(),
+            domain: "example.com".to_string(),
+            config_content: "server {}".to_string(),
+            fingerprint: sha256_hex("server {}"),
+            version: 2,
+        }];
+        let version_a = compute_agent_sync_version(&nginx_a, &[]);
+        nginx_a[0].domain = "www.example.com".to_string();
+        assert_ne!(version_a, compute_agent_sync_version(&nginx_a, &[]));
     }
 
     #[test]

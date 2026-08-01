@@ -9,6 +9,7 @@ serde.workspace = true
 sdkwork-webserver-contract.workspace = true
 sdkwork-webserver-http-host.workspace = true
 sdkwork-utils-rust.workspace = true
+url.workspace = true
 
 [dev-dependencies]
 serde_json.workspace = true
