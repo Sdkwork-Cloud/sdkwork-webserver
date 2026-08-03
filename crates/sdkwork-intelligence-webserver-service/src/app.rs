@@ -69,7 +69,7 @@ impl WebService {
         let Some(listing) = listing else {
             return if require_icon {
                 Err(sdkwork_webserver_contract::WebServiceError::conflict(
-                    "a 1024x1024 PNG application icon is required before deployment or activation",
+                    "a square 1:1 PNG application icon is required before deployment or activation",
                 ))
             } else {
                 Ok(())
@@ -78,15 +78,13 @@ impl WebService {
 
         if require_icon && listing.icon.is_none() {
             return Err(sdkwork_webserver_contract::WebServiceError::conflict(
-                "a 1024x1024 PNG application icon is required before deployment or activation",
+                "a square 1:1 PNG application icon is required before deployment or activation",
             ));
         }
         if let Some(icon) = listing.icon.as_ref() {
-            validate_store_image(
+            validate_square_store_image(
                 icon,
                 "storeListing.icon",
-                1024,
-                1024,
                 &["image/png"],
                 MAX_ICON_BYTES,
             )?;
@@ -575,6 +573,26 @@ fn validate_store_image(
     Ok(())
 }
 
+fn validate_square_store_image(
+    resource: &MediaResource,
+    field: &str,
+    accepted_mime_types: &[&str],
+    maximum_bytes: u64,
+) -> WebServiceResult<()> {
+    validate_drive_image(resource, field, accepted_mime_types, maximum_bytes)?;
+    let (Some(width), Some(height)) = (resource.width, resource.height) else {
+        return Err(sdkwork_webserver_contract::WebServiceError::validation(
+            format!("{field} must include width and height"),
+        ));
+    };
+    if width != height {
+        return Err(sdkwork_webserver_contract::WebServiceError::validation(
+            format!("{field} must be square with a 1:1 aspect ratio"),
+        ));
+    }
+    Ok(())
+}
+
 fn validate_preview_image(resource: &MediaResource, index: usize) -> WebServiceResult<()> {
     let field = format!("storeListing.previews[{index}]");
     validate_drive_image(
@@ -934,6 +952,21 @@ impl WebAppApi for WebService {
         let tenant_id = self.require_site_access(context, site_id).await?;
         self.repository
             .list_domains(tenant_id, site_id, page, page_size)
+            .await
+    }
+
+    async fn list_certificate_domains(
+        &self,
+        context: &WebAppRequestContext,
+        page: i32,
+        page_size: i32,
+    ) -> WebServiceResult<sdkwork_webserver_contract::DomainPage> {
+        if context.tenant_id <= 0 {
+            return Err(sdkwork_webserver_contract::WebServiceError::Forbidden);
+        }
+        let owner_id = Self::owner_filter(context)?;
+        self.repository
+            .list_certificate_domains(context.tenant_id, owner_id, page, page_size)
             .await
     }
 
@@ -1541,6 +1574,11 @@ mod tests {
         let mut invalid_dimensions = valid.clone();
         invalid_dimensions.icon.as_mut().unwrap().width = Some(512);
         assert!(WebService::validate_store_listing(Some(&invalid_dimensions), true).is_err());
+
+        let mut square_icon = valid.clone();
+        square_icon.icon.as_mut().unwrap().width = Some(512);
+        square_icon.icon.as_mut().unwrap().height = Some(512);
+        assert!(WebService::validate_store_listing(Some(&square_icon), true).is_ok());
 
         let mut invalid_mime = valid.clone();
         invalid_mime.icon.as_mut().unwrap().mime_type = Some("image/jpeg".to_string());

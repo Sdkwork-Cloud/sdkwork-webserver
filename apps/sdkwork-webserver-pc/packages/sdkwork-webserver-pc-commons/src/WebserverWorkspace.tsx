@@ -48,8 +48,10 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { translateWebserver, type WebserverLocale, type WebserverMessageKey } from "./i18n/index.ts";
 import {
   APPLICATION_PREVIEW_LIMIT,
+  ApplicationMediaValidationError,
   validateApplicationMediaFile,
   validateApplicationPreviewCount,
+  type ApplicationMediaFieldErrors,
   type ApplicationStoreListingInput,
   type ApplicationSubmissionInput,
 } from "./application-media.ts";
@@ -688,7 +690,7 @@ function ActionDialog({
     previewFiles: [],
     previewsMode: action.applicationSubmission === "update" ? "keep" : "remove",
   }));
-  const [mediaError, setMediaError] = useState<string>();
+  const [mediaErrors, setMediaErrors] = useState<ApplicationMediaFieldErrors>({});
   const abortControllerRef = useRef<AbortController | undefined>(undefined);
   const dialogRef = useRef<HTMLFormElement>(null);
   const applicationStageRef = useRef<HTMLDivElement>(null);
@@ -815,7 +817,7 @@ function ActionDialog({
         : undefined;
     }
     if (step === 1) {
-      return !applicationSubmissionReady(applicationSubmission, mediaError)
+      return !applicationSubmissionReady(applicationSubmission, mediaErrors)
         ? "dialog.applicationMediaRequired"
         : undefined;
     }
@@ -888,10 +890,9 @@ function ActionDialog({
   }, [applicationCreationWizard, applicationStep]);
 
   useEffect(() => {
-    if (!applicationDrawer) return undefined;
-    document.body.classList.add("application-drawer-open");
-    return () => document.body.classList.remove("application-drawer-open");
-  }, [applicationDrawer]);
+    document.body.classList.add("dialog-open");
+    return () => document.body.classList.remove("dialog-open");
+  }, []);
 
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
@@ -968,7 +969,7 @@ function ActionDialog({
       (confirmationRequired && !confirmed)
       || (action.requiresFile && !file)
       || Boolean(sourceInputError())
-      || (action.applicationSubmission && !applicationSubmissionReady(applicationSubmission, mediaError))
+      || (action.applicationSubmission && !applicationSubmissionReady(applicationSubmission, mediaErrors))
     ) return;
     submitInFlightRef.current = true;
     const abortController = new AbortController();
@@ -1008,6 +1009,7 @@ function ActionDialog({
   return (
     <div
       className={`dialog-backdrop${applicationDrawer ? " application-creation-drawer-backdrop" : ""}`}
+      onKeyDown={(event) => trapDialogFocus(event, dialogRef.current ?? event.currentTarget)}
       onMouseDown={(event) => {
         if (event.currentTarget === event.target) closeDialog();
       }}
@@ -1024,7 +1026,6 @@ function ActionDialog({
             : sourceUpdateAction
               ? "application-source-update-dialog"
               : undefined}
-        onKeyDown={trapDialogFocus}
         onSubmit={(event) => void submit(event)}
         ref={dialogRef}
         role="dialog"
@@ -1048,34 +1049,101 @@ function ActionDialog({
           </button>
         </header>
         {result ? (
-          <div className="operation-result" role="status">
-            <div className="result-notice"><Check aria-hidden="true" size={18} />{t("dialog.operationComplete")}</div>
-            {"agentToken" in result ? <div className="warning">{t("dialog.oneTimeCredential")}</div> : null}
-            <dl>
-              {action.resultFields?.map((field) => field in result ? (
-                <div key={field}>
-                  <dt>{fieldLabel(field, locale)}</dt>
-                  <dd>
-                    <code>{String(result[field] ?? "-")}</code>
-                    <button
-                      aria-label={t("dialog.copyField")}
-                      className="icon-button"
-                      onClick={() => {
-                        void navigator.clipboard.writeText(String(result[field] ?? ""));
-                        setCopiedField(field);
-                      }}
-                      title={t("dialog.copyField")}
-                      type="button"
-                    >
-                      {copiedField === field ? <Check aria-hidden="true" size={16} /> : <Clipboard aria-hidden="true" size={16} />}
-                    </button>
-                  </dd>
-                </div>
-              ) : null)}
-            </dl>
+          <div className="dialog-scroll">
+            <div className="operation-result" role="status">
+              <div className="result-notice"><Check aria-hidden="true" size={18} />{t("dialog.operationComplete")}</div>
+              {"agentToken" in result ? <div className="warning">{t("dialog.oneTimeCredential")}</div> : null}
+              <dl>
+                {action.resultFields?.map((field) => field in result ? (
+                  <div key={field}>
+                    <dt>{fieldLabel(field, locale)}</dt>
+                    <dd>
+                      <code>{String(result[field] ?? "-")}</code>
+                      <button
+                        aria-label={t("dialog.copyField")}
+                        className="icon-button"
+                        onClick={() => {
+                          void navigator.clipboard.writeText(String(result[field] ?? ""));
+                          setCopiedField(field);
+                        }}
+                        title={t("dialog.copyField")}
+                        type="button"
+                      >
+                        {copiedField === field ? <Check aria-hidden="true" size={16} /> : <Clipboard aria-hidden="true" size={16} />}
+                      </button>
+                    </dd>
+                  </div>
+                ) : null)}
+              </dl>
+            </div>
           </div>
         ) : null}
-        {!result && confirmationRequired ? <div className="warning">{t("dialog.warning")}</div> : null}
+        {!result && !applicationDrawer ? (
+          <div className="dialog-scroll">
+            {confirmationRequired ? <div className="warning">{t("dialog.warning")}</div> : null}
+            <div className="form-grid">
+              {Object.entries(body).map(([name, value]) => renderField(
+                name,
+                value,
+                action.requiredFields?.includes(name),
+              ))}
+            </div>
+            {action.applicationSubmission ? (
+              <ApplicationSubmissionFields
+                disabled={busy}
+                errors={mediaErrors}
+                existing={existingStoreListing}
+                locale={locale}
+                onChange={setApplicationSubmission}
+                onErrors={setMediaErrors}
+                submission={applicationSubmission}
+              />
+            ) : null}
+            {action.requiresFile ? (
+              <label className="file-field">
+                <span><Upload aria-hidden="true" size={16} />{t("dialog.file")}</span>
+                <input
+                  accept={action.acceptedFileTypes}
+                  disabled={busy}
+                  onChange={(event) => setFile(event.target.files?.[0])}
+                  type="file"
+                />
+              </label>
+            ) : null}
+            {action.sourceInput ? (
+              <ApplicationSourcePicker
+                busy={busy}
+                files={files}
+                locale={locale}
+                mode={sourceInputMode}
+                onFilesChange={setFiles}
+                onModeChange={setSourceInputMode}
+                onRepositoryChange={setSourceRepository}
+                repository={sourceRepository}
+              />
+            ) : null}
+            {busy && (action.requiresFile || action.sourceInput) ? (
+              <div className="upload-progress" role="status">
+                <div>
+                  <span>{t("dialog.uploadProgress")}</span>
+                  <strong>{progress}%</strong>
+                </div>
+                <progress aria-label={t("dialog.uploadProgress")} max={100} value={progress} />
+              </div>
+            ) : null}
+            {confirmationRequired ? (
+              <label className="confirm-check">
+                <input
+                  checked={confirmed}
+                  onChange={(event) => setConfirmed(event.target.checked)}
+                  type="checkbox"
+                />
+                {t("dialog.confirmRisk")}
+              </label>
+            ) : null}
+            {error ? <div className="error-banner" role="alert">{error}</div> : null}
+          </div>
+        ) : null}
         {!result && applicationCreationWizard ? (
           <div className="application-wizard-workspace">
             <ApplicationWizardProgress
@@ -1108,11 +1176,11 @@ function ActionDialog({
                     <ApplicationSubmissionFields
                       compact
                       disabled={busy}
-                      error={mediaError}
+                      errors={mediaErrors}
                       existing={existingStoreListing}
                       locale={locale}
                       onChange={setApplicationSubmission}
-                      onError={setMediaError}
+                      onErrors={setMediaErrors}
                       submission={applicationSubmission}
                     />
                     <div className="application-listing-subsection">
@@ -1228,11 +1296,11 @@ function ActionDialog({
                 <ApplicationSubmissionFields
                   compact
                   disabled={busy}
-                  error={mediaError}
+                  errors={mediaErrors}
                   existing={existingStoreListing}
                   locale={locale}
                   onChange={setApplicationSubmission}
-                  onError={setMediaError}
+                  onErrors={setMediaErrors}
                   submission={applicationSubmission}
                 />
                 <div className="application-listing-subsection">
@@ -1249,67 +1317,6 @@ function ActionDialog({
             </div>
           </div>
         ) : null}
-        {!result && !applicationDrawer ? <div className="form-grid">
-          {Object.entries(body).map(([name, value]) => renderField(
-            name,
-            value,
-            action.requiredFields?.includes(name),
-          ))}
-        </div> : null}
-        {!result && !applicationDrawer && action.applicationSubmission ? (
-          <ApplicationSubmissionFields
-            disabled={busy}
-            error={mediaError}
-            existing={existingStoreListing}
-            locale={locale}
-            onChange={setApplicationSubmission}
-            onError={setMediaError}
-            submission={applicationSubmission}
-          />
-        ) : null}
-        {!result && action.requiresFile ? (
-          <label className="file-field">
-            <span><Upload aria-hidden="true" size={16} />{t("dialog.file")}</span>
-            <input
-              accept={action.acceptedFileTypes}
-              disabled={busy}
-              onChange={(event) => setFile(event.target.files?.[0])}
-              type="file"
-            />
-          </label>
-        ) : null}
-        {!result && !applicationDrawer && action.sourceInput ? (
-          <ApplicationSourcePicker
-            busy={busy}
-            files={files}
-            locale={locale}
-            mode={sourceInputMode}
-            onFilesChange={setFiles}
-            onModeChange={setSourceInputMode}
-            onRepositoryChange={setSourceRepository}
-            repository={sourceRepository}
-          />
-        ) : null}
-        {!result && !applicationDrawer && busy && (action.requiresFile || action.sourceInput) ? (
-          <div className="upload-progress" role="status">
-            <div>
-              <span>{t("dialog.uploadProgress")}</span>
-              <strong>{progress}%</strong>
-            </div>
-            <progress aria-label={t("dialog.uploadProgress")} max={100} value={progress} />
-          </div>
-        ) : null}
-        {!result && confirmationRequired ? (
-          <label className="confirm-check">
-            <input
-              checked={confirmed}
-              onChange={(event) => setConfirmed(event.target.checked)}
-              type="checkbox"
-            />
-            {t("dialog.confirmRisk")}
-          </label>
-        ) : null}
-        {!applicationDrawer && error ? <div className="error-banner" role="alert">{error}</div> : null}
         {result ? (
           <footer>
             <button className="command-button" onClick={closeDialog} type="button">{t("dialog.close")}</button>
@@ -1351,7 +1358,7 @@ function ActionDialog({
                     || hasUnavailableOptions(body, fieldOptions, action.paginatedFields)}
                   type="submit"
                 >
-                  {busy ? t("dialog.submitting") : t("dialog.createApplication")}
+                  {busy ? <><LoaderCircle aria-hidden="true" className="is-spinning" size={16} />{t("dialog.submitting")}</> : t("dialog.createApplication")}
                 </button>
               )}
             </div>
@@ -1363,12 +1370,12 @@ function ActionDialog({
               className="command-button"
               disabled={busy
                 || optionsBusy
-                || !applicationSubmissionReady(applicationSubmission, mediaError)
+                || !applicationSubmissionReady(applicationSubmission, mediaErrors)
                 || hasMissingRequiredFields(body, action.requiredFields)
                 || hasUnavailableOptions(body, fieldOptions, action.paginatedFields)}
               type="submit"
             >
-              {busy ? t("dialog.submitting") : t("dialog.confirm")}
+              {busy ? <><LoaderCircle aria-hidden="true" className="is-spinning" size={16} />{t("dialog.submitting")}</> : t("dialog.confirm")}
             </button>
           </footer>
         ) : <footer>
@@ -1380,12 +1387,12 @@ function ActionDialog({
               || Boolean(confirmationRequired && !confirmed)
               || Boolean(action.requiresFile && !file)
               || Boolean(sourceInputError())
-              || Boolean(action.applicationSubmission && !applicationSubmissionReady(applicationSubmission, mediaError))
+              || Boolean(action.applicationSubmission && !applicationSubmissionReady(applicationSubmission, mediaErrors))
               || hasMissingRequiredFields(body, action.requiredFields)
               || hasUnavailableOptions(body, fieldOptions, action.paginatedFields)}
             type="submit"
           >
-            {busy ? t("dialog.submitting") : sourceUpdateAction ? (
+            {busy ? <><LoaderCircle aria-hidden="true" className="is-spinning" size={16} />{t("dialog.submitting")}</> : sourceUpdateAction ? (
               sourceInputMode === "git" ? (
                 <><RefreshCw aria-hidden="true" size={16} />{t("dialog.refreshGitRepository")}</>
               ) : (
@@ -1700,24 +1707,27 @@ function ApplicationCreationReview({
 function ApplicationSubmissionFields({
   compact = false,
   disabled,
-  error,
+  errors,
   existing,
   locale,
   onChange,
-  onError,
+  onErrors,
   submission,
 }: {
   compact?: boolean;
   disabled: boolean;
-  error?: string;
+  errors: ApplicationMediaFieldErrors;
   existing?: ApplicationStoreListingInput;
   locale: WebserverLocale;
   onChange(value: ApplicationSubmissionInput): void;
-  onError(value: string | undefined): void;
+  onErrors(value: ApplicationMediaFieldErrors): void;
   submission: ApplicationSubmissionInput;
 }) {
   const validationVersion = useRef(0);
   const t = (key: WebserverMessageKey, values: Record<string, string | number> = {}) => translateWebserver(locale, key, values);
+  const setFieldError = (field: keyof ApplicationMediaFieldErrors, value: string | undefined): void => {
+    onErrors({ ...errors, [field]: value });
+  };
   const iconPreview = useFilePreview(submission.iconFile);
   const coverPreview = useFilePreview(submission.coverFile);
   const previewImages = useFilePreviews(submission.previewFiles);
@@ -1732,15 +1742,15 @@ function ApplicationSubmissionFields({
       ...(role === "icon" ? { iconFile: file, iconMode: "upload" as const } : { coverFile: file, coverMode: "upload" as const }),
     });
     if (!file) {
-      onError(role === "icon" ? t("dialog.mediaIconRequired") : t("dialog.mediaCoverRequired"));
+      setFieldError(role, t(role === "icon" ? "dialog.mediaIconRequired" : "dialog.mediaCoverRequired"));
       return;
     }
-    onError(t("dialog.mediaValidating"));
+    setFieldError(role, t("dialog.mediaValidating"));
     try {
       await validateApplicationMediaFile(role, file);
-      if (validationVersion.current === version) onError(undefined);
+      if (validationVersion.current === version) setFieldError(role, undefined);
     } catch (error) {
-      if (validationVersion.current === version) onError(mediaValidationMessage(error, t));
+      if (validationVersion.current === version) setFieldError(role, mediaValidationMessage(error, t));
     }
   }
 
@@ -1748,23 +1758,33 @@ function ApplicationSubmissionFields({
     const currentFiles = append && submission.previewsMode === "replace" ? submission.previewFiles : [];
     const nextFiles = mergeApplicationPreviewFiles(currentFiles, files);
     const version = ++validationVersion.current;
-    onError(t("dialog.mediaValidating"));
+    setFieldError("previews", t("dialog.mediaValidating"));
     try {
       validateApplicationPreviewCount(nextFiles);
       if (nextFiles.length === 0) throw new Error("PREVIEW_REQUIRED");
-      for (const file of files) await validateApplicationMediaFile("preview", file);
+      for (const file of files) {
+        try {
+          await validateApplicationMediaFile("preview", file);
+        } catch (error) {
+          const finalIndex = nextFiles.findIndex((candidate) => candidate === file);
+          if (validationVersion.current === version) {
+            setFieldError("previews", mediaValidationMessage(error, t, finalIndex >= 0 ? finalIndex : undefined));
+          }
+          return;
+        }
+      }
       if (validationVersion.current === version) {
         onChange({ ...submission, previewFiles: nextFiles, previewsMode: "replace" });
-        onError(undefined);
+        setFieldError("previews", undefined);
       }
     } catch (error) {
-      if (validationVersion.current === version) onError(mediaValidationMessage(error, t));
+      if (validationVersion.current === version) setFieldError("previews", mediaValidationMessage(error, t));
     }
   }
 
   function removePreview(index: number): void {
     validationVersion.current += 1;
-    onError(undefined);
+    setFieldError("previews", undefined);
     const previewFiles = submission.previewFiles.filter((_, candidateIndex) => candidateIndex !== index);
     onChange({
       ...submission,
@@ -1777,7 +1797,7 @@ function ApplicationSubmissionFields({
     const targetIndex = index + offset;
     if (targetIndex < 0 || targetIndex >= submission.previewFiles.length) return;
     validationVersion.current += 1;
-    onError(undefined);
+    setFieldError("previews", undefined);
     const previewFiles = [...submission.previewFiles];
     [previewFiles[index], previewFiles[targetIndex]] = [previewFiles[targetIndex], previewFiles[index]];
     onChange({ ...submission, previewFiles, previewsMode: "replace" });
@@ -1785,7 +1805,7 @@ function ApplicationSubmissionFields({
 
   function removePrimaryMedia(role: "icon" | "cover"): void {
     validationVersion.current += 1;
-    onError(undefined);
+    setFieldError(role, undefined);
     onChange({
       ...submission,
       ...(role === "icon"
@@ -1821,7 +1841,7 @@ function ApplicationSubmissionFields({
               <Image aria-hidden="true" size={17} />
               <div>
                 <strong>{t("dialog.mediaIcon")}</strong>
-                <small>1024 x 1024 PNG</small>
+                <small>1:1 PNG</small>
               </div>
               <span className="required-mark">{t("dialog.mediaRequired")}</span>
             </div>
@@ -1864,6 +1884,7 @@ function ApplicationSubmissionFields({
               ref={iconInputRef}
               type="file"
             />
+            {errors.icon ? <div className="media-validation" role="alert">{errors.icon}</div> : null}
           </section>
           <section className="application-media-flat-field">
             <div className="application-media-flat-heading">
@@ -1912,6 +1933,7 @@ function ApplicationSubmissionFields({
               ref={coverInputRef}
               type="file"
             />
+            {errors.cover ? <div className="media-validation" role="alert">{errors.cover}</div> : null}
           </section>
         </div>
         <section className="application-preview-manager">
@@ -1928,8 +1950,8 @@ function ApplicationSubmissionFields({
                 {t("dialog.mediaPreviewCountStatus", { count: submission.previewFiles.length, limit: APPLICATION_PREVIEW_LIMIT })}
               </span>
               <div aria-label={t("dialog.mediaPreviewsMode")} className="media-mode-toggle" role="group">
-                {existing?.previews?.length ? <MediaModeButton active={submission.previewsMode === "keep"} disabled={disabled} icon={<BadgeCheck aria-hidden="true" size={15} />} label={t("dialog.mediaKeep")} onClick={() => { validationVersion.current += 1; onError(undefined); onChange({ ...submission, previewFiles: [], previewsMode: "keep" }); }} /> : null}
-                <MediaModeButton active={submission.previewsMode === "remove"} disabled={disabled} icon={<X aria-hidden="true" size={15} />} label={t("dialog.mediaNone")} onClick={() => { validationVersion.current += 1; onError(undefined); onChange({ ...submission, previewFiles: [], previewsMode: "remove" }); }} />
+                {existing?.previews?.length ? <MediaModeButton active={submission.previewsMode === "keep"} disabled={disabled} icon={<BadgeCheck aria-hidden="true" size={15} />} label={t("dialog.mediaKeep")} onClick={() => { validationVersion.current += 1; setFieldError("previews", undefined); onChange({ ...submission, previewFiles: [], previewsMode: "keep" }); }} /> : null}
+                <MediaModeButton active={submission.previewsMode === "remove"} disabled={disabled} icon={<X aria-hidden="true" size={15} />} label={t("dialog.mediaNone")} onClick={() => { validationVersion.current += 1; setFieldError("previews", undefined); onChange({ ...submission, previewFiles: [], previewsMode: "remove" }); }} />
               </div>
             </div>
           </div>
@@ -2009,8 +2031,8 @@ function ApplicationSubmissionFields({
             ref={previewsInputRef}
             type="file"
           />
+          {errors.previews ? <div className="media-validation" role="alert">{errors.previews}</div> : null}
         </section>
-        <div className="media-validation" role={error ? "alert" : undefined}>{error ?? ""}</div>
       </section>
     );
   }
@@ -2029,7 +2051,7 @@ function ApplicationSubmissionFields({
           <Image aria-hidden="true" size={17} />
           <strong>{t("dialog.mediaIcon")}</strong>
           <span className="required-mark">{t("dialog.mediaRequired")}</span>
-          <small>1024 x 1024 PNG</small>
+          <small>1:1 PNG</small>
         </div>
         <div aria-label={t("dialog.mediaIconMode")} className="media-mode-toggle" role="group">
           {existing?.icon ? (
@@ -2040,7 +2062,7 @@ function ApplicationSubmissionFields({
               label={t("dialog.mediaKeep")}
               onClick={() => {
                 validationVersion.current += 1;
-                onError(undefined);
+                setFieldError("icon", undefined);
                 onChange({ ...submission, iconFile: undefined, iconMode: "keep" });
               }}
             />
@@ -2052,7 +2074,7 @@ function ApplicationSubmissionFields({
             label={t("dialog.mediaDefault")}
             onClick={() => {
               validationVersion.current += 1;
-              onError(undefined);
+              setFieldError("icon", undefined);
               onChange({ ...submission, iconFile: undefined, iconMode: "default" });
             }}
           />
@@ -2083,6 +2105,7 @@ function ApplicationSubmissionFields({
             {iconPreview ? <img alt="" src={iconPreview} /> : null}
           </label>
         ) : null}
+        {errors.icon ? <div className="media-validation" role="alert">{errors.icon}</div> : null}
       </div>
       <div className="application-media-field">
         <div className="application-media-label">
@@ -2091,8 +2114,8 @@ function ApplicationSubmissionFields({
           <small>1024 x 500 PNG, JPEG, WebP</small>
         </div>
         <div aria-label={t("dialog.mediaCoverMode")} className="media-mode-toggle" role="group">
-          {existing?.cover ? <MediaModeButton active={submission.coverMode === "keep"} disabled={disabled} icon={<BadgeCheck aria-hidden="true" size={15} />} label={t("dialog.mediaKeep")} onClick={() => { validationVersion.current += 1; onError(undefined); onChange({ ...submission, coverFile: undefined, coverMode: "keep" }); }} /> : null}
-          <MediaModeButton active={submission.coverMode === "remove"} disabled={disabled} icon={<X aria-hidden="true" size={15} />} label={t("dialog.mediaNone")} onClick={() => { validationVersion.current += 1; onError(undefined); onChange({ ...submission, coverFile: undefined, coverMode: "remove" }); }} />
+          {existing?.cover ? <MediaModeButton active={submission.coverMode === "keep"} disabled={disabled} icon={<BadgeCheck aria-hidden="true" size={15} />} label={t("dialog.mediaKeep")} onClick={() => { validationVersion.current += 1; setFieldError("cover", undefined); onChange({ ...submission, coverFile: undefined, coverMode: "keep" }); }} /> : null}
+          <MediaModeButton active={submission.coverMode === "remove"} disabled={disabled} icon={<X aria-hidden="true" size={15} />} label={t("dialog.mediaNone")} onClick={() => { validationVersion.current += 1; setFieldError("cover", undefined); onChange({ ...submission, coverFile: undefined, coverMode: "remove" }); }} />
           <MediaModeButton active={submission.coverMode === "upload"} disabled={disabled} icon={<Upload aria-hidden="true" size={15} />} label={t("dialog.mediaUpload")} onClick={() => onChange({ ...submission, coverMode: "upload" })} />
         </div>
         {submission.coverMode === "keep" ? <div className="stored-media-state"><BadgeCheck aria-hidden="true" size={16} />{t("dialog.mediaStored")}</div> : null}
@@ -2103,6 +2126,7 @@ function ApplicationSubmissionFields({
             {coverPreview ? <img alt="" src={coverPreview} /> : null}
           </label>
         ) : null}
+        {errors.cover ? <div className="media-validation" role="alert">{errors.cover}</div> : null}
       </div>
       <div className="application-media-field">
         <div className="application-media-label">
@@ -2111,8 +2135,8 @@ function ApplicationSubmissionFields({
           <small>{t("dialog.mediaPreviewLimit")}</small>
         </div>
         <div aria-label={t("dialog.mediaPreviewsMode")} className="media-mode-toggle" role="group">
-          {existing?.previews?.length ? <MediaModeButton active={submission.previewsMode === "keep"} disabled={disabled} icon={<BadgeCheck aria-hidden="true" size={15} />} label={t("dialog.mediaKeep")} onClick={() => { validationVersion.current += 1; onError(undefined); onChange({ ...submission, previewFiles: [], previewsMode: "keep" }); }} /> : null}
-          <MediaModeButton active={submission.previewsMode === "remove"} disabled={disabled} icon={<X aria-hidden="true" size={15} />} label={t("dialog.mediaNone")} onClick={() => { validationVersion.current += 1; onError(undefined); onChange({ ...submission, previewFiles: [], previewsMode: "remove" }); }} />
+          {existing?.previews?.length ? <MediaModeButton active={submission.previewsMode === "keep"} disabled={disabled} icon={<BadgeCheck aria-hidden="true" size={15} />} label={t("dialog.mediaKeep")} onClick={() => { validationVersion.current += 1; setFieldError("previews", undefined); onChange({ ...submission, previewFiles: [], previewsMode: "keep" }); }} /> : null}
+          <MediaModeButton active={submission.previewsMode === "remove"} disabled={disabled} icon={<X aria-hidden="true" size={15} />} label={t("dialog.mediaNone")} onClick={() => { validationVersion.current += 1; setFieldError("previews", undefined); onChange({ ...submission, previewFiles: [], previewsMode: "remove" }); }} />
           <MediaModeButton active={submission.previewsMode === "replace"} disabled={disabled} icon={<Upload aria-hidden="true" size={15} />} label={t("dialog.mediaUpload") } onClick={() => onChange({ ...submission, previewsMode: "replace" })} />
         </div>
         {submission.previewsMode === "keep" ? <div className="stored-media-state"><BadgeCheck aria-hidden="true" size={16} />{t("dialog.mediaStoredCount", { count: existing?.previews?.length ?? 0 })}</div> : null}
@@ -2123,8 +2147,8 @@ function ApplicationSubmissionFields({
             {previewImages.length ? <div className="media-preview-grid">{previewImages.map((url, index) => <img alt="" key={`${url}-${index}`} src={url} />)}</div> : null}
           </label>
         ) : null}
+        {errors.previews ? <div className="media-validation" role="alert">{errors.previews}</div> : null}
       </div>
-      {error ? <div className="media-validation" role="alert">{error}</div> : null}
     </section>
   );
 }
@@ -2194,8 +2218,13 @@ function useFilePreviews(files: readonly File[]): readonly string[] {
   return urls;
 }
 
-function mediaValidationMessage(error: unknown, t: (key: WebserverMessageKey) => string): string {
+function mediaValidationMessage(
+  error: unknown,
+  t: (key: WebserverMessageKey, values?: Record<string, string | number>) => string,
+  previewIndex?: number,
+): string {
   const code = error instanceof Error ? error.message : "";
+  const details = error instanceof ApplicationMediaValidationError ? error.details : undefined;
   const keys: Record<string, WebserverMessageKey> = {
     COVER_DIMENSIONS: "dialog.mediaCoverDimensions",
     ICON_DIMENSIONS: "dialog.mediaIconDimensions",
@@ -2209,19 +2238,40 @@ function mediaValidationMessage(error: unknown, t: (key: WebserverMessageKey) =>
     STORE_IMAGE_SIZE: "dialog.mediaImageSize",
     STORE_IMAGE_TYPE: "dialog.mediaImageType",
   };
-  return t(keys[code] ?? "dialog.mediaDecode");
+  const key = keys[code] ?? "dialog.mediaDecode";
+  let message = code === "PREVIEW_COUNT"
+    ? t(key, { count: details?.count ?? 0 })
+    : t(key);
+  if (details) {
+    if (code === "ICON_DIMENSIONS" || code === "COVER_DIMENSIONS" || code === "PREVIEW_DIMENSIONS") {
+      message += t("dialog.mediaActualDimensions", {
+        width: details.width ?? 0,
+        height: details.height ?? 0,
+      });
+    } else if (code === "ICON_SIZE" || code === "STORE_IMAGE_SIZE") {
+      message += t("dialog.mediaActualSize", { size: formatBytes(details.actualBytes ?? 0) });
+    } else if (code === "ICON_TYPE" || code === "STORE_IMAGE_TYPE") {
+      message += t("dialog.mediaActualType", { type: String(details.actualType ?? "") });
+    }
+  }
+  if (previewIndex !== undefined) {
+    message = `${t("dialog.mediaPreviewOrdinal", { index: previewIndex + 1 })}${message}`;
+  }
+  return message;
 }
 
-function applicationSubmissionReady(submission: ApplicationSubmissionInput, mediaError: string | undefined): boolean {
-  return !mediaError
+function applicationSubmissionReady(submission: ApplicationSubmissionInput, mediaErrors: ApplicationMediaFieldErrors): boolean {
+  return !mediaErrors.icon
+    && !mediaErrors.cover
+    && !mediaErrors.previews
     && (submission.iconMode !== "upload" || Boolean(submission.iconFile))
     && (submission.coverMode !== "upload" || Boolean(submission.coverFile))
     && (submission.previewsMode !== "replace" || submission.previewFiles.length > 0);
 }
 
-function trapDialogFocus(event: ReactKeyboardEvent<HTMLFormElement>): void {
+function trapDialogFocus(event: ReactKeyboardEvent<HTMLElement>, dialog: HTMLElement): void {
   if (event.key !== "Tab") return;
-  const focusable = Array.from(event.currentTarget.querySelectorAll<HTMLElement>(
+  const focusable = Array.from(dialog.querySelectorAll<HTMLElement>(
     "button:not([disabled]), input:not([disabled]):not([tabindex='-1']), select:not([disabled]), textarea:not([disabled]), [href], [tabindex]:not([tabindex='-1'])",
   )).filter((element) => element.getAttribute("aria-hidden") !== "true");
   if (focusable.length === 0) return;
@@ -2231,6 +2281,9 @@ function trapDialogFocus(event: ReactKeyboardEvent<HTMLFormElement>): void {
     event.preventDefault();
     last.focus();
   } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  } else if (!dialog.contains(document.activeElement)) {
     event.preventDefault();
     first.focus();
   }
@@ -2359,50 +2412,74 @@ function PaginatedField({
         : t("dialog.optionsPage", { page: optionPage.pageInfo.page });
 
   return (
-    <div className="paginated-option-field" data-field={name}>
+    <div className={`paginated-option-field${multiple ? " paginated-option-field-multiple" : ""}`} data-field={name}>
       <label className="field-label-row" htmlFor={inputId}>
         <span>{fieldLabel(name, locale)}</span>
         {required ? <small aria-hidden="true" className="field-required" data-label={locale === "zh-CN" ? "必填" : "Required"} /> : null}
       </label>
-      <select
-        aria-label={fieldLabel(name, locale)}
-        aria-required={required}
-        disabled={readOnly || (displayedOptions.length === 0 && (busy || Boolean(error) || optionPage.options.length === 0))}
-        id={inputId}
-        multiple={multiple}
-        onChange={(event) => {
-          if (multiple) {
-            const nextValues = Array.from(event.target.selectedOptions).map((selected) => {
-              const option = displayedOptions.find((candidate) => String(optionValue(candidate)) === selected.value)
-                ?? selected.value;
-              return optionValue(option);
-            });
-            if (maximumSelections !== undefined && nextValues.length > maximumSelections) return;
-            const optionLookup = new Map(displayedOptions.map((option) => [String(optionValue(option)), option]));
-            setSelectedOptions(Object.fromEntries(nextValues.flatMap((nextValue) => {
-              const option = optionLookup.get(String(nextValue));
-              return option === undefined ? [] : [[String(nextValue), option]];
-            })));
-            onChange(nextValues);
-            return;
-          }
-          const selectedOption = displayedOptions.find((option) => String(optionValue(option)) === event.target.value)
-            ?? event.target.value;
-          onChange(optionValue(selectedOption), optionRelatedValues(selectedOption));
-        }}
-        size={multiple ? 6 : undefined}
-        value={multiple ? selectedValues : selectedValues[0] ?? ""}
-      >
-        {displayedOptions.length === 0 ? <option value="">-</option> : null}
-        {displayedOptions.map((option) => {
-          const optionKey = String(optionValue(option));
-          return (
-            <option disabled={selectionFull && !selectedSet.has(optionKey)} key={optionKey} value={optionKey}>
-              {optionLabel(option, name, locale)}
-            </option>
-          );
-        })}
-      </select>
+      {multiple ? (
+        <div aria-label={fieldLabel(name, locale)} className="paginated-option-list" role="group">
+          {displayedOptions.length === 0 ? (
+            <div className="paginated-option-empty">-</div>
+          ) : displayedOptions.map((option) => {
+            const optionKey = String(optionValue(option));
+            const selected = selectedSet.has(optionKey);
+            const optionDisabled = (selectionFull && !selected) || readOnly;
+            return (
+              <label
+                className={`paginated-option-item${selected ? " selected" : ""}${optionDisabled ? " disabled" : ""}`}
+                key={optionKey}
+              >
+                <input
+                  aria-label={optionLabel(option, name, locale)}
+                  checked={selected}
+                  disabled={optionDisabled}
+                  onChange={() => {
+                    const nextValues = selected
+                      ? selectedValues.filter((value) => value !== optionKey)
+                      : [...selectedValues, optionKey];
+                    if (maximumSelections !== undefined && nextValues.length > maximumSelections) return;
+                    const optionLookup = new Map(displayedOptions.map((candidate) => [String(optionValue(candidate)), candidate]));
+                    setSelectedOptions(Object.fromEntries(nextValues.flatMap((nextValue) => {
+                      const candidate = optionLookup.get(nextValue);
+                      return candidate === undefined ? [] : [[nextValue, candidate]];
+                    })));
+                    onChange(nextValues);
+                  }}
+                  type="checkbox"
+                  value={optionKey}
+                />
+                <span className="paginated-option-label" title={optionLabel(option, name, locale)}>
+                  {optionLabel(option, name, locale)}
+                </span>
+              </label>
+            );
+          })}
+        </div>
+      ) : (
+        <select
+          aria-label={fieldLabel(name, locale)}
+          aria-required={required}
+          disabled={readOnly || (displayedOptions.length === 0 && (busy || Boolean(error) || optionPage.options.length === 0))}
+          id={inputId}
+          onChange={(event) => {
+            const selectedOption = displayedOptions.find((option) => String(optionValue(option)) === event.target.value)
+              ?? event.target.value;
+            onChange(optionValue(selectedOption), optionRelatedValues(selectedOption));
+          }}
+          value={selectedValues[0] ?? ""}
+        >
+          {displayedOptions.length === 0 ? <option value="">-</option> : null}
+          {displayedOptions.map((option) => {
+            const optionKey = String(optionValue(option));
+            return (
+              <option key={optionKey} value={optionKey}>
+                {optionLabel(option, name, locale)}
+              </option>
+            );
+          })}
+        </select>
+      )}
       <div className="paginated-option-footer">
         <span aria-live="polite" className={error ? "paginated-option-error" : undefined} role={error ? "alert" : "status"}>
           {busy ? <LoaderCircle aria-hidden="true" className="is-spinning" size={14} /> : null}
@@ -2651,24 +2728,6 @@ function recordLabel(item: Record<string, unknown>, index: number): string {
 }
 
 function displayValue(value: unknown, column: string, resource: WebserverResourceKey, locale: WebserverLocale): ReactNode {
-  if (
-    resource === "managed-domains"
-    && column === "applicationName"
-    && (value === null || value === undefined || (typeof value === "string" && !value.trim()))
-  ) {
-    return <span className="status-badge status-pending">{translateWebserver(locale, "value.domainBinding.unbound")}</span>;
-  }
-  if (
-    (resource === "domains" || resource === "application-domains" || resource === "managed-domains")
-    && column === "isVerified"
-    && typeof value === "boolean"
-  ) {
-    const label = translateWebserver(
-      locale,
-      value ? "value.domainVerification.verified" : "value.domainVerification.unverified",
-    );
-    return <span className={`status-badge ${value ? "status-success" : "status-pending"}`}>{label}</span>;
-  }
   if (value === null || value === undefined) return "-";
   if ((resource === "sites" || resource === "applications") && column === "status") {
     return <span className={`status-badge application-status-${String(value).toLowerCase()}`}>{applicationStatus(value, locale)}</span>;
@@ -2682,12 +2741,6 @@ function displayValue(value: unknown, column: string, resource: WebserverResourc
   }
   if ((resource === "source-versions" || resource === "application-source-versions") && column === "status") {
     return <span className={`status-badge source-version-status-${String(value).toLowerCase()}`}>{sourceVersionStatus(value, locale)}</span>;
-  }
-  if ((resource === "certificates" || resource === "managed-certificates") && column === "status") {
-    return <span className={`status-badge certificate-status-${String(value).toLowerCase()}`}>{certificateStatus(value, locale)}</span>;
-  }
-  if ((resource === "certificates" || resource === "managed-certificates") && column === "renewalStatus") {
-    return <span className={`status-badge renewal-status-${String(value).toLowerCase()}`}>{certificateRenewalStatus(value, locale)}</span>;
   }
   if (column === "artifactSize") return formatBytes(value);
   if (column === "durationMs") return formatDuration(value);
@@ -2737,10 +2790,6 @@ function fieldLabel(value: string, locale: WebserverLocale): string {
       artifactDriveUri: "Package",
       artifactHash: "Package hash",
       artifactSize: "Package size",
-      autoRenew: "Automatic renewal",
-      certName: "Certificate name",
-      certType: "Certificate type",
-      certificateCount: "Certificates",
       checkInterval: "Check interval (seconds)",
       checkType: "Check type",
       checkUrl: "Check URL",
@@ -2763,37 +2812,21 @@ function fieldLabel(value: string, locale: WebserverLocale): string {
       privacyPolicyUrl: "Privacy policy URL",
       publicRoot: "Public root",
       officialWebsiteUrl: "Official website URL",
-      domain: "Domain",
-      domainId: "Domain",
-      domainIds: "Certificate domains",
       durationMs: "Duration",
       environment: "Environment",
       endDate: "End date",
-      hostname: "Domain",
       host: "Host",
       id: "ID",
-      isPrimary: "Primary domain",
       isActive: "Active",
       isSecret: "Secret value",
-      isVerified: "Verification",
-      issuer: "Issuer",
-      keyAlgorithm: "Key algorithm",
       key: "Variable name",
       name: "Application name",
       operatorId: "Operator ID",
       operatorType: "Operator type",
-      notAfter: "Expires at",
-      notBefore: "Valid from",
-      attemptCount: "Verification attempts",
       checkedAt: "Last checked at",
       expiresAt: "Expires at",
-      failureCode: "Failure code",
-      nextAttemptAt: "Next check at",
-      recordName: "DNS TXT record name",
-      recordValue: "DNS TXT record value",
-      renewalStatus: "Renewal status",
-      rollbackFromDeploymentId: "Restored from",
       retryCount: "Retry count",
+      rollbackFromDeploymentId: "Restored from",
       siteType: "Runtime type",
       sourceType: "Source type",
       sourceVersionId: "Source version",
@@ -2802,9 +2835,6 @@ function fieldLabel(value: string, locale: WebserverLocale): string {
       spaFallback: "SPA fallback",
       sshPort: "SSH port",
       startDate: "Start date",
-      serverName: "Server",
-      sslEnabled: "HTTPS",
-      sslProvider: "Certificate provider",
       startedAt: "Started at",
       status: "Status",
       retained: "Retained",
@@ -2832,10 +2862,6 @@ function fieldLabel(value: string, locale: WebserverLocale): string {
       artifactDriveUri: "发布包",
       artifactHash: "发布包哈希",
       artifactSize: "包大小",
-      autoRenew: "自动续期",
-      certName: "证书名称",
-      certType: "证书类型",
-      certificateCount: "证书数量",
       checkInterval: "检查间隔（秒）",
       checkType: "检查方式",
       checkUrl: "检查地址",
@@ -2858,37 +2884,21 @@ function fieldLabel(value: string, locale: WebserverLocale): string {
       privacyPolicyUrl: "隐私政策地址",
       publicRoot: "静态资源根目录",
       officialWebsiteUrl: "官方网站",
-      domain: "域名",
-      domainId: "域名",
-      domainIds: "证书域名",
       durationMs: "耗时",
       environment: "发布环境",
       endDate: "结束日期",
-      hostname: "域名",
       host: "主机",
       id: "ID",
-      isPrimary: "主域名",
       isActive: "已激活",
       isSecret: "敏感变量",
-      isVerified: "验证状态",
-      issuer: "签发机构",
-      keyAlgorithm: "密钥算法",
       key: "变量名",
       name: "应用名称",
       operatorId: "操作人 ID",
       operatorType: "操作人类型",
-      notAfter: "到期时间",
-      notBefore: "生效时间",
-      attemptCount: "验证次数",
       checkedAt: "最后检查时间",
       expiresAt: "过期时间",
-      failureCode: "失败代码",
-      nextAttemptAt: "下次检查时间",
-      recordName: "DNS TXT 记录名称",
-      recordValue: "DNS TXT 记录值",
-      renewalStatus: "续期状态",
-      rollbackFromDeploymentId: "还原来源版本",
       retryCount: "重试次数",
+      rollbackFromDeploymentId: "还原来源版本",
       siteType: "运行类型",
       sourceType: "源码类型",
       sourceVersionId: "源码版本",
@@ -2897,9 +2907,6 @@ function fieldLabel(value: string, locale: WebserverLocale): string {
       spaFallback: "SPA 回退页面",
       sshPort: "SSH 端口",
       startDate: "开始日期",
-      serverName: "服务器",
-      sslEnabled: "HTTPS",
-      sslProvider: "证书来源",
       startedAt: "开始时间",
       status: "状态",
       retained: "保留中",
@@ -3021,22 +3028,6 @@ function booleanLabel(value: boolean, locale: WebserverLocale): string {
   return locale === "zh-CN" ? (value ? "是" : "否") : (value ? "Yes" : "No");
 }
 
-function certificateStatus(value: unknown, locale: WebserverLocale): string {
-  const statuses: Record<WebserverLocale, Record<string, string>> = {
-    "en-US": { "0": "Pending", "1": "Active", "2": "Expired", "3": "Revoked", "4": "Archived" },
-    "zh-CN": { "0": "待签发", "1": "生效中", "2": "已过期", "3": "已吊销", "4": "已归档" },
-  };
-  return statuses[locale][String(value)] ?? String(value);
-}
-
-function certificateRenewalStatus(value: unknown, locale: WebserverLocale): string {
-  const statuses: Record<WebserverLocale, Record<string, string>> = {
-    "en-US": { "0": "Idle", "1": "Renewing", "2": "Pending", "3": "Failed" },
-    "zh-CN": { "0": "无需续期", "1": "续期中", "2": "等待续期", "3": "续期失败" },
-  };
-  return statuses[locale][String(value)] ?? String(value);
-}
-
 function hasUnavailableOptions(
   body: Record<string, unknown>,
   fieldOptions: WebserverResourceFieldOptions,
@@ -3091,12 +3082,6 @@ function resourceColumns(
   const preferred: Partial<Record<WebserverResourceKey, readonly string[]>> = {
     sites: ["id", "name", "applicationType", "siteType", "status", "updatedAt", "createdAt"],
     applications: ["id", "name", "applicationType", "siteType", "status", "updatedAt", "createdAt"],
-    domains: ["id", "hostname", "isPrimary", "isVerified", "sslEnabled", "sslProvider", "status", "createdAt"],
-    "application-domains": ["id", "hostname", "isPrimary", "isVerified", "sslEnabled", "sslProvider", "status", "createdAt"],
-    "managed-domains": ["hostname", "applicationName", "isVerified", "certificateCount", "isPrimary", "sslEnabled", "status", "createdAt"],
-    certificates: ["id", "domain", "certName", "issuer", "status", "renewalStatus", "notAfter", "autoRenew"],
-    "managed-certificates": ["id", "domain", "certName", "issuer", "status", "renewalStatus", "notAfter", "autoRenew"],
-    "certificate-distribution": ["serverName", "host", "desiredSyncVersion", "appliedSyncVersion", "status", "lastHeartbeatAt"],
     deployments: ["versionTag", "environment", "status", "rollbackFromDeploymentId", "artifactHash", "createdAt", "startedAt", "completedAt", "durationMs"],
     "source-versions": ["versionTag", "sourceType", "retained", "configSnapshot", "artifactSize", "artifactHash", "status", "createdAt"],
     "application-source-versions": ["versionTag", "sourceType", "retained", "configSnapshot", "artifactSize", "artifactHash", "status", "createdAt"],

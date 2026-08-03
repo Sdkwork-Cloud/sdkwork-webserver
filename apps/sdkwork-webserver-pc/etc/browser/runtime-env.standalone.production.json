@@ -6,11 +6,18 @@
   "browserOriginMode": "same-origin",
   "defaultLocale": "zh-CN",
   "fallbackLocale": "en-US",
-  "supportedLocales": ["zh-CN", "en-US"],
-  "activeLocales": ["zh-CN", "en-US"],
+  "supportedLocales": [
+    "zh-CN",
+    "en-US"
+  ],
+  "activeLocales": [
+    "zh-CN",
+    "en-US"
+  ],
   "appApiBaseUrl": "/",
   "backendApiBaseUrl": "/",
   "driveAppApiBaseUrl": "/",
   "appbaseAppApiBaseUrl": "/",
-  "messagingPcUrl": "https://messaging.sdkwork.com/notifications"
+  "messagingPcUrl": "https://messaging.sdkwork.com/notifications",
+  "deployAppApiBaseUrl": "/"
 }

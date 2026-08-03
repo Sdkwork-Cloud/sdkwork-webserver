@@ -9,13 +9,15 @@
     "protocol": "http",
     "packageName": "sdkwork-web-app-sdk"
   },
-  "changeFingerprint": "3b4e4febacd33cc3139936b2d8b49fe44ec8eab45656803d7d3957eab97e6595",
+  "changeFingerprint": "836b539e86b48d587362fef890a8c892aecf4783f2a80fa53f21688a1766b8da",
   "changes": {
-    "createdGeneratedFiles": [],
+    "createdGeneratedFiles": [
+      "src/models/domains_list_response.rs"
+    ],
     "updatedGeneratedFiles": [
       "README.md",
-      "src/api/deployment.rs",
-      "src/api/source_version.rs"
+      "src/api/domain.rs",
+      "src/models/mod.rs"
     ],
     "unchangedGeneratedFiles": [
       "bin/publish-core.mjs",
@@ -27,12 +29,13 @@
       "sdkwork-sdk.json",
       "src/api/base.rs",
       "src/api/certificate.rs",
-      "src/api/domain.rs",
+      "src/api/deployment.rs",
       "src/api/env_variable.rs",
       "src/api/mod.rs",
       "src/api/monitor.rs",
       "src/api/paths.rs",
       "src/api/site.rs",
+      "src/api/source_version.rs",
       "src/client.rs",
       "src/http/client.rs",
       "src/http/mod.rs",
@@ -69,7 +72,6 @@
       "src/models/listener_certificate_summary_response.rs",
       "src/models/media_checksum.rs",
       "src/models/media_resource.rs",
-      "src/models/mod.rs",
       "src/models/page_info.rs",
       "src/models/problem_detail.rs",
       "src/models/sdk_work_api_response.rs",
@@ -124,14 +126,21 @@
     "schemaVersion": 1,
     "areas": [
       "api-surface",
+      "models",
       "documentation"
     ],
     "details": [
       {
         "area": "api-surface",
         "paths": [
-          "src/api/deployment.rs",
-          "src/api/source_version.rs"
+          "src/api/domain.rs"
+        ]
+      },
+      {
+        "area": "models",
+        "paths": [
+          "src/models/domains_list_response.rs",
+          "src/models/mod.rs"
         ]
       },
       {
@@ -142,18 +151,18 @@
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, documentation. Verification is required."
+    "summary": "Detected impact areas: api-surface, models, documentation. Verification is required."
   },
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, documentation. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: api-surface, models, documentation. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, documentation.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, documentation.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-webserver\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-rust\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -171,7 +180,7 @@
         "id": "build",
         "title": "Unified package build",
         "required": true,
-        "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: api-surface, documentation.",
+        "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: api-surface, models, documentation.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-webserver\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-rust\\generated\\server-openapi",
         "command": "node",
         "args": [

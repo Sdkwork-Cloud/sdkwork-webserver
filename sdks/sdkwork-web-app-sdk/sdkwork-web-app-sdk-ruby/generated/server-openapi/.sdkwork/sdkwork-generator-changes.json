@@ -9,12 +9,14 @@
     "protocol": "http",
     "packageName": "sdkwork-web-app-sdk"
   },
-  "changeFingerprint": "89b2a1475cabec682794d2f15d81b7a5e6bd107391524c7b5b90ff9632ce79fc",
+  "changeFingerprint": "3975f48b0741cc96c40148e7a01a5580e3aaf35bcfcdfcca2c8d92d2ac5636a4",
   "changes": {
-    "createdGeneratedFiles": [],
+    "createdGeneratedFiles": [
+      "lib/sdkwork/app_sdk/models/domains_list_response.rb"
+    ],
     "updatedGeneratedFiles": [
-      "lib/sdkwork/app_sdk/api/deployment.rb",
-      "lib/sdkwork/app_sdk/api/source_version.rb",
+      "lib/sdkwork/app_sdk.rb",
+      "lib/sdkwork/app_sdk/api/domain.rb",
       "README.md"
     ],
     "unchangedGeneratedFiles": [
@@ -23,13 +25,13 @@
       "bin/publish.sh",
       "CHANGELOG.md",
       "Gemfile",
-      "lib/sdkwork/app_sdk.rb",
       "lib/sdkwork/app_sdk/api/base_api.rb",
       "lib/sdkwork/app_sdk/api/certificate.rb",
-      "lib/sdkwork/app_sdk/api/domain.rb",
+      "lib/sdkwork/app_sdk/api/deployment.rb",
       "lib/sdkwork/app_sdk/api/env_variable.rb",
       "lib/sdkwork/app_sdk/api/monitor.rb",
       "lib/sdkwork/app_sdk/api/site.rb",
+      "lib/sdkwork/app_sdk/api/source_version.rb",
       "lib/sdkwork/app_sdk/client.rb",
       "lib/sdkwork/app_sdk/http/client.rb",
       "lib/sdkwork/app_sdk/models/application_store_listing.rb",
@@ -122,14 +124,21 @@
     "schemaVersion": 1,
     "areas": [
       "api-surface",
-      "documentation"
+      "models",
+      "documentation",
+      "unknown"
     ],
     "details": [
       {
         "area": "api-surface",
         "paths": [
-          "lib/sdkwork/app_sdk/api/deployment.rb",
-          "lib/sdkwork/app_sdk/api/source_version.rb"
+          "lib/sdkwork/app_sdk/api/domain.rb"
+        ]
+      },
+      {
+        "area": "models",
+        "paths": [
+          "lib/sdkwork/app_sdk/models/domains_list_response.rb"
         ]
       },
       {
@@ -137,21 +146,27 @@
         "paths": [
           "README.md"
         ]
+      },
+      {
+        "area": "unknown",
+        "paths": [
+          "lib/sdkwork/app_sdk.rb"
+        ]
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, documentation. Verification is required."
+    "summary": "Detected impact areas: api-surface, models, documentation, unknown. Verification is required."
   },
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, documentation. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: api-surface, models, documentation, unknown. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, documentation.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, documentation, unknown.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-webserver\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-ruby\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -169,12 +184,14 @@
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "medium",
+    "riskLevel": "high",
     "nextAction": "verify",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
     "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
+      "manual-review-required",
+      "unknown-impact",
       "verification-required"
     ]
   },

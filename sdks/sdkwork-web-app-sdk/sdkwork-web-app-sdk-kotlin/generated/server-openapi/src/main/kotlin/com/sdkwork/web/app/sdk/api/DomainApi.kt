@@ -53,6 +53,16 @@ class DomainApi(private val client: HttpClient) {
         return client.convertValue(raw, object : TypeReference<SitesDomainsVerifyResponse>() {})
     }
 
+    /** 获取证书可签发域名列表 */
+    suspend fun domainsList(page: Int? = null, pageSize: Int? = null): DomainsListResponse? {
+        val query = buildQueryString(listOf(
+            QueryParameterSpec("page", page, "form", true, false, null),
+            QueryParameterSpec("page_size", pageSize, "form", true, false, null)
+        ))
+        val raw = client.get(ApiPaths.appendQueryString(ApiPaths.appPath("/domains"), query))
+        return client.convertValue(raw, object : TypeReference<DomainsListResponse>() {})
+    }
+
     private data class PathParameterSpec(val name: String, val style: String, val explode: Boolean)
 
     private fun serializePathParameter(value: Any?, spec: PathParameterSpec): String {

@@ -1,5 +1,6 @@
 require_relative 'base_api'
 require_relative '../models/create_domain_request'
+require_relative '../models/domains_list_response'
 require_relative '../models/sites_domains_create_response201'
 require_relative '../models/sites_domains_list_response'
 require_relative '../models/sites_domains_retrieve_response'
@@ -71,6 +72,20 @@ module Sdkwork
             options[:headers] = request_headers unless request_headers.empty?
             result = @client.request('POST', path, **options)
             result.is_a?(Hash) ? Models::SitesDomainsVerifyResponse.from_hash(result) : nil
+          end
+
+          # 获取证书可签发域名列表
+          def domains_list(page: nil, page_size: nil)
+            path = '/app/v3/api/domains'
+            query = build_query_string([
+              QueryParameterSpec.new('page', page, 'form', true, false, nil),
+              QueryParameterSpec.new('page_size', page_size, 'form', true, false, nil),
+            ])
+            path = append_query_string(path, query)
+            options = {}
+
+            result = @client.request('GET', path, **options)
+            result.is_a?(Hash) ? Models::DomainsListResponse.from_hash(result) : nil
           end
 
         private

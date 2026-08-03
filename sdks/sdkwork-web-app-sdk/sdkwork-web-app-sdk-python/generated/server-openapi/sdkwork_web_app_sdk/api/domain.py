@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional
 from ..http_client import HttpClient
-from ..models import CreateDomainRequest, SitesDomainsCreateResponse201, SitesDomainsListResponse, SitesDomainsRetrieveResponse, SitesDomainsVerifyResponse
+from ..models import CreateDomainRequest, DomainsListResponse, SitesDomainsCreateResponse201, SitesDomainsListResponse, SitesDomainsRetrieveResponse, SitesDomainsVerifyResponse
 
 def _append_query_string(path: str, raw_query_string: str) -> str:
     query = raw_query_string.lstrip('?')
@@ -244,6 +244,14 @@ class DomainApi:
         self._client = client
         self.sites = DomainSitesApi(client)
 
+
+    def list(self, page: Optional[int] = None, page_size: Optional[int] = None) -> DomainsListResponse:
+        """获取证书可签发域名列表"""
+        query = build_query_string([
+            {'name': 'page', 'value': page, 'style': 'form', 'explode': True, 'allow_reserved': False},
+            {'name': 'page_size', 'value': page_size, 'style': 'form', 'explode': True, 'allow_reserved': False},
+        ])
+        return self._client.get(_append_query_string(f"/app/v3/api/domains", query))
 
 class DomainSitesApi:
     """domain domain.sites API client."""

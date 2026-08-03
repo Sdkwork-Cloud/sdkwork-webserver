@@ -12,19 +12,27 @@
   "mode": "apply",
   "hasChanges": true,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "e4c168f93161bf430cf00197939a2a2e629b15e8ebf47cb7d396fb21b1d5892b",
+  "changeFingerprint": "a747f34bc408d6ad979b4bb1cc36622f36d983e02c2dabe8576c34bee0ab7605",
   "changeImpact": {
     "schemaVersion": 1,
     "areas": [
       "api-surface",
+      "models",
       "documentation"
     ],
     "details": [
       {
         "area": "api-surface",
         "paths": [
-          "sdkwork_web_app_sdk/api/deployment.py",
-          "sdkwork_web_app_sdk/api/source_version.py"
+          "sdkwork_web_app_sdk/api/domain.py",
+          "sdkwork_web_app_sdk/models/__init__.py"
+        ]
+      },
+      {
+        "area": "models",
+        "paths": [
+          "sdkwork_web_app_sdk/models/__init__.py",
+          "sdkwork_web_app_sdk/models/domains_list_response.py"
         ]
       },
       {
@@ -35,7 +43,7 @@
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, documentation. Verification is required."
+    "summary": "Detected impact areas: api-surface, models, documentation. Verification is required."
   },
   "executionDecision": {
     "schemaVersion": 1,
@@ -56,7 +64,7 @@
         "id": "verify-check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, documentation.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, documentation.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-webserver\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-python\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -75,13 +83,13 @@
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, documentation. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: api-surface, models, documentation. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, documentation.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, documentation.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-webserver\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-python\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -111,27 +119,29 @@
     "localVersions": []
   },
   "stats": {
-    "totalFiles": 97,
-    "models": 73,
+    "totalFiles": 98,
+    "models": 74,
     "apis": 7,
-    "types": 74
+    "types": 75
   },
   "warnings": [],
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 3,
+    "writtenFiles": 4,
     "skippedScaffoldFiles": 1,
     "skippedUnchangedGeneratedFiles": 93,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "e4c168f93161bf430cf00197939a2a2e629b15e8ebf47cb7d396fb21b1d5892b",
+    "changeFingerprint": "a747f34bc408d6ad979b4bb1cc36622f36d983e02c2dabe8576c34bee0ab7605",
     "changes": {
-      "createdGeneratedFiles": [],
+      "createdGeneratedFiles": [
+        "sdkwork_web_app_sdk/models/domains_list_response.py"
+      ],
       "updatedGeneratedFiles": [
         "README.md",
-        "sdkwork_web_app_sdk/api/deployment.py",
-        "sdkwork_web_app_sdk/api/source_version.py"
+        "sdkwork_web_app_sdk/api/domain.py",
+        "sdkwork_web_app_sdk/models/__init__.py"
       ],
       "unchangedGeneratedFiles": [
         "bin/publish-core.mjs",
@@ -145,13 +155,13 @@
         "sdkwork_web_app_sdk/__init__.py",
         "sdkwork_web_app_sdk/api/__init__.py",
         "sdkwork_web_app_sdk/api/certificate.py",
-        "sdkwork_web_app_sdk/api/domain.py",
+        "sdkwork_web_app_sdk/api/deployment.py",
         "sdkwork_web_app_sdk/api/env_variable.py",
         "sdkwork_web_app_sdk/api/monitor.py",
         "sdkwork_web_app_sdk/api/site.py",
+        "sdkwork_web_app_sdk/api/source_version.py",
         "sdkwork_web_app_sdk/client.py",
         "sdkwork_web_app_sdk/http_client.py",
-        "sdkwork_web_app_sdk/models/__init__.py",
         "sdkwork_web_app_sdk/models/application_store_listing.py",
         "sdkwork_web_app_sdk/models/certificate_identifier_response.py",
         "sdkwork_web_app_sdk/models/certificate_operation_response.py",
@@ -239,14 +249,22 @@
       "schemaVersion": 1,
       "areas": [
         "api-surface",
+        "models",
         "documentation"
       ],
       "details": [
         {
           "area": "api-surface",
           "paths": [
-            "sdkwork_web_app_sdk/api/deployment.py",
-            "sdkwork_web_app_sdk/api/source_version.py"
+            "sdkwork_web_app_sdk/api/domain.py",
+            "sdkwork_web_app_sdk/models/__init__.py"
+          ]
+        },
+        {
+          "area": "models",
+          "paths": [
+            "sdkwork_web_app_sdk/models/__init__.py",
+            "sdkwork_web_app_sdk/models/domains_list_response.py"
           ]
         },
         {
@@ -257,18 +275,18 @@
         }
       ],
       "requiresVerification": true,
-      "summary": "Detected impact areas: api-surface, documentation. Verification is required."
+      "summary": "Detected impact areas: api-surface, models, documentation. Verification is required."
     },
     "verificationPlan": {
       "shouldRun": true,
       "runPhase": "now",
-      "summary": "Detected impact areas: api-surface, documentation. Verification is required. Run the required verification commands now against the generated SDK output.",
+      "summary": "Detected impact areas: api-surface, models, documentation. Verification is required. Run the required verification commands now against the generated SDK output.",
       "steps": [
         {
           "id": "check",
           "title": "Unified package check",
           "required": true,
-          "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, documentation.",
+          "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, documentation.",
           "workingDirectory": "E:\\sdkwork-space\\sdkwork-webserver\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-python\\generated\\server-openapi",
           "command": "node",
           "args": [

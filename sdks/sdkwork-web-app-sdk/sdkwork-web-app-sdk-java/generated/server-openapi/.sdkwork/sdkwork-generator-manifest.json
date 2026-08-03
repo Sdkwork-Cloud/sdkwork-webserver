@@ -36,7 +36,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "514d31f891a42985b322aadb13e8f1719f390c6de8d6bb81ce01f5fa74616838"
+      "sha256": "39c56e04652ce5e451007f127b660bb88ff186584e7e2d7103b64937f6b2661b"
     },
     {
       "path": "sdkwork-sdk.json",
@@ -56,7 +56,7 @@
     },
     {
       "path": "src/main/java/com/sdkwork/web/app/sdk/api/DomainApi.java",
-      "sha256": "04a663943f1f00ae756295d72255b2eb2a81f6d0ce48df6d51979126693289fd"
+      "sha256": "f35955929e858470c5b7da84fd760037e6ad4141d0d230901cd499e16a6ab6a7"
     },
     {
       "path": "src/main/java/com/sdkwork/web/app/sdk/api/EnvVariableApi.java",
@@ -157,6 +157,10 @@
     {
       "path": "src/main/java/com/sdkwork/web/app/sdk/model/DomainResponse.java",
       "sha256": "4ec4a4638aee4213bd66c9a686b966300f7023375a476ad30bd8150f3d01431d"
+    },
+    {
+      "path": "src/main/java/com/sdkwork/web/app/sdk/model/DomainsListResponse.java",
+      "sha256": "b0d7f30d69cd4aa6d92a7ebfff95d46eb0fded529017361dca4530208b1c2a25"
     },
     {
       "path": "src/main/java/com/sdkwork/web/app/sdk/model/DomainVerifyResponse.java",

@@ -48,6 +48,15 @@ public class DomainApi {
         return try await client.post(ApiPaths.appPath("/sites/\(serializePathParameter(siteId, PathParameterSpec(name: "siteId", style: "simple", explode: false)))/domains/\(serializePathParameter(domainId, PathParameterSpec(name: "domainId", style: "simple", explode: false)))/verify"), body: nil, params: nil, headers: requestHeaders, responseType: SitesDomainsVerifyResponse.self)
     }
 
+    /// 获取证书可签发域名列表
+    public func domainsList(page: Int? = nil, pageSize: Int? = nil) async throws -> DomainsListResponse? {
+        let query = buildQueryString([
+            QueryParameterSpec(name: "page", value: page, style: "form", explode: true, allowReserved: false, contentType: nil),
+            QueryParameterSpec(name: "page_size", value: pageSize, style: "form", explode: true, allowReserved: false, contentType: nil)
+        ])
+        return try await client.get(ApiPaths.appendQueryString(ApiPaths.appPath("/domains"), query), responseType: DomainsListResponse.self)
+    }
+
     private struct PathParameterSpec {
         let name: String
         let style: String

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SDKWork\Web\AppSdk\Api;
 
 use SDKWork\Web\AppSdk\Models\CreateDomainRequest;
+use SDKWork\Web\AppSdk\Models\DomainsListResponse;
 use SDKWork\Web\AppSdk\Models\SitesDomainsCreateResponse201;
 use SDKWork\Web\AppSdk\Models\SitesDomainsListResponse;
 use SDKWork\Web\AppSdk\Models\SitesDomainsRetrieveResponse;
@@ -73,6 +74,19 @@ final class DomainApi extends BaseApi
             'headers' => $requestHeaders,
         ]);
         return is_array($result) ? SitesDomainsVerifyResponse::fromArray($result) : null;
+    }
+
+    /** 获取证书可签发域名列表 */
+    public function domainsList(?int $page = null, ?int $pageSize = null): ?DomainsListResponse
+    {
+        $path = '/app/v3/api/domains';
+        $query = $this->buildQueryString([
+            new QueryParameterSpec('page', $page, 'form', true, false, null),
+            new QueryParameterSpec('page_size', $pageSize, 'form', true, false, null),
+        ]);
+        $path = $this->appendQueryString($path, $query);
+        $result = $this->client->request('GET', $path, []);
+        return is_array($result) ? DomainsListResponse::fromArray($result) : null;
     }
 
     private function buildRequestHeaders(array $headers, array $cookies): array

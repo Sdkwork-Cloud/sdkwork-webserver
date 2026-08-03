@@ -30,10 +30,8 @@ client.setAccessToken('your-access-token');
 const params = {
   page: 1,
   page_size: 2,
-  site_id: 'site_id',
-  domain_id: 'domain_id',
 };
-const result = await client.certificate.list(params);
+const result = await client.domain.list(params);
 ```
 
 ## Authentication
@@ -88,13 +86,12 @@ const result = await client.site.list(params);
 ### domain
 
 ```typescript
-// 获取站点域名列表
-const siteId = '1';
+// 获取证书可签发域名列表
 const params = {
   page: 1,
   page_size: 2,
 };
-const result = await client.domain.sites.domains.list(siteId, params);
+const result = await client.domain.list(params);
 ```
 
 ### certificate
@@ -163,10 +160,8 @@ try {
   const params = {
     page: 1,
     page_size: 2,
-    site_id: 'site_id',
-    domain_id: 'domain_id',
   };
-  const result = await client.certificate.list(params);
+  const result = await client.domain.list(params);
 } catch (error) {
   if (error instanceof AuthenticationError) {
     console.error('Authentication failed:', error.message);

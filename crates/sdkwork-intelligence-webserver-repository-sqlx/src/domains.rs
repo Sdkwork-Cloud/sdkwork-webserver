@@ -108,6 +108,43 @@ impl WebRepository {
         })
     }
 
+    pub(super) async fn list_certificate_domains_repo(
+        &self,
+        tenant_id: i64,
+        owner_id: Option<i64>,
+        page: i32,
+        page_size: i32,
+    ) -> WebServiceResult<DomainPage> {
+        let (_page, page_size, offset) = pagination(page, page_size)?;
+        let total: i64 = sqlx::query_scalar(
+            "SELECT COUNT(*) FROM web_domain
+             WHERE tenant_id = $1 AND deleted_at IS NULL
+               AND ($2 IS NULL OR user_id = $2)",
+        )
+        .bind(tenant_id)
+        .bind(owner_id)
+        .fetch_one(&self.pool)
+        .await
+        .map_err(|error| store_error("count certificate domain options", error))?;
+        let rows = sqlx::query(audited_sql(&domain_select(
+            "d.tenant_id = $1 AND d.deleted_at IS NULL
+             AND ($2 IS NULL OR d.user_id = $2)
+             ORDER BY d.updated_at DESC, d.id DESC LIMIT $3 OFFSET $4",
+        )))
+        .bind(tenant_id)
+        .bind(owner_id)
+        .bind(page_size)
+        .bind(offset)
+        .fetch_all(&self.pool)
+        .await
+        .map_err(|error| store_error("list certificate domain options", error))?;
+
+        Ok(DomainPage {
+            items: map_domain_rows(&rows)?,
+            total,
+        })
+    }
+
     pub(super) async fn create_managed_domain_repo(
         &self,
         tenant_id: i64,

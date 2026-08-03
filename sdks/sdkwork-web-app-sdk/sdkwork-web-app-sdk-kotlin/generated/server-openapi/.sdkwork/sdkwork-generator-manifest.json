@@ -36,7 +36,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "89f2bed7891977d743844fcacbdaa734632d703dc33983241845a045bf2702ab"
+      "sha256": "b8846c0c6f85451bc855fa9a87feaa3b4743b6775e035257d5d24cfd04fa38e4"
     },
     {
       "path": "sdkwork-sdk.json",
@@ -64,7 +64,7 @@
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/api/DomainApi.kt",
-      "sha256": "9324a7f1709f0b6317d11377c854351dfe265df87324af8e39b0be3ff35fa0b2"
+      "sha256": "99cfab94856688201601e359ebf7d77d068df968cddce088433a7e1c65767a3e"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/api/EnvVariableApi.kt",
@@ -157,6 +157,10 @@
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/DomainResponse.kt",
       "sha256": "5b556ddcde03a35cff394ddbd38ef2c35ea18c4c89f3627381407e39428b052a"
+    },
+    {
+      "path": "src/main/kotlin/com/sdkwork/web/app/sdk/DomainsListResponse.kt",
+      "sha256": "b7ee84ce512961c06b9a0b38d5539f8d22f68d44f13e17cea94aca842a3bc380"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/DomainVerifyResponse.kt",

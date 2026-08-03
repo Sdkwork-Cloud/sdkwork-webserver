@@ -55,10 +55,37 @@ describe("application store media", () => {
     await expect(validateApplicationMediaFile(
       "icon",
       fileWithBytes("icon.jpg", "image/jpeg", 1024),
-    )).rejects.toThrow("ICON_TYPE");
+    )).rejects.toMatchObject({
+      code: "ICON_TYPE",
+      details: { actualType: "image/jpeg" },
+    });
+    vi.stubGlobal("createImageBitmap", vi.fn().mockResolvedValue({
+      close: vi.fn(),
+      height: 512,
+      width: 512,
+    }));
+    await expect(validateApplicationMediaFile("icon", fileWithBytes("icon.png", "image/png", 1024))).resolves.toEqual({
+      height: 512,
+      width: 512,
+    });
+    vi.stubGlobal("createImageBitmap", vi.fn().mockResolvedValue({
+      close: vi.fn(),
+      height: 768,
+      width: 1024,
+    }));
+    await expect(validateApplicationMediaFile(
+      "icon",
+      fileWithBytes("icon.png", "image/png", 1024),
+    )).rejects.toMatchObject({
+      code: "ICON_DIMENSIONS",
+      details: { width: 1024, height: 768 },
+    });
     expect(() => validateApplicationPreviewCount(Array.from({ length: 10 }, () => icon))).not.toThrow();
-    expect(() => validateApplicationPreviewCount(Array.from({ length: 11 }, () => icon))).toThrow(
-      "PREVIEW_COUNT",
+    expect(() => validateApplicationPreviewCount(Array.from({ length: 11 }, () => icon))).toThrowError(
+      expect.objectContaining({
+        code: "PREVIEW_COUNT",
+        details: expect.objectContaining({ count: 11 }),
+      }),
     );
   });
 

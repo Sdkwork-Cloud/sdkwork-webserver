@@ -68,6 +68,19 @@ class DomainApi {
       return map == null ? null : SitesDomainsVerifyResponse.fromJson(map);
     })();
   }
+
+  /// 获取证书可签发域名列表
+  Future<DomainsListResponse?> domainsList([int? page, int? pageSize]) async {
+    final query = buildQueryString([
+      QueryParameterSpec('page', page, 'form', true, false, null),
+      QueryParameterSpec('page_size', pageSize, 'form', true, false, null)
+    ]);
+    final response = await _client.get(ApiPaths.appendQueryString(ApiPaths.appPath('/domains'), query));
+    return (() {
+      final map = sdkworkResponseAsMap(response);
+      return map == null ? null : DomainsListResponse.fromJson(map);
+    })();
+  }
 }
 
 class PathParameterSpec {

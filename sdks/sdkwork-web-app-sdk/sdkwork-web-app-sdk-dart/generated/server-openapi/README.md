@@ -25,10 +25,8 @@ client.setAccessToken('your-access-token');
 final params = <String, dynamic>{
   'page': 1,
   'page_size': 2,
-  'site_id': '00000000-0000-0000-0000-000000000001',
-  'domain_id': '00000000-0000-0000-0000-000000000001',
 };
-final result = await client.certificate.certificatesList(params);
+final result = await client.domain.domainsList(params);
 print(result);
 ```
 
@@ -78,13 +76,12 @@ print(result);
 ### domain
 
 ```dart
-// 获取站点域名列表
-final siteId = '1';
+// 获取证书可签发域名列表
 final params = <String, dynamic>{
   'page': 1,
   'page_size': 2,
 };
-final result = await client.domain.sitesDomainsList(siteId, params);
+final result = await client.domain.domainsList(params);
 print(result);
 ```
 
@@ -157,10 +154,8 @@ try {
   final params = <String, dynamic>{
     'page': 1,
     'page_size': 2,
-    'site_id': '00000000-0000-0000-0000-000000000001',
-    'domain_id': '00000000-0000-0000-0000-000000000001',
   };
-  final result = await client.certificate.certificatesList(params);
+  final result = await client.domain.domainsList(params);
   print(result);
 } catch (error) {
   print('Error: $error');

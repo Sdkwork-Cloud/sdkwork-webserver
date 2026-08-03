@@ -28,7 +28,7 @@
     },
     {
       "path": "Api/DomainApi.cs",
-      "sha256": "75a8720e8883023099088afbcb91549cbe7d58a8eb25c24a7cc463773185c834"
+      "sha256": "765664235f57bb64cb861964e9488301f88221e861392e2344f2e0bcb1a5de2c"
     },
     {
       "path": "Api/EnvVariableApi.cs",
@@ -145,6 +145,10 @@
     {
       "path": "Models/DomainResponse.cs",
       "sha256": "481359a8b8e9ff727e36b2c86cdb7cdea2de626c5279d701bdbad8e1be887444"
+    },
+    {
+      "path": "Models/DomainsListResponse.cs",
+      "sha256": "b6604094583d061aef477eab889ce237455e690e27bd9500d126fc9450a03f2d"
     },
     {
       "path": "Models/DomainVerifyResponse.cs",
@@ -364,7 +368,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "7d4017d2c35827119a3978be568326749d2737e9441d0a21b2794f5278b2df85"
+      "sha256": "abd17d2128c293b5e2676630597ca729a31d15a49a31995b461ae25b1e15537a"
     },
     {
       "path": "sdkwork-sdk.json",

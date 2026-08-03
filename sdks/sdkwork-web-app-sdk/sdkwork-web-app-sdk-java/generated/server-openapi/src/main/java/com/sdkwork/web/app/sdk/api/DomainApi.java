@@ -55,6 +55,16 @@ public class DomainApi {
         return client.convertValue(raw, new TypeReference<SitesDomainsVerifyResponse>() {});
     }
 
+    /** 获取证书可签发域名列表 */
+    public DomainsListResponse domainsList(Integer page, Integer pageSize) throws Exception {
+        String query = buildQueryString(List.of(
+            new QueryParameterSpec("page", page, "form", true, false, null),
+            new QueryParameterSpec("page_size", pageSize, "form", true, false, null)
+        ));
+        Object raw = client.get(ApiPaths.appendQueryString(ApiPaths.appPath("/domains"), query));
+        return client.convertValue(raw, new TypeReference<DomainsListResponse>() {});
+    }
+
     private record PathParameterSpec(String name, String style, boolean explode) {}
 
     private static String serializePathParameter(Object value, PathParameterSpec spec) {

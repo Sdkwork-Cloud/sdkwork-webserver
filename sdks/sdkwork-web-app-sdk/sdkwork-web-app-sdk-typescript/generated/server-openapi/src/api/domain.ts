@@ -78,6 +78,11 @@ export class DomainSitesApi {
 
 }
 
+export interface DomainListParams {
+  page?: number;
+  pageSize?: number;
+}
+
 export class DomainApi {
   private client: HttpClient;
   public readonly sites: DomainSitesApi;
@@ -87,6 +92,15 @@ export class DomainApi {
     this.sites = new DomainSitesApi(client);
   }
 
+
+/** 获取证书可签发域名列表 */
+  async list(params?: DomainListParams, requestOptions?: ApiRequestOptions): Promise<{ items: DomainResponse[]; pageInfo: PageInfo; }> {
+    const query = buildQueryString([
+      { name: 'page', value: params?.page, style: 'form', explode: true, allowReserved: false },
+      { name: 'page_size', value: params?.pageSize, style: 'form', explode: true, allowReserved: false },
+    ]);
+    return this.client.request<{ items: DomainResponse[]; pageInfo: PageInfo; }>(appendQueryString(appApiPath(`/domains`), query), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any, sdkworkUnwrapKind: 'page' });
+  }
 }
 
 export function createDomainApi(client: HttpClient): DomainApi {

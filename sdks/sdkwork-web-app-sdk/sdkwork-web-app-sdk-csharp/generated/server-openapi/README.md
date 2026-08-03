@@ -31,10 +31,8 @@ var query = new Dictionary<string, object>
 {
     ["page"] = 1,
     ["page_size"] = 2,
-    ["site_id"] = "00000000-0000-0000-0000-000000000001",
-    ["domain_id"] = "00000000-0000-0000-0000-000000000001",
 };
-var result = await client.Certificate.CertificatesListAsync(query);
+var result = await client.Domain.DomainsListAsync(query);
 Console.WriteLine(result);
 ```
 
@@ -88,14 +86,13 @@ Console.WriteLine(result);
 ### domain
 
 ```csharp
-// 获取站点域名列表
-var siteId = "1";
+// 获取证书可签发域名列表
 var query = new Dictionary<string, object>
 {
     ["page"] = 1,
     ["page_size"] = 2,
 };
-var result = await client.Domain.SitesDomainsListAsync(siteId, query);
+var result = await client.Domain.DomainsListAsync(query);
 Console.WriteLine(result);
 ```
 
@@ -174,10 +171,8 @@ try
     {
         ["page"] = 1,
         ["page_size"] = 2,
-        ["site_id"] = "00000000-0000-0000-0000-000000000001",
-        ["domain_id"] = "00000000-0000-0000-0000-000000000001",
     };
-    await client.Certificate.CertificatesListAsync(query);
+    await client.Domain.DomainsListAsync(query);
 }
 catch (HttpRequestException ex)
 {

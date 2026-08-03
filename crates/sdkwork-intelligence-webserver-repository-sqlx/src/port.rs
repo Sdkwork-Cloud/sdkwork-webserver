@@ -221,6 +221,17 @@ impl WebRepositoryPort for WebRepository {
             .await
     }
 
+    async fn list_certificate_domains(
+        &self,
+        tenant_id: i64,
+        owner_id: Option<i64>,
+        page: i32,
+        page_size: i32,
+    ) -> WebServiceResult<DomainPage> {
+        self.list_certificate_domains_repo(tenant_id, owner_id, page, page_size)
+            .await
+    }
+
     async fn create_managed_domain(
         &self,
         tenant_id: i64,

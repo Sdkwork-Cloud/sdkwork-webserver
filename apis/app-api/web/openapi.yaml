@@ -1174,6 +1174,54 @@ paths:
       responses:
         "204":
           description: 删除成功
+  /app/v3/api/domains:
+    get:
+      operationId: domains.list
+      summary: 获取证书可签发域名列表
+      description: |
+        返回当前账号名下可用于申请证书的域名资产(租户级、按资产所有者过滤)。
+        证书签发不依赖应用路由,因此该列表包含未绑定应用的已验证域名。
+      tags:
+        - domain
+      security:
+        - AuthToken: []
+          AccessToken: []
+      x-sdkwork-api-surface: app-api
+      x-sdkwork-api-authority: sdkwork-web.app
+      x-sdkwork-request-context: WebRequestContext
+      x-sdkwork-auth-mode: dual-token
+      x-sdkwork-permission: web.certificates.read
+      x-sdkwork-owner: sdkwork-web
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/PageSizeParam"
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SdkWorkApiResponse"
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        type: object
+                        additionalProperties: false
+                        required:
+                          - items
+                          - pageInfo
+                        properties:
+                          items: &a8
+                            type: array
+                            items:
+                              $ref: "#/components/schemas/DomainResponse"
+                          pageInfo:
+                            $ref: "#/components/schemas/PageInfo"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
   /app/v3/api/certificates:
     get:
       operationId: certificates.list

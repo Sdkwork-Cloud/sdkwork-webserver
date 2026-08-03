@@ -1,7 +1,5 @@
 import { createWebserverAdminRegistry, createWebserverAdminSdkClient, WebserverAdminSdkProvider } from "@sdkwork/webserver-pc-admin-core";
 import { createWebserverAdminApplicationRegistry } from "@sdkwork/webserver-pc-admin-applications";
-import { createWebserverAdminCertificateRegistry } from "@sdkwork/webserver-pc-admin-certificates";
-import { createWebserverAdminDomainRegistry, RootDomainManagement } from "@sdkwork/webserver-pc-admin-domains";
 import { WebserverAdminShell } from "@sdkwork/webserver-pc-admin-shell";
 import type { ApplicationMediaStorage, ApplicationSourceStorage, WebserverLocale, WebserverPcModuleDefinition } from "@sdkwork/webserver-pc-commons";
 import type { AuthTokenManager } from "@sdkwork/sdk-common";
@@ -24,8 +22,6 @@ export function WebserverAdminSurface({ backendApiBaseUrl, locale, mediaStorage,
   const registry = useMemo(() => ({
     ...createWebserverAdminRegistry(client),
     ...createWebserverAdminApplicationRegistry(client, sourceStorage, mediaStorage),
-    ...createWebserverAdminDomainRegistry(client),
-    ...createWebserverAdminCertificateRegistry(client),
   }), [client, mediaStorage, sourceStorage]);
   return (
     <WebserverAdminSdkProvider client={client}>
@@ -35,9 +31,6 @@ export function WebserverAdminSurface({ backendApiBaseUrl, locale, mediaStorage,
         onSignOut={onSignOut}
         permissionScope={permissionScope}
         registry={registry}
-        resourceRenderers={{
-          "root-domains": <RootDomainManagement locale={locale} permissionScope={permissionScope} />,
-        }}
         userLabel={userLabel}
       />
     </WebserverAdminSdkProvider>

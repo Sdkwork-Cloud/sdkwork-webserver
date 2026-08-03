@@ -323,6 +323,17 @@ impl WebAppApi for StubAppApi {
         ))
     }
 
+    async fn list_certificate_domains(
+        &self,
+        _context: &WebAppRequestContext,
+        _page: i32,
+        _page_size: i32,
+    ) -> WebServiceResult<sdkwork_webserver_contract::DomainPage> {
+        Err(sdkwork_webserver_contract::WebServiceError::Internal(
+            "not implemented".into(),
+        ))
+    }
+
     async fn create_domain(
         &self,
         _context: &WebAppRequestContext,

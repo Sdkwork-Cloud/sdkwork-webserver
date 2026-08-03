@@ -1,5 +1,24 @@
 export type ApplicationMediaRole = "icon" | "cover" | "preview";
 
+export type ApplicationMediaField = "icon" | "cover" | "previews";
+
+export interface ApplicationMediaFieldErrors {
+  icon?: string;
+  cover?: string;
+  previews?: string;
+}
+
+export class ApplicationMediaValidationError extends Error {
+  readonly code: string;
+  readonly details: Readonly<Record<string, string | number>>;
+  constructor(code: string, details: Readonly<Record<string, string | number>> = {}) {
+    super(code);
+    this.name = "ApplicationMediaValidationError";
+    this.code = code;
+    this.details = details;
+  }
+}
+
 export interface ApplicationMediaResource {
   id: string;
   kind: "image";
@@ -77,17 +96,29 @@ export async function validateApplicationMediaFile(
 ): Promise<ApplicationImageDimensions> {
   const maximumBytes = role === "icon" ? ICON_BYTES : STORE_IMAGE_BYTES;
   if (file.size < 1 || file.size > maximumBytes) {
-    throw new Error(role === "icon" ? "ICON_SIZE" : "STORE_IMAGE_SIZE");
+    throw new ApplicationMediaValidationError(
+      role === "icon" ? "ICON_SIZE" : "STORE_IMAGE_SIZE",
+      { actualBytes: file.size, maxBytes: maximumBytes },
+    );
   }
   if (role === "icon" ? file.type !== "image/png" : !PREVIEW_MIME_TYPES.has(file.type)) {
-    throw new Error(role === "icon" ? "ICON_TYPE" : "STORE_IMAGE_TYPE");
+    throw new ApplicationMediaValidationError(
+      role === "icon" ? "ICON_TYPE" : "STORE_IMAGE_TYPE",
+      { actualType: file.type || "unknown" },
+    );
   }
   const dimensions = await readApplicationImageDimensions(file);
-  if (role === "icon" && (dimensions.width !== 1024 || dimensions.height !== 1024)) {
-    throw new Error("ICON_DIMENSIONS");
+  if (role === "icon" && dimensions.width !== dimensions.height) {
+    throw new ApplicationMediaValidationError("ICON_DIMENSIONS", {
+      width: dimensions.width,
+      height: dimensions.height,
+    });
   }
   if (role === "cover" && (dimensions.width !== 1024 || dimensions.height !== 500)) {
-    throw new Error("COVER_DIMENSIONS");
+    throw new ApplicationMediaValidationError("COVER_DIMENSIONS", {
+      width: dimensions.width,
+      height: dimensions.height,
+    });
   }
   if (role === "preview") {
     const minimum = Math.min(dimensions.width, dimensions.height);
@@ -99,14 +130,19 @@ export async function validateApplicationMediaFile(
       || dimensions.height > 3840
       || maximum / minimum > 2.5
     ) {
-      throw new Error("PREVIEW_DIMENSIONS");
+      throw new ApplicationMediaValidationError("PREVIEW_DIMENSIONS", {
+        width: dimensions.width,
+        height: dimensions.height,
+      });
     }
   }
   return dimensions;
 }
 
 export function validateApplicationPreviewCount(files: readonly File[]): void {
-  if (files.length > APPLICATION_PREVIEW_LIMIT) throw new Error("PREVIEW_COUNT");
+  if (files.length > APPLICATION_PREVIEW_LIMIT) {
+    throw new ApplicationMediaValidationError("PREVIEW_COUNT", { count: files.length, limit: APPLICATION_PREVIEW_LIMIT });
+  }
 }
 
 export async function readApplicationImageDimensions(file: File): Promise<ApplicationImageDimensions> {

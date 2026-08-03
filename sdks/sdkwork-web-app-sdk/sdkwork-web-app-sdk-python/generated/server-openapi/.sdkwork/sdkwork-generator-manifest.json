@@ -40,7 +40,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "9b37ed0e3ec7dc812f0bcf52e13c592db7f6359b42b8972a6b7c78238dc6e73d"
+      "sha256": "e701907dcb5d8296d05a283f3b3a4b3da26fa71f490fe8576e7a4c4104e45094"
     },
     {
       "path": "requirements.txt",
@@ -64,7 +64,7 @@
     },
     {
       "path": "sdkwork_web_app_sdk/api/domain.py",
-      "sha256": "fb0bcbceac316247634658b4c682348430068b352b7c7760281fb8ad1d3b28dc"
+      "sha256": "22b28deb324e40c098759d5ae44dae89778b5a187d2b0927ab60d87560c0a2f6"
     },
     {
       "path": "sdkwork_web_app_sdk/api/env_variable.py",
@@ -92,7 +92,7 @@
     },
     {
       "path": "sdkwork_web_app_sdk/models/__init__.py",
-      "sha256": "a3d86bbfbf6bd5a9897a82a9b5ff17dfa32572479ae2913aec22b2641689bd19"
+      "sha256": "70b0a2741cbd615d72e6aa1dbd6dac840b9ff3458906a0b273293d4716195a9d"
     },
     {
       "path": "sdkwork_web_app_sdk/models/application_store_listing.py",
@@ -173,6 +173,10 @@
     {
       "path": "sdkwork_web_app_sdk/models/domain_verify_response.py",
       "sha256": "6cdb28f9370d1b08be7586a64868ecf1ece3c23984c9c4c35ae619e8716cc091"
+    },
+    {
+      "path": "sdkwork_web_app_sdk/models/domains_list_response.py",
+      "sha256": "baf6ad2cc8f915e909842402d08a72db0382842567d714ff2cd15ed42b81bef2"
     },
     {
       "path": "sdkwork_web_app_sdk/models/env_variable_page.py",

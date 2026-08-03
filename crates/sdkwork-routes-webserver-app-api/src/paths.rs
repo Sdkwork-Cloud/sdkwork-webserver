@@ -22,6 +22,7 @@ pub const SITE_DEPLOYMENT_ROLLBACK: &str =
     "/app/v3/api/sites/{siteId}/deployments/{deploymentId}/rollback";
 pub const SITE_ENV_VARIABLES: &str = "/app/v3/api/sites/{siteId}/env_variables";
 pub const SITE_ENV_VARIABLE: &str = "/app/v3/api/sites/{siteId}/env_variables/{variableId}";
+pub const DOMAINS: &str = "/app/v3/api/domains";
 pub const CERTIFICATES: &str = "/app/v3/api/certificates";
 pub const CERTIFICATES_ISSUE: &str = "/app/v3/api/certificates/issue";
 pub const CERTIFICATE_OPERATION: &str = "/app/v3/api/certificates/operations/{operationId}";

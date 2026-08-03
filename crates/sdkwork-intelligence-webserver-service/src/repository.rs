@@ -147,6 +147,17 @@ pub trait WebRepositoryPort: Send + Sync {
         page_size: i32,
     ) -> WebServiceResult<DomainPage>;
 
+    /// Tenant-scoped domain inventory with optional owner filter, used by the
+    /// application API to offer certificate issuance choices independently of
+    /// application routing.
+    async fn list_certificate_domains(
+        &self,
+        tenant_id: i64,
+        owner_id: Option<i64>,
+        page: i32,
+        page_size: i32,
+    ) -> WebServiceResult<DomainPage>;
+
     async fn create_domain(
         &self,
         tenant_id: i64,

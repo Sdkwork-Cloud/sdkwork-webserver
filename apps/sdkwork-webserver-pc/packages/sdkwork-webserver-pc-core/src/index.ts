@@ -9,6 +9,7 @@ export interface WebserverPcRuntimeConfig {
   appbaseAppApiBaseUrl: string;
   backendApiBaseUrl: string;
   browserOriginMode: WebserverBrowserOriginMode;
+  deployAppApiBaseUrl: string;
   driveAppApiBaseUrl: string;
   defaultLocale: WebserverLocale;
   deploymentProfile: WebserverDeploymentProfile;
@@ -45,7 +46,7 @@ export function parseWebserverPcRuntimeConfig(
   const fallbackLocale = readEnum(value.fallbackLocale, ["en-US", "zh-CN"] as const, "fallbackLocale");
   if (!supportedLocales.includes(defaultLocale) || !supportedLocales.includes(fallbackLocale) || activeLocales.some((locale) => !supportedLocales.includes(locale))) throw new Error("Locale configuration is inconsistent");
   const baseUrls = deploymentProfile === "standalone"
-    ? readStandaloneBaseUrls(value, browserOrigin, browserOriginMode)
+    ? readStandaloneBaseUrls(value, browserOrigin, browserOriginMode, environment)
     : readCloudBaseUrls(value, environment, browserOriginMode);
   const messagingPcUrl = readUrl(value.messagingPcUrl, "messagingPcUrl", environment);
   return { activeLocales, ...baseUrls, browserOriginMode, defaultLocale, deploymentProfile, environment, fallbackLocale, messagingPcUrl, profileId, runtimeTarget, supportedLocales };
@@ -59,13 +60,13 @@ export function resolveWebserverLocale(config: WebserverPcRuntimeConfig, preferr
   return config.activeLocales.includes(config.defaultLocale) ? config.defaultLocale : config.fallbackLocale;
 }
 
-function readStandaloneBaseUrls(value: Record<string, unknown>, browserOrigin: string | undefined, browserOriginMode: WebserverBrowserOriginMode) {
+function readStandaloneBaseUrls(value: Record<string, unknown>, browserOrigin: string | undefined, browserOriginMode: WebserverBrowserOriginMode, environment: WebserverLifecycleEnvironment) {
   if (browserOriginMode !== "same-origin") throw new Error("standalone browserOriginMode must equal same-origin");
   const origin = readBrowserOrigin(browserOrigin);
   for (const field of ["appApiBaseUrl", "backendApiBaseUrl", "driveAppApiBaseUrl", "appbaseAppApiBaseUrl"] as const) {
     if (value[field] !== "/") throw new Error(`${field} must use the canonical standalone same-origin root /`);
   }
-  return { appApiBaseUrl: origin, appbaseAppApiBaseUrl: origin, backendApiBaseUrl: origin, driveAppApiBaseUrl: origin };
+  return { appApiBaseUrl: origin, appbaseAppApiBaseUrl: origin, backendApiBaseUrl: origin, deployAppApiBaseUrl: readDeployBaseUrl(value, origin, environment), driveAppApiBaseUrl: origin };
 }
 function readCloudBaseUrls(value: Record<string, unknown>, environment: WebserverLifecycleEnvironment, browserOriginMode: WebserverBrowserOriginMode) {
   if (browserOriginMode !== "cross-origin") throw new Error("cloud browserOriginMode must equal cross-origin");
@@ -73,8 +74,14 @@ function readCloudBaseUrls(value: Record<string, unknown>, environment: Webserve
     appApiBaseUrl: readUrl(value.appApiBaseUrl, "appApiBaseUrl", environment),
     appbaseAppApiBaseUrl: readUrl(value.appbaseAppApiBaseUrl, "appbaseAppApiBaseUrl", environment),
     backendApiBaseUrl: readUrl(value.backendApiBaseUrl, "backendApiBaseUrl", environment),
+    deployAppApiBaseUrl: readUrl(value.deployAppApiBaseUrl, "deployAppApiBaseUrl", environment),
     driveAppApiBaseUrl: readUrl(value.driveAppApiBaseUrl, "driveAppApiBaseUrl", environment),
   };
+}
+function readDeployBaseUrl(value: Record<string, unknown>, fallbackOrigin: string, environment: WebserverLifecycleEnvironment): string {
+  const raw = value.deployAppApiBaseUrl;
+  if (raw === undefined || raw === "/") return fallbackOrigin;
+  return readUrl(raw, "deployAppApiBaseUrl", environment);
 }
 function readBrowserOrigin(value: string | undefined): string { if (typeof value !== "string" || !value.trim()) throw new Error("browser origin is required for standalone runtime config"); let url: URL; try { url = new URL(value); } catch { throw new Error("browser origin must be an absolute HTTP(S) origin"); } if (!["http:", "https:"].includes(url.protocol) || url.username || url.password || url.pathname !== "/" || url.search || url.hash) throw new Error("browser origin must be an absolute HTTP(S) origin"); return url.origin; }
 function readUrl(value: unknown, field: string, environment: WebserverLifecycleEnvironment): string { if (typeof value !== "string" || !value.trim()) throw new Error(`${field} is required`); let url: URL; try { url = new URL(value); } catch { throw new Error(`${field} must be an absolute HTTP(S) URL`); } if (!["http:", "https:"].includes(url.protocol) || url.username || url.password) throw new Error(`${field} must be an absolute HTTP(S) URL`); if (environment === "production" && ["localhost", "127.0.0.1", "::1"].includes(url.hostname)) throw new Error(`${field} cannot use a loopback host in production`); return url.toString().replace(/\/$/, ""); }

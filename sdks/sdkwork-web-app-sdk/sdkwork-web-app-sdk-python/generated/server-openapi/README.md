@@ -25,10 +25,8 @@ client.set_access_token("your-access-token")
 params = {
     'page': 1,
     'page_size': 2,
-    'site_id': 'site_id',
-    'domain_id': 'domain_id',
 }
-result = client.certificate.list(params)
+result = client.domain.list(params)
 ```
 
 ## Authentication
@@ -83,13 +81,12 @@ print(result)
 ### domain
 
 ```python
-# 获取站点域名列表
-site_id = '1'
+# 获取证书可签发域名列表
 params = {
     'page': 1,
     'page_size': 2,
 }
-result = client.domain.sites.domains.list(site_id, params)
+result = client.domain.list(params)
 print(result)
 ```
 
@@ -162,10 +159,8 @@ try:
     params = {
         'page': 1,
         'page_size': 2,
-        'site_id': 'site_id',
-        'domain_id': 'domain_id',
     }
-    client.certificate.list(params)
+    client.domain.list(params)
 except Exception as error:
     print(f"Error: {error}")
 ```

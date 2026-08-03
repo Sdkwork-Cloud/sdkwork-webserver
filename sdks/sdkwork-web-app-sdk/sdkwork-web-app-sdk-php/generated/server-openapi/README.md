@@ -19,8 +19,8 @@ use SDKWork\Web\AppSdk\SdkConfig;
 
 $config = new SdkConfig(baseUrl: 'http://localhost:3800');
 $client = new SdkworkAppClient($config);
-$$params = ['page' => 1, 'page_size' => 2, 'site_id' => '00000000-0000-0000-0000-000000000001', 'domain_id' => '00000000-0000-0000-0000-000000000001'];
-$result = $client->certificate->certificatesList($params);
+$$params = ['page' => 1, 'page_size' => 2];
+$result = $client->domain->domainsList($params);
 
 
 var_dump($result);
@@ -77,10 +77,9 @@ var_dump($result);
 ```php
 <?php
 
-// 获取站点域名列表
-$siteId = '1';
+// 获取证书可签发域名列表
 $params = ['page' => 1, 'page_size' => 2];
-$result = $client->domain->sitesDomainsList($siteId, $params);
+$result = $client->domain->domainsList($params);
 var_dump($result);
 ```
 
@@ -155,8 +154,8 @@ $config = new SdkConfig(baseUrl: 'http://localhost:3800');
 $client = new SdkworkAppClient($config);
 
 try {
-    $params = ['page' => 1, 'page_size' => 2, 'site_id' => '00000000-0000-0000-0000-000000000001', 'domain_id' => '00000000-0000-0000-0000-000000000001'];
-    $client->certificate->certificatesList($params);
+    $params = ['page' => 1, 'page_size' => 2];
+    $client->domain->domainsList($params);
 } catch (\Throwable $e) {
     echo "Error: {$e->getMessage()}\n";
 }

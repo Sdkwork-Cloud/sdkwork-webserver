@@ -68,6 +68,7 @@ export type { SitesDeploymentsRollbackResponse } from './sites-deployments-rollb
 export type { SitesEnvVariablesListResponse } from './sites-env-variables-list-response';
 export type { SitesEnvVariablesCreateResponse201 } from './sites-env-variables-create-response201';
 export type { SitesEnvVariablesUpdateResponse } from './sites-env-variables-update-response';
+export type { DomainsListResponse } from './domains-list-response';
 export type { CertificatesListResponse } from './certificates-list-response';
 export type { CertificatesIssueResponse202 } from './certificates-issue-response202';
 export type { CertificatesOperationsRetrieveResponse } from './certificates-operations-retrieve-response';

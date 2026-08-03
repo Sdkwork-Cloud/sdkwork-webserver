@@ -26,11 +26,9 @@ client.setAccessToken("your-access-token")
 // Use the SDK
 let params: [String: Any] = [
     "page": 1,
-    "page_size": 2,
-    "site_id": "00000000-0000-0000-0000-000000000001",
-    "domain_id": "00000000-0000-0000-0000-000000000001"
+    "page_size": 2
 ]
-let result = try await client.certificate.certificatesList(params: params)
+let result = try await client.domain.domainsList(params: params)
 print(result)
 ```
 
@@ -83,13 +81,12 @@ print(result)
 ### domain
 
 ```swift
-// 获取站点域名列表
-let siteId = "1"
+// 获取证书可签发域名列表
 let params: [String: Any] = [
     "page": 1,
     "page_size": 2
 ]
-let result = try await client.domain.sitesDomainsList(siteId: siteId, params: params)
+let result = try await client.domain.domainsList(params: params)
 print(result)
 ```
 
@@ -161,11 +158,9 @@ print(result)
 do {
     let params: [String: Any] = [
         "page": 1,
-        "page_size": 2,
-        "site_id": "00000000-0000-0000-0000-000000000001",
-        "domain_id": "00000000-0000-0000-0000-000000000001"
+        "page_size": 2
     ]
-    try await client.certificate.certificatesList(params: params)
+    try await client.domain.domainsList(params: params)
 } catch {
     print("Error: \(error)")
 }

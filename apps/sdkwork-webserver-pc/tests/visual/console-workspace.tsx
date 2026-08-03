@@ -1,4 +1,3 @@
-import { webserverModule as deliveryModule } from "@sdkwork/webserver-pc-console-delivery";
 import { webserverModule as deploymentsModule } from "@sdkwork/webserver-pc-console-deployments";
 import { webserverModule as configurationModule } from "@sdkwork/webserver-pc-console-site-configuration";
 import { webserverModule as sitesModule } from "@sdkwork/webserver-pc-console-sites";
@@ -151,8 +150,6 @@ const registry: WebserverResourceRegistry = {
     },
   },
   configuration: emptySource,
-  domains: emptySource,
-  certificates: emptySource,
   deployments: {
     actions: [{
       id: "deploy",
@@ -230,7 +227,7 @@ createRoot(root).render(
           element={(
             <WebserverConsoleShell
               locale="en-US"
-              modules={[sitesModule, configurationModule, deliveryModule, deploymentsModule]}
+              modules={[sitesModule, configurationModule, deploymentsModule]}
               notificationsHref="/notifications"
               onSignOut={() => undefined}
               permissionScope={["web.sites.*", "web.certificates.*"]}

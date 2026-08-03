@@ -1,14 +1,12 @@
 import { useSdkworkAuthControllerState } from "@sdkwork/auth-pc-react";
 import { webserverModule as auditModule } from "@sdkwork/webserver-pc-admin-audit";
 import { webserverModule as applicationsModule } from "@sdkwork/webserver-pc-admin-applications";
-import { webserverModule as certificatesModule } from "@sdkwork/webserver-pc-admin-certificates";
 import { webserverModule as diagnosticsModule } from "@sdkwork/webserver-pc-admin-diagnostics";
-import { webserverModule as domainsModule } from "@sdkwork/webserver-pc-admin-domains";
 import { webserverModule as nginxModule } from "@sdkwork/webserver-pc-admin-nginx";
 import { webserverModule as serversModule } from "@sdkwork/webserver-pc-admin-servers";
 import { hasWebserverAdminAccess, type WebserverPcModuleDefinition } from "@sdkwork/webserver-pc-commons";
 import { createApplicationMediaStorage, createApplicationSourceStorage, createWebserverConsoleRegistry, WebserverConsoleSdkProvider } from "@sdkwork/webserver-pc-console-core";
-import { webserverModule as deliveryModule } from "@sdkwork/webserver-pc-console-delivery";
+import { DeployDomainManagementSurface, webserverModule as deliveryModule } from "@sdkwork/webserver-pc-console-delivery";
 import { webserverModule as deploymentsModule } from "@sdkwork/webserver-pc-console-deployments";
 import { WebserverConsoleShell } from "@sdkwork/webserver-pc-console-shell";
 import { webserverModule as configurationModule } from "@sdkwork/webserver-pc-console-site-configuration";
@@ -18,7 +16,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import type { BootstrappedWebserverPcRuntime } from "../bootstrap/runtime.ts";
 
 const consoleModules = [sitesModule, configurationModule, deliveryModule, deploymentsModule] satisfies readonly WebserverPcModuleDefinition[];
-const adminModules = [applicationsModule, domainsModule, certificatesModule, nginxModule, serversModule, diagnosticsModule, auditModule] satisfies readonly WebserverPcModuleDefinition[];
+const adminModules = [applicationsModule, nginxModule, serversModule, diagnosticsModule, auditModule] satisfies readonly WebserverPcModuleDefinition[];
 const LazyAdminSurface = lazy(() => import("./WebserverAdminSurface.tsx").then((module) => ({ default: module.WebserverAdminSurface })));
 
 export function WebserverAuthorizedWorkspace({ runtime }: { runtime: BootstrappedWebserverPcRuntime }) {
@@ -41,6 +39,14 @@ export function WebserverAuthorizedWorkspace({ runtime }: { runtime: Bootstrappe
   const landingPath = adminAccess ? "/admin" : "/console";
   const userLabel = authState.user?.displayName || authState.user?.email;
   const signOut = () => { void runtime.authController.signOut(); };
+  // Domain and certificate management is the canonical sdkwork-deployments
+  // surface; the Web Server console keeps the menu entries and renders the
+  // Deploy pages with the shared IAM session.
+  const deployBaseUrl = runtime.config.deployAppApiBaseUrl;
+  const resourceRenderers = {
+    domains: <DeployDomainManagementSurface deployBaseUrl={deployBaseUrl} driveBaseUrl={runtime.config.driveAppApiBaseUrl} locale={runtime.locale} resource="domains" tokenManager={runtime.tokenManager} />,
+    certificates: <DeployDomainManagementSurface deployBaseUrl={deployBaseUrl} driveBaseUrl={runtime.config.driveAppApiBaseUrl} locale={runtime.locale} resource="certificates" tokenManager={runtime.tokenManager} />,
+  };
 
   return (
     <WebserverConsoleSdkProvider clients={consoleClients}>
@@ -56,6 +62,7 @@ export function WebserverAuthorizedWorkspace({ runtime }: { runtime: Bootstrappe
               permissionScope={permissionScope}
               portalHref="/"
               registry={registry}
+              resourceRenderers={resourceRenderers}
               userLabel={userLabel}
             />
           )}

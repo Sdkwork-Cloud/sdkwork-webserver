@@ -132,6 +132,16 @@ pub trait WebAppApi: Send + Sync {
         page_size: i32,
     ) -> WebServiceResult<DomainPage>;
 
+    /// Tenant-scoped verified hostname inventory for certificate issuance. Certificate
+    /// issuance is independent of application routing, so the issuer selects from every
+    /// owned hostname instead of one application's route.
+    async fn list_certificate_domains(
+        &self,
+        context: &WebAppRequestContext,
+        page: i32,
+        page_size: i32,
+    ) -> WebServiceResult<DomainPage>;
+
     async fn create_domain(
         &self,
         context: &WebAppRequestContext,

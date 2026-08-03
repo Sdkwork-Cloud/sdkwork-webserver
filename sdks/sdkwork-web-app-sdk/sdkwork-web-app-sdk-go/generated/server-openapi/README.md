@@ -30,10 +30,8 @@ client.SetAccessToken("your-access-token")
     params := map[string]interface{}{
         "page": 1,
         "page_size": 2,
-        "site_id": "site_id",
-        "domain_id": "domain_id",
     }
-    result, err := client.Certificate.CertificatesList(params)
+    result, err := client.Domain.DomainsList(params)
     if err != nil {
         panic(err)
     }
@@ -93,13 +91,12 @@ fmt.Println(result)
 ### domain
 
 ```go
-// 获取站点域名列表
-siteId := "1"
+// 获取证书可签发域名列表
 params := map[string]interface{}{
     "page": 1,
     "page_size": 2,
 }
-result, err := client.Domain.SitesDomainsList(siteId, params)
+result, err := client.Domain.DomainsList(params)
 if err != nil {
     panic(err)
 }
@@ -189,10 +186,8 @@ fmt.Println(result)
 params := map[string]interface{}{
     "page": 1,
     "page_size": 2,
-    "site_id": "site_id",
-    "domain_id": "domain_id",
 }
-_, err := client.Certificate.CertificatesList(params)
+_, err := client.Domain.DomainsList(params)
 if err != nil {
     // Handle error
     fmt.Println("Error:", err)

@@ -3765,6 +3765,52 @@ class SitesEnvVariablesUpdateResponse {
   }
 }
 
+class DomainsListResponse {
+  final int code;
+  final dynamic data;
+  final String traceId;
+
+  DomainsListResponse({
+    required this.code,
+    required this.data,
+    required this.traceId
+  });
+
+  factory DomainsListResponse.fromJson(Map<String, dynamic> json) {
+    return DomainsListResponse(
+      code: (() {
+        final value = json['code'];
+        if (value is! int) {
+          throw FormatException('DomainsListResponse.code is required');
+        }
+        return value;
+      })(),
+      data: (() {
+        final map = _sdkworkAsMap(json['data']);
+        if (map == null) {
+          throw FormatException('DomainsListResponse.data is required');
+        }
+        return map;
+      })(),
+      traceId: (() {
+        final value = json['traceId']?.toString();
+        if (value == null) {
+          throw FormatException('DomainsListResponse.traceId is required');
+        }
+        return value;
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
 class CertificatesListResponse {
   final int code;
   final dynamic data;

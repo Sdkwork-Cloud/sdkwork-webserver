@@ -33,11 +33,9 @@ client.setAccessToken("your-access-token")
     // Use the SDK
     val params = linkedMapOf<String, Any>(
         "page" to 1,
-        "page_size" to 2,
-        "site_id" to "00000000-0000-0000-0000-000000000001",
-        "domain_id" to "00000000-0000-0000-0000-000000000001"
+        "page_size" to 2
     )
-    val result = client.certificate.certificatesList(params)
+    val result = client.domain.domainsList(params)
     println(result)
 }
 ```
@@ -88,13 +86,12 @@ println(result)
 ### domain
 
 ```kotlin
-// 获取站点域名列表
-val siteId = "1"
+// 获取证书可签发域名列表
 val params = linkedMapOf<String, Any>(
     "page" to 1,
     "page_size" to 2
 )
-val result = client.domain.sitesDomainsList(siteId, params)
+val result = client.domain.domainsList(params)
 println(result)
 ```
 
@@ -169,11 +166,9 @@ fun main() = runBlocking {
     try {
         val params = linkedMapOf<String, Any>(
             "page" to 1,
-            "page_size" to 2,
-            "site_id" to "00000000-0000-0000-0000-000000000001",
-            "domain_id" to "00000000-0000-0000-0000-000000000001"
+            "page_size" to 2
         )
-        val result = client.certificate.certificatesList(params)
+        val result = client.domain.domainsList(params)
         println(result)
     } catch (e: Exception) {
         println("Error: ${e.message}")

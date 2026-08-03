@@ -36,7 +36,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "102428d3aaeee81c82514ad6203e7559c8da16c6ea7880d4b0454eb02106d3c1"
+      "sha256": "7d3f79bb2dca8e4a580fe7e4f8fdfc1b431204d7a989dd2599f8676ae3222062"
     },
     {
       "path": "sdkwork-sdk.json",
@@ -56,7 +56,7 @@
     },
     {
       "path": "src/api/domain.rs",
-      "sha256": "b961d38ceb128e805e12c6b2a308db061ae20d4a4422d1b286fa0d0e046d1bb3"
+      "sha256": "27f245d503f3876d4bd4cd6d857240262390de9df6a6dfd20369045b5a7e071f"
     },
     {
       "path": "src/api/env_variable.rs",
@@ -183,6 +183,10 @@
       "sha256": "523e0ff2f7b03e3215e1677491275ec67c76c1636326651b2641826e65570320"
     },
     {
+      "path": "src/models/domains_list_response.rs",
+      "sha256": "6920760556f2fb1164e0c3fb57702b7d30dacfef1af0006c0638a98b51a1bf98"
+    },
+    {
       "path": "src/models/env_variable_page.rs",
       "sha256": "c928ddfe37351fc48a58d1824be0dda1674b9beeb82d16cacde7862b717ea0ce"
     },
@@ -228,7 +232,7 @@
     },
     {
       "path": "src/models/mod.rs",
-      "sha256": "6bef69839e58c6c5975e7d90b72006832fc1a363a53b197bf60c24a8cabf2ed8"
+      "sha256": "c854e30ba5e894fa4aeecd1ddf04d8ad59513089df8ae49cb7f95b2148fadf9a"
     },
     {
       "path": "src/models/page_info.rs",

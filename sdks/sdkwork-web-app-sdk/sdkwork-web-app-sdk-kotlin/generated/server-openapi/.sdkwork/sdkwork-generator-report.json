@@ -12,19 +12,19 @@
   "mode": "apply",
   "hasChanges": true,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "eb3597c182c79ce733f613770774d06a7c868e9f3575e0578cff3ab8c41b78b2",
+  "changeFingerprint": "53b55cd7548f42cb18a4b764ff2731dfdd5ee52f54168c45f7177fcdfed97d38",
   "changeImpact": {
     "schemaVersion": 1,
     "areas": [
       "api-surface",
-      "documentation"
+      "documentation",
+      "unknown"
     ],
     "details": [
       {
         "area": "api-surface",
         "paths": [
-          "src/main/kotlin/com/sdkwork/web/app/sdk/api/DeploymentApi.kt",
-          "src/main/kotlin/com/sdkwork/web/app/sdk/api/SourceVersionApi.kt"
+          "src/main/kotlin/com/sdkwork/web/app/sdk/api/DomainApi.kt"
         ]
       },
       {
@@ -32,19 +32,27 @@
         "paths": [
           "README.md"
         ]
+      },
+      {
+        "area": "unknown",
+        "paths": [
+          "src/main/kotlin/com/sdkwork/web/app/sdk/DomainsListResponse.kt"
+        ]
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, documentation. Verification is required."
+    "summary": "Detected impact areas: api-surface, documentation, unknown. Verification is required."
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "medium",
+    "riskLevel": "high",
     "nextAction": "verify",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
     "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
+      "manual-review-required",
+      "unknown-impact",
       "verification-required"
     ]
   },
@@ -56,7 +64,7 @@
         "id": "verify-check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, documentation.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, documentation, unknown.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-webserver\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-kotlin\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -75,13 +83,13 @@
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, documentation. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: api-surface, documentation, unknown. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, documentation.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, documentation, unknown.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-webserver\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-kotlin\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -111,8 +119,8 @@
     "localVersions": []
   },
   "stats": {
-    "totalFiles": 94,
-    "models": 73,
+    "totalFiles": 95,
+    "models": 74,
     "apis": 7,
     "types": 0
   },
@@ -122,16 +130,17 @@
     "controlPlaneEnabled": true,
     "writtenFiles": 3,
     "skippedScaffoldFiles": 1,
-    "skippedUnchangedGeneratedFiles": 90,
+    "skippedUnchangedGeneratedFiles": 91,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "eb3597c182c79ce733f613770774d06a7c868e9f3575e0578cff3ab8c41b78b2",
+    "changeFingerprint": "53b55cd7548f42cb18a4b764ff2731dfdd5ee52f54168c45f7177fcdfed97d38",
     "changes": {
-      "createdGeneratedFiles": [],
+      "createdGeneratedFiles": [
+        "src/main/kotlin/com/sdkwork/web/app/sdk/DomainsListResponse.kt"
+      ],
       "updatedGeneratedFiles": [
         "README.md",
-        "src/main/kotlin/com/sdkwork/web/app/sdk/api/DeploymentApi.kt",
-        "src/main/kotlin/com/sdkwork/web/app/sdk/api/SourceVersionApi.kt"
+        "src/main/kotlin/com/sdkwork/web/app/sdk/api/DomainApi.kt"
       ],
       "unchangedGeneratedFiles": [
         "bin/publish-core.mjs",
@@ -145,10 +154,11 @@
         "src/main/kotlin/com/sdkwork/web/app/sdk/api/Api.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/api/ApiPaths.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/api/CertificateApi.kt",
-        "src/main/kotlin/com/sdkwork/web/app/sdk/api/DomainApi.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/api/DeploymentApi.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/api/EnvVariableApi.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/api/MonitorApi.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/api/SiteApi.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/api/SourceVersionApi.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/ApplicationStoreListing.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/CertificateIdentifierResponse.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/CertificateOperationResponse.kt",
@@ -236,14 +246,14 @@
       "schemaVersion": 1,
       "areas": [
         "api-surface",
-        "documentation"
+        "documentation",
+        "unknown"
       ],
       "details": [
         {
           "area": "api-surface",
           "paths": [
-            "src/main/kotlin/com/sdkwork/web/app/sdk/api/DeploymentApi.kt",
-            "src/main/kotlin/com/sdkwork/web/app/sdk/api/SourceVersionApi.kt"
+            "src/main/kotlin/com/sdkwork/web/app/sdk/api/DomainApi.kt"
           ]
         },
         {
@@ -251,21 +261,27 @@
           "paths": [
             "README.md"
           ]
+        },
+        {
+          "area": "unknown",
+          "paths": [
+            "src/main/kotlin/com/sdkwork/web/app/sdk/DomainsListResponse.kt"
+          ]
         }
       ],
       "requiresVerification": true,
-      "summary": "Detected impact areas: api-surface, documentation. Verification is required."
+      "summary": "Detected impact areas: api-surface, documentation, unknown. Verification is required."
     },
     "verificationPlan": {
       "shouldRun": true,
       "runPhase": "now",
-      "summary": "Detected impact areas: api-surface, documentation. Verification is required. Run the required verification commands now against the generated SDK output.",
+      "summary": "Detected impact areas: api-surface, documentation, unknown. Verification is required. Run the required verification commands now against the generated SDK output.",
       "steps": [
         {
           "id": "check",
           "title": "Unified package check",
           "required": true,
-          "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, documentation.",
+          "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, documentation, unknown.",
           "workingDirectory": "E:\\sdkwork-space\\sdkwork-webserver\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-kotlin\\generated\\server-openapi",
           "command": "node",
           "args": [
@@ -283,12 +299,14 @@
     },
     "executionDecision": {
       "schemaVersion": 1,
-      "riskLevel": "medium",
+      "riskLevel": "high",
       "nextAction": "verify",
       "requiresManualReview": false,
       "applyRequiresExpectedFingerprint": false,
       "summary": "Changes have been applied. Run the required verification plan now.",
       "reasons": [
+        "manual-review-required",
+        "unknown-impact",
         "verification-required"
       ]
     },

@@ -64,10 +64,9 @@ puts result.inspect
 ### domain
 
 ```ruby
-# 获取站点域名列表
-site_id = '1'
+# 获取证书可签发域名列表
 params = { 'page' => 1, 'page_size' => 2 }
-result = client.domain.sites_domains_list(site_id, params: params)
+result = client.domain.domains_list(params: params)
 puts result.inspect
 ```
 

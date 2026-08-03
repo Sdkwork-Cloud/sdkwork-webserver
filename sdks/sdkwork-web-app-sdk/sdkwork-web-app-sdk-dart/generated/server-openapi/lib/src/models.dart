@@ -2640,6 +2640,34 @@ class SitesEnvVariablesUpdateResponse {
   }
 }
 
+class DomainsListResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  DomainsListResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory DomainsListResponse.fromJson(Map<String, dynamic> json) {
+    return DomainsListResponse(
+      code: json['code'] is int ? json['code'] : null,
+      data: _sdkworkAsMap(json['data']),
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
 class CertificatesListResponse {
   final int? code;
   final dynamic data;

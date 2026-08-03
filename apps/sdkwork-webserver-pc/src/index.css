@@ -191,9 +191,17 @@ tbody tr.selected .row-actions-cell { background: color-mix(in srgb, var(--sdk-c
 .resource-access-state { min-height: 0; flex: 1 1 auto; display: flex; align-items: flex-start; gap: 12px; margin-top: 12px; padding: 24px; border: 1px solid var(--sdk-color-border-default); border-radius: 6px; background: var(--sdk-color-surface-panel-muted); color: var(--sdk-color-text-secondary); }
 .resource-access-state strong { color: var(--sdk-color-text-primary); }
 .resource-access-state p { max-width: 620px; margin: 6px 0 0; color: var(--sdk-color-text-secondary); line-height: 1.6; }
-body.application-drawer-open { overflow: hidden; }
-.dialog-backdrop { position: fixed; inset: 0; background: color-mix(in srgb, var(--sdk-color-surface-overlay) 72%, rgba(0, 0, 0, .54)); display: grid; place-items: center; padding: 18px; z-index: 50; }
-.dialog { width: min(620px, 100%); max-height: calc(100dvh - 36px); overflow: auto; color: var(--sdk-color-text-primary); background: var(--sdk-color-surface-panel); border: 1px solid var(--sdk-color-border-default); padding: 20px; border-radius: 7px; box-shadow: var(--sdk-shadow-lg); }
+body.dialog-open { overflow: hidden; }
+@keyframes dialog-backdrop-enter { from { opacity: 0; } to { opacity: 1; } }
+@keyframes dialog-enter {
+  from { opacity: 0; transform: translateY(10px) scale(.985); }
+  to { opacity: 1; transform: none; }
+}
+.dialog-backdrop { position: fixed; inset: 0; background: color-mix(in srgb, var(--sdk-color-surface-overlay) 72%, rgba(0, 0, 0, .54)); display: grid; place-items: center; padding: 18px; z-index: 50; animation: dialog-backdrop-enter .18s ease-out both; }
+.dialog { width: min(620px, 100%); max-height: calc(100dvh - 36px); display: grid; grid-template-rows: auto minmax(0, 1fr) auto; overflow: hidden; color: var(--sdk-color-text-primary); background: var(--sdk-color-surface-panel); border: 1px solid var(--sdk-color-border-default); padding: 20px; border-radius: 7px; box-shadow: var(--sdk-shadow-lg); animation: dialog-enter .2s cubic-bezier(.22, 1, .36, 1) both; }
+.dialog > .dialog-scroll { min-width: 0; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding-right: 4px; scrollbar-gutter: stable; }
+.dialog > header { padding-bottom: 12px; border-bottom: 1px solid var(--sdk-color-border-subtle); margin-bottom: 14px; }
+.dialog > footer { padding-top: 14px; border-top: 1px solid var(--sdk-color-border-subtle); margin-top: 14px; }
 .dialog.application-submission-dialog { width: min(860px, 100%); }
 .dialog.source-update-dialog { width: min(680px, 100%); }
 .source-update-dialog .form-grid { grid-template-columns: 1fr; margin-bottom: 12px; }
@@ -223,10 +231,19 @@ body.application-drawer-open { overflow: hidden; }
 .form-grid input[readonly], .form-grid textarea[readonly] { color: var(--sdk-color-text-secondary); background: var(--sdk-color-surface-elevated); cursor: default; }
 .form-grid textarea { min-height: 104px; font-family: inherit; font-size: 13px; line-height: 1.45; }
 .form-grid label:has(textarea) { grid-column: 1 / -1; }
-.paginated-option-field { min-width: 0; display: grid; align-content: start; gap: 7px; }
+.paginated-option-field { min-width: 0; grid-column: 1 / -1; display: grid; align-content: start; gap: 7px; }
 .paginated-option-field > label { min-width: 0; margin: 0; font-size: 13px; font-weight: 650; }
 .paginated-option-field > select { width: 100%; height: 132px; min-height: 132px; padding: 6px; color: var(--sdk-color-text-primary); background: var(--sdk-color-surface-panel-muted); border: 1px solid var(--sdk-color-border-strong); border-radius: 5px; }
 .paginated-option-field > select option { min-height: 24px; padding: 4px 6px; }
+.paginated-option-list { min-width: 0; max-height: 240px; display: grid; align-content: start; gap: 2px; overflow-y: auto; overscroll-behavior: contain; padding: 6px; border: 1px solid var(--sdk-color-border-strong); border-radius: 5px; background: var(--sdk-color-surface-panel-muted); }
+label.paginated-option-item { min-width: 0; display: flex; align-items: center; gap: 9px; margin: 0; padding: 8px 10px; color: var(--sdk-color-text-secondary); border: 1px solid transparent; border-radius: 4px; font-size: 13px; font-weight: 500; cursor: pointer; }
+label.paginated-option-item:hover { color: var(--sdk-color-text-primary); background: var(--sdk-color-surface-panel); }
+label.paginated-option-item.selected { color: var(--sdk-color-text-primary); border-color: color-mix(in srgb, var(--sdk-color-brand-primary) 38%, transparent); background: color-mix(in srgb, var(--sdk-color-brand-primary) 10%, var(--sdk-color-surface-panel)); }
+label.paginated-option-item:has(input:focus-visible) { outline: 2px solid var(--sdk-color-border-focus); outline-offset: 1px; }
+label.paginated-option-item.disabled { cursor: not-allowed; opacity: .55; }
+.paginated-option-item input { flex: 0 0 auto; width: 15px; height: 15px; margin: 0; accent-color: var(--sdk-color-brand-primary); }
+.paginated-option-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.paginated-option-empty { padding: 14px 10px; color: var(--sdk-color-text-muted); font-size: 12px; text-align: center; }
 .paginated-option-footer { min-width: 0; min-height: 30px; display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 8px; color: var(--sdk-color-text-muted); font-size: 11px; font-variant-numeric: tabular-nums; }
 .paginated-option-footer > span { min-width: 0; display: inline-flex; align-items: center; gap: 5px; overflow-wrap: anywhere; }
 .paginated-option-error { color: var(--webserver-color-danger-text); }
@@ -734,6 +751,7 @@ html[data-sdk-color-mode="dark"] .webserver-auth-page {
 }
 .application-creation-dialog > header {
   min-width: 0;
+  margin: 0;
   padding: 0 24px;
   border-bottom: 1px solid var(--sdk-color-border-default);
   background: var(--sdk-color-surface-panel);

@@ -40,9 +40,7 @@ client.setAccessToken("your-access-token");
         Map<String, Object> params = new LinkedHashMap<>();
         params.put("page", 1);
         params.put("page_size", 2);
-        params.put("site_id", "00000000-0000-0000-0000-000000000001");
-        params.put("domain_id", "00000000-0000-0000-0000-000000000001");
-        CertificatesListResponse result = client.getCertificate().certificatesList(params);
+        DomainsListResponse result = client.getDomain().domainsList(params);
         System.out.println(result);
     }
 }
@@ -96,12 +94,11 @@ System.out.println(result);
 ### domain
 
 ```java
-// 获取站点域名列表
-String siteId = "1";
+// 获取证书可签发域名列表
 Map<String, Object> params = new LinkedHashMap<>();
 params.put("page", 1);
 params.put("page_size", 2);
-SitesDomainsListResponse result = client.getDomain().sitesDomainsList(siteId, params);
+DomainsListResponse result = client.getDomain().domainsList(params);
 System.out.println(result);
 ```
 
@@ -170,9 +167,7 @@ try {
     Map<String, Object> params = new LinkedHashMap<>();
     params.put("page", 1);
     params.put("page_size", 2);
-    params.put("site_id", "00000000-0000-0000-0000-000000000001");
-    params.put("domain_id", "00000000-0000-0000-0000-000000000001");
-    CertificatesListResponse result = client.getCertificate().certificatesList(params);
+    DomainsListResponse result = client.getDomain().domainsList(params);
     System.out.println(result);
 } catch (Exception e) {
     System.err.println("Error: " + e.getMessage());

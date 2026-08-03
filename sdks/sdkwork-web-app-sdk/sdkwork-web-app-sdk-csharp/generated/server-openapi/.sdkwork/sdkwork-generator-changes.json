@@ -9,22 +9,24 @@
     "protocol": "http",
     "packageName": "SDKWork.Web.AppSdk"
   },
-  "changeFingerprint": "23a7a517192b4e6665e4bde6c142218612a960218d421aea01459418d75a10f0",
+  "changeFingerprint": "85f4faccbf44c964fe2ea9d5ceae258656e668c0ce5c89b13ff2025e940be0ea",
   "changes": {
-    "createdGeneratedFiles": [],
+    "createdGeneratedFiles": [
+      "Models/DomainsListResponse.cs"
+    ],
     "updatedGeneratedFiles": [
-      "Api/DeploymentApi.cs",
-      "Api/SourceVersionApi.cs",
+      "Api/DomainApi.cs",
       "README.md"
     ],
     "unchangedGeneratedFiles": [
       "Api/Api.cs",
       "Api/ApiPaths.cs",
       "Api/CertificateApi.cs",
-      "Api/DomainApi.cs",
+      "Api/DeploymentApi.cs",
       "Api/EnvVariableApi.cs",
       "Api/MonitorApi.cs",
       "Api/SiteApi.cs",
+      "Api/SourceVersionApi.cs",
       "bin/publish-core.mjs",
       "bin/publish.ps1",
       "bin/publish.sh",
@@ -119,14 +121,20 @@
     "schemaVersion": 1,
     "areas": [
       "api-surface",
+      "models",
       "documentation"
     ],
     "details": [
       {
         "area": "api-surface",
         "paths": [
-          "Api/DeploymentApi.cs",
-          "Api/SourceVersionApi.cs"
+          "Api/DomainApi.cs"
+        ]
+      },
+      {
+        "area": "models",
+        "paths": [
+          "Models/DomainsListResponse.cs"
         ]
       },
       {
@@ -137,18 +145,18 @@
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, documentation. Verification is required."
+    "summary": "Detected impact areas: api-surface, models, documentation. Verification is required."
   },
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, documentation. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: api-surface, models, documentation. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, documentation.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, documentation.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-webserver\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-csharp\\generated\\server-openapi",
         "command": "node",
         "args": [

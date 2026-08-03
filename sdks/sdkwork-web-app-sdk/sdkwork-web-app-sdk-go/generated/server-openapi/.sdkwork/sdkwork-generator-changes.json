@@ -9,23 +9,25 @@
     "protocol": "http",
     "packageName": "github.com/sdkwork/sdkwork-web-app-sdk"
   },
-  "changeFingerprint": "4a5347f910cb18fcc38bd5fad978be631e82198b0347e3f70183f81e93765dd0",
+  "changeFingerprint": "acc5f0c0b5d722b21b4bf16dad4f73091b1f0de1c1b08861a18fd6d61d594770",
   "changes": {
-    "createdGeneratedFiles": [],
+    "createdGeneratedFiles": [
+      "types/domains_list_response.go"
+    ],
     "updatedGeneratedFiles": [
-      "api/deployment.go",
-      "api/source_version.go",
+      "api/domain.go",
       "README.md"
     ],
     "unchangedGeneratedFiles": [
       "api/base.go",
       "api/certificate.go",
+      "api/deployment.go",
       "api/doc.go",
-      "api/domain.go",
       "api/env_variable.go",
       "api/monitor.go",
       "api/paths.go",
       "api/site.go",
+      "api/source_version.go",
       "bin/publish-core.mjs",
       "bin/publish.ps1",
       "bin/publish.sh",
@@ -125,14 +127,20 @@
     "schemaVersion": 1,
     "areas": [
       "api-surface",
+      "models",
       "documentation"
     ],
     "details": [
       {
         "area": "api-surface",
         "paths": [
-          "api/deployment.go",
-          "api/source_version.go"
+          "api/domain.go"
+        ]
+      },
+      {
+        "area": "models",
+        "paths": [
+          "types/domains_list_response.go"
         ]
       },
       {
@@ -143,18 +151,18 @@
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, documentation. Verification is required."
+    "summary": "Detected impact areas: api-surface, models, documentation. Verification is required."
   },
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, documentation. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: api-surface, models, documentation. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, documentation.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, documentation.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-webserver\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-go\\generated\\server-openapi",
         "command": "node",
         "args": [

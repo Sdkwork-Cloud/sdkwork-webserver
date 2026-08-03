@@ -208,6 +208,13 @@ const HTTP_ROUTES: &[HttpRoute] = &[
     .with_idempotent(true),
     HttpRoute::dual_token(
         HttpMethod::Get,
+        "/app/v3/api/domains",
+        "domain",
+        "domains.list",
+    )
+    .with_required_permission("web.certificates.read"),
+    HttpRoute::dual_token(
+        HttpMethod::Get,
         "/app/v3/api/certificates",
         "certificate",
         "certificates.list",

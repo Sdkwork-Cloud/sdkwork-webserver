@@ -28,7 +28,7 @@
     },
     {
       "path": "api/domain.go",
-      "sha256": "13172d0a03f8e58cdeef6665068cd40f90046db73ec6147a2d0147fed4233b93"
+      "sha256": "489d212fd69d28db020dc28383acbcc63b1525ef3522126bb7af4bde26b68310"
     },
     {
       "path": "api/env_variable.go",
@@ -88,7 +88,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "ff062ed13a480767955ec88f8a81a50df71b52737ea38138e9cca997820c4497"
+      "sha256": "3019b52ed657e104005e569f8c324993542698dca1e44d45387d3719a85e75d1"
     },
     {
       "path": "sdk.go",
@@ -185,6 +185,10 @@
     {
       "path": "types/domain_verify_response.go",
       "sha256": "c98b49da25da718cf0def662c0570821cf7eba2de7aea203d0f77bcb384f8c16"
+    },
+    {
+      "path": "types/domains_list_response.go",
+      "sha256": "f2a01f855e4a43e198c38a781689a10b3decf4a93673843ee284f89c2a511bb5"
     },
     {
       "path": "types/env_variable_page.go",

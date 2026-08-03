@@ -136,6 +136,8 @@ pub mod sites_env_variables_create_response201;
 pub use sites_env_variables_create_response201::SitesEnvVariablesCreateResponse201;
 pub mod sites_env_variables_update_response;
 pub use sites_env_variables_update_response::SitesEnvVariablesUpdateResponse;
+pub mod domains_list_response;
+pub use domains_list_response::DomainsListResponse;
 pub mod certificates_list_response;
 pub use certificates_list_response::CertificatesListResponse;
 pub mod certificates_issue_response202;

@@ -12,7 +12,11 @@
     }
   },
   "dependencies": {
-    "@sdkwork/webserver-pc-commons": "workspace:*"
+    "@sdkwork/deployments-pc-commons": "workspace:*",
+    "@sdkwork/deployments-pc-console-core": "workspace:*",
+    "@sdkwork/deployments-pc-console-delivery": "workspace:*",
+    "@sdkwork/sdk-common": "workspace:*",
+    "react": "catalog:"
   },
   "sdkwork": {
     "applicationCode": "webserver",

@@ -23,9 +23,6 @@ type SourceVersionCreateRequest = Parameters<
   WebserverAdminSdkClient["applicationSourceVersion"]["applications"]["sourceVersions"]["create"]
 >[1];
 type ApplicationUpdateRequest = Parameters<WebserverAdminSdkClient["application"]["update"]>[1];
-type ApplicationDomainCreateRequest = Parameters<
-  WebserverAdminSdkClient["applicationDomain"]["applications"]["domains"]["create"]
->[1];
 
 export function createWebserverAdminApplicationRegistry(
   client: WebserverAdminSdkClient,
@@ -204,51 +201,6 @@ export function createWebserverAdminApplicationRegistry(
             requiredFields: ["versionTag"],
             requiresScope: true,
             sourceInput: "archive-directory-or-git",
-          },
-        ),
-      ],
-    ),
-    "application-domains": applicationSource(
-      (query) => client.applicationDomain.applications.domains.list(requiredApplicationId(query.scopeId), { page: query.page, pageSize: query.pageSize }),
-      [
-        action(
-          "create",
-          "Bind domain",
-          { hostname: "", isPrimary: false, sslEnabled: true, sslProvider: "letsencrypt" },
-          async (context) => client.applicationDomain.applications.domains.create(
-            requiredApplicationId(context.scopeId),
-            createApplicationDomainRequest(context.body),
-            idempotencyParams(context),
-          ),
-          { requiresScope: true, fieldOptions: { sslProvider: ["letsencrypt", "custom", "none"] }, permission: "web.sites.write" },
-        ),
-        action(
-          "verify",
-          "Verify domain",
-          {},
-          (context) => client.applicationDomain.applications.domains.verify(requiredApplicationId(context.scopeId), selectedId(context), idempotencyParams(context)),
-          {
-            availableWhen: ({ selectedItem }) => selectedItem?.isVerified !== true,
-            resultFields: ["status", "recordName", "recordValue", "attemptCount", "expiresAt", "nextAttemptAt", "failureCode"],
-            requiresScope: true,
-            requiresSelection: true,
-            permission: "web.sites.write",
-          },
-        ),
-        action(
-          "delete",
-          "Unbind domain",
-          {},
-          (context) => client.applicationDomain.applications.domains.delete(
-            requiredApplicationId(context.scopeId),
-            selectedId(context),
-            idempotencyParams(context),
-          ),
-          {
-            dangerous: true,
-            requiresScope: true,
-            requiresSelection: true,
-            permission: "web.sites.write",
           },
         ),
       ],
@@ -697,31 +649,6 @@ function requiredApplicationSubmission(
 ): NonNullable<WebserverResourceActionContext["applicationSubmission"]> {
   if (!context.applicationSubmission) throw new Error("Application store submission is required");
   return context.applicationSubmission;
-}
-
-function createApplicationDomainRequest(
-  body: Readonly<Record<string, unknown>>,
-): ApplicationDomainCreateRequest {
-  return {
-    hostname: hostname(body.hostname),
-    isPrimary: optionalBoolean(body.isPrimary, "Primary domain"),
-    sslEnabled: optionalBoolean(body.sslEnabled, "TLS"),
-    sslProvider: sslProvider(body.sslProvider),
-  };
-}
-
-function hostname(value: unknown): string {
-  const text = boundedRequiredText(value, "Hostname", 253);
-  if (text.startsWith(".") || text.endsWith(".") || text.split(".").some((label) => (
-    !label
-    || label.length > 63
-    || label.startsWith("-")
-    || label.endsWith("-")
-    || !/^[A-Za-z0-9-]+$/.test(label)
-  ))) {
-    throw new Error("Hostname must be a safe ASCII DNS name");
-  }
-  return text;
 }
 
 function boundedRequiredText(value: unknown, label: string, maximum: number): string {

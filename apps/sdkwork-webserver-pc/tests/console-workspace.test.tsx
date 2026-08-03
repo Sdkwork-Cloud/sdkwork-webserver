@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 
+import { createTokenManager } from "@sdkwork/sdk-common";
 import {
   hasWebserverAdminAccess,
   hasPlatformSuperAdminAccess,
@@ -7,10 +8,11 @@ import {
   WebserverWorkspace,
   type ApplicationMediaStorage,
   type ApplicationSourceStorage,
+  type WebserverResourceKey,
   type WebserverResourceRegistry,
 } from "@sdkwork/webserver-pc-commons";
 import { webserverModule as configurationModule } from "@sdkwork/webserver-pc-console-site-configuration";
-import { webserverModule as deliveryModule } from "@sdkwork/webserver-pc-console-delivery";
+import { DeployDomainManagementSurface, webserverModule as deliveryModule } from "@sdkwork/webserver-pc-console-delivery";
 import { webserverModule as deploymentsModule } from "@sdkwork/webserver-pc-console-deployments";
 import { webserverModule as sitesModule } from "@sdkwork/webserver-pc-console-sites";
 import {
@@ -19,29 +21,62 @@ import {
   type WebserverConsoleSdkClients,
 } from "@sdkwork/webserver-pc-console-core";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import type { ReactNode } from "react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const consoleModules = [sitesModule, configurationModule, deliveryModule, deploymentsModule];
 const appUserPermissionScope = ["web.sites.*", "web.certificates.*"];
 
+function deployRenderers(): Partial<Record<WebserverResourceKey, ReactNode>> {
+  const tokenManager = createTokenManager({ accessToken: "test-access-token", authToken: "test-auth-token" });
+  return {
+    domains: (
+      <DeployDomainManagementSurface
+        deployBaseUrl="http://127.0.0.1:3900"
+        driveBaseUrl="http://127.0.0.1:3800"
+        locale="en-US"
+        resource="domains"
+        tokenManager={tokenManager}
+      />
+    ),
+    certificates: (
+      <DeployDomainManagementSurface
+        deployBaseUrl="http://127.0.0.1:3900"
+        driveBaseUrl="http://127.0.0.1:3800"
+        locale="en-US"
+        resource="certificates"
+        tokenManager={tokenManager}
+      />
+    ),
+  };
+}
+
 afterEach(() => {
   cleanup();
   sessionStorage.clear();
+  vi.unstubAllGlobals();
 });
 
 describe("console workspace access", () => {
   it.each([
     ["/console/sites", "My applications"],
     ["/console/configuration", "Configuration"],
-    ["/console/domains", "Custom domains"],
+    ["/console/domains", "Domains"],
     ["/console/certificates", "Certificates"],
     ["/console/deployments", "Deployment history"],
-  ])("authorizes the app_user role for %s", (path, heading) => {
-    renderWorkspace(path, {}, appUserPermissionScope);
+  ])("authorizes the app_user role for %s", async (path, heading) => {
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({
+      code: 0,
+      data: { items: [], pageInfo: { mode: "offset", page: 1, pageSize: 20, hasMore: false } },
+      traceId: "trace-navigation-1",
+    }), {
+      headers: { "content-type": "application/json" },
+      status: 200,
+    })));
+    renderWorkspace(path, {}, appUserPermissionScope, vi.fn(), "en-US", deployRenderers());
 
-    expect(screen.getByRole("heading", { name: heading })).toBeTruthy();
-    expect(document.querySelector(".page-header")).toBeNull();
+    expect(await screen.findByRole("heading", { name: heading })).toBeTruthy();
     expect(screen.queryByText("This feature is not authorized")).toBeNull();
   });
 
@@ -672,116 +707,19 @@ describe("console release controls", () => {
     })).rejects.toThrow("every validated");
   });
 
-  it("scopes certificate listing and verified domain pages to the selected application", async () => {
-    const listCertificates = vi.fn().mockResolvedValue({
-      items: [],
-      pageInfo: { page: 1, pageSize: 20, hasMore: false },
-    });
-    const listDomains = vi.fn().mockResolvedValue({
-      items: [
-        { id: "domain-1", hostname: "app.example.com", isVerified: true },
-        { id: "domain-2", hostname: "pending.example.com", isVerified: false },
-      ],
-      pageInfo: { page: 2, pageSize: 20, hasMore: true },
-    });
-    const registry = createWebserverConsoleRegistry({
-      drive: {},
-      web: {
-        certificate: { list: listCertificates },
-        domain: { sites: { domains: { list: listDomains } } },
-      },
-    } as unknown as WebserverConsoleSdkClients);
-
-    await registry.certificates?.load({ page: 1, pageSize: 20, scopeId: "site-1" });
-    const abortController = new AbortController();
-    const optionPage = await registry.certificates?.actions[0]?.loadFieldOptionPage?.("domainIds", {
-      body: {},
-      page: 2,
-      pageSize: 20,
-      scopeId: "site-1",
-      signal: abortController.signal,
-    });
-
-    expect(listCertificates).toHaveBeenCalledWith({ page: 1, pageSize: 20, siteId: "site-1" });
-    expect(listDomains).toHaveBeenCalledWith(
-      "site-1",
-      { page: 2, pageSize: 20 },
-      { signal: abortController.signal, timeout: 30_000 },
-    );
-    expect(optionPage).toEqual({
-      options: [{ value: "domain-1", label: "app.example.com" }],
-      pageInfo: { hasMore: true, page: 2, pageSize: 20 },
-    });
-    expect(registry.certificates?.actions[0]?.fieldOptions?.certType).toEqual([1, 3]);
-    expect(registry.certificates?.actions[0]?.fieldOptions?.keyAlgorithm).toEqual(["ECDSA", "RSA"]);
-    expect(registry.certificates?.actions[0]?.fieldSelectionLimits).toEqual({ domainIds: 8 });
-    expect(registry.certificates?.actions[0]?.multipleFields).toEqual(["domainIds"]);
-    expect(registry.certificates?.actions[0]?.paginatedFields).toEqual(["domainIds"]);
-  });
-
-  it("waits for app certificate issuance through the generated operation API", async () => {
-    const issueCertificate = vi.fn().mockResolvedValue({
-      accepted: true,
-      operationId: "operation-console-1",
-      status: "pending",
-    });
-    const retrieveOperation = vi.fn().mockResolvedValue({
-      certificateId: "certificate-console-1",
-      id: "operation-console-1",
-      operationType: "ISSUE",
-      status: "SUCCEEDED",
-    });
-    const registry = createWebserverConsoleRegistry({
-      drive: {},
-      web: {
-        certificate: {
-          issue: issueCertificate,
-          operations: { retrieve: retrieveOperation },
-        },
-      },
-    } as unknown as WebserverConsoleSdkClients);
-    const issue = registry.certificates?.actions.find((candidate) => candidate.id === "issue");
-    if (!issue) throw new Error("console certificate action is unavailable");
-    const abortController = new AbortController();
-
-    await expect(issue.execute({
-      body: { domainIds: ["domain-1"], certType: 1, keyAlgorithm: "ECDSA", autoRenew: true },
-      idempotencyKey: "console-certificate-1",
-      scopeId: "site-1",
-      signal: abortController.signal,
-    })).resolves.toMatchObject({ id: "operation-console-1", status: "SUCCEEDED" });
-
-    expect(issueCertificate).toHaveBeenCalledWith(
-      { domainIds: ["domain-1"], certType: 1, keyAlgorithm: "ECDSA", autoRenew: true },
-      { idempotencyKey: "console-certificate-1" },
-      { signal: abortController.signal, timeout: 30_000 },
-    );
-    expect(retrieveOperation).toHaveBeenCalledWith(
-      "operation-console-1",
-      expect.objectContaining({ signal: expect.any(AbortSignal), timeout: 30_000 }),
-    );
-    expect(issue.dismissibleWhileBusy).toBe(true);
-  });
-
   it("rejects invalid configuration inputs before app SDK calls", async () => {
     const createVariable = vi.fn();
     const createHealthCheck = vi.fn();
-    const createDomain = vi.fn();
-    const issueCertificate = vi.fn();
     const registry = createWebserverConsoleRegistry({
       drive: {},
       web: {
         envVariable: { sites: { envVariables: { create: createVariable } } },
         monitor: { sites: { healthChecks: { create: createHealthCheck } } },
-        domain: { sites: { domains: { create: createDomain } } },
-        certificate: { issue: issueCertificate },
       },
     } as unknown as WebserverConsoleSdkClients);
     const variable = registry.configuration?.actions.find((candidate) => candidate.id === "create-variable");
     const healthCheck = registry.configuration?.actions.find((candidate) => candidate.id === "create-check");
-    const domain = registry.domains?.actions.find((candidate) => candidate.id === "create");
-    const certificate = registry.certificates?.actions.find((candidate) => candidate.id === "issue");
-    if (!variable || !healthCheck || !domain || !certificate) {
+    if (!variable || !healthCheck) {
       throw new Error("console configuration actions are unavailable");
     }
 
@@ -795,21 +733,9 @@ describe("console release controls", () => {
       body: { checkType: 1, checkUrl: "/health", checkInterval: 5, timeoutMs: 5_001, retryCount: 3 },
       idempotencyKey: "invalid-health-check",
     })).rejects.toThrow("must not exceed the check interval");
-    await expect(domain.execute({
-      scopeId: "site-1",
-      body: { hostname: "bad host", sslEnabled: true, sslProvider: "letsencrypt" },
-      idempotencyKey: "invalid-domain",
-    })).rejects.toThrow("safe ASCII DNS name");
-    await expect(certificate.execute({
-      scopeId: "site-1",
-      body: { domainIds: ["domain-1"], certType: 3, keyAlgorithm: "ECDSA", autoRenew: true },
-      idempotencyKey: "invalid-certificate-renewal",
-    })).rejects.toThrow("unavailable for self-signed certificates");
 
     expect(createVariable).not.toHaveBeenCalled();
     expect(createHealthCheck).not.toHaveBeenCalled();
-    expect(createDomain).not.toHaveBeenCalled();
-    expect(issueCertificate).not.toHaveBeenCalled();
   });
 });
 
@@ -879,6 +805,7 @@ function renderWorkspace(
   permissionScope: readonly string[],
   onSignOut = vi.fn(),
   locale: "en-US" | "zh-CN" = "en-US",
+  resourceRenderers: Partial<Record<import("@sdkwork/webserver-pc-commons").WebserverResourceKey, ReactNode>> = {},
 ) {
   return render(
     <MemoryRouter initialEntries={[path]}>
@@ -894,6 +821,7 @@ function renderWorkspace(
               permissionScope={permissionScope}
               portalHref="/"
               registry={registry}
+              resourceRenderers={resourceRenderers}
               surface="app-console"
               userLabel="user@example.test"
             />

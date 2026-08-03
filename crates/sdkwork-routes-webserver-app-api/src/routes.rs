@@ -48,6 +48,7 @@ pub fn build_router_with_shared_app_api(api: Arc<dyn WebAppApi>) -> Router {
             get(retrieve_domain).delete(delete_domain),
         )
         .route(paths::SITE_DOMAIN_VERIFY, post(verify_domain))
+        .route(paths::DOMAINS, get(list_certificate_domains))
         .route(
             paths::SITE_DOMAIN_LISTENER_CERTIFICATE_BINDINGS,
             get(list_listener_certificate_bindings).post(bind_listener_certificate),
@@ -212,6 +213,22 @@ async fn list_domains(
         state
             .api
             .list_domains(&context, &site_id, query.page, query.page_size)
+            .await,
+        query.page,
+        query.page_size,
+    )
+}
+
+async fn list_certificate_domains(
+    State(state): State<AppState>,
+    context: Option<Extension<WebAppRequestContext>>,
+    Query(query): Query<PageQuery>,
+) -> Result<Response, WebApiError> {
+    let context = require_app_context(context)?;
+    ok_domain_page(
+        state
+            .api
+            .list_certificate_domains(&context, query.page, query.page_size)
             .await,
         query.page,
         query.page_size,

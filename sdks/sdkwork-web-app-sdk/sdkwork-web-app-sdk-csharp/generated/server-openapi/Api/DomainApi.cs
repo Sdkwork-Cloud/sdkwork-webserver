@@ -74,6 +74,19 @@ namespace SDKWork.Web.AppSdk.Api
             return await _client.PostAsync<SDKWork.Web.AppSdk.Models.SitesDomainsVerifyResponse>(ApiPaths.AppPath($"/sites/{SerializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false))}/domains/{SerializePathParameter(domainId, new PathParameterSpec("domainId", "simple", false))}/verify"), null, null, requestHeaders);
         }
 
+        /// <summary>
+        /// 获取证书可签发域名列表
+        /// </summary>
+        public async Task<SDKWork.Web.AppSdk.Models.DomainsListResponse?> DomainsListAsync(int? page = null, int? pageSize = null)
+        {
+            var queryString = BuildQueryString(new[]
+            {
+                new QueryParameterSpec("page", page, "form", true, false, null),
+                new QueryParameterSpec("page_size", pageSize, "form", true, false, null),
+            });
+            return await _client.GetAsync<SDKWork.Web.AppSdk.Models.DomainsListResponse>(ApiPaths.AppendQueryString(ApiPaths.AppPath("/domains"), queryString));
+        }
+
         private sealed record PathParameterSpec(string Name, string Style, bool Explode);
 
         private static string SerializePathParameter(object? value, PathParameterSpec spec)

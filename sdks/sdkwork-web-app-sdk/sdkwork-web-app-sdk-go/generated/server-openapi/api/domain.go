@@ -79,6 +79,20 @@ func (a *DomainApi) SitesDomainsVerify(siteId string, domainId string, idempoten
     return decodeResult[sdktypes.SitesDomainsVerifyResponse](raw)
 }
 
+// 获取证书可签发域名列表
+func (a *DomainApi) DomainsList(page *int, pageSize *int) (sdktypes.DomainsListResponse, error) {
+    query := BuildQueryString([]QueryParameterSpec{
+        {Name: "page", Value: func() interface{} { if page == nil { return nil }; return *page }(), Style: "form", Explode: true, AllowReserved: false},
+        {Name: "page_size", Value: func() interface{} { if pageSize == nil { return nil }; return *pageSize }(), Style: "form", Explode: true, AllowReserved: false},
+    })
+    raw, err := a.client.Get(AppendQueryString(AppApiPath("/domains"), query), nil, nil)
+    if err != nil {
+        var zero sdktypes.DomainsListResponse
+        return zero, err
+    }
+    return decodeResult[sdktypes.DomainsListResponse](raw)
+}
+
 type PathParameterSpec struct {
     Name    string
     Style   string

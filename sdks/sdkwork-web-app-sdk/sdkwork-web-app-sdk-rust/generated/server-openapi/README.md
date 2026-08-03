@@ -24,9 +24,7 @@ client.set_access_token("your-access-token");
     let mut query = HashMap::new();
     query.insert("page".to_string(), serde_json::json!(1));
     query.insert("page_size".to_string(), serde_json::json!(2));
-    query.insert("site_id".to_string(), serde_json::json!("00000000-0000-0000-0000-000000000001"));
-    query.insert("domain_id".to_string(), serde_json::json!("00000000-0000-0000-0000-000000000001"));
-    let result = client.certificate().certificates_list(Some(&query)).await?;
+    let result = client.domain().domains_list(Some(&query)).await?;
     println!("{result:?}");
     Ok(())
 }
@@ -79,12 +77,11 @@ println!("{result:?}");
 
 ```rust
 use std::collections::HashMap;
-// 获取站点域名列表
-let site_id = "1";
+// 获取证书可签发域名列表
 let mut query = HashMap::new();
 query.insert("page".to_string(), serde_json::json!(1));
 query.insert("page_size".to_string(), serde_json::json!(2));
-let result = client.domain().sites_domains_list(site_id, Some(&query)).await?;
+let result = client.domain().domains_list(Some(&query)).await?;
 println!("{result:?}");
 ```
 
@@ -163,9 +160,7 @@ let outcome: Result<(), _> = async {
     let mut query = HashMap::new();
     query.insert("page".to_string(), serde_json::json!(1));
     query.insert("page_size".to_string(), serde_json::json!(2));
-    query.insert("site_id".to_string(), serde_json::json!("00000000-0000-0000-0000-000000000001"));
-    query.insert("domain_id".to_string(), serde_json::json!("00000000-0000-0000-0000-000000000001"));
-    client.certificate().certificates_list(Some(&query)).await?;
+    client.domain().domains_list(Some(&query)).await?;
     Ok(())
 }.await;
 

@@ -6,11 +6,18 @@
   "browserOriginMode": "same-origin",
   "defaultLocale": "zh-CN",
   "fallbackLocale": "en-US",
-  "supportedLocales": ["zh-CN", "en-US"],
-  "activeLocales": ["zh-CN", "en-US"],
+  "supportedLocales": [
+    "zh-CN",
+    "en-US"
+  ],
+  "activeLocales": [
+    "zh-CN",
+    "en-US"
+  ],
   "appApiBaseUrl": "/",
   "backendApiBaseUrl": "/",
   "driveAppApiBaseUrl": "/",
   "appbaseAppApiBaseUrl": "/",
-  "messagingPcUrl": "http://127.0.0.1:5184/notifications"
+  "messagingPcUrl": "http://127.0.0.1:5184/notifications",
+  "deployAppApiBaseUrl": "http://127.0.0.1:3900"
 }

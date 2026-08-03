@@ -3,13 +3,11 @@ import {
   createDefaultApplicationIcon,
   normalizeWebserverPage,
   normalizeApplicationGitRepositoryUrl,
-  pollWebserverOperation,
   prepareApplicationSourcePackage,
   resolveApplicationStoreListing,
   validateApplicationMediaFile,
   validateApplicationArchiveEntries,
   WebserverActionError,
-  webserverOperationRequestOptions,
   type ApplicationMediaStorage,
   type ApplicationStoreListingInput,
   type ApplicationSourceStorage,
@@ -24,9 +22,7 @@ import { createDriveAppClient, type SdkworkDriveAppClient } from "@sdkwork/drive
 import type { AuthTokenManager } from "@sdkwork/sdk-common";
 import {
   createClient as createWebAppClient,
-  type IssueCertificateRequest,
   type CreateDeploymentRequest,
-  type CreateDomainRequest,
   type CreateEnvVariableRequest,
   type CreateHealthCheckRequest,
   type CreateSourceVersionRequest,
@@ -337,54 +333,6 @@ export function createWebserverConsoleRegistry(
         ),
       ],
     ),
-    domains: scopedSource((query) => client.domain.sites.domains.list(requiredScope(query.scopeId), { page: query.page, pageSize: query.pageSize }), [
-      action("create", "Bind domain", { hostname: "", isPrimary: false, sslEnabled: true, sslProvider: "letsencrypt" }, async (context) => client.domain.sites.domains.create(requiredScope(context.scopeId), createDomainRequest(context.body), idempotencyParams(context)), { fieldOptions: { sslProvider: ["letsencrypt", "custom", "none"] }, permission: "web.sites.write", scope: true }),
-      action("verify", "Verify", {}, (context) => client.domain.sites.domains.verify(requiredScope(context.scopeId), selectedId(context, "domainId"), idempotencyParams(context)), { permission: "web.sites.write", resultFields: ["status", "recordName", "recordValue", "attemptCount", "expiresAt", "nextAttemptAt", "failureCode"], scope: true, selection: true }),
-      action("delete", "Unbind", {}, (context) => client.domain.sites.domains.delete(requiredScope(context.scopeId), selectedId(context, "domainId")), { dangerous: true, permission: "web.sites.write", scope: true, selection: true }),
-    ]),
-    certificates: scopedSource((query) => client.certificate.list({ page: query.page, pageSize: query.pageSize, siteId: requiredScope(query.scopeId) }), [
-      action("issue", "Request certificate", { domainIds: [], certType: 1, keyAlgorithm: "ECDSA", autoRenew: true }, async (context) => {
-        const accepted = await client.certificate.issue(
-          issueCertificateRequest(context.body),
-          idempotencyParams(context),
-          webserverOperationRequestOptions(context.signal),
-        );
-        return pollWebserverOperation(
-          accepted.operationId,
-          (operationId, options) => client.certificate.operations.retrieve(operationId, options),
-          { signal: context.signal },
-        );
-      }, {
-        dismissibleWhileBusy: true,
-        fieldOptions: { certType: [1, 3], domainIds: [], keyAlgorithm: ["ECDSA", "RSA"] },
-        fieldSelectionLimits: { domainIds: 8 },
-        loadFieldOptionPage: async (field, context) => {
-          if (field !== "domainIds") throw new Error(`Unsupported paginated field: ${field}`);
-          const result = await client.domain.sites.domains.list(
-            requiredScope(context.scopeId),
-            { page: context.page, pageSize: context.pageSize },
-            webserverOperationRequestOptions(context.signal),
-          );
-          return {
-            options: result.items.flatMap((domain) => (
-              domain.isVerified === true && typeof domain.id === "string"
-                ? [{ value: domain.id, label: domain.hostname || domain.id }]
-                : []
-            )),
-            pageInfo: {
-              hasMore: result.pageInfo.hasMore === true,
-              page: result.pageInfo.page ?? context.page,
-              pageSize: result.pageInfo.pageSize ?? context.pageSize,
-            },
-          };
-        },
-        multipleFields: ["domainIds"],
-        paginatedFields: ["domainIds"],
-        permission: "web.certificates.write",
-        requiredFields: ["domainIds"],
-        scope: true,
-      }),
-    ]),
     deployments: scopedSource((query) => client.deployment.sites.deployments.list(requiredScope(query.scopeId), { page: query.page, pageSize: query.pageSize }), [
       action("deploy", "Deploy", { deployType: 1, sourceVersionId: "", environment: "production", versionTag: "" }, (context) => deployApplication(clients, context), {
         confirmation: true,
@@ -824,72 +772,10 @@ function createHealthCheckRequest(body: Readonly<Record<string, unknown>>): Crea
   };
 }
 
-function createDomainRequest(body: Readonly<Record<string, unknown>>): CreateDomainRequest {
-  return {
-    hostname: hostname(body.hostname),
-    isPrimary: optionalBoolean(body.isPrimary, "Primary domain"),
-    sslEnabled: optionalBoolean(body.sslEnabled, "TLS"),
-    sslProvider: sslProvider(body.sslProvider),
-  };
-}
-
-function hostname(value: unknown): string {
-  const text = boundedRequiredText(value, "Hostname", 253);
-  if (text.startsWith(".") || text.endsWith(".") || text.split(".").some((label) => (
-    !label
-    || label.length > 63
-    || label.startsWith("-")
-    || label.endsWith("-")
-    || !/^[A-Za-z0-9-]+$/.test(label)
-  ))) {
-    throw new Error("Hostname must be a safe ASCII DNS name");
-  }
-  return text;
-}
-
-function issueCertificateRequest(body: Readonly<Record<string, unknown>>): IssueCertificateRequest {
-  const certType = certificateType(body.certType);
-  const autoRenew = optionalBoolean(body.autoRenew, "Automatic renewal");
-  if (certType === 3 && autoRenew === true) {
-    throw new Error("Automatic renewal is unavailable for self-signed certificates");
-  }
-  return {
-    domainIds: requiredTextList(body.domainIds, "Certificate domains", 8, 64),
-    certType,
-    keyAlgorithm: certificateKeyAlgorithm(body.keyAlgorithm),
-    autoRenew,
-  };
-}
-
-function certificateKeyAlgorithm(value: unknown): "ECDSA" | "RSA" {
-  if (value === "ECDSA" || value === "RSA") return value;
-  throw new Error("Certificate key algorithm is invalid");
-}
-
-function requiredTextList(
-  value: unknown,
-  label: string,
-  maximum: number,
-  maximumLength: number,
-): string[] {
-  if (!Array.isArray(value)) throw new Error(`${label} is required`);
-  const items = [...new Set(value.map((item) => boundedRequiredText(item, label, maximumLength)))];
-  if (items.length === 0 || items.length > maximum) {
-    throw new Error(`${label} must contain between 1 and ${maximum} unique values`);
-  }
-  return items;
-}
-
 function healthCheckType(value: unknown): 1 | 2 | 3 {
   const parsed = Number(value);
   if (parsed === 1 || parsed === 2 || parsed === 3) return parsed;
   throw new Error("Health check type is invalid");
-}
-
-function certificateType(value: unknown): 1 | 3 {
-  const parsed = Number(value);
-  if (parsed === 1 || parsed === 3) return parsed;
-  throw new Error("Certificate type is invalid");
 }
 
 function environment(value: unknown): "development" | "test" | "staging" | "production" | undefined {
@@ -898,12 +784,6 @@ function environment(value: unknown): "development" | "test" | "staging" | "prod
     return value;
   }
   throw new Error("Environment is invalid");
-}
-
-function sslProvider(value: unknown): "letsencrypt" | "custom" | "none" | undefined {
-  if (value === undefined || value === null || value === "") return undefined;
-  if (value === "letsencrypt" || value === "custom" || value === "none") return value;
-  throw new Error("TLS provider is invalid");
 }
 
 function boundedRequiredText(value: unknown, label: string, maximum: number): string {
