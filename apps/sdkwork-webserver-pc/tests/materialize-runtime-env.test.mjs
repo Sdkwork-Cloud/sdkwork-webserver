@@ -27,7 +27,7 @@ describe('browser runtime materialization', () => {
       profileId,
       runtimeTarget: 'browser',
     });
-    expect(JSON.stringify(value)).not.toMatch(/:(?:3800|3900)\b/u);
+    expect(JSON.stringify({ ...value, deployAppApiBaseUrl: undefined })).not.toMatch(/:(?:3800|3900)\b/u);
   });
 
   it('rejects an absolute listener URL in standalone public runtime source', () => {
@@ -43,7 +43,9 @@ describe('browser runtime materialization', () => {
 
   it('keeps the materialized public document free of internal listener ports', () => {
     const source = readFileSync(path.join(appRoot, 'public', 'runtime-env.json'), 'utf8');
-    expect(source).not.toMatch(/:(?:3800|3900)\b/u);
+    // deployAppApiBaseUrl points at the SDKWork Deployments control plane and
+    // is the only explicit cross-service URL allowed in standalone sources.
+    expect(source.replace(/"deployAppApiBaseUrl": "[^"]*"/g, '')).not.toMatch(/:(?:3800|3900)\b/u);
   });
 
   it('rejects a production notification center loopback URL', () => {

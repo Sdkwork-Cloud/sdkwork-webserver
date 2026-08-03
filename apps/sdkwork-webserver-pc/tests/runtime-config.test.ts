@@ -87,6 +87,7 @@ describe("webserver runtime config", () => {
       appbaseAppApiBaseUrl: "https://api-dev.sdkwork.com",
       backendApiBaseUrl: "https://web-admin-dev.sdkwork.com",
       browserOriginMode: "cross-origin",
+      deployAppApiBaseUrl: "https://deploy-app-dev.sdkwork.com",
       deploymentProfile: "cloud",
       driveAppApiBaseUrl: "https://api-dev.sdkwork.com",
       environment: "development",
@@ -96,6 +97,7 @@ describe("webserver runtime config", () => {
     });
 
     expect(config.browserOriginMode).toBe("cross-origin");
+    expect(config.deployAppApiBaseUrl).toBe("https://deploy-app-dev.sdkwork.com");
   });
 
   it("rejects production cloud loopback endpoints", () => {
@@ -105,6 +107,7 @@ describe("webserver runtime config", () => {
       appbaseAppApiBaseUrl: "https://api.sdkwork.com",
       backendApiBaseUrl: "https://web.sdkwork.com",
       browserOriginMode: "cross-origin",
+      deployAppApiBaseUrl: "https://deploy-app.sdkwork.com",
       deploymentProfile: "cloud",
       driveAppApiBaseUrl: "https://api.sdkwork.com",
       environment: "production",
@@ -121,6 +124,7 @@ describe("webserver runtime config", () => {
       appbaseAppApiBaseUrl: "https://api.sdkwork.com",
       backendApiBaseUrl: "https://web.sdkwork.com",
       browserOriginMode: "cross-origin",
+      deployAppApiBaseUrl: "https://deploy-app.sdkwork.com",
       deploymentProfile: "cloud",
       driveAppApiBaseUrl: "https://api.sdkwork.com",
       environment: "production",
