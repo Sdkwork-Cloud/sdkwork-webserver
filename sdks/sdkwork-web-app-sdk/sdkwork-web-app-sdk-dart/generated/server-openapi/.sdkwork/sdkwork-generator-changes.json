@@ -9,11 +9,11 @@
     "protocol": "http",
     "packageName": "sdkwork_web_app_sdk"
   },
-  "changeFingerprint": "37b43bdbb883c2090883799b394fed6b87303faad1e074f4438c9ec99312f232",
+  "changeFingerprint": "84c6558608eb09d812234bb222f10889545f089fb25f2cc6d83fa32fe42898fe",
   "changes": {
     "createdGeneratedFiles": [],
     "updatedGeneratedFiles": [
-      "lib/src/api/domain.dart",
+      "lib/src/api/certificate.dart",
       "lib/src/models.dart",
       "README.md"
     ],
@@ -26,8 +26,8 @@
       "lib/app_client.dart",
       "lib/sdkwork_web_app_sdk.dart",
       "lib/src/api/api.dart",
-      "lib/src/api/certificate.dart",
       "lib/src/api/deployment.dart",
+      "lib/src/api/domain.dart",
       "lib/src/api/env_variable.dart",
       "lib/src/api/monitor.dart",
       "lib/src/api/paths.dart",
@@ -58,7 +58,7 @@
       {
         "area": "api-surface",
         "paths": [
-          "lib/src/api/domain.dart"
+          "lib/src/api/certificate.dart"
         ]
       },
       {

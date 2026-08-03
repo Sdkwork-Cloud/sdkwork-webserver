@@ -99,15 +99,15 @@ Console.WriteLine(result);
 ### certificate
 
 ```csharp
-// 获取证书列表
+// List certificates active on the domain listener
+var siteId = "1";
+var domainId = "1";
 var query = new Dictionary<string, object>
 {
     ["page"] = 1,
     ["page_size"] = 2,
-    ["site_id"] = "00000000-0000-0000-0000-000000000001",
-    ["domain_id"] = "00000000-0000-0000-0000-000000000001",
 };
-var result = await client.Certificate.CertificatesListAsync(query);
+var result = await client.Certificate.SitesDomainsListenerCertificateBindingsListAsync(siteId, domainId, query);
 Console.WriteLine(result);
 ```
 

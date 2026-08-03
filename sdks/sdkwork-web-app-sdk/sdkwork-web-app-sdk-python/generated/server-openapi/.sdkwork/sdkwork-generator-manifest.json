@@ -40,7 +40,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "e701907dcb5d8296d05a283f3b3a4b3da26fa71f490fe8576e7a4c4104e45094"
+      "sha256": "a709e41ca1a87999bab175d82b50917e985d16fb2320e78d4ddfd594684ffbe1"
     },
     {
       "path": "requirements.txt",
@@ -56,7 +56,7 @@
     },
     {
       "path": "sdkwork_web_app_sdk/api/certificate.py",
-      "sha256": "607a172470a96cb3de7a2a9a3b2991bb0e7085f31151dac26268c0ce38b80a56"
+      "sha256": "309d4e5c6b3a3644d439ef6d9f854b21d784bd00d8e12b7f8b6bf9ecb9d50f72"
     },
     {
       "path": "sdkwork_web_app_sdk/api/deployment.py",
@@ -92,7 +92,7 @@
     },
     {
       "path": "sdkwork_web_app_sdk/models/__init__.py",
-      "sha256": "70b0a2741cbd615d72e6aa1dbd6dac840b9ff3458906a0b273293d4716195a9d"
+      "sha256": "d107d86890dac2edfe0cc6cfc1c67db07016132b2f1ce61a163c4b4ec914e51b"
     },
     {
       "path": "sdkwork_web_app_sdk/models/application_store_listing.py",
@@ -101,30 +101,6 @@
     {
       "path": "sdkwork_web_app_sdk/models/certificate_identifier_response.py",
       "sha256": "ec348a4bf20c35f200916f84889118dff0954533d063b236caa157a1319cb603"
-    },
-    {
-      "path": "sdkwork_web_app_sdk/models/certificate_operation_response.py",
-      "sha256": "fa45011ba832313c1a7c2a7b93e3b8ed4be53f572a57390dff11bf96d84093e6"
-    },
-    {
-      "path": "sdkwork_web_app_sdk/models/certificate_page.py",
-      "sha256": "b5bdd76416a5f06dbb2686347c6694eb35354e9dd971b18aa709e461fb783b83"
-    },
-    {
-      "path": "sdkwork_web_app_sdk/models/certificate_response.py",
-      "sha256": "2b20b2985cd15dc0554586d6a47eae4c1668d39bd32285c1f050d1642c88ba90"
-    },
-    {
-      "path": "sdkwork_web_app_sdk/models/certificates_issue_response202.py",
-      "sha256": "fb02f87219efae695379c5f2db420dd2b0ac4ed884e45a80804b3dd2c853d5ac"
-    },
-    {
-      "path": "sdkwork_web_app_sdk/models/certificates_list_response.py",
-      "sha256": "8f9cc74f97351e930694399fb3e9bfab940e3b88944199262cdd006b017d4ecf"
-    },
-    {
-      "path": "sdkwork_web_app_sdk/models/certificates_operations_retrieve_response.py",
-      "sha256": "2d94456c0682da8fd114ae13f85d7894b4e66f923ac35bdb923263d2bd2f35cb"
     },
     {
       "path": "sdkwork_web_app_sdk/models/create_deployment_request.py",
@@ -201,10 +177,6 @@
     {
       "path": "sdkwork_web_app_sdk/models/import_git_source_version_request.py",
       "sha256": "c0d73b10a4d82fdb6a08d7bca530e2622cce3887204d06dd2fc8a9a433dcdd99"
-    },
-    {
-      "path": "sdkwork_web_app_sdk/models/issue_certificate_request.py",
-      "sha256": "4aed347cb6ea8eac718b1b04d8213f126334477357fa446edd9fa84c0404c02a"
     },
     {
       "path": "sdkwork_web_app_sdk/models/listener_certificate_binding_response.py",

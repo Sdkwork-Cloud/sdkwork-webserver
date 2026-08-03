@@ -36,7 +36,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "b8846c0c6f85451bc855fa9a87feaa3b4743b6775e035257d5d24cfd04fa38e4"
+      "sha256": "fa52efa465cc0e0717cab5add868571154c9e8e0e3fcbd22b87b415afe5e0397"
     },
     {
       "path": "sdkwork-sdk.json",
@@ -56,7 +56,7 @@
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/api/CertificateApi.kt",
-      "sha256": "82e8c03786776e504dc1009ef962969abbe07c0f840b33cf6ddd7fa92cd0a1f9"
+      "sha256": "190797b4555ee11b14dddfe9cf425581818a983faf77a7aa38244106d46a8cc3"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/api/DeploymentApi.kt",
@@ -89,30 +89,6 @@
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/CertificateIdentifierResponse.kt",
       "sha256": "d0ea4c4242e679ebdabb3690a8e187c086ff39d031d1960c87414e21ef5f7f31"
-    },
-    {
-      "path": "src/main/kotlin/com/sdkwork/web/app/sdk/CertificateOperationResponse.kt",
-      "sha256": "c37a12b1a29dd7fd9fa47b60672bdb8f90fc81f59e80fe3f45c100bc378230fe"
-    },
-    {
-      "path": "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatePage.kt",
-      "sha256": "4a9158a119410bcf4e239c0eaa9ee14736c5aef81b154fc51e80ff3928631848"
-    },
-    {
-      "path": "src/main/kotlin/com/sdkwork/web/app/sdk/CertificateResponse.kt",
-      "sha256": "05f2aa295c0c426d609b60c1a345444c73b49b670126c203adc6fe0d748dc3fc"
-    },
-    {
-      "path": "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatesIssueResponse202.kt",
-      "sha256": "033737bfabacad66d76c7ef91fff2f0225f567b80fcebc45b89e9be04782ffb0"
-    },
-    {
-      "path": "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatesListResponse.kt",
-      "sha256": "78b6b27fe734909a2e84531045eb13876b7c914a37c81555c4c2605d14490a9a"
-    },
-    {
-      "path": "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatesOperationsRetrieveResponse.kt",
-      "sha256": "9aef158a1793b7befb2e67f2ed50425bb9db16d09207a90bfdf95b5f9e59dfa0"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/CreateDeploymentRequest.kt",
@@ -193,10 +169,6 @@
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/ImportGitSourceVersionRequest.kt",
       "sha256": "0d42a5c318320206aa42c2cb44801017febe2afbaf3c8d2a42cc7cd77437a0d3"
-    },
-    {
-      "path": "src/main/kotlin/com/sdkwork/web/app/sdk/IssueCertificateRequest.kt",
-      "sha256": "e7ee92103f5d36ba4f900655140ab89dfea786ef259d8242226d4141006840c4"
     },
     {
       "path": "src/main/kotlin/com/sdkwork/web/app/sdk/ListenerCertificateBindingResponse.kt",

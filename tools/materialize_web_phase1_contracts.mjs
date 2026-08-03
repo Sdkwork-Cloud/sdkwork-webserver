@@ -128,7 +128,11 @@ function enrichOpenApi(openapi, profile) {
       if (!operation["x-sdkwork-route-auth"]) {
         operation["x-sdkwork-route-auth"] = operation["x-sdkwork-auth-mode"];
       }
-      if (!operation["x-sdkwork-permission"] && operation.operationId) {
+      if (operation["x-sdkwork-permission"] === false) {
+        // Explicit no-permission marker: authentication still follows
+        // x-sdkwork-auth-mode, but no specific permission is required.
+        delete operation["x-sdkwork-permission"];
+      } else if (!operation["x-sdkwork-permission"] && operation.operationId) {
         const [resource, action] = operation.operationId.split(".");
         const verb = action?.includes("list") || action?.includes("retrieve")
           ? "read"

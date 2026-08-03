@@ -6,7 +6,7 @@ edition.workspace = true
 [features]
 default = ["management"]
 management = [
-  "dep:sdkwork-api-web-server-assembly",
+  "dep:sdkwork-api-webserver-assembly",
   "dep:sdkwork-api-iam-assembly",
   "dep:sdkwork-api-drive-assembly",
   "dep:sdkwork-database-sqlx",
@@ -27,7 +27,7 @@ path = "src/main.rs"
 required-features = ["management"]
 
 [dependencies]
-sdkwork-api-web-server-assembly = { workspace = true, optional = true }
+sdkwork-api-webserver-assembly = { workspace = true, optional = true }
 sdkwork-api-iam-assembly = { workspace = true, optional = true }
 sdkwork-api-drive-assembly = { workspace = true, optional = true }
 atomic-waker.workspace = true

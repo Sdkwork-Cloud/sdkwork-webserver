@@ -10,94 +10,37 @@
   },
   "status": "ok",
   "mode": "apply",
-  "hasChanges": true,
+  "hasChanges": false,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "86ae39cc3652b28d58c5c32f80a2dc0af991d749a908c89949b1f2a82ae3bcfa",
+  "changeFingerprint": "6d83a05863dadac9a7c7bce3a09bc7da796256d6d117770e5824fffe726c32ca",
   "changeImpact": {
     "schemaVersion": 1,
-    "areas": [
-      "api-surface",
-      "documentation"
-    ],
-    "details": [
-      {
-        "area": "api-surface",
-        "paths": [
-          "lib/sdkwork/backend_sdk/api/application_deployment.rb",
-          "lib/sdkwork/backend_sdk/api/application_source_version.rb",
-          "lib/sdkwork/backend_sdk/api/audit.rb",
-          "lib/sdkwork/backend_sdk/api/server.rb"
-        ]
-      },
-      {
-        "area": "documentation",
-        "paths": [
-          "README.md"
-        ]
-      }
-    ],
-    "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, documentation. Verification is required."
+    "areas": [],
+    "details": [],
+    "requiresVerification": false,
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "medium",
-    "nextAction": "verify",
+    "riskLevel": "low",
+    "nextAction": "skip",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
-    "summary": "Changes have been applied. Run the required verification plan now.",
+    "summary": "No actionable changes were detected. No apply or verification step is required.",
     "reasons": [
-      "verification-required"
+      "no-actionable-changes"
     ]
   },
   "executionHandoff": {
     "schemaVersion": 1,
-    "summary": "Run the required verification commands now.",
-    "steps": [
-      {
-        "id": "verify-check",
-        "title": "Unified package check",
-        "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, documentation.",
-        "workingDirectory": "E:\\sdkwork-space\\sdkwork-webserver\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-ruby\\generated\\server-openapi",
-        "command": "node",
-        "args": [
-          "./bin/publish-core.mjs",
-          "--language",
-          "ruby",
-          "--project-dir",
-          ".",
-          "--action",
-          "check"
-        ],
-        "displayCommand": "node ./bin/publish-core.mjs --language ruby --project-dir . --action check"
-      }
-    ]
+    "summary": "No further commands are required.",
+    "steps": []
   },
   "verificationPlan": {
-    "shouldRun": true,
-    "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, documentation. Verification is required. Run the required verification commands now against the generated SDK output.",
-    "steps": [
-      {
-        "id": "check",
-        "title": "Unified package check",
-        "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, documentation.",
-        "workingDirectory": "E:\\sdkwork-space\\sdkwork-webserver\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-ruby\\generated\\server-openapi",
-        "command": "node",
-        "args": [
-          "./bin/publish-core.mjs",
-          "--language",
-          "ruby",
-          "--project-dir",
-          ".",
-          "--action",
-          "check"
-        ],
-        "displayCommand": "node ./bin/publish-core.mjs --language ruby --project-dir . --action check"
-      }
-    ]
+    "shouldRun": false,
+    "runPhase": "skip",
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
+    "steps": []
   },
   "sdk": {
     "name": "sdkwork-web-backend-sdk",
@@ -122,21 +65,15 @@
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 5,
+    "writtenFiles": 0,
     "skippedScaffoldFiles": 1,
-    "skippedUnchangedGeneratedFiles": 128,
+    "skippedUnchangedGeneratedFiles": 133,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "86ae39cc3652b28d58c5c32f80a2dc0af991d749a908c89949b1f2a82ae3bcfa",
+    "changeFingerprint": "6d83a05863dadac9a7c7bce3a09bc7da796256d6d117770e5824fffe726c32ca",
     "changes": {
       "createdGeneratedFiles": [],
-      "updatedGeneratedFiles": [
-        "lib/sdkwork/backend_sdk/api/application_deployment.rb",
-        "lib/sdkwork/backend_sdk/api/application_source_version.rb",
-        "lib/sdkwork/backend_sdk/api/audit.rb",
-        "lib/sdkwork/backend_sdk/api/server.rb",
-        "README.md"
-      ],
+      "updatedGeneratedFiles": [],
       "unchangedGeneratedFiles": [
         "bin/publish-core.mjs",
         "bin/publish.ps1",
@@ -145,13 +82,17 @@
         "Gemfile",
         "lib/sdkwork/backend_sdk.rb",
         "lib/sdkwork/backend_sdk/api/agent.rb",
+        "lib/sdkwork/backend_sdk/api/application_deployment.rb",
         "lib/sdkwork/backend_sdk/api/application_domain.rb",
+        "lib/sdkwork/backend_sdk/api/application_source_version.rb",
         "lib/sdkwork/backend_sdk/api/application.rb",
+        "lib/sdkwork/backend_sdk/api/audit.rb",
         "lib/sdkwork/backend_sdk/api/base_api.rb",
         "lib/sdkwork/backend_sdk/api/certificate_distribution.rb",
         "lib/sdkwork/backend_sdk/api/certificate.rb",
         "lib/sdkwork/backend_sdk/api/domain.rb",
         "lib/sdkwork/backend_sdk/api/nginx.rb",
+        "lib/sdkwork/backend_sdk/api/server.rb",
         "lib/sdkwork/backend_sdk/client.rb",
         "lib/sdkwork/backend_sdk/http/client.rb",
         "lib/sdkwork/backend_sdk/models/agent_certificate_bundle.rb",
@@ -264,6 +205,7 @@
         "lib/sdkwork/backend_sdk/sdk_config.rb",
         "lib/sdkwork/backend_sdk/version.rb",
         "LICENSE",
+        "README.md",
         "sdkwork-sdk.json",
         "sdkwork-web-backend-sdk.gemspec"
       ],
@@ -276,64 +218,26 @@
     },
     "impact": {
       "schemaVersion": 1,
-      "areas": [
-        "api-surface",
-        "documentation"
-      ],
-      "details": [
-        {
-          "area": "api-surface",
-          "paths": [
-            "lib/sdkwork/backend_sdk/api/application_deployment.rb",
-            "lib/sdkwork/backend_sdk/api/application_source_version.rb",
-            "lib/sdkwork/backend_sdk/api/audit.rb",
-            "lib/sdkwork/backend_sdk/api/server.rb"
-          ]
-        },
-        {
-          "area": "documentation",
-          "paths": [
-            "README.md"
-          ]
-        }
-      ],
-      "requiresVerification": true,
-      "summary": "Detected impact areas: api-surface, documentation. Verification is required."
+      "areas": [],
+      "details": [],
+      "requiresVerification": false,
+      "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
     },
     "verificationPlan": {
-      "shouldRun": true,
-      "runPhase": "now",
-      "summary": "Detected impact areas: api-surface, documentation. Verification is required. Run the required verification commands now against the generated SDK output.",
-      "steps": [
-        {
-          "id": "check",
-          "title": "Unified package check",
-          "required": true,
-          "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, documentation.",
-          "workingDirectory": "E:\\sdkwork-space\\sdkwork-webserver\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-ruby\\generated\\server-openapi",
-          "command": "node",
-          "args": [
-            "./bin/publish-core.mjs",
-            "--language",
-            "ruby",
-            "--project-dir",
-            ".",
-            "--action",
-            "check"
-          ],
-          "displayCommand": "node ./bin/publish-core.mjs --language ruby --project-dir . --action check"
-        }
-      ]
+      "shouldRun": false,
+      "runPhase": "skip",
+      "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
+      "steps": []
     },
     "executionDecision": {
       "schemaVersion": 1,
-      "riskLevel": "medium",
-      "nextAction": "verify",
+      "riskLevel": "low",
+      "nextAction": "skip",
       "requiresManualReview": false,
       "applyRequiresExpectedFingerprint": false,
-      "summary": "Changes have been applied. Run the required verification plan now.",
+      "summary": "No actionable changes were detected. No apply or verification step is required.",
       "reasons": [
-        "verification-required"
+        "no-actionable-changes"
       ]
     },
     "backedUpFiles": [],

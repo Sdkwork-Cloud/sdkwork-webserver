@@ -12,7 +12,7 @@
   "mode": "apply",
   "hasChanges": true,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "ed1d99f254acb29eccdbd876ad8dc36abab6f4bf22fc61f5c5b09cc97e4f783f",
+  "changeFingerprint": "ca16b0e95a509b8fb1632e3ae4e8e1d9e4b60f2dfe09c7da09a6e4b9721fa338",
   "changeImpact": {
     "schemaVersion": 1,
     "areas": [
@@ -24,7 +24,7 @@
       {
         "area": "api-surface",
         "paths": [
-          "lib/src/api/domain.dart"
+          "lib/src/api/certificate.dart"
         ]
       },
       {
@@ -118,7 +118,7 @@
   },
   "stats": {
     "totalFiles": 24,
-    "models": 74,
+    "models": 67,
     "apis": 7,
     "types": 1
   },
@@ -131,11 +131,11 @@
     "skippedUnchangedGeneratedFiles": 20,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "ed1d99f254acb29eccdbd876ad8dc36abab6f4bf22fc61f5c5b09cc97e4f783f",
+    "changeFingerprint": "ca16b0e95a509b8fb1632e3ae4e8e1d9e4b60f2dfe09c7da09a6e4b9721fa338",
     "changes": {
       "createdGeneratedFiles": [],
       "updatedGeneratedFiles": [
-        "lib/src/api/domain.dart",
+        "lib/src/api/certificate.dart",
         "lib/src/models.dart",
         "README.md"
       ],
@@ -147,8 +147,8 @@
         "lib/app_client.dart",
         "lib/sdkwork_web_app_sdk.dart",
         "lib/src/api/api.dart",
-        "lib/src/api/certificate.dart",
         "lib/src/api/deployment.dart",
+        "lib/src/api/domain.dart",
         "lib/src/api/env_variable.dart",
         "lib/src/api/monitor.dart",
         "lib/src/api/paths.dart",
@@ -179,7 +179,7 @@
         {
           "area": "api-surface",
           "paths": [
-            "lib/src/api/domain.dart"
+            "lib/src/api/certificate.dart"
           ]
         },
         {

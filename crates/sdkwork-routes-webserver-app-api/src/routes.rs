@@ -7,7 +7,7 @@ use axum::{
 use sdkwork_webserver_contract::{
     CreateDeploymentRequest, CreateDomainRequest, CreateEnvVariableRequest,
     CreateHealthCheckRequest, CreateListenerCertificateBindingRequest, CreateSiteRequest,
-    CreateSourceVersionRequest, ImportGitSourceVersionRequest, IssueCertificateRequest,
+    CreateSourceVersionRequest, ImportGitSourceVersionRequest,
     ListSitesQuery, UpdateEnvVariableRequest, UpdateSiteRequest, WebAppApi, WebAppRequestContext,
 };
 use serde::Deserialize;
@@ -15,7 +15,7 @@ use std::sync::Arc;
 
 use crate::{auth::require_app_context, paths};
 use sdkwork_routes_webserver_common::{
-    accepted_async, created_resource, no_content, ok_certificate_page, ok_deployment_page,
+    created_resource, no_content, ok_deployment_page,
     ok_domain_page, ok_env_variable_page, ok_health_check_page,
     ok_listener_certificate_binding_page, ok_resource, ok_site_page, ok_source_version_page,
     validate_pagination_query, WebApiError,
@@ -80,12 +80,6 @@ pub fn build_router_with_shared_app_api(api: Arc<dyn WebAppApi>) -> Router {
             paths::SITE_ENV_VARIABLE,
             axum::routing::patch(update_env_variable).delete(delete_env_variable),
         )
-        .route(paths::CERTIFICATES, get(list_certificates))
-        .route(paths::CERTIFICATES_ISSUE, post(issue_certificate))
-        .route(
-            paths::CERTIFICATE_OPERATION,
-            get(retrieve_certificate_operation),
-        )
         .route(
             paths::SITE_HEALTH_CHECKS,
             get(list_health_checks).post(create_health_check),
@@ -101,18 +95,6 @@ struct PageQuery {
     #[serde(default = "default_page_size")]
     page_size: i32,
     cursor: Option<String>,
-}
-
-#[derive(Debug, Deserialize)]
-struct CertificatePageQuery {
-    #[serde(default = "default_page")]
-    page: i32,
-    #[serde(default = "default_page_size")]
-    page_size: i32,
-    #[serde(rename = "site_id")]
-    site_id: Option<String>,
-    #[serde(rename = "domain_id")]
-    domain_id: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -472,51 +454,6 @@ async fn delete_env_variable(
         state
             .api
             .delete_env_variable(&context, &site_id, &variable_id)
-            .await,
-    )
-}
-
-async fn list_certificates(
-    State(state): State<AppState>,
-    context: Option<Extension<WebAppRequestContext>>,
-    Query(query): Query<CertificatePageQuery>,
-) -> Result<Response, WebApiError> {
-    let context = require_app_context(context)?;
-    ok_certificate_page(
-        state
-            .api
-            .list_certificates(
-                &context,
-                query.site_id.as_deref(),
-                query.domain_id.as_deref(),
-                query.page,
-                query.page_size,
-            )
-            .await,
-        query.page,
-        query.page_size,
-    )
-}
-
-async fn issue_certificate(
-    State(state): State<AppState>,
-    context: Option<Extension<WebAppRequestContext>>,
-    Json(request): Json<IssueCertificateRequest>,
-) -> Result<Response, WebApiError> {
-    let context = require_app_context(context)?;
-    accepted_async(state.api.issue_certificate(&context, &request).await)
-}
-
-async fn retrieve_certificate_operation(
-    State(state): State<AppState>,
-    context: Option<Extension<WebAppRequestContext>>,
-    Path(operation_id): Path<String>,
-) -> Result<Response, WebApiError> {
-    let context = require_app_context(context)?;
-    ok_resource(
-        state
-            .api
-            .retrieve_certificate_operation(&context, &operation_id)
             .await,
     )
 }

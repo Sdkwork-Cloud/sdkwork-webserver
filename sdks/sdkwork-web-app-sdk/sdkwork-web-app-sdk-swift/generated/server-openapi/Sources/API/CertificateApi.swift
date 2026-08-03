@@ -38,33 +38,6 @@ public class CertificateApi {
         _ = try await client.delete(ApiPaths.appPath("/sites/\(serializePathParameter(siteId, PathParameterSpec(name: "siteId", style: "simple", explode: false)))/domains/\(serializePathParameter(domainId, PathParameterSpec(name: "domainId", style: "simple", explode: false)))/listener_certificate_bindings/\(serializePathParameter(bindingId, PathParameterSpec(name: "bindingId", style: "simple", explode: false)))"), params: nil, headers: requestHeaders)
     }
 
-    /// 获取证书列表
-    public func certificatesList(page: Int? = nil, pageSize: Int? = nil, siteId: String? = nil, domainId: String? = nil) async throws -> CertificatesListResponse? {
-        let query = buildQueryString([
-            QueryParameterSpec(name: "page", value: page, style: "form", explode: true, allowReserved: false, contentType: nil),
-            QueryParameterSpec(name: "page_size", value: pageSize, style: "form", explode: true, allowReserved: false, contentType: nil),
-            QueryParameterSpec(name: "site_id", value: siteId, style: "form", explode: true, allowReserved: false, contentType: nil),
-            QueryParameterSpec(name: "domain_id", value: domainId, style: "form", explode: true, allowReserved: false, contentType: nil)
-        ])
-        return try await client.get(ApiPaths.appendQueryString(ApiPaths.appPath("/certificates"), query), responseType: CertificatesListResponse.self)
-    }
-
-    /// 申请证书
-    public func certificatesIssue(body: IssueCertificateRequest, idempotencyKey: String) async throws -> CertificatesIssueResponse202? {
-        let requestHeaders = buildRequestHeaders(
-            [
-                "Idempotency-Key": HeaderParameterSpec(value: idempotencyKey, style: "simple", explode: false, contentType: nil),
-            ],
-            [:]
-        )
-        return try await client.post(ApiPaths.appPath("/certificates/issue"), body: body, params: nil, headers: requestHeaders, contentType: "application/json", responseType: CertificatesIssueResponse202.self)
-    }
-
-    /// 获取证书异步操作状态
-    public func certificatesOperationsRetrieve(operationId: String) async throws -> CertificatesOperationsRetrieveResponse? {
-        return try await client.get(ApiPaths.appPath("/certificates/operations/\(serializePathParameter(operationId, PathParameterSpec(name: "operationId", style: "simple", explode: false)))"), responseType: CertificatesOperationsRetrieveResponse.self)
-    }
-
     private struct PathParameterSpec {
         let name: String
         let style: String

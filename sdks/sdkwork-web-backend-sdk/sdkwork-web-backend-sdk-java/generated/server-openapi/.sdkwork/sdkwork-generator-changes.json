@@ -9,16 +9,10 @@
     "protocol": "http",
     "packageName": "com.sdkwork:sdkwork-web-backend-sdk"
   },
-  "changeFingerprint": "7f35d5f29390f79b4ff24adda3714422b136632d60b5a4920ed13e18c28de928",
+  "changeFingerprint": "0b487609b05f3cba9031fadee1d9e6bfa61f9775107326b44798653513f3670c",
   "changes": {
     "createdGeneratedFiles": [],
-    "updatedGeneratedFiles": [
-      "README.md",
-      "src/main/java/com/sdkwork/web/backend/sdk/api/ApplicationDeploymentApi.java",
-      "src/main/java/com/sdkwork/web/backend/sdk/api/ApplicationSourceVersionApi.java",
-      "src/main/java/com/sdkwork/web/backend/sdk/api/AuditApi.java",
-      "src/main/java/com/sdkwork/web/backend/sdk/api/ServerApi.java"
-    ],
+    "updatedGeneratedFiles": [],
     "unchangedGeneratedFiles": [
       "bin/publish-core.mjs",
       "bin/publish.ps1",
@@ -26,16 +20,21 @@
       "CHANGELOG.md",
       "LICENSE",
       "pom.xml",
+      "README.md",
       "sdkwork-sdk.json",
       "src/main/java/com/sdkwork/web/backend/sdk/api/AgentApi.java",
       "src/main/java/com/sdkwork/web/backend/sdk/api/ApiPaths.java",
       "src/main/java/com/sdkwork/web/backend/sdk/api/ApplicationApi.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/api/ApplicationDeploymentApi.java",
       "src/main/java/com/sdkwork/web/backend/sdk/api/ApplicationDomainApi.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/api/ApplicationSourceVersionApi.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/api/AuditApi.java",
       "src/main/java/com/sdkwork/web/backend/sdk/api/CertificateApi.java",
       "src/main/java/com/sdkwork/web/backend/sdk/api/CertificateDistributionApi.java",
       "src/main/java/com/sdkwork/web/backend/sdk/api/DomainApi.java",
       "src/main/java/com/sdkwork/web/backend/sdk/api/NginxApi.java",
       "src/main/java/com/sdkwork/web/backend/sdk/api/package-info.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/api/ServerApi.java",
       "src/main/java/com/sdkwork/web/backend/sdk/http/HttpClient.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/AgentCertificateBundle.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/AgentCertificateObservation.java",
@@ -155,64 +154,26 @@
   },
   "impact": {
     "schemaVersion": 1,
-    "areas": [
-      "api-surface",
-      "documentation"
-    ],
-    "details": [
-      {
-        "area": "api-surface",
-        "paths": [
-          "src/main/java/com/sdkwork/web/backend/sdk/api/ApplicationDeploymentApi.java",
-          "src/main/java/com/sdkwork/web/backend/sdk/api/ApplicationSourceVersionApi.java",
-          "src/main/java/com/sdkwork/web/backend/sdk/api/AuditApi.java",
-          "src/main/java/com/sdkwork/web/backend/sdk/api/ServerApi.java"
-        ]
-      },
-      {
-        "area": "documentation",
-        "paths": [
-          "README.md"
-        ]
-      }
-    ],
-    "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, documentation. Verification is required."
+    "areas": [],
+    "details": [],
+    "requiresVerification": false,
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
   },
   "verificationPlan": {
-    "shouldRun": true,
-    "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, documentation. Verification is required. Run the required verification commands now against the generated SDK output.",
-    "steps": [
-      {
-        "id": "check",
-        "title": "Unified package check",
-        "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, documentation.",
-        "workingDirectory": "E:\\sdkwork-space\\sdkwork-webserver\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-java\\generated\\server-openapi",
-        "command": "node",
-        "args": [
-          "./bin/publish-core.mjs",
-          "--language",
-          "java",
-          "--project-dir",
-          ".",
-          "--action",
-          "check"
-        ],
-        "displayCommand": "node ./bin/publish-core.mjs --language java --project-dir . --action check"
-      }
-    ]
+    "shouldRun": false,
+    "runPhase": "skip",
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
+    "steps": []
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "medium",
-    "nextAction": "verify",
+    "riskLevel": "low",
+    "nextAction": "skip",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
-    "summary": "Changes have been applied. Run the required verification plan now.",
+    "summary": "No actionable changes were detected. No apply or verification step is required.",
     "reasons": [
-      "verification-required"
+      "no-actionable-changes"
     ]
   },
   "preservedLegacyFiles": false

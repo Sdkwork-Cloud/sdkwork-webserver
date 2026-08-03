@@ -1,9 +1,5 @@
 require_relative 'base_api'
-require_relative '../models/certificates_issue_response202'
-require_relative '../models/certificates_list_response'
-require_relative '../models/certificates_operations_retrieve_response'
 require_relative '../models/create_listener_certificate_binding_request'
-require_relative '../models/issue_certificate_request'
 require_relative '../models/sites_domains_listener_certificate_bindings_create_response201'
 require_relative '../models/sites_domains_listener_certificate_bindings_list_response'
 
@@ -55,48 +51,6 @@ module Sdkwork
             options[:headers] = request_headers unless request_headers.empty?
             result = @client.request('DELETE', path, **options)
             result
-          end
-
-          # 获取证书列表
-          def certificates_list(page: nil, page_size: nil, site_id: nil, domain_id: nil)
-            path = '/app/v3/api/certificates'
-            query = build_query_string([
-              QueryParameterSpec.new('page', page, 'form', true, false, nil),
-              QueryParameterSpec.new('page_size', page_size, 'form', true, false, nil),
-              QueryParameterSpec.new('site_id', site_id, 'form', true, false, nil),
-              QueryParameterSpec.new('domain_id', domain_id, 'form', true, false, nil),
-            ])
-            path = append_query_string(path, query)
-            options = {}
-
-            result = @client.request('GET', path, **options)
-            result.is_a?(Hash) ? Models::CertificatesListResponse.from_hash(result) : nil
-          end
-
-          # 申请证书
-          def certificates_issue(idempotency_key, body: nil)
-            path = '/app/v3/api/certificates/issue'
-            payload = body.respond_to?(:to_hash) ? body.to_hash : body
-            request_headers = build_request_headers(
-              {
-                'Idempotency-Key' => HeaderParameterSpec.new(idempotency_key, 'simple', false, nil),
-              },
-              {}
-            )
-            options = {}
-            options[:headers] = request_headers unless request_headers.empty?
-            options[:json] = payload unless payload.nil?
-            result = @client.request('POST', path, **options)
-            result.is_a?(Hash) ? Models::CertificatesIssueResponse202.from_hash(result) : nil
-          end
-
-          # 获取证书异步操作状态
-          def certificates_operations_retrieve(operation_id)
-            path = interpolate_path('/app/v3/api/certificates/operations/{operationId}', operationId: serialize_path_parameter(operation_id, PathParameterSpec.new('operationId', 'simple', false)))
-            options = {}
-
-            result = @client.request('GET', path, **options)
-            result.is_a?(Hash) ? Models::CertificatesOperationsRetrieveResponse.from_hash(result) : nil
           end
 
         private

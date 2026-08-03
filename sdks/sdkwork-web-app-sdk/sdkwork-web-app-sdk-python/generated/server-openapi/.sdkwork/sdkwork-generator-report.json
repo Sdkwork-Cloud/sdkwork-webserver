@@ -11,8 +11,8 @@
   "status": "ok",
   "mode": "apply",
   "hasChanges": true,
-  "hasDestructiveChanges": false,
-  "changeFingerprint": "a747f34bc408d6ad979b4bb1cc36622f36d983e02c2dabe8576c34bee0ab7605",
+  "hasDestructiveChanges": true,
+  "changeFingerprint": "d1cc06ba64a978792f3a4095cc59eef8790e00e518d2c882134f7710129e46a3",
   "changeImpact": {
     "schemaVersion": 1,
     "areas": [
@@ -24,7 +24,7 @@
       {
         "area": "api-surface",
         "paths": [
-          "sdkwork_web_app_sdk/api/domain.py",
+          "sdkwork_web_app_sdk/api/certificate.py",
           "sdkwork_web_app_sdk/models/__init__.py"
         ]
       },
@@ -32,7 +32,13 @@
         "area": "models",
         "paths": [
           "sdkwork_web_app_sdk/models/__init__.py",
-          "sdkwork_web_app_sdk/models/domains_list_response.py"
+          "sdkwork_web_app_sdk/models/certificate_operation_response.py",
+          "sdkwork_web_app_sdk/models/certificate_page.py",
+          "sdkwork_web_app_sdk/models/certificate_response.py",
+          "sdkwork_web_app_sdk/models/certificates_issue_response202.py",
+          "sdkwork_web_app_sdk/models/certificates_list_response.py",
+          "sdkwork_web_app_sdk/models/certificates_operations_retrieve_response.py",
+          "sdkwork_web_app_sdk/models/issue_certificate_request.py"
         ]
       },
       {
@@ -47,12 +53,14 @@
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "medium",
+    "riskLevel": "high",
     "nextAction": "verify",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
     "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
+      "deleted-generated-files",
+      "manual-review-required",
       "verification-required"
     ]
   },
@@ -119,28 +127,26 @@
     "localVersions": []
   },
   "stats": {
-    "totalFiles": 98,
-    "models": 74,
+    "totalFiles": 91,
+    "models": 67,
     "apis": 7,
-    "types": 75
+    "types": 68
   },
   "warnings": [],
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 4,
+    "writtenFiles": 3,
     "skippedScaffoldFiles": 1,
-    "skippedUnchangedGeneratedFiles": 93,
-    "deletedGeneratedFiles": 0,
+    "skippedUnchangedGeneratedFiles": 87,
+    "deletedGeneratedFiles": 7,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "a747f34bc408d6ad979b4bb1cc36622f36d983e02c2dabe8576c34bee0ab7605",
+    "changeFingerprint": "d1cc06ba64a978792f3a4095cc59eef8790e00e518d2c882134f7710129e46a3",
     "changes": {
-      "createdGeneratedFiles": [
-        "sdkwork_web_app_sdk/models/domains_list_response.py"
-      ],
+      "createdGeneratedFiles": [],
       "updatedGeneratedFiles": [
         "README.md",
-        "sdkwork_web_app_sdk/api/domain.py",
+        "sdkwork_web_app_sdk/api/certificate.py",
         "sdkwork_web_app_sdk/models/__init__.py"
       ],
       "unchangedGeneratedFiles": [
@@ -154,8 +160,8 @@
         "requirements.txt",
         "sdkwork_web_app_sdk/__init__.py",
         "sdkwork_web_app_sdk/api/__init__.py",
-        "sdkwork_web_app_sdk/api/certificate.py",
         "sdkwork_web_app_sdk/api/deployment.py",
+        "sdkwork_web_app_sdk/api/domain.py",
         "sdkwork_web_app_sdk/api/env_variable.py",
         "sdkwork_web_app_sdk/api/monitor.py",
         "sdkwork_web_app_sdk/api/site.py",
@@ -164,12 +170,6 @@
         "sdkwork_web_app_sdk/http_client.py",
         "sdkwork_web_app_sdk/models/application_store_listing.py",
         "sdkwork_web_app_sdk/models/certificate_identifier_response.py",
-        "sdkwork_web_app_sdk/models/certificate_operation_response.py",
-        "sdkwork_web_app_sdk/models/certificate_page.py",
-        "sdkwork_web_app_sdk/models/certificate_response.py",
-        "sdkwork_web_app_sdk/models/certificates_issue_response202.py",
-        "sdkwork_web_app_sdk/models/certificates_list_response.py",
-        "sdkwork_web_app_sdk/models/certificates_operations_retrieve_response.py",
         "sdkwork_web_app_sdk/models/create_deployment_request.py",
         "sdkwork_web_app_sdk/models/create_domain_request.py",
         "sdkwork_web_app_sdk/models/create_env_variable_request.py",
@@ -182,13 +182,13 @@
         "sdkwork_web_app_sdk/models/domain_page.py",
         "sdkwork_web_app_sdk/models/domain_response.py",
         "sdkwork_web_app_sdk/models/domain_verify_response.py",
+        "sdkwork_web_app_sdk/models/domains_list_response.py",
         "sdkwork_web_app_sdk/models/env_variable_page.py",
         "sdkwork_web_app_sdk/models/env_variable_response.py",
         "sdkwork_web_app_sdk/models/field_error.py",
         "sdkwork_web_app_sdk/models/health_check_page.py",
         "sdkwork_web_app_sdk/models/health_check_response.py",
         "sdkwork_web_app_sdk/models/import_git_source_version_request.py",
-        "sdkwork_web_app_sdk/models/issue_certificate_request.py",
         "sdkwork_web_app_sdk/models/listener_certificate_binding_response.py",
         "sdkwork_web_app_sdk/models/listener_certificate_summary_response.py",
         "sdkwork_web_app_sdk/models/media_checksum.py",
@@ -238,7 +238,15 @@
         "sdkwork-sdk.json",
         "setup.py"
       ],
-      "deletedGeneratedFiles": [],
+      "deletedGeneratedFiles": [
+        "sdkwork_web_app_sdk/models/certificate_operation_response.py",
+        "sdkwork_web_app_sdk/models/certificate_page.py",
+        "sdkwork_web_app_sdk/models/certificate_response.py",
+        "sdkwork_web_app_sdk/models/certificates_issue_response202.py",
+        "sdkwork_web_app_sdk/models/certificates_list_response.py",
+        "sdkwork_web_app_sdk/models/certificates_operations_retrieve_response.py",
+        "sdkwork_web_app_sdk/models/issue_certificate_request.py"
+      ],
       "scaffoldedFiles": [],
       "preservedScaffoldFiles": [
         "custom/README.md"
@@ -256,7 +264,7 @@
         {
           "area": "api-surface",
           "paths": [
-            "sdkwork_web_app_sdk/api/domain.py",
+            "sdkwork_web_app_sdk/api/certificate.py",
             "sdkwork_web_app_sdk/models/__init__.py"
           ]
         },
@@ -264,7 +272,13 @@
           "area": "models",
           "paths": [
             "sdkwork_web_app_sdk/models/__init__.py",
-            "sdkwork_web_app_sdk/models/domains_list_response.py"
+            "sdkwork_web_app_sdk/models/certificate_operation_response.py",
+            "sdkwork_web_app_sdk/models/certificate_page.py",
+            "sdkwork_web_app_sdk/models/certificate_response.py",
+            "sdkwork_web_app_sdk/models/certificates_issue_response202.py",
+            "sdkwork_web_app_sdk/models/certificates_list_response.py",
+            "sdkwork_web_app_sdk/models/certificates_operations_retrieve_response.py",
+            "sdkwork_web_app_sdk/models/issue_certificate_request.py"
           ]
         },
         {
@@ -304,12 +318,14 @@
     },
     "executionDecision": {
       "schemaVersion": 1,
-      "riskLevel": "medium",
+      "riskLevel": "high",
       "nextAction": "verify",
       "requiresManualReview": false,
       "applyRequiresExpectedFingerprint": false,
       "summary": "Changes have been applied. Run the required verification plan now.",
       "reasons": [
+        "deleted-generated-files",
+        "manual-review-required",
         "verification-required"
       ]
     },

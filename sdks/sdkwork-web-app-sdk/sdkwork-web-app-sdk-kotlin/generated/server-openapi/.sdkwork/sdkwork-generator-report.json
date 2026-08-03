@@ -11,8 +11,8 @@
   "status": "ok",
   "mode": "apply",
   "hasChanges": true,
-  "hasDestructiveChanges": false,
-  "changeFingerprint": "53b55cd7548f42cb18a4b764ff2731dfdd5ee52f54168c45f7177fcdfed97d38",
+  "hasDestructiveChanges": true,
+  "changeFingerprint": "5d3a81f70a5a39f0ef1f6123f464249353fe1942addfa9f9c9c5aba3e68b9641",
   "changeImpact": {
     "schemaVersion": 1,
     "areas": [
@@ -24,7 +24,7 @@
       {
         "area": "api-surface",
         "paths": [
-          "src/main/kotlin/com/sdkwork/web/app/sdk/api/DomainApi.kt"
+          "src/main/kotlin/com/sdkwork/web/app/sdk/api/CertificateApi.kt"
         ]
       },
       {
@@ -36,7 +36,13 @@
       {
         "area": "unknown",
         "paths": [
-          "src/main/kotlin/com/sdkwork/web/app/sdk/DomainsListResponse.kt"
+          "src/main/kotlin/com/sdkwork/web/app/sdk/CertificateOperationResponse.kt",
+          "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatePage.kt",
+          "src/main/kotlin/com/sdkwork/web/app/sdk/CertificateResponse.kt",
+          "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatesIssueResponse202.kt",
+          "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatesListResponse.kt",
+          "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatesOperationsRetrieveResponse.kt",
+          "src/main/kotlin/com/sdkwork/web/app/sdk/IssueCertificateRequest.kt"
         ]
       }
     ],
@@ -51,6 +57,7 @@
     "applyRequiresExpectedFingerprint": false,
     "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
+      "deleted-generated-files",
       "manual-review-required",
       "unknown-impact",
       "verification-required"
@@ -119,8 +126,8 @@
     "localVersions": []
   },
   "stats": {
-    "totalFiles": 95,
-    "models": 74,
+    "totalFiles": 88,
+    "models": 67,
     "apis": 7,
     "types": 0
   },
@@ -128,19 +135,17 @@
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 3,
+    "writtenFiles": 2,
     "skippedScaffoldFiles": 1,
-    "skippedUnchangedGeneratedFiles": 91,
-    "deletedGeneratedFiles": 0,
+    "skippedUnchangedGeneratedFiles": 85,
+    "deletedGeneratedFiles": 7,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "53b55cd7548f42cb18a4b764ff2731dfdd5ee52f54168c45f7177fcdfed97d38",
+    "changeFingerprint": "5d3a81f70a5a39f0ef1f6123f464249353fe1942addfa9f9c9c5aba3e68b9641",
     "changes": {
-      "createdGeneratedFiles": [
-        "src/main/kotlin/com/sdkwork/web/app/sdk/DomainsListResponse.kt"
-      ],
+      "createdGeneratedFiles": [],
       "updatedGeneratedFiles": [
         "README.md",
-        "src/main/kotlin/com/sdkwork/web/app/sdk/api/DomainApi.kt"
+        "src/main/kotlin/com/sdkwork/web/app/sdk/api/CertificateApi.kt"
       ],
       "unchangedGeneratedFiles": [
         "bin/publish-core.mjs",
@@ -153,20 +158,14 @@
         "settings.gradle.kts",
         "src/main/kotlin/com/sdkwork/web/app/sdk/api/Api.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/api/ApiPaths.kt",
-        "src/main/kotlin/com/sdkwork/web/app/sdk/api/CertificateApi.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/api/DeploymentApi.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/api/DomainApi.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/api/EnvVariableApi.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/api/MonitorApi.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/api/SiteApi.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/api/SourceVersionApi.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/ApplicationStoreListing.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/CertificateIdentifierResponse.kt",
-        "src/main/kotlin/com/sdkwork/web/app/sdk/CertificateOperationResponse.kt",
-        "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatePage.kt",
-        "src/main/kotlin/com/sdkwork/web/app/sdk/CertificateResponse.kt",
-        "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatesIssueResponse202.kt",
-        "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatesListResponse.kt",
-        "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatesOperationsRetrieveResponse.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/CreateDeploymentRequest.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/CreateDomainRequest.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/CreateEnvVariableRequest.kt",
@@ -178,6 +177,7 @@
         "src/main/kotlin/com/sdkwork/web/app/sdk/DeploymentResponse.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/DomainPage.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/DomainResponse.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/DomainsListResponse.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/DomainVerifyResponse.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/EnvVariablePage.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/EnvVariableResponse.kt",
@@ -186,7 +186,6 @@
         "src/main/kotlin/com/sdkwork/web/app/sdk/HealthCheckResponse.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/http/HttpClient.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/ImportGitSourceVersionRequest.kt",
-        "src/main/kotlin/com/sdkwork/web/app/sdk/IssueCertificateRequest.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/ListenerCertificateBindingResponse.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/ListenerCertificateSummaryResponse.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/MediaChecksum.kt",
@@ -235,7 +234,15 @@
         "src/main/kotlin/com/sdkwork/web/app/sdk/UpdateEnvVariableRequest.kt",
         "src/main/kotlin/com/sdkwork/web/app/sdk/UpdateSiteRequest.kt"
       ],
-      "deletedGeneratedFiles": [],
+      "deletedGeneratedFiles": [
+        "src/main/kotlin/com/sdkwork/web/app/sdk/CertificateOperationResponse.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatePage.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/CertificateResponse.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatesIssueResponse202.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatesListResponse.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatesOperationsRetrieveResponse.kt",
+        "src/main/kotlin/com/sdkwork/web/app/sdk/IssueCertificateRequest.kt"
+      ],
       "scaffoldedFiles": [],
       "preservedScaffoldFiles": [
         "custom/README.md"
@@ -253,7 +260,7 @@
         {
           "area": "api-surface",
           "paths": [
-            "src/main/kotlin/com/sdkwork/web/app/sdk/api/DomainApi.kt"
+            "src/main/kotlin/com/sdkwork/web/app/sdk/api/CertificateApi.kt"
           ]
         },
         {
@@ -265,7 +272,13 @@
         {
           "area": "unknown",
           "paths": [
-            "src/main/kotlin/com/sdkwork/web/app/sdk/DomainsListResponse.kt"
+            "src/main/kotlin/com/sdkwork/web/app/sdk/CertificateOperationResponse.kt",
+            "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatePage.kt",
+            "src/main/kotlin/com/sdkwork/web/app/sdk/CertificateResponse.kt",
+            "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatesIssueResponse202.kt",
+            "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatesListResponse.kt",
+            "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatesOperationsRetrieveResponse.kt",
+            "src/main/kotlin/com/sdkwork/web/app/sdk/IssueCertificateRequest.kt"
           ]
         }
       ],
@@ -305,6 +318,7 @@
       "applyRequiresExpectedFingerprint": false,
       "summary": "Changes have been applied. Run the required verification plan now.",
       "reasons": [
+        "deleted-generated-files",
         "manual-review-required",
         "unknown-impact",
         "verification-required"

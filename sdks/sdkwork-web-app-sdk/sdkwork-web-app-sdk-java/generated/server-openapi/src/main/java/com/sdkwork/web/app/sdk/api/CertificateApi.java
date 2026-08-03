@@ -43,34 +43,6 @@ public class CertificateApi {
         return null;
     }
 
-    /** 获取证书列表 */
-    public CertificatesListResponse certificatesList(Integer page, Integer pageSize, String siteId, String domainId) throws Exception {
-        String query = buildQueryString(List.of(
-            new QueryParameterSpec("page", page, "form", true, false, null),
-            new QueryParameterSpec("page_size", pageSize, "form", true, false, null),
-            new QueryParameterSpec("site_id", siteId, "form", true, false, null),
-            new QueryParameterSpec("domain_id", domainId, "form", true, false, null)
-        ));
-        Object raw = client.get(ApiPaths.appendQueryString(ApiPaths.appPath("/certificates"), query));
-        return client.convertValue(raw, new TypeReference<CertificatesListResponse>() {});
-    }
-
-    /** 申请证书 */
-    public CertificatesIssueResponse202 certificatesIssue(IssueCertificateRequest body, String idempotencyKey) throws Exception {
-        Map<String, String> requestHeaders = buildRequestHeaders(
-                Map.of("Idempotency-Key", new HeaderParameterSpec(idempotencyKey, "simple", false, null)),
-                Map.of()
-        );
-        Object raw = client.post(ApiPaths.appPath("/certificates/issue"), body, null, requestHeaders, "application/json");
-        return client.convertValue(raw, new TypeReference<CertificatesIssueResponse202>() {});
-    }
-
-    /** 获取证书异步操作状态 */
-    public CertificatesOperationsRetrieveResponse certificatesOperationsRetrieve(String operationId) throws Exception {
-        Object raw = client.get(ApiPaths.appPath("/certificates/operations/" + serializePathParameter(operationId, new PathParameterSpec("operationId", "simple", false)) + ""));
-        return client.convertValue(raw, new TypeReference<CertificatesOperationsRetrieveResponse>() {});
-    }
-
     private record PathParameterSpec(String name, String style, boolean explode) {}
 
     private static String serializePathParameter(Object value, PathParameterSpec spec) {

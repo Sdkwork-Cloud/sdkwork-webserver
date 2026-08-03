@@ -210,6 +210,7 @@ function ResourcePage({
   const [items, setItems] = useState<readonly Record<string, unknown>[]>([]);
   const [page, setPage] = useState(1);
   const [pageInfo, setPageInfo] = useState<WebserverPageInfo>({ page: 1, pageSize: 20, hasMore: false });
+  const [nextCursor, setNextCursor] = useState<string | undefined>(undefined);
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -241,12 +242,13 @@ function ResourcePage({
   function persistScope(value: string): void {
     setScopeId(value);
     setPage(1);
+    setNextCursor(undefined);
     setSelected(undefined);
     if (value) sessionStorage.setItem(scopeStorageKey, value);
     else sessionStorage.removeItem(scopeStorageKey);
   }
 
-  async function load(filterValues: Readonly<Record<string, string>> = filters): Promise<void> {
+  async function load(filterValues: Readonly<Record<string, string>> = filters, cursorOverride?: string): Promise<void> {
     if (!authorized || !source || (source.requiresScope && !scopeId)) {
       setItems([]);
       return;
@@ -255,6 +257,7 @@ function ResourcePage({
     setError(undefined);
     try {
       const result = await source.load({
+        cursor: cursorOverride === undefined ? nextCursor : cursorOverride,
         filters: source.filters?.length ? filterValues : undefined,
         page,
         pageSize: 20,
@@ -263,6 +266,7 @@ function ResourcePage({
       });
       setItems(result.items);
       setPageInfo(result.pageInfo);
+      setNextCursor(result.pageInfo.nextCursor);
     } catch (caught) {
       setError(formatWebserverErrorMessage(caught, t));
     } finally {
@@ -302,9 +306,10 @@ function ResourcePage({
 
   useEffect(() => {
     void load();
-  }, [authorized, entry.resource, page, scopeId]);
+  }, [authorized, entry.resource, nextCursor, page, scopeId]);
   useEffect(() => {
     setPage(1);
+    setNextCursor(undefined);
     setSelected(undefined);
   }, [entry.resource]);
 
@@ -347,7 +352,8 @@ function ResourcePage({
                 onSubmit={(event) => {
                   event.preventDefault();
                   setPage(1);
-                  void load();
+                  setNextCursor(undefined);
+                  void load(undefined, undefined);
                 }}
                 role="search"
               >
@@ -457,7 +463,8 @@ function ResourcePage({
                   onClick={() => {
                     setFilters({});
                     setPage(1);
-                    void load({});
+                    setNextCursor(undefined);
+                    void load({}, undefined);
                   }}
                   type="button"
                 >
@@ -575,7 +582,7 @@ function ResourcePage({
                   <button
                     aria-label={t("pagination.previous")}
                     className="icon-button"
-                    disabled={page <= 1 || busy}
+                    disabled={nextCursor !== undefined || page <= 1 || busy}
                     onClick={() => setPage((value) => Math.max(1, value - 1))}
                     title={t("pagination.previous")}
                     type="button"
@@ -586,7 +593,7 @@ function ResourcePage({
                     aria-label={t("pagination.next")}
                     className="icon-button"
                     disabled={!pageInfo.hasMore || busy}
-                    onClick={() => setPage((value) => value + 1)}
+                    onClick={() => setNextCursor(pageInfo.nextCursor)}
                     title={t("pagination.next")}
                     type="button"
                   >

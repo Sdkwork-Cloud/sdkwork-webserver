@@ -89,13 +89,13 @@ println!("{result:?}");
 
 ```rust
 use std::collections::HashMap;
-// 获取证书列表
+// List certificates active on the domain listener
+let site_id = "1";
+let domain_id = "1";
 let mut query = HashMap::new();
 query.insert("page".to_string(), serde_json::json!(1));
 query.insert("page_size".to_string(), serde_json::json!(2));
-query.insert("site_id".to_string(), serde_json::json!("00000000-0000-0000-0000-000000000001"));
-query.insert("domain_id".to_string(), serde_json::json!("00000000-0000-0000-0000-000000000001"));
-let result = client.certificate().certificates_list(Some(&query)).await?;
+let result = client.certificate().sites_domains_listener_certificate_bindings_list(site_id, domain_id, Some(&query)).await?;
 println!("{result:?}");
 ```
 

@@ -9,14 +9,12 @@
     "protocol": "http",
     "packageName": "com.sdkwork:sdkwork-web-app-sdk"
   },
-  "changeFingerprint": "7cc4e59a9fea93eb43c07cf7a2704e5f1e936e1fc69c2792c087b771c3e28b39",
+  "changeFingerprint": "cf3ca55b26a82b41285470512f5b41817903869375248e70e354687787ba047f",
   "changes": {
-    "createdGeneratedFiles": [
-      "src/main/java/com/sdkwork/web/app/sdk/model/DomainsListResponse.java"
-    ],
+    "createdGeneratedFiles": [],
     "updatedGeneratedFiles": [
       "README.md",
-      "src/main/java/com/sdkwork/web/app/sdk/api/DomainApi.java"
+      "src/main/java/com/sdkwork/web/app/sdk/api/CertificateApi.java"
     ],
     "unchangedGeneratedFiles": [
       "bin/publish-core.mjs",
@@ -27,8 +25,8 @@
       "pom.xml",
       "sdkwork-sdk.json",
       "src/main/java/com/sdkwork/web/app/sdk/api/ApiPaths.java",
-      "src/main/java/com/sdkwork/web/app/sdk/api/CertificateApi.java",
       "src/main/java/com/sdkwork/web/app/sdk/api/DeploymentApi.java",
+      "src/main/java/com/sdkwork/web/app/sdk/api/DomainApi.java",
       "src/main/java/com/sdkwork/web/app/sdk/api/EnvVariableApi.java",
       "src/main/java/com/sdkwork/web/app/sdk/api/MonitorApi.java",
       "src/main/java/com/sdkwork/web/app/sdk/api/package-info.java",
@@ -37,12 +35,6 @@
       "src/main/java/com/sdkwork/web/app/sdk/http/HttpClient.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/ApplicationStoreListing.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/CertificateIdentifierResponse.java",
-      "src/main/java/com/sdkwork/web/app/sdk/model/CertificateOperationResponse.java",
-      "src/main/java/com/sdkwork/web/app/sdk/model/CertificatePage.java",
-      "src/main/java/com/sdkwork/web/app/sdk/model/CertificateResponse.java",
-      "src/main/java/com/sdkwork/web/app/sdk/model/CertificatesIssueResponse202.java",
-      "src/main/java/com/sdkwork/web/app/sdk/model/CertificatesListResponse.java",
-      "src/main/java/com/sdkwork/web/app/sdk/model/CertificatesOperationsRetrieveResponse.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/CreateDeploymentRequest.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/CreateDomainRequest.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/CreateEnvVariableRequest.java",
@@ -54,6 +46,7 @@
       "src/main/java/com/sdkwork/web/app/sdk/model/DeploymentResponse.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/DomainPage.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/DomainResponse.java",
+      "src/main/java/com/sdkwork/web/app/sdk/model/DomainsListResponse.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/DomainVerifyResponse.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/EnvVariablePage.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/EnvVariableResponse.java",
@@ -61,7 +54,6 @@
       "src/main/java/com/sdkwork/web/app/sdk/model/HealthCheckPage.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/HealthCheckResponse.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/ImportGitSourceVersionRequest.java",
-      "src/main/java/com/sdkwork/web/app/sdk/model/IssueCertificateRequest.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/ListenerCertificateBindingResponse.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/ListenerCertificateSummaryResponse.java",
       "src/main/java/com/sdkwork/web/app/sdk/model/MediaChecksum.java",
@@ -110,7 +102,15 @@
       "src/main/java/com/sdkwork/web/app/sdk/model/UpdateSiteRequest.java",
       "src/main/java/com/sdkwork/web/app/sdk/SdkworkAppClient.java"
     ],
-    "deletedGeneratedFiles": [],
+    "deletedGeneratedFiles": [
+      "src/main/java/com/sdkwork/web/app/sdk/model/CertificateOperationResponse.java",
+      "src/main/java/com/sdkwork/web/app/sdk/model/CertificatePage.java",
+      "src/main/java/com/sdkwork/web/app/sdk/model/CertificateResponse.java",
+      "src/main/java/com/sdkwork/web/app/sdk/model/CertificatesIssueResponse202.java",
+      "src/main/java/com/sdkwork/web/app/sdk/model/CertificatesListResponse.java",
+      "src/main/java/com/sdkwork/web/app/sdk/model/CertificatesOperationsRetrieveResponse.java",
+      "src/main/java/com/sdkwork/web/app/sdk/model/IssueCertificateRequest.java"
+    ],
     "scaffoldedFiles": [],
     "preservedScaffoldFiles": [
       "custom/README.md"
@@ -128,13 +128,19 @@
       {
         "area": "api-surface",
         "paths": [
-          "src/main/java/com/sdkwork/web/app/sdk/api/DomainApi.java"
+          "src/main/java/com/sdkwork/web/app/sdk/api/CertificateApi.java"
         ]
       },
       {
         "area": "models",
         "paths": [
-          "src/main/java/com/sdkwork/web/app/sdk/model/DomainsListResponse.java"
+          "src/main/java/com/sdkwork/web/app/sdk/model/CertificateOperationResponse.java",
+          "src/main/java/com/sdkwork/web/app/sdk/model/CertificatePage.java",
+          "src/main/java/com/sdkwork/web/app/sdk/model/CertificateResponse.java",
+          "src/main/java/com/sdkwork/web/app/sdk/model/CertificatesIssueResponse202.java",
+          "src/main/java/com/sdkwork/web/app/sdk/model/CertificatesListResponse.java",
+          "src/main/java/com/sdkwork/web/app/sdk/model/CertificatesOperationsRetrieveResponse.java",
+          "src/main/java/com/sdkwork/web/app/sdk/model/IssueCertificateRequest.java"
         ]
       },
       {
@@ -174,12 +180,14 @@
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "medium",
+    "riskLevel": "high",
     "nextAction": "verify",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
     "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
+      "deleted-generated-files",
+      "manual-review-required",
       "verification-required"
     ]
   },

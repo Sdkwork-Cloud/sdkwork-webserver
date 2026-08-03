@@ -2,7 +2,7 @@
   "schemaVersion": 5,
   "kind": "sdkwork.app.topology",
   "appId": "sdkwork-web-server",
-  "applicationCode": "web",
+  "applicationCode": "webserver",
   "archetype": "application-http-gateway",
   "profileRoot": "etc/topology",
   "profilePattern": "{deploymentProfile}.{environment}.env",
@@ -79,6 +79,23 @@
       ],
       "httpUrlEnv": "SDKWORK_WEB_PLATFORM_API_GATEWAY_HTTP_URL",
       "clientHttpEnv": "VITE_SDKWORK_WEB_PLATFORM_API_GATEWAY_HTTP_URL"
+    },
+    "dependency.deploy-app-api": {
+      "connectivityPlane": "dependency",
+      "protocols": [
+        "http"
+      ],
+      "runtimeMode": "same-origin",
+      "sameOriginAllowed": true,
+      "optional": true,
+      "apiAuthority": "sdkwork-deployments-app-api",
+      "sdkFamily": "deployments-app-sdk",
+      "prefix": "/app/v3/api",
+      "executableAssemblyExport": "sdkwork_api_deployments_assembly::assemble_domain_certificate_blocks",
+      "profileCoverage": [
+        "standalone.development",
+        "standalone.production"
+      ]
     }
   },
   "cloudPublicHosts": {

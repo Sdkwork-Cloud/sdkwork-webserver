@@ -52,6 +52,8 @@ export interface WebserverPageInfo {
   page: number;
   pageSize: number;
   total?: number;
+  /** Opaque continuation token for cursor-paginated resources (PAGINATION_SPEC). */
+  nextCursor?: string;
 }
 
 export interface WebserverResourcePage {
@@ -60,6 +62,8 @@ export interface WebserverResourcePage {
 }
 
 export interface WebserverResourceQuery {
+  /** Opaque keyset continuation token; cursor mode replaces page for the request (PAGINATION_SPEC). */
+  cursor?: string;
   filters?: Readonly<Record<string, string>>;
   page: number;
   pageSize: number;

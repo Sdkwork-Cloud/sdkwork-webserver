@@ -16,7 +16,7 @@
     },
     {
       "path": "api/certificate.go",
-      "sha256": "7a5f1bf318476ee88c038c34b4e010831a50e04a6604a98828640c7c85569162"
+      "sha256": "8b2dc57abdabe832aa7c6ed4c72793a8e0a5cb379b09a801c3094f46374ef5a5"
     },
     {
       "path": "api/deployment.go",
@@ -88,7 +88,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "3019b52ed657e104005e569f8c324993542698dca1e44d45387d3719a85e75d1"
+      "sha256": "cdff67509124b6d8d5db2de91a447841081cf4822d281deaf9d721e9bbffcd38"
     },
     {
       "path": "sdk.go",
@@ -105,30 +105,6 @@
     {
       "path": "types/certificate_identifier_response.go",
       "sha256": "feada5edb1a501e43ed58effcae2d2102173b9e1a8a48c110b8684bd584d47d0"
-    },
-    {
-      "path": "types/certificate_operation_response.go",
-      "sha256": "4c1229234d0810a66d3f9464f3b5f880a36cddac090c15a8b2d7725758270288"
-    },
-    {
-      "path": "types/certificate_page.go",
-      "sha256": "7e48c1f38547c1a8b371b315004abac369848841f06d2573ed5e230be4d9d17d"
-    },
-    {
-      "path": "types/certificate_response.go",
-      "sha256": "57204b309219227501f385b18818b734fe447c704ccc8400fc059e513e6a9fc9"
-    },
-    {
-      "path": "types/certificates_issue_response202.go",
-      "sha256": "d081921cbb29be33d27c19f2e29e6f70f538fa5050945dcf3f55aea5de00b618"
-    },
-    {
-      "path": "types/certificates_list_response.go",
-      "sha256": "e2c06071aaf139d4925737a3229ebcf8b8377989a4126b616c0640dc05442548"
-    },
-    {
-      "path": "types/certificates_operations_retrieve_response.go",
-      "sha256": "3c330416df09d3ee07ff88e593b264511e6d7224c850e22cc7038833ebc55911"
     },
     {
       "path": "types/common.go",
@@ -213,10 +189,6 @@
     {
       "path": "types/import_git_source_version_request.go",
       "sha256": "a297e43078e079d7a2f0450e3cfab3900aa7ccc6392d8b3826920440495949ad"
-    },
-    {
-      "path": "types/issue_certificate_request.go",
-      "sha256": "8a09e4bdadf7e9192139d0301196f670abeaa6bdb9159ff9f25973d3d646df89"
     },
     {
       "path": "types/listener_certificate_binding_response.go",

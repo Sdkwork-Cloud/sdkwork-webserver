@@ -105,13 +105,13 @@ System.out.println(result);
 ### certificate
 
 ```java
-// 获取证书列表
+// List certificates active on the domain listener
+String siteId = "1";
+String domainId = "1";
 Map<String, Object> params = new LinkedHashMap<>();
 params.put("page", 1);
 params.put("page_size", 2);
-params.put("site_id", "00000000-0000-0000-0000-000000000001");
-params.put("domain_id", "00000000-0000-0000-0000-000000000001");
-CertificatesListResponse result = client.getCertificate().certificatesList(params);
+SitesDomainsListenerCertificateBindingsListResponse result = client.getCertificate().sitesDomainsListenerCertificateBindingsList(siteId, domainId, params);
 System.out.println(result);
 ```
 

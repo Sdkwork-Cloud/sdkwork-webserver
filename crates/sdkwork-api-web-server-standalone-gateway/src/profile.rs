@@ -72,8 +72,8 @@ struct OwnerApiContribution {
 
 pub(crate) async fn assemble_standalone_profile(
 ) -> Result<StandaloneApiProfile, StandaloneProfileError> {
-    let web = sdkwork_api_web_server_assembly::assemble_api_router(
-        sdkwork_api_web_server_assembly::ApiAssemblyContext::default(),
+    let web = sdkwork_api_webserver_assembly::assemble_api_router(
+        sdkwork_api_webserver_assembly::ApiAssemblyContext::default(),
     )
     .await
     .map_err(|error| {

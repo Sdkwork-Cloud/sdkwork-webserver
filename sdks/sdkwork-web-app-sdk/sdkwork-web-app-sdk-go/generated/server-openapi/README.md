@@ -106,14 +106,14 @@ fmt.Println(result)
 ### certificate
 
 ```go
-// 获取证书列表
+// List certificates active on the domain listener
+siteId := "1"
+domainId := "1"
 params := map[string]interface{}{
     "page": 1,
     "page_size": 2,
-    "site_id": "site_id",
-    "domain_id": "domain_id",
 }
-result, err := client.Certificate.CertificatesList(params)
+result, err := client.Certificate.SitesDomainsListenerCertificateBindingsList(siteId, domainId, params)
 if err != nil {
     panic(err)
 }

@@ -88,9 +88,11 @@ var_dump($result);
 ```php
 <?php
 
-// 获取证书列表
-$params = ['page' => 1, 'page_size' => 2, 'site_id' => '00000000-0000-0000-0000-000000000001', 'domain_id' => '00000000-0000-0000-0000-000000000001'];
-$result = $client->certificate->certificatesList($params);
+// List certificates active on the domain listener
+$siteId = '1';
+$domainId = '1';
+$params = ['page' => 1, 'page_size' => 2];
+$result = $client->certificate->sitesDomainsListenerCertificateBindingsList($siteId, $domainId, $params);
 var_dump($result);
 ```
 

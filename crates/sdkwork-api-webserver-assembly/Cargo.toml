@@ -1,18 +1,19 @@
 [package]
-name = "sdkwork-api-web-server-assembly"
+name = "sdkwork-api-webserver-assembly"
 edition.workspace = true
 license.workspace = true
 version.workspace = true
-description = "Generated API assembly for sdkwork-web-server application HTTP plane."
+description = "Generated API assembly for sdkwork-webserver application HTTP plane."
 
 [lib]
-name = "sdkwork_api_web_server_assembly"
+name = "sdkwork_api_webserver_assembly"
 path = "src/lib.rs"
 
 [dependencies]
 axum.workspace = true
 tokio.workspace = true
 sdkwork-web-bootstrap.workspace = true
+sdkwork-web-core.workspace = true
 async-trait.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
@@ -21,7 +22,7 @@ sdkwork-intelligence-webserver-service.workspace = true
 sdkwork-webserver-contract.workspace = true
 sdkwork-webserver-database-host.workspace = true
 sdkwork-web-contract.workspace = true
-sdkwork-web-core.workspace = true
+sdkwork-api-deployments-assembly.workspace = true
 sdkwork-routes-webserver-app-api.workspace = true
 sdkwork-routes-webserver-backend-api.workspace = true
 sdkwork-routes-webserver-internal-api.workspace = true

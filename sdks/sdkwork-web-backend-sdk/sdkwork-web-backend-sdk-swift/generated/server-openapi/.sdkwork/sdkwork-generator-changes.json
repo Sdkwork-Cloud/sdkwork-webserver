@@ -9,16 +9,10 @@
     "protocol": "http",
     "packageName": "sdkwork-web-backend-sdk"
   },
-  "changeFingerprint": "5ff423c36a2dfa44c38512a7d8365fd29d947d50c596c46fb7fd94ee0fdbfdfe",
+  "changeFingerprint": "be87ec3ccfe3c166540dfdfd153a9afc946b330c2d19c7f144407d2c56dd6c39",
   "changes": {
     "createdGeneratedFiles": [],
-    "updatedGeneratedFiles": [
-      "README.md",
-      "Sources/API/ApplicationDeploymentApi.swift",
-      "Sources/API/ApplicationSourceVersionApi.swift",
-      "Sources/API/AuditApi.swift",
-      "Sources/API/ServerApi.swift"
-    ],
+    "updatedGeneratedFiles": [],
     "unchangedGeneratedFiles": [
       "bin/publish-core.mjs",
       "bin/publish.ps1",
@@ -26,16 +20,21 @@
       "CHANGELOG.md",
       "LICENSE",
       "Package.swift",
+      "README.md",
       "sdkwork-sdk.json",
       "Sources/API/AgentApi.swift",
       "Sources/API/API.swift",
       "Sources/API/ApiPaths.swift",
       "Sources/API/ApplicationApi.swift",
+      "Sources/API/ApplicationDeploymentApi.swift",
       "Sources/API/ApplicationDomainApi.swift",
+      "Sources/API/ApplicationSourceVersionApi.swift",
+      "Sources/API/AuditApi.swift",
       "Sources/API/CertificateApi.swift",
       "Sources/API/CertificateDistributionApi.swift",
       "Sources/API/DomainApi.swift",
       "Sources/API/NginxApi.swift",
+      "Sources/API/ServerApi.swift",
       "Sources/HTTP/HttpClient.swift",
       "Sources/Models.swift",
       "Sources/SdkworkBackendClient.swift"
@@ -49,64 +48,26 @@
   },
   "impact": {
     "schemaVersion": 1,
-    "areas": [
-      "api-surface",
-      "documentation"
-    ],
-    "details": [
-      {
-        "area": "api-surface",
-        "paths": [
-          "Sources/API/ApplicationDeploymentApi.swift",
-          "Sources/API/ApplicationSourceVersionApi.swift",
-          "Sources/API/AuditApi.swift",
-          "Sources/API/ServerApi.swift"
-        ]
-      },
-      {
-        "area": "documentation",
-        "paths": [
-          "README.md"
-        ]
-      }
-    ],
-    "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, documentation. Verification is required."
+    "areas": [],
+    "details": [],
+    "requiresVerification": false,
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
   },
   "verificationPlan": {
-    "shouldRun": true,
-    "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, documentation. Verification is required. Run the required verification commands now against the generated SDK output.",
-    "steps": [
-      {
-        "id": "check",
-        "title": "Unified package check",
-        "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, documentation.",
-        "workingDirectory": "E:\\sdkwork-space\\sdkwork-webserver\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-swift\\generated\\server-openapi",
-        "command": "node",
-        "args": [
-          "./bin/publish-core.mjs",
-          "--language",
-          "swift",
-          "--project-dir",
-          ".",
-          "--action",
-          "check"
-        ],
-        "displayCommand": "node ./bin/publish-core.mjs --language swift --project-dir . --action check"
-      }
-    ]
+    "shouldRun": false,
+    "runPhase": "skip",
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
+    "steps": []
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "medium",
-    "nextAction": "verify",
+    "riskLevel": "low",
+    "nextAction": "skip",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
-    "summary": "Changes have been applied. Run the required verification plan now.",
+    "summary": "No actionable changes were detected. No apply or verification step is required.",
     "reasons": [
-      "verification-required"
+      "no-actionable-changes"
     ]
   },
   "preservedLegacyFiles": false

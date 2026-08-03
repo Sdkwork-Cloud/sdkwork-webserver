@@ -535,7 +535,8 @@ paths:
     get:
       operationId: sites.domains.listenerCertificateBindings.list
       summary: List certificates active on the domain listener
-      description: Returns an offset-paginated P1 list ordered by default status, priority, and stable binding id.
+      description: Returns an offset-paginated P1 list ordered by default status,
+        priority, and stable binding id.
       tags:
         - certificate
       security:
@@ -559,12 +560,12 @@ paths:
                 allOf:
                   - $ref: "#/components/schemas/SdkWorkApiResponse"
                   - type: object
-                    required: [data]
+                    required: [ data ]
                     properties:
                       data:
                         type: object
                         additionalProperties: false
-                        required: [items, pageInfo]
+                        required: [ items, pageInfo ]
                         properties:
                           items:
                             type: array
@@ -607,12 +608,12 @@ paths:
                 allOf:
                   - $ref: "#/components/schemas/SdkWorkApiResponse"
                   - type: object
-                    required: [data]
+                    required: [ data ]
                     properties:
                       data:
                         type: object
                         additionalProperties: false
-                        required: [item]
+                        required: [ item ]
                         properties:
                           item:
                             $ref: "#/components/schemas/ListenerCertificateBindingResponse"
@@ -680,12 +681,12 @@ paths:
                 allOf:
                   - $ref: "#/components/schemas/SdkWorkApiResponse"
                   - type: object
-                    required: [data]
+                    required: [ data ]
                     properties:
                       data:
                         type: object
                         additionalProperties: false
-                        required: [items, pageInfo]
+                        required: [ items, pageInfo ]
                         properties:
                           items:
                             type: array
@@ -727,11 +728,11 @@ paths:
                 allOf:
                   - $ref: "#/components/schemas/SdkWorkApiResponse"
                   - type: object
-                    required: [data]
+                    required: [ data ]
                     properties:
                       data:
                         type: object
-                        required: [item]
+                        required: [ item ]
                         properties:
                           item:
                             $ref: "#/components/schemas/SourceVersionResponse"
@@ -775,11 +776,11 @@ paths:
                 allOf:
                   - $ref: "#/components/schemas/SdkWorkApiResponse"
                   - type: object
-                    required: [data]
+                    required: [ data ]
                     properties:
                       data:
                         type: object
-                        required: [item]
+                        required: [ item ]
                         properties:
                           item:
                             $ref: "#/components/schemas/SourceVersionResponse"
@@ -812,11 +813,11 @@ paths:
                 allOf:
                   - $ref: "#/components/schemas/SdkWorkApiResponse"
                   - type: object
-                    required: [data]
+                    required: [ data ]
                     properties:
                       data:
                         type: object
-                        required: [item]
+                        required: [ item ]
                         properties:
                           item:
                             $ref: "#/components/schemas/SourceVersionResponse"
@@ -1016,7 +1017,9 @@ paths:
     get:
       operationId: sites.envVariables.list
       summary: 获取环境变量列表
-      description: Returns the complete active environment-variable collection for one authorized application. The collection is transactionally capped at 100 items per application.
+      description: Returns the complete active environment-variable collection for one
+        authorized application. The collection is transactionally capped at 100
+        items per application.
       tags:
         - envVariable
       security:
@@ -1113,7 +1116,8 @@ paths:
     patch:
       operationId: sites.envVariables.update
       summary: 轮换环境变量值
-      description: Rotates the stored value of an active environment variable in place; the key and environment cannot change.
+      description: Rotates the stored value of an active environment variable in
+        place; the key and environment cannot change.
       tags:
         - envVariable
       security:
@@ -1156,7 +1160,8 @@ paths:
     delete:
       operationId: sites.envVariables.delete
       summary: 删除环境变量
-      description: Soft-deletes an active environment variable and releases its key for re-creation.
+      description: Soft-deletes an active environment variable and releases its key
+        for re-creation.
       tags:
         - envVariable
       security:
@@ -1190,7 +1195,7 @@ paths:
       x-sdkwork-api-authority: sdkwork-web.app
       x-sdkwork-request-context: WebRequestContext
       x-sdkwork-auth-mode: dual-token
-      x-sdkwork-permission: web.certificates.read
+      x-sdkwork-permission: false
       x-sdkwork-owner: sdkwork-web
       parameters:
         - $ref: "#/components/parameters/PageParam"
@@ -1222,152 +1227,15 @@ paths:
                             $ref: "#/components/schemas/PageInfo"
         "401":
           $ref: "#/components/responses/Unauthorized"
-  /app/v3/api/certificates:
-    get:
-      operationId: certificates.list
-      summary: 获取证书列表
-      tags:
-        - certificate
-      security:
-        - AuthToken: []
-          AccessToken: []
-      x-sdkwork-api-surface: app-api
-      x-sdkwork-api-authority: sdkwork-web.app
-      x-sdkwork-request-context: WebRequestContext
-      x-sdkwork-auth-mode: dual-token
-      x-sdkwork-permission: web.certificates.read
-      x-sdkwork-owner: sdkwork-web
-      parameters:
-        - $ref: "#/components/parameters/PageParam"
-        - $ref: "#/components/parameters/PageSizeParam"
-        - name: site_id
-          in: query
-          required: false
-          description: Limit certificates to one application owned by the authenticated user.
-          schema:
-            type: string
-            format: uuid
-        - name: domain_id
-          in: query
-          required: false
-          description: Limit certificates to those whose SAN identifiers cover this domain.
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: 成功
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/SdkWorkApiResponse"
-                  - type: object
-                    required:
-                      - data
-                    properties:
-                      data:
-                        type: object
-                        additionalProperties: false
-                        required:
-                          - items
-                          - pageInfo
-                        properties:
-                          items: &a5
-                            type: array
-                            items:
-                              $ref: "#/components/schemas/CertificateResponse"
-                          pageInfo:
-                            $ref: "#/components/schemas/PageInfo"
-  /app/v3/api/certificates/issue:
-    post:
-      operationId: certificates.issue
-      summary: 申请证书
-      tags:
-        - certificate
-      security:
-        - AuthToken: []
-          AccessToken: []
-      x-sdkwork-api-surface: app-api
-      x-sdkwork-api-authority: sdkwork-web.app
-      x-sdkwork-request-context: WebRequestContext
-      x-sdkwork-auth-mode: dual-token
-      x-sdkwork-permission: web.certificates.write
-      x-sdkwork-idempotent: true
-      parameters:
-        - $ref: "#/components/parameters/IdempotencyKey"
-      x-sdkwork-owner: sdkwork-web
-      x-sdkwork-rate-limit-tier: auth-critical
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/IssueCertificateRequest"
-      responses:
-        "202":
-          description: 证书申请已接受并进入异步处理队列
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/SdkWorkApiResponse"
-                  - type: object
-                    required:
-                      - data
-                    properties:
-                      data:
-                        $ref: "#/components/schemas/SdkWorkAsyncData"
-        "409":
-          $ref: "#/components/responses/Conflict"
-        "422":
-          $ref: "#/components/responses/ValidationError"
-  /app/v3/api/certificates/operations/{operationId}:
-    parameters:
-      - $ref: "#/components/parameters/CertificateOperationIdParam"
-    get:
-      operationId: certificates.operations.retrieve
-      summary: 获取证书异步操作状态
-      tags:
-        - certificate
-      security:
-        - AuthToken: []
-          AccessToken: []
-      x-sdkwork-api-surface: app-api
-      x-sdkwork-api-authority: sdkwork-web.app
-      x-sdkwork-request-context: WebRequestContext
-      x-sdkwork-auth-mode: dual-token
-      x-sdkwork-permission: web.certificates.read
-      x-sdkwork-owner: sdkwork-web
-      responses:
-        "200":
-          description: 证书异步操作状态返回成功
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/SdkWorkApiResponse"
-                  - type: object
-                    required:
-                      - data
-                    properties:
-                      data:
-                        type: object
-                        additionalProperties: false
-                        required:
-                          - item
-                        properties:
-                          item:
-                            $ref: "#/components/schemas/CertificateOperationResponse"
-        "404":
-          $ref: "#/components/responses/NotFound"
   /app/v3/api/sites/{siteId}/health_checks:
     parameters:
       - $ref: "#/components/parameters/SiteIdParam"
     get:
       operationId: sites.healthChecks.list
       summary: 获取健康检查配置
-      description: Returns the complete health-check configuration collection for one authorized application. The collection is transactionally capped at 100 items per application.
+      description: Returns the complete health-check configuration collection for one
+        authorized application. The collection is transactionally capped at 100
+        items per application.
       tags:
         - monitor
       security:
@@ -1487,7 +1355,8 @@ components:
     CursorParam:
       name: cursor
       in: query
-      description: Opaque keyset continuation token for cursor-paginated operations; must not be combined with page.
+      description: Opaque keyset continuation token for cursor-paginated operations;
+        must not be combined with page.
       schema:
         type: string
         minLength: 1
@@ -1832,7 +1701,17 @@ components:
             - none
     DomainResponse:
       type: object
-      required: [id, hostname, certificateCount, isPrimary, isVerified, sslEnabled, status, createdAt]
+      required:
+        [
+          id,
+          hostname,
+          certificateCount,
+          isPrimary,
+          isVerified,
+          sslEnabled,
+          status,
+          createdAt
+        ]
       properties:
         id:
           type: string
@@ -1890,10 +1769,10 @@ components:
           type: boolean
         status:
           type: string
-          enum: [PENDING, VERIFIED, FAILED, EXPIRED]
+          enum: [ PENDING, VERIFIED, FAILED, EXPIRED ]
         method:
           type: string
-          enum: [DNS_TXT]
+          enum: [ DNS_TXT ]
         recordName:
           type: string
           minLength: 1
@@ -1955,7 +1834,7 @@ components:
           maxLength: 100
         sourceType:
           type: string
-          enum: [ARCHIVE, DIRECTORY]
+          enum: [ ARCHIVE, DIRECTORY ]
         sourceRef:
           type: string
           minLength: 1
@@ -1983,7 +1862,7 @@ components:
     ImportGitSourceVersionRequest:
       type: object
       additionalProperties: false
-      required: [versionTag, repositoryUrl]
+      required: [ versionTag, repositoryUrl ]
       properties:
         versionTag:
           type: string
@@ -2024,7 +1903,7 @@ components:
           type: string
         sourceType:
           type: string
-          enum: [ARCHIVE, DIRECTORY, GIT]
+          enum: [ ARCHIVE, DIRECTORY, GIT ]
         sourceRef:
           type: string
         commitHash:
@@ -2045,7 +1924,7 @@ components:
           $ref: "#/components/schemas/SourceVersionConfigSnapshot"
         status:
           type: integer
-          enum: [0, 1, 2, 3]
+          enum: [ 0, 1, 2, 3 ]
         retained:
           type: boolean
         createdAt:
@@ -2068,9 +1947,9 @@ components:
       type: object
       additionalProperties: false
       description: >-
-        Deployment source command. Git deployments (deployType 2) require an HTTPS sourceRef and
-        may omit artifact fields. Other deployment types require artifactDriveUri, artifactSize,
-        and artifactHash together.
+        Deployment source command. Git deployments (deployType 2) require an
+        HTTPS sourceRef and may omit artifact fields. Other deployment types
+        require artifactDriveUri, artifactSize, and artifactHash together.
       required:
         - deployType
       properties:
@@ -2080,7 +1959,8 @@ components:
           description: Ready, retained application source version selected for this release.
         deployType:
           type: integer
-          description: 1 for a stored package, 2 for a Git repository, 3 for CI/CD, or 4 for API delivery.
+          description: 1 for a stored package, 2 for a Git repository, 3 for CI/CD, or 4
+            for API delivery.
           enum:
             - 1
             - 2
@@ -2099,12 +1979,14 @@ components:
           type: string
           minLength: 1
           maxLength: 500
-          description: HTTPS Git repository URL when deployType is 2. Credentials, query parameters, and fragments are forbidden.
+          description: HTTPS Git repository URL when deployType is 2. Credentials, query
+            parameters, and fragments are forbidden.
         artifactDriveUri:
           type: string
           maxLength: 500
           pattern: '^drive://spaces/[^/?#]+/nodes/[^/?#]+$'
-          description: Stable Drive resource identity for package deployments. Signed delivery URLs are forbidden.
+          description: Stable Drive resource identity for package deployments. Signed
+            delivery URLs are forbidden.
         artifactSize:
           type: string
           format: int64
@@ -2117,12 +1999,12 @@ components:
           description: Lowercase SHA-256 hexadecimal digest of the uploaded package.
         environment:
           type: string
-          enum: [development, test, staging, production]
+          enum: [ development, test, staging, production ]
           default: production
     DeploymentResponse:
       type: object
       additionalProperties: false
-      required: [id, siteId, status, deployType, environment, createdAt]
+      required: [ id, siteId, status, deployType, environment, createdAt ]
       properties:
         id:
           type: string
@@ -2253,38 +2135,10 @@ components:
           x-sdkwork-int64-string: true
           x-sdkwork-rust-type: i64
           description: Total item count as a string to avoid JavaScript precision loss.
-    IssueCertificateRequest:
-      type: object
-      additionalProperties: false
-      required:
-        - domainIds
-        - certType
-      properties:
-        domainIds:
-          type: array
-          minItems: 1
-          maxItems: 8
-          uniqueItems: true
-          description: Ordered exact or wildcard domain identifiers included in the certificate SAN extension.
-          items:
-            type: string
-            format: uuid
-        certType:
-          type: integer
-          enum:
-            - 1
-            - 3
-        keyAlgorithm:
-          type: string
-          enum: [ECDSA, RSA]
-          default: ECDSA
-        autoRenew:
-          type: boolean
-          default: true
     CertificateIdentifierResponse:
       type: object
       additionalProperties: false
-      required: [domainId, hostname, identifierType, position]
+      required: [ domainId, hostname, identifierType, position ]
       properties:
         domainId:
           type: string
@@ -2295,96 +2149,15 @@ components:
           maxLength: 253
         identifierType:
           type: string
-          enum: [EXACT, WILDCARD]
+          enum: [ EXACT, WILDCARD ]
         position:
           type: integer
           minimum: 0
           maximum: 7
-    CertificateResponse:
-      type: object
-      additionalProperties: false
-      required: [id, certName, identifiers, keyAlgorithm, status, createdAt]
-      properties:
-        id:
-          type: string
-          format: uuid
-        certName:
-          type: string
-        identifiers:
-          type: array
-          minItems: 1
-          maxItems: 8
-          items:
-            $ref: "#/components/schemas/CertificateIdentifierResponse"
-        certType:
-          type: integer
-        issuer:
-          type: string
-        fingerprint:
-          type: string
-          pattern: '^[a-f0-9]{64}$'
-        keyAlgorithm:
-          type: string
-          enum: [ECDSA, RSA]
-        notBefore:
-          type: string
-          format: date-time
-        notAfter:
-          type: string
-          format: date-time
-        autoRenew:
-          type: boolean
-        renewalStatus:
-          type: string
-          enum: [IDLE, RENEWING, PENDING, FAILED]
-        status:
-          type: string
-          enum: [PENDING, ISSUED, FAILED, EXPIRED, REVOKED, ARCHIVED]
-        createdAt:
-          type: string
-          format: date-time
-    CertificateOperationResponse:
-      type: object
-      additionalProperties: false
-      required: [id, certificateId, operationType, status, attemptCount, maxAttempts, nextAttemptAt, createdAt, updatedAt]
-      properties:
-        id:
-          type: string
-          format: uuid
-        certificateId:
-          type: string
-          format: uuid
-        operationType:
-          type: string
-          enum: [ISSUE, RENEW]
-        status:
-          type: string
-          enum: [PENDING, RUNNING, SUCCEEDED, FAILED]
-        attemptCount:
-          type: integer
-          minimum: 0
-        maxAttempts:
-          type: integer
-          minimum: 1
-        nextAttemptAt:
-          type: string
-          format: date-time
-        failureCode:
-          type: string
-          pattern: '^[A-Z0-9_]{1,64}$'
-        createdAt:
-          type: string
-          format: date-time
-        updatedAt:
-          type: string
-          format: date-time
-        completedAt:
-          type: string
-          format: date-time
     CreateListenerCertificateBindingRequest:
       type: object
       additionalProperties: false
-      required: [certificateId]
+      required: [ certificateId ]
       properties:
         certificateId:
           type: string
@@ -2392,7 +2165,8 @@ components:
         certificateVersionId:
           type: string
           format: uuid
-          description: Immutable certificate version. Omit to bind the certificate's current active version.
+          description: Immutable certificate version. Omit to bind the certificate's
+            current active version.
         priority:
           type: integer
           minimum: 0
@@ -2404,7 +2178,21 @@ components:
     ListenerCertificateBindingResponse:
       type: object
       additionalProperties: false
-      required: [id, siteId, domainId, certificateId, desiredCertificateVersionId, desiredCertificate, keyAlgorithm, priority, isDefault, status, createdAt, updatedAt]
+      required:
+        [
+          id,
+          siteId,
+          domainId,
+          certificateId,
+          desiredCertificateVersionId,
+          desiredCertificate,
+          keyAlgorithm,
+          priority,
+          isDefault,
+          status,
+          createdAt,
+          updatedAt
+        ]
       properties:
         id:
           type: string
@@ -2430,7 +2218,7 @@ components:
           $ref: "#/components/schemas/ListenerCertificateSummaryResponse"
         keyAlgorithm:
           type: string
-          enum: [ECDSA, RSA]
+          enum: [ ECDSA, RSA ]
         priority:
           type: integer
           minimum: 0
@@ -2439,9 +2227,9 @@ components:
           type: boolean
         status:
           type: string
-          enum: [PENDING, DEPLOYING, ACTIVE, PAUSED, FAILED, ARCHIVED]
+          enum: [ PENDING, DEPLOYING, ACTIVE, PAUSED, FAILED, ARCHIVED ]
         activatedAt:
-          type: [string, 'null']
+          type: [ string, 'null' ]
           format: date-time
         createdAt:
           type: string
@@ -2452,7 +2240,7 @@ components:
     ListenerCertificateSummaryResponse:
       type: object
       additionalProperties: false
-      required: [certName, identifiers, status]
+      required: [ certName, identifiers, status ]
       properties:
         certName:
           type: string
@@ -2472,18 +2260,7 @@ components:
           format: date-time
         status:
           type: string
-          enum: [PENDING, ISSUED, FAILED, EXPIRED, REVOKED, ARCHIVED]
-    CertificatePage:
-      type: object
-      properties:
-        items: *a5
-        total:
-          type: string
-          format: int64
-          pattern: ^[0-9]+$
-          x-sdkwork-int64-string: true
-          x-sdkwork-rust-type: i64
-          description: Total item count as a string to avoid JavaScript precision loss.
+          enum: [ PENDING, ISSUED, FAILED, EXPIRED, REVOKED, ARCHIVED ]
     CreateHealthCheckRequest:
       type: object
       additionalProperties: false
@@ -2519,7 +2296,17 @@ components:
     HealthCheckResponse:
       type: object
       additionalProperties: false
-      required: [id, checkType, checkUrl, checkInterval, timeoutMs, retryCount, status, createdAt]
+      required:
+        [
+          id,
+          checkType,
+          checkUrl,
+          checkInterval,
+          timeoutMs,
+          retryCount,
+          status,
+          createdAt
+        ]
       properties:
         id:
           type: string
@@ -2612,7 +2399,7 @@ components:
     SdkWorkAsyncData:
       type: object
       additionalProperties: false
-      required: [accepted, operationId, status]
+      required: [ accepted, operationId, status ]
       properties:
         accepted:
           type: boolean
@@ -2622,7 +2409,7 @@ components:
           format: uuid
         status:
           type: string
-          enum: [pending, running, succeeded, failed, cancelled]
+          enum: [ pending, running, succeeded, failed, cancelled ]
         pollUrl:
           type: string
           format: uri-reference

@@ -276,7 +276,7 @@ export function createWebserverConsoleRegistry(
         loadSourceInputDefaults: async (context) => {
           const versions = await client.sourceVersion.sites.sourceVersions.list(
             selectedId(context, "siteId"),
-            { page: 1, pageSize: 1 },
+            { pageSize: 1 },
           );
           const latest = versions.items[0];
           return latest?.sourceType === "GIT" && latest.sourceRef?.trim()
@@ -292,7 +292,7 @@ export function createWebserverConsoleRegistry(
         confirmation: true,
         fieldOptions: { deployType: [1], sourceVersionId: [], environment: ["production", "staging", "test", "development"] },
         loadFieldOptions: async (context) => {
-          const versions = await client.sourceVersion.sites.sourceVersions.list(selectedId(context, "siteId"), { page: 1, pageSize: 100 });
+          const versions = await client.sourceVersion.sites.sourceVersions.list(selectedId(context, "siteId"), { pageSize: 100 });
           return {
             sourceVersionId: versions.items
               .filter((version) => version.status === 1 && version.retained)
@@ -317,7 +317,7 @@ export function createWebserverConsoleRegistry(
       action("create-check", "Add health check", { checkType: 1, checkUrl: "/health", checkInterval: 30, timeoutMs: 5_000, retryCount: 3 }, async (context) => client.monitor.sites.healthChecks.create(requiredScope(context.scopeId), createHealthCheckRequest(context.body), idempotencyParams(context)), { fieldOptions: { checkType: [1, 2, 3] }, permission: "web.sites.write", scope: true }),
     ]),
     "source-versions": scopedSource(
-      (query) => client.sourceVersion.sites.sourceVersions.list(requiredScope(query.scopeId), { page: query.page, pageSize: query.pageSize }),
+      (query) => client.sourceVersion.sites.sourceVersions.list(requiredScope(query.scopeId), { cursor: query.cursor, pageSize: query.pageSize }),
       [
         action(
           "create",
@@ -333,12 +333,12 @@ export function createWebserverConsoleRegistry(
         ),
       ],
     ),
-    deployments: scopedSource((query) => client.deployment.sites.deployments.list(requiredScope(query.scopeId), { page: query.page, pageSize: query.pageSize }), [
+    deployments: scopedSource((query) => client.deployment.sites.deployments.list(requiredScope(query.scopeId), { cursor: query.cursor, pageSize: query.pageSize }), [
       action("deploy", "Deploy", { deployType: 1, sourceVersionId: "", environment: "production", versionTag: "" }, (context) => deployApplication(clients, context), {
         confirmation: true,
         fieldOptions: { deployType: [1], sourceVersionId: [], environment: ["production", "staging", "test", "development"] },
         loadFieldOptions: async (context) => {
-          const versions = await client.sourceVersion.sites.sourceVersions.list(requiredScope(context.scopeId), { page: 1, pageSize: 100 });
+          const versions = await client.sourceVersion.sites.sourceVersions.list(requiredScope(context.scopeId), { pageSize: 100 });
           return {
             sourceVersionId: versions.items
               .filter((version) => version.status === 1 && version.retained)

@@ -33,8 +33,8 @@ function deployRenderers(): Partial<Record<WebserverResourceKey, ReactNode>> {
   return {
     domains: (
       <DeployDomainManagementSurface
-        deployBaseUrl="http://127.0.0.1:3900"
-        driveBaseUrl="http://127.0.0.1:3800"
+        deployBaseUrl="/"
+        driveBaseUrl="/"
         locale="en-US"
         resource="domains"
         tokenManager={tokenManager}
@@ -42,8 +42,8 @@ function deployRenderers(): Partial<Record<WebserverResourceKey, ReactNode>> {
     ),
     certificates: (
       <DeployDomainManagementSurface
-        deployBaseUrl="http://127.0.0.1:3900"
-        driveBaseUrl="http://127.0.0.1:3800"
+        deployBaseUrl="/"
+        driveBaseUrl="/"
         locale="en-US"
         resource="certificates"
         tokenManager={tokenManager}
@@ -172,7 +172,7 @@ describe("console release controls", () => {
       mode: "git",
       repository: "https://github.com/sdkwork/customer-portal.git",
     });
-    expect(listSourceVersions).toHaveBeenCalledWith("site-1", { page: 1, pageSize: 1 });
+    expect(listSourceVersions).toHaveBeenCalledWith("site-1", { pageSize: 1 });
 
     const files = [new File(["index"], "index.html"), new File(["script"], "app.js")];
     await updateSource.execute({
@@ -233,7 +233,7 @@ describe("console release controls", () => {
       body: publish.bodyTemplate,
       selectedItem: { id: "site-1", name: "Portal", status: 2 },
     });
-    expect(listSourceVersions).toHaveBeenCalledWith("site-1", { page: 1, pageSize: 100 });
+    expect(listSourceVersions).toHaveBeenCalledWith("site-1", { pageSize: 100 });
     expect(options.sourceVersionId).toEqual([{
       label: "v3.0.0 · GIT",
       relatedValues: { versionTag: "v3.0.0" },

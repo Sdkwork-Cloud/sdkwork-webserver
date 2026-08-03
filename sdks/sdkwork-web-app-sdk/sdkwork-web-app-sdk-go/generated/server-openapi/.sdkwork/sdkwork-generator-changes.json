@@ -9,20 +9,18 @@
     "protocol": "http",
     "packageName": "github.com/sdkwork/sdkwork-web-app-sdk"
   },
-  "changeFingerprint": "acc5f0c0b5d722b21b4bf16dad4f73091b1f0de1c1b08861a18fd6d61d594770",
+  "changeFingerprint": "20f3c5681fa1b02d941d04df61b3463d2da9c10628d7585a6bf0e006c655d572",
   "changes": {
-    "createdGeneratedFiles": [
-      "types/domains_list_response.go"
-    ],
+    "createdGeneratedFiles": [],
     "updatedGeneratedFiles": [
-      "api/domain.go",
+      "api/certificate.go",
       "README.md"
     ],
     "unchangedGeneratedFiles": [
       "api/base.go",
-      "api/certificate.go",
       "api/deployment.go",
       "api/doc.go",
+      "api/domain.go",
       "api/env_variable.go",
       "api/monitor.go",
       "api/paths.go",
@@ -41,12 +39,6 @@
       "sdkwork-sdk.json",
       "types/application_store_listing.go",
       "types/certificate_identifier_response.go",
-      "types/certificate_operation_response.go",
-      "types/certificate_page.go",
-      "types/certificate_response.go",
-      "types/certificates_issue_response202.go",
-      "types/certificates_list_response.go",
-      "types/certificates_operations_retrieve_response.go",
       "types/common.go",
       "types/create_deployment_request.go",
       "types/create_domain_request.go",
@@ -61,13 +53,13 @@
       "types/domain_page.go",
       "types/domain_response.go",
       "types/domain_verify_response.go",
+      "types/domains_list_response.go",
       "types/env_variable_page.go",
       "types/env_variable_response.go",
       "types/field_error.go",
       "types/health_check_page.go",
       "types/health_check_response.go",
       "types/import_git_source_version_request.go",
-      "types/issue_certificate_request.go",
       "types/listener_certificate_binding_response.go",
       "types/listener_certificate_summary_response.go",
       "types/media_checksum.go",
@@ -116,7 +108,15 @@
       "types/update_env_variable_request.go",
       "types/update_site_request.go"
     ],
-    "deletedGeneratedFiles": [],
+    "deletedGeneratedFiles": [
+      "types/certificate_operation_response.go",
+      "types/certificate_page.go",
+      "types/certificate_response.go",
+      "types/certificates_issue_response202.go",
+      "types/certificates_list_response.go",
+      "types/certificates_operations_retrieve_response.go",
+      "types/issue_certificate_request.go"
+    ],
     "scaffoldedFiles": [],
     "preservedScaffoldFiles": [
       "custom/README.md"
@@ -134,13 +134,19 @@
       {
         "area": "api-surface",
         "paths": [
-          "api/domain.go"
+          "api/certificate.go"
         ]
       },
       {
         "area": "models",
         "paths": [
-          "types/domains_list_response.go"
+          "types/certificate_operation_response.go",
+          "types/certificate_page.go",
+          "types/certificate_response.go",
+          "types/certificates_issue_response202.go",
+          "types/certificates_list_response.go",
+          "types/certificates_operations_retrieve_response.go",
+          "types/issue_certificate_request.go"
         ]
       },
       {
@@ -180,12 +186,14 @@
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "medium",
+    "riskLevel": "high",
     "nextAction": "verify",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
     "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
+      "deleted-generated-files",
+      "manual-review-required",
       "verification-required"
     ]
   },

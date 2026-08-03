@@ -122,7 +122,7 @@ pub async fn build_router() -> Result<Router, String> {
 }
 
 pub async fn run_database_migrate_only() -> Result<(), String> {
-    sdkwork_api_web_server_assembly::migrate_database_from_env()
+    sdkwork_api_webserver_assembly::migrate_database_from_env()
         .await
         .map_err(|error| error.to_string())?;
     info!("Web database migration completed");

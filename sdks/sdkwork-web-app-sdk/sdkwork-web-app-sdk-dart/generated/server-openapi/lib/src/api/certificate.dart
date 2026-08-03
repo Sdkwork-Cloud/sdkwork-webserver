@@ -50,46 +50,6 @@ class CertificateApi {
     );
     await _client.delete(ApiPaths.appPath('/sites/${serializePathParameter(siteId, const PathParameterSpec('siteId', 'simple', false))}/domains/${serializePathParameter(domainId, const PathParameterSpec('domainId', 'simple', false))}/listener_certificate_bindings/${serializePathParameter(bindingId, const PathParameterSpec('bindingId', 'simple', false))}'), headers: requestHeaders);
   }
-
-  /// 获取证书列表
-  Future<CertificatesListResponse?> certificatesList([int? page, int? pageSize, String? siteId, String? domainId]) async {
-    final query = buildQueryString([
-      QueryParameterSpec('page', page, 'form', true, false, null),
-      QueryParameterSpec('page_size', pageSize, 'form', true, false, null),
-      QueryParameterSpec('site_id', siteId, 'form', true, false, null),
-      QueryParameterSpec('domain_id', domainId, 'form', true, false, null)
-    ]);
-    final response = await _client.get(ApiPaths.appendQueryString(ApiPaths.appPath('/certificates'), query));
-    return (() {
-      final map = sdkworkResponseAsMap(response);
-      return map == null ? null : CertificatesListResponse.fromJson(map);
-    })();
-  }
-
-  /// 申请证书
-  Future<CertificatesIssueResponse202?> certificatesIssue(IssueCertificateRequest body, String idempotencyKey) async {
-    final requestHeaders = buildRequestHeaders(
-      <String, HeaderParameterSpec>{
-        'Idempotency-Key': HeaderParameterSpec(idempotencyKey, 'simple', false, null),
-      },
-      <String, HeaderParameterSpec>{},
-    );
-    final payload = body.toJson();
-    final response = await _client.post(ApiPaths.appPath('/certificates/issue'), body: payload, headers: requestHeaders, contentType: 'application/json');
-    return (() {
-      final map = sdkworkResponseAsMap(response);
-      return map == null ? null : CertificatesIssueResponse202.fromJson(map);
-    })();
-  }
-
-  /// 获取证书异步操作状态
-  Future<CertificatesOperationsRetrieveResponse?> certificatesOperationsRetrieve(String operationId) async {
-    final response = await _client.get(ApiPaths.appPath('/certificates/operations/${serializePathParameter(operationId, const PathParameterSpec('operationId', 'simple', false))}'));
-    return (() {
-      final map = sdkworkResponseAsMap(response);
-      return map == null ? null : CertificatesOperationsRetrieveResponse.fromJson(map);
-    })();
-  }
 }
 
 class PathParameterSpec {

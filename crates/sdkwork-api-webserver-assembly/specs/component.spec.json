@@ -2,11 +2,11 @@
   "schemaVersion": 1,
   "kind": "sdkwork.component.spec",
   "component": {
-    "name": "sdkwork-api-web-server-assembly",
+    "name": "sdkwork-api-webserver-assembly",
     "displayName": "SDKWork web-server Gateway Assembly",
     "version": "0.1.0",
     "type": "rust-api-assembly",
-    "root": "crates/sdkwork-api-web-server-assembly",
+    "root": "crates/sdkwork-api-webserver-assembly",
     "domain": "application",
     "capability": "api-assembly",
     "surface": "api-assembly",
@@ -65,7 +65,7 @@
   "verification": {
     "commands": [
       "pnpm run api:assembly:validate",
-      "cargo check -p sdkwork-api-web-server-assembly"
+      "cargo check -p sdkwork-api-webserver-assembly"
     ]
   }
 }

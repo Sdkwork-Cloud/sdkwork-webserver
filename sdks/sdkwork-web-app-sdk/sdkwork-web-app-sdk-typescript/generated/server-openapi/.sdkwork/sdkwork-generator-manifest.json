@@ -44,7 +44,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "371502a9735c0dd86d40f530e7b144f4486a660d6bafef78a31f0f9b95eba0ae"
+      "sha256": "5c04ea3290f4ab1194e579caf7dccca59935d309d5ca77846a29552f9b181ce4"
     },
     {
       "path": "sdkwork-sdk.json",
@@ -56,7 +56,7 @@
     },
     {
       "path": "src/api/certificate.ts",
-      "sha256": "5f1f84e9ab3ee3aabfce4ecb9b56a9c729b6b61bd7db2e0b8ac1f5451e08835f"
+      "sha256": "573d7d7967c6d9c968f744cb4b6a5755331388fff36f95df0899ffd11df818fd"
     },
     {
       "path": "src/api/deployment.ts",
@@ -117,30 +117,6 @@
     {
       "path": "src/types/certificate-identifier-response.ts",
       "sha256": "a0fea23b578fae454b8ee7189439df62fcbda528ea9426de867d4d31f60a1023"
-    },
-    {
-      "path": "src/types/certificate-operation-response.ts",
-      "sha256": "a3067818ce82cb18dafac6bee875c62e99d3180be2f5db4d3bbb2ad862578103"
-    },
-    {
-      "path": "src/types/certificate-page.ts",
-      "sha256": "65fb9dc8d4d47b891c1ef206e3c28cbe4db69ea398d33ad2c06d9feb04d9ba4a"
-    },
-    {
-      "path": "src/types/certificate-response.ts",
-      "sha256": "787a49b889ad93aea125b12d843a4b114300a8f3114118139ab2626b6e84c740"
-    },
-    {
-      "path": "src/types/certificates-issue-response202.ts",
-      "sha256": "49b1ec128603f913d023293a70b81c7346c6e78a03374b64e6661ea1beeaee79"
-    },
-    {
-      "path": "src/types/certificates-list-response.ts",
-      "sha256": "b18af31ac02a1b55e3504058ae01af55ce286ef66ce49739db5d91ab26f4d167"
-    },
-    {
-      "path": "src/types/certificates-operations-retrieve-response.ts",
-      "sha256": "cb3ba76e348b850e33a4896a83ddc099fefbcea2b9c3588641f5d8ee84b1e107"
     },
     {
       "path": "src/types/common.ts",
@@ -224,11 +200,7 @@
     },
     {
       "path": "src/types/index.ts",
-      "sha256": "59b57a5c44de8176d4fc52e5263c694c4c4c13bc76793cfa6ad5f3ec428bdffe"
-    },
-    {
-      "path": "src/types/issue-certificate-request.ts",
-      "sha256": "03268bdf0a9b945fd20a429463f7b127924b4e057e8ce25f9168734669e5f740"
+      "sha256": "8c1835303111f01bdb2fc6a1c6d8481b5e304f9940c7553e8b75eb8788d954a3"
     },
     {
       "path": "src/types/listener-certificate-binding-response.ts",

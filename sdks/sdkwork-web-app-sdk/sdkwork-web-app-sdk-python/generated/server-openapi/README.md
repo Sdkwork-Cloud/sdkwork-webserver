@@ -93,14 +93,14 @@ print(result)
 ### certificate
 
 ```python
-# 获取证书列表
+# List certificates active on the domain listener
+site_id = '1'
+domain_id = '1'
 params = {
     'page': 1,
     'page_size': 2,
-    'site_id': 'site_id',
-    'domain_id': 'domain_id',
 }
-result = client.certificate.list(params)
+result = client.certificate.sites.domains.listener_certificate_bindings.list(site_id, domain_id, params)
 print(result)
 ```
 

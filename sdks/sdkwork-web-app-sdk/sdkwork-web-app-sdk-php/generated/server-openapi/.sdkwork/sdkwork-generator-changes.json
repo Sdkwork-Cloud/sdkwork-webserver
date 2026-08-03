@@ -9,14 +9,12 @@
     "protocol": "http",
     "packageName": "sdkwork/web-app-sdk"
   },
-  "changeFingerprint": "734547fb1c786afc4e5c9165f54774c479a24cf21284d0cc54a3444493668633",
+  "changeFingerprint": "b39b6c033cc5a04ef8e9149f950b273b08840a725085eb2310f99a8ae0b62174",
   "changes": {
-    "createdGeneratedFiles": [
-      "src/Models/DomainsListResponse.php"
-    ],
+    "createdGeneratedFiles": [],
     "updatedGeneratedFiles": [
       "README.md",
-      "src/Api/Domain.php"
+      "src/Api/Certificate.php"
     ],
     "unchangedGeneratedFiles": [
       "bin/publish-core.mjs",
@@ -27,8 +25,8 @@
       "LICENSE",
       "sdkwork-sdk.json",
       "src/Api/BaseApi.php",
-      "src/Api/Certificate.php",
       "src/Api/Deployment.php",
+      "src/Api/Domain.php",
       "src/Api/EnvVariable.php",
       "src/Api/Monitor.php",
       "src/Api/Site.php",
@@ -36,12 +34,6 @@
       "src/Http/HttpClient.php",
       "src/Models/ApplicationStoreListing.php",
       "src/Models/CertificateIdentifierResponse.php",
-      "src/Models/CertificateOperationResponse.php",
-      "src/Models/CertificatePage.php",
-      "src/Models/CertificateResponse.php",
-      "src/Models/CertificatesIssueResponse202.php",
-      "src/Models/CertificatesListResponse.php",
-      "src/Models/CertificatesOperationsRetrieveResponse.php",
       "src/Models/CreateDeploymentRequest.php",
       "src/Models/CreateDomainRequest.php",
       "src/Models/CreateEnvVariableRequest.php",
@@ -53,6 +45,7 @@
       "src/Models/DeploymentResponse.php",
       "src/Models/DomainPage.php",
       "src/Models/DomainResponse.php",
+      "src/Models/DomainsListResponse.php",
       "src/Models/DomainVerifyResponse.php",
       "src/Models/EnvVariablePage.php",
       "src/Models/EnvVariableResponse.php",
@@ -60,7 +53,6 @@
       "src/Models/HealthCheckPage.php",
       "src/Models/HealthCheckResponse.php",
       "src/Models/ImportGitSourceVersionRequest.php",
-      "src/Models/IssueCertificateRequest.php",
       "src/Models/ListenerCertificateBindingResponse.php",
       "src/Models/ListenerCertificateSummaryResponse.php",
       "src/Models/MediaChecksum.php",
@@ -110,7 +102,15 @@
       "src/SdkConfig.php",
       "src/SdkworkAppClient.php"
     ],
-    "deletedGeneratedFiles": [],
+    "deletedGeneratedFiles": [
+      "src/Models/CertificateOperationResponse.php",
+      "src/Models/CertificatePage.php",
+      "src/Models/CertificateResponse.php",
+      "src/Models/CertificatesIssueResponse202.php",
+      "src/Models/CertificatesListResponse.php",
+      "src/Models/CertificatesOperationsRetrieveResponse.php",
+      "src/Models/IssueCertificateRequest.php"
+    ],
     "scaffoldedFiles": [],
     "preservedScaffoldFiles": [
       "custom/README.md"
@@ -128,13 +128,19 @@
       {
         "area": "api-surface",
         "paths": [
-          "src/Api/Domain.php"
+          "src/Api/Certificate.php"
         ]
       },
       {
         "area": "models",
         "paths": [
-          "src/Models/DomainsListResponse.php"
+          "src/Models/CertificateOperationResponse.php",
+          "src/Models/CertificatePage.php",
+          "src/Models/CertificateResponse.php",
+          "src/Models/CertificatesIssueResponse202.php",
+          "src/Models/CertificatesListResponse.php",
+          "src/Models/CertificatesOperationsRetrieveResponse.php",
+          "src/Models/IssueCertificateRequest.php"
         ]
       },
       {
@@ -174,12 +180,14 @@
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "medium",
+    "riskLevel": "high",
     "nextAction": "verify",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
     "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
+      "deleted-generated-files",
+      "manual-review-required",
       "verification-required"
     ]
   },

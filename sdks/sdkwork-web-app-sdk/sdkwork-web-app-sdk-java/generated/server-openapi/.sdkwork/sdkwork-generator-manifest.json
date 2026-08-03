@@ -36,7 +36,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "39c56e04652ce5e451007f127b660bb88ff186584e7e2d7103b64937f6b2661b"
+      "sha256": "85b9b8e5944cf849e02f39c46b25aaae7f0fc2ced689e658a6c0eaee2a14554f"
     },
     {
       "path": "sdkwork-sdk.json",
@@ -48,7 +48,7 @@
     },
     {
       "path": "src/main/java/com/sdkwork/web/app/sdk/api/CertificateApi.java",
-      "sha256": "4f0e854d3d5774104681d76414be2d78377d6e473237b0886ef673be1ec591a2"
+      "sha256": "84aec0391020922346b8e3548510d8650cfd7e5b02bb8fd9f545643663e4f309"
     },
     {
       "path": "src/main/java/com/sdkwork/web/app/sdk/api/DeploymentApi.java",
@@ -89,30 +89,6 @@
     {
       "path": "src/main/java/com/sdkwork/web/app/sdk/model/CertificateIdentifierResponse.java",
       "sha256": "a64e47e11319a65ca0c43ffad2f488e8a9152d1f72610125e2da67867b1dc255"
-    },
-    {
-      "path": "src/main/java/com/sdkwork/web/app/sdk/model/CertificateOperationResponse.java",
-      "sha256": "d292d7fd028fa59bcc93d8b1f6a6ed27860f557fb5397cec776a14a9fd8b0657"
-    },
-    {
-      "path": "src/main/java/com/sdkwork/web/app/sdk/model/CertificatePage.java",
-      "sha256": "200799c0ee791e4ab5e852fe1e1dc30f258ec4202ab45e5ac1043b6da00d60dc"
-    },
-    {
-      "path": "src/main/java/com/sdkwork/web/app/sdk/model/CertificateResponse.java",
-      "sha256": "be97bf9023eb956f3e746fc23bd60bba9b7455c49549001ffadd054e8f23a973"
-    },
-    {
-      "path": "src/main/java/com/sdkwork/web/app/sdk/model/CertificatesIssueResponse202.java",
-      "sha256": "92c6d479616088d3de0783383d24321dc996c79938aca45478e2eb5f29ebca2a"
-    },
-    {
-      "path": "src/main/java/com/sdkwork/web/app/sdk/model/CertificatesListResponse.java",
-      "sha256": "371fe5cac899faec276131606d341e76a085c7b2fb6479db603367fecfa98999"
-    },
-    {
-      "path": "src/main/java/com/sdkwork/web/app/sdk/model/CertificatesOperationsRetrieveResponse.java",
-      "sha256": "7929df64a0f6cc1807ebe3f66c05dc7f6079ead6a88656215195cddccef230b8"
     },
     {
       "path": "src/main/java/com/sdkwork/web/app/sdk/model/CreateDeploymentRequest.java",
@@ -189,10 +165,6 @@
     {
       "path": "src/main/java/com/sdkwork/web/app/sdk/model/ImportGitSourceVersionRequest.java",
       "sha256": "43a89f7f6d0d2a600206b44be0cb1701366a9f50130143a66a9e281628fa7b79"
-    },
-    {
-      "path": "src/main/java/com/sdkwork/web/app/sdk/model/IssueCertificateRequest.java",
-      "sha256": "18bae881955ee9c75fa66937b98652f95d91cd89a8b5c9d66a5de6090d0187d2"
     },
     {
       "path": "src/main/java/com/sdkwork/web/app/sdk/model/ListenerCertificateBindingResponse.java",

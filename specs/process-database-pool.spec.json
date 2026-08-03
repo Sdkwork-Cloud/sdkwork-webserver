@@ -19,7 +19,7 @@
       "temporaryDriverPoolCountEnv": "SDKWORK_DATABASE_TEMPORARY_DRIVER_POOL_COUNT",
       "productionSourceRoots": [
         "crates/sdkwork-api-web-server-standalone-gateway/src",
-        "crates/sdkwork-api-web-server-assembly/src",
+        "crates/sdkwork-api-webserver-assembly/src",
         "crates/sdkwork-intelligence-webserver-repository-sqlx/src",
         "crates/sdkwork-webserver-database-host/src"
       ],

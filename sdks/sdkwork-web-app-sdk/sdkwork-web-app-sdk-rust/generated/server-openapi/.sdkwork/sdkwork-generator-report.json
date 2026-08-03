@@ -11,8 +11,8 @@
   "status": "ok",
   "mode": "apply",
   "hasChanges": true,
-  "hasDestructiveChanges": false,
-  "changeFingerprint": "836b539e86b48d587362fef890a8c892aecf4783f2a80fa53f21688a1766b8da",
+  "hasDestructiveChanges": true,
+  "changeFingerprint": "5534355290b3fb8f754a7eda02e3499d1cf20eca8ad492b6744994fa877631a3",
   "changeImpact": {
     "schemaVersion": 1,
     "areas": [
@@ -24,13 +24,19 @@
       {
         "area": "api-surface",
         "paths": [
-          "src/api/domain.rs"
+          "src/api/certificate.rs"
         ]
       },
       {
         "area": "models",
         "paths": [
-          "src/models/domains_list_response.rs",
+          "src/models/certificate_operation_response.rs",
+          "src/models/certificate_page.rs",
+          "src/models/certificate_response.rs",
+          "src/models/certificates_issue_response202.rs",
+          "src/models/certificates_list_response.rs",
+          "src/models/certificates_operations_retrieve_response.rs",
+          "src/models/issue_certificate_request.rs",
           "src/models/mod.rs"
         ]
       },
@@ -46,12 +52,14 @@
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "medium",
+    "riskLevel": "high",
     "nextAction": "verify",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
     "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
+      "deleted-generated-files",
+      "manual-review-required",
       "verification-required"
     ]
   },
@@ -154,28 +162,26 @@
     "localVersions": []
   },
   "stats": {
-    "totalFiles": 99,
-    "models": 74,
+    "totalFiles": 92,
+    "models": 67,
     "apis": 7,
-    "types": 76
+    "types": 69
   },
   "warnings": [],
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 4,
+    "writtenFiles": 3,
     "skippedScaffoldFiles": 1,
-    "skippedUnchangedGeneratedFiles": 94,
-    "deletedGeneratedFiles": 0,
+    "skippedUnchangedGeneratedFiles": 88,
+    "deletedGeneratedFiles": 7,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "836b539e86b48d587362fef890a8c892aecf4783f2a80fa53f21688a1766b8da",
+    "changeFingerprint": "5534355290b3fb8f754a7eda02e3499d1cf20eca8ad492b6744994fa877631a3",
     "changes": {
-      "createdGeneratedFiles": [
-        "src/models/domains_list_response.rs"
-      ],
+      "createdGeneratedFiles": [],
       "updatedGeneratedFiles": [
         "README.md",
-        "src/api/domain.rs",
+        "src/api/certificate.rs",
         "src/models/mod.rs"
       ],
       "unchangedGeneratedFiles": [
@@ -187,8 +193,8 @@
         "LICENSE",
         "sdkwork-sdk.json",
         "src/api/base.rs",
-        "src/api/certificate.rs",
         "src/api/deployment.rs",
+        "src/api/domain.rs",
         "src/api/env_variable.rs",
         "src/api/mod.rs",
         "src/api/monitor.rs",
@@ -201,12 +207,6 @@
         "src/lib.rs",
         "src/models/application_store_listing.rs",
         "src/models/certificate_identifier_response.rs",
-        "src/models/certificate_operation_response.rs",
-        "src/models/certificate_page.rs",
-        "src/models/certificate_response.rs",
-        "src/models/certificates_issue_response202.rs",
-        "src/models/certificates_list_response.rs",
-        "src/models/certificates_operations_retrieve_response.rs",
         "src/models/common.rs",
         "src/models/create_deployment_request.rs",
         "src/models/create_domain_request.rs",
@@ -220,13 +220,13 @@
         "src/models/domain_page.rs",
         "src/models/domain_response.rs",
         "src/models/domain_verify_response.rs",
+        "src/models/domains_list_response.rs",
         "src/models/env_variable_page.rs",
         "src/models/env_variable_response.rs",
         "src/models/field_error.rs",
         "src/models/health_check_page.rs",
         "src/models/health_check_response.rs",
         "src/models/import_git_source_version_request.rs",
-        "src/models/issue_certificate_request.rs",
         "src/models/listener_certificate_binding_response.rs",
         "src/models/listener_certificate_summary_response.rs",
         "src/models/media_checksum.rs",
@@ -274,7 +274,15 @@
         "src/models/update_env_variable_request.rs",
         "src/models/update_site_request.rs"
       ],
-      "deletedGeneratedFiles": [],
+      "deletedGeneratedFiles": [
+        "src/models/certificate_operation_response.rs",
+        "src/models/certificate_page.rs",
+        "src/models/certificate_response.rs",
+        "src/models/certificates_issue_response202.rs",
+        "src/models/certificates_list_response.rs",
+        "src/models/certificates_operations_retrieve_response.rs",
+        "src/models/issue_certificate_request.rs"
+      ],
       "scaffoldedFiles": [],
       "preservedScaffoldFiles": [
         "custom/README.md"
@@ -292,13 +300,19 @@
         {
           "area": "api-surface",
           "paths": [
-            "src/api/domain.rs"
+            "src/api/certificate.rs"
           ]
         },
         {
           "area": "models",
           "paths": [
-            "src/models/domains_list_response.rs",
+            "src/models/certificate_operation_response.rs",
+            "src/models/certificate_page.rs",
+            "src/models/certificate_response.rs",
+            "src/models/certificates_issue_response202.rs",
+            "src/models/certificates_list_response.rs",
+            "src/models/certificates_operations_retrieve_response.rs",
+            "src/models/issue_certificate_request.rs",
             "src/models/mod.rs"
           ]
         },
@@ -357,12 +371,14 @@
     },
     "executionDecision": {
       "schemaVersion": 1,
-      "riskLevel": "medium",
+      "riskLevel": "high",
       "nextAction": "verify",
       "requiresManualReview": false,
       "applyRequiresExpectedFingerprint": false,
       "summary": "Changes have been applied. Run the required verification plan now.",
       "reasons": [
+        "deleted-generated-files",
+        "manual-review-required",
         "verification-required"
       ]
     },

@@ -12,7 +12,7 @@
   "mode": "apply",
   "hasChanges": true,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "f53ecf5a9e04cdd288f9c4e9665df35163a491712c2ad639e43102eaf4e9fbc2",
+  "changeFingerprint": "47dada33344f30e07d3c7b3d76f37ebd16cd1f7f2eac7b6ee8081f98cea3727f",
   "changeImpact": {
     "schemaVersion": 1,
     "areas": [
@@ -24,7 +24,7 @@
       {
         "area": "api-surface",
         "paths": [
-          "Sources/API/DomainApi.swift"
+          "Sources/API/CertificateApi.swift"
         ]
       },
       {
@@ -118,7 +118,7 @@
   },
   "stats": {
     "totalFiles": 21,
-    "models": 74,
+    "models": 67,
     "apis": 7,
     "types": 0
   },
@@ -131,12 +131,12 @@
     "skippedUnchangedGeneratedFiles": 17,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "f53ecf5a9e04cdd288f9c4e9665df35163a491712c2ad639e43102eaf4e9fbc2",
+    "changeFingerprint": "47dada33344f30e07d3c7b3d76f37ebd16cd1f7f2eac7b6ee8081f98cea3727f",
     "changes": {
       "createdGeneratedFiles": [],
       "updatedGeneratedFiles": [
         "README.md",
-        "Sources/API/DomainApi.swift",
+        "Sources/API/CertificateApi.swift",
         "Sources/Models.swift"
       ],
       "unchangedGeneratedFiles": [
@@ -149,8 +149,8 @@
         "sdkwork-sdk.json",
         "Sources/API/API.swift",
         "Sources/API/ApiPaths.swift",
-        "Sources/API/CertificateApi.swift",
         "Sources/API/DeploymentApi.swift",
+        "Sources/API/DomainApi.swift",
         "Sources/API/EnvVariableApi.swift",
         "Sources/API/MonitorApi.swift",
         "Sources/API/SiteApi.swift",
@@ -176,7 +176,7 @@
         {
           "area": "api-surface",
           "paths": [
-            "Sources/API/DomainApi.swift"
+            "Sources/API/CertificateApi.swift"
           ]
         },
         {

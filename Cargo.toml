@@ -1,7 +1,7 @@
 [workspace]
 resolver = "2"
 members = [
-  "crates/sdkwork-api-web-server-assembly",
+  "crates/sdkwork-api-webserver-assembly",
   "crates/sdkwork-webserver-database-host",
   "crates/sdkwork-webserver-http-host",
   "crates/sdkwork-routes-webserver-common",
@@ -107,9 +107,10 @@ sdkwork-intelligence-webserver-service = { path = "crates/sdkwork-intelligence-w
 sdkwork-intelligence-webserver-repository-sqlx = { path = "crates/sdkwork-intelligence-webserver-repository-sqlx" }
 sdkwork-routes-webserver-app-api = { path = "crates/sdkwork-routes-webserver-app-api" }
 sdkwork-routes-webserver-backend-api = { path = "crates/sdkwork-routes-webserver-backend-api" }
+sdkwork-api-deployments-assembly = { path = "../sdkwork-deployments/crates/sdkwork-api-deployments-assembly" }
 sdkwork-routes-webserver-internal-api = { path = "crates/sdkwork-routes-webserver-internal-api" }
 sdkwork-routes-webserver-common = { path = "crates/sdkwork-routes-webserver-common" }
-sdkwork-api-web-server-assembly = { path = "crates/sdkwork-api-web-server-assembly" }
+sdkwork-api-webserver-assembly = { path = "crates/sdkwork-api-webserver-assembly" }
 sdkwork-api-web-server-standalone-gateway = { path = "crates/sdkwork-api-web-server-standalone-gateway", default-features = false }
 sdkwork-web-server-website-delivery-edge-runtime = { path = "crates/sdkwork-web-server-website-delivery-edge-runtime" }
 sdkwork-web-backend-sdk = { path = "sdks/sdkwork-web-backend-sdk/sdkwork-web-backend-sdk-rust/generated/server-openapi" }

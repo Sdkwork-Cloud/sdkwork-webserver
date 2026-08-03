@@ -97,7 +97,7 @@ export function createWebserverAdminApplicationRegistry(
             loadSourceInputDefaults: async (context) => {
               const versions = await client.applicationSourceVersion.applications.sourceVersions.list(
                 selectedId(context),
-                { page: 1, pageSize: 1 },
+                { pageSize: 1 },
               );
               const latest = versions.items[0];
               return latest?.sourceType === "GIT" && latest.sourceRef?.trim()
@@ -131,7 +131,7 @@ export function createWebserverAdminApplicationRegistry(
             loadFieldOptions: async (context) => {
               const versions = await client.applicationSourceVersion.applications.sourceVersions.list(
                 selectedId(context),
-                { page: 1, pageSize: 100 },
+                { pageSize: 100 },
               );
               return {
                 sourceVersionId: versions.items
@@ -188,7 +188,7 @@ export function createWebserverAdminApplicationRegistry(
     "application-source-versions": applicationSource(
       (query) => client.applicationSourceVersion.applications.sourceVersions.list(
         requiredApplicationId(query.scopeId),
-        { page: query.page, pageSize: query.pageSize },
+        { cursor: query.cursor, pageSize: query.pageSize },
       ),
       [
         action(
@@ -206,7 +206,7 @@ export function createWebserverAdminApplicationRegistry(
       ],
     ),
     "application-deployments": applicationSource(
-      (query) => client.applicationDeployment.applications.deployments.list(requiredApplicationId(query.scopeId), { page: query.page, pageSize: query.pageSize }),
+      (query) => client.applicationDeployment.applications.deployments.list(requiredApplicationId(query.scopeId), { cursor: query.cursor, pageSize: query.pageSize }),
       [
         action(
           "deploy",
@@ -229,7 +229,7 @@ export function createWebserverAdminApplicationRegistry(
             loadFieldOptions: async (context) => {
               const versions = await client.applicationSourceVersion.applications.sourceVersions.list(
                 requiredApplicationId(context.scopeId),
-                { page: 1, pageSize: 100 },
+                { pageSize: 100 },
               );
               return {
                 sourceVersionId: versions.items

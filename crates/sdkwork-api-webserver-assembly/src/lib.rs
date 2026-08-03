@@ -1,4 +1,4 @@
-//! API assembly for sdkwork-web-server.
+//! API assembly for sdkwork-webserver.
 //! Application bootstrap lives in `bootstrap.rs`; route inventory is in `assembly-manifest.json`.
 
 mod bootstrap;
@@ -7,7 +7,6 @@ mod generated;
 
 pub use bootstrap::{
     assemble_api_router, migrate_database_from_env, ApiAssembly, ApiAssemblyContext,
-    ApiAssemblyError,
 };
 
 pub fn assembly_route_count() -> usize {

@@ -492,21 +492,6 @@ public struct EnvVariablePage: Codable {
     }
 }
 
-public struct IssueCertificateRequest: Codable {
-    public let domainIds: [String]?
-    public let certType: Int?
-    public let keyAlgorithm: String?
-    public let autoRenew: Bool?
-
-
-    public init(domainIds: [String]? = nil, certType: Int? = nil, keyAlgorithm: String? = nil, autoRenew: Bool? = nil) {
-        self.domainIds = domainIds
-        self.certType = certType
-        self.keyAlgorithm = keyAlgorithm
-        self.autoRenew = autoRenew
-    }
-}
-
 public struct CertificateIdentifierResponse: Codable {
     public let domainId: String?
     public let hostname: String?
@@ -519,68 +504,6 @@ public struct CertificateIdentifierResponse: Codable {
         self.hostname = hostname
         self.identifierType = identifierType
         self.position = position
-    }
-}
-
-public struct CertificateResponse: Codable {
-    public let id: String?
-    public let certName: String?
-    public let identifiers: [CertificateIdentifierResponse]?
-    public let certType: Int?
-    public let issuer: String?
-    public let fingerprint: String?
-    public let keyAlgorithm: String?
-    public let notBefore: String?
-    public let notAfter: String?
-    public let autoRenew: Bool?
-    public let renewalStatus: String?
-    public let status: String?
-    public let createdAt: String?
-
-
-    public init(id: String? = nil, certName: String? = nil, identifiers: [CertificateIdentifierResponse]? = nil, certType: Int? = nil, issuer: String? = nil, fingerprint: String? = nil, keyAlgorithm: String? = nil, notBefore: String? = nil, notAfter: String? = nil, autoRenew: Bool? = nil, renewalStatus: String? = nil, status: String? = nil, createdAt: String? = nil) {
-        self.id = id
-        self.certName = certName
-        self.identifiers = identifiers
-        self.certType = certType
-        self.issuer = issuer
-        self.fingerprint = fingerprint
-        self.keyAlgorithm = keyAlgorithm
-        self.notBefore = notBefore
-        self.notAfter = notAfter
-        self.autoRenew = autoRenew
-        self.renewalStatus = renewalStatus
-        self.status = status
-        self.createdAt = createdAt
-    }
-}
-
-public struct CertificateOperationResponse: Codable {
-    public let id: String?
-    public let certificateId: String?
-    public let operationType: String?
-    public let status: String?
-    public let attemptCount: Int?
-    public let maxAttempts: Int?
-    public let nextAttemptAt: String?
-    public let failureCode: String?
-    public let createdAt: String?
-    public let updatedAt: String?
-    public let completedAt: String?
-
-
-    public init(id: String? = nil, certificateId: String? = nil, operationType: String? = nil, status: String? = nil, attemptCount: Int? = nil, maxAttempts: Int? = nil, nextAttemptAt: String? = nil, failureCode: String? = nil, createdAt: String? = nil, updatedAt: String? = nil, completedAt: String? = nil) {
-        self.id = id
-        self.certificateId = certificateId
-        self.operationType = operationType
-        self.status = status
-        self.attemptCount = attemptCount
-        self.maxAttempts = maxAttempts
-        self.nextAttemptAt = nextAttemptAt
-        self.failureCode = failureCode
-        self.createdAt = createdAt
-        self.updatedAt = updatedAt
-        self.completedAt = completedAt
     }
 }
 
@@ -652,17 +575,6 @@ public struct ListenerCertificateSummaryResponse: Codable {
         self.fingerprint = fingerprint
         self.notAfter = notAfter
         self.status = status
-    }
-}
-
-public struct CertificatePage: Codable {
-    public let items: [CertificateResponse]?
-    public let total: String?
-
-
-    public init(items: [CertificateResponse]? = nil, total: String? = nil) {
-        self.items = items
-        self.total = total
     }
 }
 
@@ -1151,45 +1063,6 @@ public struct SitesEnvVariablesUpdateResponse: Codable {
 }
 
 public struct DomainsListResponse: Codable {
-    public let code: Int?
-    public let data: Any?
-    public let traceId: String?
-
-
-    public init(code: Int? = nil, data: Any? = nil, traceId: String? = nil) {
-        self.code = code
-        self.data = data
-        self.traceId = traceId
-    }
-}
-
-public struct CertificatesListResponse: Codable {
-    public let code: Int?
-    public let data: Any?
-    public let traceId: String?
-
-
-    public init(code: Int? = nil, data: Any? = nil, traceId: String? = nil) {
-        self.code = code
-        self.data = data
-        self.traceId = traceId
-    }
-}
-
-public struct CertificatesIssueResponse202: Codable {
-    public let code: Int?
-    public let data: Any?
-    public let traceId: String?
-
-
-    public init(code: Int? = nil, data: Any? = nil, traceId: String? = nil) {
-        self.code = code
-        self.data = data
-        self.traceId = traceId
-    }
-}
-
-public struct CertificatesOperationsRetrieveResponse: Codable {
     public let code: Int?
     public let data: Any?
     public let traceId: String?

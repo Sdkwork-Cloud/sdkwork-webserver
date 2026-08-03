@@ -36,7 +36,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "7d3f79bb2dca8e4a580fe7e4f8fdfc1b431204d7a989dd2599f8676ae3222062"
+      "sha256": "b7763981f74ab2073184b8a44e8ed361d53de2e34a761d7618495b3933649c81"
     },
     {
       "path": "sdkwork-sdk.json",
@@ -48,7 +48,7 @@
     },
     {
       "path": "src/api/certificate.rs",
-      "sha256": "e016a2a5e695ced325f545360a0ce9b141da1e5b9fcacbc80f7b8d78c09a9cce"
+      "sha256": "55f967f59545be05bd84633eef1a899e38f64d74245abcdf38f1cab45378a32c"
     },
     {
       "path": "src/api/deployment.rs",
@@ -105,30 +105,6 @@
     {
       "path": "src/models/certificate_identifier_response.rs",
       "sha256": "34ba782244920c9f95b766bc72fe0ca5a0744f763fe485f2044e5deeb970a259"
-    },
-    {
-      "path": "src/models/certificate_operation_response.rs",
-      "sha256": "8919d7056b87fac507fdc16d4aa7b26871b8042f945c6d611adf862f1127ac10"
-    },
-    {
-      "path": "src/models/certificate_page.rs",
-      "sha256": "644bdf780d909542b35b45b18a32f9b0a51825c26666fd1519d02064b61c7a03"
-    },
-    {
-      "path": "src/models/certificate_response.rs",
-      "sha256": "58bfc9c3fc4afcd57a1af78da37868d4d591c0339c8d8df2047107603aa4e2aa"
-    },
-    {
-      "path": "src/models/certificates_issue_response202.rs",
-      "sha256": "09ada74d96200d8638eab712b2db832bc139b2e583346b2c2d675395dd621e35"
-    },
-    {
-      "path": "src/models/certificates_list_response.rs",
-      "sha256": "2547f6caf273bcd0e63973a7a36960c1d44bef7cf910260c0b3657688ca558ce"
-    },
-    {
-      "path": "src/models/certificates_operations_retrieve_response.rs",
-      "sha256": "ab50e8871c9514d3d8d31f65f312b6a966e3b3475c1faec04709536f05ea647d"
     },
     {
       "path": "src/models/common.rs",
@@ -211,10 +187,6 @@
       "sha256": "d7904ab015539d74fea4b5901ab137e801b935db604995935ea68fc3277fd023"
     },
     {
-      "path": "src/models/issue_certificate_request.rs",
-      "sha256": "b64ad933e1f825637157c1d3b2e448ddd8d87f08008d1b9dc3c57705fc67d842"
-    },
-    {
       "path": "src/models/listener_certificate_binding_response.rs",
       "sha256": "9da5af95f87de8ccf510fc0f96745a15335a3151645ece8eb4bf15f99cfa4bfa"
     },
@@ -232,7 +204,7 @@
     },
     {
       "path": "src/models/mod.rs",
-      "sha256": "c854e30ba5e894fa4aeecd1ddf04d8ad59513089df8ae49cb7f95b2148fadf9a"
+      "sha256": "2ff94c2a68ee8db092e2924681c7c7c22a839fd05b64c4f78e9d79d58d34f55c"
     },
     {
       "path": "src/models/page_info.rs",

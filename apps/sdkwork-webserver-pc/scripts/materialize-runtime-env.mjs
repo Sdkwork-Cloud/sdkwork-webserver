@@ -14,6 +14,7 @@ const SDK_BASE_URL_KEYS = [
   'backendApiBaseUrl',
   'driveAppApiBaseUrl',
   'appbaseAppApiBaseUrl',
+  'deployAppApiBaseUrl',
 ];
 const NAVIGATION_URL_KEYS = ['messagingPcUrl'];
 

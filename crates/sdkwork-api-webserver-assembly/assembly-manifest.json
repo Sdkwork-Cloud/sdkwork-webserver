@@ -1,10 +1,10 @@
 {
   "kind": "sdkwork.api.assembly",
   "schemaVersion": 1,
-  "applicationCode": "web-server",
+  "applicationCode": "webserver",
   "apiMode": "served",
-  "packageName": "sdkwork-api-web-server-assembly",
-  "crateDir": "crates/sdkwork-api-web-server-assembly",
+  "packageName": "sdkwork-api-webserver-assembly",
+  "crateDir": "crates/sdkwork-api-webserver-assembly",
   "routeCrates": [
     {
       "packageName": "sdkwork-routes-webserver-app-api",

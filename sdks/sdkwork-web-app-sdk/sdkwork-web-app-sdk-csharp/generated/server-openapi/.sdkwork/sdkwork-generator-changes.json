@@ -9,20 +9,18 @@
     "protocol": "http",
     "packageName": "SDKWork.Web.AppSdk"
   },
-  "changeFingerprint": "85f4faccbf44c964fe2ea9d5ceae258656e668c0ce5c89b13ff2025e940be0ea",
+  "changeFingerprint": "b7a8966e32b2db183bed57e5a75a4969bca6f70707565b9139ec5616614f493c",
   "changes": {
-    "createdGeneratedFiles": [
-      "Models/DomainsListResponse.cs"
-    ],
+    "createdGeneratedFiles": [],
     "updatedGeneratedFiles": [
-      "Api/DomainApi.cs",
+      "Api/CertificateApi.cs",
       "README.md"
     ],
     "unchangedGeneratedFiles": [
       "Api/Api.cs",
       "Api/ApiPaths.cs",
-      "Api/CertificateApi.cs",
       "Api/DeploymentApi.cs",
+      "Api/DomainApi.cs",
       "Api/EnvVariableApi.cs",
       "Api/MonitorApi.cs",
       "Api/SiteApi.cs",
@@ -35,12 +33,6 @@
       "LICENSE",
       "Models/ApplicationStoreListing.cs",
       "Models/CertificateIdentifierResponse.cs",
-      "Models/CertificateOperationResponse.cs",
-      "Models/CertificatePage.cs",
-      "Models/CertificateResponse.cs",
-      "Models/CertificatesIssueResponse202.cs",
-      "Models/CertificatesListResponse.cs",
-      "Models/CertificatesOperationsRetrieveResponse.cs",
       "Models/CreateDeploymentRequest.cs",
       "Models/CreateDomainRequest.cs",
       "Models/CreateEnvVariableRequest.cs",
@@ -52,6 +44,7 @@
       "Models/DeploymentResponse.cs",
       "Models/DomainPage.cs",
       "Models/DomainResponse.cs",
+      "Models/DomainsListResponse.cs",
       "Models/DomainVerifyResponse.cs",
       "Models/EnvVariablePage.cs",
       "Models/EnvVariableResponse.cs",
@@ -59,7 +52,6 @@
       "Models/HealthCheckPage.cs",
       "Models/HealthCheckResponse.cs",
       "Models/ImportGitSourceVersionRequest.cs",
-      "Models/IssueCertificateRequest.cs",
       "Models/ListenerCertificateBindingResponse.cs",
       "Models/ListenerCertificateSummaryResponse.cs",
       "Models/MediaChecksum.cs",
@@ -110,7 +102,15 @@
       "SDKWork.Web.AppSdk.csproj",
       "SdkworkAppClient.cs"
     ],
-    "deletedGeneratedFiles": [],
+    "deletedGeneratedFiles": [
+      "Models/CertificateOperationResponse.cs",
+      "Models/CertificatePage.cs",
+      "Models/CertificateResponse.cs",
+      "Models/CertificatesIssueResponse202.cs",
+      "Models/CertificatesListResponse.cs",
+      "Models/CertificatesOperationsRetrieveResponse.cs",
+      "Models/IssueCertificateRequest.cs"
+    ],
     "scaffoldedFiles": [],
     "preservedScaffoldFiles": [
       "custom/README.md"
@@ -128,13 +128,19 @@
       {
         "area": "api-surface",
         "paths": [
-          "Api/DomainApi.cs"
+          "Api/CertificateApi.cs"
         ]
       },
       {
         "area": "models",
         "paths": [
-          "Models/DomainsListResponse.cs"
+          "Models/CertificateOperationResponse.cs",
+          "Models/CertificatePage.cs",
+          "Models/CertificateResponse.cs",
+          "Models/CertificatesIssueResponse202.cs",
+          "Models/CertificatesListResponse.cs",
+          "Models/CertificatesOperationsRetrieveResponse.cs",
+          "Models/IssueCertificateRequest.cs"
         ]
       },
       {
@@ -174,12 +180,14 @@
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "medium",
+    "riskLevel": "high",
     "nextAction": "verify",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
     "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
+      "deleted-generated-files",
+      "manual-review-required",
       "verification-required"
     ]
   },

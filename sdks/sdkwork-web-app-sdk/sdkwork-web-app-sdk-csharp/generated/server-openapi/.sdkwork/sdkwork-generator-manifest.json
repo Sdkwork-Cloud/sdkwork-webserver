@@ -20,7 +20,7 @@
     },
     {
       "path": "Api/CertificateApi.cs",
-      "sha256": "5b11f8a14c853d75655145f8795a6ca05176032a20dbaeebe193959cd40f4166"
+      "sha256": "91c4db81746b4810be259cd576ddfabe2d2b46e9161999b6296ce13f67aa706e"
     },
     {
       "path": "Api/DeploymentApi.cs",
@@ -77,30 +77,6 @@
     {
       "path": "Models/CertificateIdentifierResponse.cs",
       "sha256": "8df90067704bb6fd6b9f0b027322b472ddb85a6fefe48c80d1dc23a09b22c454"
-    },
-    {
-      "path": "Models/CertificateOperationResponse.cs",
-      "sha256": "d4141b4feb06b2914d42ff61549524f3901cdb61d16b44d12bc2570a0a351576"
-    },
-    {
-      "path": "Models/CertificatePage.cs",
-      "sha256": "8eb2af39714e5a4bc1820d2e49934d2e730151939e9beecfbedff5b111ae404c"
-    },
-    {
-      "path": "Models/CertificateResponse.cs",
-      "sha256": "5116f081b0244f17589a9fec9caa7eae0c1e6add508e6acbd058d2c48925dccd"
-    },
-    {
-      "path": "Models/CertificatesIssueResponse202.cs",
-      "sha256": "7772cd83d4f6c1cdc1b9ee6ae00ab8812bdb5987a3c9e14d4ebd13708c23fd9d"
-    },
-    {
-      "path": "Models/CertificatesListResponse.cs",
-      "sha256": "f3c5d11a6e438f1f43fcfe732eab635b6b33d452edbbd30af58aefe5f09eba75"
-    },
-    {
-      "path": "Models/CertificatesOperationsRetrieveResponse.cs",
-      "sha256": "1ffc850ebd0e04e4b3322d1105496929b1a44f109691043f9604bbd789c00442"
     },
     {
       "path": "Models/CreateDeploymentRequest.cs",
@@ -177,10 +153,6 @@
     {
       "path": "Models/ImportGitSourceVersionRequest.cs",
       "sha256": "6e1e58dcc04cf33d7b6d6e0634305a5206963f3573a2df387e31c18f9fc039e6"
-    },
-    {
-      "path": "Models/IssueCertificateRequest.cs",
-      "sha256": "3c9ced099a0eeadb48cd2b2e953763c07d1522472e1c381de4b03fdcdf1ae2e3"
     },
     {
       "path": "Models/ListenerCertificateBindingResponse.cs",
@@ -368,7 +340,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "abd17d2128c293b5e2676630597ca729a31d15a49a31995b461ae25b1e15537a"
+      "sha256": "f6b63324e8308e0946296a4860ce7c9c271a155041a18173226c1de05dad1f38"
     },
     {
       "path": "sdkwork-sdk.json",

@@ -97,14 +97,14 @@ const result = await client.domain.list(params);
 ### certificate
 
 ```typescript
-// 获取证书列表
+// List certificates active on the domain listener
+const siteId = '1';
+const domainId = '1';
 const params = {
   page: 1,
   page_size: 2,
-  site_id: 'site_id',
-  domain_id: 'domain_id',
 };
-const result = await client.certificate.list(params);
+const result = await client.certificate.sites.domains.listenerCertificateBindings.list(siteId, domainId, params);
 ```
 
 ### source_version

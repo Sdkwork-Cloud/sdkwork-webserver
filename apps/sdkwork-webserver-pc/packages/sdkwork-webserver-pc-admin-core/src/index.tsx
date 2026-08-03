@@ -24,13 +24,13 @@ export function createWebserverAdminRegistry(client: WebserverAdminSdkClient): W
       action("deploy", "Deploy", {}, (context) => client.nginx.configs.deploy(selectedId(context, "id"), idempotencyParams(context)), { dangerous: true, permission: "web.nginx.write", selection: true }),
       action("reload", "Reload runtime", {}, (context) => client.nginx.reload.create(idempotencyParams(context)), { dangerous: true, permission: "web.nginx.write" }),
     ]),
-    servers: source((query) => client.server.list({ page: query.page, pageSize: query.pageSize }), [
+    servers: source((query) => client.server.list({ cursor: query.cursor, pageSize: query.pageSize }), [
       action("create", "Register server", { name: "", host: "", sshPort: 22, tenantScopeHash: "" }, async (context) => client.server.create(createServerRequest(context.body), idempotencyParams(context)), { permission: "web.servers.write", requiredFields: ["name", "host", "tenantScopeHash"], resultFields: ["agentToken", "id", "name", "host", "sshPort"] }),
     ]),
     diagnostics: source(async () => client.nginx.status.retrieve(), [action("reload", "Reload runtime", {}, (context) => client.nginx.reload.create(idempotencyParams(context)), { dangerous: true, permission: "web.nginx.write" })]),
     audit: {
       ...source((query) => client.audit.auditLogs.list({
-        page: query.page,
+        cursor: query.cursor,
         pageSize: query.pageSize,
         targetType: filterValue(query.filters, "targetType"),
         action: filterValue(query.filters, "action") ?? query.search,

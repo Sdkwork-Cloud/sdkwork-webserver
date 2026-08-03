@@ -1,22 +1,8 @@
 import { appApiPath } from './paths';
 import type { ApiRequestOptions, HttpClient } from '../http/client';
 
-import type { CertificateOperationResponse, CertificateResponse, CreateListenerCertificateBindingRequest, IssueCertificateRequest, ListenerCertificateBindingResponse, PageInfo, SdkWorkAsyncData } from '../types';
+import type { CreateListenerCertificateBindingRequest, ListenerCertificateBindingResponse, PageInfo } from '../types';
 
-
-export class CertificateOperationsApi {
-  private client: HttpClient;
-
-  constructor(client: HttpClient) {
-    this.client = client;
-  }
-
-
-/** 获取证书异步操作状态 */
-  async retrieve(operationId: string, requestOptions?: ApiRequestOptions): Promise<CertificateOperationResponse> {
-    return this.client.request<CertificateOperationResponse>(appApiPath(`/certificates/operations/${serializePathParameter(operationId, { name: 'operationId', style: 'simple', explode: false })}`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any, sdkworkUnwrapKind: 'item' });
-  }
-}
 
 export interface CertificateSitesDomainsListenerCertificateBindingsListParams {
   page?: number;
@@ -93,50 +79,15 @@ export class CertificateSitesApi {
 
 }
 
-export interface CertificateListParams {
-  page?: number;
-  pageSize?: number;
-  siteId?: string;
-  domainId?: string;
-}
-
-export interface CertificateIssueParams {
-  idempotencyKey: string;
-}
-
 export class CertificateApi {
   private client: HttpClient;
   public readonly sites: CertificateSitesApi;
-  public readonly operations: CertificateOperationsApi;
 
   constructor(client: HttpClient) {
     this.client = client;
     this.sites = new CertificateSitesApi(client);
-    this.operations = new CertificateOperationsApi(client);
   }
 
-
-/** 获取证书列表 */
-  async list(params?: CertificateListParams, requestOptions?: ApiRequestOptions): Promise<{ items: CertificateResponse[]; pageInfo: PageInfo; }> {
-    const query = buildQueryString([
-      { name: 'page', value: params?.page, style: 'form', explode: true, allowReserved: false },
-      { name: 'page_size', value: params?.pageSize, style: 'form', explode: true, allowReserved: false },
-      { name: 'site_id', value: params?.siteId, style: 'form', explode: true, allowReserved: false },
-      { name: 'domain_id', value: params?.domainId, style: 'form', explode: true, allowReserved: false },
-    ]);
-    return this.client.request<{ items: CertificateResponse[]; pageInfo: PageInfo; }>(appendQueryString(appApiPath(`/certificates`), query), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'GET' as any, sdkworkUnwrapKind: 'page' });
-  }
-
-/** 申请证书 */
-  async issue(body: IssueCertificateRequest, params: CertificateIssueParams, requestOptions?: ApiRequestOptions): Promise<SdkWorkAsyncData> {
-    const requestHeaders = buildRequestHeaders(
-      {
-        'Idempotency-Key': { value: params.idempotencyKey, style: 'simple', explode: false },
-      },
-      {}
-    );
-    return this.client.request<SdkWorkAsyncData>(appApiPath(`/certificates/issue`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, body, headers: requestHeaders, contentType: 'application/json', sdkworkUnwrapKind: 'command' });
-  }
 }
 
 export function createCertificateApi(client: HttpClient): CertificateApi {

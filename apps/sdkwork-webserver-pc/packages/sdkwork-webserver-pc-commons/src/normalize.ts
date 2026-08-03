@@ -9,7 +9,8 @@ export function normalizeWebserverPage(value: unknown): WebserverResourcePage {
   const page = positiveInteger(info.page, 1);
   const pageSize = positiveInteger(info.pageSize, Math.max(items.length, 20));
   const total = nonNegativeSafeInteger(info.totalItems);
-  return { items, pageInfo: { page, pageSize, total, hasMore: typeof info.hasMore === "boolean" ? info.hasMore : total === undefined ? items.length >= pageSize : page * pageSize < total } };
+  const nextCursor = typeof info.nextCursor === "string" && info.nextCursor.length > 0 ? info.nextCursor : undefined;
+  return { items, pageInfo: { page, pageSize, total, nextCursor, hasMore: typeof info.hasMore === "boolean" ? info.hasMore : total === undefined ? items.length >= pageSize : page * pageSize < total } };
 }
 
 function unwrap(value: unknown): unknown {

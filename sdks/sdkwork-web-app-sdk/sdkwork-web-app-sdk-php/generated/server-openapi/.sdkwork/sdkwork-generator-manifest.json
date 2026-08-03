@@ -36,7 +36,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "35a8ba1bd0fde93023c2f891960b6df1a4718ff45725c2324707f77f7280f1b5"
+      "sha256": "ce805fd96d26b0a459e9718ef85a27975c77421ea400014dbe6ea080f2d1f19d"
     },
     {
       "path": "sdkwork-sdk.json",
@@ -48,7 +48,7 @@
     },
     {
       "path": "src/Api/Certificate.php",
-      "sha256": "f8966f9e3a9a643b6ed4fb9b66959ee3566230f9d6dfcf858dbd7246a1cb9f49"
+      "sha256": "ba3469b863322ad83bf1d75fe7e424fb2cf2dee693ea9d6980edcdefd91da141"
     },
     {
       "path": "src/Api/Deployment.php",
@@ -85,30 +85,6 @@
     {
       "path": "src/Models/CertificateIdentifierResponse.php",
       "sha256": "b7da63765422230317d9ab8a24f43ec63354d0e0589e2d5fe8ed7c0d7790eb55"
-    },
-    {
-      "path": "src/Models/CertificateOperationResponse.php",
-      "sha256": "6fe830eb1e41226dd43d2612707f49424351059421b10dc3a42a54d87dda6652"
-    },
-    {
-      "path": "src/Models/CertificatePage.php",
-      "sha256": "c34c5493ab2bdf7b5645ca20324cf05c9e540507ffdda209f447dce88e4a9c18"
-    },
-    {
-      "path": "src/Models/CertificateResponse.php",
-      "sha256": "03dc3797bc07cc6ad523e01cb14e2e5ecc68773c3ce77403f19f93dd6815c733"
-    },
-    {
-      "path": "src/Models/CertificatesIssueResponse202.php",
-      "sha256": "2fc48dcbc4393709a196b90fb9d73e07e96527e9f290cc4100a985fe3b45f4be"
-    },
-    {
-      "path": "src/Models/CertificatesListResponse.php",
-      "sha256": "2e762762b8e2645a1a5a228d904a4a41f7c62ab3e7c885ce64235e2b2ef6cd99"
-    },
-    {
-      "path": "src/Models/CertificatesOperationsRetrieveResponse.php",
-      "sha256": "680a2a575d15799321ef0724ed0c20d90412b987689c55aee48588b05807c5f7"
     },
     {
       "path": "src/Models/CreateDeploymentRequest.php",
@@ -185,10 +161,6 @@
     {
       "path": "src/Models/ImportGitSourceVersionRequest.php",
       "sha256": "3fe7d844d6b5f98e3b987816ab6970b4f6ebb311f549e90a8899d06d753b3da6"
-    },
-    {
-      "path": "src/Models/IssueCertificateRequest.php",
-      "sha256": "d15dedd4a54cb66e60887da038b6ca8070627e2bd590d56016929ec76896dfb4"
     },
     {
       "path": "src/Models/ListenerCertificateBindingResponse.php",

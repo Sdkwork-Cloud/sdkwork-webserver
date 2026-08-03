@@ -73,9 +73,11 @@ puts result.inspect
 ### certificate
 
 ```ruby
-# 获取证书列表
-params = { 'page' => 1, 'page_size' => 2, 'site_id' => '00000000-0000-0000-0000-000000000001', 'domain_id' => '00000000-0000-0000-0000-000000000001' }
-result = client.certificate.certificates_list(params: params)
+# List certificates active on the domain listener
+site_id = '1'
+domain_id = '1'
+params = { 'page' => 1, 'page_size' => 2 }
+result = client.certificate.sites_domains_listener_certificate_bindings_list(site_id, domain_id, params: params)
 puts result.inspect
 ```
 

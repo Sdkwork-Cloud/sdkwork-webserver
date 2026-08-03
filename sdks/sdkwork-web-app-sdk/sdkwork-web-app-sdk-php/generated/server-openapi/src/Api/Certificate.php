@@ -4,11 +4,7 @@ declare(strict_types=1);
 
 namespace SDKWork\Web\AppSdk\Api;
 
-use SDKWork\Web\AppSdk\Models\CertificatesIssueResponse202;
-use SDKWork\Web\AppSdk\Models\CertificatesListResponse;
-use SDKWork\Web\AppSdk\Models\CertificatesOperationsRetrieveResponse;
 use SDKWork\Web\AppSdk\Models\CreateListenerCertificateBindingRequest;
-use SDKWork\Web\AppSdk\Models\IssueCertificateRequest;
 use SDKWork\Web\AppSdk\Models\SitesDomainsListenerCertificateBindingsCreateResponse201;
 use SDKWork\Web\AppSdk\Models\SitesDomainsListenerCertificateBindingsListResponse;
 
@@ -59,47 +55,6 @@ final class CertificateApi extends BaseApi
             'headers' => $requestHeaders,
         ]);
         return $result;
-    }
-
-    /** 获取证书列表 */
-    public function certificatesList(?int $page = null, ?int $pageSize = null, ?string $siteId = null, ?string $domainId = null): ?CertificatesListResponse
-    {
-        $path = '/app/v3/api/certificates';
-        $query = $this->buildQueryString([
-            new QueryParameterSpec('page', $page, 'form', true, false, null),
-            new QueryParameterSpec('page_size', $pageSize, 'form', true, false, null),
-            new QueryParameterSpec('site_id', $siteId, 'form', true, false, null),
-            new QueryParameterSpec('domain_id', $domainId, 'form', true, false, null),
-        ]);
-        $path = $this->appendQueryString($path, $query);
-        $result = $this->client->request('GET', $path, []);
-        return is_array($result) ? CertificatesListResponse::fromArray($result) : null;
-    }
-
-    /** 申请证书 */
-    public function certificatesIssue(array|IssueCertificateRequest $body, string $idempotencyKey): ?CertificatesIssueResponse202
-    {
-        $path = '/app/v3/api/certificates/issue';
-        $payload = $body instanceof IssueCertificateRequest ? $body->toArray() : $body;
-        $requestHeaders = $this->buildRequestHeaders(
-            [
-                'Idempotency-Key' => new HeaderParameterSpec($idempotencyKey, 'simple', false, null),
-            ],
-            []
-        );
-        $result = $this->client->request('POST', $path, [
-            'headers' => $requestHeaders,
-            'json' => $payload,
-        ]);
-        return is_array($result) ? CertificatesIssueResponse202::fromArray($result) : null;
-    }
-
-    /** 获取证书异步操作状态 */
-    public function certificatesOperationsRetrieve(string $operationId): ?CertificatesOperationsRetrieveResponse
-    {
-        $path = $this->interpolatePath('/app/v3/api/certificates/operations/{operationId}', ['operationId' => $this->serializePathParameter($operationId, new PathParameterSpec('operationId', 'simple', false))]);
-        $result = $this->client->request('GET', $path, []);
-        return is_array($result) ? CertificatesOperationsRetrieveResponse::fromArray($result) : null;
     }
 
     private function buildRequestHeaders(array $headers, array $cookies): array

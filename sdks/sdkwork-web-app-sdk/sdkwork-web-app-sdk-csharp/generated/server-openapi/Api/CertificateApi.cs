@@ -58,44 +58,6 @@ namespace SDKWork.Web.AppSdk.Api
             await _client.DeleteAsync<object>(ApiPaths.AppPath($"/sites/{SerializePathParameter(siteId, new PathParameterSpec("siteId", "simple", false))}/domains/{SerializePathParameter(domainId, new PathParameterSpec("domainId", "simple", false))}/listener_certificate_bindings/{SerializePathParameter(bindingId, new PathParameterSpec("bindingId", "simple", false))}"), null, requestHeaders);
         }
 
-        /// <summary>
-        /// 获取证书列表
-        /// </summary>
-        public async Task<SDKWork.Web.AppSdk.Models.CertificatesListResponse?> CertificatesListAsync(int? page = null, int? pageSize = null, string? siteId = null, string? domainId = null)
-        {
-            var queryString = BuildQueryString(new[]
-            {
-                new QueryParameterSpec("page", page, "form", true, false, null),
-                new QueryParameterSpec("page_size", pageSize, "form", true, false, null),
-                new QueryParameterSpec("site_id", siteId, "form", true, false, null),
-                new QueryParameterSpec("domain_id", domainId, "form", true, false, null),
-            });
-            return await _client.GetAsync<SDKWork.Web.AppSdk.Models.CertificatesListResponse>(ApiPaths.AppendQueryString(ApiPaths.AppPath("/certificates"), queryString));
-        }
-
-        /// <summary>
-        /// 申请证书
-        /// </summary>
-        public async Task<SDKWork.Web.AppSdk.Models.CertificatesIssueResponse202?> CertificatesIssueAsync(SDKWork.Web.AppSdk.Models.IssueCertificateRequest body, string idempotencyKey)
-        {
-            var requestHeaders = BuildRequestHeaders(
-                new Dictionary<string, HeaderParameterSpec>
-                {
-                    ["Idempotency-Key"] = new HeaderParameterSpec(idempotencyKey, "simple", false, null),
-                },
-                new Dictionary<string, HeaderParameterSpec>()
-            );
-            return await _client.PostAsync<SDKWork.Web.AppSdk.Models.CertificatesIssueResponse202>(ApiPaths.AppPath("/certificates/issue"), body, null, requestHeaders, "application/json");
-        }
-
-        /// <summary>
-        /// 获取证书异步操作状态
-        /// </summary>
-        public async Task<SDKWork.Web.AppSdk.Models.CertificatesOperationsRetrieveResponse?> CertificatesOperationsRetrieveAsync(string operationId)
-        {
-            return await _client.GetAsync<SDKWork.Web.AppSdk.Models.CertificatesOperationsRetrieveResponse>(ApiPaths.AppPath($"/certificates/operations/{SerializePathParameter(operationId, new PathParameterSpec("operationId", "simple", false))}"));
-        }
-
         private sealed record PathParameterSpec(string Name, string Style, bool Explode);
 
         private static string SerializePathParameter(object? value, PathParameterSpec spec)

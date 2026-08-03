@@ -11,8 +11,8 @@
   "status": "ok",
   "mode": "apply",
   "hasChanges": true,
-  "hasDestructiveChanges": false,
-  "changeFingerprint": "3975f48b0741cc96c40148e7a01a5580e3aaf35bcfcdfcca2c8d92d2ac5636a4",
+  "hasDestructiveChanges": true,
+  "changeFingerprint": "2b440dc48505b6f96dcf82841de1b3132c42830b8b7c8840ff707302ca25d656",
   "changeImpact": {
     "schemaVersion": 1,
     "areas": [
@@ -25,13 +25,19 @@
       {
         "area": "api-surface",
         "paths": [
-          "lib/sdkwork/app_sdk/api/domain.rb"
+          "lib/sdkwork/app_sdk/api/certificate.rb"
         ]
       },
       {
         "area": "models",
         "paths": [
-          "lib/sdkwork/app_sdk/models/domains_list_response.rb"
+          "lib/sdkwork/app_sdk/models/certificate_operation_response.rb",
+          "lib/sdkwork/app_sdk/models/certificate_page.rb",
+          "lib/sdkwork/app_sdk/models/certificate_response.rb",
+          "lib/sdkwork/app_sdk/models/certificates_issue_response202.rb",
+          "lib/sdkwork/app_sdk/models/certificates_list_response.rb",
+          "lib/sdkwork/app_sdk/models/certificates_operations_retrieve_response.rb",
+          "lib/sdkwork/app_sdk/models/issue_certificate_request.rb"
         ]
       },
       {
@@ -58,6 +64,7 @@
     "applyRequiresExpectedFingerprint": false,
     "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
+      "deleted-generated-files",
       "manual-review-required",
       "unknown-impact",
       "verification-required"
@@ -126,28 +133,26 @@
     "localVersions": []
   },
   "stats": {
-    "totalFiles": 97,
-    "models": 74,
+    "totalFiles": 90,
+    "models": 67,
     "apis": 7,
-    "types": 74
+    "types": 67
   },
   "warnings": [],
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 4,
+    "writtenFiles": 3,
     "skippedScaffoldFiles": 1,
-    "skippedUnchangedGeneratedFiles": 92,
-    "deletedGeneratedFiles": 0,
+    "skippedUnchangedGeneratedFiles": 86,
+    "deletedGeneratedFiles": 7,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "3975f48b0741cc96c40148e7a01a5580e3aaf35bcfcdfcca2c8d92d2ac5636a4",
+    "changeFingerprint": "2b440dc48505b6f96dcf82841de1b3132c42830b8b7c8840ff707302ca25d656",
     "changes": {
-      "createdGeneratedFiles": [
-        "lib/sdkwork/app_sdk/models/domains_list_response.rb"
-      ],
+      "createdGeneratedFiles": [],
       "updatedGeneratedFiles": [
         "lib/sdkwork/app_sdk.rb",
-        "lib/sdkwork/app_sdk/api/domain.rb",
+        "lib/sdkwork/app_sdk/api/certificate.rb",
         "README.md"
       ],
       "unchangedGeneratedFiles": [
@@ -157,8 +162,8 @@
         "CHANGELOG.md",
         "Gemfile",
         "lib/sdkwork/app_sdk/api/base_api.rb",
-        "lib/sdkwork/app_sdk/api/certificate.rb",
         "lib/sdkwork/app_sdk/api/deployment.rb",
+        "lib/sdkwork/app_sdk/api/domain.rb",
         "lib/sdkwork/app_sdk/api/env_variable.rb",
         "lib/sdkwork/app_sdk/api/monitor.rb",
         "lib/sdkwork/app_sdk/api/site.rb",
@@ -167,12 +172,6 @@
         "lib/sdkwork/app_sdk/http/client.rb",
         "lib/sdkwork/app_sdk/models/application_store_listing.rb",
         "lib/sdkwork/app_sdk/models/certificate_identifier_response.rb",
-        "lib/sdkwork/app_sdk/models/certificate_operation_response.rb",
-        "lib/sdkwork/app_sdk/models/certificate_page.rb",
-        "lib/sdkwork/app_sdk/models/certificate_response.rb",
-        "lib/sdkwork/app_sdk/models/certificates_issue_response202.rb",
-        "lib/sdkwork/app_sdk/models/certificates_list_response.rb",
-        "lib/sdkwork/app_sdk/models/certificates_operations_retrieve_response.rb",
         "lib/sdkwork/app_sdk/models/create_deployment_request.rb",
         "lib/sdkwork/app_sdk/models/create_domain_request.rb",
         "lib/sdkwork/app_sdk/models/create_env_variable_request.rb",
@@ -185,13 +184,13 @@
         "lib/sdkwork/app_sdk/models/domain_page.rb",
         "lib/sdkwork/app_sdk/models/domain_response.rb",
         "lib/sdkwork/app_sdk/models/domain_verify_response.rb",
+        "lib/sdkwork/app_sdk/models/domains_list_response.rb",
         "lib/sdkwork/app_sdk/models/env_variable_page.rb",
         "lib/sdkwork/app_sdk/models/env_variable_response.rb",
         "lib/sdkwork/app_sdk/models/field_error.rb",
         "lib/sdkwork/app_sdk/models/health_check_page.rb",
         "lib/sdkwork/app_sdk/models/health_check_response.rb",
         "lib/sdkwork/app_sdk/models/import_git_source_version_request.rb",
-        "lib/sdkwork/app_sdk/models/issue_certificate_request.rb",
         "lib/sdkwork/app_sdk/models/listener_certificate_binding_response.rb",
         "lib/sdkwork/app_sdk/models/listener_certificate_summary_response.rb",
         "lib/sdkwork/app_sdk/models/media_checksum.rb",
@@ -244,7 +243,15 @@
         "sdkwork-sdk.json",
         "sdkwork-web-app-sdk.gemspec"
       ],
-      "deletedGeneratedFiles": [],
+      "deletedGeneratedFiles": [
+        "lib/sdkwork/app_sdk/models/certificate_operation_response.rb",
+        "lib/sdkwork/app_sdk/models/certificate_page.rb",
+        "lib/sdkwork/app_sdk/models/certificate_response.rb",
+        "lib/sdkwork/app_sdk/models/certificates_issue_response202.rb",
+        "lib/sdkwork/app_sdk/models/certificates_list_response.rb",
+        "lib/sdkwork/app_sdk/models/certificates_operations_retrieve_response.rb",
+        "lib/sdkwork/app_sdk/models/issue_certificate_request.rb"
+      ],
       "scaffoldedFiles": [],
       "preservedScaffoldFiles": [
         "custom/README.md"
@@ -263,13 +270,19 @@
         {
           "area": "api-surface",
           "paths": [
-            "lib/sdkwork/app_sdk/api/domain.rb"
+            "lib/sdkwork/app_sdk/api/certificate.rb"
           ]
         },
         {
           "area": "models",
           "paths": [
-            "lib/sdkwork/app_sdk/models/domains_list_response.rb"
+            "lib/sdkwork/app_sdk/models/certificate_operation_response.rb",
+            "lib/sdkwork/app_sdk/models/certificate_page.rb",
+            "lib/sdkwork/app_sdk/models/certificate_response.rb",
+            "lib/sdkwork/app_sdk/models/certificates_issue_response202.rb",
+            "lib/sdkwork/app_sdk/models/certificates_list_response.rb",
+            "lib/sdkwork/app_sdk/models/certificates_operations_retrieve_response.rb",
+            "lib/sdkwork/app_sdk/models/issue_certificate_request.rb"
           ]
         },
         {
@@ -321,6 +334,7 @@
       "applyRequiresExpectedFingerprint": false,
       "summary": "Changes have been applied. Run the required verification plan now.",
       "reasons": [
+        "deleted-generated-files",
         "manual-review-required",
         "unknown-impact",
         "verification-required"

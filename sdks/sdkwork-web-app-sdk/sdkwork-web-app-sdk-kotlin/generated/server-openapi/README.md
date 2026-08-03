@@ -98,14 +98,14 @@ println(result)
 ### certificate
 
 ```kotlin
-// 获取证书列表
+// List certificates active on the domain listener
+val siteId = "1"
+val domainId = "1"
 val params = linkedMapOf<String, Any>(
     "page" to 1,
-    "page_size" to 2,
-    "site_id" to "00000000-0000-0000-0000-000000000001",
-    "domain_id" to "00000000-0000-0000-0000-000000000001"
+    "page_size" to 2
 )
-val result = client.certificate.certificatesList(params)
+val result = client.certificate.sitesDomainsListenerCertificateBindingsList(siteId, domainId, params)
 println(result)
 ```
 

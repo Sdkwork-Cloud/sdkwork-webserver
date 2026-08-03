@@ -86,14 +86,14 @@ print(result);
 
 ### certificate
 ```dart
-// 获取证书列表
+// List certificates active on the domain listener
+final siteId = '1';
+final domainId = '1';
 final params = <String, dynamic>{
   'page': 1,
   'page_size': 2,
-  'site_id': '00000000-0000-0000-0000-000000000001',
-  'domain_id': '00000000-0000-0000-0000-000000000001',
 };
-final result = await client.certificate.certificatesList(params);
+final result = await client.certificate.sitesDomainsListenerCertificateBindingsList(siteId, domainId, params);
 print(result);
 ```
 

@@ -303,7 +303,7 @@ describe("admin control-plane capability", () => {
       pageSize: 20,
     });
     expect(listAudit).toHaveBeenCalledWith({
-      page: 2,
+      cursor: undefined,
       pageSize: 20,
       targetType: "deployment",
       action: "sites.rollback",

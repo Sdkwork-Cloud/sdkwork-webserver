@@ -93,14 +93,14 @@ print(result)
 ### certificate
 
 ```swift
-// 获取证书列表
+// List certificates active on the domain listener
+let siteId = "1"
+let domainId = "1"
 let params: [String: Any] = [
     "page": 1,
-    "page_size": 2,
-    "site_id": "00000000-0000-0000-0000-000000000001",
-    "domain_id": "00000000-0000-0000-0000-000000000001"
+    "page_size": 2
 ]
-let result = try await client.certificate.certificatesList(params: params)
+let result = try await client.certificate.sitesDomainsListenerCertificateBindingsList(siteId: siteId, domainId: domainId, params: params)
 print(result)
 ```
 
