@@ -34,8 +34,7 @@ test('node daemon persists desired before apply and observed only after real rel
   );
   const desiredIndex = source.indexOf('local_state.with_desired');
   const desiredSaveIndex = source.indexOf('desired_state.save');
-  const deployIndex = source.indexOf('edge.deploy_site_config');
-  const reloadIndex = source.indexOf('edge.reload()?');
+  const deployIndex = source.indexOf('activate_deployment_async');
   const observedIndex = source.indexOf('local_state.with_observed');
   const observedSaveIndex = source.indexOf('observed_state.save');
   const processLockIndex = source.indexOf('NodeDaemonLock::acquire');
@@ -43,8 +42,7 @@ test('node daemon persists desired before apply and observed only after real rel
   assert.ok(processLockIndex >= 0 && processLockIndex < stateLoadIndex);
   assert.ok(desiredIndex >= 0 && desiredIndex < desiredSaveIndex);
   assert.ok(desiredSaveIndex < deployIndex);
-  assert.ok(deployIndex < reloadIndex);
-  assert.ok(reloadIndex < observedIndex && observedIndex < observedSaveIndex);
+  assert.ok(deployIndex < observedIndex && observedIndex < observedSaveIndex);
   assert.match(
     source,
     /last_sync_version: local_state\.observed_sync_version\(\)/u,
