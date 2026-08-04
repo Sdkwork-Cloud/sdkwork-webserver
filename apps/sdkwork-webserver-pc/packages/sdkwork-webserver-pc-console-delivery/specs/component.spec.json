@@ -6,7 +6,7 @@
     "displayName": "SDKWork Webserver PC delivery",
     "version": "0.1.0",
     "type": "node-package",
-    "root": "sdkwork-web-server/apps/sdkwork-webserver-pc/packages/sdkwork-webserver-pc-console-delivery",
+    "root": "sdkwork-webserver/apps/sdkwork-webserver-pc/packages/sdkwork-webserver-pc-console-delivery",
     "domain": "infrastructure",
     "capability": "delivery",
     "surface": "app-console",

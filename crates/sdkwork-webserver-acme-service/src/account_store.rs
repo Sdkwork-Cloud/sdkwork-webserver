@@ -185,7 +185,7 @@ impl AcmeAccountStore for EncryptedFileAcmeAccountStore {
             ));
         }
         let encoded = aes_gcm_encrypt(&self.encryption_key, &plaintext)
-            .map_err(|error| AcmeServiceError::Internal(error))?;
+            .map_err(AcmeServiceError::Internal)?;
         let path = self.credential_path(directory_url);
 
         let _guard = self.serialize.lock().await;

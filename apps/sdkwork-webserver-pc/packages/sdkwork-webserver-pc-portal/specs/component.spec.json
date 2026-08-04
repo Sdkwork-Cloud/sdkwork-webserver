@@ -6,7 +6,7 @@
     "displayName": "SDKWork Webserver PC Portal",
     "version": "0.1.0",
     "type": "react-package",
-    "root": "sdkwork-web-server/apps/sdkwork-webserver-pc/packages/sdkwork-webserver-pc-portal",
+    "root": "sdkwork-webserver/apps/sdkwork-webserver-pc/packages/sdkwork-webserver-pc-portal",
     "domain": "infrastructure",
     "capability": "portal",
     "surface": "app",

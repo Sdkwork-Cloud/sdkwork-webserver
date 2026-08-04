@@ -140,6 +140,21 @@ namespace SDKWork.Web.BackendSdk.Api
             return await _client.PostAsync<SDKWork.Web.BackendSdk.Models.CertificatesRenewResponse202>(ApiPaths.BackendPath($"/certificates/{SerializePathParameter(certificateId, new PathParameterSpec("certificateId", "simple", false))}/renew"), null, null, requestHeaders);
         }
 
+        /// <summary>
+        /// Revoke a canonical certificate
+        /// </summary>
+        public async Task<SDKWork.Web.BackendSdk.Models.CertificatesRevokeResponse?> CertificatesRevokeAsync(string certificateId, SDKWork.Web.BackendSdk.Models.RevokeCertificateRequest body, string idempotencyKey)
+        {
+            var requestHeaders = BuildRequestHeaders(
+                new Dictionary<string, HeaderParameterSpec>
+                {
+                    ["Idempotency-Key"] = new HeaderParameterSpec(idempotencyKey, "simple", false, null),
+                },
+                new Dictionary<string, HeaderParameterSpec>()
+            );
+            return await _client.PostAsync<SDKWork.Web.BackendSdk.Models.CertificatesRevokeResponse>(ApiPaths.BackendPath($"/certificates/{SerializePathParameter(certificateId, new PathParameterSpec("certificateId", "simple", false))}/revoke"), body, null, requestHeaders, "application/json");
+        }
+
         private sealed record PathParameterSpec(string Name, string Style, bool Explode);
 
         private static string SerializePathParameter(object? value, PathParameterSpec spec)

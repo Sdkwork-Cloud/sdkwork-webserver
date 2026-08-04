@@ -9,22 +9,28 @@ use rcgen::{CertificateParams, DistinguishedName};
 
 use crate::account_store::AcmeAccountStore;
 use crate::challenge_store::ChallengeStore;
-use crate::http_client::BoundedAcmeHttpClient;
+use crate::http_client::AcmeHttpClientFactory;
 use crate::model::IssuedCertificateMaterial;
 use crate::self_signed::{certificate_evidence_from_pem, generate_key_pair};
 use crate::{AcmeConfig, AcmeServiceError, AcmeServiceResult};
 
 const MAX_AUTHORIZATIONS_PER_ORDER: usize = 8;
 
+/// Issuance parameters grouped to keep the ACME entry points readable.
+pub(crate) struct AcmeIssueParams<'a> {
+    pub hostnames: &'a [String],
+    pub cert_name: &'a str,
+    pub cert_root: &'a str,
+    pub key_algorithm: &'a str,
+}
+
 pub async fn issue_lets_encrypt(
     config: &AcmeConfig,
     challenge_store: &ChallengeStore,
     account_store: &dyn AcmeAccountStore,
-    hostnames: &[String],
-    cert_name: &str,
-    cert_root: &str,
+    client_factory: &dyn AcmeHttpClientFactory,
+    params: AcmeIssueParams<'_>,
     operation_timeout: Duration,
-    key_algorithm: &str,
 ) -> AcmeServiceResult<IssuedCertificateMaterial> {
     match tokio::time::timeout(
         operation_timeout,
@@ -32,11 +38,9 @@ pub async fn issue_lets_encrypt(
             config,
             challenge_store,
             account_store,
-            hostnames,
-            cert_name,
-            cert_root,
+            client_factory,
+            params,
             operation_timeout,
-            key_algorithm,
         ),
     )
     .await
@@ -53,12 +57,16 @@ async fn issue_lets_encrypt_inner(
     config: &AcmeConfig,
     challenge_store: &ChallengeStore,
     account_store: &dyn AcmeAccountStore,
-    hostnames: &[String],
-    cert_name: &str,
-    cert_root: &str,
+    client_factory: &dyn AcmeHttpClientFactory,
+    params: AcmeIssueParams<'_>,
     operation_timeout: Duration,
-    key_algorithm: &str,
 ) -> AcmeServiceResult<IssuedCertificateMaterial> {
+    let AcmeIssueParams {
+        hostnames,
+        cert_name,
+        cert_root,
+        key_algorithm,
+    } = params;
     let webroot = config.webroot.as_deref().map(Path::new).ok_or_else(|| {
         AcmeServiceError::config(
             "SDKWORK_WEB_ACME_WEBROOT is required for Let's Encrypt HTTP-01 issuance",
@@ -70,24 +78,23 @@ async fn issue_lets_encrypt_inner(
     // account and persist it. Reusing one account avoids the CA account
     // creation rate limit and preserves account identity across renewals.
     let account = if let Some(credentials) = account_store.load(&config.directory_url).await? {
-        Account::builder_with_http(Box::new(BoundedAcmeHttpClient::new()?))
+        Account::builder_with_http(client_factory.build()?)
             .from_credentials(credentials)
             .await
             .map_err(|error| AcmeServiceError::provider(format!("restore ACME account: {error}")))?
     } else {
-        let (account, credentials) =
-            Account::builder_with_http(Box::new(BoundedAcmeHttpClient::new()?))
-                .create(
-                    &NewAccount {
-                        contact: &[&contact],
-                        terms_of_service_agreed: true,
-                        only_return_existing: false,
-                    },
-                    config.directory_url.clone(),
-                    None,
-                )
-                .await
-                .map_err(|error| AcmeServiceError::provider(error.to_string()))?;
+        let (account, credentials) = Account::builder_with_http(client_factory.build()?)
+            .create(
+                &NewAccount {
+                    contact: &[&contact],
+                    terms_of_service_agreed: true,
+                    only_return_existing: false,
+                },
+                config.directory_url.clone(),
+                None,
+            )
+            .await
+            .map_err(|error| AcmeServiceError::provider(error.to_string()))?;
         account_store
             .save(&config.directory_url, &credentials)
             .await?;

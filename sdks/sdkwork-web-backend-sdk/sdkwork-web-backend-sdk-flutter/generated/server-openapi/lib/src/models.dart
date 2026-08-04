@@ -1920,6 +1920,32 @@ class CertificateResponse {
   }
 }
 
+class RevokeCertificateRequest {
+  final String reason;
+
+  RevokeCertificateRequest({
+    required this.reason
+  });
+
+  factory RevokeCertificateRequest.fromJson(Map<String, dynamic> json) {
+    return RevokeCertificateRequest(
+      reason: (() {
+        final value = json['reason']?.toString();
+        if (value == null) {
+          throw FormatException('RevokeCertificateRequest.reason is required');
+        }
+        return value;
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'reason': reason,
+    };
+  }
+}
+
 class CertificateOperationResponse {
   final String id;
   final String certificateId;
@@ -5195,6 +5221,46 @@ class CertificatesRenewResponse202 {
         final value = json['traceId']?.toString();
         if (value == null) {
           throw FormatException('CertificatesRenewResponse202.traceId is required');
+        }
+        return value;
+      })()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class CertificatesRevokeResponse {
+  final int code;
+  final dynamic data;
+  final String traceId;
+
+  CertificatesRevokeResponse({
+    required this.code,
+    required this.data,
+    required this.traceId
+  });
+
+  factory CertificatesRevokeResponse.fromJson(Map<String, dynamic> json) {
+    return CertificatesRevokeResponse(
+      code: (() {
+        final value = json['code'];
+        if (value is! int) {
+          throw FormatException('CertificatesRevokeResponse.code is required');
+        }
+        return value;
+      })(),
+      data: json['data'],
+      traceId: (() {
+        final value = json['traceId']?.toString();
+        if (value == null) {
+          throw FormatException('CertificatesRevokeResponse.traceId is required');
         }
         return value;
       })()

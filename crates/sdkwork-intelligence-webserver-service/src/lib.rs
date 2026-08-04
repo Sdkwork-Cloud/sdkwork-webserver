@@ -10,15 +10,18 @@ pub mod nginx_ops;
 pub mod repository;
 pub mod runtime_assignment_ops;
 pub mod source_import;
+pub mod tls_material_distribution;
 
 pub use domain_verification::{DnsTxtDomainOwnershipVerifier, DomainOwnershipVerifier};
 pub use repository::{
-    AuditLogWrite, DomainVerificationChallenge, DomainVerificationObservation,
-    RuntimeAssignmentTarget, RuntimeAssignmentWrite, RuntimeObservationWrite, WebRepositoryPort,
+    AuditLogWrite, CertificateRevocationMaterial, DomainVerificationChallenge,
+    DomainVerificationObservation, RuntimeAssignmentTarget, RuntimeAssignmentWrite,
+    RuntimeObservationWrite, WebRepositoryPort,
 };
 pub use source_import::{
     ApplicationSourceImporter, GitSourceImportRequest, ImportedApplicationSource,
 };
+pub use tls_material_distribution::TlsMaterialDistributionConfig;
 
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;

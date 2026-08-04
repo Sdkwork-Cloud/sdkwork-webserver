@@ -44,7 +44,7 @@
     },
     {
       "path": "Api/CertificateApi.cs",
-      "sha256": "bb3adc72464b85e78b893ae78e08cb170cf86777dc101974dfbee15211dd4c8f"
+      "sha256": "38e1ed6abdc31743cfcd9764367044ce63562d6e0e745d5c5b769caf6b6c0a31"
     },
     {
       "path": "Api/CertificateDistributionApi.cs",
@@ -255,6 +255,10 @@
       "sha256": "867337a639931e0af536addb289838ddb9d7590be8b72bb31d5a8827bd0ee317"
     },
     {
+      "path": "Models/CertificatesRevokeResponse.cs",
+      "sha256": "6bcb8a324031a14766aa5fa77784520b9292e9fcca53586e63f3715520fe4791"
+    },
+    {
       "path": "Models/CertificatesUpdateResponse.cs",
       "sha256": "4bf48aa9a30079997e2d648257530014a96c550b57e36a6ae1afb3601917bf60"
     },
@@ -421,6 +425,10 @@
     {
       "path": "Models/RetrieveResponse.cs",
       "sha256": "1ab97761a8910ffd120ab2136137ee0672a147341c8049c3dc95e05601db1e89"
+    },
+    {
+      "path": "Models/RevokeCertificateRequest.cs",
+      "sha256": "44f01aaf5f2c67d50babc9bcf78529d9c274412a1a2c1960ffca8627a222bc99"
     },
     {
       "path": "Models/RootDomainResponse.cs",

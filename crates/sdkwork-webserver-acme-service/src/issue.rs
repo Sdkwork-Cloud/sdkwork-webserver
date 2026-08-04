@@ -9,6 +9,7 @@ use tokio::sync::Semaphore;
 use crate::account_store::{AcmeAccountStore, MemoryAcmeAccountStore};
 use crate::challenge_store::ChallengeStore;
 use crate::config::AcmeConfig;
+use crate::http_client::{AcmeHttpClientFactory, PlatformVerifierClientFactory};
 use crate::lets_encrypt::issue_lets_encrypt;
 use crate::model::IssuedCertificateMaterial;
 use crate::self_signed::{certificate_evidence_from_pem, issue_self_signed};
@@ -21,12 +22,13 @@ const MAX_CONCURRENT_CERTIFICATE_ISSUANCE: usize = 8;
 const MAX_CERTIFICATE_IDENTIFIERS: usize = 8;
 
 pub struct CertificateIssuer {
-    config: AcmeConfig,
-    challenge_store: Arc<ChallengeStore>,
-    account_store: Arc<dyn AcmeAccountStore>,
-    cert_root: String,
-    operation_timeout: Duration,
-    admission: Semaphore,
+    pub(crate) config: AcmeConfig,
+    pub(crate) challenge_store: Arc<ChallengeStore>,
+    pub(crate) account_store: Arc<dyn AcmeAccountStore>,
+    pub(crate) client_factory: Arc<dyn AcmeHttpClientFactory>,
+    pub(crate) cert_root: String,
+    pub(crate) operation_timeout: Duration,
+    pub(crate) admission: Semaphore,
 }
 
 impl CertificateIssuer {
@@ -57,6 +59,24 @@ impl CertificateIssuer {
         operation_timeout_ms: u64,
         account_store: Arc<dyn AcmeAccountStore>,
     ) -> AcmeServiceResult<Self> {
+        Self::new_with_client_factory(
+            config,
+            cert_root,
+            operation_timeout_ms,
+            account_store,
+            Arc::new(PlatformVerifierClientFactory),
+        )
+    }
+
+    /// Construct with a custom ACME HTTP client factory (for example extra
+    /// private CA trust roots) and a durable account store.
+    pub fn new_with_client_factory(
+        config: AcmeConfig,
+        cert_root: impl Into<String>,
+        operation_timeout_ms: u64,
+        account_store: Arc<dyn AcmeAccountStore>,
+        client_factory: Arc<dyn AcmeHttpClientFactory>,
+    ) -> AcmeServiceResult<Self> {
         config.validate()?;
         let cert_root = cert_root.into();
         if cert_root.is_empty()
@@ -80,6 +100,7 @@ impl CertificateIssuer {
             config,
             challenge_store: Arc::new(ChallengeStore::default()),
             account_store,
+            client_factory,
             cert_root,
             operation_timeout: Duration::from_millis(operation_timeout_ms),
             admission: Semaphore::new(MAX_CONCURRENT_CERTIFICATE_ISSUANCE),
@@ -136,11 +157,14 @@ impl CertificateIssuer {
                     &self.config,
                     self.challenge_store.as_ref(),
                     self.account_store.as_ref(),
-                    hostnames,
-                    cert_name,
-                    &self.cert_root,
+                    self.client_factory.as_ref(),
+                    crate::lets_encrypt::AcmeIssueParams {
+                        hostnames,
+                        cert_name,
+                        cert_root: &self.cert_root,
+                        key_algorithm,
+                    },
                     self.operation_timeout,
-                    key_algorithm,
                 )
                 .await
             }

@@ -9,13 +9,10 @@
     "protocol": "http",
     "packageName": "sdkwork/web-app-sdk"
   },
-  "changeFingerprint": "b39b6c033cc5a04ef8e9149f950b273b08840a725085eb2310f99a8ae0b62174",
+  "changeFingerprint": "ad75d8fbda2d8aec3957066e2a9efb7ef02b1d1b3c39c2933827172a50ce9fe4",
   "changes": {
     "createdGeneratedFiles": [],
-    "updatedGeneratedFiles": [
-      "README.md",
-      "src/Api/Certificate.php"
-    ],
+    "updatedGeneratedFiles": [],
     "unchangedGeneratedFiles": [
       "bin/publish-core.mjs",
       "bin/publish.ps1",
@@ -23,8 +20,10 @@
       "CHANGELOG.md",
       "composer.json",
       "LICENSE",
+      "README.md",
       "sdkwork-sdk.json",
       "src/Api/BaseApi.php",
+      "src/Api/Certificate.php",
       "src/Api/Deployment.php",
       "src/Api/Domain.php",
       "src/Api/EnvVariable.php",
@@ -102,15 +101,7 @@
       "src/SdkConfig.php",
       "src/SdkworkAppClient.php"
     ],
-    "deletedGeneratedFiles": [
-      "src/Models/CertificateOperationResponse.php",
-      "src/Models/CertificatePage.php",
-      "src/Models/CertificateResponse.php",
-      "src/Models/CertificatesIssueResponse202.php",
-      "src/Models/CertificatesListResponse.php",
-      "src/Models/CertificatesOperationsRetrieveResponse.php",
-      "src/Models/IssueCertificateRequest.php"
-    ],
+    "deletedGeneratedFiles": [],
     "scaffoldedFiles": [],
     "preservedScaffoldFiles": [
       "custom/README.md"
@@ -119,76 +110,26 @@
   },
   "impact": {
     "schemaVersion": 1,
-    "areas": [
-      "api-surface",
-      "models",
-      "documentation"
-    ],
-    "details": [
-      {
-        "area": "api-surface",
-        "paths": [
-          "src/Api/Certificate.php"
-        ]
-      },
-      {
-        "area": "models",
-        "paths": [
-          "src/Models/CertificateOperationResponse.php",
-          "src/Models/CertificatePage.php",
-          "src/Models/CertificateResponse.php",
-          "src/Models/CertificatesIssueResponse202.php",
-          "src/Models/CertificatesListResponse.php",
-          "src/Models/CertificatesOperationsRetrieveResponse.php",
-          "src/Models/IssueCertificateRequest.php"
-        ]
-      },
-      {
-        "area": "documentation",
-        "paths": [
-          "README.md"
-        ]
-      }
-    ],
-    "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, models, documentation. Verification is required."
+    "areas": [],
+    "details": [],
+    "requiresVerification": false,
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
   },
   "verificationPlan": {
-    "shouldRun": true,
-    "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, models, documentation. Verification is required. Run the required verification commands now against the generated SDK output.",
-    "steps": [
-      {
-        "id": "check",
-        "title": "Unified package check",
-        "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, documentation.",
-        "workingDirectory": "E:\\sdkwork-space\\sdkwork-webserver\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-php\\generated\\server-openapi",
-        "command": "node",
-        "args": [
-          "./bin/publish-core.mjs",
-          "--language",
-          "php",
-          "--project-dir",
-          ".",
-          "--action",
-          "check"
-        ],
-        "displayCommand": "node ./bin/publish-core.mjs --language php --project-dir . --action check"
-      }
-    ]
+    "shouldRun": false,
+    "runPhase": "skip",
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
+    "steps": []
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "high",
-    "nextAction": "verify",
+    "riskLevel": "low",
+    "nextAction": "skip",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
-    "summary": "Changes have been applied. Run the required verification plan now.",
+    "summary": "No actionable changes were detected. No apply or verification step is required.",
     "reasons": [
-      "deleted-generated-files",
-      "manual-review-required",
-      "verification-required"
+      "no-actionable-changes"
     ]
   },
   "preservedLegacyFiles": false

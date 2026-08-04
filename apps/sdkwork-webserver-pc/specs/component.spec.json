@@ -6,7 +6,7 @@
     "displayName": "SDKWork Webserver PC",
     "version": "0.1.0",
     "type": "pc-application",
-    "root": "sdkwork-web-server/apps/sdkwork-webserver-pc",
+    "root": "sdkwork-webserver/apps/sdkwork-webserver-pc",
     "domain": "infrastructure",
     "capability": "webserver",
     "surface": "pc",
@@ -52,5 +52,5 @@
   "verification": {
     "commands": ["pnpm --dir apps/sdkwork-webserver-pc check", "node ../sdkwork-specs/tools/check-app-sdk-consumer-imports.mjs --workspace .", "node ../sdkwork-specs/tools/check-source-config-standard.mjs --root apps/sdkwork-webserver-pc"]
   },
-  "metadata": { "managedBy": "sdkwork-web-server", "standardVersion": "2026-07-24" }
+  "metadata": { "managedBy": "sdkwork-webserver", "standardVersion": "2026-07-24" }
 }

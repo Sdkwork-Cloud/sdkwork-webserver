@@ -14,6 +14,7 @@ pub use deployment::NginxSiteConfigMaterial;
 pub use error::{EdgeRuntimeError, EdgeRuntimeResult};
 pub use nginx::{
     deploy_nginx_config, reload_nginx, validate_active_nginx_config, validate_nginx_config,
+    verify_served_config,
 };
 pub use paths::{cert_bundle_paths, nginx_site_path};
 pub use tls_probe::verify_served_certificate;
@@ -189,6 +190,12 @@ impl EdgeRuntime {
 
     pub fn reload(&self) -> Result<(), EdgeRuntimeError> {
         reload_nginx(&self.config)
+    }
+
+    /// Proves the loaded Nginx configuration contains `expected_fragment`
+    /// (PRD-FR-020 served-revision evidence for reload convergence).
+    pub fn verify_served_config(&self, expected_fragment: &str) -> Result<(), EdgeRuntimeError> {
+        verify_served_config(&self.config, expected_fragment)
     }
 
     pub fn validate_active_config(&self) -> Result<(), EdgeRuntimeError> {

@@ -134,6 +134,9 @@ pub enum DataPlaneError {
     #[error("data-plane operations listener stopped before shutdown")]
     OperationsListenerStopped,
 
+    #[error("provider-backed resource bootstrap failed: {0}")]
+    ProviderBootstrap(#[source] Box<crate::website::WebsiteDataPlaneBootstrapError>),
+
     #[error("listener task failed: {0}")]
     ListenerTask(#[from] tokio::task::JoinError),
 }

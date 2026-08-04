@@ -1,6 +1,6 @@
 # apps/
 
-Application: sdkwork-web-server
+Application: sdkwork-webserver
 Status: active
 Owner: SDKWork maintainers
 Specs: APPLICATION_SPEC.md, SDKWORK_WORKSPACE_SPEC.md

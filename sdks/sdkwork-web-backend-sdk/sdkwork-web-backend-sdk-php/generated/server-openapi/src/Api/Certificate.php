@@ -10,9 +10,11 @@ use SDKWork\Web\BackendSdk\Models\CertificatesIssueResponse202;
 use SDKWork\Web\BackendSdk\Models\CertificatesListResponse;
 use SDKWork\Web\BackendSdk\Models\CertificatesOperationsRetrieveResponse;
 use SDKWork\Web\BackendSdk\Models\CertificatesRenewResponse202;
+use SDKWork\Web\BackendSdk\Models\CertificatesRevokeResponse;
 use SDKWork\Web\BackendSdk\Models\CertificatesUpdateResponse;
 use SDKWork\Web\BackendSdk\Models\CreateListenerCertificateBindingRequest;
 use SDKWork\Web\BackendSdk\Models\IssueCertificateRequest;
+use SDKWork\Web\BackendSdk\Models\RevokeCertificateRequest;
 use SDKWork\Web\BackendSdk\Models\UpdateCertificateRequest;
 
 final class CertificateApi extends BaseApi
@@ -152,6 +154,24 @@ final class CertificateApi extends BaseApi
             'headers' => $requestHeaders,
         ]);
         return is_array($result) ? CertificatesRenewResponse202::fromArray($result) : null;
+    }
+
+    /** Revoke a canonical certificate */
+    public function certificatesRevoke(string $certificateId, array|RevokeCertificateRequest $body, string $idempotencyKey): ?CertificatesRevokeResponse
+    {
+        $path = $this->interpolatePath('/backend/v3/api/certificates/{certificateId}/revoke', ['certificateId' => $this->serializePathParameter($certificateId, new PathParameterSpec('certificateId', 'simple', false))]);
+        $payload = $body instanceof RevokeCertificateRequest ? $body->toArray() : $body;
+        $requestHeaders = $this->buildRequestHeaders(
+            [
+                'Idempotency-Key' => new HeaderParameterSpec($idempotencyKey, 'simple', false, null),
+            ],
+            []
+        );
+        $result = $this->client->request('POST', $path, [
+            'headers' => $requestHeaders,
+            'json' => $payload,
+        ]);
+        return is_array($result) ? CertificatesRevokeResponse::fromArray($result) : null;
     }
 
     private function buildRequestHeaders(array $headers, array $cookies): array

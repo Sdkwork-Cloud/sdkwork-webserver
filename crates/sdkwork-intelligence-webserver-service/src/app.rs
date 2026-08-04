@@ -82,12 +82,7 @@ impl WebService {
             ));
         }
         if let Some(icon) = listing.icon.as_ref() {
-            validate_square_store_image(
-                icon,
-                "storeListing.icon",
-                &["image/png"],
-                MAX_ICON_BYTES,
-            )?;
+            validate_square_store_image(icon, "storeListing.icon", &["image/png"], MAX_ICON_BYTES)?;
         }
         if let Some(cover) = listing.cover.as_ref() {
             validate_store_image(
@@ -1350,6 +1345,11 @@ impl WebAppApi for WebService {
             site_id,
         )
         .await;
+        // A binding change alters the node's served certificate set; publish
+        // the TLS material snapshot immediately so the data plane converges
+        // without waiting for the next certificate operation.
+        self.publish_node_tls_material_best_effort("listener_certificate_bind")
+            .await;
         Ok(binding)
     }
 
@@ -1370,6 +1370,8 @@ impl WebAppApi for WebService {
             site_id,
         )
         .await;
+        self.publish_node_tls_material_best_effort("listener_certificate_unbind")
+            .await;
         Ok(())
     }
 

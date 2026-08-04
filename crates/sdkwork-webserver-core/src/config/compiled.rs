@@ -24,6 +24,7 @@ pub struct CompiledWebServerApp {
     static_roots: HashMap<String, PathBuf>,
     certificate_paths: HashMap<String, (PathBuf, PathBuf)>,
     upstream_tls_paths: HashMap<String, CompiledUpstreamTlsPaths>,
+    acme_webroots: HashMap<String, PathBuf>,
 }
 
 #[derive(Debug)]
@@ -157,6 +158,24 @@ impl CompiledWebServerApp {
             );
         }
 
+        let mut acme_webroots = HashMap::new();
+        for (index, listener) in config.listeners.iter().enumerate() {
+            let Some(acme) = &listener.acme_http_01 else {
+                continue;
+            };
+            let resolved = canonical_directory(
+                &base_directory.join(&acme.webroot),
+                &format!("/listeners/{index}/acmeHttp01/webroot"),
+            )?;
+            if !resolved.starts_with(&base_directory) {
+                return Err(validation_error(
+                    format!("/listeners/{index}/acmeHttp01/webroot"),
+                    "ACME webroot escapes the configuration directory",
+                ));
+            }
+            acme_webroots.insert(listener.id.clone(), resolved);
+        }
+
         let compiled_hosts = config
             .virtual_hosts
             .iter()
@@ -198,7 +217,7 @@ impl CompiledWebServerApp {
                     }
                 }
             }
-            wildcard_hosts.sort_by(|left, right| right.0.len().cmp(&left.0.len()));
+            wildcard_hosts.sort_by_key(|item| std::cmp::Reverse(item.0.len()));
             let default_host = listener
                 .default_virtual_host_ref
                 .as_deref()
@@ -226,6 +245,7 @@ impl CompiledWebServerApp {
             static_roots,
             certificate_paths,
             upstream_tls_paths,
+            acme_webroots,
         })
     }
 
@@ -245,6 +265,13 @@ impl CompiledWebServerApp {
         self.listeners
             .get(id)
             .map(|index| &self.config.listeners[*index])
+    }
+
+    /// Resolved ACME HTTP-01 webroot for a listener, when the listener
+    /// configured `acmeHttp01`. The path is canonical and confined to the
+    /// configuration directory at compile time.
+    pub fn acme_webroot(&self, listener_id: &str) -> Option<&Path> {
+        self.acme_webroots.get(listener_id).map(PathBuf::as_path)
     }
 
     pub fn resource(&self, id: &str) -> Option<&ResourceConfig> {
@@ -273,6 +300,17 @@ impl CompiledWebServerApp {
 
     pub fn static_root(&self, resource_id: &str) -> Option<&Path> {
         self.static_roots.get(resource_id).map(PathBuf::as_path)
+    }
+
+    /// Every provider-backed resource (Drive or Knowledgebase) in this
+    /// configuration, in declaration order. The data-plane bootstrap uses
+    /// this to assemble provider connections and to fail closed when a
+    /// referenced provider is unavailable.
+    pub fn provider_resources(&self) -> impl Iterator<Item = &ResourceConfig> {
+        self.config
+            .resources
+            .iter()
+            .filter(|resource| resource.provider_type().is_some())
     }
 
     pub fn certificate_paths(&self, certificate_id: &str) -> Option<(&Path, &Path)> {

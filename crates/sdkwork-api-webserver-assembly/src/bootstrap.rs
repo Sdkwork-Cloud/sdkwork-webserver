@@ -299,8 +299,7 @@ mod tests {
         // false` in its API source), so the served OpenAPI must not invent a
         // permission extension for them.
         assert!(
-            openapi["paths"]["/app/v3/api/domain_zones"]["get"]["x-sdkwork-permission"]
-                .is_null()
+            openapi["paths"]["/app/v3/api/domain_zones"]["get"]["x-sdkwork-permission"].is_null()
         );
     }
 

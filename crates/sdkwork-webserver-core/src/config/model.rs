@@ -12,6 +12,10 @@ fn default_unknown_directive_policy() -> String {
     "error".to_owned()
 }
 
+fn default_provider_timeout_ms() -> u64 {
+    30_000
+}
+
 fn default_max_request_body_bytes() -> u64 {
     10 * 1024 * 1024
 }
@@ -456,6 +460,8 @@ impl Default for CompatibilityConfig {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct WebServerLimits {
+    #[serde(default = "default_provider_timeout_ms")]
+    pub provider_timeout_ms: u64,
     #[serde(default = "default_max_request_body_bytes")]
     pub max_request_body_bytes: u64,
     #[serde(default = "default_max_response_body_bytes")]
@@ -551,6 +557,7 @@ pub struct WebServerLimits {
 impl Default for WebServerLimits {
     fn default() -> Self {
         Self {
+            provider_timeout_ms: default_provider_timeout_ms(),
             max_request_body_bytes: default_max_request_body_bytes(),
             max_response_body_bytes: default_max_response_body_bytes(),
             request_timeout_ms: default_request_timeout_ms(),
@@ -614,6 +621,18 @@ pub struct ListenerConfig {
     pub max_connections: Option<usize>,
     pub trusted_proxy: Option<TrustedProxyConfig>,
     pub proxy_protocol: Option<ProxyProtocolConfig>,
+    pub acme_http_01: Option<AcmeHttp01Config>,
+}
+
+/// Narrow-precedence ACME HTTP-01 challenge serving for a listener.
+///
+/// When configured, the listener serves only the exact
+/// `/.well-known/acme-challenge/<token>` path from a single bounded regular
+/// file under `webroot`; no directory listing or unrelated route is exposed.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct AcmeHttp01Config {
+    pub webroot: String,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -783,6 +802,23 @@ pub enum ResourceConfig {
         #[serde(default)]
         body: String,
     },
+    Drive {
+        id: String,
+        provider_resource_uuid: String,
+        resource_subpath: Option<String>,
+        #[serde(default = "default_index_files")]
+        index_files: Vec<String>,
+        spa_fallback: Option<String>,
+        #[serde(default)]
+        cache: Option<ProviderCachePolicy>,
+    },
+    Knowledgebase {
+        id: String,
+        provider_resource_uuid: String,
+        locale: Option<String>,
+        #[serde(default)]
+        cache: Option<ProviderCachePolicy>,
+    },
 }
 
 impl ResourceConfig {
@@ -791,9 +827,104 @@ impl ResourceConfig {
             Self::Static { id, .. }
             | Self::Proxy { id, .. }
             | Self::Redirect { id, .. }
-            | Self::Respond { id, .. } => id,
+            | Self::Respond { id, .. }
+            | Self::Drive { id, .. }
+            | Self::Knowledgebase { id, .. } => id,
         }
     }
+
+    /// Provider-backed resource type, when this resource is served from a
+    /// Drive WebsiteRoot or a Knowledgebase WikiPublication instead of the
+    /// local filesystem. The config module keeps this provider vocabulary
+    /// local; callers map it to the website-runtime provider registry.
+    pub fn provider_type(&self) -> Option<ConfigProviderType> {
+        match self {
+            Self::Drive { .. } => Some(ConfigProviderType::Drive),
+            Self::Knowledgebase { .. } => Some(ConfigProviderType::Knowledgebase),
+            Self::Static { .. }
+            | Self::Proxy { .. }
+            | Self::Redirect { .. }
+            | Self::Respond { .. } => None,
+        }
+    }
+
+    /// Provider resource identifier (WebsiteRoot or WikiPublication uuid),
+    /// when this resource is provider-backed.
+    pub fn provider_resource_uuid(&self) -> Option<&str> {
+        match self {
+            Self::Drive {
+                provider_resource_uuid,
+                ..
+            }
+            | Self::Knowledgebase {
+                provider_resource_uuid,
+                ..
+            } => Some(provider_resource_uuid),
+            Self::Static { .. }
+            | Self::Proxy { .. }
+            | Self::Redirect { .. }
+            | Self::Respond { .. } => None,
+        }
+    }
+
+    /// Optional resolution-cache policy for provider-backed resources.
+    pub fn provider_cache_policy(&self) -> Option<ProviderCachePolicy> {
+        match self {
+            Self::Drive { cache, .. } | Self::Knowledgebase { cache, .. } => *cache,
+            Self::Static { .. }
+            | Self::Proxy { .. }
+            | Self::Redirect { .. }
+            | Self::Respond { .. } => None,
+        }
+    }
+}
+
+/// Provider vocabulary for application-config resources backed by the
+/// website-runtime provider registry.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ConfigProviderType {
+    Drive,
+    Knowledgebase,
+}
+
+/// Optional resolution-cache policy for Drive and Knowledgebase resources.
+///
+/// Mirrors the website-runtime descriptor `deliveryPolicy` cache TTL semantics:
+/// metadata resolutions are cached for `metadata_ttl_seconds`, negative
+/// resolutions (not-found/revoked) for `negative_ttl_seconds`, and stale
+/// entries may be served while a background revalidation runs for
+/// `stale_while_revalidate_seconds`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct ProviderCachePolicy {
+    #[serde(default = "default_provider_metadata_cache_ttl_seconds")]
+    pub metadata_ttl_seconds: u32,
+    #[serde(default = "default_provider_negative_cache_ttl_seconds")]
+    pub negative_ttl_seconds: u32,
+    #[serde(default = "default_provider_stale_while_revalidate_seconds")]
+    pub stale_while_revalidate_seconds: u32,
+}
+
+impl Default for ProviderCachePolicy {
+    fn default() -> Self {
+        Self {
+            metadata_ttl_seconds: default_provider_metadata_cache_ttl_seconds(),
+            negative_ttl_seconds: default_provider_negative_cache_ttl_seconds(),
+            stale_while_revalidate_seconds: default_provider_stale_while_revalidate_seconds(),
+        }
+    }
+}
+
+fn default_provider_metadata_cache_ttl_seconds() -> u32 {
+    30
+}
+
+fn default_provider_negative_cache_ttl_seconds() -> u32 {
+    5
+}
+
+fn default_provider_stale_while_revalidate_seconds() -> u32 {
+    0
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

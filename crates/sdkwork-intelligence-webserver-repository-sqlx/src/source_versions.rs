@@ -95,15 +95,13 @@ impl WebRepository {
         }
         let (cursor_created_at, cursor_id) = decode_keyset_cursor(cursor)
             .ok_or_else(|| WebServiceError::validation("cursor is invalid"))?;
-        let sql = format!(
-            "SELECT uuid, version_tag, source_type, source_ref, commit_hash, artifact_path,
+        let sql = "SELECT uuid, version_tag, source_type, source_ref, commit_hash, artifact_path,
                     artifact_size, artifact_hash, CAST(config_snapshot AS TEXT) AS config_snapshot,
                     status, CAST(created_at AS TEXT) AS created_at
              FROM web_source_version
              WHERE tenant_id = $1 AND site_id = $2
                AND (created_at, id) < ($3, $4)
-             ORDER BY created_at DESC, id DESC LIMIT $5"
-        );
+             ORDER BY created_at DESC, id DESC LIMIT $5".to_string();
         let fetch_size = i64::from(page_size) + 1;
         let rows = sqlx::query(audited_sql(&sql))
             .bind(tenant_id)

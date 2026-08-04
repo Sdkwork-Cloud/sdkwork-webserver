@@ -90,16 +90,14 @@ impl WebRepository {
         }
         let (cursor_updated_at, cursor_id) = decode_keyset_cursor(cursor)
             .ok_or_else(|| WebServiceError::validation("cursor is invalid"))?;
-        let sql = format!(
-            "SELECT uuid, name, host, tenant_scope_hash, ssh_port, status,
+        let sql = "SELECT uuid, name, host, tenant_scope_hash, ssh_port, status,
                     CAST(metadata AS TEXT) AS metadata,
                     CAST(updated_at AS TEXT) AS updated_at,
                     CAST(created_at AS TEXT) AS created_at
              FROM web_server
              WHERE tenant_id = $1
                AND (updated_at, id) < ($2, $3)
-             ORDER BY updated_at DESC, id DESC LIMIT $4"
-        );
+             ORDER BY updated_at DESC, id DESC LIMIT $4".to_string();
         let fetch_size = i64::from(page_size) + 1;
         let rows = sqlx::query(audited_sql(&sql))
             .bind(tenant_id)

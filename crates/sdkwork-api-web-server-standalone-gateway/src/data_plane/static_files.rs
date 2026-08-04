@@ -55,7 +55,7 @@ pub async fn serve_static(
     }
 }
 
-fn relative_request_path<'a>(route: &RouteConfig, request_path: &'a str) -> &'a str {
+pub(crate) fn relative_request_path<'a>(route: &RouteConfig, request_path: &'a str) -> &'a str {
     match route.route_match.path_type {
         RoutePathType::Exact | RoutePathType::Prefix => request_path
             .strip_prefix(&route.route_match.path)

@@ -148,7 +148,7 @@ fn delivery_request(
     })
 }
 
-fn bounded_header(
+pub(crate) fn bounded_header(
     headers: &HeaderMap,
     name: HeaderName,
     maximum_bytes: usize,
@@ -170,7 +170,7 @@ fn bounded_header(
     Ok(Some(value.to_owned()))
 }
 
-fn parse_range(value: &str) -> Result<WebsiteByteRange, RequestHeaderError> {
+pub(crate) fn parse_range(value: &str) -> Result<WebsiteByteRange, RequestHeaderError> {
     let Some(value) = value.strip_prefix("bytes=") else {
         return Err(RequestHeaderError::Range);
     };
@@ -204,7 +204,7 @@ fn parse_range(value: &str) -> Result<WebsiteByteRange, RequestHeaderError> {
     })
 }
 
-fn parse_locale(value: &str) -> Result<Option<String>, RequestHeaderError> {
+pub(crate) fn parse_locale(value: &str) -> Result<Option<String>, RequestHeaderError> {
     let locale = value
         .split(',')
         .next()
@@ -297,7 +297,7 @@ fn is_tv_user_agent(lower_user_agent: &str) -> bool {
         .any(|signature| lower_user_agent.contains(signature))
 }
 
-fn navigation_request(headers: &HeaderMap) -> Result<bool, RequestHeaderError> {
+pub(crate) fn navigation_request(headers: &HeaderMap) -> Result<bool, RequestHeaderError> {
     if header_value(headers, SEC_FETCH_MODE, 32)? == Some("navigate") {
         return Ok(true);
     }
@@ -305,7 +305,7 @@ fn navigation_request(headers: &HeaderMap) -> Result<bool, RequestHeaderError> {
         .is_some_and(|accept| accept.to_ascii_lowercase().contains("text/html")))
 }
 
-fn header_value(
+pub(crate) fn header_value(
     headers: &HeaderMap,
     name: HeaderName,
     maximum_bytes: usize,
@@ -323,7 +323,10 @@ fn header_value(
         .map_err(|_| RequestHeaderError::Invalid)
 }
 
-fn outcome_response(outcome: WebsiteDeliveryOutcome, query: Option<&str>) -> Response<Body> {
+pub(crate) fn outcome_response(
+    outcome: WebsiteDeliveryOutcome,
+    query: Option<&str>,
+) -> Response<Body> {
     match outcome {
         WebsiteDeliveryOutcome::NotFound => text_response(StatusCode::NOT_FOUND),
         WebsiteDeliveryOutcome::NotModified => empty_response(StatusCode::NOT_MODIFIED),
@@ -332,7 +335,10 @@ fn outcome_response(outcome: WebsiteDeliveryOutcome, query: Option<&str>) -> Res
     }
 }
 
-fn redirect_response(redirect: WebsiteDeliveryRedirect, query: Option<&str>) -> Response<Body> {
+pub(crate) fn redirect_response(
+    redirect: WebsiteDeliveryRedirect,
+    query: Option<&str>,
+) -> Response<Body> {
     let (status_code, location, preserve_query) = match redirect {
         WebsiteDeliveryRedirect::Binding {
             status_code,
@@ -370,7 +376,7 @@ fn redirect_response(redirect: WebsiteDeliveryRedirect, query: Option<&str>) -> 
     response
 }
 
-fn append_query(mut location: String, query: Option<&str>) -> String {
+pub(crate) fn append_query(mut location: String, query: Option<&str>) -> String {
     if let Some(query) = query.filter(|query| !query.is_empty()) {
         location.push('?');
         location.push_str(query);
@@ -378,7 +384,7 @@ fn append_query(mut location: String, query: Option<&str>) -> String {
     location
 }
 
-fn content_response(mut content: WebsiteDeliveryContent) -> Response<Body> {
+pub(crate) fn content_response(mut content: WebsiteDeliveryContent) -> Response<Body> {
     let status = if content.content_range.is_some() {
         StatusCode::PARTIAL_CONTENT
     } else {
@@ -432,7 +438,7 @@ fn content_response(mut content: WebsiteDeliveryContent) -> Response<Body> {
     response
 }
 
-fn stream_body(stream: Box<dyn WebsiteProviderContentStream>) -> Body {
+pub(crate) fn stream_body(stream: Box<dyn WebsiteProviderContentStream>) -> Body {
     let stream = stream::unfold(Some(stream), |state| async move {
         let mut stream = state?;
         match stream.next_chunk().await {
@@ -444,7 +450,7 @@ fn stream_body(stream: Box<dyn WebsiteProviderContentStream>) -> Body {
     Body::from_stream(stream)
 }
 
-fn delivery_error_response(error: WebsiteDeliveryError) -> Response<Body> {
+pub(crate) fn delivery_error_response(error: WebsiteDeliveryError) -> Response<Body> {
     match error {
         WebsiteDeliveryError::RouteSelection(WebsiteRouteSelectionError::InvalidHost)
         | WebsiteDeliveryError::RouteSelection(WebsiteRouteSelectionError::InvalidPath)
@@ -480,7 +486,7 @@ fn delivery_error_response(error: WebsiteDeliveryError) -> Response<Body> {
     }
 }
 
-fn retry_response(status: StatusCode, retry_after_ms: Option<u64>) -> Response<Body> {
+pub(crate) fn retry_response(status: StatusCode, retry_after_ms: Option<u64>) -> Response<Body> {
     let mut response = text_response(status);
     let seconds = retry_after_ms
         .unwrap_or(1_000)
@@ -492,7 +498,7 @@ fn retry_response(status: StatusCode, retry_after_ms: Option<u64>) -> Response<B
     response
 }
 
-fn method_not_allowed() -> Response<Body> {
+pub(crate) fn method_not_allowed() -> Response<Body> {
     let mut response = text_response(StatusCode::METHOD_NOT_ALLOWED);
     response
         .headers_mut()
@@ -500,7 +506,7 @@ fn method_not_allowed() -> Response<Body> {
     response
 }
 
-fn range_not_satisfiable() -> Response<Body> {
+pub(crate) fn range_not_satisfiable() -> Response<Body> {
     let mut response = text_response(StatusCode::RANGE_NOT_SATISFIABLE);
     response
         .headers_mut()
@@ -508,13 +514,13 @@ fn range_not_satisfiable() -> Response<Body> {
     response
 }
 
-fn empty_response(status: StatusCode) -> Response<Body> {
+pub(crate) fn empty_response(status: StatusCode) -> Response<Body> {
     let mut response = Response::new(Body::empty());
     *response.status_mut() = status;
     response
 }
 
-fn text_response(status: StatusCode) -> Response<Body> {
+pub(crate) fn text_response(status: StatusCode) -> Response<Body> {
     let mut response = Response::new(Body::from(status.canonical_reason().unwrap_or("error")));
     *response.status_mut() = status;
     response.headers_mut().insert(
@@ -524,7 +530,7 @@ fn text_response(status: StatusCode) -> Response<Body> {
     response
 }
 
-fn finalize_response(
+pub(crate) fn finalize_response(
     mut response: Response<Body>,
     request_id: &str,
     suppress_body: bool,
@@ -553,7 +559,7 @@ fn finalize_response(
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-enum RequestHeaderError {
+pub(crate) enum RequestHeaderError {
     Invalid,
     Range,
 }

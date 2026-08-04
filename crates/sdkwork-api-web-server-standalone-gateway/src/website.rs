@@ -16,24 +16,29 @@ use sdkwork_knowledgebase_internal_sdk::{
 use sdkwork_webserver_contract::RuntimeObservationState;
 use sdkwork_webserver_core::{
     load_and_compile_webserver_config_revision,
+    runtime_env::web_environment_name,
     website_runtime::{
-        CompiledWebsiteRuntimeSet, WebsiteProviderType, WebsiteRuntimeEnvironment,
-        WebsiteRuntimeRegistry, WebsiteRuntimeSetError, MAX_WEBSITE_RUNTIME_SET_BYTES,
+        CompiledWebsiteRuntimeSet, ProviderResourceReference, WebsiteProviderType,
+        WebsiteRuntimeEnvironment, WebsiteRuntimeRegistry, WebsiteRuntimeSetError,
+        MAX_WEBSITE_RUNTIME_SET_BYTES,
     },
-    WebServerConfigError,
+    ConfigProviderType, ResourceConfig, WebServerConfigError,
 };
 use sdkwork_webserver_delivery_runtime::{
-    probe_website_runtime_set_activation, WebsiteDeliveryExecutor, WebsiteProviderEventInvalidator,
-    WebsiteProviderRegistry, WebsiteProviderRegistryError, WebsiteRuntimeActivationProbeError,
+    probe_website_runtime_set_activation, AppConfigResourceExecutor, AppConfigResourceHandler,
+    WebsiteDeliveryExecutor, WebsiteProviderEventInvalidator, WebsiteProviderRegistry,
+    WebsiteProviderRegistryError, WebsiteRuntimeActivationProbeError,
     WebsiteRuntimeProviderValidationError, WebsiteRuntimeSetProviderEventReconciler,
     DEFAULT_PROVIDER_BUFFERED_CONTENT_BYTES, DEFAULT_PROVIDER_RESOLUTION_CACHE_ENTRIES,
     MAXIMUM_PROVIDER_RESOLUTION_CACHE_ENTRIES,
 };
 use sdkwork_webserver_drive_provider::{
-    DriveWebsiteProvider, FixedDriveWebsiteSdkClientResolver, MAXIMUM_DRIVE_CONTENT_BYTES,
+    DriveWebsiteProvider, FixedDriveWebsiteSdkClientResolver,
+    DRIVE_WEBSITE_ROOT_PROVIDER_CONTRACT_VERSION, MAXIMUM_DRIVE_CONTENT_BYTES,
 };
 use sdkwork_webserver_knowledgebase_provider::{
     FixedKnowledgebaseWikiSdkClientResolver, KnowledgebaseWikiWebsiteProvider,
+    KNOWLEDGEBASE_WIKI_PROVIDER_CONTRACT_VERSION,
 };
 use thiserror::Error;
 use tokio::{
@@ -978,6 +983,110 @@ fn build_drive_provider(
             .map_err(WebsiteDataPlaneBootstrapError::ProviderConfig)?,
     );
     Ok(Some(Arc::new(DriveWebsiteProvider::new(resolver))))
+}
+
+/// Assembles the provider executor for `drive` and `knowledgebase` resources
+/// declared directly in the application Web Server configuration.
+///
+/// Returns `Ok(None)` when the configuration references no provider-backed
+/// resource, so a local-only configuration never introduces provider
+/// environment requirements. When provider resources exist, the bootstrap
+/// fails closed: the tenant scope hash and provider SDK environment must be
+/// configured, every referenced resource must validate against its provider
+/// within the configured provider timeout, and any mismatch aborts startup.
+pub(crate) async fn build_app_config_provider_executor(
+    app: &sdkwork_webserver_core::CompiledWebServerApp,
+) -> Result<Option<Arc<AppConfigResourceExecutor>>, WebsiteDataPlaneBootstrapError> {
+    let mut requires_drive = false;
+    let mut requires_knowledgebase = false;
+    for resource in app.provider_resources() {
+        match resource.provider_type().expect("provider-backed resource") {
+            ConfigProviderType::Drive => requires_drive = true,
+            ConfigProviderType::Knowledgebase => requires_knowledgebase = true,
+        }
+    }
+    if !requires_drive && !requires_knowledgebase {
+        return Ok(None);
+    }
+
+    let tenant_scope_hash = website_tenant_scope_hash()?;
+    let environment = app_config_runtime_environment()?;
+    let mut registry = WebsiteProviderRegistry::new();
+    if requires_drive {
+        let provider = build_drive_provider(&tenant_scope_hash, environment, true)?
+            .expect("required drive provider is configured");
+        registry.register_static(WebsiteProviderType::Drive, provider)?;
+    }
+    if requires_knowledgebase {
+        let provider = build_knowledgebase_provider(&tenant_scope_hash, environment, true)?
+            .expect("required knowledgebase provider is configured");
+        registry.register_wiki(WebsiteProviderType::Knowledgebase, provider)?;
+    }
+
+    let executor = AppConfigResourceExecutor::new(
+        Arc::new(registry),
+        app.config().app_key.clone(),
+        tenant_scope_hash,
+    )
+    .map_err(|error| {
+        WebsiteDataPlaneBootstrapError::ProviderConfig(format!(
+            "provider executor configuration is invalid: {error}"
+        ))
+    })?;
+    let provider_timeout_ms = app.config().limits.provider_timeout_ms;
+    for resource in app.provider_resources() {
+        let (handler, provider_type, contract_version) = match resource {
+            ResourceConfig::Drive { .. } => (
+                AppConfigResourceHandler::Static,
+                WebsiteProviderType::Drive,
+                DRIVE_WEBSITE_ROOT_PROVIDER_CONTRACT_VERSION,
+            ),
+            ResourceConfig::Knowledgebase { .. } => (
+                AppConfigResourceHandler::Wiki,
+                WebsiteProviderType::Knowledgebase,
+                KNOWLEDGEBASE_WIKI_PROVIDER_CONTRACT_VERSION,
+            ),
+            _ => continue,
+        };
+        let provider_reference = ProviderResourceReference {
+            provider_type,
+            provider_resource_uuid: resource
+                .provider_resource_uuid()
+                .expect("provider-backed resource uuid")
+                .to_owned(),
+            provider_contract_version: contract_version.to_owned(),
+        };
+        executor
+            .validate_resource(
+                resource.id(),
+                &provider_reference,
+                handler,
+                provider_timeout_ms,
+            )
+            .await
+            .inspect_err(|_error| {
+                tracing::error!(
+                    resource_id = resource.id(),
+                    provider_type = ?provider_type,
+                    "provider-backed application resource validation failed"
+                );
+            })?;
+    }
+    Ok(Some(Arc::new(executor)))
+}
+
+fn app_config_runtime_environment(
+) -> Result<WebsiteRuntimeEnvironment, WebsiteDataPlaneBootstrapError> {
+    let name = web_environment_name();
+    match name.as_str() {
+        "development" | "dev" => Ok(WebsiteRuntimeEnvironment::Development),
+        "test" => Ok(WebsiteRuntimeEnvironment::Test),
+        "staging" | "stage" => Ok(WebsiteRuntimeEnvironment::Staging),
+        "production" | "prod" => Ok(WebsiteRuntimeEnvironment::Production),
+        other => Err(WebsiteDataPlaneBootstrapError::ProviderConfig(format!(
+            "SDKWORK_WEB_ENVIRONMENT is invalid: {other}"
+        ))),
+    }
 }
 
 struct ProviderSdkConfig {

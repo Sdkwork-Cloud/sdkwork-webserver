@@ -6,7 +6,7 @@
     "displayName": "SDKWork Webserver PC admin-shell",
     "version": "0.1.0",
     "type": "node-package",
-    "root": "sdkwork-web-server/apps/sdkwork-webserver-pc/packages/sdkwork-webserver-pc-admin-shell",
+    "root": "sdkwork-webserver/apps/sdkwork-webserver-pc/packages/sdkwork-webserver-pc-admin-shell",
     "domain": "infrastructure",
     "capability": "admin-shell",
     "surface": "backend-admin",

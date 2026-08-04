@@ -71,6 +71,10 @@ Current implemented baseline:
   checkpoints, gap/conflict uncertainty, and current-runtime Provider reconciliation;
 - bounded HTTP/1, HTTP/2, TLS, static, redirect, reverse-proxy, WebSocket, health, retry, admission,
   pressure, DNS, and observability controls;
+- `drive` and `knowledgebase` application-config resources that mix local static/proxy routes with
+  Drive WebsiteRoot (or subdirectory) mounts and Knowledgebase WikiPublications in one
+  `sdkwork.webserver.config.json`, assembled fail-closed from environment-owned provider SDK
+  credentials and executed through the shared bounded provider registry and resolution cache;
 - standalone and cloud development topology plans plus standalone/cloud production deployment
   templates.
 
@@ -97,7 +101,7 @@ and production monitoring evidence.
 | App Web Server config | JSON Schema authority + Serde + semantic compiler | Implemented |
 | Database | `sdkwork-database` + SQLx; PostgreSQL authoritative-server profile only | Implemented baseline; managed HA, client failover, fencing, PITR, and production query-plan evidence remain open |
 | IAM | `sdkwork-iam-web-adapter` for protected management surfaces | Implemented |
-| Certificates | `instant-acme`, `rcgen`, encrypted persistence, Rustls activation | Implemented bounded baseline |
+| Certificates | `instant-acme`, `rcgen`, encrypted persistence, durable accounts, revocation, ARI, self-hosted Rustls snapshot activation | Implemented bounded baseline |
 
 ## 3. System Boundaries
 
@@ -107,7 +111,7 @@ sdkwork-api-web-server-standalone-gateway
   |-- Web Server owner assembly -> app/backend/internal route crates -> service -> repository -> database
   |-- IAM owner App API assembly contribution (same process, same application ingress)
   |-- Drive owner App API assembly contribution (same process, same application ingress)
-  |-- data-plane bootstrap -> compiled Web Server config -> legacy HTTP/HTTPS/static/proxy
+  |-- data-plane bootstrap -> compiled Web Server config -> HTTP/HTTPS/static/proxy/Drive/Knowledgebase
   `-- host operations -> config, signals, readiness, drain, runtime paths
 
 sdkwork-web-server-website-delivery-edge-runtime
@@ -134,6 +138,11 @@ The request path does not call management services or repositories. Management r
 - `specs/sdkwork.webserver.config.schema.json` is the local machine contract for application Web
   Server configuration; the app manifest remains identity/release metadata rather than runtime
   configuration authority.
+- Application-config `drive` and `knowledgebase` resources reuse the website provider contracts and
+  bounded resolution cache through the shared provider executor. Provider SDK connections are
+  environment-owned (base URL + ingress token file + tenant scope hash); every referenced resource
+  is validated against its provider before the data plane starts, and watched reloads that would
+  reference an unassembled provider type are rejected while the active generation is retained.
 - Host process configuration follows `CONFIG_SPEC.md` and `RUNTIME_DIRECTORY_SPEC.md`.
 - Node synchronization publishes bounded immutable `sv1:` snapshots through the Agent contract;
   mutable management DTOs do not enter the request path.
@@ -191,12 +200,26 @@ with a bounded client deadline and can stop observing without cancelling server 
 certificate worker schedules due renewals and claims both issue and renew operations with
 `FOR UPDATE SKIP LOCKED`, expiring leases, bounded retries, and fencing tokens. Finalization updates
 the immutable certificate version and canonical aggregate in the same PostgreSQL transaction;
-stale or exhausted work cannot overwrite a newer result.
+stale or exhausted work cannot overwrite a newer result. Revocation (`POST .../revoke`) is
+synchronous: the CA acknowledges before the aggregate is marked `status=3`, listener bindings are
+archived, and auto-renewal stops. Renewal scheduling prefers the CA-suggested ARI window recorded on
+the aggregate, falling back to the fixed `renew_before_days` window.
 
 Only ACME certificate aggregates may enable automatic renewal or enter the scheduled scan.
 Self-signed aggregates remain eligible for explicit manual reissuance. Every provider result passes
 the common issuer boundary's SAN, algorithm, current-validity, leaf/private-key SPKI, and parsed
 metadata checks before a worker can finalize an immutable version.
+
+ACME accounts are persisted encrypted (AES-256-GCM under the process master key) per CA directory
+URL and shared by issuance, renewal, revocation, and ARI lookups, so restarts never create new CA
+accounts. HTTP-01 challenges are written atomically into the configured webroot by the worker and
+served by the self-hosted data plane through the narrow `acmeHttp01.webroot` listener endpoint
+(exact `/.well-known/acme-challenge/<token>` path only). After every successful certificate
+operation the worker projects the node's listener certificate bindings into versioned TLS material
+under `SDKWORK_WEB_TLS_MATERIAL_ROOT` and publishes a monotonic `tls-runtime.json` snapshot; the
+data plane's `FileTlsRuntimeController` hot-loads the new Rustls configuration without dropping
+existing connections. External Nginx artifact activation is a documented optional legacy path and
+is not part of the certificate lifecycle.
 
 `sdkwork-web` owns the mutable Zone, hostname, verification, route, certificate, listener, and Web
 deployment intent. `sdkwork-deploy` is being aligned to immutable rollout, distribution, snapshot,
@@ -204,6 +227,21 @@ and observation evidence that references Web public ids and versions. `sdkwork-i
 application registration, and authorization; it must not own primary-domain or domain-configuration
 state. The cross-repository boundary remains proposed pending human review in
 `ADR-20260731-web-deploy-domain-certificate-authority`.
+
+The composed Deployments domain matches the Web domain on the shared standards:
+environment-variable secrets are AES-GCM encrypted at rest and masked in responses; audit logs
+require a tenant context (no tenant-less enumeration); deployment rollback is transactional; site
+writes use optimistic `version` concurrency; deployment creation deduplicates idempotency keys;
+growing lists (`auditLogs.list`, `deployments.list`) use opaque keyset cursors with
+`mode=cursor` pageInfo; `page_size` overflow and pagination aliases are rejected; query
+parameters are `lower_snake_case`; and env/health collections are capped at 100 items per site
+(PAGINATION_SPEC, SECURITY_SPEC, PRD-FR-011).
+
+Web and Deploy deployment records are command intents: the deployment worker that advances
+`status` beyond `PENDING` remains a separate authority (REQ-2026-0061/0062 gate). Until that
+authority exists, `sites.activate` (which requires a successful deployment) and
+`deployments.rollback` (which requires a successful source) honestly return `409`; the system
+never invents a success state.
 
 ## 6. Security, Privacy, And Resource Boundaries
 

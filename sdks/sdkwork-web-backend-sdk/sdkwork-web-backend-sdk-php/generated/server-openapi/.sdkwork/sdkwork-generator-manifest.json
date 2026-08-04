@@ -72,7 +72,7 @@
     },
     {
       "path": "src/Api/Certificate.php",
-      "sha256": "aa0d3854741c048d10b6ccdf913f8ce4ee869888a7908010fe3056f4b41d0be9"
+      "sha256": "5eee7cc31d4333a8caede871e0d70bb10ca3f7e9dd4961af9bad5c0292b57285"
     },
     {
       "path": "src/Api/CertificateDistribution.php",
@@ -263,6 +263,10 @@
       "sha256": "74885d9a3b1426d9f2c45a55b9c4bfe70a53eb6c5dbba989c39cfd68160423e5"
     },
     {
+      "path": "src/Models/CertificatesRevokeResponse.php",
+      "sha256": "0cd5d3086063401ae1b56b5617815222eca4595bd614b9fb18f842372029883e"
+    },
+    {
       "path": "src/Models/CertificatesUpdateResponse.php",
       "sha256": "ff683f292008292d1883d65be6f0cea4c45638e77a43849ac3c1cfdb76ca44ef"
     },
@@ -429,6 +433,10 @@
     {
       "path": "src/Models/RetrieveResponse.php",
       "sha256": "3d33ae0063f18e226798abe078105020504b6d52d437c27462c7623aa0bc5e6c"
+    },
+    {
+      "path": "src/Models/RevokeCertificateRequest.php",
+      "sha256": "a73e6fc14b7240948f9895c50e6e6e26d3d5134bb61a44f008ce3418eff96b4b"
     },
     {
       "path": "src/Models/RootDomainResponse.php",

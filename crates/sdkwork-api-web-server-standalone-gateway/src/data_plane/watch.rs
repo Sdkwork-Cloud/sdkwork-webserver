@@ -9,12 +9,14 @@ use sdkwork_webserver_core::{
     inspect_webserver_config_revision, load_and_compile_webserver_config_revision,
     CompiledWebServerRevision, ReloadMode, WebServerConfigError,
 };
+use sdkwork_webserver_delivery_runtime::AppConfigResourceExecutor;
 use tokio::{sync::watch, time::MissedTickBehavior};
 
 use super::{
     operations::DataPlaneOperationsConfig, runtime::DataPlaneRuntime,
     server::run_data_plane_runtime_until, DataPlaneError,
 };
+use crate::website::build_app_config_provider_executor;
 
 pub async fn run_data_plane_from_config_until<F>(
     config_path: impl Into<PathBuf>,
@@ -44,9 +46,25 @@ where
         )?,
         None => DataPlaneRuntime::build_revision(initial)?,
     };
+    // Assemble provider-backed (drive/knowledgebase) resources declared in the
+    // application configuration. This fails closed when the configuration
+    // references a provider that is not configured in the environment.
+    let provider_resources = {
+        let current = runtime.current();
+        build_app_config_provider_executor(&current.app)
+            .await
+            .map_err(|error| DataPlaneError::ProviderBootstrap(Box::new(error)))?
+    };
     if reload.mode == ReloadMode::Disabled {
-        let result =
-            run_data_plane_runtime_until(runtime.clone(), operations, None, None, shutdown).await;
+        let result = run_data_plane_runtime_until(
+            runtime.clone(),
+            operations,
+            None,
+            provider_resources,
+            None,
+            shutdown,
+        )
+        .await;
         let health_result = runtime.stop_active_health().await;
         let resource_result = runtime.stop_resource_pressure().await;
         return result.and(health_result).and(resource_result);
@@ -55,18 +73,27 @@ where
     let (stop_tx, stop_rx) = watch::channel(false);
     let worker_runtime = runtime.clone();
     let worker_path = config_path.clone();
+    let worker_provider_resources = provider_resources.clone();
     let worker = tokio::spawn(async move {
         watch_config(
             worker_runtime,
             worker_path,
+            worker_provider_resources,
             Duration::from_millis(reload.poll_interval_ms),
             stop_rx,
         )
         .await;
     });
 
-    let result =
-        run_data_plane_runtime_until(runtime.clone(), operations, None, None, shutdown).await;
+    let result = run_data_plane_runtime_until(
+        runtime.clone(),
+        operations,
+        None,
+        provider_resources,
+        None,
+        shutdown,
+    )
+    .await;
     let _ = stop_tx.send(true);
     if let Err(error) = worker.await {
         if result.is_ok() {
@@ -83,6 +110,7 @@ where
 async fn watch_config(
     runtime: Arc<DataPlaneRuntime>,
     config_path: PathBuf,
+    provider_resources: Option<Arc<AppConfigResourceExecutor>>,
     poll_interval: Duration,
     mut stop: watch::Receiver<bool>,
 ) {
@@ -153,6 +181,31 @@ async fn watch_config(
                         continue;
                     }
                 };
+
+                // Reject candidates that reference a provider type that was
+                // not assembled at bootstrap, retaining the active generation.
+                if let Some(executor) = provider_resources.as_ref() {
+                    let provider_types = candidate
+                        .app()
+                        .provider_resources()
+                        .filter_map(|resource| match resource.provider_type()? {
+                            sdkwork_webserver_core::ConfigProviderType::Drive => {
+                                Some(sdkwork_webserver_core::website_runtime::WebsiteProviderType::Drive)
+                            }
+                            sdkwork_webserver_core::ConfigProviderType::Knowledgebase => Some(
+                                sdkwork_webserver_core::website_runtime::WebsiteProviderType::Knowledgebase,
+                            ),
+                        })
+                        .collect::<Vec<_>>();
+                    if !executor.can_serve_config(&provider_types) {
+                        log_reload_error_once(
+                            &mut last_error,
+                            "candidate-provider-unavailable".to_owned(),
+                            &config_path,
+                        );
+                        continue;
+                    }
+                }
 
                 match publish_candidate(&runtime, candidate).await {
                     Ok(report) => {

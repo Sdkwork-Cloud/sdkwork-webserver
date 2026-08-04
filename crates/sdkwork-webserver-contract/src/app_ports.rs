@@ -580,6 +580,13 @@ pub trait WebBackendApi: Send + Sync {
         certificate_id: &str,
     ) -> WebServiceResult<CertificateOperationAcceptedResponse>;
 
+    async fn revoke_managed_certificate(
+        &self,
+        context: &WebBackendRequestContext,
+        certificate_id: &str,
+        request: &RevokeCertificateRequest,
+    ) -> WebServiceResult<CertificateResponse>;
+
     async fn list_application_listener_certificate_bindings(
         &self,
         context: &WebBackendRequestContext,

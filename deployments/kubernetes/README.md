@@ -144,3 +144,25 @@ Knowledgebase SDK client lifecycle, tenant-aware provider-event subscription aut
 client/cache eviction, and tenant-qualified readiness, drift, usage, and rollout contracts. Do not
 replace those missing contracts with token maps, tenant headers, raw HTTP, or direct cross-service
 storage access.
+
+## Certificate Worker
+
+`certificate-worker.yaml` deploys `sdkwork-webserver-certificate-worker` (exactly one
+replica; the worker id and ACME account credentials are stable process identities). It consumes
+`database-url` and `secret-encryption-key` from `sdkwork-web-server-runtime`, `acme-contact-email`
+from the same Secret, and `node-uuid` from the Node Secret of the fleet it serves.
+
+The `sdkwork-web-certificate-state` PVC carries three state roots:
+
+| Root | Purpose |
+| --- | --- |
+| `acme-accounts/` | Encrypted ACME account credentials (reuse one CA account across restarts) |
+| `acme-webroot/` | HTTP-01 challenge tokens written by the worker |
+| `tls-materials/` | Versioned certificate material + `tls-runtime.json` snapshot for the self-hosted TLS runtime |
+
+To activate self-hosted TLS hot reload and HTTP-01 challenge serving on a Node, mount the same PVC
+into the website data-plane StatefulSet (e.g. `certificate-state` mounted at
+`/var/lib/sdkwork/web`), set `SDKWORK_WEB_TLS_RUNTIME_SOURCE=file` with the matching
+`SDKWORK_WEB_TLS_RUNTIME_SNAPSHOT_FILE`/`SDKWORK_WEB_TLS_MATERIAL_ROOT`, and configure
+`acmeHttp01.webroot` in the Node's `sdkwork.webserver.config.json` to point at the shared
+`acme-webroot` directory. No nginx directive or external process is involved.

@@ -2,8 +2,9 @@ use std::{fs, path::Path};
 
 use sdkwork_webserver_core::{
     inspect_webserver_config_revision, load_and_compile_webserver_config,
-    load_and_compile_webserver_config_revision, ProxyProtocolCrc32cPolicy, ProxyProtocolVersion,
-    ResourceConfig, ResourceSampleFailurePolicy, TrustedProxyHeader, WebServerConfigError,
+    load_and_compile_webserver_config_revision, ConfigProviderType, ProxyProtocolCrc32cPolicy,
+    ProxyProtocolVersion, ResourceConfig, ResourceSampleFailurePolicy, TrustedProxyHeader,
+    WebServerConfigError,
 };
 use serde_json::{json, Value};
 use tempfile::TempDir;
@@ -2033,4 +2034,270 @@ fn loader_rejects_configuration_larger_than_one_megabyte() {
 
     let error = load_and_compile_webserver_config(path).expect_err("oversized config must fail");
     assert!(matches!(error, WebServerConfigError::TooLarge { .. }));
+}
+
+#[test]
+fn acme_http01_webroot_resolves_and_is_confined() {
+    let directory = TempDir::new().expect("create temp directory");
+    fs::create_dir(directory.path().join("acme-webroot")).expect("create webroot");
+    let mut config = base_config();
+    config["listeners"][0]["acmeHttp01"] = json!({
+        "webroot": "acme-webroot"
+    });
+    let path = write_config(directory.path(), &config);
+
+    let compiled = load_and_compile_webserver_config(path).expect("compile ACME webroot");
+    let listener = compiled.listener("http").expect("listener");
+    assert!(listener.acme_http_01.is_some());
+    let resolved = compiled.acme_webroot("http").expect("resolved webroot");
+    assert_eq!(
+        resolved,
+        directory
+            .path()
+            .join("acme-webroot")
+            .canonicalize()
+            .expect("canonical")
+    );
+    assert!(resolved.starts_with(compiled.base_directory()));
+    assert!(compiled.acme_webroot("unknown-listener").is_none());
+    assert!(compiled.acme_webroot("http").is_some());
+}
+
+#[test]
+fn acme_http01_webroot_escape_is_rejected() {
+    let directory = TempDir::new().expect("create temp directory");
+    let unique = format!(
+        "outside-{}",
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .expect("clock")
+            .as_nanos()
+    );
+    let outside = directory.path().parent().expect("temp parent").join(unique);
+    fs::create_dir(&outside).expect("create outside directory");
+    let mut config = base_config();
+    config["listeners"][0]["acmeHttp01"] = json!({
+        "webroot": format!("../{}", outside.file_name().expect("name").to_string_lossy())
+    });
+    let path = write_config(directory.path(), &config);
+
+    let error = load_and_compile_webserver_config(path).expect_err("webroot escape must fail");
+    assert!(error
+        .diagnostics()
+        .iter()
+        .any(|diagnostic| diagnostic.message.contains("ACME webroot escapes")));
+}
+
+#[test]
+fn acme_http01_webroot_unsafe_bytes_are_rejected() {
+    let directory = TempDir::new().expect("create temp directory");
+    let mut config = base_config();
+    config["listeners"][0]["acmeHttp01"] = json!({
+        "webroot": "acme\u{0}webroot"
+    });
+    let path = write_config(directory.path(), &config);
+
+    let error = load_and_compile_webserver_config(path).expect_err("NUL webroot must fail");
+    assert!(error
+        .diagnostics()
+        .iter()
+        .any(|diagnostic| diagnostic.message.contains("NUL or control bytes")));
+}
+
+#[test]
+fn drive_resource_compiles_and_is_listed_as_provider_resource() {
+    let directory = TempDir::new().expect("create temp directory");
+    let mut config = base_config();
+    config["resources"]
+        .as_array_mut()
+        .expect("resources array")
+        .push(json!({
+            "id": "docs-drive",
+            "type": "drive",
+            "providerResourceUuid": "root-1234-5678",
+            "resourceSubpath": "/site/docs",
+            "indexFiles": ["index.html"],
+            "spaFallback": "index.html",
+            "cache": {
+                "metadataTtlSeconds": 60,
+                "negativeTtlSeconds": 10,
+                "staleWhileRevalidateSeconds": 5
+            }
+        }));
+    let path = write_config(directory.path(), &config);
+
+    let compiled = load_and_compile_webserver_config(path).expect("compile drive resource");
+    let resources: Vec<_> = compiled.provider_resources().collect();
+    assert_eq!(resources.len(), 1);
+    assert_eq!(resources[0].id(), "docs-drive");
+    assert_eq!(
+        resources[0].provider_type(),
+        Some(ConfigProviderType::Drive)
+    );
+    assert_eq!(
+        resources[0].provider_resource_uuid(),
+        Some("root-1234-5678")
+    );
+    let cache = resources[0]
+        .provider_cache_policy()
+        .expect("cache policy present");
+    assert_eq!(cache.metadata_ttl_seconds, 60);
+    assert_eq!(cache.negative_ttl_seconds, 10);
+    assert_eq!(cache.stale_while_revalidate_seconds, 5);
+}
+
+#[test]
+fn knowledgebase_resource_compiles_and_is_listed_as_provider_resource() {
+    let directory = TempDir::new().expect("create temp directory");
+    let mut config = base_config();
+    config["resources"]
+        .as_array_mut()
+        .expect("resources array")
+        .push(json!({
+            "id": "kb-docs",
+            "type": "knowledgebase",
+            "providerResourceUuid": "wiki-pub-1234",
+            "locale": "zh-CN"
+        }));
+    let path = write_config(directory.path(), &config);
+
+    let compiled = load_and_compile_webserver_config(path).expect("compile knowledgebase resource");
+    let resources: Vec<_> = compiled.provider_resources().collect();
+    assert_eq!(resources.len(), 1);
+    assert_eq!(resources[0].id(), "kb-docs");
+    assert_eq!(
+        resources[0].provider_type(),
+        Some(ConfigProviderType::Knowledgebase)
+    );
+    assert_eq!(resources[0].provider_resource_uuid(), Some("wiki-pub-1234"));
+}
+
+#[test]
+fn provider_resources_omits_local_resources() {
+    let directory = TempDir::new().expect("create temp directory");
+    let mut config = base_config();
+    config["resources"]
+        .as_array_mut()
+        .expect("resources array")
+        .push(json!({
+            "id": "docs-drive",
+            "type": "drive",
+            "providerResourceUuid": "root-1234"
+        }));
+    let path = write_config(directory.path(), &config);
+
+    let compiled = load_and_compile_webserver_config(path).expect("compile mixed config");
+    let resources: Vec<_> = compiled.provider_resources().collect();
+    assert_eq!(resources.len(), 1);
+    assert_eq!(resources[0].id(), "docs-drive");
+    assert!(compiled.resource("exact-response").is_some());
+}
+
+#[test]
+fn drive_resource_rejects_unsafe_subpath() {
+    let directory = TempDir::new().expect("create temp directory");
+    let mut config = base_config();
+    config["resources"]
+        .as_array_mut()
+        .expect("resources array")
+        .push(json!({
+            "id": "unsafe-drive",
+            "type": "drive",
+            "providerResourceUuid": "root-1234",
+            "resourceSubpath": "/../outside"
+        }));
+    let path = write_config(directory.path(), &config);
+
+    let error = load_and_compile_webserver_config(path).expect_err("unsafe subpath must fail");
+    assert!(error
+        .diagnostics()
+        .iter()
+        .any(|diagnostic| diagnostic.path.ends_with("/resourceSubpath")));
+}
+
+#[test]
+fn drive_resource_rejects_non_index_index_files() {
+    let directory = TempDir::new().expect("create temp directory");
+    let mut config = base_config();
+    config["resources"]
+        .as_array_mut()
+        .expect("resources array")
+        .push(json!({
+            "id": "indexed-drive",
+            "type": "drive",
+            "providerResourceUuid": "root-1234",
+            "indexFiles": ["home.html"]
+        }));
+    let path = write_config(directory.path(), &config);
+
+    let error = load_and_compile_webserver_config(path).expect_err("indexFiles must fail");
+    assert!(error
+        .diagnostics()
+        .iter()
+        .any(|diagnostic| diagnostic.path.ends_with("/indexFiles")));
+}
+
+#[test]
+fn drive_resource_rejects_blank_provider_resource_uuid() {
+    let directory = TempDir::new().expect("create temp directory");
+    let mut config = base_config();
+    config["resources"]
+        .as_array_mut()
+        .expect("resources array")
+        .push(json!({
+            "id": "blank-drive",
+            "type": "drive",
+            "providerResourceUuid": "  "
+        }));
+    let path = write_config(directory.path(), &config);
+
+    let error = load_and_compile_webserver_config(path).expect_err("blank uuid must fail");
+    assert!(error
+        .diagnostics()
+        .iter()
+        .any(|diagnostic| diagnostic.path.contains("/resources/")));
+}
+
+#[test]
+fn knowledgebase_resource_rejects_invalid_locale() {
+    let directory = TempDir::new().expect("create temp directory");
+    let mut config = base_config();
+    config["resources"]
+        .as_array_mut()
+        .expect("resources array")
+        .push(json!({
+            "id": "bad-locale-kb",
+            "type": "knowledgebase",
+            "providerResourceUuid": "wiki-pub-1234",
+            "locale": "zh_CN"
+        }));
+    let path = write_config(directory.path(), &config);
+
+    let error = load_and_compile_webserver_config(path).expect_err("invalid locale must fail");
+    assert!(error
+        .diagnostics()
+        .iter()
+        .any(|diagnostic| diagnostic.path.contains("/resources/")));
+}
+
+#[test]
+fn knowledgebase_resource_rejects_index_files_at_schema_level() {
+    let directory = TempDir::new().expect("create temp directory");
+    let mut config = base_config();
+    config["resources"]
+        .as_array_mut()
+        .expect("resources array")
+        .push(json!({
+            "id": "indexed-kb",
+            "type": "knowledgebase",
+            "providerResourceUuid": "wiki-pub-1234",
+            "indexFiles": ["index.html"]
+        }));
+    let path = write_config(directory.path(), &config);
+
+    let error = load_and_compile_webserver_config(path).expect_err("indexFiles must fail");
+    assert!(error
+        .diagnostics()
+        .iter()
+        .any(|diagnostic| diagnostic.path.contains("/resources/")));
 }

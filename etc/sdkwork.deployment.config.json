@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "kind": "sdkwork.deployment-index",
-  "application": "sdkwork-web-server",
+  "application": "sdkwork-webserver",
   "topology": "../specs/topology.spec.json",
   "defaultProfile": "standalone.development",
   "environments": {

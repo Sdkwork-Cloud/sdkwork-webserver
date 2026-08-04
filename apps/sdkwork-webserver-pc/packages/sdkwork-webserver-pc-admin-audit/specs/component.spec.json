@@ -6,7 +6,7 @@
     "displayName": "SDKWork Webserver PC audit",
     "version": "0.1.0",
     "type": "node-package",
-    "root": "sdkwork-web-server/apps/sdkwork-webserver-pc/packages/sdkwork-webserver-pc-admin-audit",
+    "root": "sdkwork-webserver/apps/sdkwork-webserver-pc/packages/sdkwork-webserver-pc-admin-audit",
     "domain": "infrastructure",
     "capability": "audit",
     "surface": "backend-admin",

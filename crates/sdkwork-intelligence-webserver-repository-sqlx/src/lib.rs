@@ -87,6 +87,9 @@ macro_rules! repository_engine {
             mod certificate_bindings {
                 include!("certificate_bindings.rs");
             }
+            mod tls_material {
+                include!("tls_material.rs");
+            }
             mod deployments {
                 include!("deployments.rs");
             }

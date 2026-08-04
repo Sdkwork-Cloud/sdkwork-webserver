@@ -39,15 +39,15 @@
   "contracts": {
     "layerRole": "runtime-composition",
     "publicExports": [
-      "sdkwork_api_web_server_assembly::assemble_api_router",
-      "sdkwork_api_web_server_assembly::migrate_database_from_env",
-      "sdkwork_api_web_server_assembly::ApiAssembly",
-      "sdkwork_api_web_server_assembly::ApiAssemblyContext",
-      "sdkwork_api_web_server_assembly::ApiAssemblyError"
+      "sdkwork_api_webserver_assembly::assemble_api_router",
+      "sdkwork_api_webserver_assembly::migrate_database_from_env",
+      "sdkwork_api_webserver_assembly::ApiAssembly",
+      "sdkwork_api_webserver_assembly::ApiAssemblyContext",
+      "sdkwork_api_webserver_assembly::ApiAssemblyError"
     ],
     "providedPorts": [
-      {"name": "webServerApiAssembly", "export": "sdkwork_api_web_server_assembly::assemble_api_router"},
-      {"name": "webServerDatabaseMigration", "export": "sdkwork_api_web_server_assembly::migrate_database_from_env"}
+      {"name": "webServerApiAssembly", "export": "sdkwork_api_webserver_assembly::assemble_api_router"},
+      {"name": "webServerDatabaseMigration", "export": "sdkwork_api_webserver_assembly::migrate_database_from_env"}
     ],
     "requiredPorts": [
       {"name": "webServerRepositoryRuntime", "export": "crate-root", "provider": "sdkwork-intelligence-webserver-repository-sqlx"},

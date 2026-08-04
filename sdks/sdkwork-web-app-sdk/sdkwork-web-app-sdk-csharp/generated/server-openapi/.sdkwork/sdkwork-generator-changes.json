@@ -9,16 +9,14 @@
     "protocol": "http",
     "packageName": "SDKWork.Web.AppSdk"
   },
-  "changeFingerprint": "b7a8966e32b2db183bed57e5a75a4969bca6f70707565b9139ec5616614f493c",
+  "changeFingerprint": "b7af60ba9c7b039e4d7759365228487fdf437256e0fccd8e129bb9c7564113c9",
   "changes": {
     "createdGeneratedFiles": [],
-    "updatedGeneratedFiles": [
-      "Api/CertificateApi.cs",
-      "README.md"
-    ],
+    "updatedGeneratedFiles": [],
     "unchangedGeneratedFiles": [
       "Api/Api.cs",
       "Api/ApiPaths.cs",
+      "Api/CertificateApi.cs",
       "Api/DeploymentApi.cs",
       "Api/DomainApi.cs",
       "Api/EnvVariableApi.cs",
@@ -98,19 +96,12 @@
       "Models/SourceVersionResponse.cs",
       "Models/UpdateEnvVariableRequest.cs",
       "Models/UpdateSiteRequest.cs",
+      "README.md",
       "sdkwork-sdk.json",
       "SDKWork.Web.AppSdk.csproj",
       "SdkworkAppClient.cs"
     ],
-    "deletedGeneratedFiles": [
-      "Models/CertificateOperationResponse.cs",
-      "Models/CertificatePage.cs",
-      "Models/CertificateResponse.cs",
-      "Models/CertificatesIssueResponse202.cs",
-      "Models/CertificatesListResponse.cs",
-      "Models/CertificatesOperationsRetrieveResponse.cs",
-      "Models/IssueCertificateRequest.cs"
-    ],
+    "deletedGeneratedFiles": [],
     "scaffoldedFiles": [],
     "preservedScaffoldFiles": [
       "custom/README.md"
@@ -119,76 +110,26 @@
   },
   "impact": {
     "schemaVersion": 1,
-    "areas": [
-      "api-surface",
-      "models",
-      "documentation"
-    ],
-    "details": [
-      {
-        "area": "api-surface",
-        "paths": [
-          "Api/CertificateApi.cs"
-        ]
-      },
-      {
-        "area": "models",
-        "paths": [
-          "Models/CertificateOperationResponse.cs",
-          "Models/CertificatePage.cs",
-          "Models/CertificateResponse.cs",
-          "Models/CertificatesIssueResponse202.cs",
-          "Models/CertificatesListResponse.cs",
-          "Models/CertificatesOperationsRetrieveResponse.cs",
-          "Models/IssueCertificateRequest.cs"
-        ]
-      },
-      {
-        "area": "documentation",
-        "paths": [
-          "README.md"
-        ]
-      }
-    ],
-    "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, models, documentation. Verification is required."
+    "areas": [],
+    "details": [],
+    "requiresVerification": false,
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
   },
   "verificationPlan": {
-    "shouldRun": true,
-    "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, models, documentation. Verification is required. Run the required verification commands now against the generated SDK output.",
-    "steps": [
-      {
-        "id": "check",
-        "title": "Unified package check",
-        "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, documentation.",
-        "workingDirectory": "E:\\sdkwork-space\\sdkwork-webserver\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-csharp\\generated\\server-openapi",
-        "command": "node",
-        "args": [
-          "./bin/publish-core.mjs",
-          "--language",
-          "csharp",
-          "--project-dir",
-          ".",
-          "--action",
-          "check"
-        ],
-        "displayCommand": "node ./bin/publish-core.mjs --language csharp --project-dir . --action check"
-      }
-    ]
+    "shouldRun": false,
+    "runPhase": "skip",
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
+    "steps": []
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "high",
-    "nextAction": "verify",
+    "riskLevel": "low",
+    "nextAction": "skip",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
-    "summary": "Changes have been applied. Run the required verification plan now.",
+    "summary": "No actionable changes were detected. No apply or verification step is required.",
     "reasons": [
-      "deleted-generated-files",
-      "manual-review-required",
-      "verification-required"
+      "no-actionable-changes"
     ]
   },
   "preservedLegacyFiles": false

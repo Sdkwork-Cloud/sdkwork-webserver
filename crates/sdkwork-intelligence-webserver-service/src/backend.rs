@@ -658,6 +658,55 @@ impl WebBackendApi for WebService {
         Ok(operation)
     }
 
+    async fn revoke_managed_certificate(
+        &self,
+        context: &WebBackendRequestContext,
+        certificate_id: &str,
+        request: &sdkwork_webserver_contract::RevokeCertificateRequest,
+    ) -> WebServiceResult<sdkwork_webserver_contract::CertificateResponse> {
+        let tenant_id = Self::require_backend_tenant(context)?;
+        let reason = sdkwork_webserver_acme_service::CertificateRevocationReason::parse(
+            &request.reason,
+        )
+        .ok_or_else(|| {
+            WebServiceError::validation(
+                "revocation reason must be one of keyCompromise, affiliationChanged, superseded, cessationOfOperation, privilegeWithdrawn",
+            )
+        })?;
+        // CA revocation must be acknowledged before the aggregate is marked
+        // revoked; a rejected revocation fails the request without touching
+        // the certificate state. Self-signed certificates have no CA and are
+        // marked revoked locally.
+        let material = self
+            .repository
+            .load_certificate_revocation_material(tenant_id, certificate_id)
+            .await?;
+        if material.cert_type == 1 {
+            self.certificate_issuer
+                .revoke_certificate(&material.fullchain_pem, reason)
+                .await
+                .map_err(|error| {
+                    WebServiceError::Internal(format!("certificate revocation failed: {error}"))
+                })?;
+        }
+        let certificate = self
+            .repository
+            .mark_certificate_revoked(tenant_id, certificate_id, request, context.operator_id)
+            .await?;
+        self.audit_backend_action(
+            context,
+            "certificates.revoke",
+            "certificate",
+            certificate_id,
+        )
+        .await;
+        // Revocation archives the listener bindings; publish immediately so
+        // the data plane stops serving the revoked revision.
+        self.publish_node_tls_material_best_effort("certificate_revoke")
+            .await;
+        Ok(certificate)
+    }
+
     async fn list_application_listener_certificate_bindings(
         &self,
         context: &WebBackendRequestContext,
@@ -815,6 +864,13 @@ impl WebBackendApi for WebService {
         // edge never diverges silently from the control-plane state.
         self.deploy_nginx_site(&domain, &content).await?;
         self.reload_nginx_runtime().await?;
+        // PRD-FR-020: prove the served revision before reporting success.
+        // `nginx -s reload` only signals the master; a config that fails
+        // validation keeps the previous revision serving. `nginx -T` dumps
+        // the loaded configuration, so the server-name fragment must be
+        // present before activation is acknowledged.
+        self.verify_nginx_served(&format!("server_name {domain};"))
+            .await?;
         let response = match self
             .repository
             .web_nginx_config(Some(tenant_id), config_id)

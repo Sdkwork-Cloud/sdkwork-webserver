@@ -2,7 +2,7 @@
 
 Application: `sdkwork-web-server`
 
-Updated: 2026-08-01
+Updated: 2026-08-03
 
 This document records current implementation and evidence. It does not declare production release
 approval. Normative requirements are owned by `../sdkwork-specs`.
@@ -104,7 +104,25 @@ approval. Normative requirements are owned by `../sdkwork-specs`.
   issuance is no longer reaped mid-flight.
 - Let's Encrypt account credentials are persisted encrypted (AES-256-GCM under the process
   secret key, atomic file commit, `0600`) and reused across issuances and restarts, avoiding
-  per-operation CA account creation and its rate limits.
+  per-operation CA account creation and its rate limits. The runtime requires
+  `SDKWORK_WEB_ACME_ACCOUNT_ROOT` in production-like environments and falls back to process
+  memory only for development.
+- Certificate revocation (`POST /backend/v3/api/certificates/{certificateId}/revoke`) is
+  synchronous and CA-acknowledged: the ACME account restores from the durable store, the CA
+  confirms the RFC 5280 reason before the aggregate is marked `status=3`, listener bindings are
+  archived, node observations are cleared, and auto-renewal stops. Self-signed certificates are
+  marked revoked locally without a CA.
+- The due-renewal scheduler prefers the CA-suggested ARI window (RFC 9773) recorded on the
+  certificate aggregate after each successful issuance, falling back to the fixed
+  `renew_before_days` window.
+- Self-hosted TLS activation: after each successful certificate operation the worker projects the
+  node's listener certificate bindings into versioned material files
+  (`SDKWORK_WEB_TLS_MATERIAL_ROOT/<version-uuid>/fullchain.pem + privkey.pem`, atomic, `0600`
+  private keys) and publishes a monotonic `tls-runtime.json` snapshot; the data plane's
+  `FileTlsRuntimeController` hot-loads the revision with fingerprint, validity, SNI, and ALPN
+  verification and A/B recovery slots. HTTP-01 challenges are served by the data plane listener
+  that configures `acmeHttp01.webroot` (narrow exact-path endpoint only). External Nginx artifact
+  activation remains a documented optional legacy path outside the certificate lifecycle.
 - Certificate listener convergence processes each candidate in its own short row-locked
   transaction with a status guard (idempotent under concurrent workers) instead of one long
   transaction spanning hundreds of statements; agent certificate observations are batch-bounded.
@@ -116,6 +134,41 @@ approval. Normative requirements are owned by `../sdkwork-specs`.
 - HTTP health-check targets must be credentialed-free HTTP(S) URLs; Nginx site content is scanned
   before activation and rejects `include`, `alias`, localhost proxies, and literal private/metadata
   upstream addresses; `reload_nginx` rejects machine principals.
+- Nginx reload convergence is proven before activation success is reported (PRD-FR-020):
+  `nginx -T` dumps the loaded configuration (includes expanded), so the deployed site's
+  `server_name` fragment must be present after `deploy + reload`; a reload that failed validation
+  keeps the previous revision serving and the activation fails instead of reporting a false success.
+
+## Deployments Domain Alignment (composed dependency assembly)
+
+- Environment-variable secrets are encrypted at rest with AES-GCM under the process secret key
+  (`SDKWORK_DEPLOY_SECRET_ENCRYPTION_KEY`, development fallback derived with a warning) and masked
+  as `***` in every response; the `value_encrypted` column never returns plaintext, matching the
+  Web domain contract.
+- Audit log listing requires a tenant context at both the service and repository layers;
+  tenant-less tokens are rejected (`Forbidden`) instead of enumerating the whole table.
+- Deployment rollback marks the source record and inserts the rollback record in one transaction;
+  a failed insert no longer leaves the source marked rolled back.
+- Site update and status transitions enforce optimistic concurrency (`version` compare-and-swap)
+  and return `409 conflict` on concurrent modification instead of silent last-write-wins.
+- Deployment creation deduplicates concurrent idempotency-key submissions: the unique-violation
+  path re-reads and returns the existing record instead of surfacing `409`.
+- Growing collections (`auditLogs.list`, `deployments.list`) use opaque keyset cursor pagination
+  on `(created_at, id)` with `mode=cursor` pageInfo, `nextCursor`, and exact `hasMore`
+  (PAGINATION_SPEC §6/§12); offset lists carry stable `id` tie-breakers and exact `hasMore`;
+  `page_size` beyond 200 and pagination aliases are rejected with 400 at the shared middleware,
+  `cursor` fails closed on non-keyset endpoints, and audit log filters (`target_type`, `action`,
+  `operator_id`, `start_date`, `end_date`) declared in OpenAPI are implemented with bound
+  parameters.
+- HTTP GET query parameters across the Deployments API use `lower_snake_case` exclusively
+  (`site_type`, `site_id`, `config_type`, `is_active`, `cluster_id`, `target_type`,
+  `operator_id`, `start_date`, `end_date`, `cursor`); no camelCase query aliases remain.
+- Environment-variable and health-check collections are capped at 100 active items per site with a
+  row-locked cardinality check on create and a cardinality invariant on list, bounding list memory
+  to O(capacity) (PAGINATION_SPEC §2).
+- The legacy top-level `migrations/` directory (deprecated pre-framework SQL) and the obsolete
+  `postgres_composition_matches_sqlite_transaction_semantics` spec reference were removed; the
+  deploy module remains PostgreSQL-only with a fail-closed engine gate.
 
 ## Deployment And Release State
 

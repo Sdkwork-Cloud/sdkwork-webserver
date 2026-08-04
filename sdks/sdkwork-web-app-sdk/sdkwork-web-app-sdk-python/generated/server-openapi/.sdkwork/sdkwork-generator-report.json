@@ -10,108 +10,37 @@
   },
   "status": "ok",
   "mode": "apply",
-  "hasChanges": true,
-  "hasDestructiveChanges": true,
-  "changeFingerprint": "d1cc06ba64a978792f3a4095cc59eef8790e00e518d2c882134f7710129e46a3",
+  "hasChanges": false,
+  "hasDestructiveChanges": false,
+  "changeFingerprint": "83d096772d4c803767afca344a6936c47bc8385fbb8d2045cfe0efcaa102dd77",
   "changeImpact": {
     "schemaVersion": 1,
-    "areas": [
-      "api-surface",
-      "models",
-      "documentation"
-    ],
-    "details": [
-      {
-        "area": "api-surface",
-        "paths": [
-          "sdkwork_web_app_sdk/api/certificate.py",
-          "sdkwork_web_app_sdk/models/__init__.py"
-        ]
-      },
-      {
-        "area": "models",
-        "paths": [
-          "sdkwork_web_app_sdk/models/__init__.py",
-          "sdkwork_web_app_sdk/models/certificate_operation_response.py",
-          "sdkwork_web_app_sdk/models/certificate_page.py",
-          "sdkwork_web_app_sdk/models/certificate_response.py",
-          "sdkwork_web_app_sdk/models/certificates_issue_response202.py",
-          "sdkwork_web_app_sdk/models/certificates_list_response.py",
-          "sdkwork_web_app_sdk/models/certificates_operations_retrieve_response.py",
-          "sdkwork_web_app_sdk/models/issue_certificate_request.py"
-        ]
-      },
-      {
-        "area": "documentation",
-        "paths": [
-          "README.md"
-        ]
-      }
-    ],
-    "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, models, documentation. Verification is required."
+    "areas": [],
+    "details": [],
+    "requiresVerification": false,
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "high",
-    "nextAction": "verify",
+    "riskLevel": "low",
+    "nextAction": "skip",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
-    "summary": "Changes have been applied. Run the required verification plan now.",
+    "summary": "No actionable changes were detected. No apply or verification step is required.",
     "reasons": [
-      "deleted-generated-files",
-      "manual-review-required",
-      "verification-required"
+      "no-actionable-changes"
     ]
   },
   "executionHandoff": {
     "schemaVersion": 1,
-    "summary": "Run the required verification commands now.",
-    "steps": [
-      {
-        "id": "verify-check",
-        "title": "Unified package check",
-        "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, documentation.",
-        "workingDirectory": "E:\\sdkwork-space\\sdkwork-webserver\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-python\\generated\\server-openapi",
-        "command": "node",
-        "args": [
-          "./bin/publish-core.mjs",
-          "--language",
-          "python",
-          "--project-dir",
-          ".",
-          "--action",
-          "check"
-        ],
-        "displayCommand": "node ./bin/publish-core.mjs --language python --project-dir . --action check"
-      }
-    ]
+    "summary": "No further commands are required.",
+    "steps": []
   },
   "verificationPlan": {
-    "shouldRun": true,
-    "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, models, documentation. Verification is required. Run the required verification commands now against the generated SDK output.",
-    "steps": [
-      {
-        "id": "check",
-        "title": "Unified package check",
-        "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, documentation.",
-        "workingDirectory": "E:\\sdkwork-space\\sdkwork-webserver\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-python\\generated\\server-openapi",
-        "command": "node",
-        "args": [
-          "./bin/publish-core.mjs",
-          "--language",
-          "python",
-          "--project-dir",
-          ".",
-          "--action",
-          "check"
-        ],
-        "displayCommand": "node ./bin/publish-core.mjs --language python --project-dir . --action check"
-      }
-    ]
+    "shouldRun": false,
+    "runPhase": "skip",
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
+    "steps": []
   },
   "sdk": {
     "name": "sdkwork-web-app-sdk",
@@ -136,19 +65,15 @@
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 3,
+    "writtenFiles": 0,
     "skippedScaffoldFiles": 1,
-    "skippedUnchangedGeneratedFiles": 87,
-    "deletedGeneratedFiles": 7,
+    "skippedUnchangedGeneratedFiles": 90,
+    "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "d1cc06ba64a978792f3a4095cc59eef8790e00e518d2c882134f7710129e46a3",
+    "changeFingerprint": "83d096772d4c803767afca344a6936c47bc8385fbb8d2045cfe0efcaa102dd77",
     "changes": {
       "createdGeneratedFiles": [],
-      "updatedGeneratedFiles": [
-        "README.md",
-        "sdkwork_web_app_sdk/api/certificate.py",
-        "sdkwork_web_app_sdk/models/__init__.py"
-      ],
+      "updatedGeneratedFiles": [],
       "unchangedGeneratedFiles": [
         "bin/publish-core.mjs",
         "bin/publish.ps1",
@@ -157,9 +82,11 @@
         "LICENSE",
         "MANIFEST.in",
         "pyproject.toml",
+        "README.md",
         "requirements.txt",
         "sdkwork_web_app_sdk/__init__.py",
         "sdkwork_web_app_sdk/api/__init__.py",
+        "sdkwork_web_app_sdk/api/certificate.py",
         "sdkwork_web_app_sdk/api/deployment.py",
         "sdkwork_web_app_sdk/api/domain.py",
         "sdkwork_web_app_sdk/api/env_variable.py",
@@ -168,6 +95,7 @@
         "sdkwork_web_app_sdk/api/source_version.py",
         "sdkwork_web_app_sdk/client.py",
         "sdkwork_web_app_sdk/http_client.py",
+        "sdkwork_web_app_sdk/models/__init__.py",
         "sdkwork_web_app_sdk/models/application_store_listing.py",
         "sdkwork_web_app_sdk/models/certificate_identifier_response.py",
         "sdkwork_web_app_sdk/models/create_deployment_request.py",
@@ -238,15 +166,7 @@
         "sdkwork-sdk.json",
         "setup.py"
       ],
-      "deletedGeneratedFiles": [
-        "sdkwork_web_app_sdk/models/certificate_operation_response.py",
-        "sdkwork_web_app_sdk/models/certificate_page.py",
-        "sdkwork_web_app_sdk/models/certificate_response.py",
-        "sdkwork_web_app_sdk/models/certificates_issue_response202.py",
-        "sdkwork_web_app_sdk/models/certificates_list_response.py",
-        "sdkwork_web_app_sdk/models/certificates_operations_retrieve_response.py",
-        "sdkwork_web_app_sdk/models/issue_certificate_request.py"
-      ],
+      "deletedGeneratedFiles": [],
       "scaffoldedFiles": [],
       "preservedScaffoldFiles": [
         "custom/README.md"
@@ -255,78 +175,26 @@
     },
     "impact": {
       "schemaVersion": 1,
-      "areas": [
-        "api-surface",
-        "models",
-        "documentation"
-      ],
-      "details": [
-        {
-          "area": "api-surface",
-          "paths": [
-            "sdkwork_web_app_sdk/api/certificate.py",
-            "sdkwork_web_app_sdk/models/__init__.py"
-          ]
-        },
-        {
-          "area": "models",
-          "paths": [
-            "sdkwork_web_app_sdk/models/__init__.py",
-            "sdkwork_web_app_sdk/models/certificate_operation_response.py",
-            "sdkwork_web_app_sdk/models/certificate_page.py",
-            "sdkwork_web_app_sdk/models/certificate_response.py",
-            "sdkwork_web_app_sdk/models/certificates_issue_response202.py",
-            "sdkwork_web_app_sdk/models/certificates_list_response.py",
-            "sdkwork_web_app_sdk/models/certificates_operations_retrieve_response.py",
-            "sdkwork_web_app_sdk/models/issue_certificate_request.py"
-          ]
-        },
-        {
-          "area": "documentation",
-          "paths": [
-            "README.md"
-          ]
-        }
-      ],
-      "requiresVerification": true,
-      "summary": "Detected impact areas: api-surface, models, documentation. Verification is required."
+      "areas": [],
+      "details": [],
+      "requiresVerification": false,
+      "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
     },
     "verificationPlan": {
-      "shouldRun": true,
-      "runPhase": "now",
-      "summary": "Detected impact areas: api-surface, models, documentation. Verification is required. Run the required verification commands now against the generated SDK output.",
-      "steps": [
-        {
-          "id": "check",
-          "title": "Unified package check",
-          "required": true,
-          "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, documentation.",
-          "workingDirectory": "E:\\sdkwork-space\\sdkwork-webserver\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-python\\generated\\server-openapi",
-          "command": "node",
-          "args": [
-            "./bin/publish-core.mjs",
-            "--language",
-            "python",
-            "--project-dir",
-            ".",
-            "--action",
-            "check"
-          ],
-          "displayCommand": "node ./bin/publish-core.mjs --language python --project-dir . --action check"
-        }
-      ]
+      "shouldRun": false,
+      "runPhase": "skip",
+      "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
+      "steps": []
     },
     "executionDecision": {
       "schemaVersion": 1,
-      "riskLevel": "high",
-      "nextAction": "verify",
+      "riskLevel": "low",
+      "nextAction": "skip",
       "requiresManualReview": false,
       "applyRequiresExpectedFingerprint": false,
-      "summary": "Changes have been applied. Run the required verification plan now.",
+      "summary": "No actionable changes were detected. No apply or verification step is required.",
       "reasons": [
-        "deleted-generated-files",
-        "manual-review-required",
-        "verification-required"
+        "no-actionable-changes"
       ]
     },
     "backedUpFiles": [],

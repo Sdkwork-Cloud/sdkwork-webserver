@@ -92,6 +92,20 @@ impl WebService {
                 }
             }
         }
+        // A succeeded operation changed the node's certificate state; project
+        // the listener bindings into the self-hosted TLS runtime snapshot so
+        // the data plane hot-loads the new revision. Distribution failure is
+        // recorded but does not fail the operation (the database state is
+        // already final); the next successful operation republishes.
+        if report.succeeded > 0 {
+            if let Err(error) = self.publish_node_tls_material().await {
+                tracing::error!(
+                    lease_owner,
+                    error = ?error,
+                    "node TLS material distribution failed after a certificate operation"
+                );
+            }
+        }
         Ok(report)
     }
 }
@@ -145,7 +159,7 @@ async fn execute_certificate_operation(
         spki_sha256: material.spki_sha256,
         chain_sha256: material.chain_sha256,
         key_algorithm: material.key_algorithm,
-        fullchain_pem: material.cert_pem,
+        fullchain_pem: material.cert_pem.clone(),
         private_key_pem: material.private_key_pem,
         not_before: material.not_before,
         not_after: material.not_after,
@@ -172,6 +186,19 @@ async fn execute_certificate_operation(
             .await;
         }
     };
+    // Record the CA-suggested ARI renewal window (RFC 9773) so the scheduler
+    // can prefer it over the fixed `renew_before_days` fallback. Best effort:
+    // CAs without ARI support and transient lookup failures keep the fixed
+    // window.
+    if lease.cert_type == 1 {
+        record_ari_renewal_window(
+            repository.as_ref(),
+            certificate_issuer.as_ref(),
+            &lease,
+            &material.cert_pem,
+        )
+        .await;
+    }
     let audit_action = match lease.operation_type.as_str() {
         "ISSUE" => "certificates.issue",
         "RENEW" => "certificates.renew",
@@ -201,6 +228,46 @@ async fn execute_certificate_operation(
         );
     }
     Ok(CertificateOperationOutcome::Succeeded)
+}
+
+/// Records the CA-suggested ARI renewal window on the certificate aggregate.
+/// Best effort by design: the fixed `renew_before_days` window remains the
+/// scheduler fallback when the CA does not support ARI or the lookup fails.
+async fn record_ari_renewal_window(
+    repository: &dyn WebRepositoryPort,
+    certificate_issuer: &CertificateIssuer,
+    lease: &CertificateOperationLease,
+    cert_pem: &str,
+) {
+    match certificate_issuer.renewal_info(cert_pem).await {
+        Ok(Some(window)) => {
+            if let Err(error) = repository
+                .record_certificate_renewal_info(
+                    lease.tenant_id,
+                    &lease.certificate_id,
+                    &window.window_start,
+                    &window.window_end,
+                )
+                .await
+            {
+                tracing::warn!(
+                    tenant_id = lease.tenant_id,
+                    certificate_id = %lease.certificate_id,
+                    error = ?error,
+                    "failed to record the ACME renewal information window"
+                );
+            }
+        }
+        Ok(None) => {}
+        Err(error) => {
+            tracing::debug!(
+                tenant_id = lease.tenant_id,
+                certificate_id = %lease.certificate_id,
+                error = ?error,
+                "ACME renewal information lookup is unavailable; keeping the fixed renewal window"
+            );
+        }
+    }
 }
 
 async fn persist_certificate_operation_failure(

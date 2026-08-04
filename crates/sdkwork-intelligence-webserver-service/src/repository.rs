@@ -15,10 +15,11 @@ use sdkwork_webserver_contract::{
     ListAuditLogsQuery, ListNginxConfigsQuery, ListRootDomainsQuery, ListSitesQuery,
     ListenerCertificateBindingPage, ListenerCertificateBindingResponse, NginxConfigPage,
     NginxConfigResponse, NginxReloadResponse, NginxStatusResponse, NginxValidateResponse,
-    RootDomainPage, RootDomainResponse, RuntimeAssignment, RuntimeAssignmentDelivery,
-    RuntimeObservation, RuntimeObservationState, ServerPage, SitePage, SiteResponse,
-    SourceVersionPage, SourceVersionResponse, UpdateDomainApplicationBindingRequest,
-    UpdateEnvVariableRequest, UpdateNginxConfigRequest, UpdateSiteRequest,
+    RevokeCertificateRequest, RootDomainPage, RootDomainResponse, RuntimeAssignment,
+    RuntimeAssignmentDelivery, RuntimeObservation, RuntimeObservationState, ServerPage, SitePage,
+    SiteResponse, SourceVersionPage, SourceVersionResponse, TlsCertificateAssignmentMaterial,
+    UpdateDomainApplicationBindingRequest, UpdateEnvVariableRequest, UpdateNginxConfigRequest,
+    UpdateSiteRequest,
 };
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -27,6 +28,12 @@ pub struct RuntimeAssignmentTarget {
     pub node_uuid: String,
     pub tenant_id: i64,
     pub tenant_scope_hash: String,
+}
+
+#[derive(Clone, Debug)]
+pub struct CertificateRevocationMaterial {
+    pub cert_type: i32,
+    pub fullchain_pem: String,
 }
 
 #[derive(Clone, Debug)]
@@ -471,6 +478,45 @@ pub trait WebRepositoryPort: Send + Sync {
         certificate_id: &str,
         auto_renew: bool,
     ) -> WebServiceResult<CertificateResponse>;
+
+    /// Projects the decrypted TLS certificate material the node must serve
+    /// into its self-hosted TLS runtime snapshot: every listener certificate
+    /// binding on the node with a desired version, across all tenants the
+    /// node serves.
+    async fn load_node_tls_certificate_assignments(
+        &self,
+        node_uuid: &str,
+    ) -> WebServiceResult<Vec<TlsCertificateAssignmentMaterial>>;
+
+    /// Loads the revocation material (cert type and leaf chain) for a
+    /// certificate, locking the aggregate so revocation is exclusive.
+    async fn load_certificate_revocation_material(
+        &self,
+        tenant_id: i64,
+        certificate_id: &str,
+    ) -> WebServiceResult<CertificateRevocationMaterial>;
+
+    /// Marks a certificate revoked after the CA acknowledged the revocation:
+    /// stops auto-renewal, archives listener bindings, and records the
+    /// revocation metadata.
+    async fn mark_certificate_revoked(
+        &self,
+        tenant_id: i64,
+        certificate_id: &str,
+        request: &RevokeCertificateRequest,
+        revoked_by: Option<i64>,
+    ) -> WebServiceResult<CertificateResponse>;
+
+    /// Records the CA-suggested ARI renewal window on the certificate
+    /// aggregate so the due-renewal scheduler prefers it over the fixed
+    /// `renew_before_days` fallback.
+    async fn record_certificate_renewal_info(
+        &self,
+        tenant_id: i64,
+        certificate_id: &str,
+        window_start: &str,
+        window_end: &str,
+    ) -> WebServiceResult<()>;
 
     async fn list_certificate_distribution(
         &self,

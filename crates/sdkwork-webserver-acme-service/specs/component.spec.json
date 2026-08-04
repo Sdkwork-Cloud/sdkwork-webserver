@@ -10,28 +10,75 @@
     "domain": "platform",
     "capability": "webserver-certificate-issuance",
     "surface": "backend-service",
-    "languages": ["rust"],
+    "languages": [
+      "rust"
+    ],
     "generated": false,
     "status": "active",
-    "manifests": ["Cargo.toml", "specs/component.spec.json"]
+    "manifests": [
+      "Cargo.toml",
+      "specs/component.spec.json"
+    ]
   },
   "canonicalSpecs": [
-    {"file": "CODE_STYLE_SPEC.md", "path": "../../../sdkwork-specs/CODE_STYLE_SPEC.md", "purpose": "Authored provider boundaries."},
-    {"file": "NAMING_SPEC.md", "path": "../../../sdkwork-specs/NAMING_SPEC.md", "purpose": "Certificate provider naming."},
-    {"file": "RUST_CODE_SPEC.md", "path": "../../../sdkwork-specs/RUST_CODE_SPEC.md", "purpose": "Rust crate structure."},
-    {"file": "CONFIG_SPEC.md", "path": "../../../sdkwork-specs/CONFIG_SPEC.md", "purpose": "Typed ACME provider configuration."},
-    {"file": "SECURITY_SPEC.md", "path": "../../../sdkwork-specs/SECURITY_SPEC.md", "purpose": "Private key, challenge, and external provider safety."},
-    {"file": "PERFORMANCE_SPEC.md", "path": "../../../sdkwork-specs/PERFORMANCE_SPEC.md", "purpose": "Bounded external operation budgets."},
-    {"file": "TEST_SPEC.md", "path": "../../../sdkwork-specs/TEST_SPEC.md", "purpose": "Provider and crypto verification."}
+    {
+      "file": "CODE_STYLE_SPEC.md",
+      "path": "../../../sdkwork-specs/CODE_STYLE_SPEC.md",
+      "purpose": "Authored provider boundaries."
+    },
+    {
+      "file": "NAMING_SPEC.md",
+      "path": "../../../sdkwork-specs/NAMING_SPEC.md",
+      "purpose": "Certificate provider naming."
+    },
+    {
+      "file": "RUST_CODE_SPEC.md",
+      "path": "../../../sdkwork-specs/RUST_CODE_SPEC.md",
+      "purpose": "Rust crate structure."
+    },
+    {
+      "file": "CONFIG_SPEC.md",
+      "path": "../../../sdkwork-specs/CONFIG_SPEC.md",
+      "purpose": "Typed ACME provider configuration."
+    },
+    {
+      "file": "SECURITY_SPEC.md",
+      "path": "../../../sdkwork-specs/SECURITY_SPEC.md",
+      "purpose": "Private key, challenge, and external provider safety."
+    },
+    {
+      "file": "PERFORMANCE_SPEC.md",
+      "path": "../../../sdkwork-specs/PERFORMANCE_SPEC.md",
+      "purpose": "Bounded external operation budgets."
+    },
+    {
+      "file": "TEST_SPEC.md",
+      "path": "../../../sdkwork-specs/TEST_SPEC.md",
+      "purpose": "Provider and crypto verification."
+    }
   ],
   "contracts": {
     "layerRole": "backend-provider",
-    "publicExports": ["crate-root"],
-    "providedPorts": [
-      {"name": "certificateIssuer", "export": "crate-root"},
-      {"name": "acmeChallengeStore", "export": "crate-root"}
+    "publicExports": [
+      "crate-root"
     ],
-    "requiredPorts": [{"name": "acmeDirectoryProvider", "export": "crate-root", "provider": "instant-acme"}],
+    "providedPorts": [
+      {
+        "name": "certificateIssuer",
+        "export": "crate-root"
+      },
+      {
+        "name": "acmeChallengeStore",
+        "export": "crate-root"
+      }
+    ],
+    "requiredPorts": [
+      {
+        "name": "acmeDirectoryProvider",
+        "export": "crate-root",
+        "provider": "instant-acme"
+      }
+    ],
     "runtimeEntrypoints": [],
     "routeManifest": null,
     "sdkClients": [],
@@ -41,16 +88,19 @@
     "dependencyApiSurfaces": [],
     "events": [],
     "configKeys": [
-      "SDKWORK_WEB_ACME_DIRECTORY_URL",
+      "SDKWORK_WEB_ACME_ACCOUNT_ROOT",
       "SDKWORK_WEB_ACME_CONTACT_EMAIL",
+      "SDKWORK_WEB_ACME_DIRECTORY_URL",
       "SDKWORK_WEB_ACME_OPERATION_TIMEOUT_MS",
+      "SDKWORK_WEB_ACME_PROFILE",
       "SDKWORK_WEB_ACME_WEBROOT",
       "SDKWORK_WEB_CERT_LIVE_ROOT",
-      "SDKWORK_WEB_CERT_RENEW_BEFORE_DAYS",
-      "SDKWORK_WEB_ACME_PROFILE"
+      "SDKWORK_WEB_CERT_RENEW_BEFORE_DAYS"
     ]
   },
   "verification": {
-    "commands": ["cargo test -p sdkwork-webserver-acme-service"]
+    "commands": [
+      "cargo test -p sdkwork-webserver-acme-service"
+    ]
   }
 }

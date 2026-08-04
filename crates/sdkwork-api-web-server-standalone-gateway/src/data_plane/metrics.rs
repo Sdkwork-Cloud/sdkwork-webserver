@@ -1085,7 +1085,7 @@ impl HttpBody for RequestMetricBody {
     }
 
     fn size_hint(&self) -> SizeHint {
-        self.remaining_hint.clone()
+        self.remaining_hint
     }
 }
 

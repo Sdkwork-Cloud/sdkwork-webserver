@@ -2,6 +2,7 @@ use std::error::Error as StdError;
 use std::future::Future;
 use std::io;
 use std::pin::Pin;
+use std::sync::Arc;
 
 use async_trait::async_trait;
 use bytes::{Buf, Bytes, BytesMut};
@@ -15,12 +16,51 @@ use hyper_util::client::legacy::connect::HttpConnector;
 use hyper_util::client::legacy::Client;
 use hyper_util::rt::TokioExecutor;
 use instant_acme::{BodyWrapper, BytesBody, BytesResponse, Error as InstantAcmeError, HttpClient};
+use rustls_pki_types::CertificateDer;
 
 use crate::{AcmeServiceError, AcmeServiceResult};
 
 pub(crate) const MAX_ACME_RESPONSE_BODY_BYTES: usize = 2 * 1024 * 1024;
 
 type AcmeHyperClient = Client<hyper_rustls::HttpsConnector<HttpConnector>, BodyWrapper<Bytes>>;
+
+/// Builds the bounded ACME HTTP client used for CA directory requests.
+///
+/// The default factory uses the platform verifier; a custom factory can add
+/// private CA trust roots (for example a local Pebble test server or an
+/// internal ACME directory).
+pub trait AcmeHttpClientFactory: Send + Sync {
+    fn build(&self) -> AcmeServiceResult<Box<dyn HttpClient>>;
+}
+
+/// Default factory: platform trust store (Let's Encrypt and public CAs).
+#[derive(Default)]
+pub struct PlatformVerifierClientFactory;
+
+impl AcmeHttpClientFactory for PlatformVerifierClientFactory {
+    fn build(&self) -> AcmeServiceResult<Box<dyn HttpClient>> {
+        Ok(Box::new(BoundedAcmeHttpClient::new()?))
+    }
+}
+
+/// Factory that trusts the platform roots plus explicit extra roots.
+pub struct ExtraRootsClientFactory {
+    extra_roots: Vec<CertificateDer<'static>>,
+}
+
+impl ExtraRootsClientFactory {
+    pub fn new(extra_roots: Vec<CertificateDer<'static>>) -> Self {
+        Self { extra_roots }
+    }
+}
+
+impl AcmeHttpClientFactory for ExtraRootsClientFactory {
+    fn build(&self) -> AcmeServiceResult<Box<dyn HttpClient>> {
+        Ok(Box::new(BoundedAcmeHttpClient::new_with_roots(
+            self.extra_roots.clone(),
+        )?))
+    }
+}
 
 pub(crate) struct BoundedAcmeHttpClient {
     client: AcmeHyperClient,
@@ -33,6 +73,55 @@ impl BoundedAcmeHttpClient {
             .map_err(|error| {
                 AcmeServiceError::provider(format!("initialize ACME TLS verifier: {error}"))
             })?
+            .https_only()
+            .enable_http1()
+            .enable_http2()
+            .build();
+        let client = Client::builder(TokioExecutor::new()).build(connector);
+        Ok(Self { client })
+    }
+
+    /// ACME client that trusts the platform roots plus `extra_roots`.
+    ///
+    /// This is the integration point for private ACME CAs (for example a
+    /// local Pebble test server or an internal CA directory) whose chain is
+    /// not part of the platform trust store. The caller provides the complete
+    /// set of trust anchors the CA chain is verified against. Production
+    /// Let's Encrypt issuance keeps using [`Self::new`].
+    pub(crate) fn new_with_roots(
+        extra_roots: Vec<CertificateDer<'static>>,
+    ) -> AcmeServiceResult<Self> {
+        if extra_roots.is_empty() {
+            return Err(AcmeServiceError::config(
+                "at least one extra ACME trust root is required",
+            ));
+        }
+        let mut roots = rustls::RootCertStore::empty();
+        for root in extra_roots {
+            roots
+                .add(root)
+                .map_err(|error| AcmeServiceError::Internal(format!("add extra root: {error}")))?;
+        }
+        let provider = Arc::new(rustls::crypto::aws_lc_rs::default_provider());
+        let verifier = rustls::client::WebPkiServerVerifier::builder_with_provider(
+            Arc::new(roots),
+            provider.clone(),
+        )
+        .build()
+        .map_err(|error| {
+            AcmeServiceError::provider(format!("initialize ACME TLS verifier: {error}"))
+        })?;
+        let config = rustls::ClientConfig::builder_with_provider(provider)
+            .with_safe_default_protocol_versions()
+            .map_err(|error| {
+                AcmeServiceError::provider(format!(
+                    "initialize ACME TLS protocol versions: {error}"
+                ))
+            })?
+            .with_webpki_verifier(verifier)
+            .with_no_client_auth();
+        let connector = HttpsConnectorBuilder::new()
+            .with_tls_config(config)
             .https_only()
             .enable_http1()
             .enable_http2()

@@ -72,7 +72,7 @@
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/api/CertificateApi.java",
-      "sha256": "f84a32e45ff540df1bb369999d6d53af3a3207df49b9ce60154a4fc1ce7cff39"
+      "sha256": "fc6fbf4b0b199b449377a7891637c3cae22e4644b0343ace9ee0b081d24862c9"
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/api/CertificateDistributionApi.java",
@@ -267,6 +267,10 @@
       "sha256": "c9014cacb279180d316689501df49b92886ca2076e11ecc44549b78ab8be595a"
     },
     {
+      "path": "src/main/java/com/sdkwork/web/backend/sdk/model/CertificatesRevokeResponse.java",
+      "sha256": "8b54def637a20658eca21980ce3120f7024dfd0e2438196f19765f84b9a639c0"
+    },
+    {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/model/CertificatesUpdateResponse.java",
       "sha256": "228bb218198012280d76af97493763b2e746ee34e8d97f7ab3ec77d0e08ef5db"
     },
@@ -433,6 +437,10 @@
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/model/RetrieveResponse.java",
       "sha256": "b48f4e3045aa2220f2a550a69507a4c8dada23968a77af760a7add1b9202d3ab"
+    },
+    {
+      "path": "src/main/java/com/sdkwork/web/backend/sdk/model/RevokeCertificateRequest.java",
+      "sha256": "a3d3e11d59889306712cdd9832e60edfd0c2209ba183536be2f73b100e36065a"
     },
     {
       "path": "src/main/java/com/sdkwork/web/backend/sdk/model/RootDomainResponse.java",

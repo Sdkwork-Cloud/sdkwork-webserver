@@ -596,6 +596,15 @@ public struct CertificateResponse: Codable {
     }
 }
 
+public struct RevokeCertificateRequest: Codable {
+    public let reason: String?
+
+
+    public init(reason: String? = nil) {
+        self.reason = reason
+    }
+}
+
 public struct CertificateOperationResponse: Codable {
     public let id: String?
     public let certificateId: String?
@@ -1567,6 +1576,19 @@ public struct CertificatesUpdateResponse: Codable {
 }
 
 public struct CertificatesRenewResponse202: Codable {
+    public let code: Int?
+    public let data: Any?
+    public let traceId: String?
+
+
+    public init(code: Int? = nil, data: Any? = nil, traceId: String? = nil) {
+        self.code = code
+        self.data = data
+        self.traceId = traceId
+    }
+}
+
+public struct CertificatesRevokeResponse: Codable {
     public let code: Int?
     public let data: Any?
     public let traceId: String?

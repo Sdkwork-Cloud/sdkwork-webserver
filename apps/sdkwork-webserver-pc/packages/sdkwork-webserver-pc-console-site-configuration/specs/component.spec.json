@@ -6,7 +6,7 @@
     "displayName": "SDKWork Webserver PC site-configuration",
     "version": "0.1.0",
     "type": "node-package",
-    "root": "sdkwork-web-server/apps/sdkwork-webserver-pc/packages/sdkwork-webserver-pc-console-site-configuration",
+    "root": "sdkwork-webserver/apps/sdkwork-webserver-pc/packages/sdkwork-webserver-pc-console-site-configuration",
     "domain": "infrastructure",
     "capability": "site-configuration",
     "surface": "app-console",

@@ -140,6 +140,20 @@ func (a *CertificateApi) CertificatesRenew(certificateId string, idempotencyKey 
     return decodeResult[sdktypes.CertificatesRenewResponse202](raw)
 }
 
+// Revoke a canonical certificate
+func (a *CertificateApi) CertificatesRevoke(certificateId string, body sdktypes.RevokeCertificateRequest, idempotencyKey string) (sdktypes.CertificatesRevokeResponse, error) {
+    headers := BuildRequestHeaders(
+        map[string]ParameterSpec{"Idempotency-Key": ParameterSpec{Value: idempotencyKey, Style: "simple", Explode: false},},
+        map[string]ParameterSpec{},
+    )
+    raw, err := a.client.Post(BackendApiPath(fmt.Sprintf("/certificates/%s/revoke", SerializePathParameter(certificateId, PathParameterSpec{Name: "certificateId", Style: "simple", Explode: false}))), body, nil, headers, "application/json")
+    if err != nil {
+        var zero sdktypes.CertificatesRevokeResponse
+        return zero, err
+    }
+    return decodeResult[sdktypes.CertificatesRevokeResponse](raw)
+}
+
 type PathParameterSpec struct {
     Name    string
     Style   string

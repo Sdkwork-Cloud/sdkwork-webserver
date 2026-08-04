@@ -339,7 +339,13 @@ impl WebRepository {
               AND version.certificate_id = certificate.id
              WHERE certificate.auto_renew = TRUE AND certificate.status = 1
                AND certificate.cert_type = 1 AND certificate.deleted_at IS NULL
-               AND version.not_after <= NOW() + ($1 * INTERVAL '1 day')
+               AND COALESCE(
+                     CASE WHEN certificate.metadata #>> '{ari,windowStart}' ~
+                               '^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}'
+                          THEN (certificate.metadata #>> '{ari,windowStart}')::timestamptz
+                          ELSE NULL END,
+                     version.not_after - ($1 * INTERVAL '1 day')
+                   ) <= NOW()
                AND NOT EXISTS (
                    SELECT 1 FROM web_certificate_operation active_operation
                    WHERE active_operation.tenant_id = certificate.tenant_id

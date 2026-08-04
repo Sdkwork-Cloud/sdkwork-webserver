@@ -1497,6 +1497,51 @@ paths:
           $ref: '#/components/responses/Conflict'
         '422':
           $ref: '#/components/responses/ValidationError'
+  /backend/v3/api/certificates/{certificateId}/revoke:
+    parameters:
+    - $ref: '#/components/parameters/CertificateIdParam'
+    post:
+      operationId: certificates.revoke
+      summary: Revoke a canonical certificate
+      tags: [certificate]
+      security:
+      - AuthToken: []
+        AccessToken: []
+      x-sdkwork-api-surface: backend-api
+      x-sdkwork-api-authority: sdkwork-web.backend
+      x-sdkwork-request-context: WebRequestContext
+      x-sdkwork-auth-mode: dual-token
+      x-sdkwork-permission: web.certificates.write
+      x-sdkwork-idempotent: true
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      x-sdkwork-rate-limit-tier: auth-critical
+      x-sdkwork-owner: sdkwork-web
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RevokeCertificateRequest'
+      responses:
+        '200':
+          description: Certificate revoked and listener bindings archived.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SdkWorkApiResponse'
+                - type: object
+                  required: [data]
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/CertificateResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/ValidationError'
   /backend/v3/api/certificate_distribution:
     get:
       operationId: certificates.distribution.list
@@ -3044,6 +3089,17 @@ components:
         createdAt:
           type: string
           format: date-time
+    RevokeCertificateRequest:
+      type: object
+      required: [reason]
+      additionalProperties: false
+      properties:
+        reason:
+          type: string
+          enum: [keyCompromise, affiliationChanged, superseded, cessationOfOperation, privilegeWithdrawn]
+          description: RFC 5280 section 5.3.1 revocation reason.
+
+
     CertificateOperationResponse:
       type: object
       additionalProperties: false

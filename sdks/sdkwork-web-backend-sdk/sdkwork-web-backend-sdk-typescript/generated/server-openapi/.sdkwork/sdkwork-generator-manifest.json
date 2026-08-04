@@ -84,7 +84,7 @@
     },
     {
       "path": "src/api/certificate.ts",
-      "sha256": "ff12c12d7d51582b586ec16bf3fe3b8bd7e84c75954795964551c6aebe9e72a7"
+      "sha256": "773775c7732357008bd6f07978b09906b7a1a44676426cb82103a0af2a41ee1d"
     },
     {
       "path": "src/api/domain.ts",
@@ -295,6 +295,10 @@
       "sha256": "f964600c10ffe1fe737b3a5076407b7ce4cf57a1577902deea57a8dbdba662a6"
     },
     {
+      "path": "src/types/certificates-revoke-response.ts",
+      "sha256": "a5f081bf1fd20044f402b76b591e0079e243a48daf505c51a2e6b3d8da25e37d"
+    },
+    {
       "path": "src/types/certificates-update-response.ts",
       "sha256": "d00a804553213c48fb71aee9f6996a4765965e00c8f7d13a0f239db593920be4"
     },
@@ -408,7 +412,7 @@
     },
     {
       "path": "src/types/index.ts",
-      "sha256": "2424bfc042c3238dfd1100840816121c32b7ec82a24974ebdb1101d0257b03f2"
+      "sha256": "c7b643338287943cd27e17ac08abad09bbd334e68e3befd29494f73ee0ec2448"
     },
     {
       "path": "src/types/int64-string.ts",
@@ -473,6 +477,10 @@
     {
       "path": "src/types/retrieve-response.ts",
       "sha256": "91906d71eed8368926183a11bcc172e33d4272d059ef4879decf6759e37e8a17"
+    },
+    {
+      "path": "src/types/revoke-certificate-request.ts",
+      "sha256": "194b15542d9b0d6b1418033cdc3ba06f35e38c4f0d0e2ed370d3fe0412df9ff8"
     },
     {
       "path": "src/types/root-domain-response.ts",

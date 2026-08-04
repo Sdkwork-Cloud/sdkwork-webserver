@@ -64,29 +64,42 @@ async fn invalid_repository_url_forms_are_rejected_before_network_access() {
 }
 
 #[tokio::test]
+// The environment lock must stay held across awaits so parallel tests cannot
+// observe a half-set allowlist; tokio::test runs on a current-thread runtime.
+#[allow(clippy::await_holding_lock)]
 async fn configured_host_allowlist_is_case_insensitive_and_fail_closed() {
-    let _lock = GIT_ALLOWED_HOSTS_ENV_LOCK.lock().unwrap();
+    let lock = GIT_ALLOWED_HOSTS_ENV_LOCK.lock().unwrap();
     let _guard = EnvironmentVariableGuard::set(" 8.8.8.8, GITHUB.COM ");
-    validate_repository_target("https://8.8.8.8/team/repository.git")
-        .await
-        .expect("allowlisted public host");
-    expect_validation(validate_repository_target("https://1.1.1.1/team/repository.git").await);
+    let validated = validate_repository_target("https://8.8.8.8/team/repository.git").await;
+    let rejected = validate_repository_target("https://1.1.1.1/team/repository.git").await;
+    drop(lock);
+    validated.expect("allowlisted public host");
+    expect_validation(rejected);
 }
 
 #[tokio::test]
+// The environment lock must stay held across awaits so parallel tests cannot
+// observe a half-set allowlist; tokio::test runs on a current-thread runtime.
+#[allow(clippy::await_holding_lock)]
 async fn missing_host_allowlist_disables_git_import() {
-    let _lock = GIT_ALLOWED_HOSTS_ENV_LOCK.lock().unwrap();
+    let lock = GIT_ALLOWED_HOSTS_ENV_LOCK.lock().unwrap();
     let _guard = EnvironmentVariableGuard::set("");
-    expect_validation(validate_repository_target("https://8.8.8.8/team/repository.git").await);
+    let result = validate_repository_target("https://8.8.8.8/team/repository.git").await;
+    drop(lock);
+    expect_validation(result);
 }
 
 #[tokio::test]
+// The environment lock must stay held across awaits so parallel tests cannot
+// observe a half-set allowlist; tokio::test runs on a current-thread runtime.
+#[allow(clippy::await_holding_lock)]
 async fn validated_target_retains_the_pinned_public_address() {
-    let _lock = GIT_ALLOWED_HOSTS_ENV_LOCK.lock().unwrap();
+    let lock = GIT_ALLOWED_HOSTS_ENV_LOCK.lock().unwrap();
     let _guard = EnvironmentVariableGuard::set("8.8.8.8");
     let target = validate_repository_target("https://8.8.8.8/team/repository.git")
         .await
         .expect("allowlisted public target");
+    drop(lock);
     assert_eq!(target.host_name, "8.8.8.8");
     assert_eq!(
         target.resolved_addresses,

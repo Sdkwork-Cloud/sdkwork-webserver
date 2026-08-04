@@ -97,6 +97,17 @@ public class CertificateApi {
         return try await client.post(ApiPaths.backendPath("/certificates/\(serializePathParameter(certificateId, PathParameterSpec(name: "certificateId", style: "simple", explode: false)))/renew"), body: nil, params: nil, headers: requestHeaders, responseType: CertificatesRenewResponse202.self)
     }
 
+    /// Revoke a canonical certificate
+    public func certificatesRevoke(certificateId: String, body: RevokeCertificateRequest, idempotencyKey: String) async throws -> CertificatesRevokeResponse? {
+        let requestHeaders = buildRequestHeaders(
+            [
+                "Idempotency-Key": HeaderParameterSpec(value: idempotencyKey, style: "simple", explode: false, contentType: nil),
+            ],
+            [:]
+        )
+        return try await client.post(ApiPaths.backendPath("/certificates/\(serializePathParameter(certificateId, PathParameterSpec(name: "certificateId", style: "simple", explode: false)))/revoke"), body: body, params: nil, headers: requestHeaders, contentType: "application/json", responseType: CertificatesRevokeResponse.self)
+    }
+
     private struct PathParameterSpec {
         let name: String
         let style: String

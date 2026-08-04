@@ -174,6 +174,41 @@ pub fn reload_nginx(config: &EdgeRuntimeConfig) -> EdgeRuntimeResult<()> {
     )
 }
 
+/// Proves that the running Nginx master has actually loaded a configuration
+/// containing `expected_fragment` (PRD-FR-020 served-revision evidence).
+///
+/// `nginx -T` dumps the *loaded* configuration with includes expanded. A
+/// reload that fails validation keeps the previous revision serving, so the
+/// fragment check fails instead of reporting a false success.
+pub fn verify_served_config(
+    config: &EdgeRuntimeConfig,
+    expected_fragment: &str,
+) -> EdgeRuntimeResult<()> {
+    require_nginx_enabled(config)?;
+    let fragment = expected_fragment.trim();
+    if fragment.is_empty() {
+        return Err(EdgeRuntimeError::Config(
+            "served-config verification fragment is empty".to_string(),
+        ));
+    }
+    let main = nginx_path(&config.nginx_main_config)?;
+    let dumped = run_nginx_command_captured(
+        config,
+        "dump",
+        [
+            OsString::from("-T"),
+            OsString::from("-c"),
+            OsString::from(main),
+        ],
+    )?;
+    if dumped.contains(fragment) {
+        return Ok(());
+    }
+    Err(EdgeRuntimeError::Nginx(format!(
+        "served nginx configuration does not contain the expected revision fragment `{fragment}`"
+    )))
+}
+
 pub fn validate_active_nginx_config(config: &EdgeRuntimeConfig) -> EdgeRuntimeResult<()> {
     require_nginx_enabled(config)?;
     run_nginx_command(
@@ -197,16 +232,53 @@ where
     I: IntoIterator<Item = S>,
     S: AsRef<OsStr>,
 {
+    run_nginx_command_inner(config, operation, arguments, CaptureMode::Discard)?;
+    Ok(())
+}
+
+/// Runs an Nginx command and returns its captured stdout (used by
+/// [`verify_served_config`] to prove the loaded revision).
+fn run_nginx_command_captured<I, S>(
+    config: &EdgeRuntimeConfig,
+    operation: &'static str,
+    arguments: I,
+) -> EdgeRuntimeResult<String>
+where
+    I: IntoIterator<Item = S>,
+    S: AsRef<OsStr>,
+{
+    run_nginx_command_inner(config, operation, arguments, CaptureMode::Capture)
+}
+
+enum CaptureMode {
+    Discard,
+    Capture,
+}
+
+fn run_nginx_command_inner<I, S>(
+    config: &EdgeRuntimeConfig,
+    operation: &'static str,
+    arguments: I,
+    capture: CaptureMode,
+) -> EdgeRuntimeResult<String>
+where
+    I: IntoIterator<Item = S>,
+    S: AsRef<OsStr>,
+{
     let mut diagnostic = tempfile::tempfile().map_err(|error| {
         EdgeRuntimeError::Filesystem(format!("create nginx diagnostic file: {error}"))
     })?;
     let diagnostic_writer = diagnostic.try_clone().map_err(|error| {
         EdgeRuntimeError::Filesystem(format!("clone nginx diagnostic file: {error}"))
     })?;
+    let stdout = match capture {
+        CaptureMode::Discard => Stdio::null(),
+        CaptureMode::Capture => Stdio::piped(),
+    };
     let mut child = Command::new(&config.nginx_binary)
         .args(arguments)
         .stdin(Stdio::null())
-        .stdout(Stdio::null())
+        .stdout(stdout)
         .stderr(Stdio::from(diagnostic_writer))
         .spawn()
         .map_err(|error| {
@@ -239,8 +311,22 @@ where
             }
         }
     };
+
+    let captured = if let CaptureMode::Capture = capture {
+        let mut output = String::new();
+        if let Some(mut stdout) = child.stdout.take() {
+            use std::io::Read as _;
+            stdout.read_to_string(&mut output).map_err(|error| {
+                EdgeRuntimeError::Nginx(format!("read nginx {operation} stdout: {error}"))
+            })?;
+        }
+        output
+    } else {
+        String::new()
+    };
+
     if status.success() {
-        return Ok(());
+        return Ok(captured);
     }
 
     let diagnostic = read_bounded_diagnostic(&mut diagnostic);

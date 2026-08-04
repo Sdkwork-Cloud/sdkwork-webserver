@@ -6,7 +6,7 @@
     "displayName": "SDKWork Webserver PC diagnostics",
     "version": "0.1.0",
     "type": "node-package",
-    "root": "sdkwork-web-server/apps/sdkwork-webserver-pc/packages/sdkwork-webserver-pc-admin-diagnostics",
+    "root": "sdkwork-webserver/apps/sdkwork-webserver-pc/packages/sdkwork-webserver-pc-admin-diagnostics",
     "domain": "infrastructure",
     "capability": "diagnostics",
     "surface": "backend-admin",

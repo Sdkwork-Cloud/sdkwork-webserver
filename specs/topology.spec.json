@@ -1,7 +1,7 @@
 {
   "schemaVersion": 5,
   "kind": "sdkwork.app.topology",
-  "appId": "sdkwork-web-server",
+  "appId": "sdkwork-webserver",
   "applicationCode": "webserver",
   "archetype": "application-http-gateway",
   "profileRoot": "etc/topology",

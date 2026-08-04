@@ -1341,6 +1341,26 @@ class CertificateResponse {
   }
 }
 
+class RevokeCertificateRequest {
+  final String? reason;
+
+  RevokeCertificateRequest({
+    this.reason
+  });
+
+  factory RevokeCertificateRequest.fromJson(Map<String, dynamic> json) {
+    return RevokeCertificateRequest(
+      reason: json['reason']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'reason': reason,
+    };
+  }
+}
+
 class CertificateOperationResponse {
   final String? id;
   final String? certificateId;
@@ -3542,6 +3562,34 @@ class CertificatesRenewResponse202 {
 
   factory CertificatesRenewResponse202.fromJson(Map<String, dynamic> json) {
     return CertificatesRenewResponse202(
+      code: json['code'] is int ? json['code'] : null,
+      data: json['data'],
+      traceId: json['traceId']?.toString()
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'code': code,
+      'data': data,
+      'traceId': traceId,
+    };
+  }
+}
+
+class CertificatesRevokeResponse {
+  final int? code;
+  final dynamic data;
+  final String? traceId;
+
+  CertificatesRevokeResponse({
+    this.code,
+    this.data,
+    this.traceId
+  });
+
+  factory CertificatesRevokeResponse.fromJson(Map<String, dynamic> json) {
+    return CertificatesRevokeResponse(
       code: json['code'] is int ? json['code'] : null,
       data: json['data'],
       traceId: json['traceId']?.toString()

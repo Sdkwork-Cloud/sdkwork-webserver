@@ -76,7 +76,7 @@
     },
     {
       "path": "Sources/API/CertificateApi.swift",
-      "sha256": "7a2eb1d968b6a3b0ef48a623215d01ae8bd57184a98d473f7effa56478136f01"
+      "sha256": "e4f554191f7682605e115949aa300862359b4e66445664eddc41edaee61a17bb"
     },
     {
       "path": "Sources/API/CertificateDistributionApi.swift",
@@ -100,7 +100,7 @@
     },
     {
       "path": "Sources/Models.swift",
-      "sha256": "9affc60be07d9258f20b25e0817416bbb49f8bfe27501a6d173c88683aff7a69"
+      "sha256": "2875f6bebcb360f20f1f392bc2ed4a1a81bbc6742d1f099653dc8c253bc55ff0"
     },
     {
       "path": "Sources/SdkworkBackendClient.swift",

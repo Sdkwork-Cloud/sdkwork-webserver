@@ -286,6 +286,21 @@ impl SemanticValidator {
                     ),
                 }
             }
+            if let Some(acme) = &listener.acme_http_01 {
+                let webroot_path = format!("{path}/acmeHttp01/webroot");
+                if acme.webroot.is_empty() || acme.webroot.len() > 4_096 {
+                    self.push(&webroot_path, "webroot must contain 1..4096 bytes");
+                } else if acme
+                    .webroot
+                    .bytes()
+                    .any(|byte| byte == 0 || byte.is_ascii_control())
+                {
+                    self.push(
+                        &webroot_path,
+                        "webroot must not contain NUL or control bytes",
+                    );
+                }
+            }
         }
 
         for (index, certificate) in config.certificates.iter().enumerate() {
@@ -460,6 +475,67 @@ impl SemanticValidator {
                             format!("{path}/body"),
                             "HTTP 204, 205, and 304 fixed responses cannot contain a body",
                         );
+                    }
+                }
+                ResourceConfig::Drive {
+                    provider_resource_uuid,
+                    resource_subpath,
+                    index_files,
+                    spa_fallback,
+                    ..
+                } => {
+                    validate_provider_resource_uuid(
+                        self,
+                        &format!("{path}/providerResourceUuid"),
+                        provider_resource_uuid,
+                    );
+                    if let Some(subpath) = resource_subpath {
+                        validate_provider_subpath(
+                            self,
+                            &format!("{path}/resourceSubpath"),
+                            subpath,
+                        );
+                    }
+                    for (file_index, file) in index_files.iter().enumerate() {
+                        validate_relative_path(
+                            self,
+                            &format!("{path}/indexFiles/{file_index}"),
+                            file,
+                            false,
+                        );
+                    }
+                    if index_files.as_slice() != ["index.html"] {
+                        self.push(
+                            format!("{path}/indexFiles"),
+                            "REQ-2026-0003 currently supports indexFiles=[\"index.html\"] only",
+                        );
+                    }
+                    if let Some(file) = spa_fallback {
+                        validate_relative_path(self, &format!("{path}/spaFallback"), file, false);
+                    }
+                }
+                ResourceConfig::Knowledgebase {
+                    provider_resource_uuid,
+                    locale,
+                    ..
+                } => {
+                    validate_provider_resource_uuid(
+                        self,
+                        &format!("{path}/providerResourceUuid"),
+                        provider_resource_uuid,
+                    );
+                    if let Some(locale) = locale {
+                        if locale.is_empty()
+                            || locale.len() > 35
+                            || !locale.chars().all(|character| {
+                                character.is_ascii_alphanumeric() || character == '-'
+                            })
+                        {
+                            self.push(
+                                format!("{path}/locale"),
+                                "locale must be 1..=35 ASCII letters, digits, or '-'",
+                            );
+                        }
                     }
                 }
             }
@@ -1472,6 +1548,38 @@ fn validate_redirect_location(validator: &mut SemanticValidator, path: &str, loc
             path,
             "redirect location must be a safe absolute path or http/https URL without credentials",
         ),
+    }
+}
+
+fn validate_provider_resource_uuid(validator: &mut SemanticValidator, path: &str, value: &str) {
+    if value.is_empty()
+        || value.len() > 128
+        || value
+            .chars()
+            .any(|character| character.is_whitespace() || character.is_control())
+    {
+        validator.push(
+            path,
+            "providerResourceUuid must be 1..=128 characters without whitespace or control characters",
+        );
+    }
+}
+
+fn validate_provider_subpath(validator: &mut SemanticValidator, path: &str, value: &str) {
+    let candidate = Path::new(value);
+    let has_unsafe_component = candidate
+        .components()
+        .any(|component| matches!(component, Component::ParentDir | Component::Prefix(_)));
+    if !value.starts_with('/')
+        || value.starts_with("//")
+        || value.contains('\\')
+        || value.contains('\0')
+        || has_unsafe_component
+    {
+        validator.push(
+            path,
+            "resourceSubpath must be a safe absolute provider path without parent, double-slash, backslash, or NUL",
+        );
     }
 }
 

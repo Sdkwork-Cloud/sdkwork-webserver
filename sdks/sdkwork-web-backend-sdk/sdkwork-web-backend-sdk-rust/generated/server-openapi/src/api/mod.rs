@@ -1,6 +1,6 @@
+pub mod application;
 pub mod base;
 pub mod paths;
-pub mod application;
 pub use application::ApplicationApi;
 pub mod application_domain;
 pub use application_domain::ApplicationDomainApi;

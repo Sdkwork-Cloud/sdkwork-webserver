@@ -29,7 +29,7 @@ use sdkwork_webserver_core::{
     CompiledWebServerApp, ListenerConfig, ListenerProtocol, ListenerTlsRuntime,
     ProxyProtocolConfig, WebServerLimits,
 };
-use sdkwork_webserver_delivery_runtime::WebsiteDeliveryExecutor;
+use sdkwork_webserver_delivery_runtime::{AppConfigResourceExecutor, WebsiteDeliveryExecutor};
 use tokio::{
     io::{AsyncRead, AsyncWrite},
     net::{TcpListener, TcpStream},
@@ -89,7 +89,7 @@ where
         None => DataPlaneRuntime::build(app)?,
     };
     let result =
-        run_data_plane_runtime_until(runtime.clone(), operations, None, None, shutdown).await;
+        run_data_plane_runtime_until(runtime.clone(), operations, None, None, None, shutdown).await;
     let health_result = runtime.stop_active_health().await;
     let resource_result = runtime.stop_resource_pressure().await;
     result.and(health_result).and(resource_result)
@@ -126,6 +126,7 @@ where
         operations,
         Some(website_delivery),
         None,
+        None,
         shutdown,
     )
     .await;
@@ -154,6 +155,7 @@ where
         runtime.clone(),
         operations,
         Some(website_delivery),
+        None,
         Some(tls_runtime),
         shutdown,
     )
@@ -167,6 +169,7 @@ pub(crate) async fn run_data_plane_runtime_until<F>(
     runtime: Arc<DataPlaneRuntime>,
     operations: Option<DataPlaneOperationsConfig>,
     website_delivery: Option<Arc<WebsiteDeliveryExecutor>>,
+    provider_resources: Option<Arc<AppConfigResourceExecutor>>,
     tls_runtime: Option<Arc<FileTlsRuntimeController>>,
     shutdown: F,
 ) -> Result<(), DataPlaneError>
@@ -225,6 +228,7 @@ where
         shutdown_senders.push(shutdown_tx);
         let runtime = runtime.clone();
         let website_delivery = website_delivery.clone();
+        let provider_resources = provider_resources.clone();
         let listener_id = listener.config.id.clone();
         tracing::info!(
             listener_id = %listener_id,
@@ -236,6 +240,7 @@ where
             let result = serve_listener(
                 runtime,
                 website_delivery,
+                provider_resources,
                 listener,
                 shutdown_rx,
                 drain_timeout,
@@ -249,11 +254,13 @@ where
         shutdown_senders.push(shutdown_tx);
         let runtime = runtime.clone();
         let website_delivery = website_delivery.clone();
+        let provider_resources = provider_resources.clone();
         tasks.spawn(async move {
             let result = serve_operations_listener(
                 prepared_operations,
                 runtime,
                 website_delivery,
+                provider_resources,
                 shutdown_rx,
             )
             .await;
@@ -400,6 +407,7 @@ async fn prepare_listener(
 async fn serve_listener(
     runtime: Arc<DataPlaneRuntime>,
     website_delivery: Option<Arc<WebsiteDeliveryExecutor>>,
+    provider_resources: Option<Arc<AppConfigResourceExecutor>>,
     listener: PreparedListener,
     shutdown: watch::Receiver<bool>,
     drain_timeout: Duration,
@@ -415,6 +423,7 @@ async fn serve_listener(
     let state = ListenerState {
         runtime: runtime.clone(),
         website_delivery,
+        provider_resources,
         listener_id: listener_id.clone(),
         is_tls: listener.tls.is_some(),
     };

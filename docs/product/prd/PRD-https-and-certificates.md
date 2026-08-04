@@ -9,7 +9,7 @@ Specs: NGINX_SPEC.md, SECURITY_SPEC.md, CONFIG_SPEC.md, ENVIRONMENT_SPEC.md, DEP
 
 ## 1. Purpose
 
-Define production HTTPS behavior for the SDKWork Rust data plane, including TLS policy, SNI, certificate acquisition, private-key protection, renewal, atomic rotation, node-scoped distribution, failure handling, observability, and interoperability with the supported Nginx profile.
+Define production HTTPS behavior for the SDKWork Rust data plane, including TLS policy, SNI, certificate acquisition, private-key protection, renewal, atomic rotation, node-scoped distribution, failure handling, observability, and interoperability with the supported TLS client matrix (the Rust data plane itself is the reference implementation).
 
 HTTPS is a release-critical runtime capability. A database certificate record, uploaded file, successful ACME request, or generated configuration does not by itself mean that HTTPS is active. Success requires cryptographic validation, authorized distribution, atomic runtime activation, and a served handshake that proves the intended certificate revision.
 
@@ -247,7 +247,7 @@ Release verification includes:
 
 | Area | Required evidence |
 | --- | --- |
-| Interoperability | Current supported browsers, SDKs, `openssl`, Nginx reference, HTTP/1.1, HTTP/2, RSA/ECDSA, SNI, wildcard/SAN, and ALPN matrices. |
+| Interoperability | Current supported browsers, SDKs, `openssl`, Rust data plane reference, HTTP/1.1, HTTP/2, RSA/ECDSA, SNI, wildcard/SAN, and ALPN matrices. |
 | Negative security | Weak protocol/cipher, bad chain, hostname mismatch, expired/not-yet-valid cert, wrong key, unknown SNI, malformed ClientHello, invalid OCSP, traversal, secret redaction, replay, and unauthorized node tests. |
 | Lifecycle | Import, issuance, HTTP-01, DNS-01, propagation delay, renewal, key rotation, revocation, challenge cleanup, clock skew, rate limit, and issuer outage tests. |
 | Runtime | Atomic reload, concurrent reload fencing, existing-connection survival, served fingerprint probe, rollback, node restart, offline reconciliation, and rolling upgrade tests. |
@@ -259,8 +259,8 @@ Release verification includes:
 - Every production public host serves HTTPS with TLS 1.2/1.3, a valid hostname-covering chain, and the intended active fingerprint.
 - HTTP is limited to approved redirect, challenge, development, or private health behavior.
 - SNI, RSA/ECDSA selection, ALPN, redirect, HSTS, mTLS where configured, and upstream verification pass interoperability and negative tests.
-- ACME HTTP-01 and DNS-01 complete real external validation, clean up challenges, respect retries/rate limits, and renew before the safety threshold.
-- Private keys never appear in authored configuration, API output, logs, metrics, traces, database plaintext, generated Nginx source, or support bundles.
+- ACME HTTP-01 completes real external validation through the data plane's narrow-precedence challenge endpoint, cleans up challenges, respects retries/rate limits, and renews before the safety threshold (CA ARI window preferred).
+- Private keys never appear in authored configuration, API output, logs, metrics, traces, database plaintext, generated Web Server configuration, or support bundles.
 - Rotation is atomic, existing healthy connections remain available, all ready nodes converge, and a failed candidate restores the last verified context.
 - Certificate operations, queues, caches, TLS contexts, worker concurrency, and node synchronization remain bounded under load and soak tests without OOM.
 - PostgreSQL lifecycle and recovery suites pass and no database-only state transition is presented as proof of an external effect.

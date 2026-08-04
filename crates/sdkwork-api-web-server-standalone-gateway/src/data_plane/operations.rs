@@ -7,7 +7,7 @@ use hyper_util::{
     service::TowerToHyperService,
 };
 use sdkwork_web_bootstrap::{service_router, ServiceRouterConfig};
-use sdkwork_webserver_delivery_runtime::WebsiteDeliveryExecutor;
+use sdkwork_webserver_delivery_runtime::{AppConfigResourceExecutor, WebsiteDeliveryExecutor};
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
     net::TcpListener,
@@ -150,6 +150,7 @@ pub(crate) async fn serve_operations_listener(
     prepared: PreparedOperationsListener,
     runtime: Arc<DataPlaneRuntime>,
     website_delivery: Option<Arc<WebsiteDeliveryExecutor>>,
+    provider_resources: Option<Arc<AppConfigResourceExecutor>>,
     shutdown: watch::Receiver<bool>,
 ) -> Result<(), DataPlaneError> {
     let metrics_runtime = runtime.clone();
@@ -158,10 +159,14 @@ pub(crate) async fn serve_operations_listener(
         get(move || {
             let runtime = metrics_runtime.clone();
             let website_delivery = website_delivery.clone();
+            let provider_resources = provider_resources.clone();
             async move {
                 let provider_resolution_cache = match website_delivery.as_ref() {
                     Some(executor) => Some(executor.provider_resolution_cache_snapshot().await),
-                    None => None,
+                    None => match provider_resources.as_ref() {
+                        Some(executor) => Some(executor.provider_resolution_cache_snapshot().await),
+                        None => None,
+                    },
                 };
                 (
                     StatusCode::OK,

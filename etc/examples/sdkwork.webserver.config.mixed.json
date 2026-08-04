@@ -1,0 +1,197 @@
+{
+  "schemaVersion": 1,
+  "kind": "sdkwork.webserver.app",
+  "appKey": "sdkwork-example-mixed-web",
+  "compatibility": {
+    "nginxProfile": "http-core-v1",
+    "unknownDirectivePolicy": "error"
+  },
+  "limits": {
+    "providerTimeoutMs": 30000,
+    "maxRequestBodyBytes": 10485760,
+    "requestTimeoutMs": 30000,
+    "requestBodyStartTimeoutMs": 30000,
+    "requestBodyIdleTimeoutMs": 30000,
+    "responseBodyIdleTimeoutMs": 30000,
+    "connectionWriteTimeoutMs": 30000,
+    "http1KeepAliveIdleTimeoutMs": 75000,
+    "http1MaxPipelineDepth": 16,
+    "drainTimeoutMs": 30000,
+    "maxConnections": 10000,
+    "maxConcurrentRequests": 4096,
+    "maxConcurrentHealthChecks": 64,
+    "maxRequestHeaderBytes": 65536,
+    "maxRequestLineBytes": 8192,
+    "maxRequestMethodBytes": 32,
+    "maxRequestTargetBytes": 8192,
+    "maxUriPathBytes": 8192,
+    "maxDecodedPathBytes": 8192,
+    "maxPathSegments": 256,
+    "maxQueryStringBytes": 4096,
+    "maxQueryParameters": 256,
+    "maxQueryComponentBytes": 1024,
+    "maxHeaderNameBytes": 256,
+    "maxHeaderValueBytes": 8192,
+    "maxRequestHeaders": 100,
+    "requestHeaderTimeoutMs": 10000,
+    "maxChunkLineBytes": 1024,
+    "maxTrailerBytes": 8192,
+    "maxTrailers": 32,
+    "http2MaxConcurrentStreams": 100,
+    "maxConnectionAgeMs": 3600000,
+    "http2KeepAliveIntervalMs": 60000,
+    "http2KeepAliveTimeoutMs": 20000,
+    "http2MaxPendingAcceptResetStreams": 20,
+    "http2MaxLocalErrorResetStreams": 128,
+    "http2MaxSendBufferBytes": 65536,
+    "http2MaxHeaderListBytes": 65536,
+    "http2MaxFrameBytes": 16384,
+    "http2AbuseWindowMs": 1000,
+    "http2MaxFramesPerWindow": 10000,
+    "http2MaxNewStreamsPerWindow": 1000,
+    "http2MaxResetFramesPerWindow": 100,
+    "http2MaxContinuationFrames": 16,
+    "http2MaxEncodedHeaderBlockBytes": 65536
+  },
+  "listeners": [
+    {
+      "id": "public-http",
+      "bind": "127.0.0.1",
+      "port": 18080,
+      "protocols": ["http1"],
+      "defaultVirtualHostRef": "mixed-web"
+    }
+  ],
+  "certificates": [],
+  "tlsPolicies": [],
+  "resolvers": [],
+  "resources": [
+    {
+      "id": "local-static",
+      "type": "static",
+      "root": "public",
+      "indexFiles": ["index.html"],
+      "spaFallback": "index.html",
+      "followSymlinks": false
+    },
+    {
+      "id": "origin-proxy",
+      "type": "proxy",
+      "upstreamRef": "example-origin",
+      "stripPrefix": true
+    },
+    {
+      "id": "docs-drive",
+      "type": "drive",
+      "providerResourceUuid": "11111111-1111-4111-8111-111111111701",
+      "resourceSubpath": "/site/docs",
+      "indexFiles": ["index.html"],
+      "spaFallback": "index.html",
+      "cache": {
+        "metadataTtlSeconds": 30,
+        "negativeTtlSeconds": 5,
+        "staleWhileRevalidateSeconds": 0
+      }
+    },
+    {
+      "id": "wiki-knowledgebase",
+      "type": "knowledgebase",
+      "providerResourceUuid": "11111111-1111-4111-8111-111111111501",
+      "locale": "zh-CN",
+      "cache": {
+        "metadataTtlSeconds": 30,
+        "negativeTtlSeconds": 5,
+        "staleWhileRevalidateSeconds": 0
+      }
+    }
+  ],
+  "upstreams": [
+    {
+      "id": "example-origin",
+      "loadBalancing": "least-connections",
+      "targets": [
+        {"url": "https://example.com", "weight": 1, "maxConnections": 32}
+      ],
+      "connectTimeoutMs": 5000,
+      "requestTimeoutMs": 30000,
+      "maxConnections": 64,
+      "maxIdleConnections": 16,
+      "maxResponseHeaderBytes": 65536,
+      "maxResponseHeaders": 100,
+      "idleConnectionTimeoutMs": 60000,
+      "maxInFlightRequests": 256
+    }
+  ],
+  "virtualHosts": [
+    {
+      "id": "mixed-web",
+      "listenerRefs": ["public-http"],
+      "serverNames": ["localhost"],
+      "routes": [
+        {
+          "id": "local-site",
+          "match": {
+            "pathType": "prefix",
+            "path": "/"
+          },
+          "resourceRef": "local-static"
+        },
+        {
+          "id": "api-gateway",
+          "match": {
+            "pathType": "prefix",
+            "path": "/api"
+          },
+          "resourceRef": "origin-proxy"
+        },
+        {
+          "id": "drive-docs",
+          "match": {
+            "pathType": "prefix",
+            "path": "/docs"
+          },
+          "resourceRef": "docs-drive"
+        },
+        {
+          "id": "wiki-docs",
+          "match": {
+            "pathType": "prefix",
+            "path": "/wiki"
+          },
+          "resourceRef": "wiki-knowledgebase"
+        }
+      ]
+    }
+  ],
+  "observability": {
+    "accessLog": true
+  },
+  "deployment": {
+    "drainTimeoutMs": 30000,
+    "reload": {
+      "mode": "disabled",
+      "pollIntervalMs": 1000
+    },
+    "resourcePressure": {
+      "sampleIntervalMs": 250,
+      "maximumProcessMemoryBytes": 1073741824,
+      "memoryReserveBytes": 67108864,
+      "memoryAdmissionPercent": 90,
+      "memoryRecoveryPercent": 80,
+      "maximumOpenHandles": 16384,
+      "openHandleReserve": 128,
+      "openHandleAdmissionPercent": 90,
+      "openHandleRecoveryPercent": 80,
+      "eventLoopLagAdmissionMs": 250,
+      "eventLoopLagRecoveryMs": 50,
+      "consecutivePressureSamples": 2,
+      "consecutiveRecoverySamples": 4,
+      "operationsReserveRequests": 16,
+      "sampleFailurePolicy": "fail-closed"
+    }
+  },
+  "metadata": {
+    "owner": "sdkwork",
+    "purpose": "mixed-deployment-example"
+  }
+}

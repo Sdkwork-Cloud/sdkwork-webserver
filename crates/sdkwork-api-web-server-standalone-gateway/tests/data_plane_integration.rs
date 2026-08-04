@@ -4856,7 +4856,7 @@ async fn request_body_progress_timeouts_close_http1_and_allow_fresh_connections(
         .write_all(b"POST / HTTP/1.1\r\nHost: test.localhost\r\nContent-Length: 4\r\nConnection: close\r\n\r\na")
         .await
         .expect("write progressing request headers and first byte");
-    for byte in [b'b', b'c', b'd'] {
+    for byte in *b"bcd" {
         tokio::time::sleep(Duration::from_millis(100)).await;
         progressing
             .write_all(&[byte])
@@ -5940,4 +5940,103 @@ async fn concurrent_requests_observe_only_complete_reload_generations() {
         reader.await.expect("reload reader joins");
     }
     stop_data_plane(shutdown, task).await;
+}
+
+#[tokio::test]
+async fn acme_http01_challenge_is_served_with_narrow_precedence() {
+    let directory = TempDir::new().expect("create temp directory");
+    let challenge_dir = directory
+        .path()
+        .join("acme-webroot")
+        .join(".well-known")
+        .join("acme-challenge");
+    fs::create_dir_all(&challenge_dir).expect("create challenge directory");
+    fs::write(challenge_dir.join("valid-token"), "valid-token.thumbprint")
+        .expect("write challenge token");
+
+    let port = available_port();
+    let mut config = base_config(
+        port,
+        json!([{
+            "id": "catch-all",
+            "type": "respond",
+            "status": 200,
+            "body": "ordinary"
+        }]),
+        json!([]),
+        json!([{
+            "id": "catch-all-route",
+            "match": {"pathType": "prefix", "path": "/"},
+            "resourceRef": "catch-all"
+        }]),
+    );
+    config["listeners"][0]["acmeHttp01"] = json!({"webroot": "acme-webroot"});
+    let path = write_config(directory.path(), &config);
+    let (shutdown_tx, task) = spawn_data_plane(&path);
+    let client = reqwest::Client::new();
+    let base = format!("http://127.0.0.1:{port}");
+    wait_for_http(&client, &base, "test.localhost").await;
+
+    let response = client
+        .get(format!("{base}/.well-known/acme-challenge/valid-token"))
+        .header("host", "test.localhost")
+        .send()
+        .await
+        .expect("challenge request");
+    assert_eq!(response.status(), reqwest::StatusCode::OK);
+    assert_eq!(
+        response
+            .headers()
+            .get(reqwest::header::CONTENT_TYPE)
+            .and_then(|value| value.to_str().ok()),
+        Some("text/plain; charset=utf-8")
+    );
+    assert_eq!(
+        response.text().await.expect("challenge body"),
+        "valid-token.thumbprint"
+    );
+
+    let head = client
+        .head(format!("{base}/.well-known/acme-challenge/valid-token"))
+        .header("host", "test.localhost")
+        .send()
+        .await
+        .expect("challenge HEAD");
+    assert_eq!(head.status(), reqwest::StatusCode::OK);
+    assert_eq!(head.text().await.expect("HEAD body").len(), 0);
+
+    let missing = client
+        .get(format!("{base}/.well-known/acme-challenge/unknown-token"))
+        .header("host", "test.localhost")
+        .send()
+        .await
+        .expect("missing challenge request");
+    assert_eq!(missing.status(), reqwest::StatusCode::NOT_FOUND);
+
+    let invalid = client
+        .get(format!("{base}/.well-known/acme-challenge/dot.token"))
+        .header("host", "test.localhost")
+        .send()
+        .await
+        .expect("invalid token request");
+    assert_eq!(invalid.status(), reqwest::StatusCode::NOT_FOUND);
+
+    let post = client
+        .post(format!("{base}/.well-known/acme-challenge/valid-token"))
+        .header("host", "test.localhost")
+        .send()
+        .await
+        .expect("challenge POST");
+    assert_eq!(post.status(), reqwest::StatusCode::METHOD_NOT_ALLOWED);
+
+    let ordinary = client
+        .get(format!("{base}/index.html"))
+        .header("host", "test.localhost")
+        .send()
+        .await
+        .expect("ordinary request");
+    assert_eq!(ordinary.status(), reqwest::StatusCode::OK);
+    assert_eq!(ordinary.text().await.expect("ordinary body"), "ordinary");
+
+    stop_data_plane(shutdown_tx, task).await;
 }

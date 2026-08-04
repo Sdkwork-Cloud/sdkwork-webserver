@@ -7,6 +7,7 @@ edition.workspace = true
 async-trait.workspace = true
 chrono.workspace = true
 hickory-resolver.workspace = true
+sdkwork-database-id.workspace = true
 serde_json.workspace = true
 sdkwork-webserver-acme-service.workspace = true
 sdkwork-webserver-contract.workspace = true

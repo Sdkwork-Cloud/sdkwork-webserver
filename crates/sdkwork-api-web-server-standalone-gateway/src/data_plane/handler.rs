@@ -12,7 +12,16 @@ use axum::{
     },
 };
 use futures_util::StreamExt;
-use sdkwork_webserver_core::{normalize_authority_host, ResourceConfig, RoutePathType};
+use sdkwork_webserver_core::{
+    normalize_authority_host,
+    website_runtime::{ProviderResourceReference, WebsiteProviderType},
+    ResourceConfig, RoutePathType,
+};
+use sdkwork_webserver_delivery_runtime::{
+    AppConfigProviderPolicy, AppConfigResourceHandler, AppConfigResourceRoute,
+};
+use sdkwork_webserver_drive_provider::DRIVE_WEBSITE_ROOT_PROVIDER_CONTRACT_VERSION;
+use sdkwork_webserver_knowledgebase_provider::KNOWLEDGEBASE_WIKI_PROVIDER_CONTRACT_VERSION;
 
 use super::{
     forwarded_scheme::resolve_request_scheme,
@@ -25,6 +34,7 @@ use super::{
     request_body_timeout::RequestBodyTimeout,
     request_gate::RequestAdmissionRejection,
     request_uri::{validate_request_uri, RequestUriError},
+    runtime::RuntimeGeneration,
     static_files::serve_static,
     website_delivery::serve_website_request,
     ListenerState,
@@ -147,6 +157,16 @@ async fn route_admitted_request(
     };
     let method = request.method().as_str().to_owned();
     let path = normalized_path;
+    if super::acme_challenge::acme_http01_request_enabled(listener, &path) {
+        if let Some(response) = classify_request(&state, admitted, false, request.version()) {
+            return response;
+        }
+        if let Some(response) =
+            super::acme_challenge::serve_acme_http01_challenge(&state, &path, &method).await
+        {
+            return response;
+        }
+    }
     if let Some(executor) = state.website_delivery.clone() {
         if let Some(response) = classify_request(&state, admitted, false, request.version()) {
             return response;
@@ -312,6 +332,86 @@ async fn route_admitted_request(
             )
             .await
         }
+        ResourceConfig::Drive {
+            id,
+            resource_subpath,
+            index_files,
+            spa_fallback,
+            cache,
+            ..
+        } => {
+            let provider_path = super::provider_resource::translate_provider_path(
+                selected.route,
+                &path,
+                resource_subpath.as_deref(),
+            );
+            let route = AppConfigResourceRoute {
+                virtual_host_id: virtual_host_id.clone(),
+                route_id: route_id.clone(),
+                resource_id: id.clone(),
+                provider: ProviderResourceReference {
+                    provider_type: WebsiteProviderType::Drive,
+                    provider_resource_uuid: selected
+                        .resource
+                        .provider_resource_uuid()
+                        .expect("drive resource uuid")
+                        .to_owned(),
+                    provider_contract_version: DRIVE_WEBSITE_ROOT_PROVIDER_CONTRACT_VERSION
+                        .to_owned(),
+                },
+                handler: AppConfigResourceHandler::Static,
+                provider_relative_path: provider_path,
+                index_files: index_files.clone(),
+                spa_fallback: spa_fallback.clone(),
+                directory_request: path.ends_with('/'),
+                locale: None,
+                cache: cache.unwrap_or_default(),
+            };
+            serve_provider_backed_resource(
+                &state,
+                &generation,
+                &method,
+                request,
+                request_failure,
+                route,
+            )
+            .await
+        }
+        ResourceConfig::Knowledgebase {
+            id, locale, cache, ..
+        } => {
+            let route = AppConfigResourceRoute {
+                virtual_host_id: virtual_host_id.clone(),
+                route_id: route_id.clone(),
+                resource_id: id.clone(),
+                provider: ProviderResourceReference {
+                    provider_type: WebsiteProviderType::Knowledgebase,
+                    provider_resource_uuid: selected
+                        .resource
+                        .provider_resource_uuid()
+                        .expect("knowledgebase resource uuid")
+                        .to_owned(),
+                    provider_contract_version: KNOWLEDGEBASE_WIKI_PROVIDER_CONTRACT_VERSION
+                        .to_owned(),
+                },
+                handler: AppConfigResourceHandler::Wiki,
+                provider_relative_path: path.clone(),
+                index_files: Vec::new(),
+                spa_fallback: None,
+                directory_request: false,
+                locale: locale.clone(),
+                cache: cache.unwrap_or_default(),
+            };
+            serve_provider_backed_resource(
+                &state,
+                &generation,
+                &method,
+                request,
+                request_failure,
+                route,
+            )
+            .await
+        }
     };
 
     if generation.app.config().observability.access_log {
@@ -462,6 +562,47 @@ async fn drain_bounded_request_body(
         }
     }
     Ok(Request::from_parts(parts, Body::empty()))
+}
+
+/// Drains the request body and serves one provider-backed resource through
+/// the application-config provider executor. The provider executor is
+/// assembled at bootstrap when the configuration references provider
+/// resources, so its absence here is a server-internal invariant violation.
+async fn serve_provider_backed_resource(
+    state: &ListenerState,
+    generation: &RuntimeGeneration,
+    method: &str,
+    request: Request<Body>,
+    request_failure: RequestBodyFailure,
+    route: AppConfigResourceRoute,
+) -> Response<Body> {
+    let Some(executor) = state.provider_resources.clone() else {
+        return text_response(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "provider resource is unavailable\n",
+        );
+    };
+    let limits = &generation.app.config().limits;
+    let policy = AppConfigProviderPolicy {
+        provider_timeout_ms: limits.provider_timeout_ms,
+        maximum_object_bytes: limits.max_response_body_bytes,
+    };
+    match drain_bounded_request_body(request, limits.max_request_body_bytes, &request_failure).await
+    {
+        Ok(request) => {
+            let query = request.uri().query().map(str::to_owned);
+            super::provider_resource::serve_provider_resource(
+                executor,
+                method,
+                query,
+                request.headers().clone(),
+                route,
+                policy,
+            )
+            .await
+        }
+        Err(response) => response,
+    }
 }
 
 fn content_length_exceeds(headers: &HeaderMap, maximum: u64) -> bool {

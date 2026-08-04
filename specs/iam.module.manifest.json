@@ -4,7 +4,7 @@
   "moduleId": "web",
   "catalogVersion": "1.0.0",
   "domain": "web",
-  "owner": "sdkwork-web-server",
+  "owner": "sdkwork-webserver",
   "displayName": "SDKWork Web Server",
   "permissions": {
     "catalog": [

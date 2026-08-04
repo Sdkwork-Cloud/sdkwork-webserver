@@ -10,29 +10,79 @@
     "domain": "platform",
     "capability": "webserver-certificate-renewal",
     "surface": "backend-service",
-    "languages": ["rust"],
+    "languages": [
+      "rust"
+    ],
     "generated": false,
     "status": "active",
-    "manifests": ["Cargo.toml", "specs/component.spec.json"]
+    "manifests": [
+      "Cargo.toml",
+      "specs/component.spec.json"
+    ]
   },
   "canonicalSpecs": [
-    {"file": "CODE_STYLE_SPEC.md", "path": "../../../sdkwork-specs/CODE_STYLE_SPEC.md", "purpose": "Authored worker boundaries."},
-    {"file": "NAMING_SPEC.md", "path": "../../../sdkwork-specs/NAMING_SPEC.md", "purpose": "Worker naming."},
-    {"file": "RUST_CODE_SPEC.md", "path": "../../../sdkwork-specs/RUST_CODE_SPEC.md", "purpose": "Rust binary structure."},
-    {"file": "CONFIG_SPEC.md", "path": "../../../sdkwork-specs/CONFIG_SPEC.md", "purpose": "Typed worker configuration."},
-    {"file": "DEPLOYMENT_SPEC.md", "path": "../../../sdkwork-specs/DEPLOYMENT_SPEC.md", "purpose": "Worker lifecycle and deployment."},
-    {"file": "SECURITY_SPEC.md", "path": "../../../sdkwork-specs/SECURITY_SPEC.md", "purpose": "Certificate and secret safety."},
-    {"file": "TEST_SPEC.md", "path": "../../../sdkwork-specs/TEST_SPEC.md", "purpose": "Durable certificate operation worker verification."}
+    {
+      "file": "CODE_STYLE_SPEC.md",
+      "path": "../../../sdkwork-specs/CODE_STYLE_SPEC.md",
+      "purpose": "Authored worker boundaries."
+    },
+    {
+      "file": "NAMING_SPEC.md",
+      "path": "../../../sdkwork-specs/NAMING_SPEC.md",
+      "purpose": "Worker naming."
+    },
+    {
+      "file": "RUST_CODE_SPEC.md",
+      "path": "../../../sdkwork-specs/RUST_CODE_SPEC.md",
+      "purpose": "Rust binary structure."
+    },
+    {
+      "file": "CONFIG_SPEC.md",
+      "path": "../../../sdkwork-specs/CONFIG_SPEC.md",
+      "purpose": "Typed worker configuration."
+    },
+    {
+      "file": "DEPLOYMENT_SPEC.md",
+      "path": "../../../sdkwork-specs/DEPLOYMENT_SPEC.md",
+      "purpose": "Worker lifecycle and deployment."
+    },
+    {
+      "file": "SECURITY_SPEC.md",
+      "path": "../../../sdkwork-specs/SECURITY_SPEC.md",
+      "purpose": "Certificate and secret safety."
+    },
+    {
+      "file": "TEST_SPEC.md",
+      "path": "../../../sdkwork-specs/TEST_SPEC.md",
+      "purpose": "Durable certificate operation worker verification."
+    }
   ],
   "contracts": {
     "layerRole": "runtime-service-host",
-    "publicExports": ["binary"],
-    "providedPorts": [{"name": "certificateRenewalWorkerProcess", "export": "binary"}],
-    "requiredPorts": [
-      {"name": "webServerBusinessService", "export": "binary", "provider": "sdkwork-intelligence-webserver-service"},
-      {"name": "webServerRepository", "export": "binary", "provider": "sdkwork-intelligence-webserver-repository-sqlx"}
+    "publicExports": [
+      "binary"
     ],
-    "runtimeEntrypoints": ["binary#sdkwork-webserver-certificate-worker"],
+    "providedPorts": [
+      {
+        "name": "certificateRenewalWorkerProcess",
+        "export": "binary"
+      }
+    ],
+    "requiredPorts": [
+      {
+        "name": "webServerBusinessService",
+        "export": "binary",
+        "provider": "sdkwork-intelligence-webserver-service"
+      },
+      {
+        "name": "webServerRepository",
+        "export": "binary",
+        "provider": "sdkwork-intelligence-webserver-repository-sqlx"
+      }
+    ],
+    "runtimeEntrypoints": [
+      "binary#sdkwork-webserver-certificate-worker"
+    ],
     "routeManifest": null,
     "sdkClients": [],
     "sdkDependencies": [],
@@ -41,12 +91,28 @@
     "dependencyApiSurfaces": [],
     "events": [],
     "configKeys": [
+      "SDKWORK_WEB_ACME_ACCOUNT_ROOT",
+      "SDKWORK_WEB_ACME_CONTACT_EMAIL",
+      "SDKWORK_WEB_ACME_DIRECTORY_URL",
+      "SDKWORK_WEB_ACME_OPERATION_TIMEOUT_MS",
+      "SDKWORK_WEB_ACME_PROFILE",
+      "SDKWORK_WEB_ACME_WEBROOT",
+      "SDKWORK_WEB_CERT_LIVE_ROOT",
       "SDKWORK_WEB_CERT_OPERATION_POLL_INTERVAL_SECS",
+      "SDKWORK_WEB_CERT_RENEW_BEFORE_DAYS",
       "SDKWORK_WEB_CERT_RENEW_SCAN_INTERVAL_SECS",
-      "SDKWORK_WEB_CERT_WORKER_ID"
+      "SDKWORK_WEB_CERT_WORKER_ID",
+      "SDKWORK_WEB_NGINX_ENABLED",
+      "SDKWORK_WEB_NGINX_SITES_ROOT",
+      "SDKWORK_WEB_NODE_UUID",
+      "SDKWORK_WEB_TLS_MATERIAL_ROOT",
+      "SDKWORK_WEB_TLS_RUNTIME_SNAPSHOT_FILE",
+      "SDKWORK_WEB_TLS_SNAPSHOT_ALPN"
     ]
   },
   "verification": {
-    "commands": ["cargo test -p sdkwork-webserver-certificate-worker"]
+    "commands": [
+      "cargo test -p sdkwork-webserver-certificate-worker"
+    ]
   }
 }

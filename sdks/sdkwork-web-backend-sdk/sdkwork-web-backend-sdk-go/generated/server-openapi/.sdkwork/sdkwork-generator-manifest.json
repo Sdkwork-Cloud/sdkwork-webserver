@@ -44,7 +44,7 @@
     },
     {
       "path": "api/certificate.go",
-      "sha256": "9943a18988d94bef48050313e37e045496577a40cf38efb8d5cf2610b1e7b6b4"
+      "sha256": "6b2fd5711c88f0ea0bb8c31809e670d09535b365baf77e431a567974f52697cb"
     },
     {
       "path": "api/doc.go",
@@ -283,6 +283,10 @@
       "sha256": "c8a3a1b808553ac85033f557aee765cd7ec8c3095b4725d88f144994ffce5573"
     },
     {
+      "path": "types/certificates_revoke_response.go",
+      "sha256": "82e865de37df86d90d44a1c69aa85a9b8bec2c4a0bdfa26cdb4af67d529a3140"
+    },
+    {
       "path": "types/certificates_update_response.go",
       "sha256": "d45d8afbb9d068aab4f346f1365b06f244611524f5ee35715624ae154cd2aedd"
     },
@@ -461,6 +465,10 @@
     {
       "path": "types/retrieve_response.go",
       "sha256": "b9743c649273eb2663e568f7feef0d3b9dde49e9959d9497b6b54cd527a34451"
+    },
+    {
+      "path": "types/revoke_certificate_request.go",
+      "sha256": "fe2380ff1b4997d78548cb8ca881b1036637efb5d9b842f8e18aedd846702676"
     },
     {
       "path": "types/root_domain_response.go",

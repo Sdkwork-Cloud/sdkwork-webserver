@@ -1,3 +1,4 @@
+mod acme_challenge;
 mod active_health;
 mod connection_limit;
 mod dns;
@@ -11,6 +12,7 @@ mod io_timeout;
 mod keep_alive_timeout;
 mod metrics;
 mod operations;
+mod provider_resource;
 mod proxy;
 mod proxy_body;
 mod proxy_protocol;
@@ -57,6 +59,7 @@ use self::runtime::DataPlaneRuntime;
 struct ListenerState {
     runtime: Arc<DataPlaneRuntime>,
     website_delivery: Option<Arc<sdkwork_webserver_delivery_runtime::WebsiteDeliveryExecutor>>,
+    provider_resources: Option<Arc<sdkwork_webserver_delivery_runtime::AppConfigResourceExecutor>>,
     listener_id: String,
     is_tls: bool,
 }

@@ -7,7 +7,8 @@ use sdkwork_database_sqlx::enable_process_shared_database_pool;
 use sdkwork_intelligence_webserver_service::{WebRepositoryPort, WebService};
 use sdkwork_utils_rust::derive_aes_256_key;
 use sdkwork_webserver_acme_service::{
-    AcmeConfig, CertificateIssuer, DEFAULT_ACME_OPERATION_TIMEOUT_MS,
+    AcmeAccountStore, AcmeConfig, CertificateIssuer, EncryptedFileAcmeAccountStore,
+    MemoryAcmeAccountStore, DEFAULT_ACME_OPERATION_TIMEOUT_MS,
 };
 use sdkwork_webserver_contract::{web_environment_name, web_is_production_like_environment};
 use sdkwork_webserver_database_host::bootstrap_web_database_from_env;
@@ -62,7 +63,9 @@ fn secret_key_from_env() -> Result<SecretEncryptionKey, String> {
     ))
 }
 
-fn certificate_issuer_from_env() -> Result<CertificateIssuer, String> {
+fn certificate_issuer_from_env(
+    secret_key: &SecretEncryptionKey,
+) -> Result<CertificateIssuer, String> {
     let environment = web_environment_name();
     let environment_production_like = web_is_production_like_environment();
     let use_production = match std::env::var("SDKWORK_WEB_ACME_PROFILE") {
@@ -103,6 +106,44 @@ fn certificate_issuer_from_env() -> Result<CertificateIssuer, String> {
         "SDKWORK_WEB_ACME_OPERATION_TIMEOUT_MS",
         DEFAULT_ACME_OPERATION_TIMEOUT_MS,
     )?;
+    // Durable ACME account credentials: one encrypted file per CA directory
+    // URL under the account root, shared by every issuance/renewal process.
+    // Reusing one account avoids the CA account-creation rate limit and
+    // preserves account identity across restarts. The in-memory fallback
+    // exists only for development; production-like environments must persist.
+    let account_store: Arc<dyn AcmeAccountStore> = match std::env::var(
+        "SDKWORK_WEB_ACME_ACCOUNT_ROOT",
+    ) {
+        Ok(root) => {
+            if root.is_empty()
+                || root.len() > 4_096
+                || root
+                    .bytes()
+                    .any(|byte| byte == 0 || byte.is_ascii_control())
+            {
+                return Err(
+                    "SDKWORK_WEB_ACME_ACCOUNT_ROOT must contain 1..4096 safe path bytes"
+                        .to_string(),
+                );
+            }
+            Arc::new(EncryptedFileAcmeAccountStore::new(
+                std::path::PathBuf::from(root),
+                secret_key,
+            ))
+        }
+        Err(_) if !production_like => {
+            tracing::warn!(
+                    "SDKWORK_WEB_ACME_ACCOUNT_ROOT missing; ACME account credentials are kept only in process memory"
+                );
+            Arc::new(MemoryAcmeAccountStore::default())
+        }
+        Err(_) => {
+            return Err(
+                "SDKWORK_WEB_ACME_ACCOUNT_ROOT is required in production-like environments"
+                    .to_string(),
+            );
+        }
+    };
 
     let config = AcmeConfig::new(
         directory_url,
@@ -112,8 +153,13 @@ fn certificate_issuer_from_env() -> Result<CertificateIssuer, String> {
         use_production,
     )
     .map_err(|error| format!("ACME configuration failed: {error}"))?;
-    CertificateIssuer::new_with_operation_timeout_ms(config, cert_root, operation_timeout_ms)
-        .map_err(|error| format!("certificate issuer bootstrap failed: {error}"))
+    CertificateIssuer::new_with_account_store(
+        config,
+        cert_root,
+        operation_timeout_ms,
+        account_store,
+    )
+    .map_err(|error| format!("certificate issuer bootstrap failed: {error}"))
 }
 
 fn parse_env_or<T>(key: &str, default: T) -> Result<T, String>
@@ -146,7 +192,7 @@ pub async fn bootstrap_web_runtime_from_env() -> Result<WebRuntime, String> {
         secret_key,
     )) as Arc<dyn WebRepositoryPort>;
 
-    let certificate_issuer = Arc::new(certificate_issuer_from_env()?);
+    let certificate_issuer = Arc::new(certificate_issuer_from_env(&secret_key)?);
     let edge_runtime = Arc::new(
         EdgeRuntime::from_env()
             .map_err(|error| format!("edge runtime bootstrap failed: {error}"))?,

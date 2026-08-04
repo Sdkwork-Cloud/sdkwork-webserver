@@ -1,7 +1,10 @@
 use crate::audited_sql;
+use sdkwork_intelligence_webserver_service::CertificateRevocationMaterial;
+use serde_json::json;
 use sdkwork_webserver_contract::{
     CertificateIdentifierResponse, CertificateIssueUpdate, CertificateOperationLease,
-    CertificatePage, CertificateResponse, WebServiceError, WebServiceResult,
+    CertificatePage, CertificateResponse, RevokeCertificateRequest, WebServiceError,
+    WebServiceResult,
 };
 use sqlx::Row;
 
@@ -10,8 +13,8 @@ use super::support::{
     store_error,
 };
 use super::certificate_secrets::{
-    certificate_secret_ref, encrypt_certificate_secret_bundle,
-    CERTIFICATE_SECRET_ENCRYPTION_ALGORITHM,
+    certificate_secret_ref, decrypt_certificate_secret_bundle,
+    encrypt_certificate_secret_bundle, CERTIFICATE_SECRET_ENCRYPTION_ALGORITHM,
 };
 use super::{EngineRow, WebRepository};
 
@@ -245,6 +248,176 @@ impl WebRepository {
         tx.commit()
             .await
             .map_err(|error| store_error("commit delete certificate transaction", error))?;
+        Ok(())
+    }
+
+    pub(super) async fn load_certificate_revocation_material_repo(
+        &self,
+        tenant_id: i64,
+        certificate_uuid: &str,
+    ) -> WebServiceResult<CertificateRevocationMaterial> {
+        let mut tx = self
+            .pool
+            .begin()
+            .await
+            .map_err(|error| store_error("begin certificate revocation material", error))?;
+        let row = sqlx::query(
+            "SELECT c.id, c.cert_type, c.renewal_status, c.current_version_id,
+                    v.secret_bundle_ref, sb.encryption_algorithm, sb.bundle_encrypted
+             FROM web_certificate c
+             INNER JOIN web_certificate_version v
+                 ON v.tenant_id = c.tenant_id AND v.certificate_id = c.id
+                 AND v.id = c.current_version_id
+             INNER JOIN web_certificate_secret_bundle sb
+                 ON sb.tenant_id = v.tenant_id AND sb.certificate_version_id = v.id
+             WHERE c.tenant_id = $1 AND c.uuid = $2 AND c.deleted_at IS NULL
+             FOR UPDATE OF c",
+        )
+        .bind(tenant_id)
+        .bind(certificate_uuid)
+        .fetch_optional(&mut *tx)
+        .await
+        .map_err(|error| store_error("lock certificate for revocation", error))?
+        .ok_or_else(|| WebServiceError::not_found("certificate not found"))?;
+        let cert_type: i32 = row
+            .try_get("cert_type")
+            .map_err(|error| store_error("map revocation certificate type", error))?;
+        let renewal_status: i32 = row
+            .try_get("renewal_status")
+            .map_err(|error| store_error("map revocation renewal status", error))?;
+        if matches!(renewal_status, 1 | 2) {
+            return Err(WebServiceError::conflict(
+                "certificate issuance or renewal is in progress; wait for it to finish",
+            ));
+        }
+        let secret_bundle_ref: String = row
+            .try_get("secret_bundle_ref")
+            .map_err(|error| store_error("map revocation secret ref", error))?;
+        let encryption_algorithm: String = row
+            .try_get("encryption_algorithm")
+            .map_err(|error| store_error("map revocation encryption algorithm", error))?;
+        let bundle_encrypted: String = row
+            .try_get("bundle_encrypted")
+            .map_err(|error| store_error("map revocation encrypted bundle", error))?;
+        let version_uuid = version_uuid_for(&secret_bundle_ref);
+        let secret_bundle = decrypt_certificate_secret_bundle(
+            self.secret_key(),
+            tenant_id,
+            &version_uuid,
+            &secret_bundle_ref,
+            &encryption_algorithm,
+            &bundle_encrypted,
+        )?;
+        tx.commit()
+            .await
+            .map_err(|error| store_error("commit certificate revocation material", error))?;
+        Ok(CertificateRevocationMaterial {
+            cert_type,
+            fullchain_pem: secret_bundle.fullchain_pem,
+        })
+    }
+
+    pub(super) async fn mark_certificate_revoked_repo(
+        &self,
+        tenant_id: i64,
+        certificate_uuid: &str,
+        request: &RevokeCertificateRequest,
+        revoked_by: Option<i64>,
+    ) -> WebServiceResult<CertificateResponse> {
+        validate_revocation_reason(&request.reason)?;
+        let mut tx = self
+            .pool
+            .begin()
+            .await
+            .map_err(|error| store_error("begin mark certificate revoked", error))?;
+        let metadata = json!({
+            "certificateRevocation": {
+                "reason": request.reason,
+                "revokedBy": revoked_by,
+                "revokedAt": chrono::Utc::now().to_rfc3339()
+            }
+        });
+        let updated = sqlx::query(
+            "UPDATE web_certificate
+             SET status = 3, auto_renew = FALSE, renewal_status = 0,
+                 metadata = metadata || $3, updated_at = NOW(), version = version + 1
+             WHERE tenant_id = $1 AND uuid = $2 AND status = 1 AND deleted_at IS NULL",
+        )
+        .bind(tenant_id)
+        .bind(certificate_uuid)
+        .bind(metadata.to_string())
+        .execute(&mut *tx)
+        .await
+        .map_err(|error| store_error("mark certificate revoked", error))?;
+        if updated.rows_affected() == 0 {
+            return Err(WebServiceError::conflict(
+                "certificate is not in an active state; nothing was revoked",
+            ));
+        }
+        let certificate_internal_id: i64 = sqlx::query_scalar(
+            "SELECT id FROM web_certificate WHERE tenant_id = $1 AND uuid = $2",
+        )
+        .bind(tenant_id)
+        .bind(certificate_uuid)
+        .fetch_one(&mut *tx)
+        .await
+        .map_err(|error| store_error("resolve revoked certificate id", error))?;
+        sqlx::query(
+            "UPDATE web_listener_certificate_binding
+             SET status = 'ARCHIVED', updated_at = NOW(), version = version + 1
+             WHERE tenant_id = $1 AND certificate_id = $2
+               AND status <> 'ARCHIVED' AND deleted_at IS NULL",
+        )
+        .bind(tenant_id)
+        .bind(certificate_internal_id)
+        .execute(&mut *tx)
+        .await
+        .map_err(|error| store_error("archive revoked certificate bindings", error))?;
+        // Stale node observations would keep reporting the revoked revision as
+        // served; drop them so the node converges to the remaining set.
+        sqlx::query(
+            "DELETE FROM web_certificate_node_state
+             WHERE tenant_id = $1 AND certificate_id = $2",
+        )
+        .bind(tenant_id)
+        .bind(certificate_internal_id)
+        .execute(&mut *tx)
+        .await
+        .map_err(|error| store_error("clear revoked certificate node state", error))?;
+        tx.commit()
+            .await
+            .map_err(|error| store_error("commit certificate revocation", error))?;
+        self.retrieve_certificate_repo(tenant_id, certificate_uuid).await
+    }
+
+    pub(super) async fn record_certificate_renewal_info_repo(
+        &self,
+        tenant_id: i64,
+        certificate_uuid: &str,
+        window_start: &str,
+        window_end: &str,
+    ) -> WebServiceResult<()> {
+        let metadata = json!({
+            "ari": {
+                "windowStart": window_start,
+                "windowEnd": window_end,
+                "recordedAt": chrono::Utc::now().to_rfc3339()
+            }
+        });
+        let updated = sqlx::query(
+            "UPDATE web_certificate
+             SET metadata = metadata || $3, updated_at = NOW(), version = version + 1
+             WHERE tenant_id = $1 AND uuid = $2 AND deleted_at IS NULL",
+        )
+        .bind(tenant_id)
+        .bind(certificate_uuid)
+        .bind(metadata.to_string())
+        .execute(&self.pool)
+        .await
+        .map_err(|error| store_error("record certificate ARI window", error))?;
+        if updated.rows_affected() == 0 {
+            return Err(WebServiceError::not_found("certificate not found"));
+        }
         Ok(())
     }
 
@@ -554,6 +727,38 @@ pub(super) fn certificate_asset_status(
     .to_string()
 }
 
+fn version_uuid_for(secret_bundle_ref: &str) -> String {
+    secret_bundle_ref
+        .strip_prefix("secret:")
+        .unwrap_or(secret_bundle_ref)
+        .to_string()
+}
+
+fn validate_revocation_reason(reason: &str) -> WebServiceResult<()> {
+    if reason.is_empty()
+        || reason.len() > 64
+        || !reason
+            .bytes()
+            .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'-' | b'_'))
+    {
+        return Err(WebServiceError::validation(
+            "revocation reason must contain 1..64 safe ASCII bytes",
+        ));
+    }
+    Ok(())
+}
+
+fn certificate_renewal_status(status: i32) -> String {
+    match status {
+        0 => "IDLE",
+        1 => "RENEWING",
+        2 => "PENDING",
+        3 => "FAILED",
+        _ => "FAILED",
+    }
+    .to_string()
+}
+
 #[cfg(test)]
 mod tests {
     use super::certificate_asset_status;
@@ -573,15 +778,4 @@ mod tests {
             "REVOKED"
         );
     }
-}
-
-fn certificate_renewal_status(status: i32) -> String {
-    match status {
-        0 => "IDLE",
-        1 => "RENEWING",
-        2 => "PENDING",
-        3 => "FAILED",
-        _ => "FAILED",
-    }
-    .to_string()
 }

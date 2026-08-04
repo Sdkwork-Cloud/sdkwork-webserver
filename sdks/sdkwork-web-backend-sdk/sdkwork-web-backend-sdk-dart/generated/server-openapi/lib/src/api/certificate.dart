@@ -131,6 +131,22 @@ class CertificateApi {
       return map == null ? null : CertificatesRenewResponse202.fromJson(map);
     })();
   }
+
+  /// Revoke a canonical certificate
+  Future<CertificatesRevokeResponse?> certificatesRevoke(String certificateId, RevokeCertificateRequest body, String idempotencyKey) async {
+    final requestHeaders = buildRequestHeaders(
+      <String, HeaderParameterSpec>{
+        'Idempotency-Key': HeaderParameterSpec(idempotencyKey, 'simple', false, null),
+      },
+      <String, HeaderParameterSpec>{},
+    );
+    final payload = body.toJson();
+    final response = await _client.post(ApiPaths.backendPath('/certificates/${serializePathParameter(certificateId, const PathParameterSpec('certificateId', 'simple', false))}/revoke'), body: payload, headers: requestHeaders, contentType: 'application/json');
+    return (() {
+      final map = sdkworkResponseAsMap(response);
+      return map == null ? null : CertificatesRevokeResponse.fromJson(map);
+    })();
+  }
 }
 
 class PathParameterSpec {

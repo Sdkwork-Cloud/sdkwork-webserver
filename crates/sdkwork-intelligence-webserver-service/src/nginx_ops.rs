@@ -52,6 +52,21 @@ impl WebService {
             .map_err(|error| WebServiceError::Internal(format!("join nginx reload: {error}")))?
             .map_err(|error| WebServiceError::Internal(error.to_string()))
     }
+
+    /// Proves the running Nginx master actually serves the deployed revision
+    /// (PRD-FR-020): `nginx -T` must contain the site's server-name fragment.
+    /// A reload that failed validation keeps the previous revision serving,
+    /// so this check fails instead of reporting a false success.
+    pub async fn verify_nginx_served(&self, expected_fragment: &str) -> WebServiceResult<()> {
+        let runtime = self.edge_runtime.clone();
+        let fragment = expected_fragment.to_owned();
+        tokio::task::spawn_blocking(move || runtime.verify_served_config(&fragment))
+            .await
+            .map_err(|error| {
+                WebServiceError::Internal(format!("join nginx served verification: {error}"))
+            })?
+            .map_err(|error| WebServiceError::Internal(error.to_string()))
+    }
 }
 
 /// Scans operator-managed Nginx site content for directives that are never

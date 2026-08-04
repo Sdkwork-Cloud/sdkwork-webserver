@@ -2,8 +2,9 @@
 
 use async_trait::async_trait;
 use sdkwork_intelligence_webserver_service::{
-    AuditLogWrite, DomainVerificationChallenge, DomainVerificationObservation,
-    RuntimeAssignmentTarget, RuntimeAssignmentWrite, RuntimeObservationWrite, WebRepositoryPort,
+    AuditLogWrite, CertificateRevocationMaterial, DomainVerificationChallenge,
+    DomainVerificationObservation, RuntimeAssignmentTarget, RuntimeAssignmentWrite,
+    RuntimeObservationWrite, WebRepositoryPort,
 };
 use sdkwork_webserver_contract::{
     AgentHeartbeatRequest, AgentHeartbeatResponse, AgentSyncResponse, AuditLogPage,
@@ -24,7 +25,8 @@ use sdkwork_webserver_contract::{
     NginxReloadResponse, NginxStatusResponse, NginxValidateResponse, RootDomainPage,
     RootDomainResponse, RuntimeAssignment, RuntimeAssignmentDelivery, RuntimeObservation,
     ServerPage, SitePage, SiteResponse, SourceVersionPage, SourceVersionResponse,
-    UpdateDomainApplicationBindingRequest, UpdateNginxConfigRequest, UpdateSiteRequest,
+    TlsCertificateAssignmentMaterial, UpdateDomainApplicationBindingRequest,
+    UpdateNginxConfigRequest, UpdateSiteRequest, RevokeCertificateRequest,
 };
 use sdkwork_webserver_contract::{WebServiceError, WebServiceResult};
 
@@ -561,6 +563,50 @@ impl WebRepositoryPort for WebRepository {
     ) -> WebServiceResult<CertificateResponse> {
         self.update_certificate_auto_renew_repo(tenant_id, certificate_id, auto_renew)
             .await
+    }
+
+    async fn load_node_tls_certificate_assignments(
+        &self,
+        node_uuid: &str,
+    ) -> WebServiceResult<Vec<TlsCertificateAssignmentMaterial>> {
+        self.load_node_tls_certificate_assignments_repo(node_uuid)
+            .await
+    }
+
+    async fn load_certificate_revocation_material(
+        &self,
+        tenant_id: i64,
+        certificate_id: &str,
+    ) -> WebServiceResult<CertificateRevocationMaterial> {
+        self.load_certificate_revocation_material_repo(tenant_id, certificate_id)
+            .await
+    }
+
+    async fn mark_certificate_revoked(
+        &self,
+        tenant_id: i64,
+        certificate_id: &str,
+        request: &RevokeCertificateRequest,
+        revoked_by: Option<i64>,
+    ) -> WebServiceResult<CertificateResponse> {
+        self.mark_certificate_revoked_repo(tenant_id, certificate_id, request, revoked_by)
+            .await
+    }
+
+    async fn record_certificate_renewal_info(
+        &self,
+        tenant_id: i64,
+        certificate_id: &str,
+        window_start: &str,
+        window_end: &str,
+    ) -> WebServiceResult<()> {
+        self.record_certificate_renewal_info_repo(
+            tenant_id,
+            certificate_id,
+            window_start,
+            window_end,
+        )
+        .await
     }
 
     async fn list_certificate_distribution(

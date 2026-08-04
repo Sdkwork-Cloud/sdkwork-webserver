@@ -9,9 +9,9 @@ use sdkwork_webserver_contract::{
     CreateManagedDomainRequest, CreateNginxConfigRequest, CreateRootDomainHostnameRequest,
     CreateRootDomainRequest, CreateServerRequest, CreateSiteRequest, CreateSourceVersionRequest,
     ImportGitSourceVersionRequest, IssueCertificateRequest, ListAuditLogsQuery,
-    ListNginxConfigsQuery, ListRootDomainsQuery, ListSitesQuery, UpdateCertificateRequest,
-    UpdateDomainApplicationBindingRequest, UpdateNginxConfigRequest, UpdateSiteRequest,
-    WebBackendApi, WebBackendRequestContext,
+    ListNginxConfigsQuery, ListRootDomainsQuery, ListSitesQuery, RevokeCertificateRequest,
+    UpdateCertificateRequest, UpdateDomainApplicationBindingRequest, UpdateNginxConfigRequest,
+    UpdateSiteRequest, WebBackendApi, WebBackendRequestContext,
 };
 use serde::Deserialize;
 use std::sync::Arc;
@@ -125,6 +125,7 @@ pub fn build_router_with_shared_backend_api(api: Arc<dyn WebBackendApi>) -> Rout
             axum::routing::put(update_managed_certificate).delete(delete_managed_certificate),
         )
         .route(paths::CERTIFICATE_RENEW, post(renew_managed_certificate))
+        .route(paths::CERTIFICATE_REVOKE, post(revoke_managed_certificate))
         .route(
             paths::CERTIFICATE_DISTRIBUTION,
             get(list_certificate_distribution),
@@ -742,6 +743,21 @@ async fn renew_managed_certificate(
         state
             .api
             .renew_managed_certificate(&context, &certificate_id)
+            .await,
+    )
+}
+
+async fn revoke_managed_certificate(
+    State(state): State<BackendState>,
+    context: Option<Extension<WebBackendRequestContext>>,
+    Path(certificate_id): Path<String>,
+    Json(request): Json<RevokeCertificateRequest>,
+) -> Result<Response, WebApiError> {
+    let context = require_backend_context(context)?;
+    ok_resource(
+        state
+            .api
+            .revoke_managed_certificate(&context, &certificate_id, &request)
             .await,
     )
 }

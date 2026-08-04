@@ -28,6 +28,7 @@ export type { IssueCertificateRequest } from './issue-certificate-request';
 export type { CertificateIdentifierResponse } from './certificate-identifier-response';
 export type { UpdateCertificateRequest } from './update-certificate-request';
 export type { CertificateResponse } from './certificate-response';
+export type { RevokeCertificateRequest } from './revoke-certificate-request';
 export type { CertificateOperationResponse } from './certificate-operation-response';
 export type { CreateListenerCertificateBindingRequest } from './create-listener-certificate-binding-request';
 export type { ListenerCertificateBindingResponse } from './listener-certificate-binding-response';
@@ -94,6 +95,7 @@ export type { CertificatesIssueResponse202 } from './certificates-issue-response
 export type { CertificatesOperationsRetrieveResponse } from './certificates-operations-retrieve-response';
 export type { CertificatesUpdateResponse } from './certificates-update-response';
 export type { CertificatesRenewResponse202 } from './certificates-renew-response202';
+export type { CertificatesRevokeResponse } from './certificates-revoke-response';
 export type { CertificatesDistributionListResponse } from './certificates-distribution-list-response';
 export type { ConfigsListResponse } from './configs-list-response';
 export type { ConfigsCreateResponse201 } from './configs-create-response201';

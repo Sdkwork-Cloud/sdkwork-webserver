@@ -238,6 +238,12 @@ const HTTP_ROUTES: &[HttpRoute] = &[
         "certificates.renew",
     ).with_required_permission("web.certificates.write").with_idempotent(true).with_rate_limit_tier(RateLimitTier::AuthCritical),
     HttpRoute::dual_token(
+        HttpMethod::Post,
+        "/backend/v3/api/certificates/{certificateId}/revoke",
+        "certificate",
+        "certificates.revoke",
+    ).with_required_permission("web.certificates.write").with_idempotent(true).with_rate_limit_tier(RateLimitTier::AuthCritical),
+    HttpRoute::dual_token(
         HttpMethod::Get,
         "/backend/v3/api/certificate_distribution",
         "certificateDistribution",

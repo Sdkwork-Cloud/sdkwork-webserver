@@ -650,6 +650,31 @@ pub struct CertificateOperationAcceptedResponse {
     pub status: String,
 }
 
+/// Decrypted node-scoped TLS assignment material projected from the control
+/// plane for the self-hosted TLS runtime snapshot. Private key material is
+/// transported only inside the process boundary and never leaves the node.
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TlsCertificateAssignmentMaterial {
+    pub certificate_id: String,
+    pub version_uuid: String,
+    pub cert_name: String,
+    pub hostnames: Vec<String>,
+    pub fingerprint_sha256: String,
+    pub not_before: String,
+    pub not_after: String,
+    pub fullchain_pem: String,
+    pub private_key_pem: String,
+}
+
+/// Certificate revocation request. `reason` selects one of the RFC 5280
+/// §5.3.1 revocation reasons accepted by the control plane.
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct RevokeCertificateRequest {
+    pub reason: String,
+}
+
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CertificateOperationResponse {

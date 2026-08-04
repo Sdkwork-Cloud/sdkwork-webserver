@@ -105,6 +105,18 @@ class CertificateApi(private val client: HttpClient) {
         return client.convertValue(raw, object : TypeReference<CertificatesRenewResponse202>() {})
     }
 
+    /** Revoke a canonical certificate */
+    suspend fun certificatesRevoke(certificateId: String, body: RevokeCertificateRequest, idempotencyKey: String): CertificatesRevokeResponse? {
+        val requestHeaders = buildRequestHeaders(
+            mapOf(
+                "Idempotency-Key" to HeaderParameterSpec(idempotencyKey, "simple", false, null),
+            ),
+            emptyMap()
+        )
+        val raw = client.post(ApiPaths.backendPath("/certificates/${serializePathParameter(certificateId, PathParameterSpec("certificateId", "simple", false))}/revoke"), body, null, requestHeaders, "application/json")
+        return client.convertValue(raw, object : TypeReference<CertificatesRevokeResponse>() {})
+    }
+
     private data class PathParameterSpec(val name: String, val style: String, val explode: Boolean)
 
     private fun serializePathParameter(value: Any?, spec: PathParameterSpec): String {

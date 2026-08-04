@@ -6,13 +6,14 @@ use std::{
 
 use futures_util::{stream, StreamExt, TryStreamExt};
 use sdkwork_webserver_contract::provider::{
-    ValidateWebsiteResourceRequest, WebsiteProviderError, WebsiteProviderErrorKind,
-    WebsiteProviderPurpose, WebsiteProviderRuntimeContext, WebsiteStaticContentProvider,
-    WebsiteWikiProvider,
+    ValidateWebsiteResourceRequest, ValidatedWebsiteResource, WebsiteProviderError,
+    WebsiteProviderErrorKind, WebsiteProviderPurpose, WebsiteProviderRuntimeContext,
+    WebsiteStaticContentProvider, WebsiteWikiProvider,
 };
 use sdkwork_webserver_core::website_runtime::{
-    CompiledWebsiteRuntimeSet, WebsiteBinding, WebsiteBindingAction, WebsiteHandler, WebsiteMount,
-    WebsiteProviderType, WebsiteResource, WebsiteRuntimeDescriptor,
+    CompiledWebsiteRuntimeSet, ProviderResourceReference, WebsiteBinding, WebsiteBindingAction,
+    WebsiteHandler, WebsiteMount, WebsiteProviderType, WebsiteResource,
+    WebsiteResourceCapabilities, WebsiteRuntimeDescriptor,
 };
 use tokio::time::timeout;
 
@@ -70,6 +71,76 @@ impl WebsiteProviderRegistry {
 
     pub fn supports_static(&self, provider_type: WebsiteProviderType) -> bool {
         self.static_providers.contains_key(&provider_type)
+    }
+
+    /// Validates one provider-backed application-config resource (Drive or
+    /// Knowledgebase) against its registered provider before the data plane
+    /// starts serving it. The provider must be registered, must validate the
+    /// reference within the deadline, and must return consistent generation
+    /// tokens and the required capabilities; any mismatch fails closed.
+    pub async fn validate_provider_resource(
+        &self,
+        provider: &ProviderResourceReference,
+        required_capabilities: &WebsiteResourceCapabilities,
+        context: WebsiteProviderRuntimeContext,
+    ) -> Result<ValidatedWebsiteResource, WebsiteRuntimeProviderValidationError> {
+        let provider_type = provider.provider_type;
+        let provider_resource_uuid = provider.provider_resource_uuid.clone();
+        let capability = if required_capabilities.wiki_routes {
+            ValidationCapability::Wiki
+        } else {
+            ValidationCapability::Static
+        };
+        let registered = match capability {
+            ValidationCapability::Static => self
+                .static_providers
+                .get(&provider_type)
+                .cloned()
+                .map(ValidationProvider::Static),
+            ValidationCapability::Wiki => self
+                .wiki_providers
+                .get(&provider_type)
+                .cloned()
+                .map(ValidationProvider::Wiki),
+        }
+        .ok_or(
+            WebsiteRuntimeProviderValidationError::ProviderNotRegistered {
+                provider_type,
+                capability: capability.label(),
+            },
+        )?;
+        let request = ValidateWebsiteResourceRequest {
+            context: context.clone(),
+            provider: provider.clone(),
+            required_capabilities: required_capabilities.clone(),
+        };
+        let validated = timeout(
+            Duration::from_millis(context.deadline_ms),
+            registered.validate_resource(&request),
+        )
+        .await
+        .map_err(|_| WebsiteRuntimeProviderValidationError::Provider {
+            provider_type,
+            provider_resource_uuid: provider_resource_uuid.clone(),
+            kind: WebsiteProviderErrorKind::DeadlineExceeded,
+        })?
+        .map_err(|error| WebsiteRuntimeProviderValidationError::Provider {
+            provider_type,
+            provider_resource_uuid: provider_resource_uuid.clone(),
+            kind: error.kind,
+        })?;
+        if validated.provider_resource_uuid != provider_resource_uuid
+            || !valid_generation_token(&validated.provider_generation)
+            || !valid_generation_token(&validated.public_generation)
+            || !capabilities_include(&validated.capabilities, required_capabilities)
+        {
+            return Err(WebsiteRuntimeProviderValidationError::Provider {
+                provider_type,
+                provider_resource_uuid,
+                kind: WebsiteProviderErrorKind::ContractMismatch,
+            });
+        }
+        Ok(validated)
     }
 
     pub async fn validate_runtime_set(

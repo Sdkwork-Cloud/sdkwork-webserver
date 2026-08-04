@@ -6,7 +6,7 @@
     "displayName": "SDKWork Webserver PC shared-ui",
     "version": "0.1.0",
     "type": "node-package",
-    "root": "sdkwork-web-server/apps/sdkwork-webserver-pc/packages/sdkwork-webserver-pc-commons",
+    "root": "sdkwork-webserver/apps/sdkwork-webserver-pc/packages/sdkwork-webserver-pc-commons",
     "domain": "infrastructure",
     "capability": "shared-ui",
     "surface": "pc",

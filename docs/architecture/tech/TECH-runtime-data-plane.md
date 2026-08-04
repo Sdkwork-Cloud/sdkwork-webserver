@@ -61,7 +61,7 @@ The existing `sdkwork-webserver-edge-runtime` name predates the current naming s
 5. The gateway preserves raw Path and Query, validates their finite budgets, and produces one bounded canonical Path.
 6. The compiled core selects listener, virtual host, and route deterministically.
 7. Exact fixed `GET`/`HEAD` operations routes retain total capacity; all other routes must obtain business capacity and pass the pressure check. Rejection releases total capacity before constructing the fixed overload response.
-8. The action adapter serves a fixed response, redirect, static resource, or reverse proxy.
+8. The action adapter serves a fixed response, redirect, static resource, Drive WebsiteRoot mount, Knowledgebase WikiPublication, or reverse proxy.
 9. Backpressure and cancellation flow through the body stream while request permits remain attached to response ownership.
 10. Bounded structured telemetry records result, duration, bytes, and selected ids without secrets.
 
@@ -158,6 +158,7 @@ The foundation establishes bounded behavior but does not yet satisfy the parent 
 | Core config model/compiler | Implemented; strict validation and immutable host/route indexes verified |
 | HTTP listener and fixed/redirect routes | Implemented and real-socket tested |
 | Static and streaming proxy routes | Implemented and real-socket tested; proxy bodies are not fully collected. Static delivery uses capability-relative per-component no-follow opening and streams from the stable open handle. Windows and Linux tests cover path replacement, final/intermediate symlink rejection, directory index/redirect, SPA fallback, conditional requests, Range, HEAD, and MIME behavior. |
+| Drive and Knowledgebase application-config resources | Implemented: `drive`/`knowledgebase` resources in `sdkwork.webserver.config.json` are assembled fail-closed from environment-owned provider SDK credentials, validated before startup, served through the shared bounded provider registry and resolution cache (GET/HEAD, conditional requests, Range, SPA candidates, wiki routes/redirects, resource-level locale default), and watched reloads referencing an unassembled provider are rejected with the active generation retained |
 | HTTPS listener | Implemented and tested with Rustls TLS, HTTP/2 ALPN, immutable multi-certificate Exact/Wildcard SNI selection, leaf SAN/time/key activation checks, and fail-closed unknown/no-SNI behavior |
 | Connection admission and graceful drain | Implemented and tested under connection saturation |
 | Same-topology local configuration reload | Implemented with SHA-256 revisions, `ArcSwap`, failed-candidate retention, and concurrent real-socket tests |

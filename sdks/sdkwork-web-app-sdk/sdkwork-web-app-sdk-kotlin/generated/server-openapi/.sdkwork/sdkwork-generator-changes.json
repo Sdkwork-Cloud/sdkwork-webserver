@@ -9,13 +9,10 @@
     "protocol": "http",
     "packageName": "com.sdkwork:sdkwork-web-app-sdk"
   },
-  "changeFingerprint": "5d3a81f70a5a39f0ef1f6123f464249353fe1942addfa9f9c9c5aba3e68b9641",
+  "changeFingerprint": "7c6ce6a59d9e9bfe59ce5983c3e6018e1c6d27de940bee51ec8d923f2eae3daa",
   "changes": {
     "createdGeneratedFiles": [],
-    "updatedGeneratedFiles": [
-      "README.md",
-      "src/main/kotlin/com/sdkwork/web/app/sdk/api/CertificateApi.kt"
-    ],
+    "updatedGeneratedFiles": [],
     "unchangedGeneratedFiles": [
       "bin/publish-core.mjs",
       "bin/publish.ps1",
@@ -23,10 +20,12 @@
       "build.gradle.kts",
       "CHANGELOG.md",
       "LICENSE",
+      "README.md",
       "sdkwork-sdk.json",
       "settings.gradle.kts",
       "src/main/kotlin/com/sdkwork/web/app/sdk/api/Api.kt",
       "src/main/kotlin/com/sdkwork/web/app/sdk/api/ApiPaths.kt",
+      "src/main/kotlin/com/sdkwork/web/app/sdk/api/CertificateApi.kt",
       "src/main/kotlin/com/sdkwork/web/app/sdk/api/DeploymentApi.kt",
       "src/main/kotlin/com/sdkwork/web/app/sdk/api/DomainApi.kt",
       "src/main/kotlin/com/sdkwork/web/app/sdk/api/EnvVariableApi.kt",
@@ -103,15 +102,7 @@
       "src/main/kotlin/com/sdkwork/web/app/sdk/UpdateEnvVariableRequest.kt",
       "src/main/kotlin/com/sdkwork/web/app/sdk/UpdateSiteRequest.kt"
     ],
-    "deletedGeneratedFiles": [
-      "src/main/kotlin/com/sdkwork/web/app/sdk/CertificateOperationResponse.kt",
-      "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatePage.kt",
-      "src/main/kotlin/com/sdkwork/web/app/sdk/CertificateResponse.kt",
-      "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatesIssueResponse202.kt",
-      "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatesListResponse.kt",
-      "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatesOperationsRetrieveResponse.kt",
-      "src/main/kotlin/com/sdkwork/web/app/sdk/IssueCertificateRequest.kt"
-    ],
+    "deletedGeneratedFiles": [],
     "scaffoldedFiles": [],
     "preservedScaffoldFiles": [
       "custom/README.md"
@@ -120,77 +111,26 @@
   },
   "impact": {
     "schemaVersion": 1,
-    "areas": [
-      "api-surface",
-      "documentation",
-      "unknown"
-    ],
-    "details": [
-      {
-        "area": "api-surface",
-        "paths": [
-          "src/main/kotlin/com/sdkwork/web/app/sdk/api/CertificateApi.kt"
-        ]
-      },
-      {
-        "area": "documentation",
-        "paths": [
-          "README.md"
-        ]
-      },
-      {
-        "area": "unknown",
-        "paths": [
-          "src/main/kotlin/com/sdkwork/web/app/sdk/CertificateOperationResponse.kt",
-          "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatePage.kt",
-          "src/main/kotlin/com/sdkwork/web/app/sdk/CertificateResponse.kt",
-          "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatesIssueResponse202.kt",
-          "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatesListResponse.kt",
-          "src/main/kotlin/com/sdkwork/web/app/sdk/CertificatesOperationsRetrieveResponse.kt",
-          "src/main/kotlin/com/sdkwork/web/app/sdk/IssueCertificateRequest.kt"
-        ]
-      }
-    ],
-    "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, documentation, unknown. Verification is required."
+    "areas": [],
+    "details": [],
+    "requiresVerification": false,
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
   },
   "verificationPlan": {
-    "shouldRun": true,
-    "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, documentation, unknown. Verification is required. Run the required verification commands now against the generated SDK output.",
-    "steps": [
-      {
-        "id": "check",
-        "title": "Unified package check",
-        "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, documentation, unknown.",
-        "workingDirectory": "E:\\sdkwork-space\\sdkwork-webserver\\sdks\\sdkwork-web-app-sdk\\sdkwork-web-app-sdk-kotlin\\generated\\server-openapi",
-        "command": "node",
-        "args": [
-          "./bin/publish-core.mjs",
-          "--language",
-          "kotlin",
-          "--project-dir",
-          ".",
-          "--action",
-          "check"
-        ],
-        "displayCommand": "node ./bin/publish-core.mjs --language kotlin --project-dir . --action check"
-      }
-    ]
+    "shouldRun": false,
+    "runPhase": "skip",
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
+    "steps": []
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "high",
-    "nextAction": "verify",
+    "riskLevel": "low",
+    "nextAction": "skip",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
-    "summary": "Changes have been applied. Run the required verification plan now.",
+    "summary": "No actionable changes were detected. No apply or verification step is required.",
     "reasons": [
-      "deleted-generated-files",
-      "manual-review-required",
-      "unknown-impact",
-      "verification-required"
+      "no-actionable-changes"
     ]
   },
   "preservedLegacyFiles": false

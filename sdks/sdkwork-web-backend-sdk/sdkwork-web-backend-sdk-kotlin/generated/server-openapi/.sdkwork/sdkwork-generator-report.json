@@ -10,37 +10,94 @@
   },
   "status": "ok",
   "mode": "apply",
-  "hasChanges": false,
+  "hasChanges": true,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "707f7d492f9f7f7cb715d9354ff53786b57053bc7f4a919987ce1e08f4670504",
+  "changeFingerprint": "e9ed7457c4b64a96b33c65231e5b43568bc30c911c002c2e47faf36c500a7ea9",
   "changeImpact": {
     "schemaVersion": 1,
-    "areas": [],
-    "details": [],
-    "requiresVerification": false,
-    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
+    "areas": [
+      "api-surface",
+      "unknown"
+    ],
+    "details": [
+      {
+        "area": "api-surface",
+        "paths": [
+          "src/main/kotlin/com/sdkwork/web/backend/sdk/api/CertificateApi.kt"
+        ]
+      },
+      {
+        "area": "unknown",
+        "paths": [
+          "src/main/kotlin/com/sdkwork/web/backend/sdk/CertificatesRevokeResponse.kt",
+          "src/main/kotlin/com/sdkwork/web/backend/sdk/RevokeCertificateRequest.kt"
+        ]
+      }
+    ],
+    "requiresVerification": true,
+    "summary": "Detected impact areas: api-surface, unknown. Verification is required."
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "low",
-    "nextAction": "skip",
+    "riskLevel": "high",
+    "nextAction": "verify",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
-    "summary": "No actionable changes were detected. No apply or verification step is required.",
+    "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
-      "no-actionable-changes"
+      "manual-review-required",
+      "unknown-impact",
+      "verification-required"
     ]
   },
   "executionHandoff": {
     "schemaVersion": 1,
-    "summary": "No further commands are required.",
-    "steps": []
+    "summary": "Run the required verification commands now.",
+    "steps": [
+      {
+        "id": "verify-check",
+        "title": "Unified package check",
+        "required": true,
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, unknown.",
+        "workingDirectory": "E:\\sdkwork-space\\sdkwork-webserver\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-kotlin\\generated\\server-openapi",
+        "command": "node",
+        "args": [
+          "./bin/publish-core.mjs",
+          "--language",
+          "kotlin",
+          "--project-dir",
+          ".",
+          "--action",
+          "check"
+        ],
+        "displayCommand": "node ./bin/publish-core.mjs --language kotlin --project-dir . --action check"
+      }
+    ]
   },
   "verificationPlan": {
-    "shouldRun": false,
-    "runPhase": "skip",
-    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
-    "steps": []
+    "shouldRun": true,
+    "runPhase": "now",
+    "summary": "Detected impact areas: api-surface, unknown. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "steps": [
+      {
+        "id": "check",
+        "title": "Unified package check",
+        "required": true,
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, unknown.",
+        "workingDirectory": "E:\\sdkwork-space\\sdkwork-webserver\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-kotlin\\generated\\server-openapi",
+        "command": "node",
+        "args": [
+          "./bin/publish-core.mjs",
+          "--language",
+          "kotlin",
+          "--project-dir",
+          ".",
+          "--action",
+          "check"
+        ],
+        "displayCommand": "node ./bin/publish-core.mjs --language kotlin --project-dir . --action check"
+      }
+    ]
   },
   "sdk": {
     "name": "sdkwork-web-backend-sdk",
@@ -56,8 +113,8 @@
     "localVersions": []
   },
   "stats": {
-    "totalFiles": 132,
-    "models": 107,
+    "totalFiles": 134,
+    "models": 109,
     "apis": 11,
     "types": 0
   },
@@ -65,15 +122,20 @@
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 0,
+    "writtenFiles": 3,
     "skippedScaffoldFiles": 1,
-    "skippedUnchangedGeneratedFiles": 131,
+    "skippedUnchangedGeneratedFiles": 130,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "707f7d492f9f7f7cb715d9354ff53786b57053bc7f4a919987ce1e08f4670504",
+    "changeFingerprint": "e9ed7457c4b64a96b33c65231e5b43568bc30c911c002c2e47faf36c500a7ea9",
     "changes": {
-      "createdGeneratedFiles": [],
-      "updatedGeneratedFiles": [],
+      "createdGeneratedFiles": [
+        "src/main/kotlin/com/sdkwork/web/backend/sdk/CertificatesRevokeResponse.kt",
+        "src/main/kotlin/com/sdkwork/web/backend/sdk/RevokeCertificateRequest.kt"
+      ],
+      "updatedGeneratedFiles": [
+        "src/main/kotlin/com/sdkwork/web/backend/sdk/api/CertificateApi.kt"
+      ],
       "unchangedGeneratedFiles": [
         "bin/publish-core.mjs",
         "bin/publish.ps1",
@@ -98,7 +160,6 @@
         "src/main/kotlin/com/sdkwork/web/backend/sdk/api/ApplicationDomainApi.kt",
         "src/main/kotlin/com/sdkwork/web/backend/sdk/api/ApplicationSourceVersionApi.kt",
         "src/main/kotlin/com/sdkwork/web/backend/sdk/api/AuditApi.kt",
-        "src/main/kotlin/com/sdkwork/web/backend/sdk/api/CertificateApi.kt",
         "src/main/kotlin/com/sdkwork/web/backend/sdk/api/CertificateDistributionApi.kt",
         "src/main/kotlin/com/sdkwork/web/backend/sdk/api/DomainApi.kt",
         "src/main/kotlin/com/sdkwork/web/backend/sdk/api/NginxApi.kt",
@@ -216,26 +277,64 @@
     },
     "impact": {
       "schemaVersion": 1,
-      "areas": [],
-      "details": [],
-      "requiresVerification": false,
-      "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
+      "areas": [
+        "api-surface",
+        "unknown"
+      ],
+      "details": [
+        {
+          "area": "api-surface",
+          "paths": [
+            "src/main/kotlin/com/sdkwork/web/backend/sdk/api/CertificateApi.kt"
+          ]
+        },
+        {
+          "area": "unknown",
+          "paths": [
+            "src/main/kotlin/com/sdkwork/web/backend/sdk/CertificatesRevokeResponse.kt",
+            "src/main/kotlin/com/sdkwork/web/backend/sdk/RevokeCertificateRequest.kt"
+          ]
+        }
+      ],
+      "requiresVerification": true,
+      "summary": "Detected impact areas: api-surface, unknown. Verification is required."
     },
     "verificationPlan": {
-      "shouldRun": false,
-      "runPhase": "skip",
-      "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
-      "steps": []
+      "shouldRun": true,
+      "runPhase": "now",
+      "summary": "Detected impact areas: api-surface, unknown. Verification is required. Run the required verification commands now against the generated SDK output.",
+      "steps": [
+        {
+          "id": "check",
+          "title": "Unified package check",
+          "required": true,
+          "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, unknown.",
+          "workingDirectory": "E:\\sdkwork-space\\sdkwork-webserver\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-kotlin\\generated\\server-openapi",
+          "command": "node",
+          "args": [
+            "./bin/publish-core.mjs",
+            "--language",
+            "kotlin",
+            "--project-dir",
+            ".",
+            "--action",
+            "check"
+          ],
+          "displayCommand": "node ./bin/publish-core.mjs --language kotlin --project-dir . --action check"
+        }
+      ]
     },
     "executionDecision": {
       "schemaVersion": 1,
-      "riskLevel": "low",
-      "nextAction": "skip",
+      "riskLevel": "high",
+      "nextAction": "verify",
       "requiresManualReview": false,
       "applyRequiresExpectedFingerprint": false,
-      "summary": "No actionable changes were detected. No apply or verification step is required.",
+      "summary": "Changes have been applied. Run the required verification plan now.",
       "reasons": [
-        "no-actionable-changes"
+        "manual-review-required",
+        "unknown-impact",
+        "verification-required"
       ]
     },
     "backedUpFiles": [],

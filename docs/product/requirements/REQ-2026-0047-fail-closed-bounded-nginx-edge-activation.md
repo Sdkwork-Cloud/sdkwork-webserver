@@ -3,6 +3,10 @@
 ```yaml
 id: REQ-2026-0047
 title: Replace fake Nginx validation and reload success with bounded fail-closed edge activation
+# note: this requirement governs the optional legacy external-Nginx edge adapter
+# (sdkwork-webserver-edge-runtime). The certificate lifecycle main path is the
+# self-hosted data plane TLS runtime (versioned material root + tls-runtime
+# snapshot) and does not involve Nginx.
 owner: sdkwork-web-server
 status: accepted
 source: nginx-edge-commercial-readiness

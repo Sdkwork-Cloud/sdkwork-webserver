@@ -74,6 +74,12 @@
           },
           {
             "$ref": "#/$defs/respondResource"
+          },
+          {
+            "$ref": "#/$defs/driveResource"
+          },
+          {
+            "$ref": "#/$defs/knowledgebaseResource"
           }
         ]
       }
@@ -147,6 +153,13 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
+        "providerTimeoutMs": {
+          "type": "integer",
+          "minimum": 100,
+          "maximum": 60000,
+          "default": 30000,
+          "description": "Maximum wall-clock budget for one Drive or Knowledgebase provider operation (resolution, content open, or validation) in milliseconds."
+        },
         "maxRequestBodyBytes": {
           "type": "integer",
           "minimum": 0,
@@ -481,6 +494,18 @@
         },
         "proxyProtocol": {
           "$ref": "#/$defs/proxyProtocol"
+        },
+        "acmeHttp01": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["webroot"],
+          "properties": {
+            "webroot": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            }
+          }
         }
       }
     },
@@ -806,6 +831,104 @@
           "type": "string",
           "maxLength": 65536,
           "default": ""
+        }
+      }
+    },
+    "providerResourceUuid": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[^\\s\\u0000-\\u001f\\u007f]+$"
+    },
+    "providerCachePolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "metadataTtlSeconds": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 604800,
+          "default": 30
+        },
+        "negativeTtlSeconds": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 604800,
+          "default": 5
+        },
+        "staleWhileRevalidateSeconds": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 604800,
+          "default": 0
+        }
+      }
+    },
+    "driveResource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "providerResourceUuid"],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "type": {
+          "const": "drive"
+        },
+        "providerResourceUuid": {
+          "$ref": "#/$defs/providerResourceUuid"
+        },
+        "resourceSubpath": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096,
+          "pattern": "^/",
+          "description": "Provider-relative path prefix inside the Drive WebsiteRoot served by this resource. Omit to serve the WebsiteRoot itself."
+        },
+        "indexFiles": {
+          "type": "array",
+          "maxItems": 16,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "default": ["index.html"]
+        },
+        "spaFallback": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
+        },
+        "cache": {
+          "$ref": "#/$defs/providerCachePolicy"
+        }
+      }
+    },
+    "knowledgebaseResource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "providerResourceUuid"],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "type": {
+          "const": "knowledgebase"
+        },
+        "providerResourceUuid": {
+          "$ref": "#/$defs/providerResourceUuid"
+        },
+        "locale": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 35,
+          "pattern": "^[A-Za-z0-9-]+$",
+          "description": "Resource-level default locale for wiki route resolution. The request-level Accept-Language header takes precedence when present."
+        },
+        "cache": {
+          "$ref": "#/$defs/providerCachePolicy"
         }
       }
     },

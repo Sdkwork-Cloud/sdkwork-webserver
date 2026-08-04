@@ -6,7 +6,7 @@
     "displayName": "SDKWork Webserver PC console-shell",
     "version": "0.1.0",
     "type": "node-package",
-    "root": "sdkwork-web-server/apps/sdkwork-webserver-pc/packages/sdkwork-webserver-pc-console-shell",
+    "root": "sdkwork-webserver/apps/sdkwork-webserver-pc/packages/sdkwork-webserver-pc-console-shell",
     "domain": "infrastructure",
     "capability": "console-shell",
     "surface": "app-console",

@@ -100,6 +100,16 @@ public class CertificateApi {
         return client.convertValue(raw, new TypeReference<CertificatesRenewResponse202>() {});
     }
 
+    /** Revoke a canonical certificate */
+    public CertificatesRevokeResponse certificatesRevoke(String certificateId, RevokeCertificateRequest body, String idempotencyKey) throws Exception {
+        Map<String, String> requestHeaders = buildRequestHeaders(
+                Map.of("Idempotency-Key", new HeaderParameterSpec(idempotencyKey, "simple", false, null)),
+                Map.of()
+        );
+        Object raw = client.post(ApiPaths.backendPath("/certificates/" + serializePathParameter(certificateId, new PathParameterSpec("certificateId", "simple", false)) + "/revoke"), body, null, requestHeaders, "application/json");
+        return client.convertValue(raw, new TypeReference<CertificatesRevokeResponse>() {});
+    }
+
     private record PathParameterSpec(String name, String style, boolean explode) {}
 
     private static String serializePathParameter(Object value, PathParameterSpec spec) {

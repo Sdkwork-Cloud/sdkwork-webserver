@@ -11,7 +11,7 @@ test('node daemon sync state is durable, checksummed, bounded, and fail-closed',
     path.join(REPO_ROOT, 'crates/sdkwork-web-agent/src/state.rs'),
     'utf8',
   );
-  assert.match(state, /const MAX_STATE_BYTES: u64 = 8 \* 1024/u);
+  assert.match(state, /const MAX_STATE_BYTES: u64 = 1024 \* 1024/u);
   assert.match(state, /SYNC_VERSION_PREFIX: &str = "sv1:"/u);
   assert.match(state, /struct StateChecksumPayload/u);
   assert.match(state, /sdkwork_utils_rust::crypto::sha256_hash/u);

@@ -462,10 +462,11 @@ struct OwnedSelectedRoute {
     maximum_object_bytes: u64,
 }
 
-struct OpenedDeliveryBody {
-    stream: Option<Box<dyn sdkwork_webserver_contract::provider::WebsiteProviderContentStream>>,
-    content_length: u64,
-    content_range: Option<WebsiteContentRange>,
+pub(crate) struct OpenedDeliveryBody {
+    pub(crate) stream:
+        Option<Box<dyn sdkwork_webserver_contract::provider::WebsiteProviderContentStream>>,
+    pub(crate) content_length: u64,
+    pub(crate) content_range: Option<WebsiteContentRange>,
 }
 
 impl OwnedSelectedRoute {
@@ -569,7 +570,7 @@ fn static_candidates(route: &OwnedSelectedRoute, spa_fallback_eligible: bool) ->
     candidates
 }
 
-fn join_provider_path(directory: &str, index: &str) -> String {
+pub(crate) fn join_provider_path(directory: &str, index: &str) -> String {
     if directory == "/" {
         format!("/{index}")
     } else {
@@ -600,7 +601,7 @@ fn strip_segment_prefix(path: &str, prefix: &str) -> Option<String> {
         .map(str::to_owned)
 }
 
-fn join_canonical_paths(prefix: &str, suffix: &str) -> String {
+pub fn join_canonical_paths(prefix: &str, suffix: &str) -> String {
     match (prefix, suffix) {
         ("/", suffix) => suffix.to_owned(),
         (prefix, "/") => prefix.to_owned(),
@@ -608,7 +609,7 @@ fn join_canonical_paths(prefix: &str, suffix: &str) -> String {
     }
 }
 
-fn enforce_content_policy(
+pub(crate) fn enforce_content_policy(
     metadata: &WebsiteContentMetadata,
     maximum_bytes: u64,
     range: Option<sdkwork_webserver_contract::provider::WebsiteByteRange>,
@@ -625,7 +626,7 @@ fn enforce_content_policy(
     Ok(())
 }
 
-fn opened_body_fields(
+pub(crate) fn opened_body_fields(
     opened: Option<OpenedWebsiteContent>,
     metadata: &WebsiteContentMetadata,
     requested_range: Option<WebsiteByteRange>,
@@ -720,7 +721,7 @@ fn valid_bounded_identity(value: &str, maximum_bytes: usize) -> bool {
         && !value.bytes().any(|byte| byte.is_ascii_control())
 }
 
-fn request_conditions_are_cacheable(conditions: &WebsiteRequestConditions) -> bool {
+pub(crate) fn request_conditions_are_cacheable(conditions: &WebsiteRequestConditions) -> bool {
     conditions.if_match.is_none()
         && conditions.if_none_match.is_none()
         && conditions.if_modified_since.is_none()
@@ -728,7 +729,7 @@ fn request_conditions_are_cacheable(conditions: &WebsiteRequestConditions) -> bo
         && conditions.if_range.is_none()
 }
 
-fn provider_error_is_not_found(error: &WebsiteProviderError) -> bool {
+pub(crate) fn provider_error_is_not_found(error: &WebsiteProviderError) -> bool {
     matches!(
         error.kind,
         WebsiteProviderErrorKind::NotFound
@@ -737,7 +738,7 @@ fn provider_error_is_not_found(error: &WebsiteProviderError) -> bool {
     )
 }
 
-fn provider_error_outcome(
+pub(crate) fn provider_error_outcome(
     error: WebsiteProviderError,
 ) -> Result<WebsiteDeliveryOutcome, WebsiteDeliveryError> {
     if provider_error_is_not_found(&error) {
@@ -749,18 +750,18 @@ fn provider_error_outcome(
     }
 }
 
-struct ProviderDeadline {
+pub(crate) struct ProviderDeadline {
     expires_at: Instant,
 }
 
 impl ProviderDeadline {
-    fn new(timeout_ms: u64) -> Self {
+    pub(crate) fn new(timeout_ms: u64) -> Self {
         Self {
             expires_at: Instant::now() + Duration::from_millis(timeout_ms),
         }
     }
 
-    fn remaining_ms(&self) -> WebsiteProviderResult<u64> {
+    pub(crate) fn remaining_ms(&self) -> WebsiteProviderResult<u64> {
         let remaining = self.expires_at.saturating_duration_since(Instant::now());
         if remaining.is_zero() {
             return Err(provider_deadline_exceeded());
@@ -770,7 +771,7 @@ impl ProviderDeadline {
             .max(1))
     }
 
-    async fn call<T, F>(&self, future: F) -> WebsiteProviderResult<T>
+    pub(crate) async fn call<T, F>(&self, future: F) -> WebsiteProviderResult<T>
     where
         F: Future<Output = WebsiteProviderResult<T>>,
     {
@@ -781,17 +782,17 @@ impl ProviderDeadline {
     }
 }
 
-fn provider_deadline_exceeded() -> WebsiteProviderError {
+pub(crate) fn provider_deadline_exceeded() -> WebsiteProviderError {
     WebsiteProviderError::new(WebsiteProviderErrorKind::DeadlineExceeded)
 }
 
-fn provider_unavailable() -> WebsiteProviderError {
+pub(crate) fn provider_unavailable() -> WebsiteProviderError {
     WebsiteProviderError::with_retry_after(
         WebsiteProviderErrorKind::Unavailable,
         PROVIDER_BUFFER_RETRY_AFTER_MS,
     )
 }
 
-fn provider_contract_mismatch() -> WebsiteDeliveryError {
+pub(crate) fn provider_contract_mismatch() -> WebsiteDeliveryError {
     WebsiteProviderError::new(WebsiteProviderErrorKind::ContractMismatch).into()
 }

@@ -1,7 +1,7 @@
 import { backendApiPath } from './paths';
 import type { ApiRequestOptions, HttpClient } from '../http/client';
 
-import type { CertificateOperationResponse, CertificateResponse, CreateListenerCertificateBindingRequest, IssueCertificateRequest, ListenerCertificateBindingResponse, PageInfo, SdkWorkAsyncData, UpdateCertificateRequest } from '../types';
+import type { CertificateOperationResponse, CertificateResponse, CreateListenerCertificateBindingRequest, IssueCertificateRequest, ListenerCertificateBindingResponse, PageInfo, RevokeCertificateRequest, SdkWorkAsyncData, UpdateCertificateRequest } from '../types';
 
 
 export class CertificateOperationsApi {
@@ -115,6 +115,10 @@ export interface CertificateRenewParams {
   idempotencyKey: string;
 }
 
+export interface CertificateRevokeParams {
+  idempotencyKey: string;
+}
+
 export class CertificateApi {
   private client: HttpClient;
   public readonly applications: CertificateApplicationsApi;
@@ -179,6 +183,17 @@ export class CertificateApi {
       {}
     );
     return this.client.request<SdkWorkAsyncData>(backendApiPath(`/certificates/${serializePathParameter(certificateId, { name: 'certificateId', style: 'simple', explode: false })}/renew`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, headers: requestHeaders, sdkworkUnwrapKind: 'command' });
+  }
+
+/** Revoke a canonical certificate */
+  async revoke(certificateId: string, body: RevokeCertificateRequest, params: CertificateRevokeParams, requestOptions?: ApiRequestOptions): Promise<CertificateResponse> {
+    const requestHeaders = buildRequestHeaders(
+      {
+        'Idempotency-Key': { value: params.idempotencyKey, style: 'simple', explode: false },
+      },
+      {}
+    );
+    return this.client.request<CertificateResponse>(backendApiPath(`/certificates/${serializePathParameter(certificateId, { name: 'certificateId', style: 'simple', explode: false })}/revoke`), { signal: requestOptions?.signal, timeout: requestOptions?.timeout, method: 'POST' as any, body, headers: requestHeaders, contentType: 'application/json', sdkworkUnwrapKind: 'data' });
   }
 }
 

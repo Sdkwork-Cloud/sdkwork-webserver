@@ -92,6 +92,31 @@ fn open_fallback(
     }
 }
 
+/// Opens the ACME HTTP-01 challenge file for `token` under the webroot.
+///
+/// The path is fixed to `<webroot>/.well-known/acme-challenge/<token>` and
+/// every component is opened without following symlinks, so the challenge
+/// never escapes the webroot and never exposes a directory or another file.
+/// `token` must already satisfy the strict ACME token character set.
+pub(crate) async fn open_challenge_file(
+    root: &Path,
+    token: &str,
+) -> Result<OpenedStaticFile, StaticPathError> {
+    let root = root.to_owned();
+    let token = token.to_owned();
+    tokio::task::spawn_blocking(move || {
+        let root_dir = Dir::open_ambient_dir(&root, ambient_authority()).map_err(map_root_error)?;
+        let well_known = open_directory_component(root_dir, Path::new(".well-known"))?;
+        let challenge = open_directory_component(well_known, Path::new("acme-challenge"))?;
+        match open_entry(&challenge, Path::new(&token), Path::new(&token))? {
+            OpenedEntry::File(file) => Ok(file),
+            OpenedEntry::Directory(_) => Err(StaticPathError::NotFound),
+        }
+    })
+    .await
+    .map_err(|_| StaticPathError::Io)?
+}
+
 fn open_relative_entry(
     mut directory: Dir,
     components: &[PathBuf],

@@ -5,9 +5,11 @@ require_relative '../models/certificates_issue_response202'
 require_relative '../models/certificates_list_response'
 require_relative '../models/certificates_operations_retrieve_response'
 require_relative '../models/certificates_renew_response202'
+require_relative '../models/certificates_revoke_response'
 require_relative '../models/certificates_update_response'
 require_relative '../models/create_listener_certificate_binding_request'
 require_relative '../models/issue_certificate_request'
+require_relative '../models/revoke_certificate_request'
 require_relative '../models/update_certificate_request'
 
 module Sdkwork
@@ -146,6 +148,23 @@ module Sdkwork
             options[:headers] = request_headers unless request_headers.empty?
             result = @client.request('POST', path, **options)
             result.is_a?(Hash) ? Models::CertificatesRenewResponse202.from_hash(result) : nil
+          end
+
+          # Revoke a canonical certificate
+          def certificates_revoke(certificate_id, idempotency_key, body: nil)
+            path = interpolate_path('/backend/v3/api/certificates/{certificateId}/revoke', certificateId: serialize_path_parameter(certificate_id, PathParameterSpec.new('certificateId', 'simple', false)))
+            payload = body.respond_to?(:to_hash) ? body.to_hash : body
+            request_headers = build_request_headers(
+              {
+                'Idempotency-Key' => HeaderParameterSpec.new(idempotency_key, 'simple', false, nil),
+              },
+              {}
+            )
+            options = {}
+            options[:headers] = request_headers unless request_headers.empty?
+            options[:json] = payload unless payload.nil?
+            result = @client.request('POST', path, **options)
+            result.is_a?(Hash) ? Models::CertificatesRevokeResponse.from_hash(result) : nil
           end
 
         private

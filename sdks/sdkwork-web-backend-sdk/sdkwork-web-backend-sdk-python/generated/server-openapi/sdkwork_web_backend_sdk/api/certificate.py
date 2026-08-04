@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional
 from ..http_client import HttpClient
-from ..models import ApplicationsDomainsListenerCertificateBindingsCreateResponse201, ApplicationsDomainsListenerCertificateBindingsListResponse, CertificatesIssueResponse202, CertificatesListResponse, CertificatesOperationsRetrieveResponse, CertificatesRenewResponse202, CertificatesUpdateResponse, CreateListenerCertificateBindingRequest, IssueCertificateRequest, UpdateCertificateRequest
+from ..models import ApplicationsDomainsListenerCertificateBindingsCreateResponse201, ApplicationsDomainsListenerCertificateBindingsListResponse, CertificatesIssueResponse202, CertificatesListResponse, CertificatesOperationsRetrieveResponse, CertificatesRenewResponse202, CertificatesRevokeResponse, CertificatesUpdateResponse, CreateListenerCertificateBindingRequest, IssueCertificateRequest, RevokeCertificateRequest, UpdateCertificateRequest
 
 def _append_query_string(path: str, raw_query_string: str) -> str:
     query = raw_query_string.lstrip('?')
@@ -294,6 +294,16 @@ class CertificateApi:
             {}
         )
         return self._client.post(f"/backend/v3/api/certificates/{serialize_path_parameter(certificate_id, {'name': 'certificateId', 'style': 'simple', 'explode': False})}/renew", headers=request_headers)
+
+    def create_revoke(self, certificate_id: str, body: RevokeCertificateRequest, idempotency_key: str) -> CertificatesRevokeResponse:
+        """Revoke a canonical certificate"""
+        request_headers = build_request_headers(
+            {
+                'Idempotency-Key': {'value': idempotency_key, 'style': 'simple', 'explode': False},
+            },
+            {}
+        )
+        return self._client.post(f"/backend/v3/api/certificates/{serialize_path_parameter(certificate_id, {'name': 'certificateId', 'style': 'simple', 'explode': False})}/revoke", json=body, headers=request_headers)
 
 class CertificateApplicationsApi:
     """certificate certificate.applications API client."""

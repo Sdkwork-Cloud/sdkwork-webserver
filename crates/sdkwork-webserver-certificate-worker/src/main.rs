@@ -52,6 +52,15 @@ async fn main() -> anyhow::Result<()> {
         .map_err(|error| anyhow::anyhow!(error))?;
     let mut shutdown_task = tokio::spawn(shutdown_signal());
     let mut next_renewal_schedule = Instant::now();
+    // Reconcile the node TLS runtime snapshot on startup: after a worker or
+    // data-plane restart the snapshot must converge to the database state
+    // without waiting for the next certificate operation.
+    if let Err(error) = runtime.service.publish_node_tls_material().await {
+        warn!(
+            error = %error,
+            "startup node TLS material reconciliation failed"
+        );
+    }
     // Randomize the startup phase so multiple worker replicas do not claim
     // operations in lockstep.
     tokio::time::sleep(Duration::from_millis(jitter_millis(

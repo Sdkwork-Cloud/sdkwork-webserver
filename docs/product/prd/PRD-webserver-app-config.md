@@ -3,7 +3,7 @@
 Status: active
 Owner: SDKWork maintainers
 Application: sdkwork-web
-Updated: 2026-07-15
+Updated: 2026-08-04
 Parent: [PRD.md](PRD.md)
 Specs: APP_MANIFEST_SPEC.md, APPLICATION_SPEC.md, CONFIG_SPEC.md, ENVIRONMENT_SPEC.md, NGINX_SPEC.md, SECURITY_SPEC.md
 
@@ -141,11 +141,24 @@ Each `tlsPolicies` entry declares protocol versions, approved cipher/security pr
 Resource types:
 
 - `static`: protected filesystem or packaged artifact root.
-- `drive-artifact`: immutable SDKWork Drive-backed Web artifact.
+- `drive`: live Drive WebsiteRoot mount (a space root or a folder inside a space,
+  declared through `providerResourceUuid` and optional `resourceSubpath`), served with
+  index files, SPA fallback, conditional requests, byte ranges, and bounded resolution caching.
+- `knowledgebase`: live Knowledgebase WikiPublication site, served through wiki route
+  resolution, canonical redirects, navigation, and search with an optional resource-level
+  `locale` default.
+- `drive-artifact`: immutable SDKWork Drive-backed Web artifact (application release
+  artifacts; distinct from the live `drive` WebsiteRoot mount).
 - `proxy`: reference to an upstream pool.
 - `redirect`: status and safe location template.
 - `respond`: bounded fixed response.
 - `acme-http-01`: reserved managed challenge responder.
+
+Provider-backed `drive` and `knowledgebase` resources reuse the shared website provider
+contracts and bounded resolution cache. Provider SDK connections are environment-owned
+(base URL, ingress token file, tenant scope hash); every referenced resource is validated
+against its provider before the data plane starts, and watched reloads that would reference
+an unassembled provider type are rejected while the active generation is retained.
 
 Static resources support index files, `tryFiles`, SPA fallback, directory listing policy, MIME mapping, charset, ETag, Last-Modified, byte ranges, precompressed variants, cache control, hidden-file policy, symlink policy, dot-file policy, and maximum file size policy.
 
@@ -173,7 +186,7 @@ Route matches may include:
 - Header, query, cookie, source network, protocol, or host conditions.
 - Explicit priority only for match combinations that cannot be represented by Nginx location order.
 
-Route actions are exactly one of static resource, proxy upstream, redirect, fixed response, or managed extension. Rewrites, header transforms, body limits, timeout, cache, compression, rate, access, authentication, and observability are policies around the action rather than hidden side effects.
+Route actions are exactly one of static resource, Drive WebsiteRoot mount, Knowledgebase WikiPublication, proxy upstream, redirect, fixed response, or managed extension. Rewrites, header transforms, body limits, timeout, cache, compression, rate, access, authentication, and observability are policies around the action rather than hidden side effects.
 
 The compiler must reject ambiguous exact matches, unreachable routes, unsafe rewrites, rewrite loops, invalid regex, conflicting actions, missing references, and route counts above the configured application quota.
 

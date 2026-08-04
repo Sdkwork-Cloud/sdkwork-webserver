@@ -17,8 +17,9 @@ use sdkwork_webserver_contract::{
     CreateRootDomainHostnameRequest, CreateRootDomainRequest, CreateServerRequest,
     CreateSiteRequest, CreateSourceVersionRequest, IssueCertificateRequest, ListAuditLogsQuery,
     ListNginxConfigsQuery, ListRootDomainsQuery, ListSitesQuery, MediaResource,
-    RuntimeObservationState, SourceVersionConfigSnapshot, UpdateDomainApplicationBindingRequest,
-    UpdateNginxConfigRequest, UpdateSiteRequest, WebServiceErrorKind, WebsiteRuntimeSetSnapshot,
+    RevokeCertificateRequest, RuntimeObservationState, SourceVersionConfigSnapshot,
+    UpdateDomainApplicationBindingRequest, UpdateNginxConfigRequest, UpdateSiteRequest,
+    WebServiceErrorKind, WebsiteRuntimeSetSnapshot,
 };
 use sdkwork_webserver_core::website_runtime::website_runtime_set_snapshot_sha256;
 use sdkwork_webserver_database_host::bootstrap_web_database;
@@ -184,7 +185,294 @@ async fn postgres_repository_transactions_tenants_idempotency_and_pagination_are
 
     verify_repository_contract(&context).await;
     verify_certificate_activation_compensation(&context).await;
+    verify_certificate_revocation_ari_and_tls_projection(&context).await;
     context.pool.close().await;
+}
+
+async fn verify_certificate_revocation_ari_and_tls_projection(context: &TestContext) {
+    let repository = &context.repository;
+    let site = repository
+        .create_site(
+            TENANT_A,
+            Some(31),
+            Some(91),
+            &CreateSiteRequest {
+                name: "Parity Revocation Site".to_string(),
+                slug: Some("parity-revocation".to_string()),
+                description: None,
+                application_type: "WEB".to_string(),
+                site_type: 1,
+                runtime_config: None,
+                store_listing: None,
+            },
+        )
+        .await
+        .expect("create revocation site");
+    let domain = repository
+        .create_domain(
+            TENANT_A,
+            &site.id,
+            &CreateDomainRequest {
+                hostname: "revoke.example.test".to_string(),
+                is_primary: true,
+                ssl_enabled: true,
+                ssl_provider: Some("self-signed".to_string()),
+            },
+        )
+        .await
+        .expect("create revocation domain");
+    verify_site_domain_with_evidence(&context.repository, TENANT_A, &site.id, &domain.id).await;
+
+    // 1) Revocation lifecycle: issue a self-signed certificate, bind it to a
+    // listener, revoke it, and prove the bindings are archived and the
+    // aggregate is terminal.
+    let revoke_lease = enqueue_and_claim_certificate(
+        repository,
+        TENANT_A,
+        Some(91),
+        Some(91),
+        &IssueCertificateRequest {
+            domain_ids: vec![domain.id.clone()],
+            cert_type: 3,
+            key_algorithm: "ECDSA".to_string(),
+            auto_renew: false,
+        },
+        "parity-certificate-revoke",
+        "repository-parity-revoke",
+    )
+    .await;
+    let revoked_certificate = repository
+        .finalize_certificate_operation(
+            &revoke_lease,
+            &test_certificate_update("revoke.example.test", 3, "ECDSA", '7', false),
+        )
+        .await
+        .expect("finalize revoke certificate");
+    assert_eq!(revoked_certificate.status, "ISSUED");
+    let revoke_binding = repository
+        .bind_listener_certificate(
+            TENANT_A,
+            &site.id,
+            &domain.id,
+            &CreateListenerCertificateBindingRequest {
+                certificate_id: revoke_lease.certificate_id.clone(),
+                certificate_version_id: None,
+                priority: 100,
+                is_default: true,
+            },
+        )
+        .await
+        .expect("bind certificate for revocation");
+    assert_eq!(revoke_binding.status, "PENDING");
+
+    let revocation_material = repository
+        .load_certificate_revocation_material(TENANT_A, &revoke_lease.certificate_id)
+        .await
+        .expect("load revocation material");
+    assert_eq!(revocation_material.cert_type, 3);
+    assert!(revocation_material
+        .fullchain_pem
+        .contains("BEGIN CERTIFICATE"));
+
+    let revoked = repository
+        .mark_certificate_revoked(
+            TENANT_A,
+            &revoke_lease.certificate_id,
+            &RevokeCertificateRequest {
+                reason: "superseded".to_string(),
+            },
+            Some(91),
+        )
+        .await
+        .expect("mark certificate revoked");
+    assert_eq!(revoked.status, "REVOKED");
+    assert!(
+        repository
+            .mark_certificate_revoked(
+                TENANT_A,
+                &revoke_lease.certificate_id,
+                &RevokeCertificateRequest {
+                    reason: "superseded".to_string()
+                },
+                Some(91),
+            )
+            .await
+            .is_err(),
+        "a second revocation of an inactive certificate must conflict"
+    );
+    let archived_bindings = repository
+        .list_listener_certificate_bindings(TENANT_A, &site.id, &domain.id, 1, 20)
+        .await
+        .expect("list bindings after revocation");
+    assert!(
+        archived_bindings
+            .items
+            .iter()
+            .all(|binding| binding.status == "ARCHIVED"),
+        "revocation must archive every listener binding"
+    );
+
+    // 2) ARI scheduling: a future CA-suggested window suppresses scheduling
+    // inside the fixed window; an elapsed window schedules immediately.
+    let ari_lease = enqueue_and_claim_certificate(
+        repository,
+        TENANT_A,
+        Some(91),
+        Some(91),
+        &IssueCertificateRequest {
+            domain_ids: vec![domain.id.clone()],
+            cert_type: 1,
+            key_algorithm: "ECDSA".to_string(),
+            auto_renew: true,
+        },
+        "parity-certificate-ari",
+        "repository-parity-ari",
+    )
+    .await;
+    let ari_certificate = repository
+        .finalize_certificate_operation(
+            &ari_lease,
+            &test_certificate_update("ari.example.test", 1, "ECDSA", '8', true),
+        )
+        .await
+        .expect("finalize ARI certificate");
+    assert_eq!(ari_certificate.status, "ISSUED");
+    repository
+        .record_certificate_renewal_info(
+            TENANT_A,
+            &ari_lease.certificate_id,
+            "2099-01-01T00:00:00Z",
+            "2099-02-01T00:00:00Z",
+        )
+        .await
+        .expect("record future ARI window");
+    let scheduled_with_future_ari = repository
+        .schedule_due_certificate_renewals(365, 100)
+        .await
+        .expect("schedule with future ARI window");
+    repository
+        .record_certificate_renewal_info(
+            TENANT_A,
+            &ari_lease.certificate_id,
+            "2020-01-01T00:00:00Z",
+            "2020-02-01T00:00:00Z",
+        )
+        .await
+        .expect("record elapsed ARI window");
+    let scheduled_with_elapsed_ari = repository
+        .schedule_due_certificate_renewals(365, 100)
+        .await
+        .expect("schedule with elapsed ARI window");
+    assert!(
+        scheduled_with_elapsed_ari > scheduled_with_future_ari,
+        "an elapsed ARI window must schedule renewal even inside the fixed window"
+    );
+
+    // 3) Node TLS material projection: only active bindings on assigned sites
+    // are projected; revoked certificates never appear.
+    let ari_domain = repository
+        .create_domain(
+            TENANT_A,
+            &site.id,
+            &CreateDomainRequest {
+                hostname: "ari.example.test".to_string(),
+                is_primary: false,
+                ssl_enabled: true,
+                ssl_provider: Some("lets-encrypt".to_string()),
+            },
+        )
+        .await
+        .expect("create ARI domain");
+    verify_site_domain_with_evidence(&context.repository, TENANT_A, &site.id, &ari_domain.id).await;
+    let _ari_binding = repository
+        .bind_listener_certificate(
+            TENANT_A,
+            &site.id,
+            &ari_domain.id,
+            &CreateListenerCertificateBindingRequest {
+                certificate_id: ari_lease.certificate_id.clone(),
+                certificate_version_id: None,
+                priority: 100,
+                is_default: true,
+            },
+        )
+        .await
+        .expect("bind ARI certificate to listener");
+
+    let server = repository
+        .create_server(
+            TENANT_A,
+            &CreateServerRequest {
+                name: "Parity TLS Node".to_string(),
+                host: "192.0.2.46".to_string(),
+                tenant_scope_hash: "a".repeat(64),
+                ssh_port: 22,
+            },
+        )
+        .await
+        .expect("create TLS projection node");
+    let target = repository
+        .resolve_runtime_assignment_target(TENANT_A, false, &server.server.id)
+        .await
+        .expect("resolve TLS node runtime target");
+    repository
+        .publish_runtime_assignment(runtime_assignment_write(
+            &target,
+            "production",
+            1,
+            "parity-tls-projection",
+        ))
+        .await
+        .expect("publish TLS node runtime assignment");
+    sqlx::query(
+        "UPDATE web_runtime_assignment a
+         SET runtime_set = jsonb_set(
+             a.runtime_set,
+             '{descriptors}',
+             jsonb_build_array(jsonb_build_object('siteUuid', CAST($3 AS TEXT))),
+             FALSE
+         )
+         FROM web_server s
+         WHERE a.tenant_id = $1 AND a.server_id = s.id AND s.uuid = $2",
+    )
+    .bind(TENANT_A)
+    .bind(&server.server.id)
+    .bind(&site.id)
+    .execute(&context.pool)
+    .await
+    .expect("scope TLS node assignment to the revocation site");
+
+    let assignments = repository
+        .load_node_tls_certificate_assignments(&server.server.id)
+        .await
+        .expect("load node TLS certificate assignments");
+    assert_eq!(
+        assignments.len(),
+        1,
+        "only the active listener binding is projected"
+    );
+    assert_eq!(assignments[0].certificate_id, ari_lease.certificate_id);
+    assert_eq!(assignments[0].cert_name, "ari.example.test");
+    assert_eq!(
+        assignments[0].hostnames,
+        vec!["ari.example.test".to_string()]
+    );
+    assert!(assignments[0].fullchain_pem.contains("BEGIN CERTIFICATE"));
+    assert!(assignments[0].private_key_pem.contains("PRIVATE KEY"));
+    assert!(assignments[0].not_before.ends_with('Z'));
+    assert!(assignments[0].not_after.ends_with('Z'));
+    assert_eq!(assignments[0].fingerprint_sha256.len(), 64);
+    assert!(
+        !assignments
+            .iter()
+            .any(|assignment| assignment.certificate_id == revoke_lease.certificate_id),
+        "revoked certificates must never be projected into node TLS material"
+    );
+    assert!(repository
+        .load_node_tls_certificate_assignments("unknown-node")
+        .await
+        .expect("unknown node yields no assignments")
+        .is_empty());
 }
 
 async fn verify_certificate_activation_compensation(context: &TestContext) {
@@ -339,7 +627,7 @@ async fn prepare_database(config: DatabaseConfig) -> TestContext {
         .await
         .expect("initialize PostgreSQL Web database lifecycle");
 
-    let database_engine = config.engine;
+    let _database_engine = config.engine;
     let id_generator = SnowflakeIdGenerator::new(731).expect("create test Snowflake generator");
     let repository = Arc::new(PostgresWebRepository::new(
         pool.clone(),

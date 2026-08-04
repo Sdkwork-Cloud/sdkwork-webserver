@@ -76,7 +76,7 @@
     },
     {
       "path": "src/api/certificate.rs",
-      "sha256": "0ea437dcfe920b01599072d87bac295b56a52762faf930c6167740811cc69592"
+      "sha256": "8ad9d72c207b6435112ace129d0225ac899bf2d39ff8df1b1e30cc83394cb7ab"
     },
     {
       "path": "src/api/domain.rs",
@@ -283,6 +283,10 @@
       "sha256": "e8418852fc27ee2d8c3fb97a7569397e2e9ca00b3a6b36fe94a56440ae2271ee"
     },
     {
+      "path": "src/models/certificates_revoke_response.rs",
+      "sha256": "51d8bf856c210a9dec471a0af8a2ca9e0b012e49ec94ebc86e0187f92b87119a"
+    },
+    {
       "path": "src/models/certificates_update_response.rs",
       "sha256": "953b7b668424191ec86c73ed8861eb2bfb1ed54700e01cb15ada9fd4652a4d54"
     },
@@ -416,7 +420,7 @@
     },
     {
       "path": "src/models/mod.rs",
-      "sha256": "1e5e5c448b9de780c5ff54998edc32b50fe2b28bcf5bc58845127868e6665e41"
+      "sha256": "0ef3c591ec6450cf36c31b9a8ca0020320c13c712311cada4b1622d2cc34b1bc"
     },
     {
       "path": "src/models/nginx_config_page.rs",
@@ -457,6 +461,10 @@
     {
       "path": "src/models/retrieve_response.rs",
       "sha256": "53d31ca3aa934dc31eb3b4a9b1277364cda8ee5c921e4fd88420cd8c783b314f"
+    },
+    {
+      "path": "src/models/revoke_certificate_request.rs",
+      "sha256": "79c8faf5320b0946153ba2270820d0b2de076a31c367a392c0c37f709c612f9e"
     },
     {
       "path": "src/models/root_domain_response.rs",
