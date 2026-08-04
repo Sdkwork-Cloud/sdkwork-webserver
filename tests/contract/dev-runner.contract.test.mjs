@@ -32,7 +32,7 @@ test('deployment index owns all supported Web Server profiles', () => {
   const deployment = JSON.parse(
     readFileSync(path.join(REPO_ROOT, 'etc', 'sdkwork.deployment.config.json'), 'utf8'),
   );
-  assert.equal(deployment.application, 'sdkwork-web-server');
+  assert.equal(deployment.application, 'sdkwork-webserver');
   assert.equal(deployment.topology, '../specs/topology.spec.json');
   assert.equal(deployment.defaultProfile, 'standalone.development');
   assert.deepEqual(Object.keys(deployment.profiles).sort(), [

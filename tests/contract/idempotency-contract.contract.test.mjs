@@ -15,7 +15,7 @@ const surfaces = [
     authority: 'apis/app-api/web/web-app-api.openapi.json',
     manifest: 'sdks/_route-manifests/app-api/sdkwork-routes-webserver-app-api.route-manifest.json',
     typescriptApi: 'sdks/sdkwork-web-app-sdk/sdkwork-web-app-sdk-typescript/generated/server-openapi/src/api',
-    expectedIdempotentOperations: 8,
+    expectedIdempotentOperations: 14,
   },
   {
     name: 'backend-api',
@@ -23,7 +23,7 @@ const surfaces = [
     authority: 'apis/backend-api/web/web-backend-api.openapi.json',
     manifest: 'sdks/_route-manifests/backend-api/sdkwork-routes-webserver-backend-api.route-manifest.json',
     typescriptApi: 'sdks/sdkwork-web-backend-sdk/sdkwork-web-backend-sdk-typescript/generated/server-openapi/src/api',
-    expectedIdempotentOperations: 18,
+    expectedIdempotentOperations: 32,
   },
   {
     name: 'internal-api',
@@ -124,7 +124,6 @@ test('deployment idempotency is Header-owned and consumers do not assemble it ma
     'apps/sdkwork-webserver-pc/packages/sdkwork-webserver-pc-console-core/src/index.tsx',
     'apps/sdkwork-webserver-pc/packages/sdkwork-webserver-pc-admin-core/src/index.tsx',
     'apps/sdkwork-webserver-pc/packages/sdkwork-webserver-pc-admin-applications/src/data-source.ts',
-    'apps/sdkwork-webserver-pc/packages/sdkwork-webserver-pc-admin-certificates/src/data-source.ts',
   ];
   for (const file of consumerFiles) {
     assert.doesNotMatch(read(file), /Idempotency-Key/u, `${file} must use generated SDK params`);

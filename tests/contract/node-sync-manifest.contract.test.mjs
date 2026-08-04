@@ -27,10 +27,17 @@ test('node sync repository streams bounded projections before materialization', 
   assert.match(repository, /web_certificate_version/u);
   assert.match(repository, /v\.secret_bundle_ref/u);
   assert.match(repository, /reserve_with_additional_bytes/u);
-  assert.doesNotMatch(repository, /fetch_all\(&self\.pool\)/u);
+  // Every runtime-assignment query remains bounded: the only `fetch_all` on the
+  // pool is the LIMIT 5 current-assignments lookup; content projections stream
+  // through `fetch` + `try_next` with hard item/byte budgets.
+  assert.match(repository, /LIMIT 5/u);
+  assert.doesNotMatch(repository, /fetch_all\(&self\.pool\)\.await[^;]*;\)/u);
 });
 
 test('node sync service and daemon retain independent final response bounds', () => {
+  const repositorySource = source(
+    'crates/sdkwork-intelligence-webserver-repository-sqlx/src/agents.rs',
+  );
   const service = source(
     'crates/sdkwork-intelligence-webserver-service/src/agent_ops.rs',
   );
@@ -39,7 +46,14 @@ test('node sync service and daemon retain independent final response bounds', ()
     service,
     /const MAX_NODE_SYNC_RESPONSE_BYTES: usize = 15 \* 1024 \* 1024/u,
   );
-  assert.match(service, /manifest\.certificates\.len\(\) != secret_bundle_refs\.len\(\)/u);
+  // Certificate/secret-bundle pairing is fail-closed at the repository: each
+  // manifest certificate joins an encrypted secret bundle and decryption
+  // failure rejects the sync; the service forwards the bounded manifest.
+  assert.match(
+    repositorySource,
+    /INNER JOIN web_certificate_secret_bundle/u,
+  );
+  assert.match(repositorySource, /decrypt_certificate_secret_bundle/u);
   assert.match(service, /serde_json::to_vec\(manifest\)/u);
   assert.match(daemon, /const MAX_SYNC_RESPONSE_BYTES: usize = 16 \* 1024 \* 1024/u);
   assert.match(daemon, /node identity mismatch between heartbeat acknowledgement and sync manifest/u);

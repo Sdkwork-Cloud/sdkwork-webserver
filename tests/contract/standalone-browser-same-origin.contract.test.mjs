@@ -91,7 +91,9 @@ test('Vite proxies every canonical infrastructure path and keeps one React insta
   assert.doesNotMatch(browserTopology, /rewrite\s*:/u);
 
   const vite = read('apps/sdkwork-webserver-pc/vite.config.ts');
-  assert.match(vite, /dedupe:\s*\["react",\s*"react-dom"\]/u);
+  // react/react-dom must be deduped; the configuration may list additional
+  // framework packages after them.
+  assert.match(vite, /dedupe:\s*\["react",\s*"react-dom"[^\]]*\]/u);
   assert.match(vite, /createCanonicalApiProxyConfig/u);
 });
 
