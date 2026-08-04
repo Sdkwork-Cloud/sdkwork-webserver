@@ -15,15 +15,16 @@ pub use loader::{
 };
 pub use model::{
     AcmeHttp01Config, CertificateConfig, CertificateSource, CompatibilityConfig,
-    ConfigProviderType, DeploymentConfig, ListenerConfig, ListenerProtocol, ListenerTlsRuntime,
-    ObservabilityConfig, ProviderCachePolicy, ProxyProtocolConfig, ProxyProtocolCrc32cPolicy,
-    ProxyProtocolVersion, ReloadConfig, ReloadMode, ResolverConfig, ResourceConfig,
-    ResourcePressureConfig, ResourceSampleFailurePolicy, RouteConfig, RouteMatchConfig,
-    RoutePathType, TlsPolicyConfig, TlsVersion, TrustedProxyConfig, TrustedProxyHeader,
+    ConfigProviderType, CustomHeaderConfig, DeploymentConfig, ListenerConfig, ListenerProtocol,
+    ListenerTlsRuntime, ObservabilityConfig, ProviderCachePolicy, ProxyProtocolConfig,
+    ProxyProtocolCrc32cPolicy, ProxyProtocolVersion, ReloadConfig, ReloadMode, ResolverConfig,
+    ResourceConfig, ResourcePressureConfig, ResourceSampleFailurePolicy, RouteConfig,
+    RouteMatchConfig, RoutePathType, SecurityHeadersConfig, StrictTransportSecurityConfig,
+    TlsPolicyConfig, TlsVersion, TrustedProxyConfig, TrustedProxyHeader,
     UpstreamActiveHealthConfig, UpstreamActiveHealthMethod, UpstreamAddressPolicyConfig,
     UpstreamConfig, UpstreamLoadBalancingStrategy, UpstreamPassiveHealthConfig,
     UpstreamRetryCondition, UpstreamRetryConfig, UpstreamTargetConfig, UpstreamTlsConfig,
-    UpstreamTlsTrustMode, VirtualHostConfig, WebServerAppConfig, WebServerLimits,
+    UpstreamTlsTrustMode, VirtualHostConfig, WebServerAppConfig, WebServerLimits, XFrameOptions,
 };
 pub use network::{is_supported_upstream_allowed_cidr, upstream_ip_is_allowed};
 pub use uri::{normalize_uri_path, UriPathNormalizationError};

@@ -135,7 +135,7 @@ impl WebService {
             return Ok(());
         }
         let _lock = DistributionLock::acquire(&config.material_root)?;
-        fs::create_dir_all(&config.material_root).map_err(|error| {
+        create_private_directory(&config.material_root).map_err(|error| {
             WebServiceError::Internal(format!(
                 "create TLS material root {}: {error}",
                 config.material_root.display()
@@ -250,7 +250,7 @@ fn write_material_files(
     material: &TlsCertificateAssignmentMaterial,
 ) -> WebServiceResult<()> {
     let directory = material_root.join(&material.version_uuid);
-    fs::create_dir_all(&directory).map_err(|error| {
+    create_private_directory(&directory).map_err(|error| {
         WebServiceError::Internal(format!(
             "create TLS material directory {}: {error}",
             directory.display()
@@ -374,7 +374,7 @@ fn write_snapshot_atomically(snapshot_file: &Path, serialized: &[u8]) -> WebServ
     let parent = snapshot_file.parent().ok_or_else(|| {
         WebServiceError::Internal("TLS snapshot file has no parent directory".to_string())
     })?;
-    fs::create_dir_all(parent).map_err(|error| {
+    create_private_directory(parent).map_err(|error| {
         WebServiceError::Internal(format!(
             "create TLS snapshot directory {}: {error}",
             parent.display()
@@ -531,7 +531,7 @@ struct DistributionLock {
 
 impl DistributionLock {
     fn acquire(material_root: &Path) -> WebServiceResult<Self> {
-        fs::create_dir_all(material_root).map_err(|error| {
+        create_private_directory(material_root).map_err(|error| {
             WebServiceError::Internal(format!(
                 "create TLS material root {}: {error}",
                 material_root.display()
@@ -571,6 +571,20 @@ impl Drop for DistributionLock {
     }
 }
 
+/// Creates a directory with owner-only permissions on Unix. TLS material
+/// directories hold private key bundles; umask-dependent default modes are
+/// not acceptable for them.
+fn create_private_directory(path: &Path) -> std::io::Result<()> {
+    fs::create_dir_all(path)?;
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let mut permissions = fs::metadata(path)?.permissions();
+        permissions.set_mode(0o700);
+        fs::set_permissions(path, permissions)?;
+    }
+    Ok(())
+}
 #[cfg(test)]
 mod tests {
     use super::*;

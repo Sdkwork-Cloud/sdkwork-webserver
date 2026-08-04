@@ -9,9 +9,9 @@ use url::Url;
 
 use super::{
     is_supported_upstream_allowed_cidr, upstream_ip_is_allowed, CertificateSource,
-    ConfigDiagnostic, ListenerProtocol, ResourceConfig, RouteConfig, TlsVersion,
-    UpstreamLoadBalancingStrategy, UpstreamTlsTrustMode, WebServerAppConfig, WebServerConfigError,
-    WebServerLimits,
+    ConfigDiagnostic, ListenerProtocol, ResourceConfig, RouteConfig, SecurityHeadersConfig,
+    TlsVersion, UpstreamLoadBalancingStrategy, UpstreamTlsTrustMode, WebServerAppConfig,
+    WebServerConfigError, WebServerLimits,
 };
 
 const MAX_DIAGNOSTICS: usize = 128;
@@ -114,6 +114,19 @@ impl SemanticValidator {
                     format!("{path}/protocols"),
                     "HTTP/2 requires TLS in the foundation profile; public h2c is unsupported",
                 );
+            }
+            if let Ok(bind) = listener.bind.parse::<IpAddr>() {
+                let has_tls = listener.tls_policy_ref.is_some() || listener.tls_runtime.is_some();
+                if !bind.is_loopback()
+                    && !has_tls
+                    && listener.acme_http_01.is_none()
+                    && !listener.allow_plaintext_http
+                {
+                    self.push(
+                        format!("{path}/bind"),
+                        "public non-loopback listener without TLS requires allowPlaintextHttp, acmeHttp01, or a TLS policy; plaintext HTTP is fail-closed by default",
+                    );
+                }
             }
             if listener.tls_policy_ref.is_some() && listener.tls_runtime.is_some() {
                 self.push(
@@ -803,6 +816,7 @@ impl SemanticValidator {
                 &resources,
                 &config.limits,
             );
+            validate_security_headers(self, &path, virtual_host.security_headers.as_ref());
         }
         if total_routes > MAX_TOTAL_ROUTES {
             self.push(
@@ -1550,6 +1564,45 @@ fn validate_redirect_location(validator: &mut SemanticValidator, path: &str, loc
         ),
     }
 }
+
+fn validate_security_headers(
+    validator: &mut SemanticValidator,
+    host_path: &str,
+    security_headers: Option<&SecurityHeadersConfig>,
+) {
+    let Some(security_headers) = security_headers else {
+        return;
+    };
+    for (index, header) in security_headers.custom_headers.iter().enumerate() {
+        let name = header.name.to_ascii_lowercase();
+        if HOP_BY_HOP_HEADERS.contains(&name.as_str()) {
+            validator.push(
+                format!("{host_path}/securityHeaders/customHeaders/{index}/name"),
+                format!("hop-by-hop header {name} is forbidden in customHeaders"),
+            );
+        }
+    }
+}
+
+const HOP_BY_HOP_HEADERS: &[&str] = &[
+    "connection",
+    "keep-alive",
+    "proxy-authenticate",
+    "proxy-authorization",
+    "te",
+    "trailer",
+    "transfer-encoding",
+    "upgrade",
+    "host",
+    "content-length",
+    "content-encoding",
+    "content-type",
+    "strict-transport-security",
+    "x-frame-options",
+    "content-security-policy",
+    "referrer-policy",
+    "x-content-type-options",
+];
 
 fn validate_provider_resource_uuid(validator: &mut SemanticValidator, path: &str, value: &str) {
     if value.is_empty()

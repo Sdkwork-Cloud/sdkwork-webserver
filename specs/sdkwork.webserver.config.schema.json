@@ -506,6 +506,11 @@
               "maxLength": 4096
             }
           }
+        },
+        "allowPlaintextHttp": {
+          "type": "boolean",
+          "default": false,
+          "description": "Explicit opt-in for a public (non-loopback) listener without TLS. Plaintext HTTP on a public listener is otherwise rejected; the exceptions are loopback binds, listeners with `acmeHttp01` (HTTP-01 challenge serving), and this flag."
         }
       }
     },
@@ -1271,6 +1276,74 @@
           "maxItems": 10000,
           "items": {
             "$ref": "#/$defs/route"
+          }
+        },
+        "securityHeaders": {
+          "$ref": "#/$defs/securityHeaders"
+        }
+      }
+    },
+    "securityHeaders": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "strictTransportSecurity": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "maxAgeSeconds": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 31536000,
+              "default": 31536000
+            },
+            "includeSubDomains": {
+              "type": "boolean",
+              "default": true
+            },
+            "preload": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        },
+        "xFrameOptions": {
+          "enum": ["DENY", "SAMEORIGIN"]
+        },
+        "contentSecurityPolicy": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "referrerPolicy": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "xContentTypeOptions": {
+          "type": "boolean",
+          "default": true
+        },
+        "customHeaders": {
+          "type": "array",
+          "maxItems": 16,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "value"],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128,
+                "pattern": "^[!#$%&'*+.^_`|~0-9A-Za-z-]+$"
+              },
+              "value": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1024
+              }
+            }
           }
         }
       }

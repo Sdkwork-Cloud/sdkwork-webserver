@@ -188,6 +188,8 @@ Route matches may include:
 
 Route actions are exactly one of static resource, Drive WebsiteRoot mount, Knowledgebase WikiPublication, proxy upstream, redirect, fixed response, or managed extension. Rewrites, header transforms, body limits, timeout, cache, compression, rate, access, authentication, and observability are policies around the action rather than hidden side effects.
 
+Each virtual host may declare `securityHeaders` applied to every selected response: HSTS (HTTPS only), `X-Frame-Options`, `Content-Security-Policy`, `Referrer-Policy`, `X-Content-Type-Options` (default `nosniff`), and up to sixteen bounded custom headers. Custom headers reject hop-by-hop and framework-owned names at compile time. Public non-loopback listeners without TLS fail closed unless the operator explicitly declares `allowPlaintextHttp` or serves ACME HTTP-01 challenges through `acmeHttp01`.
+
 The compiler must reject ambiguous exact matches, unreachable routes, unsafe rewrites, rewrite loops, invalid regex, conflicting actions, missing references, and route counts above the configured application quota.
 
 ## 11. Upstream Contract

@@ -8,14 +8,14 @@ use axum::{
             CONNECTION, CONTENT_LENGTH, CONTENT_TYPE, EXPECT, HOST, LOCATION, RETRY_AFTER, TE,
             TRANSFER_ENCODING,
         },
-        HeaderMap, HeaderValue, Request, Response, StatusCode, Version,
+        HeaderMap, HeaderName, HeaderValue, Request, Response, StatusCode, Version,
     },
 };
 use futures_util::StreamExt;
 use sdkwork_webserver_core::{
     normalize_authority_host,
     website_runtime::{ProviderResourceReference, WebsiteProviderType},
-    ResourceConfig, RoutePathType,
+    ResourceConfig, RoutePathType, SecurityHeadersConfig, XFrameOptions,
 };
 use sdkwork_webserver_delivery_runtime::{
     AppConfigProviderPolicy, AppConfigResourceHandler, AppConfigResourceRoute,
@@ -427,6 +427,74 @@ async fn route_admitted_request(
             "request served"
         );
     }
+    apply_security_headers(
+        response,
+        selected.virtual_host.security_headers.as_ref(),
+        scheme.as_str(),
+    )
+}
+
+/// Applies the selected virtual host's security response headers. HSTS is
+/// emitted only for HTTPS responses; `x_content_type_options` defaults to
+/// `nosniff` and is only suppressed when explicitly disabled.
+fn apply_security_headers(
+    mut response: Response<Body>,
+    security_headers: Option<&SecurityHeadersConfig>,
+    scheme: &str,
+) -> Response<Body> {
+    let Some(security_headers) = security_headers else {
+        return response;
+    };
+    let headers = response.headers_mut();
+    if let Some(hsts) = &security_headers.strict_transport_security {
+        if scheme == "https" {
+            let mut value = format!("max-age={}", hsts.max_age_seconds);
+            if hsts.include_sub_domains {
+                value.push_str("; includeSubDomains");
+            }
+            if hsts.preload {
+                value.push_str("; preload");
+            }
+            if let Ok(value) = HeaderValue::from_str(&value) {
+                headers.insert(HeaderName::from_static("strict-transport-security"), value);
+            }
+        }
+    }
+    if let Some(frame_options) = security_headers.x_frame_options {
+        let value = match frame_options {
+            XFrameOptions::Deny => "DENY",
+            XFrameOptions::SameOrigin => "SAMEORIGIN",
+        };
+        headers.insert(
+            HeaderName::from_static("x-frame-options"),
+            HeaderValue::from_static(value),
+        );
+    }
+    if let Some(policy) = &security_headers.content_security_policy {
+        if let Ok(value) = HeaderValue::from_str(policy) {
+            headers.insert(HeaderName::from_static("content-security-policy"), value);
+        }
+    }
+    if let Some(policy) = &security_headers.referrer_policy {
+        if let Ok(value) = HeaderValue::from_str(policy) {
+            headers.insert(HeaderName::from_static("referrer-policy"), value);
+        }
+    }
+    if security_headers.x_content_type_options {
+        headers.insert(
+            HeaderName::from_static("x-content-type-options"),
+            HeaderValue::from_static("nosniff"),
+        );
+    }
+    for custom in &security_headers.custom_headers {
+        let Ok(name) = HeaderName::from_bytes(custom.name.as_bytes()) else {
+            continue;
+        };
+        let Ok(value) = HeaderValue::from_str(&custom.value) else {
+            continue;
+        };
+        headers.insert(name, value);
+    }
     response
 }
 
@@ -745,4 +813,84 @@ fn redirect_response(status: u16, location: &str) -> Response<Body> {
         response.headers_mut().insert(LOCATION, value);
     }
     response
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use sdkwork_webserver_core::{
+        CustomHeaderConfig, SecurityHeadersConfig, StrictTransportSecurityConfig, XFrameOptions,
+    };
+
+    fn security_config() -> SecurityHeadersConfig {
+        SecurityHeadersConfig {
+            strict_transport_security: Some(StrictTransportSecurityConfig {
+                max_age_seconds: 31_536_000,
+                include_sub_domains: true,
+                preload: true,
+            }),
+            x_frame_options: Some(XFrameOptions::Deny),
+            content_security_policy: Some("default-src 'self'".to_owned()),
+            referrer_policy: Some("strict-origin-when-cross-origin".to_owned()),
+            x_content_type_options: true,
+            custom_headers: vec![CustomHeaderConfig {
+                name: "X-Custom-Tag".to_owned(),
+                value: "web-1".to_owned(),
+            }],
+        }
+    }
+
+    fn base_response() -> Response<Body> {
+        Response::new(Body::from("ok"))
+    }
+
+    #[test]
+    fn security_headers_applied_only_for_the_configured_host() {
+        let response = apply_security_headers(base_response(), None, "https");
+        assert!(response
+            .headers()
+            .get("strict-transport-security")
+            .is_none());
+        assert!(response.headers().get("x-frame-options").is_none());
+    }
+
+    #[test]
+    fn hsts_emitted_only_over_https() {
+        let config = security_config();
+        let https = apply_security_headers(base_response(), Some(&config), "https");
+        assert_eq!(
+            https.headers().get("strict-transport-security").unwrap(),
+            "max-age=31536000; includeSubDomains; preload"
+        );
+        let http = apply_security_headers(base_response(), Some(&config), "http");
+        assert!(http.headers().get("strict-transport-security").is_none());
+    }
+
+    #[test]
+    fn fixed_security_headers_and_defaults_are_applied() {
+        let config = security_config();
+        let response = apply_security_headers(base_response(), Some(&config), "https");
+        assert_eq!(response.headers().get("x-frame-options").unwrap(), "DENY");
+        assert_eq!(
+            response.headers().get("content-security-policy").unwrap(),
+            "default-src 'self'"
+        );
+        assert_eq!(
+            response.headers().get("referrer-policy").unwrap(),
+            "strict-origin-when-cross-origin"
+        );
+        assert_eq!(
+            response.headers().get("x-content-type-options").unwrap(),
+            "nosniff"
+        );
+        assert_eq!(response.headers().get("x-custom-tag").unwrap(), "web-1");
+    }
+
+    #[test]
+    fn x_content_type_options_can_be_explicitly_disabled() {
+        let mut config = security_config();
+        config.x_content_type_options = false;
+        let response = apply_security_headers(base_response(), Some(&config), "https");
+        assert!(response.headers().get("x-content-type-options").is_none());
+    }
 }

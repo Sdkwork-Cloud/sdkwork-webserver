@@ -622,6 +622,8 @@ pub struct ListenerConfig {
     pub trusted_proxy: Option<TrustedProxyConfig>,
     pub proxy_protocol: Option<ProxyProtocolConfig>,
     pub acme_http_01: Option<AcmeHttp01Config>,
+    #[serde(default)]
+    pub allow_plaintext_http: bool,
 }
 
 /// Narrow-precedence ACME HTTP-01 challenge serving for a listener.
@@ -1097,6 +1099,63 @@ pub struct VirtualHostConfig {
     pub listener_refs: Vec<String>,
     pub server_names: Vec<String>,
     pub routes: Vec<RouteConfig>,
+    #[serde(default)]
+    pub security_headers: Option<SecurityHeadersConfig>,
+}
+
+/// Per-virtual-host security response headers, applied to every response
+/// selected by that host. `x_content_type_options` defaults to `true`
+/// (`nosniff`); HSTS is emitted only over HTTPS.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct SecurityHeadersConfig {
+    #[serde(default)]
+    pub strict_transport_security: Option<StrictTransportSecurityConfig>,
+    pub x_frame_options: Option<XFrameOptions>,
+    pub content_security_policy: Option<String>,
+    pub referrer_policy: Option<String>,
+    #[serde(default = "default_x_content_type_options")]
+    pub x_content_type_options: bool,
+    #[serde(default)]
+    pub custom_headers: Vec<CustomHeaderConfig>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StrictTransportSecurityConfig {
+    #[serde(default = "default_hsts_max_age_seconds")]
+    pub max_age_seconds: u32,
+    #[serde(default = "default_true")]
+    pub include_sub_domains: bool,
+    #[serde(default)]
+    pub preload: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum XFrameOptions {
+    #[serde(rename = "DENY")]
+    Deny,
+    #[serde(rename = "SAMEORIGIN")]
+    SameOrigin,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct CustomHeaderConfig {
+    pub name: String,
+    pub value: String,
+}
+
+fn default_x_content_type_options() -> bool {
+    true
+}
+
+fn default_hsts_max_age_seconds() -> u32 {
+    31_536_000
+}
+
+fn default_true() -> bool {
+    true
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

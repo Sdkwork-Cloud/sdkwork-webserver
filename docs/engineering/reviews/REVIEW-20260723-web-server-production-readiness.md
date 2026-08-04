@@ -261,7 +261,7 @@ Deploy-valid repositories are `sdkwork-agents`, `sdkwork-aiot`, `sdkwork-drive`,
 `sdkwork-knowledgebase`, `sdkwork-manager`, and `sdkwork-web-server`.
 
 Deploy-invalid repositories are `sdkwork-agentstudio`, `sdkwork-appstore`, `sdkwork-birdcoder`,
-`sdkwork-canvas`, `sdkwork-clawrouter`, `sdkwork-community`, `sdkwork-course`,
+`sdkwork-canvas`, `sdkwork-cloudrouter`, `sdkwork-community`, `sdkwork-course`,
 `sdkwork-customerservice`, `sdkwork-deployments`, `sdkwork-discovery`, `sdkwork-gameengine`,
 `sdkwork-iam`, `sdkwork-mail`, `sdkwork-memory`, `sdkwork-modelkit`, `sdkwork-notes`,
 `sdkwork-portal`, `sdkwork-settings`, `sdkwork-skills`, and `sdkwork-voice`. Dominant failures are

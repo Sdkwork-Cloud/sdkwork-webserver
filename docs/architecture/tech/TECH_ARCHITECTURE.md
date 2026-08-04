@@ -75,6 +75,10 @@ Current implemented baseline:
   Drive WebsiteRoot (or subdirectory) mounts and Knowledgebase WikiPublications in one
   `sdkwork.webserver.config.json`, assembled fail-closed from environment-owned provider SDK
   credentials and executed through the shared bounded provider registry and resolution cache;
+- per-virtual-host security response headers (HSTS over HTTPS, X-Frame-Options, CSP,
+  Referrer-Policy, `nosniff` default, bounded custom headers with hop-by-hop rejection) and a
+  fail-closed plaintext policy that rejects public non-loopback listeners without TLS unless
+  `allowPlaintextHttp` or `acmeHttp01` is declared;
 - standalone and cloud development topology plans plus standalone/cloud production deployment
   templates.
 

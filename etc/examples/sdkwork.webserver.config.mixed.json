@@ -127,6 +127,20 @@
       "id": "mixed-web",
       "listenerRefs": ["public-http"],
       "serverNames": ["localhost"],
+      "securityHeaders": {
+        "strictTransportSecurity": {
+          "maxAgeSeconds": 31536000,
+          "includeSubDomains": true,
+          "preload": false
+        },
+        "xFrameOptions": "DENY",
+        "contentSecurityPolicy": "default-src 'self'",
+        "referrerPolicy": "strict-origin-when-cross-origin",
+        "xContentTypeOptions": true,
+        "customHeaders": [
+          {"name": "X-Content-Version", "value": "1"}
+        ]
+      },
       "routes": [
         {
           "id": "local-site",

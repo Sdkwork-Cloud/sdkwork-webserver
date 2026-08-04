@@ -2301,3 +2301,69 @@ fn knowledgebase_resource_rejects_index_files_at_schema_level() {
         .iter()
         .any(|diagnostic| diagnostic.path.contains("/resources/")));
 }
+
+#[test]
+fn public_listener_without_tls_is_rejected_unless_explicitly_allowed() {
+    let directory = TempDir::new().expect("create temp directory");
+    let mut config = base_config();
+    config["listeners"][0]["bind"] = json!("0.0.0.0");
+    let path = write_config(directory.path(), &config);
+    let error = load_and_compile_webserver_config(path).expect_err("public plaintext must fail");
+    assert!(error
+        .diagnostics()
+        .iter()
+        .any(|diagnostic| diagnostic.path.ends_with("/bind")
+            && diagnostic.message.contains("allowPlaintextHttp")));
+}
+
+#[test]
+fn public_listener_plaintext_opt_in_and_acme_http01_are_accepted() {
+    let directory = TempDir::new().expect("create temp directory");
+    let mut config = base_config();
+    config["listeners"][0]["bind"] = json!("0.0.0.0");
+    config["listeners"][0]["allowPlaintextHttp"] = json!(true);
+    let path = write_config(directory.path(), &config);
+    load_and_compile_webserver_config(path).expect("explicit plaintext opt-in compiles");
+
+    let mut config = base_config();
+    config["listeners"][0]["bind"] = json!("0.0.0.0");
+    config["listeners"][0]["acmeHttp01"] = json!({"webroot": "acme-webroot"});
+    fs::create_dir(directory.path().join("acme-webroot")).expect("create webroot");
+    let path = write_config(directory.path(), &config);
+    load_and_compile_webserver_config(path).expect("acmeHttp01 plaintext compiles");
+}
+
+#[test]
+fn security_headers_compile_and_hop_by_hop_custom_headers_are_rejected() {
+    let directory = TempDir::new().expect("create temp directory");
+    let mut config = base_config();
+    config["virtualHosts"][0]["securityHeaders"] = json!({
+        "strictTransportSecurity": {
+            "maxAgeSeconds": 31536000,
+            "includeSubDomains": true,
+            "preload": true
+        },
+        "xFrameOptions": "DENY",
+        "contentSecurityPolicy": "default-src 'self'",
+        "referrerPolicy": "strict-origin-when-cross-origin",
+        "xContentTypeOptions": true,
+        "customHeaders": [
+            {"name": "X-Custom-Tag", "value": "web-1"}
+        ]
+    });
+    let path = write_config(directory.path(), &config);
+    load_and_compile_webserver_config(path).expect("security headers compile");
+
+    let mut config = base_config();
+    config["virtualHosts"][0]["securityHeaders"] = json!({
+        "customHeaders": [
+            {"name": "Connection", "value": "close"}
+        ]
+    });
+    let path = write_config(directory.path(), &config);
+    let error = load_and_compile_webserver_config(path).expect_err("hop-by-hop header must fail");
+    assert!(error
+        .diagnostics()
+        .iter()
+        .any(|diagnostic| diagnostic.message.contains("hop-by-hop header")));
+}

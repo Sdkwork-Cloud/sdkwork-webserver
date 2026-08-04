@@ -1177,6 +1177,7 @@ fn read_ingress_token(
             "{config_key} must reference a non-empty bounded secret file"
         )));
     }
+    validate_secret_file_permissions(&metadata, config_key)?;
     let token = std::fs::read_to_string(path).map_err(|_| {
         WebsiteDataPlaneBootstrapError::ProviderConfig(format!(
             "{config_key} must reference a UTF-8 secret file"
@@ -1188,6 +1189,27 @@ fn read_ingress_token(
         )));
     }
     Ok(token)
+}
+
+/// Rejects secret files that group or other users can read or write. On Unix
+/// the mode must not expose any group/other bits (for example `0644` and
+/// `0600` are accepted, `0660`/`0664` are not); Windows ACLs are not checked.
+fn validate_secret_file_permissions(
+    metadata: &std::fs::Metadata,
+    config_key: &str,
+) -> Result<(), WebsiteDataPlaneBootstrapError> {
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let mode = metadata.permissions().mode();
+        if mode & 0o077 != 0 {
+            return Err(WebsiteDataPlaneBootstrapError::ProviderConfig(format!(
+                "{config_key} must not be readable or writable by group or other users (mode {mode:o})"
+            )));
+        }
+    }
+    let _ = (metadata, config_key);
+    Ok(())
 }
 
 fn runtime_set_poll_interval() -> Result<Duration, WebsiteDataPlaneBootstrapError> {
