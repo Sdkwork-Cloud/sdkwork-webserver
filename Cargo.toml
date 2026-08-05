@@ -40,8 +40,8 @@ arc-swap = "1"
 axum = "0.8"
 axum-server = { version = "0.8", features = ["tls-rustls"] }
 bytes = "1"
-cap-fs-ext = "3.4.5"
-cap-std = "3.4.5"
+cap-fs-ext = "4.0.2"
+cap-std = "4.0.2"
 crc = "3"
 dotenvy = "0.15"
 http = "1.4"
@@ -55,10 +55,10 @@ hyper-rustls = { version = "0.27", default-features = false, features = ["aws-lc
 ipnet = { version = "2", features = ["serde"] }
 futures-util = "0.3"
 hashlink = "0.12"
-hickory-resolver = "0.24"
+hickory-resolver = "0.26"
 mime_guess = "2"
 percent-encoding = "2"
-reqwest = { version = "0.12", default-features = false, features = ["http2", "rustls-tls", "stream"] }
+reqwest = { version = "0.13", default-features = false, features = ["http2", "rustls", "stream"] }
 rustls = { version = "0.23", default-features = false, features = ["aws_lc_rs", "std", "tls12"] }
 rustls-pki-types = "1"
 url = "2"
@@ -72,7 +72,7 @@ thiserror = "2"
 tempfile = "3"
 tokio = { version = "1", features = ["fs", "io-util", "macros", "net", "rt-multi-thread", "signal", "sync", "time"] }
 tower = { version = "0.5", features = ["util"] }
-tower-http = { version = "0.6", features = ["fs", "timeout", "trace"] }
+tower-http = { version = "0.7", features = ["fs", "timeout", "trace"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 chrono = { version = "0.4", features = ["serde"] }
@@ -84,8 +84,8 @@ sha2 = "0.10"
 sync_wrapper = "1"
 aes-gcm = "0.10"
 instant-acme = { version = "0.8", features = ["rcgen", "time"] }
-rcgen = { version = "0.13", default-features = false, features = ["crypto", "pem", "aws_lc_rs"] }
-x509-parser = "0.16"
+rcgen = { version = "0.14", default-features = false, features = ["crypto", "pem", "aws_lc_rs"] }
+x509-parser = "0.18"
 time = { version = "0.3", features = ["formatting", "parsing"] }
 zeroize = "1"
 tokio-rustls = "0.26"

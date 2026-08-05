@@ -1,4 +1,5 @@
 use std::{
+    collections::VecDeque,
     sync::{
         atomic::{AtomicU16, AtomicU64, AtomicUsize, Ordering},
         Arc, Mutex,
@@ -25,8 +26,20 @@ use sdkwork_webserver_contract::provider::{
 use sdkwork_webserver_core::website_runtime::WebsiteProviderType;
 use sdkwork_webserver_knowledgebase_provider::{
     FixedKnowledgebaseWikiSdkClientResolver, KnowledgebaseWikiSdkClient,
-    KnowledgebaseWikiWebsiteProvider, KNOWLEDGEBASE_WIKI_PROVIDER_CONTRACT_VERSION,
+    KnowledgebaseWikiWebsiteProvider, OpenedWikiContentStream, WikiContentChunkStream,
+    KNOWLEDGEBASE_WIKI_PROVIDER_CONTRACT_VERSION,
 };
+
+struct TestWikiChunkStream {
+    chunks: VecDeque<Vec<u8>>,
+}
+
+#[async_trait]
+impl WikiContentChunkStream for TestWikiChunkStream {
+    async fn next_chunk(&mut self) -> Result<Option<Vec<u8>>, SdkworkError> {
+        Ok(self.chunks.pop_front())
+    }
+}
 
 const PUBLICATION_UUID: &str = "11111111-1111-4111-8111-111111111501";
 const PROJECTION_UUID: &str = "11111111-1111-4111-8111-111111111601";
@@ -116,6 +129,24 @@ impl KnowledgebaseWikiSdkClient for FakeKnowledgebaseWikiSdk {
     ) -> Result<Vec<u8>, SdkworkError> {
         self.content_calls.fetch_add(1, Ordering::AcqRel);
         Ok(self.content.lock().expect("content lock").clone())
+    }
+
+    async fn retrieve_content_stream(
+        &self,
+        _publication_uuid: &str,
+        _content_handle: &str,
+    ) -> Result<OpenedWikiContentStream, SdkworkError> {
+        self.content_calls.fetch_add(1, Ordering::AcqRel);
+        let content = self.content.lock().expect("content lock").clone();
+        let content_length = u64::try_from(content.len()).ok();
+        let chunks = content
+            .chunks(4)
+            .map(<[u8]>::to_vec)
+            .collect::<VecDeque<_>>();
+        Ok(OpenedWikiContentStream {
+            content_length,
+            stream: Box::new(TestWikiChunkStream { chunks }),
+        })
     }
 
     async fn list_navigation(
@@ -258,10 +289,16 @@ async fn opens_revalidated_bounded_content_and_rejects_range_or_oversize() {
         .expect("open content");
     assert_eq!(opened.content_length, 6);
     assert_eq!(opened.content_range, None);
-    assert_eq!(
-        opened.stream.next_chunk().await.expect("first chunk"),
-        Some(b"# Wiki".to_vec())
-    );
+    let mut collected = Vec::new();
+    while let Some(chunk) = opened
+        .stream
+        .next_chunk()
+        .await
+        .expect("content chunk")
+    {
+        collected.extend_from_slice(&chunk);
+    }
+    assert_eq!(collected, b"# Wiki".to_vec());
     assert_eq!(opened.stream.next_chunk().await.expect("end stream"), None);
 
     let range = provider

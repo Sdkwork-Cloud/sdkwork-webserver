@@ -192,22 +192,28 @@ impl WebsiteWikiProvider for KnowledgebaseWikiWebsiteProvider {
             return Err(contract_mismatch());
         }
         let client = self.client(&request.context.tenant_scope_hash)?;
-        let content = self
+        // Streaming retrieval: the wiki body is forwarded in bounded
+        // transport chunks; the byte ceiling is enforced while the stream is
+        // consumed, so memory stays O(chunk) instead of O(page size).
+        let opened = self
             .call(
                 request.context.deadline_ms,
-                client.retrieve_content(
+                client.retrieve_content_stream(
                     &request.provider.provider_resource_uuid,
                     request.content_handle.as_str(),
                 ),
             )
             .await?;
-        let actual_bytes = u64::try_from(content.len()).map_err(|_| contract_mismatch())?;
-        if actual_bytes > request.maximum_bytes || actual_bytes > self.maximum_content_bytes {
+        let maximum_bytes = request.maximum_bytes.min(self.maximum_content_bytes);
+        if opened
+            .content_length
+            .is_some_and(|length| length > maximum_bytes)
+        {
             return Err(contract_mismatch());
         }
         Ok(OpenedWebsiteContent {
-            stream: Box::new(BoundedWikiContentStream::new(content)),
-            content_length: actual_bytes,
+            stream: Box::new(BoundedWikiContentStream::new(opened.stream, maximum_bytes)),
+            content_length: opened.content_length.unwrap_or(0),
             content_range: None,
         })
     }
@@ -602,7 +608,8 @@ fn map_sdk_error(error: SdkworkError) -> WebsiteProviderError {
         | SdkworkError::InvalidHeaderValue(_)
         | SdkworkError::InvalidHttpMethod(_)
         | SdkworkError::ResponseBodyTooLarge { .. }
-        | SdkworkError::ApiStatus { .. } => WebsiteProviderErrorKind::ContractMismatch,
+        | SdkworkError::ApiStatus { .. }
+        | SdkworkError::MissingAccessToken => WebsiteProviderErrorKind::ContractMismatch,
     };
     provider_error(kind)
 }

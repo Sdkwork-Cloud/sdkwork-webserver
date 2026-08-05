@@ -9,7 +9,7 @@ use sdkwork_webserver_core::website_runtime::{
     compile_website_runtime_set_snapshot, WebsiteRuntimeEnvironment,
 };
 
-use crate::{RuntimeAssignmentWrite, RuntimeObservationWrite, WebService};
+use crate::{AuditLogWrite, RuntimeAssignmentWrite, RuntimeObservationWrite, WebService};
 
 const AGENT_TOKEN_PREFIX: &str = "wagent_";
 const MAX_NODE_VERSION_BYTES: usize = 64;
@@ -69,7 +69,8 @@ impl WebInternalApi for WebService {
             return Err(WebServiceError::Forbidden);
         }
 
-        self.repository
+        let assignment = self
+            .repository
             .publish_runtime_assignment(RuntimeAssignmentWrite {
                 tenant_id: target.tenant_id,
                 server_id: target.server_id,
@@ -82,7 +83,34 @@ impl WebInternalApi for WebService {
                 runtime_set_json,
                 assigned_by_subject: context.subject_id.clone(),
             })
-            .await
+            .await?;
+        // Cross-tenant publication is an explicit exception on the internal
+        // surface (permission + tenant-scope-hash gated): record a durable
+        // audit marker so the event is attributable and observable.
+        if target.tenant_id != context.tenant_id {
+            let metadata = format!(
+                "{{\"targetTenantId\":{},\"sourceTenantId\":{},\"subjectId\":{}}}",
+                target.tenant_id,
+                context.tenant_id,
+                serde_json::to_string(&context.subject_id)
+                    .unwrap_or_else(|_| "\"unknown\"".to_string())
+            );
+            let _ = self
+                .record_audit_log(AuditLogWrite {
+                    tenant_id: context.tenant_id,
+                    organization_id: 0,
+                    operator_id: 0,
+                    operator_type: "MACHINE",
+                    action: "web.runtime_assignment.publish_cross_tenant",
+                    target_type: "node",
+                    target_id: Some(target.server_id),
+                    target_uuid: Some(node_uuid),
+                    request_id: None,
+                    metadata_json: &metadata,
+                })
+                .await;
+        }
+        Ok(assignment)
     }
 
     async fn retrieve_current_runtime_assignment(

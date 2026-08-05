@@ -72,6 +72,18 @@ async fn run() -> MainResult<()> {
 async fn run_management_plane() -> MainResult<()> {
     let bind_address = std::env::var("SDKWORK_WEB_APPLICATION_PUBLIC_INGRESS_BIND")
         .unwrap_or_else(|_| "127.0.0.1:3800".to_owned());
+    // Fail closed: the management listener exposes unauthenticated
+    // /healthz, /readyz, /livez, and /metrics. A non-loopback bind is only
+    // allowed with an explicit operator authorization (for example
+    // Kubernetes probes that must reach the pod address).
+    if !bind_address_is_loopback(&bind_address)
+        && std::env::var("SDKWORK_WEB_MANAGEMENT_EXPOSE_ALLOWED").is_err()
+    {
+        return Err(io::Error::other(
+            "management listener (health/readiness/metrics) refuses a non-loopback bind; set SDKWORK_WEB_MANAGEMENT_EXPOSE_ALLOWED=true to authorize it",
+        )
+        .into());
+    }
     let app = build_router()
         .await
         .map_err(|error| io::Error::other(format!("management bootstrap failed: {error}")))?;
@@ -81,6 +93,13 @@ async fn run_management_plane() -> MainResult<()> {
         .with_graceful_shutdown(shutdown_signal())
         .await?;
     Ok(())
+}
+
+/// True when the bind host is the IPv4/IPv6 loopback (optionally with a
+/// port). DNS names and wildcards are never treated as loopback.
+fn bind_address_is_loopback(bind: &str) -> bool {
+    let host = bind.rsplit_once(':').map_or(bind, |(host, _)| host);
+    matches!(host, "127.0.0.1" | "localhost" | "::1" | "[::1]")
 }
 
 fn validate_config(path: PathBuf) -> MainResult<()> {

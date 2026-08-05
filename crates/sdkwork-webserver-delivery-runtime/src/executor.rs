@@ -304,7 +304,13 @@ impl WebsiteDeliveryExecutor {
         let mut opened = deadline
             .call(provider.open_wiki_content(&open_request))
             .await?;
-        if request.range.is_none() && opened.content_length != expected_bytes {
+        // `content_length == 0` means the provider could not declare a length
+        // (for example a streaming response without Content-Length); the byte
+        // ceiling is still enforced while the stream is consumed.
+        if request.range.is_none()
+            && opened.content_length != 0
+            && opened.content_length != expected_bytes
+        {
             return Err(provider_contract_mismatch());
         }
         opened.stream = Box::new(AdmittedProviderContentStream::new(opened.stream, permit));

@@ -690,3 +690,32 @@ The following release blockers remain authoritative:
 
 No API exception, database migration approval, cross-repository Drive change, or commercial
 production approval is granted by this addendum.
+
+## Addendum 2026-08-05: Resolved Items
+
+The following review blockers have been closed since the original review. This addendum
+does not revise the original findings; it records the resolution evidence.
+
+1. **End-to-end provider streaming (blocker 2, section 4 "End-to-end provider streaming")** —
+   resolved. The SDK generator's Rust client now emits `BinaryResponseStream` (bounded chunk
+   reads with a byte budget and declared `Content-Length`) and a `_stream` variant for every
+   binary operation; the Drive and Knowledgebase internal SDKs were regenerated; the Web
+   Server provider adapters forward chunks and enforce expected length / ceilings while
+   consuming, so request memory is O(chunk) instead of O(object size).
+2. **Nginx repository stubs (section 4 "Nginx")** — resolved. Repository-layer
+   validate/reload stubs were removed; `retrieve_nginx_status` probes the real edge
+   configuration (`nginx -t`) for its `running` flag.
+3. **Certificate convergence FAILED transition** — resolved. Every convergence branch now
+   commits its short transaction, so node-reported failure durably terminates the rollout.
+4. **Management listener exposure** — hardened. Non-loopback binds fail closed unless
+   `SDKWORK_WEB_MANAGEMENT_EXPOSE_ALLOWED=true`; the standalone production profile also
+   enables the loopback data-plane operations listener.
+5. **Dependency currency** — the direct dependency graph was moved to current releases
+   (`tower-http` 0.7, `cap-std` 4.0.2, `rcgen` 0.14, `x509-parser` 0.18, `reqwest` 0.13,
+   `hickory-resolver` 0.26, `jsonschema` 0.49, `hashlink` 0.12). Transitive forks (for
+   example `opentelemetry-otlp` → `reqwest` 0.12) are ecosystem pins outside application
+   control.
+
+Commercial release approval still requires the remaining PRD gates (capacity, soak,
+multi-node drills, published/signed packages, managed HA evidence) named in section 1 and
+in `docs/standards-alignment.md`.

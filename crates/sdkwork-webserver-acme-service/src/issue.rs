@@ -203,7 +203,7 @@ fn validate_issued_material(
 
     let key_pair = KeyPair::from_pem(&material.private_key_pem)
         .map_err(|_| AcmeServiceError::provider("issued certificate private key is invalid"))?;
-    if sha256_hash(&key_pair.public_key_der()) != evidence.spki_sha256 {
+    if sha256_hash(&public_key_spki_der(&key_pair)) != evidence.spki_sha256 {
         return Err(AcmeServiceError::provider(
             "issued certificate private key does not match the leaf certificate",
         ));
@@ -255,6 +255,22 @@ fn normalized_san_set(hostnames: &[String]) -> AcmeServiceResult<BTreeSet<String
         .map(|hostname| {
             validate_hostname(hostname)?;
             Ok(hostname.to_ascii_lowercase())
+        })
+        .collect()
+}
+
+/// SubjectPublicKeyInfo DER of a key pair. rcgen 0.14 no longer exposes the
+/// DER directly, so the PEM form (which carries the SPKI) is decoded.
+fn public_key_spki_der(key_pair: &rcgen::KeyPair) -> Vec<u8> {
+    use base64::Engine as _;
+    key_pair
+        .public_key_pem()
+        .lines()
+        .filter(|line| !line.starts_with("-----"))
+        .flat_map(|line| {
+            base64::engine::general_purpose::STANDARD
+                .decode(line.trim())
+                .unwrap_or_default()
         })
         .collect()
 }

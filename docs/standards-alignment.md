@@ -50,11 +50,12 @@ approval. Normative requirements are owned by `../sdkwork-specs`.
   sdkwork-drive), enabling the compile-time SQL injection audit (`SqlSafeStr`): every
   dynamically assembled repository statement passes through the audited `audited_sql` wrapper
   that requires fixed-clause-only assembly with `$N` bind parameters for all request input.
-- Direct dependencies track current releases within their semver range (`jsonschema` 0.49,
-  `hashlink` 0.12, axum 0.8.9, tokio 1.53, sqlx 0.9, rustls 0.23). Major-version bumps that
-  cross repository boundaries (`tower-http` 0.7 with sdkwork-web-framework, `cap-std` 4,
-  `rcgen` 0.14, `x509-parser` 0.18, `reqwest` 0.13, `hickory-resolver` 0.26) are tracked as a
-  coordinated cross-repository upgrade and are not applied unilaterally.
+- Direct dependencies track current releases: `jsonschema` 0.49, `hashlink` 0.12,
+  `tower-http` 0.7, `cap-std`/`cap-fs-ext` 4.0.2, `rcgen` 0.14, `x509-parser` 0.18,
+  `reqwest` 0.13 (generated SDK client templates included), `hickory-resolver` 0.26,
+  axum 0.8.9, tokio 1.53, sqlx 0.9, rustls 0.23. Remaining version forks are transitive
+  ecosystem pins (for example `opentelemetry-otlp` → `reqwest` 0.12) and are not under
+  application control.
 - SQLite engine branches were removed from the repository (the repository is instantiated
   exclusively with PostgreSQL); the `database_engine` field, engine-parameterized write
   expressions, and the SQLite JSON `json_set` branch no longer exist as dead code.
@@ -69,6 +70,12 @@ approval. Normative requirements are owned by `../sdkwork-specs`.
   first-label remainder in the request, website-runtime, and TLS compiled indexes, replacing
   per-request linear scans; listener compilation is a single pass over virtual-host
   declarations instead of an O(listeners x hosts) nested scan.
+- End-to-end provider streaming is implemented: the generated Rust SDK clients expose a
+  `BinaryResponseStream` (bounded chunk reads, byte budget, declared `Content-Length`) and
+  every binary operation gains a `_stream` variant; the Drive and Knowledgebase adapters
+  forward chunks instead of materializing `Vec<u8>` payloads, so request memory is O(chunk)
+  instead of O(object size). The stream adapters enforce the expected length (Drive) or the
+  configured ceiling (Knowledgebase) while consuming, failing closed on contract drift.
 - The repository layer owns no Nginx validation/reload stubs: Nginx syntax validation and reload
   run exclusively through the edge runtime, `retrieve_nginx_status` probes the real edge
   configuration (`nginx -t`) for its `running` flag, and removed port methods can no longer
@@ -110,6 +117,12 @@ approval. Normative requirements are owned by `../sdkwork-specs`.
   misleading 500 internal-server fault.
 - Audit writes fail closed when the IAM tenant subject cannot be resolved to a positive numeric
   id: no audit row is persisted with a fabricated `tenant_id = 0`.
+- The management listener (unauthenticated `/healthz`, `/readyz`, `/livez`, `/metrics`) fails
+  closed on a non-loopback bind unless `SDKWORK_WEB_MANAGEMENT_EXPOSE_ALLOWED=true` is set by
+  the operator; the standalone production profile declares it explicitly, and the standalone
+  data-plane operations listener (`127.0.0.1:3901`) keeps the profile observable.
+- Cross-tenant runtime-assignment publication records a durable
+  `web.runtime_assignment.publish_cross_tenant` audit marker with source/target tenant ids.
 
 ## Persistence And Data Lifecycle
 

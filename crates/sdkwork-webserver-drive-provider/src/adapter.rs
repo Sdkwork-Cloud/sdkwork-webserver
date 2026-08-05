@@ -194,10 +194,13 @@ impl WebsiteStaticContentProvider for DriveWebsiteProvider {
         let selected_range = select_range(request.range, &request.conditions, &metadata)?;
         let range_header =
             selected_range.map(|range| format!("bytes={}-{}", range.start, range.end_inclusive));
-        let content = self
+        // Streaming retrieval: the immutable object is forwarded in bounded
+        // transport chunks; the expected length is enforced while the stream
+        // is consumed, so memory stays O(chunk) instead of O(object size).
+        let stream = self
             .call(
                 request.context.deadline_ms,
-                client.retrieve_content(
+                client.retrieve_content_stream(
                     &resolution.logical_node_version_id,
                     DRIVE_SCOPE_TYPE,
                     &request.provider.provider_resource_uuid,
@@ -212,16 +215,12 @@ impl WebsiteStaticContentProvider for DriveWebsiteProvider {
                 ),
             )
             .await?;
-        let actual_length = u64::try_from(content.len()).map_err(|_| contract_mismatch())?;
         let expected_length = selected_range.map_or(metadata.content_length, |range| {
             range.end_inclusive - range.start + 1
         });
-        if actual_length != expected_length {
-            return Err(contract_mismatch());
-        }
         Ok(OpenedWebsiteContent {
-            stream: Box::new(BoundedDriveContentStream::new(content)),
-            content_length: actual_length,
+            stream: Box::new(BoundedDriveContentStream::new(stream, expected_length)),
+            content_length: expected_length,
             content_range: selected_range,
         })
     }
@@ -574,7 +573,8 @@ fn map_sdk_error(error: SdkworkError) -> WebsiteProviderError {
         | SdkworkError::InvalidHeaderValue(_)
         | SdkworkError::InvalidHttpMethod(_)
         | SdkworkError::ResponseBodyTooLarge { .. }
-        | SdkworkError::ApiStatus { .. } => WebsiteProviderErrorKind::ContractMismatch,
+        | SdkworkError::ApiStatus { .. }
+        | SdkworkError::MissingAccessToken => WebsiteProviderErrorKind::ContractMismatch,
     };
     provider_error(kind)
 }

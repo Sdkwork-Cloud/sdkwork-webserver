@@ -20,7 +20,7 @@ use futures_util::StreamExt;
 use http_body_util::{channel::Channel, BodyExt};
 use rcgen::{
     BasicConstraints, Certificate, CertificateParams, DistinguishedName, DnType,
-    ExtendedKeyUsagePurpose, IsCa, KeyPair, KeyUsagePurpose,
+    ExtendedKeyUsagePurpose, IsCa, Issuer, KeyPair, KeyUsagePurpose,
 };
 use rustls::{
     pki_types::{CertificateDer, PrivateKeyDer, PrivatePkcs8KeyDer, ServerName},
@@ -47,6 +47,7 @@ type UpstreamTask = JoinHandle<()>;
 struct TestCertificateAuthority {
     certificate: Certificate,
     key: KeyPair,
+    params: CertificateParams,
 }
 
 struct TestTlsIdentity {
@@ -487,7 +488,11 @@ fn write_test_ca(directory: &Path, stem: &str) -> TestCertificateAuthority {
     let certificate = params.self_signed(&key).expect("self-sign test CA");
     fs::write(directory.join(format!("{stem}.pem")), certificate.pem())
         .expect("write test CA certificate");
-    TestCertificateAuthority { certificate, key }
+    TestCertificateAuthority {
+        certificate,
+        key,
+        params,
+    }
 }
 
 fn write_signed_identity(
@@ -514,7 +519,10 @@ fn write_signed_identity(
     }];
     let key = KeyPair::generate().expect("generate signed identity key");
     let certificate = params
-        .signed_by(&key, &authority.certificate, &authority.key)
+        .signed_by(
+            &key,
+            &Issuer::new(authority.params.clone(), &authority.key),
+        )
         .expect("sign test identity");
     fs::write(directory.join(format!("{stem}.pem")), certificate.pem())
         .expect("write signed certificate");

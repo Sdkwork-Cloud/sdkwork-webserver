@@ -8,5 +8,5 @@ pub use adapter::{
 };
 pub use sdk::{
     FixedKnowledgebaseWikiSdkClientResolver, KnowledgebaseWikiSdkClient,
-    KnowledgebaseWikiSdkClientResolver,
+    KnowledgebaseWikiSdkClientResolver, OpenedWikiContentStream, WikiContentChunkStream,
 };

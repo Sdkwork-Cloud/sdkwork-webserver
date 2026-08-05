@@ -1,4 +1,5 @@
 use std::{
+    collections::VecDeque,
     sync::{
         atomic::{AtomicU16, AtomicU64, AtomicUsize, Ordering},
         Arc, Mutex,
@@ -20,8 +21,8 @@ use sdkwork_webserver_contract::provider::{
 };
 use sdkwork_webserver_core::website_runtime::WebsiteProviderType;
 use sdkwork_webserver_drive_provider::{
-    DriveWebsiteProvider, DriveWebsiteSdkClient, FixedDriveWebsiteSdkClientResolver,
-    DRIVE_WEBSITE_ROOT_PROVIDER_CONTRACT_VERSION,
+    DriveContentChunkStream, DriveWebsiteProvider, DriveWebsiteSdkClient,
+    FixedDriveWebsiteSdkClientResolver, DRIVE_WEBSITE_ROOT_PROVIDER_CONTRACT_VERSION,
 };
 
 const WEBSITE_ROOT_UUID: &str = "11111111-1111-4111-8111-111111111701";
@@ -133,6 +134,61 @@ impl DriveWebsiteSdkClient for FakeDriveWebsiteSdk {
             Some(other) => panic!("unexpected test range {other}"),
             None => Ok(content),
         }
+    }
+
+    async fn retrieve_content_stream(
+        &self,
+        node_version_id: &str,
+        _scope_type: &str,
+        scope_uuid: &str,
+        relative_path: &str,
+        pinned_generation: Option<&str>,
+        range: Option<&str>,
+        _if_match: Option<&str>,
+        _if_none_match: Option<&str>,
+        _if_range: Option<&str>,
+        _if_modified_since: Option<&str>,
+        _if_unmodified_since: Option<&str>,
+    ) -> Result<Box<dyn DriveContentChunkStream>, SdkworkError> {
+        self.content_calls
+            .lock()
+            .expect("content calls lock")
+            .push(ContentCall {
+                node_version_id: node_version_id.to_string(),
+                scope_uuid: scope_uuid.to_string(),
+                relative_path: relative_path.to_string(),
+                pinned_generation: pinned_generation.map(str::to_string),
+                range: range.map(str::to_string),
+            });
+        let status = self.next_content_status.swap(0, Ordering::AcqRel);
+        if status > 0 {
+            return Err(SdkworkError::HttpStatus {
+                status,
+                body: "{}".to_string(),
+            });
+        }
+        let content = self.content.lock().expect("content lock").clone();
+        let selected = match range {
+            Some("bytes=2-5") => content[2..=5].to_vec(),
+            Some(other) => panic!("unexpected test range {other}"),
+            None => content,
+        };
+        let chunks = selected
+            .chunks(4)
+            .map(<[u8]>::to_vec)
+            .collect::<VecDeque<_>>();
+        Ok(Box::new(TestMemoryChunkStream { chunks }))
+    }
+}
+
+struct TestMemoryChunkStream {
+    chunks: VecDeque<Vec<u8>>,
+}
+
+#[async_trait]
+impl DriveContentChunkStream for TestMemoryChunkStream {
+    async fn next_chunk(&mut self) -> Result<Option<Vec<u8>>, SdkworkError> {
+        Ok(self.chunks.pop_front())
     }
 }
 
@@ -246,11 +302,20 @@ async fn revalidates_path_generation_and_node_version_before_opening_content() {
         .expect("open complete content");
     assert_eq!(opened.content_length, 10);
     assert_eq!(opened.content_range, None);
+    let mut collected = Vec::new();
+    while let Some(chunk) = opened
+        .stream
+        .next_chunk()
+        .await
+        .expect("content chunk")
+    {
+        collected.extend_from_slice(&chunk);
+    }
+    assert_eq!(collected, b"0123456789".to_vec());
     assert_eq!(
-        opened.stream.next_chunk().await.expect("content chunk"),
-        Some(b"0123456789".to_vec())
+        opened.stream.next_chunk().await.expect("stream end"),
+        None
     );
-    assert_eq!(opened.stream.next_chunk().await.expect("stream end"), None);
 
     let request = sdk
         .resolve_requests
@@ -389,16 +454,29 @@ async fn fails_closed_on_revocation_contract_drift_and_length_mismatch() {
     *sdk.resolution.lock().expect("resolution lock") = resource_resolution();
     let handle = resolved_handle(&provider).await;
     *sdk.content.lock().expect("content lock") = b"short".to_vec();
-    let short = provider
+    // A short owner body opens successfully in streaming mode and fails
+    // closed while the stream is consumed (exact-length enforcement).
+    let mut short = provider
         .open_static_content(&open_request(
             handle,
             None,
             WebsiteRequestConditions::default(),
         ))
         .await
-        .err()
-        .expect("short owner body");
-    assert_eq!(short.kind, WebsiteProviderErrorKind::ContractMismatch);
+        .expect("streaming open succeeds");
+    let mut short_error = None;
+    loop {
+        match short.stream.next_chunk().await {
+            Ok(Some(_)) => {}
+            Ok(None) => panic!("short owner body must fail length enforcement before EOF"),
+            Err(error) => {
+                short_error = Some(error);
+                break;
+            }
+        }
+    }
+    let short_error = short_error.expect("short owner body fails while streaming");
+    assert_eq!(short_error.kind, WebsiteProviderErrorKind::ContractMismatch);
 }
 
 #[tokio::test]

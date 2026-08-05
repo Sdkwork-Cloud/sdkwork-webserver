@@ -604,12 +604,13 @@ mod tests {
     };
     use sdkwork_webserver_delivery_runtime::WebsiteProviderRegistry;
     use sdkwork_webserver_drive_provider::{
-        DriveWebsiteProvider, DriveWebsiteSdkClient, FixedDriveWebsiteSdkClientResolver,
-        DRIVE_WEBSITE_ROOT_PROVIDER_CONTRACT_VERSION,
+        DriveContentChunkStream, DriveWebsiteProvider, DriveWebsiteSdkClient,
+        FixedDriveWebsiteSdkClientResolver, DRIVE_WEBSITE_ROOT_PROVIDER_CONTRACT_VERSION,
     };
     use sdkwork_webserver_knowledgebase_provider::{
         FixedKnowledgebaseWikiSdkClientResolver, KnowledgebaseWikiSdkClient,
-        KnowledgebaseWikiWebsiteProvider, KNOWLEDGEBASE_WIKI_PROVIDER_CONTRACT_VERSION,
+        KnowledgebaseWikiWebsiteProvider, OpenedWikiContentStream, WikiContentChunkStream,
+        KNOWLEDGEBASE_WIKI_PROVIDER_CONTRACT_VERSION,
     };
     use serde_json::{json, Value};
 
@@ -1189,6 +1190,20 @@ mod tests {
             Ok(b"# Wiki".to_vec())
         }
 
+        async fn retrieve_content_stream(
+            &self,
+            _publication_uuid: &str,
+            _content_handle: &str,
+        ) -> Result<OpenedWikiContentStream, SdkworkError> {
+            self.content_calls.fetch_add(1, Ordering::AcqRel);
+            Ok(OpenedWikiContentStream {
+                content_length: Some(6),
+                stream: Box::new(MemoryWikiChunkStream {
+                    chunks: vec![b"# Wiki".to_vec()].into(),
+                }),
+            })
+        }
+
         async fn list_navigation(
             &self,
             _publication_uuid: &str,
@@ -1298,6 +1313,33 @@ mod tests {
                 None => Ok(b"0123456789".to_vec()),
             }
         }
+
+        async fn retrieve_content_stream(
+            &self,
+            _node_version_id: &str,
+            _scope_type: &str,
+            _scope_uuid: &str,
+            _relative_path: &str,
+            _pinned_generation: Option<&str>,
+            range: Option<&str>,
+            _if_match: Option<&str>,
+            _if_none_match: Option<&str>,
+            _if_range: Option<&str>,
+            _if_modified_since: Option<&str>,
+            _if_unmodified_since: Option<&str>,
+        ) -> Result<Box<dyn DriveContentChunkStream>, DriveSdkworkError> {
+            self.content_calls.fetch_add(1, Ordering::AcqRel);
+            let content: &[u8] = match range {
+                Some("bytes=2-5") => b"2345",
+                Some(other) => panic!("unexpected test range {other}"),
+                None => b"0123456789",
+            };
+            let chunks = content
+                .chunks(4)
+                .map(<[u8]>::to_vec)
+                .collect::<VecDeque<_>>();
+            Ok(Box::new(MemoryChunkStream { chunks }))
+        }
     }
 
     struct MemoryStream {
@@ -1307,6 +1349,28 @@ mod tests {
     #[async_trait]
     impl WebsiteProviderContentStream for MemoryStream {
         async fn next_chunk(&mut self) -> WebsiteProviderResult<Option<Vec<u8>>> {
+            Ok(self.chunks.pop_front())
+        }
+    }
+
+    struct MemoryChunkStream {
+        chunks: VecDeque<Vec<u8>>,
+    }
+
+    #[async_trait]
+    impl DriveContentChunkStream for MemoryChunkStream {
+        async fn next_chunk(&mut self) -> Result<Option<Vec<u8>>, DriveSdkworkError> {
+            Ok(self.chunks.pop_front())
+        }
+    }
+
+    struct MemoryWikiChunkStream {
+        chunks: VecDeque<Vec<u8>>,
+    }
+
+    #[async_trait]
+    impl WikiContentChunkStream for MemoryWikiChunkStream {
+        async fn next_chunk(&mut self) -> Result<Option<Vec<u8>>, SdkworkError> {
             Ok(self.chunks.pop_front())
         }
     }

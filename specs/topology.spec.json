@@ -47,7 +47,10 @@
         "http"
       ],
       "bindEnv": "SDKWORK_WEB_APPLICATION_PUBLIC_INGRESS_BIND",
-      "httpUrlEnv": "SDKWORK_WEB_APPLICATION_PUBLIC_HTTP_URL"
+      "httpUrlEnv": "SDKWORK_WEB_APPLICATION_PUBLIC_HTTP_URL",
+      "healthAttempts": 300,
+      "healthIntervalMs": 1000,
+      "healthTimeoutMs": 2000
     },
     "application.app-http": {
       "connectivityPlane": "application",

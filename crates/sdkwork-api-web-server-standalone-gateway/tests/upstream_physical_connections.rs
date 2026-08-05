@@ -17,7 +17,7 @@ use hyper::{server::conn::http2, service::service_fn};
 use hyper_util::rt::{TokioExecutor, TokioIo};
 use rcgen::{
     BasicConstraints, Certificate, CertificateParams, DistinguishedName, DnType,
-    ExtendedKeyUsagePurpose, IsCa, KeyPair, KeyUsagePurpose,
+    ExtendedKeyUsagePurpose, IsCa, Issuer, KeyPair, KeyUsagePurpose,
 };
 use rustls::{
     pki_types::{CertificateDer, PrivateKeyDer, PrivatePkcs8KeyDer},
@@ -61,6 +61,7 @@ struct CountedUpstream {
 struct TestCertificateAuthority {
     certificate: Certificate,
     key: KeyPair,
+    params: CertificateParams,
 }
 
 struct TestTlsIdentity {
@@ -412,7 +413,11 @@ fn write_test_ca(directory: &Path) -> TestCertificateAuthority {
     let key = KeyPair::generate().expect("generate CA key");
     let certificate = params.self_signed(&key).expect("self-sign test CA");
     fs::write(directory.join("upstream-ca.pem"), certificate.pem()).expect("write upstream CA");
-    TestCertificateAuthority { certificate, key }
+    TestCertificateAuthority {
+        certificate,
+        key,
+        params,
+    }
 }
 
 fn signed_server_identity(authority: &TestCertificateAuthority) -> TestTlsIdentity {
@@ -426,7 +431,10 @@ fn signed_server_identity(authority: &TestCertificateAuthority) -> TestTlsIdenti
     params.extended_key_usages = vec![ExtendedKeyUsagePurpose::ServerAuth];
     let key = KeyPair::generate().expect("generate server key");
     let certificate = params
-        .signed_by(&key, &authority.certificate, &authority.key)
+        .signed_by(
+            &key,
+            &Issuer::new(authority.params.clone(), &authority.key),
+        )
         .expect("sign server identity");
     TestTlsIdentity {
         certificate: CertificateDer::from(certificate.der().to_vec()),

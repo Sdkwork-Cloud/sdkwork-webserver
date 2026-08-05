@@ -19,7 +19,7 @@ use std::process::{Child, Command, Stdio};
 use std::time::Duration;
 
 use axum::{routing::get, Router};
-use rcgen::{CertificateParams, DistinguishedName, DnType, Ia5String, KeyPair, SanType};
+use rcgen::{CertificateParams, DistinguishedName, DnType, KeyPair, SanType};
 use rustls_pki_types::pem::PemObject;
 use rustls_pki_types::CertificateDer;
 use sdkwork_webserver_acme_service::{
@@ -59,7 +59,7 @@ fn write_pebble_identity(directory: &Path) -> (String, String) {
     params.distinguished_name = DistinguishedName::new();
     params.distinguished_name.push(DnType::CommonName, "pebble");
     params.subject_alt_names = vec![
-        SanType::DnsName(Ia5String::try_from("localhost").expect("localhost dns name")),
+        SanType::DnsName("localhost".try_into().expect("localhost dns name")),
         SanType::IpAddress(std::net::IpAddr::V4(std::net::Ipv4Addr::LOCALHOST)),
         SanType::IpAddress(std::net::IpAddr::V6(std::net::Ipv6Addr::LOCALHOST)),
     ];

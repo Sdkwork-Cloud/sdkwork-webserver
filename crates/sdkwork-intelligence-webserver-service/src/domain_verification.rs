@@ -1,8 +1,10 @@
 use std::time::Duration;
 
 use async_trait::async_trait;
-use hickory_resolver::config::{ResolverConfig, ResolverOpts};
-use hickory_resolver::TokioAsyncResolver;
+use hickory_resolver::config::ResolverConfig;
+use hickory_resolver::net::runtime::TokioRuntimeProvider;
+use hickory_resolver::proto::rr::RData;
+use hickory_resolver::TokioResolver;
 use sdkwork_utils_rust::crypto::sha256_hash;
 use sdkwork_webserver_contract::{DomainVerifyResponse, WebServiceResult};
 
@@ -21,15 +23,22 @@ pub trait DomainOwnershipVerifier: Send + Sync {
 }
 
 pub struct DnsTxtDomainOwnershipVerifier {
-    resolver: TokioAsyncResolver,
+    resolver: TokioResolver,
 }
 
 impl DnsTxtDomainOwnershipVerifier {
     pub fn new() -> Self {
-        let resolver = TokioAsyncResolver::tokio_from_system_conf().unwrap_or_else(|error| {
-            tracing::warn!(error = %error, "system DNS resolver configuration unavailable; using bounded default resolver configuration");
-            TokioAsyncResolver::tokio(ResolverConfig::default(), ResolverOpts::default())
-        });
+        let resolver = TokioResolver::builder_tokio()
+            .and_then(|builder| builder.build())
+            .unwrap_or_else(|error| {
+                tracing::warn!(error = %error, "system DNS resolver configuration unavailable; using bounded default resolver configuration");
+                hickory_resolver::Resolver::builder_with_config(
+                    ResolverConfig::default(),
+                    TokioRuntimeProvider::default(),
+                )
+                .build()
+                .expect("default DNS resolver configuration builds")
+            });
         Self { resolver }
     }
 }
@@ -74,18 +83,22 @@ impl DomainOwnershipVerifier for DnsTxtDomainOwnershipVerifier {
         };
 
         let payloads = lookup
+            .answers()
             .iter()
             .take(MAX_TXT_RECORDS)
             .filter_map(|record| {
-                let size = record
-                    .txt_data()
+                let RData::TXT(txt) = &record.data else {
+                    return None;
+                };
+                let size = txt
+                    .txt_data
                     .iter()
                     .try_fold(0usize, |size, chunk| size.checked_add(chunk.len()))?;
                 if size == 0 || size > MAX_TXT_RECORD_BYTES {
                     return None;
                 }
                 let mut payload = Vec::with_capacity(size);
-                for chunk in record.txt_data() {
+                for chunk in txt.txt_data.iter() {
                     payload.extend_from_slice(chunk);
                 }
                 Some(payload)
