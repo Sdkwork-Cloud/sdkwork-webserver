@@ -126,45 +126,65 @@ impl WebService {
         if !config.enabled() {
             return Ok(());
         }
-        let node_uuid = config.node_uuid.as_deref().expect("enabled config");
+        let node_uuid = config.node_uuid.clone().expect("enabled config");
         let assignments = self
             .repository
-            .load_node_tls_certificate_assignments(node_uuid)
+            .load_node_tls_certificate_assignments(&node_uuid)
             .await?;
         if assignments.is_empty() {
             return Ok(());
         }
-        let _lock = DistributionLock::acquire(&config.material_root)?;
-        create_private_directory(&config.material_root).map_err(|error| {
-            WebServiceError::Internal(format!(
-                "create TLS material root {}: {error}",
-                config.material_root.display()
-            ))
-        })?;
-        for assignment in &assignments {
-            write_material_files(&config.material_root, assignment)?;
-        }
-        let generation = next_snapshot_generation(&config.snapshot_file)?;
-        let snapshot = build_snapshot(node_uuid, &config.alpn, generation, assignments)?;
-        let snapshot_sha256 = tls_assignment_snapshot_sha256(&snapshot)
-            .map_err(|error| WebServiceError::Internal(error.to_string()))?;
-        if existing_snapshot_matches(&config.snapshot_file, &snapshot_sha256)? {
-            return Ok(());
-        }
-        let serialized = serde_json::to_vec(&snapshot).map_err(|error| {
-            WebServiceError::Internal(format!("serialize TLS snapshot: {error}"))
-        })?;
-        write_snapshot_atomically(&config.snapshot_file, &serialized)?;
-        prune_stale_material_directories(&config.material_root, &snapshot)?;
-        tracing::info!(
-            node_uuid,
-            assignments = snapshot.assignments.len(),
-            generation,
-            snapshot_sha256 = %snapshot_sha256,
-            "published node TLS runtime snapshot"
-        );
-        Ok(())
+        // File-system publication (distribution lock, material writes,
+        // fsync, stale pruning) is blocking work: run it on the blocking
+        // thread pool so tokio worker threads never stall on disk I/O under
+        // concurrent control-plane traffic.
+        tokio::task::spawn_blocking(move || {
+            publish_node_tls_material_blocking(&config, &assignments)
+        })
+        .await
+        .map_err(|error| {
+            WebServiceError::Internal(format!("join node TLS material distribution: {error}"))
+        })?
     }
+}
+
+/// Synchronous projection of the node TLS runtime snapshot. Executed on the
+/// blocking thread pool by [`WebService::publish_node_tls_material`].
+fn publish_node_tls_material_blocking(
+    config: &TlsMaterialDistributionConfig,
+    assignments: &[TlsCertificateAssignmentMaterial],
+) -> WebServiceResult<()> {
+    let node_uuid = config.node_uuid.as_deref().expect("enabled config");
+    let _lock = DistributionLock::acquire(&config.material_root)?;
+    create_private_directory(&config.material_root).map_err(|error| {
+        WebServiceError::Internal(format!(
+            "create TLS material root {}: {error}",
+            config.material_root.display()
+        ))
+    })?;
+    for assignment in assignments {
+        write_material_files(&config.material_root, assignment)?;
+    }
+    let generation = next_snapshot_generation(&config.snapshot_file)?;
+    let snapshot = build_snapshot(node_uuid, &config.alpn, generation, assignments.to_vec())?;
+    let snapshot_sha256 = tls_assignment_snapshot_sha256(&snapshot)
+        .map_err(|error| WebServiceError::Internal(error.to_string()))?;
+    if existing_snapshot_matches(&config.snapshot_file, &snapshot_sha256)? {
+        return Ok(());
+    }
+    let serialized = serde_json::to_vec(&snapshot).map_err(|error| {
+        WebServiceError::Internal(format!("serialize TLS snapshot: {error}"))
+    })?;
+    write_snapshot_atomically(&config.snapshot_file, &serialized)?;
+    prune_stale_material_directories(&config.material_root, &snapshot)?;
+    tracing::info!(
+        node_uuid,
+        assignments = snapshot.assignments.len(),
+        generation,
+        snapshot_sha256 = %snapshot_sha256,
+        "published node TLS runtime snapshot"
+    );
+    Ok(())
 }
 
 fn build_snapshot(
@@ -316,7 +336,8 @@ fn write_bounded_file(path: &Path, content: &[u8]) -> WebServiceResult<()> {
     fs::rename(&staged, path).map_err(|error| {
         WebServiceError::Internal(format!("activate TLS material {}: {error}", path.display()))
     })?;
-    sync_directory(parent);
+    // Directory fsync makes the material rename durable across a crash.
+    sync_directory(parent)?;
     Ok(())
 }
 
@@ -406,14 +427,26 @@ fn write_snapshot_atomically(snapshot_file: &Path, serialized: &[u8]) -> WebServ
             snapshot_file.display()
         ))
     })?;
-    sync_directory(parent);
+    // Directory fsync makes the rename durable across a crash; a failure here
+    // means the activated snapshot may not survive power loss and must be
+    // reported instead of silently ignored.
+    sync_directory(parent)?;
     Ok(())
 }
 
-fn sync_directory(directory: &Path) {
-    if let Ok(handle) = fs::File::open(directory) {
-        let _ = handle.sync_all();
-    }
+fn sync_directory(directory: &Path) -> WebServiceResult<()> {
+    let handle = fs::File::open(directory).map_err(|error| {
+        WebServiceError::Internal(format!(
+            "open TLS snapshot directory {}: {error}",
+            directory.display()
+        ))
+    })?;
+    handle.sync_all().map_err(|error| {
+        WebServiceError::Internal(format!(
+            "sync TLS snapshot directory {}: {error}",
+            directory.display()
+        ))
+    })
 }
 
 /// Grace period before an unreferenced versioned material directory is

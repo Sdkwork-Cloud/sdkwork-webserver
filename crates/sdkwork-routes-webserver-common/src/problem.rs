@@ -39,6 +39,7 @@ impl From<WebServiceError> for WebApiError {
             WebServiceErrorKind::Validation => SdkWorkResultCode::ValidationError,
             WebServiceErrorKind::Forbidden => SdkWorkResultCode::PermissionRequired,
             WebServiceErrorKind::DatabaseUnavailable => SdkWorkResultCode::ServiceUnavailable,
+            WebServiceErrorKind::Unavailable => SdkWorkResultCode::ServiceUnavailable,
             WebServiceErrorKind::Internal => SdkWorkResultCode::InternalError,
         };
         let detail = match kind {

@@ -9,12 +9,9 @@
     "protocol": "http",
     "packageName": "sdkwork/web-backend-sdk"
   },
-  "changeFingerprint": "8a518f44108d646117dd03c034b939de00dc42866013ce1bf692ef5014608b3b",
+  "changeFingerprint": "4a18df17169155c1f34fbb43dfb7afa392cf6fb22f5044de6693b6e0ea1f2001",
   "changes": {
-    "createdGeneratedFiles": [
-      "src/Models/CertificatesRevokeResponse.php",
-      "src/Models/RevokeCertificateRequest.php"
-    ],
+    "createdGeneratedFiles": [],
     "updatedGeneratedFiles": [
       "src/Api/Certificate.php"
     ],
@@ -81,6 +78,7 @@
       "src/Models/CertificatesListResponse.php",
       "src/Models/CertificatesOperationsRetrieveResponse.php",
       "src/Models/CertificatesRenewResponse202.php",
+      "src/Models/CertificatesRevokeResponse.php",
       "src/Models/CertificatesUpdateResponse.php",
       "src/Models/ConfigsCreateResponse201.php",
       "src/Models/ConfigsDeployResponse.php",
@@ -123,6 +121,7 @@
       "src/Models/ProblemDetail.php",
       "src/Models/ReloadResponse.php",
       "src/Models/RetrieveResponse.php",
+      "src/Models/RevokeCertificateRequest.php",
       "src/Models/RootDomainResponse.php",
       "src/Models/RootDomainsCreateResponse201.php",
       "src/Models/RootDomainsListResponse.php",
@@ -154,13 +153,14 @@
     "preservedScaffoldFiles": [
       "custom/README.md"
     ],
-    "backedUpFiles": []
+    "backedUpFiles": [
+      "src/Api/Certificate.php"
+    ]
   },
   "impact": {
     "schemaVersion": 1,
     "areas": [
-      "api-surface",
-      "models"
+      "api-surface"
     ],
     "details": [
       {
@@ -168,28 +168,21 @@
         "paths": [
           "src/Api/Certificate.php"
         ]
-      },
-      {
-        "area": "models",
-        "paths": [
-          "src/Models/CertificatesRevokeResponse.php",
-          "src/Models/RevokeCertificateRequest.php"
-        ]
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, models. Verification is required."
+    "summary": "Detected impact areas: api-surface. Verification is required."
   },
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: api-surface. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-webserver\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-php\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -207,12 +200,14 @@
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "medium",
+    "riskLevel": "high",
     "nextAction": "verify",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
     "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
+      "backed-up-generated-files",
+      "manual-review-required",
       "verification-required"
     ]
   },

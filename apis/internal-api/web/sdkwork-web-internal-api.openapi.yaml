@@ -395,20 +395,20 @@ components:
     SdkWorkApiResponse:
       type: object
       additionalProperties: false
-      required: [code, message, data, traceId]
+      required: [code, data, traceId]
       properties:
         code:
           type: integer
           const: 0
-        message:
-          type: string
         data: {}
         traceId:
           type: string
+          format: uuid
+          description: Server-owned request correlation id.
     ProblemDetail:
       type: object
       additionalProperties: true
-      required: [type, title, status, detail, code, traceId]
+      required: [type, title, status, code, traceId]
       properties:
         type:
           type: string

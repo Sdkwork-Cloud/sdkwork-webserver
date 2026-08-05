@@ -33,12 +33,19 @@ impl AuditEmitter for WebFrameworkAuditEmitter {
             "subjectId": fact.user_id.as_deref(),
         }))
         .map_err(|_| WebFrameworkError::dependency_unavailable("encode Web audit metadata"))?;
+        // Audit rows must never land with a fabricated tenant id of 0: a
+        // subject that cannot be resolved to a positive numeric tenant is an
+        // IAM-injection anomaly and the audit write fails closed.
+        let tenant_id = resolved_numeric_subject_id(
+            fact.tenant_id.as_deref(),
+            "audit tenant subject is not a positive numeric id",
+        )?;
 
         self.service
             .record_audit_log(AuditLogWrite {
-                tenant_id: numeric_subject_id(fact.tenant_id.as_deref()),
+                tenant_id,
                 organization_id: 0,
-                operator_id: numeric_subject_id(fact.user_id.as_deref()),
+                operator_id: numeric_subject_id(fact.user_id.as_deref()).unwrap_or(0),
                 operator_type: if fact.user_id.is_some() {
                     "USER"
                 } else {
@@ -82,7 +89,10 @@ impl SecurityEventEmitter for WebFrameworkSecurityEventEmitter {
 
         self.service
             .record_audit_log(AuditLogWrite {
-                tenant_id: numeric_subject_id(event.tenant_id.as_deref()),
+                tenant_id: resolved_numeric_subject_id(
+                    event.tenant_id.as_deref(),
+                    "security-event tenant subject is not a positive numeric id",
+                )?,
                 organization_id: 0,
                 operator_id: 0,
                 operator_type: "SYSTEM",
@@ -102,11 +112,19 @@ impl SecurityEventEmitter for WebFrameworkSecurityEventEmitter {
     }
 }
 
-fn numeric_subject_id(value: Option<&str>) -> i64 {
+fn numeric_subject_id(value: Option<&str>) -> Option<i64> {
     value
         .and_then(|value| value.parse::<i64>().ok())
         .filter(|value| *value > 0)
-        .unwrap_or(0)
+}
+
+/// Resolves a required positive numeric subject id, rejecting the write
+/// instead of persisting a fabricated zero.
+fn resolved_numeric_subject_id(
+    value: Option<&str>,
+    detail: &'static str,
+) -> Result<i64, WebFrameworkError> {
+    numeric_subject_id(value).ok_or_else(|| WebFrameworkError::bad_request(detail))
 }
 
 fn bounded_text(value: &str, maximum_bytes: usize) -> &str {
@@ -145,9 +163,10 @@ mod tests {
 
     #[test]
     fn opaque_subjects_do_not_overflow_numeric_audit_columns() {
-        assert_eq!(numeric_subject_id(Some("42")), 42);
-        assert_eq!(numeric_subject_id(Some("user-42")), 0);
-        assert_eq!(numeric_subject_id(Some("-1")), 0);
+        assert_eq!(numeric_subject_id(Some("42")), Some(42));
+        assert_eq!(numeric_subject_id(Some("user-42")), None);
+        assert_eq!(numeric_subject_id(Some("-1")), None);
+        assert_eq!(numeric_subject_id(None), None);
     }
 
     #[test]

@@ -12,7 +12,7 @@
   "mode": "apply",
   "hasChanges": true,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "342184f8a6dbea9b11a92aabbed08b9ac799ecbffcf7669e5b11f2e3475f23a1",
+  "changeFingerprint": "518b349e9d1e9e4bd9ff3eb950751e19da5d4cd98f35223f7556a967eafcd53b",
   "changeImpact": {
     "schemaVersion": 1,
     "areas": [
@@ -38,12 +38,14 @@
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "medium",
+    "riskLevel": "high",
     "nextAction": "verify",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
     "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
+      "backed-up-generated-files",
+      "manual-review-required",
       "verification-required"
     ]
   },
@@ -124,7 +126,7 @@
     "skippedUnchangedGeneratedFiles": 22,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "342184f8a6dbea9b11a92aabbed08b9ac799ecbffcf7669e5b11f2e3475f23a1",
+    "changeFingerprint": "518b349e9d1e9e4bd9ff3eb950751e19da5d4cd98f35223f7556a967eafcd53b",
     "changes": {
       "createdGeneratedFiles": [],
       "updatedGeneratedFiles": [
@@ -160,7 +162,10 @@
       "preservedScaffoldFiles": [
         "custom/README.md"
       ],
-      "backedUpFiles": []
+      "backedUpFiles": [
+        "Sources/API/CertificateApi.swift",
+        "Sources/Models.swift"
+      ]
     },
     "impact": {
       "schemaVersion": 1,
@@ -212,16 +217,21 @@
     },
     "executionDecision": {
       "schemaVersion": 1,
-      "riskLevel": "medium",
+      "riskLevel": "high",
       "nextAction": "verify",
       "requiresManualReview": false,
       "applyRequiresExpectedFingerprint": false,
       "summary": "Changes have been applied. Run the required verification plan now.",
       "reasons": [
+        "backed-up-generated-files",
+        "manual-review-required",
         "verification-required"
       ]
     },
-    "backedUpFiles": [],
+    "backedUpFiles": [
+      "Sources/API/CertificateApi.swift",
+      "Sources/Models.swift"
+    ],
     "preservedLegacyFiles": false
   }
 }

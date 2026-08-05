@@ -85,4 +85,6 @@ pub enum WebsiteRuntimeProviderValidationError {
         provider_resource_uuid: String,
         kind: WebsiteProviderErrorKind,
     },
+    #[error("compiled runtime-set violates the provider validation contract")]
+    CompiledContractViolation,
 }

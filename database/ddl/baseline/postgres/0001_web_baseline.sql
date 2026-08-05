@@ -588,6 +588,12 @@ CREATE INDEX idx_web_listener_certificate_binding_certificate
     ON web_listener_certificate_binding (tenant_id, certificate_id, status)
     WHERE deleted_at IS NULL;
 
+-- List-query hardening: listener binding listing orders by
+-- (is_default DESC, priority ASC, id ASC) per site binding.
+CREATE INDEX idx_web_listener_certificate_binding_site_sort
+    ON web_listener_certificate_binding (site_binding_id, is_default, priority, id)
+    WHERE deleted_at IS NULL;
+
 CREATE TABLE web_source_version (
     id              BIGINT       NOT NULL,
     uuid            VARCHAR(64)  NOT NULL,
@@ -623,6 +629,11 @@ COMMENT ON COLUMN web_source_version.status IS 'Status: 0=preparing, 1=ready, 2=
 
 CREATE INDEX idx_web_source_version_site_created
     ON web_source_version (site_id, created_at DESC);
+
+-- List-query hardening: source-version listing filters by tenant then site and
+-- sorts by created_at DESC (PAGINATION_SPEC/DATABASE_SPEC §20.5).
+CREATE INDEX idx_web_source_version_tenant_site_created
+    ON web_source_version (tenant_id, site_id, created_at DESC);
 
 CREATE INDEX idx_web_source_version_retention
     ON web_source_version (tenant_id, site_id, status, created_at DESC);
@@ -678,6 +689,11 @@ COMMENT ON COLUMN web_deployment.idempotency_key IS 'Client-provided idempotency
 
 CREATE INDEX idx_web_deployment_site_created
     ON web_deployment (site_id, created_at DESC);
+
+-- List-query hardening: deployment listing filters by tenant then site and
+-- sorts by created_at DESC (PAGINATION_SPEC/DATABASE_SPEC §20.5).
+CREATE INDEX idx_web_deployment_tenant_site_created
+    ON web_deployment (tenant_id, site_id, created_at DESC);
 
 CREATE INDEX idx_web_deployment_source_version
     ON web_deployment (source_version_id);
@@ -880,6 +896,11 @@ COMMENT ON COLUMN web_server.status IS 'Status: 0=offline, 1=online, 2=deploying
 
 CREATE INDEX idx_web_server_tenant_status
     ON web_server (tenant_id, status, updated_at DESC);
+
+-- List-query hardening: Web Node keyset listing orders by (updated_at DESC,
+-- id DESC) without a status predicate; this index covers the keyset seek.
+CREATE INDEX idx_web_server_tenant_updated
+    ON web_server (tenant_id, updated_at DESC);
 
 -- Node credential lookup: agent token hashes are stored in metadata and must
 -- be indexed for bounded authentication, otherwise every node heartbeat scans

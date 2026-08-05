@@ -49,6 +49,9 @@ export interface WebserverPcModuleDefinition {
 
 export interface WebserverPageInfo {
   hasMore: boolean;
+  /** `offset` (page/page_size) or `cursor` (opaque keyset) per PAGINATION_SPEC;
+   *  absent values normalize to `offset` for legacy in-memory fixtures. */
+  mode?: "cursor" | "offset";
   page: number;
   pageSize: number;
   total?: number;

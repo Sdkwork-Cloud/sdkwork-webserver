@@ -2,15 +2,32 @@ import type { WebserverResourcePage } from "./types.ts";
 
 export function normalizeWebserverPage(value: unknown): WebserverResourcePage {
   const candidate = unwrap(value);
-  if (Array.isArray(candidate)) return { items: candidate.map(toRecord), pageInfo: { page: 1, pageSize: candidate.length, hasMore: false } };
-  if (!isRecord(candidate)) return { items: [], pageInfo: { page: 1, pageSize: 20, hasMore: false } };
+  if (Array.isArray(candidate))
+    return { items: candidate.map(toRecord), pageInfo: { page: 1, pageSize: candidate.length, hasMore: false, mode: "offset" } };
+  if (!isRecord(candidate))
+    return { items: [], pageInfo: { page: 1, pageSize: 20, hasMore: false, mode: "offset" } };
   const items = Array.isArray(candidate.items) ? candidate.items.map(toRecord) : [candidate];
   const info = isRecord(candidate.pageInfo) ? candidate.pageInfo : {};
   const page = positiveInteger(info.page, 1);
   const pageSize = positiveInteger(info.pageSize, Math.max(items.length, 20));
   const total = nonNegativeSafeInteger(info.totalItems);
   const nextCursor = typeof info.nextCursor === "string" && info.nextCursor.length > 0 ? info.nextCursor : undefined;
-  return { items, pageInfo: { page, pageSize, total, nextCursor, hasMore: typeof info.hasMore === "boolean" ? info.hasMore : total === undefined ? items.length >= pageSize : page * pageSize < total } };
+  const mode = info.mode === "cursor" ? "cursor" : "offset";
+  return {
+    items,
+    pageInfo: {
+      page,
+      pageSize,
+      total,
+      nextCursor,
+      mode,
+      hasMore: typeof info.hasMore === "boolean"
+        ? info.hasMore
+        : total === undefined
+          ? items.length >= pageSize
+          : page * pageSize < total,
+    },
+  };
 }
 
 function unwrap(value: unknown): unknown {

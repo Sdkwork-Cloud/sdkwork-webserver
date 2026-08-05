@@ -21,10 +21,14 @@ This module is in initialization state for greenfield PostgreSQL deployments:
 3. Production and staging use explicit migration commands; `lifecycle.autoMigrate` defaults to `false`.
 4. `pnpm db:drift:check` verifies the deployed schema before release.
 
-The pre-launch `1.1.0` reconciliation migration upgrades databases initialized before the Website
-runtime control plane and `application_type` were added. It preserves existing sites as `WEB` and
-refuses to invent tenant-scope hashes for legacy Web Nodes; operators must supply those hashes from
-their authoritative tenant assignments before rerunning the migration.
+The pre-launch reconciliation migration
+(`0001_web_schema_hardening`, plus `0002` env-variable rotation and `0003`
+certificate lifecycle completion) upgrades databases initialized before the
+Website runtime control plane and `application_type` were added. It preserves
+existing sites as `WEB` and refuses to invent tenant-scope hashes for legacy
+Web Nodes; operators must supply those hashes from their authoritative tenant
+assignments before rerunning the migration. `0004_web_list_index_hardening`
+adds the tenant-prefixed list-query indexes.
 
 SQLite is not an authoritative server engine or deployment profile. This Web Server repository
 does not provide a server-side SQLite repository or SQLite release profile. Any future SQLite

@@ -9,12 +9,9 @@
     "protocol": "http",
     "packageName": "com.sdkwork:sdkwork-web-backend-sdk"
   },
-  "changeFingerprint": "8af92fa9b6449d6f1bf3d765cac587ed67f2705c595a7547b058c35ecd88a1a8",
+  "changeFingerprint": "049f1e885389ad8bf68a8a120389e946ced20e8f7aa2e0bf0b7b361d863660f6",
   "changes": {
-    "createdGeneratedFiles": [
-      "src/main/java/com/sdkwork/web/backend/sdk/model/CertificatesRevokeResponse.java",
-      "src/main/java/com/sdkwork/web/backend/sdk/model/RevokeCertificateRequest.java"
-    ],
+    "createdGeneratedFiles": [],
     "updatedGeneratedFiles": [
       "src/main/java/com/sdkwork/web/backend/sdk/api/CertificateApi.java"
     ],
@@ -82,6 +79,7 @@
       "src/main/java/com/sdkwork/web/backend/sdk/model/CertificatesListResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/CertificatesOperationsRetrieveResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/CertificatesRenewResponse202.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/model/CertificatesRevokeResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/CertificatesUpdateResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/ConfigsCreateResponse201.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/ConfigsDeployResponse.java",
@@ -124,6 +122,7 @@
       "src/main/java/com/sdkwork/web/backend/sdk/model/ProblemDetail.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/ReloadResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/RetrieveResponse.java",
+      "src/main/java/com/sdkwork/web/backend/sdk/model/RevokeCertificateRequest.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/RootDomainResponse.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/RootDomainsCreateResponse201.java",
       "src/main/java/com/sdkwork/web/backend/sdk/model/RootDomainsListResponse.java",
@@ -154,13 +153,14 @@
     "preservedScaffoldFiles": [
       "custom/README.md"
     ],
-    "backedUpFiles": []
+    "backedUpFiles": [
+      "src/main/java/com/sdkwork/web/backend/sdk/api/CertificateApi.java"
+    ]
   },
   "impact": {
     "schemaVersion": 1,
     "areas": [
-      "api-surface",
-      "models"
+      "api-surface"
     ],
     "details": [
       {
@@ -168,28 +168,21 @@
         "paths": [
           "src/main/java/com/sdkwork/web/backend/sdk/api/CertificateApi.java"
         ]
-      },
-      {
-        "area": "models",
-        "paths": [
-          "src/main/java/com/sdkwork/web/backend/sdk/model/CertificatesRevokeResponse.java",
-          "src/main/java/com/sdkwork/web/backend/sdk/model/RevokeCertificateRequest.java"
-        ]
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, models. Verification is required."
+    "summary": "Detected impact areas: api-surface. Verification is required."
   },
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: api-surface. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-webserver\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-java\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -207,12 +200,14 @@
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "medium",
+    "riskLevel": "high",
     "nextAction": "verify",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
     "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
+      "backed-up-generated-files",
+      "manual-review-required",
       "verification-required"
     ]
   },

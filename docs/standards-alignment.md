@@ -50,6 +50,11 @@ approval. Normative requirements are owned by `../sdkwork-specs`.
   sdkwork-drive), enabling the compile-time SQL injection audit (`SqlSafeStr`): every
   dynamically assembled repository statement passes through the audited `audited_sql` wrapper
   that requires fixed-clause-only assembly with `$N` bind parameters for all request input.
+- Direct dependencies track current releases within their semver range (`jsonschema` 0.49,
+  `hashlink` 0.12, axum 0.8.9, tokio 1.53, sqlx 0.9, rustls 0.23). Major-version bumps that
+  cross repository boundaries (`tower-http` 0.7 with sdkwork-web-framework, `cap-std` 4,
+  `rcgen` 0.14, `x509-parser` 0.18, `reqwest` 0.13, `hickory-resolver` 0.26) are tracked as a
+  coordinated cross-repository upgrade and are not applied unilaterally.
 - SQLite engine branches were removed from the repository (the repository is instantiated
   exclusively with PostgreSQL); the `database_engine` field, engine-parameterized write
   expressions, and the SQLite JSON `json_set` branch no longer exist as dead code.
@@ -60,6 +65,24 @@ approval. Normative requirements are owned by `../sdkwork-specs`.
   present.
 - IAM provider callbacks consume `quick-xml` 0.41+, preserve XML entity and CDATA values, and
   reject DTDs, nested callback fields, unknown entities, and incomplete documents.
+- Wildcard host matching (`*.suffix`) is a constant-time map lookup on the request host's
+  first-label remainder in the request, website-runtime, and TLS compiled indexes, replacing
+  per-request linear scans; listener compilation is a single pass over virtual-host
+  declarations instead of an O(listeners x hosts) nested scan.
+- The repository layer owns no Nginx validation/reload stubs: Nginx syntax validation and reload
+  run exclusively through the edge runtime, `retrieve_nginx_status` probes the real edge
+  configuration (`nginx -t`) for its `running` flag, and removed port methods can no longer
+  misreport a fake result.
+- Nginx subprocess capture (`nginx -T`) is bounded (4 MiB ceiling), provider-event checkpoint
+  recovery enforces an aggregate byte budget and retains only the highest generation per stream,
+  and TLS material distribution runs its file-system work on the blocking thread pool with
+  fsync failures surfaced instead of swallowed.
+- The certificate operation worker wraps each cycle in a watchdog timeout so a stalled ACME or
+  database call can never block renewal scheduling or graceful shutdown.
+- The PC Console pagination state machine pages both modes correctly: offset lists increment
+  `page`, cursor lists navigate an explicit back-stack (`cursorHistory`), and a page load no
+  longer re-triggers itself through the effect dependency (the previous `nextCursor`-driven
+  effect could auto-advance through every page).
 
 ## API And SDK Guarantees
 
@@ -79,6 +102,14 @@ approval. Normative requirements are owned by `../sdkwork-specs`.
   migrations run at bootstrap) so Idempotency-Key replay deduplication survives restarts and
   multi-replica deployments, and applies a 60 s business handler deadline so stuck handlers
   fail bounded instead of occupying workers indefinitely.
+- The internal API OpenAPI envelope matches the runtime: `SdkWorkApiResponse` requires only
+  `code`/`data`/`traceId` (no invented `message`), and `ProblemDetail.detail` is optional,
+  consistent with the app/backend envelopes.
+- Unassembled runtime capabilities (for example Git source import without a configured
+  importer) fail with a dedicated `Unavailable` error mapped to HTTP 503 instead of a
+  misleading 500 internal-server fault.
+- Audit writes fail closed when the IAM tenant subject cannot be resolved to a positive numeric
+  id: no audit row is persisted with a fabricated `tenant_id = 0`.
 
 ## Persistence And Data Lifecycle
 
@@ -86,20 +117,30 @@ approval. Normative requirements are owned by `../sdkwork-specs`.
   `database/contract/schema.yaml` is fully materialized for every table including
   `web_certificate_operation` with constraints, partial unique indexes, and predicates.
 - `database/migrations/postgres/` carries expand-only migrations (`0001_web_schema_hardening`,
-  `0002_web_env_variable_rotation`) with standard metadata headers, paired down migrations, and
-  idempotent statements for already-installed databases.
+  `0002_web_env_variable_rotation`, `0003_web_certificate_lifecycle_completion`,
+  `0004_web_list_index_hardening`) with standard metadata headers, paired down migrations, and
+  idempotent statements for already-installed databases. `0004` adds tenant-prefixed
+  `(tenant_id, site_id, created_at)` indexes for deployment/source-version keyset listing, a
+  `(tenant_id, updated_at)` Web Node keyset index, and the listener-binding
+  `(site_binding_id, is_default, priority, id)` sort index; the baseline snapshot and
+  `database/contract/schema.yaml` are kept in sync with the same index set.
 - Soft-deleted sites archive their bindings, TLS policies, listener certificate bindings, and
   deactivate environment variables and health checks in one transaction; active slugs are unique
   per tenant through a partial unique index.
 - Certificates support soft deletion (`DELETE /backend/v3/api/certificates/{certificateId}`) that
   releases domain identifiers; terminal-failed ISSUE certificates are auto-archived by the worker
   reaper, so failed issuance never blocks domain removal.
+- Managed-domain responses project `latestDeployment` from the same `web_deployment` join used by
+  root-domain hostname responses, so the two listing paths return consistent deployment
+  visibility.
 - Environment variables support in-place rotation and soft deletion
   (`PATCH`/`DELETE /app/v3/api/sites/{siteId}/env_variables/{variableId}`); the active-key unique
   index releases keys on deactivation.
-- Optimistic concurrency: `version` columns are enforced with compare-and-swap updates on site and
-  Nginx configuration writes, returning `409` on concurrent modification instead of silent
-  last-write-wins.
+- Optimistic concurrency: `version` columns are enforced with compare-and-swap updates on site,
+  Nginx configuration, and environment-variable writes, returning `409` on concurrent
+  modification instead of silent last-write-wins. Certificate renewal-policy updates use a
+  row-locked transaction, and agent heartbeats use atomic JSONB merges so concurrent heartbeats
+  never drop fields.
 - Certificate operation leases are renewed by a heartbeat while issuer work runs, so slow ACME
   issuance is no longer reaped mid-flight.
 - Let's Encrypt account credentials are persisted encrypted (AES-256-GCM under the process
@@ -126,6 +167,9 @@ approval. Normative requirements are owned by `../sdkwork-specs`.
 - Certificate listener convergence processes each candidate in its own short row-locked
   transaction with a status guard (idempotent under concurrent workers) instead of one long
   transaction spanning hundreds of statements; agent certificate observations are batch-bounded.
+  Every transition branch (ACTIVE, DEPLOYING, FAILED) commits its short transaction explicitly,
+  so a node-reported failure durably terminates the rollout instead of being rolled back with a
+  dropped transaction.
 - `web_nginx_config` activation is edge-first: the site is deployed and reloaded before the
   control-plane state commits, and a failed commit rolls the edge back to the previously
   active configuration.

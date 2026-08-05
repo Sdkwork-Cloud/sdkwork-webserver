@@ -261,6 +261,14 @@ impl WebRepository {
                 .execute(&mut *transaction)
                 .await
                 .map_err(|error| store_error("fail listener certificate rollout", error))?;
+                // Commit the FAILED transition before continuing: dropping
+                // the transaction without an explicit commit would roll back
+                // the status update and leave the binding permanently stuck
+                // in PENDING/DEPLOYING with an endless retry loop.
+                transaction
+                    .commit()
+                    .await
+                    .map_err(|error| store_error("commit failed listener certificate rollout", error))?;
                 continue;
             }
             if assigned_count > 0 && served_count == assigned_count {

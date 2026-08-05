@@ -299,12 +299,25 @@ fn load_checkpoint_directory(
 ) -> Result<BTreeMap<String, StoredCheckpoint>, WebsiteProviderEventCheckpointError> {
     let mut candidates: BTreeMap<String, Vec<PathBuf>> = BTreeMap::new();
     let maximum_files = maximum_streams.saturating_mul(2);
+    // Aggregate byte budget for everything the loader may retain: two slots
+    // per stream at the per-document ceiling is the physical upper bound, and
+    // the budget keeps startup memory bounded even when the directory has
+    // been filled with maximum-size documents.
+    let aggregate_budget = (maximum_files as u64).saturating_mul(MAXIMUM_CHECKPOINT_BYTES);
+    let mut total_bytes: u64 = 0;
     for entry in fs::read_dir(directory).map_err(|_| WebsiteProviderEventCheckpointError::Io)? {
         let entry = entry.map_err(|_| WebsiteProviderEventCheckpointError::Io)?;
         let metadata = fs::symlink_metadata(entry.path())
             .map_err(|_| WebsiteProviderEventCheckpointError::Io)?;
         if !metadata.is_file() || metadata.file_type().is_symlink() {
             return Err(WebsiteProviderEventCheckpointError::InvalidDirectory);
+        }
+        if metadata.len() > MAXIMUM_CHECKPOINT_BYTES {
+            return Err(WebsiteProviderEventCheckpointError::Corrupt);
+        }
+        total_bytes = total_bytes.saturating_add(metadata.len());
+        if total_bytes > aggregate_budget {
+            return Err(WebsiteProviderEventCheckpointError::StreamLimit);
         }
         let name = entry
             .file_name()
@@ -326,16 +339,21 @@ fn load_checkpoint_directory(
 
     let mut checkpoints: BTreeMap<String, StoredCheckpoint> = BTreeMap::new();
     for (digest, paths) in candidates {
-        let mut valid = Vec::new();
+        // Keep only the highest-generation document per stream: the other
+        // slot is parsed for validation but never retained, so memory stays
+        // O(streams) instead of O(streams x slots) during recovery.
+        let mut best: Option<CheckpointDocument> = None;
         for path in paths {
             if let Ok(document) = read_checkpoint(&path, &digest) {
-                valid.push(document);
+                if best
+                    .as_ref()
+                    .is_none_or(|current: &CheckpointDocument| document.generation > current.generation)
+                {
+                    best = Some(document);
+                }
             }
         }
-        let document = valid
-            .into_iter()
-            .max_by_key(|document| document.generation)
-            .ok_or(WebsiteProviderEventCheckpointError::Corrupt)?;
+        let document = best.ok_or(WebsiteProviderEventCheckpointError::Corrupt)?;
         match checkpoints.get(&document.stream_id) {
             Some(existing) if existing.generation >= document.generation => {}
             _ => {

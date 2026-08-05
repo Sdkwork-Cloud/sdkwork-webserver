@@ -14,7 +14,7 @@ use sdkwork_webserver_contract::{
     EnvVariableResponse, HealthCheckPage, HealthCheckResponse, IssueCertificateRequest,
     ListAuditLogsQuery, ListNginxConfigsQuery, ListRootDomainsQuery, ListSitesQuery,
     ListenerCertificateBindingPage, ListenerCertificateBindingResponse, NginxConfigPage,
-    NginxConfigResponse, NginxReloadResponse, NginxStatusResponse, NginxValidateResponse,
+    NginxConfigResponse, NginxStatusResponse,
     RevokeCertificateRequest, RootDomainPage, RootDomainResponse, RuntimeAssignment,
     RuntimeAssignmentDelivery, RuntimeObservation, RuntimeObservationState, ServerPage, SitePage,
     SiteResponse, SourceVersionPage, SourceVersionResponse, TlsCertificateAssignmentMaterial,
@@ -275,40 +275,28 @@ pub trait WebRepositoryPort: Send + Sync {
 
     async fn list_source_versions(
         &self,
-        _tenant_id: i64,
-        _site_id: &str,
-        _page: i32,
-        _page_size: i32,
-        _cursor: Option<&str>,
-    ) -> WebServiceResult<SourceVersionPage> {
-        Err(sdkwork_webserver_contract::WebServiceError::Internal(
-            "source versions are unavailable".to_string(),
-        ))
-    }
+        tenant_id: i64,
+        site_id: &str,
+        page: i32,
+        page_size: i32,
+        cursor: Option<&str>,
+    ) -> WebServiceResult<SourceVersionPage>;
 
     async fn create_source_version(
         &self,
-        _tenant_id: i64,
-        _site_id: &str,
-        _actor_id: Option<i64>,
-        _retention_limit: i32,
-        _request: &CreateSourceVersionRequest,
-    ) -> WebServiceResult<SourceVersionResponse> {
-        Err(sdkwork_webserver_contract::WebServiceError::Internal(
-            "source versions are unavailable".to_string(),
-        ))
-    }
+        tenant_id: i64,
+        site_id: &str,
+        actor_id: Option<i64>,
+        retention_limit: i32,
+        request: &CreateSourceVersionRequest,
+    ) -> WebServiceResult<SourceVersionResponse>;
 
     async fn retrieve_source_version(
         &self,
-        _tenant_id: i64,
-        _site_id: &str,
-        _source_version_id: &str,
-    ) -> WebServiceResult<SourceVersionResponse> {
-        Err(sdkwork_webserver_contract::WebServiceError::Internal(
-            "source versions are unavailable".to_string(),
-        ))
-    }
+        tenant_id: i64,
+        site_id: &str,
+        source_version_id: &str,
+    ) -> WebServiceResult<SourceVersionResponse>;
 
     async fn list_deployments(
         &self,
@@ -563,12 +551,6 @@ pub trait WebRepositoryPort: Send + Sync {
         request: &UpdateNginxConfigRequest,
     ) -> WebServiceResult<NginxConfigResponse>;
 
-    async fn validate_nginx_config(
-        &self,
-        tenant_id: Option<i64>,
-        config_id: &str,
-    ) -> WebServiceResult<NginxValidateResponse>;
-
     async fn load_nginx_config_content(
         &self,
         tenant_id: Option<i64>,
@@ -580,13 +562,9 @@ pub trait WebRepositoryPort: Send + Sync {
     /// succeeds at the edge but fails in the control plane.
     async fn load_active_nginx_config_content(
         &self,
-        _tenant_id: i64,
-        _site_id: &str,
-    ) -> WebServiceResult<Option<String>> {
-        Err(sdkwork_webserver_contract::WebServiceError::Internal(
-            "active nginx config content is unavailable".to_string(),
-        ))
-    }
+        tenant_id: i64,
+        site_id: &str,
+    ) -> WebServiceResult<Option<String>>;
 
     async fn resolve_site_primary_hostname(
         &self,
@@ -599,8 +577,6 @@ pub trait WebRepositoryPort: Send + Sync {
         tenant_id: Option<i64>,
         config_id: &str,
     ) -> WebServiceResult<NginxConfigResponse>;
-
-    async fn reload_nginx(&self) -> WebServiceResult<NginxReloadResponse>;
 
     async fn retrieve_nginx_status(
         &self,

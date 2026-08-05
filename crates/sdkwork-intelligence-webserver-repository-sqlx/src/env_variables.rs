@@ -215,7 +215,7 @@ impl WebRepository {
     ) -> WebServiceResult<EnvVariableResponse> {
         let site_internal_id = resolve_site_internal_id(&self.pool, tenant_id, site_id).await?;
         let row = sqlx::query(
-            "SELECT uuid, key, environment, is_secret
+            "SELECT uuid, key, environment, is_secret, version
              FROM web_env_variable
              WHERE tenant_id = $1 AND site_id = $2 AND uuid = $3 AND status = 1",
         )
@@ -232,6 +232,9 @@ impl WebRepository {
         let environment: String = row
             .try_get("environment")
             .map_err(|error| store_error("map web_env_variable environment", error))?;
+        let stored_version: i64 = row
+            .try_get("version")
+            .map_err(|error| store_error("map web_env_variable version", error))?;
         let stored_value = if request.is_secret {
             aes_gcm_encrypt(self.secret_key(), request.value.as_bytes()).map_err(|error| {
                 WebServiceError::Internal(format!("encrypt env variable: {error}"))
@@ -246,7 +249,7 @@ impl WebRepository {
             "UPDATE web_env_variable
              SET value_encrypted = $4, is_secret = $6,
                  updated_at = {now_expression}, version = version + 1
-             WHERE tenant_id = $1 AND site_id = $2 AND uuid = $3 AND status = 1"
+             WHERE tenant_id = $1 AND site_id = $2 AND uuid = $3 AND status = 1 AND version = $7"
         );
         let result = sqlx::query(audited_sql(&update_sql))
             .bind(tenant_id)
@@ -255,11 +258,17 @@ impl WebRepository {
             .bind(&stored_value)
             .bind(&now)
             .bind(request.is_secret)
+            .bind(stored_version)
             .execute(&self.pool)
             .await
             .map_err(|error| store_error("update web_env_variable", error))?;
         if result.rows_affected() == 0 {
-            return Err(WebServiceError::not_found("environment variable not found"));
+            // The variable was modified concurrently or removed between the
+            // read and the compare-and-swap update: distinguish the two
+            // truthfully instead of silently losing an update.
+            return self
+                .conflict_or_missing_env_variable(tenant_id, site_internal_id, variable_id)
+                .await;
         }
         Ok(EnvVariableResponse {
             id: variable_id.to_string(),
@@ -302,6 +311,32 @@ impl WebRepository {
             return Err(WebServiceError::not_found("environment variable not found"));
         }
         Ok(())
+    }
+
+    /// Distinguishes a concurrent-write conflict from a missing variable
+    /// after a compare-and-swap update affected zero rows.
+    async fn conflict_or_missing_env_variable(
+        &self,
+        tenant_id: i64,
+        site_internal_id: i64,
+        variable_id: &str,
+    ) -> WebServiceResult<EnvVariableResponse> {
+        let exists = sqlx::query_scalar::<_, i64>(
+            "SELECT 1 FROM web_env_variable
+             WHERE tenant_id = $1 AND site_id = $2 AND uuid = $3 AND status = 1",
+        )
+        .bind(tenant_id)
+        .bind(site_internal_id)
+        .bind(variable_id)
+        .fetch_optional(&self.pool)
+        .await
+        .map_err(|error| store_error("recheck web_env_variable existence", error))?;
+        if exists.is_some() {
+            return Err(WebServiceError::conflict(
+                "environment variable was modified concurrently; reload and retry",
+            ));
+        }
+        Err(WebServiceError::not_found("environment variable not found"))
     }
 }
 

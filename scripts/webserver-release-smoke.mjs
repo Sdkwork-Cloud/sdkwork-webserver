@@ -357,8 +357,6 @@ function standaloneManagementEnv(packageRoot, port) {
     SDKWORK_WEB_APPLICATION_BACKEND_HTTP_URL: `http://127.0.0.1:${port}`,
     SDKWORK_WEB_PC_STATIC_ROOT: STANDALONE_PC_ROOT,
     SDKWORK_DATABASE_AUTO_MIGRATE: 'true',
-    SDKWORK_DATABASE_TEMPORARY_ANY_POOL_EXCEPTION: 'true',
-    SDKWORK_DATABASE_TEMPORARY_DRIVER_POOL_COUNT: '1',
     SDKWORK_WEB_SECRET_ENCRYPTION_KEY:
       'sdkwork-release-smoke-web-secret-encryption-key-2026',
     SDKWORK_WEB_ACME_PROFILE: 'staging',

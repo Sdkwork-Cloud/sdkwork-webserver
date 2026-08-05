@@ -38,8 +38,10 @@ impl ApplicationSourceImporter for UnavailableApplicationSourceImporter {
         &self,
         _request: &GitSourceImportRequest,
     ) -> WebServiceResult<ImportedApplicationSource> {
-        Err(WebServiceError::Internal(
-            "Git source import is unavailable in this runtime".to_string(),
+        // 503: the capability is deliberately not assembled in this runtime
+        // rather than masquerading as a 500 server fault.
+        Err(WebServiceError::unavailable(
+            "Git source import is unavailable in this runtime",
         ))
     }
 }

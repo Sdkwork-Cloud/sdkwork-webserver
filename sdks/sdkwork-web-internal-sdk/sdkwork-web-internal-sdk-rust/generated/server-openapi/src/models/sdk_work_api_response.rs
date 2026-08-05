@@ -4,10 +4,9 @@ use serde::{Deserialize, Serialize};
 pub struct SdkWorkApiResponse {
     pub code: i64,
 
-    pub message: String,
-
     pub data: serde_json::Value,
 
+    /// Server-owned request correlation id.
     #[serde(rename = "traceId")]
     pub trace_id: String,
 }

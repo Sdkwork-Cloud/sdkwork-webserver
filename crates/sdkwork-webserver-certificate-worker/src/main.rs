@@ -11,6 +11,11 @@ const MAX_OPERATION_POLL_INTERVAL_SECS: u64 = 60;
 const DEFAULT_RENEWAL_SCHEDULE_INTERVAL_SECS: u64 = 3_600;
 const MIN_RENEWAL_SCHEDULE_INTERVAL_SECS: u64 = 60;
 const MAX_RENEWAL_SCHEDULE_INTERVAL_SECS: u64 = 86_400;
+/// Watchdog ceiling for one certificate operation cycle. A cycle that hangs
+/// (for example a stalled ACME or database call without its own deadline)
+/// must not block renewal scheduling or graceful shutdown forever.
+const MIN_CYCLE_TIMEOUT_SECS: u64 = 60;
+const MAX_CYCLE_TIMEOUT_SECS: u64 = 600;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -69,33 +74,56 @@ async fn main() -> anyhow::Result<()> {
     .await;
 
     let mut consecutive_failures: u32 = 0;
+    // Watchdog: a cycle that outlives this bound is cancelled so renewal
+    // scheduling and graceful shutdown always make progress.
+    let cycle_timeout_secs = (poll_interval_secs.saturating_mul(12))
+        .clamp(MIN_CYCLE_TIMEOUT_SECS, MAX_CYCLE_TIMEOUT_SECS);
     loop {
         let schedule_renewals = Instant::now() >= next_renewal_schedule;
-        match runtime
-            .service
-            .run_certificate_operation_cycle(&worker_id, schedule_renewals)
-            .await
-        {
-            Ok(report) => {
-                consecutive_failures = 0;
-                if schedule_renewals {
-                    next_renewal_schedule =
-                        Instant::now() + Duration::from_secs(renewal_schedule_interval_secs);
-                }
-                if report.scheduled > 0 || report.claimed > 0 {
-                    info!(
-                        scheduled = report.scheduled,
-                        claimed = report.claimed,
-                        succeeded = report.succeeded,
-                        retried = report.retried,
-                        failed = report.failed,
-                        "certificate operation cycle completed"
-                    );
+        let cycle_report = tokio::select! {
+            result = runtime
+                .service
+                .run_certificate_operation_cycle(&worker_id, schedule_renewals) => {
+                match result {
+                    Ok(report) => Some(report),
+                    Err(error) => {
+                        consecutive_failures = consecutive_failures.saturating_add(1);
+                        warn!(error = %error, "certificate operation cycle failed");
+                        None
+                    }
                 }
             }
-            Err(error) => {
+            result = &mut shutdown_task => {
+                result
+                    .map_err(|error| anyhow::anyhow!("certificate worker shutdown task failed: {error}"))?
+                    .map_err(|error| anyhow::anyhow!("certificate worker shutdown listener failed: {error}"))?;
+                info!("certificate operation worker stopped after completing the active cycle");
+                break;
+            }
+            () = tokio::time::sleep(Duration::from_secs(cycle_timeout_secs)) => {
                 consecutive_failures = consecutive_failures.saturating_add(1);
-                warn!(error = %error, "certificate operation cycle failed");
+                warn!(
+                    cycle_timeout_secs,
+                    "certificate operation cycle exceeded its watchdog timeout"
+                );
+                None
+            }
+        };
+        if let Some(report) = cycle_report {
+            consecutive_failures = 0;
+            if schedule_renewals {
+                next_renewal_schedule =
+                    Instant::now() + Duration::from_secs(renewal_schedule_interval_secs);
+            }
+            if report.scheduled > 0 || report.claimed > 0 {
+                info!(
+                    scheduled = report.scheduled,
+                    claimed = report.claimed,
+                    succeeded = report.succeeded,
+                    retried = report.retried,
+                    failed = report.failed,
+                    "certificate operation cycle completed"
+                );
             }
         }
         // Exponential backoff on failure (bounded) plus per-cycle jitter so

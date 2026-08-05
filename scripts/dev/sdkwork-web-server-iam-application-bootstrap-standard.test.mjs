@@ -66,7 +66,7 @@ test('standalone startup embeds IAM App API through its owner assembly', () => {
   assert.doesNotMatch(gatewayCargo, /sdkwork-iam-standalone-gateway/u);
 });
 
-test('standalone profile governs the temporary Drive database driver exception', () => {
+test('standalone profiles no longer carry the temporary Drive AnyPool driver exception', () => {
   const developmentProfile = read('etc/topology/standalone.development.env');
   const productionProfile = read('etc/topology/standalone.production.env');
   const poolContract = readJson('specs/process-database-pool.spec.json');
@@ -74,28 +74,16 @@ test('standalone profile governs the temporary Drive database driver exception',
     (entry) => entry.id === 'sdkwork-api-web-server-standalone-gateway',
   );
 
+  // The temporary sqlx::AnyPool mechanism was removed: no production code
+  // path consumes it, so profiles and the pool contract must not re-introduce
+  // the exception flags (standards-alignment: "no production code path
+  // consumes the temporary AnyPool mechanism").
   for (const profile of [developmentProfile, productionProfile]) {
-    assert.match(profile, /^SDKWORK_DATABASE_TEMPORARY_ANY_POOL_EXCEPTION=true$/mu);
-    assert.match(profile, /^SDKWORK_DATABASE_TEMPORARY_DRIVER_POOL_COUNT=1$/mu);
+    assert.doesNotMatch(profile, /^SDKWORK_DATABASE_TEMPORARY_ANY_POOL_EXCEPTION=/mu);
+    assert.doesNotMatch(profile, /^SDKWORK_DATABASE_TEMPORARY_DRIVER_POOL_COUNT=/mu);
   }
-
-  assert.equal(
-    processContract.temporaryDriverPoolCountEnv,
-    'SDKWORK_DATABASE_TEMPORARY_DRIVER_POOL_COUNT',
-  );
-  assert.deepEqual(processContract.temporaryDriverExceptions, [
-    {
-      driver: 'sqlx::AnyPool',
-      owner: 'sdkwork-drive maintainers',
-      removalMilestone:
-        'Migrate Drive PostgreSQL App API repositories to sqlx::PgPool before the next Web Server production release',
-      combinedConnectionBudget: 'SDKWORK_DATABASE_MAX_CONNECTIONS',
-      adr: 'docs/architecture/decisions/ADR-20260728-embedded-standalone-dependency-assemblies.md',
-      evidence: [
-        '../sdkwork-drive/crates/sdkwork-drive-workspace-service/src/infrastructure/sql/installer.rs',
-      ],
-    },
-  ]);
+  assert.equal(processContract.temporaryDriverPoolCountEnv, undefined);
+  assert.deepEqual(processContract.temporaryDriverExceptions, []);
 });
 
 test('standalone runner injects owner runtime roots and keeps real auth enabled', () => {

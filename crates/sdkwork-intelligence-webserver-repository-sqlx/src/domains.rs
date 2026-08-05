@@ -6,8 +6,8 @@ use sdkwork_intelligence_webserver_service::{
 };
 use sdkwork_utils_rust::crypto::sha256_hash;
 use sdkwork_webserver_contract::{
-    CreateDomainRequest, CreateManagedDomainRequest, DomainPage, DomainResponse,
-    UpdateDomainApplicationBindingRequest, WebServiceError, WebServiceResult,
+    CreateDomainRequest, CreateManagedDomainRequest, DomainDeploymentResponse, DomainPage,
+    DomainResponse, UpdateDomainApplicationBindingRequest, WebServiceError, WebServiceResult,
 };
 use sqlx::{Postgres, Row, Transaction};
 
@@ -1101,7 +1101,13 @@ fn domain_select(predicate: &str) -> String {
                     ELSE NULL
                 END AS ssl_provider,
                 d.status, CAST(d.created_at AS TEXT) AS created_at,
-                CAST(d.updated_at AS TEXT) AS updated_at
+                CAST(d.updated_at AS TEXT) AS updated_at,
+                latest.uuid AS latest_deployment_id,
+                latest.status AS latest_deployment_status,
+                latest.environment AS latest_deployment_environment,
+                latest.version_tag AS latest_deployment_version_tag,
+                CAST(latest.completed_at AS TEXT) AS latest_deployment_completed_at,
+                CAST(latest.created_at AS TEXT) AS latest_deployment_created_at
          FROM web_domain d
          INNER JOIN web_root_domain r ON r.id = d.root_domain_id
          LEFT JOIN LATERAL (
@@ -1115,6 +1121,11 @@ fn domain_select(predicate: &str) -> String {
          LEFT JOIN web_site s ON s.id = b.site_id
          LEFT JOIN web_tls_policy p ON p.tenant_id = b.tenant_id
              AND p.site_binding_id = b.id AND p.status = 'ACTIVE' AND p.deleted_at IS NULL
+         LEFT JOIN web_deployment latest ON latest.id = (
+             SELECT dep.id FROM web_deployment dep
+             WHERE dep.tenant_id = d.tenant_id AND dep.site_id = b.site_id
+             ORDER BY dep.created_at DESC, dep.id DESC LIMIT 1
+         )
          WHERE {predicate}"
     )
 }
@@ -1127,6 +1138,19 @@ fn map_domain_rows(rows: &[EngineRow]) -> WebServiceResult<Vec<DomainResponse>> 
 }
 
 fn map_domain_row(row: &EngineRow) -> Result<DomainResponse, sqlx::Error> {
+    let latest_deployment_id: Option<String> = row.try_get("latest_deployment_id")?;
+    let latest_deployment = latest_deployment_id
+        .map(|id| {
+            Ok::<DomainDeploymentResponse, sqlx::Error>(DomainDeploymentResponse {
+                id,
+                status: row.try_get("latest_deployment_status")?,
+                environment: row.try_get("latest_deployment_environment")?,
+                version_tag: row.try_get("latest_deployment_version_tag")?,
+                completed_at: optional_instant_from_row(row, "latest_deployment_completed_at")?,
+                created_at: instant_from_row(row, "latest_deployment_created_at")?,
+            })
+        })
+        .transpose()?;
     Ok(DomainResponse {
         id: row.try_get("uuid")?,
         hostname: row.try_get("hostname")?,
@@ -1140,7 +1164,7 @@ fn map_domain_row(row: &EngineRow) -> Result<DomainResponse, sqlx::Error> {
         ssl_enabled: bool_from_row(row, "ssl_enabled")?,
         ssl_provider: row.try_get("ssl_provider")?,
         status: row.try_get("status")?,
-        latest_deployment: None,
+        latest_deployment,
         created_at: instant_from_row(row, "created_at")?,
         updated_at: Some(instant_from_row(row, "updated_at")?),
     })

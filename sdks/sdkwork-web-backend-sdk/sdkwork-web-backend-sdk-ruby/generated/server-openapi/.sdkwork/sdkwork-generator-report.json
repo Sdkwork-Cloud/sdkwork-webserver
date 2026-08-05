@@ -12,12 +12,11 @@
   "mode": "apply",
   "hasChanges": true,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "c484688f778831c70d0d61e67580769eeaba9e703f47fcfea3259c10fadc66ae",
+  "changeFingerprint": "c80d886e694266dfcfc6dcac7e64874b8e2b1a739b08e8f02a5861d59b205fe7",
   "changeImpact": {
     "schemaVersion": 1,
     "areas": [
       "api-surface",
-      "models",
       "unknown"
     ],
     "details": [
@@ -28,13 +27,6 @@
         ]
       },
       {
-        "area": "models",
-        "paths": [
-          "lib/sdkwork/backend_sdk/models/certificates_revoke_response.rb",
-          "lib/sdkwork/backend_sdk/models/revoke_certificate_request.rb"
-        ]
-      },
-      {
         "area": "unknown",
         "paths": [
           "lib/sdkwork/backend_sdk.rb"
@@ -42,7 +34,7 @@
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, models, unknown. Verification is required."
+    "summary": "Detected impact areas: api-surface, unknown. Verification is required."
   },
   "executionDecision": {
     "schemaVersion": 1,
@@ -52,6 +44,7 @@
     "applyRequiresExpectedFingerprint": false,
     "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
+      "backed-up-generated-files",
       "manual-review-required",
       "unknown-impact",
       "verification-required"
@@ -65,7 +58,7 @@
         "id": "verify-check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, unknown.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, unknown.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-webserver\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-ruby\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -84,13 +77,13 @@
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, models, unknown. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: api-surface, unknown. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, unknown.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, unknown.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-webserver\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-ruby\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -129,17 +122,14 @@
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 4,
+    "writtenFiles": 2,
     "skippedScaffoldFiles": 1,
-    "skippedUnchangedGeneratedFiles": 131,
+    "skippedUnchangedGeneratedFiles": 133,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "c484688f778831c70d0d61e67580769eeaba9e703f47fcfea3259c10fadc66ae",
+    "changeFingerprint": "c80d886e694266dfcfc6dcac7e64874b8e2b1a739b08e8f02a5861d59b205fe7",
     "changes": {
-      "createdGeneratedFiles": [
-        "lib/sdkwork/backend_sdk/models/certificates_revoke_response.rb",
-        "lib/sdkwork/backend_sdk/models/revoke_certificate_request.rb"
-      ],
+      "createdGeneratedFiles": [],
       "updatedGeneratedFiles": [
         "lib/sdkwork/backend_sdk.rb",
         "lib/sdkwork/backend_sdk/api/certificate.rb"
@@ -205,6 +195,7 @@
         "lib/sdkwork/backend_sdk/models/certificates_list_response.rb",
         "lib/sdkwork/backend_sdk/models/certificates_operations_retrieve_response.rb",
         "lib/sdkwork/backend_sdk/models/certificates_renew_response202.rb",
+        "lib/sdkwork/backend_sdk/models/certificates_revoke_response.rb",
         "lib/sdkwork/backend_sdk/models/certificates_update_response.rb",
         "lib/sdkwork/backend_sdk/models/configs_create_response201.rb",
         "lib/sdkwork/backend_sdk/models/configs_deploy_response.rb",
@@ -247,6 +238,7 @@
         "lib/sdkwork/backend_sdk/models/problem_detail.rb",
         "lib/sdkwork/backend_sdk/models/reload_response.rb",
         "lib/sdkwork/backend_sdk/models/retrieve_response.rb",
+        "lib/sdkwork/backend_sdk/models/revoke_certificate_request.rb",
         "lib/sdkwork/backend_sdk/models/root_domain_response.rb",
         "lib/sdkwork/backend_sdk/models/root_domains_create_response201.rb",
         "lib/sdkwork/backend_sdk/models/root_domains_list_response.rb",
@@ -282,13 +274,15 @@
       "preservedScaffoldFiles": [
         "custom/README.md"
       ],
-      "backedUpFiles": []
+      "backedUpFiles": [
+        "lib/sdkwork/backend_sdk.rb",
+        "lib/sdkwork/backend_sdk/api/certificate.rb"
+      ]
     },
     "impact": {
       "schemaVersion": 1,
       "areas": [
         "api-surface",
-        "models",
         "unknown"
       ],
       "details": [
@@ -299,13 +293,6 @@
           ]
         },
         {
-          "area": "models",
-          "paths": [
-            "lib/sdkwork/backend_sdk/models/certificates_revoke_response.rb",
-            "lib/sdkwork/backend_sdk/models/revoke_certificate_request.rb"
-          ]
-        },
-        {
           "area": "unknown",
           "paths": [
             "lib/sdkwork/backend_sdk.rb"
@@ -313,18 +300,18 @@
         }
       ],
       "requiresVerification": true,
-      "summary": "Detected impact areas: api-surface, models, unknown. Verification is required."
+      "summary": "Detected impact areas: api-surface, unknown. Verification is required."
     },
     "verificationPlan": {
       "shouldRun": true,
       "runPhase": "now",
-      "summary": "Detected impact areas: api-surface, models, unknown. Verification is required. Run the required verification commands now against the generated SDK output.",
+      "summary": "Detected impact areas: api-surface, unknown. Verification is required. Run the required verification commands now against the generated SDK output.",
       "steps": [
         {
           "id": "check",
           "title": "Unified package check",
           "required": true,
-          "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, unknown.",
+          "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, unknown.",
           "workingDirectory": "E:\\sdkwork-space\\sdkwork-webserver\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-ruby\\generated\\server-openapi",
           "command": "node",
           "args": [
@@ -348,12 +335,16 @@
       "applyRequiresExpectedFingerprint": false,
       "summary": "Changes have been applied. Run the required verification plan now.",
       "reasons": [
+        "backed-up-generated-files",
         "manual-review-required",
         "unknown-impact",
         "verification-required"
       ]
     },
-    "backedUpFiles": [],
+    "backedUpFiles": [
+      "lib/sdkwork/backend_sdk.rb",
+      "lib/sdkwork/backend_sdk/api/certificate.rb"
+    ],
     "preservedLegacyFiles": false
   }
 }

@@ -12,7 +12,7 @@
   "mode": "apply",
   "hasChanges": true,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "ab92df117c252e29b861b9fd73ef37bb6b5900547ff4afc44636f54b5ec4d47a",
+  "changeFingerprint": "278c2beb174e9b45ebd96bf2bd124bb95e3afcfdad25d15671e5ced59efe777e",
   "changeImpact": {
     "schemaVersion": 1,
     "areas": [
@@ -29,9 +29,7 @@
       {
         "area": "models",
         "paths": [
-          "src/types/certificates-revoke-response.ts",
-          "src/types/index.ts",
-          "src/types/revoke-certificate-request.ts"
+          "src/types/index.ts"
         ]
       }
     ],
@@ -40,12 +38,14 @@
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "medium",
+    "riskLevel": "high",
     "nextAction": "verify",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
     "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
+      "backed-up-generated-files",
+      "manual-review-required",
       "verification-required"
     ]
   },
@@ -157,17 +157,14 @@
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 4,
+    "writtenFiles": 2,
     "skippedScaffoldFiles": 2,
-    "skippedUnchangedGeneratedFiles": 139,
+    "skippedUnchangedGeneratedFiles": 141,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "ab92df117c252e29b861b9fd73ef37bb6b5900547ff4afc44636f54b5ec4d47a",
+    "changeFingerprint": "278c2beb174e9b45ebd96bf2bd124bb95e3afcfdad25d15671e5ced59efe777e",
     "changes": {
-      "createdGeneratedFiles": [
-        "src/types/certificates-revoke-response.ts",
-        "src/types/revoke-certificate-request.ts"
-      ],
+      "createdGeneratedFiles": [],
       "updatedGeneratedFiles": [
         "src/api/certificate.ts",
         "src/types/index.ts"
@@ -243,6 +240,7 @@
         "src/types/certificates-list-response.ts",
         "src/types/certificates-operations-retrieve-response.ts",
         "src/types/certificates-renew-response202.ts",
+        "src/types/certificates-revoke-response.ts",
         "src/types/certificates-update-response.ts",
         "src/types/common.ts",
         "src/types/configs-create-response201.ts",
@@ -287,6 +285,7 @@
         "src/types/problem-detail.ts",
         "src/types/reload-response.ts",
         "src/types/retrieve-response.ts",
+        "src/types/revoke-certificate-request.ts",
         "src/types/root-domain-response.ts",
         "src/types/root-domains-create-response201.ts",
         "src/types/root-domains-list-response.ts",
@@ -319,7 +318,10 @@
         "custom/build-runtime.mjs",
         "custom/README.md"
       ],
-      "backedUpFiles": []
+      "backedUpFiles": [
+        "src/api/certificate.ts",
+        "src/types/index.ts"
+      ]
     },
     "impact": {
       "schemaVersion": 1,
@@ -337,9 +339,7 @@
         {
           "area": "models",
           "paths": [
-            "src/types/certificates-revoke-response.ts",
-            "src/types/index.ts",
-            "src/types/revoke-certificate-request.ts"
+            "src/types/index.ts"
           ]
         }
       ],
@@ -391,16 +391,21 @@
     },
     "executionDecision": {
       "schemaVersion": 1,
-      "riskLevel": "medium",
+      "riskLevel": "high",
       "nextAction": "verify",
       "requiresManualReview": false,
       "applyRequiresExpectedFingerprint": false,
       "summary": "Changes have been applied. Run the required verification plan now.",
       "reasons": [
+        "backed-up-generated-files",
+        "manual-review-required",
         "verification-required"
       ]
     },
-    "backedUpFiles": [],
+    "backedUpFiles": [
+      "src/api/certificate.ts",
+      "src/types/index.ts"
+    ],
     "preservedLegacyFiles": false
   }
 }

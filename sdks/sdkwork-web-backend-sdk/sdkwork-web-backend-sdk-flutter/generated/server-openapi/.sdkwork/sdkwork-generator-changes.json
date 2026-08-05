@@ -9,7 +9,7 @@
     "protocol": "http",
     "packageName": "sdkwork_web_backend_sdk"
   },
-  "changeFingerprint": "14dd9b6250f8ceea5a2d42ea9230b18d187fcb84d605f8e3a978e0003fd150f3",
+  "changeFingerprint": "a3cb174e1c1fc6336921052751265c652102c062977262b487f587cbe18d1f18",
   "changes": {
     "createdGeneratedFiles": [],
     "updatedGeneratedFiles": [
@@ -48,7 +48,10 @@
     "preservedScaffoldFiles": [
       "custom/README.md"
     ],
-    "backedUpFiles": []
+    "backedUpFiles": [
+      "lib/src/api/certificate.dart",
+      "lib/src/models.dart"
+    ]
   },
   "impact": {
     "schemaVersion": 1,
@@ -100,12 +103,14 @@
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "medium",
+    "riskLevel": "high",
     "nextAction": "verify",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
     "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
+      "backed-up-generated-files",
+      "manual-review-required",
       "verification-required"
     ]
   },

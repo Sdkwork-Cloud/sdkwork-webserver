@@ -939,7 +939,6 @@
         "additionalProperties": false,
         "required": [
           "code",
-          "message",
           "data",
           "traceId"
         ],
@@ -948,12 +947,11 @@
             "type": "integer",
             "const": 0
           },
-          "message": {
-            "type": "string"
-          },
           "data": {},
           "traceId": {
-            "type": "string"
+            "type": "string",
+            "format": "uuid",
+            "description": "Server-owned request correlation id."
           }
         }
       },
@@ -964,7 +962,6 @@
           "type",
           "title",
           "status",
-          "detail",
           "code",
           "traceId"
         ],

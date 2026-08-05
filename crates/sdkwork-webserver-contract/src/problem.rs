@@ -7,6 +7,9 @@ pub enum WebServiceErrorKind {
     Validation,
     Forbidden,
     DatabaseUnavailable,
+    /// A required runtime capability (for example a configured source
+    /// importer) is not assembled in this deployment. Maps to HTTP 503.
+    Unavailable,
     Internal,
 }
 
@@ -22,6 +25,8 @@ pub enum WebServiceError {
     Forbidden,
     #[error("database unavailable")]
     DatabaseUnavailable,
+    #[error("unavailable: {0}")]
+    Unavailable(String),
     #[error("internal error: {0}")]
     Internal(String),
 }
@@ -34,6 +39,7 @@ impl WebServiceError {
             Self::Validation(_) => WebServiceErrorKind::Validation,
             Self::Forbidden => WebServiceErrorKind::Forbidden,
             Self::DatabaseUnavailable => WebServiceErrorKind::DatabaseUnavailable,
+            Self::Unavailable(_) => WebServiceErrorKind::Unavailable,
             Self::Internal(_) => WebServiceErrorKind::Internal,
         }
     }
@@ -48,6 +54,10 @@ impl WebServiceError {
 
     pub fn validation(detail: impl Into<String>) -> Self {
         Self::Validation(detail.into())
+    }
+
+    pub fn unavailable(detail: impl Into<String>) -> Self {
+        Self::Unavailable(detail.into())
     }
 }
 

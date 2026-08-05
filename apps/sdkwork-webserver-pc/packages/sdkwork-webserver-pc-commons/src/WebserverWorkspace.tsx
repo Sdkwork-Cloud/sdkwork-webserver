@@ -209,8 +209,12 @@ function ResourcePage({
   const scopeStorageKey = `sdkwork.webserver.${scopeKind}Id`;
   const [items, setItems] = useState<readonly Record<string, unknown>[]>([]);
   const [page, setPage] = useState(1);
-  const [pageInfo, setPageInfo] = useState<WebserverPageInfo>({ page: 1, pageSize: 20, hasMore: false });
+  const [pageInfo, setPageInfo] = useState<WebserverPageInfo>({ page: 1, pageSize: 20, hasMore: false, mode: "offset" });
   const [nextCursor, setNextCursor] = useState<string | undefined>(undefined);
+  /** Cursor that loaded the currently displayed page (its start token). */
+  const [currentCursor, setCurrentCursor] = useState<string | undefined>(undefined);
+  /** Start tokens of pages behind the current one, for cursor-mode back navigation. */
+  const [cursorHistory, setCursorHistory] = useState<string[]>([]);
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -241,23 +245,34 @@ function ResourcePage({
 
   function persistScope(value: string): void {
     setScopeId(value);
-    setPage(1);
-    setNextCursor(undefined);
+    resetPagination();
     setSelected(undefined);
     if (value) sessionStorage.setItem(scopeStorageKey, value);
     else sessionStorage.removeItem(scopeStorageKey);
   }
 
-  async function load(filterValues: Readonly<Record<string, string>> = filters, cursorOverride?: string): Promise<void> {
+  /** Resets both pagination modes to their first page. */
+  function resetPagination(): void {
+    setPage(1);
+    setNextCursor(undefined);
+    setCursorHistory([]);
+    setCurrentCursor(undefined);
+  }
+
+  async function load(filterValues: Readonly<Record<string, string>> = filters, cursorOverride?: string | null): Promise<void> {
     if (!authorized || !source || (source.requiresScope && !scopeId)) {
       setItems([]);
       return;
     }
+    // `null` forces the first page even when the state still holds a stale
+    // cursor; `undefined` continues from the current cursor/page state.
+    const cursor = cursorOverride === null ? undefined : (cursorOverride === undefined ? nextCursor : cursorOverride);
+    setCurrentCursor(cursor);
     setBusy(true);
     setError(undefined);
     try {
       const result = await source.load({
-        cursor: cursorOverride === undefined ? nextCursor : cursorOverride,
+        cursor,
         filters: source.filters?.length ? filterValues : undefined,
         page,
         pageSize: 20,
@@ -271,6 +286,42 @@ function ResourcePage({
       setError(formatWebserverErrorMessage(caught, t));
     } finally {
       setBusy(false);
+    }
+  }
+
+  /** Advances to the next page: cursor pages push the current page start
+   *  onto the back-stack; offset pages increment `page`. */
+  function goToNextPage(): void {
+    if (busy) return;
+    if (pageInfo.mode === "cursor") {
+      const next = pageInfo.nextCursor;
+      if (!next) return;
+      setCursorHistory((history) => [...history, currentCursor ?? ""]);
+      setCurrentCursor(next);
+      setNextCursor(next);
+      void load(undefined, next);
+    } else if (pageInfo.hasMore) {
+      setPage((value) => value + 1);
+    }
+  }
+
+  /** Returns to the previous page: cursor pages pop the back-stack;
+   *  offset pages decrement `page`. */
+  function goToPreviousPage(): void {
+    if (busy) return;
+    if (pageInfo.mode === "cursor") {
+      const history = [...cursorHistory];
+      const previous = history.pop();
+      if (previous === undefined) return;
+      setCursorHistory(history);
+      const previousCursor = previous === "" ? undefined : previous;
+      setCurrentCursor(previousCursor);
+      setNextCursor(previousCursor);
+      // `null` forces the first page explicitly: the state closure may still
+      // hold the stale forward cursor when `previousCursor` is undefined.
+      void load(undefined, previousCursor === undefined ? null : previousCursor);
+    } else {
+      setPage((value) => Math.max(1, value - 1));
     }
   }
 
@@ -306,10 +357,9 @@ function ResourcePage({
 
   useEffect(() => {
     void load();
-  }, [authorized, entry.resource, nextCursor, page, scopeId]);
+  }, [authorized, entry.resource, page, scopeId]);
   useEffect(() => {
-    setPage(1);
-    setNextCursor(undefined);
+    resetPagination();
     setSelected(undefined);
   }, [entry.resource]);
 
@@ -351,9 +401,8 @@ function ResourcePage({
                 className="search-box"
                 onSubmit={(event) => {
                   event.preventDefault();
-                  setPage(1);
-                  setNextCursor(undefined);
-                  void load(undefined, undefined);
+                  resetPagination();
+                  void load(undefined, null);
                 }}
                 role="search"
               >
@@ -462,9 +511,8 @@ function ResourcePage({
                   disabled={activeFilterCount(filters) === 0}
                   onClick={() => {
                     setFilters({});
-                    setPage(1);
-                    setNextCursor(undefined);
-                    void load({}, undefined);
+                    resetPagination();
+                    void load({}, null);
                   }}
                   type="button"
                 >
@@ -582,8 +630,8 @@ function ResourcePage({
                   <button
                     aria-label={t("pagination.previous")}
                     className="icon-button"
-                    disabled={nextCursor !== undefined || page <= 1 || busy}
-                    onClick={() => setPage((value) => Math.max(1, value - 1))}
+                    disabled={busy || (pageInfo.mode === "cursor" ? cursorHistory.length === 0 : page <= 1)}
+                    onClick={goToPreviousPage}
                     title={t("pagination.previous")}
                     type="button"
                   >
@@ -592,8 +640,8 @@ function ResourcePage({
                   <button
                     aria-label={t("pagination.next")}
                     className="icon-button"
-                    disabled={!pageInfo.hasMore || busy}
-                    onClick={() => setNextCursor(pageInfo.nextCursor)}
+                    disabled={busy || !pageInfo.hasMore}
+                    onClick={goToNextPage}
                     title={t("pagination.next")}
                     type="button"
                   >

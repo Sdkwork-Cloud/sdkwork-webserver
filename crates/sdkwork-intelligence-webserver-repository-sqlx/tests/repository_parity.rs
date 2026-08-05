@@ -1560,15 +1560,6 @@ async fn verify_public_repository_surface(context: &TestContext, site_id: &str) 
         )
         .await
         .expect("update nginx config timestamp");
-    let repository_validation = repository
-        .validate_nginx_config(Some(TENANT_A), &nginx.id)
-        .await
-        .expect("repository validation remains fail closed");
-    assert!(!repository_validation.valid);
-    assert!(repository_validation
-        .message
-        .as_deref()
-        .is_some_and(|message| message.contains("edge runtime")));
     assert_eq!(
         repository
             .list_nginx_configs(
@@ -2163,19 +2154,26 @@ async fn verify_public_repository_surface(context: &TestContext, site_id: &str) 
         })
         .await
         .expect("insert audit timestamp");
+    // Audit logs are a growing collection and list only supports opaque
+    // keyset cursor pagination (PAGINATION_SPEC §6/§12): no OFFSET, and
+    // `total` is not computed in cursor mode. A first-page cursor is the
+    // far-future bound `(9999-12-31T23:59:59Z, i64::MAX)` encoded as
+    // base64url of `v1|<created_at>|<id>`.
     let audit_page = repository
         .list_audit_logs(
             Some(TENANT_A),
             &ListAuditLogsQuery {
-                page: 1,
+                cursor: Some(
+                    "djF8OTk5OS0xMi0zMVQyMzo1OTo1OVp8OTIyMzM3MjAzNjg1NDc3NTgwNw".to_string(),
+                ),
                 page_size: 20,
                 ..ListAuditLogsQuery::default()
             },
         )
         .await
         .expect("list audit timestamp projections");
-    assert_eq!(audit_page.total, 1);
     assert_eq!(audit_page.items[0].action, "repository.parity");
+    assert_eq!(audit_page.has_more, Some(false));
 
     repository
         .unbind_listener_certificate(TENANT_A, site_id, &domain.id, &listener_binding.id)

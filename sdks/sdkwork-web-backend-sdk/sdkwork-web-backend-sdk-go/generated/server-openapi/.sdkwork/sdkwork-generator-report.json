@@ -12,12 +12,11 @@
   "mode": "apply",
   "hasChanges": true,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "4b3f1022a14679ba37964dd689e263b11ae3cf169f5aa6362a41d653e0f0415a",
+  "changeFingerprint": "d09f914e40b573846ca9220634550b3fb6cc92dcf00de0bac4644bf40cf1f190",
   "changeImpact": {
     "schemaVersion": 1,
     "areas": [
-      "api-surface",
-      "models"
+      "api-surface"
     ],
     "details": [
       {
@@ -25,26 +24,21 @@
         "paths": [
           "api/certificate.go"
         ]
-      },
-      {
-        "area": "models",
-        "paths": [
-          "types/certificates_revoke_response.go",
-          "types/revoke_certificate_request.go"
-        ]
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, models. Verification is required."
+    "summary": "Detected impact areas: api-surface. Verification is required."
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "medium",
+    "riskLevel": "high",
     "nextAction": "verify",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
     "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
+      "backed-up-generated-files",
+      "manual-review-required",
       "verification-required"
     ]
   },
@@ -56,7 +50,7 @@
         "id": "verify-check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-webserver\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-go\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -75,13 +69,13 @@
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: api-surface. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-webserver\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-go\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -120,17 +114,14 @@
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 3,
+    "writtenFiles": 1,
     "skippedScaffoldFiles": 1,
-    "skippedUnchangedGeneratedFiles": 136,
+    "skippedUnchangedGeneratedFiles": 138,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "4b3f1022a14679ba37964dd689e263b11ae3cf169f5aa6362a41d653e0f0415a",
+    "changeFingerprint": "d09f914e40b573846ca9220634550b3fb6cc92dcf00de0bac4644bf40cf1f190",
     "changes": {
-      "createdGeneratedFiles": [
-        "types/certificates_revoke_response.go",
-        "types/revoke_certificate_request.go"
-      ],
+      "createdGeneratedFiles": [],
       "updatedGeneratedFiles": [
         "api/certificate.go"
       ],
@@ -202,6 +193,7 @@
         "types/certificates_list_response.go",
         "types/certificates_operations_retrieve_response.go",
         "types/certificates_renew_response202.go",
+        "types/certificates_revoke_response.go",
         "types/certificates_update_response.go",
         "types/common.go",
         "types/configs_create_response201.go",
@@ -247,6 +239,7 @@
         "types/problem_detail.go",
         "types/reload_response.go",
         "types/retrieve_response.go",
+        "types/revoke_certificate_request.go",
         "types/root_domain_response.go",
         "types/root_domains_create_response201.go",
         "types/root_domains_list_response.go",
@@ -277,13 +270,14 @@
       "preservedScaffoldFiles": [
         "custom/README.md"
       ],
-      "backedUpFiles": []
+      "backedUpFiles": [
+        "api/certificate.go"
+      ]
     },
     "impact": {
       "schemaVersion": 1,
       "areas": [
-        "api-surface",
-        "models"
+        "api-surface"
       ],
       "details": [
         {
@@ -291,28 +285,21 @@
           "paths": [
             "api/certificate.go"
           ]
-        },
-        {
-          "area": "models",
-          "paths": [
-            "types/certificates_revoke_response.go",
-            "types/revoke_certificate_request.go"
-          ]
         }
       ],
       "requiresVerification": true,
-      "summary": "Detected impact areas: api-surface, models. Verification is required."
+      "summary": "Detected impact areas: api-surface. Verification is required."
     },
     "verificationPlan": {
       "shouldRun": true,
       "runPhase": "now",
-      "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
+      "summary": "Detected impact areas: api-surface. Verification is required. Run the required verification commands now against the generated SDK output.",
       "steps": [
         {
           "id": "check",
           "title": "Unified package check",
           "required": true,
-          "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
+          "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface.",
           "workingDirectory": "E:\\sdkwork-space\\sdkwork-webserver\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-go\\generated\\server-openapi",
           "command": "node",
           "args": [
@@ -330,16 +317,20 @@
     },
     "executionDecision": {
       "schemaVersion": 1,
-      "riskLevel": "medium",
+      "riskLevel": "high",
       "nextAction": "verify",
       "requiresManualReview": false,
       "applyRequiresExpectedFingerprint": false,
       "summary": "Changes have been applied. Run the required verification plan now.",
       "reasons": [
+        "backed-up-generated-files",
+        "manual-review-required",
         "verification-required"
       ]
     },
-    "backedUpFiles": [],
+    "backedUpFiles": [
+      "api/certificate.go"
+    ],
     "preservedLegacyFiles": false
   }
 }

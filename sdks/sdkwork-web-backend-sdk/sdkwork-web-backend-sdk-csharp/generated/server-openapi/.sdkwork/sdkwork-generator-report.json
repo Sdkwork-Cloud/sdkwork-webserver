@@ -12,12 +12,11 @@
   "mode": "apply",
   "hasChanges": true,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "7dbf04fa67d87708ec1a0b1336b1eb81f62c461ee7258dab6d7b160932b94246",
+  "changeFingerprint": "256fd4f1c59cadce22e8c586c2160d8629210390c352dc12d6584b80ddae4ceb",
   "changeImpact": {
     "schemaVersion": 1,
     "areas": [
-      "api-surface",
-      "models"
+      "api-surface"
     ],
     "details": [
       {
@@ -25,26 +24,21 @@
         "paths": [
           "Api/CertificateApi.cs"
         ]
-      },
-      {
-        "area": "models",
-        "paths": [
-          "Models/CertificatesRevokeResponse.cs",
-          "Models/RevokeCertificateRequest.cs"
-        ]
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, models. Verification is required."
+    "summary": "Detected impact areas: api-surface. Verification is required."
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "medium",
+    "riskLevel": "high",
     "nextAction": "verify",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
     "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
+      "backed-up-generated-files",
+      "manual-review-required",
       "verification-required"
     ]
   },
@@ -56,7 +50,7 @@
         "id": "verify-check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-webserver\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-csharp\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -75,13 +69,13 @@
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: api-surface. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-webserver\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-csharp\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -120,17 +114,14 @@
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 3,
+    "writtenFiles": 1,
     "skippedScaffoldFiles": 1,
-    "skippedUnchangedGeneratedFiles": 129,
+    "skippedUnchangedGeneratedFiles": 131,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "7dbf04fa67d87708ec1a0b1336b1eb81f62c461ee7258dab6d7b160932b94246",
+    "changeFingerprint": "256fd4f1c59cadce22e8c586c2160d8629210390c352dc12d6584b80ddae4ceb",
     "changes": {
-      "createdGeneratedFiles": [
-        "Models/CertificatesRevokeResponse.cs",
-        "Models/RevokeCertificateRequest.cs"
-      ],
+      "createdGeneratedFiles": [],
       "updatedGeneratedFiles": [
         "Api/CertificateApi.cs"
       ],
@@ -195,6 +186,7 @@
         "Models/CertificatesListResponse.cs",
         "Models/CertificatesOperationsRetrieveResponse.cs",
         "Models/CertificatesRenewResponse202.cs",
+        "Models/CertificatesRevokeResponse.cs",
         "Models/CertificatesUpdateResponse.cs",
         "Models/ConfigsCreateResponse201.cs",
         "Models/ConfigsDeployResponse.cs",
@@ -237,6 +229,7 @@
         "Models/ProblemDetail.cs",
         "Models/ReloadResponse.cs",
         "Models/RetrieveResponse.cs",
+        "Models/RevokeCertificateRequest.cs",
         "Models/RootDomainResponse.cs",
         "Models/RootDomainsCreateResponse201.cs",
         "Models/RootDomainsListResponse.cs",
@@ -270,13 +263,14 @@
       "preservedScaffoldFiles": [
         "custom/README.md"
       ],
-      "backedUpFiles": []
+      "backedUpFiles": [
+        "Api/CertificateApi.cs"
+      ]
     },
     "impact": {
       "schemaVersion": 1,
       "areas": [
-        "api-surface",
-        "models"
+        "api-surface"
       ],
       "details": [
         {
@@ -284,28 +278,21 @@
           "paths": [
             "Api/CertificateApi.cs"
           ]
-        },
-        {
-          "area": "models",
-          "paths": [
-            "Models/CertificatesRevokeResponse.cs",
-            "Models/RevokeCertificateRequest.cs"
-          ]
         }
       ],
       "requiresVerification": true,
-      "summary": "Detected impact areas: api-surface, models. Verification is required."
+      "summary": "Detected impact areas: api-surface. Verification is required."
     },
     "verificationPlan": {
       "shouldRun": true,
       "runPhase": "now",
-      "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
+      "summary": "Detected impact areas: api-surface. Verification is required. Run the required verification commands now against the generated SDK output.",
       "steps": [
         {
           "id": "check",
           "title": "Unified package check",
           "required": true,
-          "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
+          "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface.",
           "workingDirectory": "E:\\sdkwork-space\\sdkwork-webserver\\sdks\\sdkwork-web-backend-sdk\\sdkwork-web-backend-sdk-csharp\\generated\\server-openapi",
           "command": "node",
           "args": [
@@ -323,16 +310,20 @@
     },
     "executionDecision": {
       "schemaVersion": 1,
-      "riskLevel": "medium",
+      "riskLevel": "high",
       "nextAction": "verify",
       "requiresManualReview": false,
       "applyRequiresExpectedFingerprint": false,
       "summary": "Changes have been applied. Run the required verification plan now.",
       "reasons": [
+        "backed-up-generated-files",
+        "manual-review-required",
         "verification-required"
       ]
     },
-    "backedUpFiles": [],
+    "backedUpFiles": [
+      "Api/CertificateApi.cs"
+    ],
     "preservedLegacyFiles": false
   }
 }

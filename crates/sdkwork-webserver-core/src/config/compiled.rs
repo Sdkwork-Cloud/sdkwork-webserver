@@ -36,7 +36,12 @@ struct CompiledUpstreamTlsPaths {
 #[derive(Debug)]
 struct CompiledListener {
     exact_hosts: HashMap<String, usize>,
-    wildcard_hosts: Vec<(String, usize)>,
+    /// Wildcard server names keyed by their suffix (without the leading
+    /// `*.`): a request host matches when `host.split_once('.')` yields that
+    /// exact suffix, which is the Nginx one-level `*.suffix` semantics. A
+    /// map lookup replaces a per-request linear scan over every wildcard
+    /// (O(1) instead of O(wildcards)).
+    wildcard_hosts: HashMap<String, usize>,
     default_host: Option<usize>,
 }
 
@@ -191,18 +196,17 @@ impl CompiledWebServerApp {
             .enumerate()
             .map(|(index, host)| (host.id.as_str(), index))
             .collect::<HashMap<_, _>>();
-        let mut compiled_listeners = HashMap::new();
-        for listener in &config.listeners {
-            let mut exact_hosts = HashMap::new();
-            let mut wildcard_hosts = Vec::new();
-            for (host_index, virtual_host) in config.virtual_hosts.iter().enumerate() {
-                if !virtual_host
-                    .listener_refs
-                    .iter()
-                    .any(|listener_ref| listener_ref == &listener.id)
-                {
-                    continue;
-                }
+        // Single pass over virtual hosts instead of an O(listeners x hosts)
+        // nested scan: each host contributes its server names once to every
+        // listener it references, keeping compilation linear in the total
+        // declared server-name count.
+        let mut listener_hosts: HashMap<&str, (HashMap<String, usize>, HashMap<String, usize>)> =
+            HashMap::new();
+        for (host_index, virtual_host) in config.virtual_hosts.iter().enumerate() {
+            for listener_ref in &virtual_host.listener_refs {
+                let (exact_hosts, wildcard_hosts) = listener_hosts
+                    .entry(listener_ref.as_str())
+                    .or_default();
                 for server_name in &virtual_host.server_names {
                     let normalized = normalize_server_name(server_name).ok_or_else(|| {
                         validation_error(
@@ -211,13 +215,18 @@ impl CompiledWebServerApp {
                         )
                     })?;
                     if let Some(suffix) = normalized.strip_prefix("*.") {
-                        wildcard_hosts.push((suffix.to_owned(), host_index));
+                        wildcard_hosts.insert(suffix.to_owned(), host_index);
                     } else {
                         exact_hosts.insert(normalized, host_index);
                     }
                 }
             }
-            wildcard_hosts.sort_by_key(|item| std::cmp::Reverse(item.0.len()));
+        }
+        let mut compiled_listeners = HashMap::new();
+        for listener in &config.listeners {
+            let (exact_hosts, wildcard_hosts) = listener_hosts
+                .remove(listener.id.as_str())
+                .unwrap_or_default();
             let default_host = listener
                 .default_virtual_host_ref
                 .as_deref()
@@ -345,12 +354,15 @@ impl CompiledWebServerApp {
             .as_deref()
             .and_then(|host| listener.exact_hosts.get(host).copied())
             .or_else(|| {
+                // One-level wildcard (`*.suffix`) semantics: the host must be
+                // exactly one label plus the configured suffix, which is a
+                // constant-time map lookup on `host.split_once('.')`.
                 normalized_host.as_deref().and_then(|host| {
-                    listener
-                        .wildcard_hosts
-                        .iter()
-                        .find(|(suffix, _)| wildcard_matches(suffix, host))
-                        .map(|(_, index)| *index)
+                    host.split_once('.')
+                        .and_then(|(label, remainder)| {
+                            (!label.is_empty()).then_some(remainder)
+                        })
+                        .and_then(|suffix| listener.wildcard_hosts.get(suffix).copied())
                 })
             })
             .or(listener.default_host)?;
@@ -550,12 +562,6 @@ pub fn normalize_authority_host(authority: &str) -> Option<String> {
         _ => authority,
     };
     normalize_server_name(host)
-}
-
-fn wildcard_matches(suffix: &str, host: &str) -> bool {
-    host.strip_suffix(suffix).is_some_and(|prefix| {
-        prefix.ends_with('.') && prefix.len() > 1 && !prefix[..prefix.len() - 1].contains('.')
-    })
 }
 
 fn route_matches_method(route: &RouteConfig, method: &str) -> bool {

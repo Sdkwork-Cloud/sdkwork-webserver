@@ -25,9 +25,10 @@ in `sdkwork.app.config.json`.
 
 ## Deployment Profile And Runtime Target Behavior
 
-PostgreSQL is the standalone shared/cloud engine. SQLite is restricted to an
-explicit single-node profile. This crate is control-plane only and is not part
-of the HTTP/HTTPS request data path.
+PostgreSQL is the only authoritative server database for standalone and cloud
+profiles (REQ-2026-0004); no server-side SQLite repository or release profile
+exists. This crate is control-plane only and is not part of the HTTP/HTTPS
+request data path.
 
 ## Security
 
@@ -44,6 +45,5 @@ ad hoc DDL from HTTP handlers or repositories.
 
 ```powershell
 pnpm db:validate
-pnpm db:test:sqlite
 $env:SDKWORK_DATABASE_TEST_POSTGRES_URL='<disposable-url>'; pnpm db:test:postgres
 ```

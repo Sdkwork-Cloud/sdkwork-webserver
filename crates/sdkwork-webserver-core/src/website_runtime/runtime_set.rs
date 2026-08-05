@@ -14,7 +14,7 @@ use crate::{
 
 use super::{
     compile_website_runtime_descriptor,
-    compiled::{normalize_request_hostname, wildcard_matches, PrefixIndex},
+    compiled::{normalize_request_hostname, PrefixIndex},
     CompiledWebsiteRuntimeDescriptor, WebsiteRequestRoutingContext, WebsiteRouteSelection,
     WebsiteRouteSelectionError, WebsiteRuntimeDescriptor, WebsiteRuntimeDescriptorError,
     WebsiteRuntimeEnvironment,
@@ -62,7 +62,11 @@ pub struct CompiledWebsiteRuntimeSet {
     tenant_scope_hashes: HashSet<String>,
     provider_types: HashSet<super::WebsiteProviderType>,
     exact_hosts: HashMap<String, PrefixIndex>,
-    wildcard_hosts: Vec<(String, PrefixIndex)>,
+    /// Wildcard bindings keyed by their suffix (without the leading `*.`):
+    /// `*.suffix` matches a request host exactly when the host is one label
+    /// plus that suffix, resolved as a constant-time map lookup instead of a
+    /// per-request scan over every wildcard.
+    wildcard_hosts: HashMap<String, PrefixIndex>,
 }
 
 #[derive(Debug, Error)]
@@ -236,14 +240,6 @@ impl CompiledWebsiteRuntimeSet {
                 }
             }
         }
-        let mut wildcard_hosts = wildcard_hosts.into_iter().collect::<Vec<_>>();
-        wildcard_hosts.sort_unstable_by(|left, right| {
-            right
-                .0
-                .len()
-                .cmp(&left.0.len())
-                .then_with(|| left.0.cmp(&right.0))
-        });
         let tenant_scope_hashes = descriptors
             .iter()
             .map(|descriptor| descriptor.descriptor().tenant_scope_hash.clone())
@@ -327,10 +323,14 @@ impl CompiledWebsiteRuntimeSet {
         let descriptor_index = if let Some(index) = self.exact_hosts.get(&normalized_host) {
             index.select(&normalized_path)
         } else {
-            self.wildcard_hosts
-                .iter()
-                .find(|(suffix, _)| wildcard_matches(suffix, &normalized_host))
-                .and_then(|(_, index)| index.select(&normalized_path))
+            // One-level wildcard (`*.suffix`) semantics: the host must be
+            // exactly one label plus the configured suffix (constant-time
+            // map lookup on `host.split_once('.')`).
+            normalized_host
+                .split_once('.')
+                .and_then(|(label, suffix)| (!label.is_empty()).then_some(suffix))
+                .and_then(|suffix| self.wildcard_hosts.get(suffix))
+                .and_then(|index| index.select(&normalized_path))
         };
         let Some(descriptor_index) = descriptor_index else {
             return Ok(None);

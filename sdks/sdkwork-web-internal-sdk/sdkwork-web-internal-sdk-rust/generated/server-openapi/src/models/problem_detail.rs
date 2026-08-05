@@ -8,7 +8,8 @@ pub struct ProblemDetail {
 
     pub status: i64,
 
-    pub detail: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub detail: Option<String>,
 
     pub code: i64,
 

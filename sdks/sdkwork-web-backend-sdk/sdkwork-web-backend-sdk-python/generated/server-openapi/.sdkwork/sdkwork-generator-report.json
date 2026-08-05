@@ -12,7 +12,7 @@
   "mode": "apply",
   "hasChanges": true,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "e19db4ea4bcfa2c72c4f3481433ded902d23f595a794fdafa7600b30da633b89",
+  "changeFingerprint": "4dba31bfd9424bcbfdbbebdd190c251660906f689abec104f271542bf8bc3843",
   "changeImpact": {
     "schemaVersion": 1,
     "areas": [
@@ -30,9 +30,7 @@
       {
         "area": "models",
         "paths": [
-          "sdkwork_web_backend_sdk/models/__init__.py",
-          "sdkwork_web_backend_sdk/models/certificates_revoke_response.py",
-          "sdkwork_web_backend_sdk/models/revoke_certificate_request.py"
+          "sdkwork_web_backend_sdk/models/__init__.py"
         ]
       }
     ],
@@ -41,12 +39,14 @@
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "medium",
+    "riskLevel": "high",
     "nextAction": "verify",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
     "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
+      "backed-up-generated-files",
+      "manual-review-required",
       "verification-required"
     ]
   },
@@ -122,17 +122,14 @@
   "syncSummary": {
     "dryRun": false,
     "controlPlaneEnabled": true,
-    "writtenFiles": 4,
+    "writtenFiles": 2,
     "skippedScaffoldFiles": 1,
-    "skippedUnchangedGeneratedFiles": 132,
+    "skippedUnchangedGeneratedFiles": 134,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "e19db4ea4bcfa2c72c4f3481433ded902d23f595a794fdafa7600b30da633b89",
+    "changeFingerprint": "4dba31bfd9424bcbfdbbebdd190c251660906f689abec104f271542bf8bc3843",
     "changes": {
-      "createdGeneratedFiles": [
-        "sdkwork_web_backend_sdk/models/certificates_revoke_response.py",
-        "sdkwork_web_backend_sdk/models/revoke_certificate_request.py"
-      ],
+      "createdGeneratedFiles": [],
       "updatedGeneratedFiles": [
         "sdkwork_web_backend_sdk/api/certificate.py",
         "sdkwork_web_backend_sdk/models/__init__.py"
@@ -203,6 +200,7 @@
         "sdkwork_web_backend_sdk/models/certificates_list_response.py",
         "sdkwork_web_backend_sdk/models/certificates_operations_retrieve_response.py",
         "sdkwork_web_backend_sdk/models/certificates_renew_response202.py",
+        "sdkwork_web_backend_sdk/models/certificates_revoke_response.py",
         "sdkwork_web_backend_sdk/models/certificates_update_response.py",
         "sdkwork_web_backend_sdk/models/configs_create_response201.py",
         "sdkwork_web_backend_sdk/models/configs_deploy_response.py",
@@ -245,6 +243,7 @@
         "sdkwork_web_backend_sdk/models/problem_detail.py",
         "sdkwork_web_backend_sdk/models/reload_response.py",
         "sdkwork_web_backend_sdk/models/retrieve_response.py",
+        "sdkwork_web_backend_sdk/models/revoke_certificate_request.py",
         "sdkwork_web_backend_sdk/models/root_domain_response.py",
         "sdkwork_web_backend_sdk/models/root_domains_create_response201.py",
         "sdkwork_web_backend_sdk/models/root_domains_list_response.py",
@@ -276,7 +275,10 @@
       "preservedScaffoldFiles": [
         "custom/README.md"
       ],
-      "backedUpFiles": []
+      "backedUpFiles": [
+        "sdkwork_web_backend_sdk/api/certificate.py",
+        "sdkwork_web_backend_sdk/models/__init__.py"
+      ]
     },
     "impact": {
       "schemaVersion": 1,
@@ -295,9 +297,7 @@
         {
           "area": "models",
           "paths": [
-            "sdkwork_web_backend_sdk/models/__init__.py",
-            "sdkwork_web_backend_sdk/models/certificates_revoke_response.py",
-            "sdkwork_web_backend_sdk/models/revoke_certificate_request.py"
+            "sdkwork_web_backend_sdk/models/__init__.py"
           ]
         }
       ],
@@ -331,16 +331,21 @@
     },
     "executionDecision": {
       "schemaVersion": 1,
-      "riskLevel": "medium",
+      "riskLevel": "high",
       "nextAction": "verify",
       "requiresManualReview": false,
       "applyRequiresExpectedFingerprint": false,
       "summary": "Changes have been applied. Run the required verification plan now.",
       "reasons": [
+        "backed-up-generated-files",
+        "manual-review-required",
         "verification-required"
       ]
     },
-    "backedUpFiles": [],
+    "backedUpFiles": [
+      "sdkwork_web_backend_sdk/api/certificate.py",
+      "sdkwork_web_backend_sdk/models/__init__.py"
+    ],
     "preservedLegacyFiles": false
   }
 }

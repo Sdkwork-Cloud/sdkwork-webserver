@@ -12,7 +12,7 @@
   "mode": "apply",
   "hasChanges": true,
   "hasDestructiveChanges": false,
-  "changeFingerprint": "6013d7d608e76d902f010fe8b855f95594a10a65664a76ae2780167466311b20",
+  "changeFingerprint": "051137df6ef301c191337f674b80dd5c44184ea4c627dcb90ff8ca8301f906b9",
   "changeImpact": {
     "schemaVersion": 1,
     "areas": [
@@ -38,12 +38,14 @@
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "medium",
+    "riskLevel": "high",
     "nextAction": "verify",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
     "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
+      "backed-up-generated-files",
+      "manual-review-required",
       "verification-required"
     ]
   },
@@ -124,7 +126,7 @@
     "skippedUnchangedGeneratedFiles": 26,
     "deletedGeneratedFiles": 0,
     "changeSummaryPath": ".sdkwork/sdkwork-generator-changes.json",
-    "changeFingerprint": "6013d7d608e76d902f010fe8b855f95594a10a65664a76ae2780167466311b20",
+    "changeFingerprint": "051137df6ef301c191337f674b80dd5c44184ea4c627dcb90ff8ca8301f906b9",
     "changes": {
       "createdGeneratedFiles": [],
       "updatedGeneratedFiles": [
@@ -164,7 +166,10 @@
       "preservedScaffoldFiles": [
         "custom/README.md"
       ],
-      "backedUpFiles": []
+      "backedUpFiles": [
+        "lib/src/api/certificate.dart",
+        "lib/src/models.dart"
+      ]
     },
     "impact": {
       "schemaVersion": 1,
@@ -216,16 +221,21 @@
     },
     "executionDecision": {
       "schemaVersion": 1,
-      "riskLevel": "medium",
+      "riskLevel": "high",
       "nextAction": "verify",
       "requiresManualReview": false,
       "applyRequiresExpectedFingerprint": false,
       "summary": "Changes have been applied. Run the required verification plan now.",
       "reasons": [
+        "backed-up-generated-files",
+        "manual-review-required",
         "verification-required"
       ]
     },
-    "backedUpFiles": [],
+    "backedUpFiles": [
+      "lib/src/api/certificate.dart",
+      "lib/src/models.dart"
+    ],
     "preservedLegacyFiles": false
   }
 }

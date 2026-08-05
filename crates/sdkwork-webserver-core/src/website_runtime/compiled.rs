@@ -14,7 +14,10 @@ pub struct CompiledWebsiteRuntimeDescriptor {
     descriptor: WebsiteRuntimeDescriptor,
     descriptor_sha256: String,
     exact_bindings: HashMap<String, PrefixIndex>,
-    wildcard_bindings: Vec<(String, PrefixIndex)>,
+    /// Wildcard bindings keyed by their suffix (without the leading `*.`):
+    /// `*.suffix` matches a request host exactly when the host is one label
+    /// plus that suffix (constant-time map lookup, no per-request scan).
+    wildcard_bindings: HashMap<String, PrefixIndex>,
     variants: HashMap<String, usize>,
     resources: HashMap<String, usize>,
     mounts_by_variant: HashMap<String, PrefixIndex>,
@@ -115,15 +118,6 @@ impl CompiledWebsiteRuntimeDescriptor {
                     .insert(&binding.path_prefix, index);
             }
         }
-        let mut wildcard_bindings = wildcard_bindings.into_iter().collect::<Vec<_>>();
-        wildcard_bindings.sort_unstable_by(|left, right| {
-            right
-                .0
-                .len()
-                .cmp(&left.0.len())
-                .then_with(|| left.0.cmp(&right.0))
-        });
-
         let variants = descriptor
             .variants
             .iter()
@@ -316,10 +310,12 @@ impl CompiledWebsiteRuntimeDescriptor {
         if let Some(index) = self.exact_bindings.get(host) {
             return index.select(path);
         }
-        self.wildcard_bindings
-            .iter()
-            .find(|(suffix, _)| wildcard_matches(suffix, host))
-            .and_then(|(_, index)| index.select(path))
+        // One-level wildcard (`*.suffix`) semantics: the host must be exactly
+        // one label plus the configured suffix (constant-time map lookup).
+        host.split_once('.')
+            .and_then(|(label, suffix)| (!label.is_empty()).then_some(suffix))
+            .and_then(|suffix| self.wildcard_bindings.get(suffix))
+            .and_then(|index| index.select(path))
     }
 
     fn path_is_denied(&self, path: &str) -> bool {
@@ -452,12 +448,6 @@ fn matcher_path_length(matcher: &WebsiteVariantRuleMatcher) -> usize {
         WebsiteVariantRuleMatcher::PathPrefix { path_prefix } => path_prefix.len(),
         WebsiteVariantRuleMatcher::ClientClass { .. } => 0,
     }
-}
-
-pub(super) fn wildcard_matches(suffix: &str, host: &str) -> bool {
-    host.strip_suffix(suffix).is_some_and(|prefix| {
-        prefix.ends_with('.') && prefix.len() > 1 && !prefix[..prefix.len() - 1].contains('.')
-    })
 }
 
 pub(super) fn normalize_request_hostname(authority: &str) -> Option<String> {

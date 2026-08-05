@@ -905,7 +905,23 @@ impl WebBackendApi for WebService {
         context: &WebBackendRequestContext,
     ) -> WebServiceResult<sdkwork_webserver_contract::NginxStatusResponse> {
         let tenant_id = Self::require_backend_tenant(context)?;
-        self.repository.retrieve_nginx_status(Some(tenant_id)).await
+        let mut response = self
+            .repository
+            .retrieve_nginx_status(Some(tenant_id))
+            .await?;
+        // Truthfulness (PRD-FR-020): `running` must reflect the actual edge
+        // runtime, not a database inference from active config rows. A real
+        // `nginx -t` on the served active configuration is the strongest
+        // local liveness/validity evidence available to the control plane.
+        let runtime = self.edge_runtime.clone();
+        let running = tokio::task::spawn_blocking(move || runtime.validate_active_config())
+            .await
+            .map_err(|error| {
+                WebServiceError::Internal(format!("join nginx status probe: {error}"))
+            })?
+            .is_ok();
+        response.running = running;
+        Ok(response)
     }
 
     async fn list_servers(

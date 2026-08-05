@@ -14,6 +14,10 @@ use crate::{EdgeRuntimeError, EdgeRuntimeResult};
 
 const MAX_NGINX_CONFIG_BYTES: usize = 1_048_576;
 const MAX_NGINX_DIAGNOSTIC_BYTES: u64 = 8_192;
+/// Ceiling for `nginx -T` captured output (`verify_served_config`). The dump
+/// expands every included site file, so the capture must be bounded to keep
+/// subprocess output memory O(ceiling) instead of O(merged configuration).
+const MAX_NGINX_CAPTURE_BYTES: u64 = 4 * 1024 * 1024;
 const PROCESS_POLL_INTERVAL: Duration = Duration::from_millis(10);
 const NGINX_DEPLOYMENT_LOCK_FILE: &str = ".nginx-deployment.lock";
 
@@ -313,14 +317,22 @@ where
     };
 
     let captured = if let CaptureMode::Capture = capture {
-        let mut output = String::new();
-        if let Some(mut stdout) = child.stdout.take() {
-            use std::io::Read as _;
-            stdout.read_to_string(&mut output).map_err(|error| {
-                EdgeRuntimeError::Nginx(format!("read nginx {operation} stdout: {error}"))
-            })?;
+        let mut output = Vec::with_capacity(MAX_NGINX_CAPTURE_BYTES as usize);
+        if let Some(stdout) = child.stdout.take() {
+            stdout
+                .take(MAX_NGINX_CAPTURE_BYTES + 1)
+                .read_to_end(&mut output)
+                .map_err(|error| {
+                    EdgeRuntimeError::Nginx(format!("read nginx {operation} stdout: {error}"))
+                })?;
         }
-        output
+        let truncated = output.len() > MAX_NGINX_CAPTURE_BYTES as usize;
+        output.truncate(MAX_NGINX_CAPTURE_BYTES as usize);
+        let mut value = String::from_utf8_lossy(&output).into_owned();
+        if truncated {
+            value.push_str("\n[output truncated]");
+        }
+        value
     } else {
         String::new()
     };

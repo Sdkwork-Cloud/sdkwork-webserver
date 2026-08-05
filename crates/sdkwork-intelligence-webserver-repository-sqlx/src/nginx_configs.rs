@@ -1,8 +1,7 @@
 use crate::audited_sql;
 use sdkwork_webserver_contract::{
     CreateNginxConfigRequest, ListNginxConfigsQuery, NginxConfigPage, NginxConfigResponse,
-    NginxReloadResponse, NginxStatusResponse, NginxValidateResponse, UpdateNginxConfigRequest,
-    WebServiceError, WebServiceResult,
+    NginxStatusResponse, UpdateNginxConfigRequest, WebServiceError, WebServiceResult,
 };
 use super::{EngineArguments, EngineDatabase, EngineRow, WebRepository};
 use sqlx::Row;
@@ -303,41 +302,6 @@ impl WebRepository {
             .map_err(|error| store_error("load web_nginx_config content column", error))
     }
 
-    pub(super) async fn validate_nginx_config_repo(
-        &self,
-        tenant_id: Option<i64>,
-        config_id: &str,
-    ) -> WebServiceResult<NginxValidateResponse> {
-        let row = if let Some(tenant_id) = tenant_id {
-            sqlx::query(
-                "SELECT config_content FROM web_nginx_config WHERE tenant_id = $1 AND uuid = $2",
-            )
-            .bind(tenant_id)
-            .bind(config_id)
-            .fetch_optional(&self.pool)
-            .await
-            .map_err(|error| store_error("validate web_nginx_config lookup", error))?
-        } else {
-            sqlx::query("SELECT config_content FROM web_nginx_config WHERE uuid = $1")
-                .bind(config_id)
-                .fetch_optional(&self.pool)
-                .await
-                .map_err(|error| store_error("validate web_nginx_config lookup", error))?
-        }
-        .ok_or_else(|| WebServiceError::not_found("nginx config not found"))?;
-
-        let _content: String = row
-            .try_get("config_content")
-            .map_err(|error| store_error("validate web_nginx_config content", error))?;
-        Ok(NginxValidateResponse {
-            valid: false,
-            message: Some(
-                "Nginx syntax validation requires the edge runtime and is unavailable in the repository layer"
-                    .to_string(),
-            ),
-        })
-    }
-
     /// Content of the currently active config for a site (`None` when no
     /// config is active yet). Used as the edge rollback target.
     pub(super) async fn load_active_nginx_config_content_repo(
@@ -453,10 +417,6 @@ impl WebRepository {
             .map_err(|error| store_error("commit deploy web_nginx_config transaction", error))?;
 
         self.retrieve_nginx_config_repo(tenant_id, config_id).await
-    }
-
-    pub(super) async fn reload_nginx_repo(&self) -> WebServiceResult<NginxReloadResponse> {
-        Ok(NginxReloadResponse { reloaded: true })
     }
 
     pub(super) async fn retrieve_nginx_status_repo(

@@ -22,7 +22,7 @@ use sdkwork_webserver_contract::{
     UpdateEnvVariableRequest,
     HealthCheckPage, HealthCheckResponse, ListNginxConfigsQuery,
     ListRootDomainsQuery, ListSitesQuery, NginxConfigPage, NginxConfigResponse,
-    NginxReloadResponse, NginxStatusResponse, NginxValidateResponse, RootDomainPage,
+    NginxStatusResponse, RootDomainPage,
     RootDomainResponse, RuntimeAssignment, RuntimeAssignmentDelivery, RuntimeObservation,
     ServerPage, SitePage, SiteResponse, SourceVersionPage, SourceVersionResponse,
     TlsCertificateAssignmentMaterial, UpdateDomainApplicationBindingRequest,
@@ -671,14 +671,6 @@ impl WebRepositoryPort for WebRepository {
             .await
     }
 
-    async fn validate_nginx_config(
-        &self,
-        tenant_id: Option<i64>,
-        config_id: &str,
-    ) -> WebServiceResult<NginxValidateResponse> {
-        self.validate_nginx_config_repo(tenant_id, config_id).await
-    }
-
     async fn load_nginx_config_content(
         &self,
         tenant_id: Option<i64>,
@@ -712,10 +704,6 @@ impl WebRepositoryPort for WebRepository {
         config_id: &str,
     ) -> WebServiceResult<NginxConfigResponse> {
         self.web_nginx_config_repo(tenant_id, config_id).await
-    }
-
-    async fn reload_nginx(&self) -> WebServiceResult<NginxReloadResponse> {
-        self.reload_nginx_repo().await
     }
 
     async fn retrieve_nginx_status(

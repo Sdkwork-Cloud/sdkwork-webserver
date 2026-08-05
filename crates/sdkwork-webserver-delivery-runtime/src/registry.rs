@@ -170,14 +170,14 @@ impl WebsiteProviderRegistry {
         let mut jobs = Vec::new();
         for compiled in runtime_set.descriptors() {
             let descriptor = compiled.descriptor();
-            let binding = activation_binding(descriptor);
+            let binding = activation_binding(descriptor)?;
             let mut scheduled = HashSet::new();
             for mount in &descriptor.mounts {
                 let resource = descriptor
                     .resources
                     .iter()
                     .find(|resource| resource.resource_uuid == mount.resource_uuid)
-                    .expect("compiled runtime-set retains validated resource references");
+                    .ok_or(WebsiteRuntimeProviderValidationError::CompiledContractViolation)?;
                 let capability = ValidationCapability::for_handler(mount.handler);
                 if !scheduled.insert((resource.resource_uuid.as_str(), capability)) {
                     continue;
@@ -352,17 +352,15 @@ async fn validate_job(
     Ok(())
 }
 
-fn activation_binding(descriptor: &WebsiteRuntimeDescriptor) -> &WebsiteBinding {
+fn activation_binding(
+    descriptor: &WebsiteRuntimeDescriptor,
+) -> Result<&WebsiteBinding, WebsiteRuntimeProviderValidationError> {
     descriptor
         .bindings
         .iter()
         .find(|binding| matches!(binding.action, WebsiteBindingAction::Serve { .. }))
-        .unwrap_or_else(|| {
-            descriptor
-                .bindings
-                .first()
-                .expect("compiled runtime-set retains at least one validated binding")
-        })
+        .or_else(|| descriptor.bindings.first())
+        .ok_or(WebsiteRuntimeProviderValidationError::CompiledContractViolation)
 }
 
 fn valid_generation_token(value: &str) -> bool {

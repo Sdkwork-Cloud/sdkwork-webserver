@@ -51,7 +51,7 @@ impl WebRepository {
                     CAST(created_at AS TEXT) AS created_at
              FROM web_health_check
              WHERE tenant_id = $1 AND site_id = $2
-             ORDER BY created_at DESC
+             ORDER BY created_at DESC, id DESC
              LIMIT 100",
         )
         .bind(tenant_id)

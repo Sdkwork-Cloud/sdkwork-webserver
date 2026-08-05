@@ -1,6 +1,6 @@
 export interface SdkWorkApiResponse {
   code: 0;
-  message: string;
   data: unknown;
+  /** Server-owned request correlation id. */
   traceId: string;
 }

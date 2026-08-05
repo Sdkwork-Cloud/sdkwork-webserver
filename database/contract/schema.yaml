@@ -521,6 +521,7 @@ tables:
       - { name: uk_web_listener_certificate_binding_active_algorithm, columns: [site_binding_id, key_algorithm], unique: true, predicate: "(((status)::text <> 'ARCHIVED'::text) AND (deleted_at IS NULL))" }
       - { name: uk_web_listener_certificate_binding_default, columns: [site_binding_id], unique: true, predicate: "((is_default = true) AND ((status)::text <> 'ARCHIVED'::text) AND (deleted_at IS NULL))" }
       - { name: idx_web_listener_certificate_binding_certificate, columns: [tenant_id, certificate_id, status], predicate: "deleted_at IS NULL" }
+      - { name: idx_web_listener_certificate_binding_site_sort, columns: [site_binding_id, is_default, priority, id], predicate: "deleted_at IS NULL" }
   - name: web_source_version
     lifecycle_status: active
     owner: web-platform
@@ -561,6 +562,7 @@ tables:
       - { name: uk_web_source_version_uuid, columns: [uuid], unique: true }
       - { name: uk_web_source_version_site_tag, columns: [tenant_id, site_id, version_tag], unique: true }
       - { name: idx_web_source_version_site_created, columns: [site_id, created_at] }
+      - { name: idx_web_source_version_tenant_site_created, columns: [tenant_id, site_id, created_at] }
       - { name: idx_web_source_version_retention, columns: [tenant_id, site_id, status, created_at] }
   - name: web_deployment
     lifecycle_status: active
@@ -612,6 +614,7 @@ tables:
       - { name: uk_web_deployment_uuid, columns: [uuid], unique: true }
       - { name: uk_web_deployment_idempotency, columns: [tenant_id, idempotency_key], unique: true }
       - { name: idx_web_deployment_site_created, columns: [site_id, created_at] }
+      - { name: idx_web_deployment_tenant_site_created, columns: [tenant_id, site_id, created_at] }
       - { name: idx_web_deployment_source_version, columns: [source_version_id] }
       - { name: idx_web_deployment_tenant_status, columns: [tenant_id, status, created_at] }
       - { name: idx_web_deployment_status, columns: [status], predicate: "(status = ANY (ARRAY[0, 1, 2]))" }
@@ -760,6 +763,7 @@ tables:
       - { name: uk_web_server_host, columns: [tenant_id, host], unique: true }
       - { name: uk_web_server_tenant_id, columns: [tenant_id, id], unique: true }
       - { name: idx_web_server_tenant_status, columns: [tenant_id, status, updated_at] }
+      - { name: idx_web_server_tenant_updated, columns: [tenant_id, updated_at] }
       - { name: idx_web_server_metadata_gin, columns: [metadata], type: gin }
   - name: web_certificate_node_state
     lifecycle_status: active

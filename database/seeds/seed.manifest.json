@@ -23,13 +23,20 @@
       "required": true,
       "checksum": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "files": []
+    },
+    "en-US": {
+      "version": "1.0.0",
+      "required": false,
+      "checksum": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "files": []
     }
   },
   "profiles": {
     "minimal": {
       "common": [],
       "locales": {
-        "zh-CN": []
+        "zh-CN": [],
+        "en-US": []
       }
     },
     "standard": {
@@ -37,7 +44,8 @@
         "common/001_bootstrap.sql"
       ],
       "locales": {
-        "zh-CN": []
+        "zh-CN": [],
+        "en-US": []
       }
     }
   }
