@@ -188,27 +188,27 @@ ownership belong to Deploy/KMS/secret infrastructure.
 
 | Variable | Purpose | Production rule |
 | --- | --- | --- |
-| `SDKWORK_WEB_RUNTIME_ASSIGNMENT_SOURCE` | Website source: `cloud` or `file`. | Use `cloud`; file mode is standalone/development only. |
-| `SDKWORK_WEB_INTERNAL_API_BASE_URL` | Generated Web Internal SDK origin. | Protected HTTPS, not same-origin. |
-| `SDKWORK_WEB_NODE_UUID` | Node assignment identity. | Required and must match snapshots. |
-| `SDKWORK_WEB_NODE_TOKEN_FILE` | Web Internal SDK node credential file. | Secret file only; no inline token. |
-| `SDKWORK_WEB_WEBSITE_RUNTIME_ENVIRONMENT` | `development`, `test`, `staging`, or `production`. | Must match assignment environment. |
-| `SDKWORK_WEB_WEBSITE_RUNTIME_SET_FILE` | Local Website runtime-set source. | File mode only. |
-| `SDKWORK_WEB_WEBSITE_RUNTIME_SET_RECOVERY_DIRECTORY` | Website A/B recovery. | Required for staging/production. |
-| `SDKWORK_WEB_WEBSITE_TENANT_SCOPE_HASH` | Dedicated fleet tenant scope. | Secret-backed and must match every descriptor. |
-| `SDKWORK_WEB_WEBSITE_PROVIDER_BUFFERED_CONTENT_BYTES` | Process-wide admission budget for retained generated-SDK content buffers. | Integer 16 MiB..2 GiB; default/template 256 MiB; capacity evidence required before raising. |
-| `SDKWORK_WEB_WEBSITE_PROVIDER_RESOLUTION_CACHE_ENTRIES` | Maximum node-local Provider resolution metadata entries and in-flight slots. | Integer 1..1048576; default/template 16384; capacity evidence required before raising. |
-| `SDKWORK_WEB_WEBSITE_PROVIDER_EVENT_CONFIG_FILE` | Provider-event subscriptions and secret-file references. | Required when active resources use Drive/Knowledgebase in staging/production. |
+| `SDKWORK_WEBSERVER_RUNTIME_ASSIGNMENT_SOURCE` | Website source: `cloud` or `file`. | Use `cloud`; file mode is standalone/development only. |
+| `SDKWORK_WEBSERVER_INTERNAL_API_BASE_URL` | Generated Web Internal SDK origin. | Protected HTTPS, not same-origin. |
+| `SDKWORK_WEBSERVER_NODE_UUID` | Node assignment identity. | Required and must match snapshots. |
+| `SDKWORK_WEBSERVER_NODE_TOKEN_FILE` | Web Internal SDK node credential file. | Secret file only; no inline token. |
+| `SDKWORK_WEBSERVER_WEBSITE_RUNTIME_ENVIRONMENT` | `development`, `test`, `staging`, or `production`. | Must match assignment environment. |
+| `SDKWORK_WEBSERVER_WEBSITE_RUNTIME_SET_FILE` | Local Website runtime-set source. | File mode only. |
+| `SDKWORK_WEBSERVER_WEBSITE_RUNTIME_SET_RECOVERY_DIRECTORY` | Website A/B recovery. | Required for staging/production. |
+| `SDKWORK_WEBSERVER_WEBSITE_TENANT_SCOPE_HASH` | Dedicated fleet tenant scope. | Secret-backed and must match every descriptor. |
+| `SDKWORK_WEBSERVER_WEBSITE_PROVIDER_BUFFERED_CONTENT_BYTES` | Process-wide admission budget for retained generated-SDK content buffers. | Integer 16 MiB..2 GiB; default/template 256 MiB; capacity evidence required before raising. |
+| `SDKWORK_WEBSERVER_WEBSITE_PROVIDER_RESOLUTION_CACHE_ENTRIES` | Maximum node-local Provider resolution metadata entries and in-flight slots. | Integer 1..1048576; default/template 16384; capacity evidence required before raising. |
+| `SDKWORK_WEBSERVER_WEBSITE_PROVIDER_EVENT_CONFIG_FILE` | Provider-event subscriptions and secret-file references. | Required when active resources use Drive/Knowledgebase in staging/production. |
 | `SDKWORK_WEBSERVER_DRIVE_INTERNAL_API_BASE_URL` | Generated Drive Internal SDK origin. | Protected HTTPS. |
 | `SDKWORK_WEBSERVER_DRIVE_INTERNAL_API_INGRESS_TOKEN_FILE` | Drive provider credential. | Secret file only. |
 | `SDKWORK_WEBSERVER_KNOWLEDGEBASE_INTERNAL_API_BASE_URL` | Generated Knowledgebase Internal SDK origin. | Protected HTTPS. |
 | `SDKWORK_WEBSERVER_KNOWLEDGEBASE_INTERNAL_API_INGRESS_TOKEN_FILE` | Knowledgebase provider credential. | Secret file only. |
-| `SDKWORK_WEB_TLS_RUNTIME_SOURCE` | TLS source: `external` or `file`. | Current Kubernetes baseline uses `external`. |
-| `SDKWORK_WEB_TLS_RUNTIME_SNAPSHOT_FILE` | Native TLS assignment snapshot. | Required for file TLS. |
-| `SDKWORK_WEB_TLS_MATERIAL_ROOT` | Root of immutable certificate versions. | Required for file TLS; resolved material cannot escape it. |
-| `SDKWORK_WEB_TLS_LISTENER_ID` | Listener receiving assignments. | Listener must declare `tlsRuntime: assignment`. |
-| `SDKWORK_WEB_TLS_RUNTIME_POLL_INTERVAL_MS` | TLS candidate poll interval. | Bounded to 250..60000 ms. |
-| `SDKWORK_WEB_TLS_RUNTIME_RECOVERY_DIRECTORY` | TLS A/B recovery. | Required for staging/production native TLS. |
+| `SDKWORK_WEBSERVER_TLS_RUNTIME_SOURCE` | TLS source: `external` or `file`. | Current Kubernetes baseline uses `external`. |
+| `SDKWORK_WEBSERVER_TLS_RUNTIME_SNAPSHOT_FILE` | Native TLS assignment snapshot. | Required for file TLS. |
+| `SDKWORK_WEBSERVER_TLS_MATERIAL_ROOT` | Root of immutable certificate versions. | Required for file TLS; resolved material cannot escape it. |
+| `SDKWORK_WEBSERVER_TLS_LISTENER_ID` | Listener receiving assignments. | Listener must declare `tlsRuntime: assignment`. |
+| `SDKWORK_WEBSERVER_TLS_RUNTIME_POLL_INTERVAL_MS` | TLS candidate poll interval. | Bounded to 250..60000 ms. |
+| `SDKWORK_WEBSERVER_TLS_RUNTIME_RECOVERY_DIRECTORY` | TLS A/B recovery. | Required for staging/production native TLS. |
 
 Concrete examples live in `etc/data-plane/`. `sdkwork.app.config.json` remains identity and release
 metadata; it is not a runtime-secret or environment-value authority.
@@ -708,7 +708,7 @@ does not revise the original findings; it records the resolution evidence.
 3. **Certificate convergence FAILED transition** — resolved. Every convergence branch now
    commits its short transaction, so node-reported failure durably terminates the rollout.
 4. **Management listener exposure** — hardened. Non-loopback binds fail closed unless
-   `SDKWORK_WEB_MANAGEMENT_EXPOSE_ALLOWED=true`; the standalone production profile also
+   `SDKWORK_WEBSERVER_MANAGEMENT_EXPOSE_ALLOWED=true`; the standalone production profile also
    enables the loopback data-plane operations listener.
 5. **Dependency currency** — the direct dependency graph was moved to current releases
    (`tower-http` 0.7, `cap-std` 4.0.2, `rcgen` 0.14, `x509-parser` 0.18, `reqwest` 0.13,

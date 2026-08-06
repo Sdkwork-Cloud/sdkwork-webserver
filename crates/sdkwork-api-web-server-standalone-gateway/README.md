@@ -21,11 +21,11 @@ This runtime does not consume generated HTTP SDKs. It mounts repository-owned ma
 
 ## Configuration
 
-Management mode uses SDKWork typed server/database environment configuration. `validate` and `data-plane` accept an explicit config argument or `SDKWORK_WEB_SERVER_CONFIG_FILE`.
+Management mode uses SDKWork typed server/database environment configuration. `validate` and `data-plane` resolve the config file in this order: an explicit config argument, then `SDKWORK_WEBSERVER_SERVER_CONFIG_FILE`, then the canonical OS system-scope directory for application code `webserver` (Linux `/etc/sdkwork/webserver`, macOS `/Library/Application Support/sdkwork/webserver`, Windows `%ProgramData%\sdkwork\webserver`) joined with `sdkwork.webserver.config.json`. A missing canonical default fails closed with the expected path and override variable.
 
 `data-plane` honors `deployment.reload`: `disabled` keeps the startup generation; `watch` publishes verified same-topology generations through a lock-free request-path pointer. Listener topology, static TLS policy, connection-admission, timeout, drain, or Watch-policy changes require restart. A listener declared with `tlsRuntime: assignment` uses the independent TLS runtime to validate and atomically activate certificate-material rotations without replacing the listener; staging and production retain a separate A/B TLS snapshot recovery state.
 
-`SDKWORK_WEB_DATA_PLANE_OPERATIONS_BIND` optionally enables a separate loopback-only listener with `/healthz`, `/livez`, `/readyz`, and `/metrics`. It is disabled by default and rejects port zero, wildcard, private-LAN, and public binds. The listener is host policy, never an application virtual-host route. It uses canonical `SDKWORK_WEB_ENVIRONMENT`, `SDKWORK_WEB_DEPLOYMENT_PROFILE`, and `SDKWORK_WEB_RUNTIME_TARGET` dimensions and fails startup on unknown aliases.
+`SDKWORK_WEBSERVER_DATA_PLANE_OPERATIONS_BIND` optionally enables a separate loopback-only listener with `/healthz`, `/livez`, `/readyz`, and `/metrics`. It is disabled by default and rejects port zero, wildcard, private-LAN, and public binds. The listener is host policy, never an application virtual-host route. It uses canonical `SDKWORK_WEBSERVER_ENVIRONMENT`, `SDKWORK_WEBSERVER_DEPLOYMENT_PROFILE`, and `SDKWORK_WEBSERVER_RUNTIME_TARGET` dimensions and fails startup on unknown aliases.
 
 ## Deployment Profile And Runtime Target Behavior
 

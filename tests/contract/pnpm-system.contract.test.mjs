@@ -136,7 +136,7 @@ test('standalone profile exposes only the application gateway to browser clients
     'utf8',
   );
   assert.doesNotMatch(env, /PLATFORM_API_GATEWAY_HTTP_URL/u);
-  assert.match(env, /SDKWORK_WEB_APPLICATION_PUBLIC_HTTP_URL=http:\/\/127\.0\.0\.1:3800/u);
+  assert.match(env, /SDKWORK_WEBSERVER_APPLICATION_PUBLIC_HTTP_URL=http:\/\/127\.0\.0\.1:3800/u);
 
   const development = topology.orchestration.profiles['standalone.development'];
   assert.deepEqual(development.browserDeliveries, [
@@ -163,14 +163,14 @@ test('standalone profile exposes only the application gateway to browser clients
       apiSurfaceId: 'application.public-ingress',
       hostProcessId: 'application.public-ingress',
       buildOutput: 'apps/sdkwork-webserver-pc/dist',
-      runtimeRootEnv: 'SDKWORK_WEB_PC_STATIC_ROOT',
+      runtimeRootEnv: 'SDKWORK_WEBSERVER_PC_STATIC_ROOT',
       mountPath: '/',
       spaFallback: '/index.html',
     },
   ]);
   assert.match(
     readFileSync(path.join(REPO_ROOT, topology.profileFiles['standalone.production']), 'utf8'),
-    /SDKWORK_WEB_PC_STATIC_ROOT=share\/sdkwork\/webserver-pc/u,
+    /SDKWORK_WEBSERVER_PC_STATIC_ROOT=share\/sdkwork\/webserver-pc/u,
   );
 });
 

@@ -54,7 +54,7 @@ on:
         description: sdkwork-ui commit/ref.
         required: false
         default: main
-      sdkwork_web_framework_ref:
+      sdkwork_webserver_framework_ref:
         description: sdkwork-web-framework commit/ref.
         required: false
         default: main
@@ -107,7 +107,7 @@ jobs:
           "SDKWORK_APPBASE_REF": "${{ github.event.inputs.sdkwork_appbase_ref || vars.SDKWORK_APPBASE_REF }}",
           "SDKWORK_CORE_REF": "${{ github.event.inputs.sdkwork_core_ref || vars.SDKWORK_CORE_REF }}",
           "SDKWORK_UI_REF": "${{ github.event.inputs.sdkwork_ui_ref || vars.SDKWORK_UI_REF }}",
-          "SDKWORK_WEB_FRAMEWORK_REF": "${{ github.event.inputs.sdkwork_web_framework_ref || vars.SDKWORK_WEB_FRAMEWORK_REF }}",
+          "SDKWORK_WEBSERVER_FRAMEWORK_REF": "${{ github.event.inputs.sdkwork_webserver_framework_ref || vars.SDKWORK_WEBSERVER_FRAMEWORK_REF }}",
           "SDKWORK_IAM_REF": "${{ github.event.inputs.sdkwork_iam_ref || vars.SDKWORK_IAM_REF }}",
           "SDKWORK_DATABASE_REF": "${{ github.event.inputs.sdkwork_database_ref || vars.SDKWORK_DATABASE_REF }}",
           "SDKWORK_SDK_COMMONS_REF": "${{ github.event.inputs.sdkwork_sdk_commons_ref || vars.SDKWORK_SDK_COMMONS_REF }}",

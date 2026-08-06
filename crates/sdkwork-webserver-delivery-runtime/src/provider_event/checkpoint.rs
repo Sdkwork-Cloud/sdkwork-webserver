@@ -345,10 +345,9 @@ fn load_checkpoint_directory(
         let mut best: Option<CheckpointDocument> = None;
         for path in paths {
             if let Ok(document) = read_checkpoint(&path, &digest) {
-                if best
-                    .as_ref()
-                    .is_none_or(|current: &CheckpointDocument| document.generation > current.generation)
-                {
+                if best.as_ref().is_none_or(|current: &CheckpointDocument| {
+                    document.generation > current.generation
+                }) {
                     best = Some(document);
                 }
             }

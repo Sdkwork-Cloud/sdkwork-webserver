@@ -36,7 +36,7 @@ const PACKAGE_FILES = new Map([
   ['etc/examples/sdkwork.webserver.config.json', '{}\n'],
   ['etc/examples/public/index.html', '<h1>release fixture</h1>\n'],
   ['etc/data-plane/website.cloud.config.json', '{}\n'],
-  ['etc/node-daemon/development.env.example', 'SDKWORK_WEB_NODE_TOKEN=\n'],
+  ['etc/node-daemon/development.env.example', 'SDKWORK_WEBSERVER_NODE_TOKEN=\n'],
   ['database/README.md', '# Database\n'],
   ['database/database.manifest.json', '{}\n'],
   ['database/contract/prefix-registry.json', '{}\n'],
@@ -255,22 +255,22 @@ test('Kubernetes renderer binds one tenant fleet and Node identity without cross
     assert.ok(
       container.env.some(
         (entry) =>
-          entry.name === 'SDKWORK_WEB_NODE_UUID' &&
+          entry.name === 'SDKWORK_WEBSERVER_NODE_UUID' &&
           entry.valueFrom?.secretKeyRef?.name === secretName,
       ),
     );
     assert.ok(
       container.env.some(
         (entry) =>
-          entry.name === 'SDKWORK_WEB_NODE_TOKEN_FILE' &&
+          entry.name === 'SDKWORK_WEBSERVER_NODE_TOKEN_FILE' &&
           entry.value === '/run/secrets/sdkwork-web-node/node-token',
       ),
     );
     assert.ok(
       container.env.some(
         (entry) =>
-          entry.name === 'SDKWORK_WEB_SERVER_CONFIG_FILE' &&
-          entry.value === '/etc/sdkwork/web/sdkwork.webserver.config.json',
+          entry.name === 'SDKWORK_WEBSERVER_SERVER_CONFIG_FILE' &&
+          entry.value === '/etc/sdkwork/webserver/sdkwork.webserver.config.json',
       ),
     );
     assert.ok(container.volumeMounts.some((mount) => mount.name === 'host-config'));
@@ -735,10 +735,10 @@ test('Linux release smoke validates, extracts, serves HTTP and HTTPS, and cleans
   assert.match(source, /run\(gateway, \['validate-app-shell'\]/u);
   assert.match(source, /SDKWORK_IAM_APP_ROOT/u);
   assert.match(source, /SDKWORK_DRIVE_APP_ROOT/u);
-  assert.match(source, /SDKWORK_WEB_SNOWFLAKE_NODE_ID: '0'/u);
-  assert.match(source, /SDKWORK_WEB_SECRET_ENCRYPTION_KEY/u);
-  assert.match(source, /SDKWORK_WEB_ACME_PROFILE: 'staging'/u);
-  assert.match(source, /SDKWORK_WEB_ACME_CONTACT_EMAIL/u);
+  assert.match(source, /SDKWORK_WEBSERVER_SNOWFLAKE_NODE_ID: '0'/u);
+  assert.match(source, /SDKWORK_WEBSERVER_SECRET_ENCRYPTION_KEY/u);
+  assert.match(source, /SDKWORK_WEBSERVER_ACME_PROFILE: 'staging'/u);
+  assert.match(source, /SDKWORK_WEBSERVER_ACME_CONTACT_EMAIL/u);
   assert.match(source, /SDKWORK_DRIVE_DOWNLOAD_TOKEN_HMAC_SECRET/u);
   assert.match(source, /sites\.list/u);
   assert.match(source, /sessions\.current\.retrieve/u);

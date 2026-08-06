@@ -45,8 +45,8 @@
     "events": [],
     "configKeys": [
       "SDKWORK_DATABASE_URL",
-      "SDKWORK_WEB_SNOWFLAKE_NODE_ID",
-      "SDKWORK_WEB_SECRET_ENCRYPTION_KEY"
+      "SDKWORK_WEBSERVER_SNOWFLAKE_NODE_ID",
+      "SDKWORK_WEBSERVER_SECRET_ENCRYPTION_KEY"
     ]
   },
   "verification": {

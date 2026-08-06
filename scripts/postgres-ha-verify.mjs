@@ -33,7 +33,7 @@ const CRITICAL_SOURCE_FILES = Object.freeze([
 ]);
 
 export function createPostgresHaPlan({
-  image = process.env.SDKWORK_WEB_POSTGRES_CI_IMAGE || DEFAULT_POSTGRES_IMAGE,
+  image = process.env.SDKWORK_WEBSERVER_POSTGRES_CI_IMAGE || DEFAULT_POSTGRES_IMAGE,
 } = {}) {
   if (!/^postgres:[a-zA-Z0-9_.-]+@sha256:[a-f0-9]{64}$/u.test(image)) {
     throw new Error('PostgreSQL HA image must use a tag plus sha256 digest');

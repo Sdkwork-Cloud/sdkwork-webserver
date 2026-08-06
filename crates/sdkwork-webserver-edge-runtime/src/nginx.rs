@@ -463,7 +463,7 @@ mod tests {
     }
 
     fn installed_nginx() -> Option<String> {
-        std::env::var("SDKWORK_WEB_TEST_NGINX_BINARY")
+        std::env::var("SDKWORK_WEBSERVER_TEST_NGINX_BINARY")
             .ok()
             .or_else(|| {
                 Command::new("nginx")

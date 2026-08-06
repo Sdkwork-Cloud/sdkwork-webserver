@@ -383,7 +383,7 @@ Axum streams provider chunks without response buffering, but the current generat
 retrieve each content object as a bounded `Vec<u8>` before the adapters create their streams.
 Activation therefore enforces the concrete 16 MiB Knowledgebase or 256 MiB Drive adapter ceiling
 even though the transport-neutral descriptor schema permits a future true-streaming Provider up to
-1 TiB. `SDKWORK_WEB_WEBSITE_PROVIDER_BUFFERED_CONTENT_BYTES` adds a 16 MiB..2 GiB process admission
+1 TiB. `SDKWORK_WEBSERVER_WEBSITE_PROVIDER_BUFFERED_CONTENT_BYTES` adds a 16 MiB..2 GiB process admission
 bound, defaulting to 256 MiB, over concurrent retained provider buffers. It reduces concurrent
 memory amplification but cannot eliminate the generated SDK's single-response allocation or copy.
 Raw HTTP, manually assembled credentials, direct provider storage access, and false
@@ -418,7 +418,7 @@ cache response body bytes, credentials, raw generated-SDK responses, activation 
 responses, or private/draft content. Cacheable values are public static resolution metadata, public
 Wiki content metadata, Wiki redirects, and a non-disclosing sentinel for not-found/not-public/revoked
 outcomes. The maximum entry count defaults to 16384, is configured by
-`SDKWORK_WEB_WEBSITE_PROVIDER_RESOLUTION_CACHE_ENTRIES`, is hard-bounded at 1048576, and uses LRU
+`SDKWORK_WEBSERVER_WEBSITE_PROVIDER_RESOLUTION_CACHE_ENTRIES`, is hard-bounded at 1048576, and uses LRU
 eviction. Descriptor delivery policy owns metadata TTL, short negative TTL, and positive-only
 stale-while-revalidate duration.
 

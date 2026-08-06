@@ -220,7 +220,7 @@ accounts. HTTP-01 challenges are written atomically into the configured webroot 
 served by the self-hosted data plane through the narrow `acmeHttp01.webroot` listener endpoint
 (exact `/.well-known/acme-challenge/<token>` path only). After every successful certificate
 operation the worker projects the node's listener certificate bindings into versioned TLS material
-under `SDKWORK_WEB_TLS_MATERIAL_ROOT` and publishes a monotonic `tls-runtime.json` snapshot; the
+under `SDKWORK_WEBSERVER_TLS_MATERIAL_ROOT` and publishes a monotonic `tls-runtime.json` snapshot; the
 data plane's `FileTlsRuntimeController` hot-loads the new Rustls configuration without dropping
 existing connections. External Nginx artifact activation is a documented optional legacy path and
 is not part of the certificate lifecycle.

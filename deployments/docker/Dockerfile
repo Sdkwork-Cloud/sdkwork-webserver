@@ -11,13 +11,13 @@ WORKDIR /app
 # The build context is the verified sdkwork-web/ root extracted from the release archive.
 COPY --chown=10001:10001 . /app/
 
-ENV SDKWORK_WEB_APP_ROOT=/app \
-    SDKWORK_WEB_ENVIRONMENT=production \
-    SDKWORK_WEB_CONFIG_PROFILE=production \
-    SDKWORK_WEB_DEPLOYMENT_PROFILE=cloud \
-    SDKWORK_WEB_RUNTIME_TARGET=container \
-    SDKWORK_WEB_SERVICE_LAYOUT=website-data-plane \
-    SDKWORK_WEB_SERVER_CONFIG_FILE=/app/etc/data-plane/website.cloud.config.json
+ENV SDKWORK_WEBSERVER_APP_ROOT=/app \
+    SDKWORK_WEBSERVER_ENVIRONMENT=production \
+    SDKWORK_WEBSERVER_CONFIG_PROFILE=production \
+    SDKWORK_WEBSERVER_DEPLOYMENT_PROFILE=cloud \
+    SDKWORK_WEBSERVER_RUNTIME_TARGET=container \
+    SDKWORK_WEBSERVER_SERVICE_LAYOUT=website-data-plane \
+    SDKWORK_WEBSERVER_SERVER_CONFIG_FILE=/app/etc/data-plane/website.cloud.config.json
 
 USER 10001:10001
 EXPOSE 8080

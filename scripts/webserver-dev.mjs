@@ -106,10 +106,10 @@ function buildRuntimeEnv(settings) {
       SDKWORK_ENVIRONMENT: settings.environment,
       SDKWORK_DATABASE_AUTO_MIGRATE:
         iamEnv.SDKWORK_DATABASE_AUTO_MIGRATE ?? autoMigrate,
-      SDKWORK_WEB_DEPLOYMENT_PROFILE: settings.deploymentProfile,
-      SDKWORK_WEB_ENVIRONMENT: settings.environment,
-      SDKWORK_WEB_RUNTIME_TARGET: 'server',
-      SDKWORK_WEB_SNOWFLAKE_NODE_ID: process.env.SDKWORK_WEB_SNOWFLAKE_NODE_ID ?? '0',
+      SDKWORK_WEBSERVER_DEPLOYMENT_PROFILE: settings.deploymentProfile,
+      SDKWORK_WEBSERVER_ENVIRONMENT: settings.environment,
+      SDKWORK_WEBSERVER_RUNTIME_TARGET: 'server',
+      SDKWORK_WEBSERVER_SNOWFLAKE_NODE_ID: process.env.SDKWORK_WEBSERVER_SNOWFLAKE_NODE_ID ?? '0',
     },
   };
 }
@@ -128,7 +128,7 @@ async function run() {
   );
   console.log(`[sdkwork-web] databaseSource=${runtime.databaseSource}`);
   console.log(
-    `[sdkwork-web] managementUrl=${runtime.env.SDKWORK_WEB_APPLICATION_PUBLIC_HTTP_URL}`,
+    `[sdkwork-web] managementUrl=${runtime.env.SDKWORK_WEBSERVER_APPLICATION_PUBLIC_HTTP_URL}`,
   );
 
   const command = process.platform === 'win32' ? 'cargo.exe' : 'cargo';

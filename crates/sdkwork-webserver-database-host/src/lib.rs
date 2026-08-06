@@ -79,7 +79,7 @@ pub async fn bootstrap_web_database_from_env() -> Result<WebDatabaseHost, String
 }
 
 fn resolve_app_root() -> PathBuf {
-    std::env::var("SDKWORK_WEB_APP_ROOT")
+    std::env::var("SDKWORK_WEBSERVER_APP_ROOT")
         .map(PathBuf::from)
         .unwrap_or_else(|_| {
             PathBuf::from(env!("CARGO_MANIFEST_DIR"))

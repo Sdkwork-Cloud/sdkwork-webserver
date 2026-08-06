@@ -5,7 +5,9 @@ use sdkwork_api_web_server_standalone_gateway::{
     run_data_plane_from_config_with_operations_until, run_database_migrate_only,
     validate_pc_app_shell_from_env, DataPlaneOperationsConfig,
 };
-use sdkwork_webserver_core::load_and_compile_webserver_config_revision;
+use sdkwork_webserver_core::{
+    load_and_compile_webserver_config_revision, resolve_webserver_config_path,
+};
 use tokio::signal;
 
 type MainResult<T> = Result<T, Box<dyn Error + Send + Sync>>;
@@ -70,17 +72,17 @@ async fn run() -> MainResult<()> {
 }
 
 async fn run_management_plane() -> MainResult<()> {
-    let bind_address = std::env::var("SDKWORK_WEB_APPLICATION_PUBLIC_INGRESS_BIND")
+    let bind_address = std::env::var("SDKWORK_WEBSERVER_APPLICATION_PUBLIC_INGRESS_BIND")
         .unwrap_or_else(|_| "127.0.0.1:3800".to_owned());
     // Fail closed: the management listener exposes unauthenticated
     // /healthz, /readyz, /livez, and /metrics. A non-loopback bind is only
     // allowed with an explicit operator authorization (for example
     // Kubernetes probes that must reach the pod address).
     if !bind_address_is_loopback(&bind_address)
-        && std::env::var("SDKWORK_WEB_MANAGEMENT_EXPOSE_ALLOWED").is_err()
+        && std::env::var("SDKWORK_WEBSERVER_MANAGEMENT_EXPOSE_ALLOWED").is_err()
     {
         return Err(io::Error::other(
-            "management listener (health/readiness/metrics) refuses a non-loopback bind; set SDKWORK_WEB_MANAGEMENT_EXPOSE_ALLOWED=true to authorize it",
+            "management listener (health/readiness/metrics) refuses a non-loopback bind; set SDKWORK_WEBSERVER_MANAGEMENT_EXPOSE_ALLOWED=true to authorize it",
         )
         .into());
     }
@@ -135,16 +137,8 @@ fn validate_config(path: PathBuf) -> MainResult<()> {
 }
 
 fn config_path(argument: Option<String>) -> MainResult<PathBuf> {
-    argument
-        .or_else(|| std::env::var("SDKWORK_WEB_SERVER_CONFIG_FILE").ok())
-        .map(PathBuf::from)
-        .ok_or_else(|| {
-            io::Error::new(
-                io::ErrorKind::InvalidInput,
-                "a config path argument or SDKWORK_WEB_SERVER_CONFIG_FILE is required",
-            )
-            .into()
-        })
+    resolve_webserver_config_path(argument)
+        .map_err(|message| io::Error::new(io::ErrorKind::InvalidInput, message).into())
 }
 
 fn print_help() {
@@ -157,7 +151,13 @@ fn print_help() {
            validate <config>      Validate and compile Web Server app config.\n\
            validate-app-shell     Validate the configured standalone PC app shell.\n\
            data-plane <config>    Start HTTP/HTTPS application listeners without a database.\n\
-                                  Set SDKWORK_WEB_DATA_PLANE_OPERATIONS_BIND to an explicit loopback socket for host health and metrics.\n"
+                                  Set SDKWORK_WEBSERVER_DATA_PLANE_OPERATIONS_BIND to an explicit loopback socket for host health and metrics.\n\
+         \n\
+         Config resolution: explicit <config> argument, then\n\
+         SDKWORK_WEBSERVER_SERVER_CONFIG_FILE, then the canonical OS config\n\
+         directory (Linux /etc/sdkwork/webserver, macOS\n\
+         /Library/Application Support/sdkwork/webserver, Windows\n\
+         %ProgramData%\\sdkwork\\webserver) joined with sdkwork.webserver.config.json.\n"
     );
 }
 

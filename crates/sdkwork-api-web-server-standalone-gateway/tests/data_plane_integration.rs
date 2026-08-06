@@ -519,10 +519,7 @@ fn write_signed_identity(
     }];
     let key = KeyPair::generate().expect("generate signed identity key");
     let certificate = params
-        .signed_by(
-            &key,
-            &Issuer::new(authority.params.clone(), &authority.key),
-        )
+        .signed_by(&key, &Issuer::new(authority.params.clone(), &authority.key))
         .expect("sign test identity");
     fs::write(directory.join(format!("{stem}.pem")), certificate.pem())
         .expect("write signed certificate");

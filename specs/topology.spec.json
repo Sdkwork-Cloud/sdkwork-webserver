@@ -33,12 +33,12 @@
     "standalone.production": "etc/topology/standalone.production.env"
   },
   "envKeys": {
-    "deploymentProfile": "SDKWORK_WEB_DEPLOYMENT_PROFILE",
-    "environment": "SDKWORK_WEB_ENVIRONMENT",
-    "profileId": "SDKWORK_WEB_PROFILE_ID",
-    "standaloneGatewayBind": "SDKWORK_WEB_APPLICATION_PUBLIC_INGRESS_BIND",
-    "apiGatewayBaseUrl": "SDKWORK_WEB_PLATFORM_API_GATEWAY_HTTP_URL",
-    "clientApiGatewayBaseUrl": "VITE_SDKWORK_WEB_PLATFORM_API_GATEWAY_HTTP_URL"
+    "deploymentProfile": "SDKWORK_WEBSERVER_DEPLOYMENT_PROFILE",
+    "environment": "SDKWORK_WEBSERVER_ENVIRONMENT",
+    "profileId": "SDKWORK_WEBSERVER_PROFILE_ID",
+    "standaloneGatewayBind": "SDKWORK_WEBSERVER_APPLICATION_PUBLIC_INGRESS_BIND",
+    "apiGatewayBaseUrl": "SDKWORK_WEBSERVER_PLATFORM_API_GATEWAY_HTTP_URL",
+    "clientApiGatewayBaseUrl": "VITE_SDKWORK_WEBSERVER_PLATFORM_API_GATEWAY_HTTP_URL"
   },
   "surfaces": {
     "application.public-ingress": {
@@ -46,8 +46,8 @@
       "protocols": [
         "http"
       ],
-      "bindEnv": "SDKWORK_WEB_APPLICATION_PUBLIC_INGRESS_BIND",
-      "httpUrlEnv": "SDKWORK_WEB_APPLICATION_PUBLIC_HTTP_URL",
+      "bindEnv": "SDKWORK_WEBSERVER_APPLICATION_PUBLIC_INGRESS_BIND",
+      "httpUrlEnv": "SDKWORK_WEBSERVER_APPLICATION_PUBLIC_HTTP_URL",
       "healthAttempts": 300,
       "healthIntervalMs": 1000,
       "healthTimeoutMs": 2000
@@ -57,31 +57,31 @@
       "protocols": [
         "http"
       ],
-      "bindEnv": "SDKWORK_WEB_APPLICATION_APP_HTTP_BIND",
-      "httpUrlEnv": "SDKWORK_WEB_APPLICATION_APP_HTTP_URL"
+      "bindEnv": "SDKWORK_WEBSERVER_APPLICATION_APP_HTTP_BIND",
+      "httpUrlEnv": "SDKWORK_WEBSERVER_APPLICATION_APP_HTTP_URL"
     },
     "application.backend-http": {
       "connectivityPlane": "application",
       "protocols": [
         "http"
       ],
-      "bindEnv": "SDKWORK_WEB_APPLICATION_BACKEND_HTTP_BIND",
-      "httpUrlEnv": "SDKWORK_WEB_APPLICATION_BACKEND_HTTP_URL"
+      "bindEnv": "SDKWORK_WEBSERVER_APPLICATION_BACKEND_HTTP_BIND",
+      "httpUrlEnv": "SDKWORK_WEBSERVER_APPLICATION_BACKEND_HTTP_URL"
     },
     "edge.website-delivery": {
       "connectivityPlane": "edge",
       "protocols": [
         "http"
       ],
-      "httpUrlEnv": "SDKWORK_WEB_WEBSITE_DELIVERY_HTTP_URL"
+      "httpUrlEnv": "SDKWORK_WEBSERVER_WEBSITE_DELIVERY_HTTP_URL"
     },
     "platform.api-gateway": {
       "connectivityPlane": "platform",
       "protocols": [
         "http"
       ],
-      "httpUrlEnv": "SDKWORK_WEB_PLATFORM_API_GATEWAY_HTTP_URL",
-      "clientHttpEnv": "VITE_SDKWORK_WEB_PLATFORM_API_GATEWAY_HTTP_URL"
+      "httpUrlEnv": "SDKWORK_WEBSERVER_PLATFORM_API_GATEWAY_HTTP_URL",
+      "clientHttpEnv": "VITE_SDKWORK_WEBSERVER_PLATFORM_API_GATEWAY_HTTP_URL"
     },
     "dependency.deploy-app-api": {
       "connectivityPlane": "dependency",
@@ -138,7 +138,7 @@
             "role": "client",
             "script": "_sdkwork:client:browser:standalone",
             "applicationRoot": "apps/sdkwork-webserver-pc",
-            "bindEnv": "SDKWORK_WEB_PC_DEV_BIND",
+            "bindEnv": "SDKWORK_WEBSERVER_PC_DEV_BIND",
             "runtimeTargets": [
               "browser"
             ],
@@ -180,7 +180,7 @@
             "role": "client",
             "script": "_sdkwork:client:browser:cloud",
             "applicationRoot": "apps/sdkwork-webserver-pc",
-            "bindEnv": "SDKWORK_WEB_PC_DEV_BIND",
+            "bindEnv": "SDKWORK_WEBSERVER_PC_DEV_BIND",
             "runtimeTargets": [
               "browser"
             ],
@@ -234,7 +234,7 @@
             "apiSurfaceId": "application.public-ingress",
             "hostProcessId": "application.public-ingress",
             "buildOutput": "apps/sdkwork-webserver-pc/dist",
-            "runtimeRootEnv": "SDKWORK_WEB_PC_STATIC_ROOT",
+            "runtimeRootEnv": "SDKWORK_WEBSERVER_PC_STATIC_ROOT",
             "mountPath": "/",
             "spaFallback": "/index.html"
           }

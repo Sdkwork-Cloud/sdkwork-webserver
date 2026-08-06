@@ -38,7 +38,7 @@
     {
       "id": "sdkwork-web-framework",
       "repository": "Sdkwork-Cloud/sdkwork-web-framework",
-      "refInput": "SDKWORK_WEB_FRAMEWORK_REF",
+      "refInput": "SDKWORK_WEBSERVER_FRAMEWORK_REF",
       "tokenSecret": "SDKWORK_RELEASE_TOKEN"
     },
     {

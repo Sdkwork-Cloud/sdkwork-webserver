@@ -19,8 +19,8 @@ non_goals:
   - Hand-editing generated SDK artifacts.
 acceptance_criteria:
   - Product documentation defines one canonical dictionary and identifies every retained Agent name as a legacy compatibility identifier.
-  - SDKWORK_WEB_NODE_TOKEN, SDKWORK_WEB_NODE_SYNC_INTERVAL_SECS, SDKWORK_WEB_NODE_STATE_PATH, and SDKWORK_WEB_NODE_STATE_DIR are preferred runtime keys.
-  - Corresponding SDKWORK_WEB_AGENT aliases remain readable during the v3 window; conflicting preferred and legacy values fail startup.
+  - SDKWORK_WEBSERVER_NODE_TOKEN, SDKWORK_WEBSERVER_NODE_SYNC_INTERVAL_SECS, SDKWORK_WEBSERVER_NODE_STATE_PATH, and SDKWORK_WEBSERVER_NODE_STATE_DIR are preferred runtime keys.
+  - Corresponding SDKWORK_WEBSERVER_AGENT aliases remain readable during the v3 window; conflicting preferred and legacy values fail startup.
   - Existing default state location and filename remain unchanged so an upgrade cannot silently lose the last observed generation.
   - A future public migration uses a new API major version, additive generated SDK family output, explicit deprecation metadata, and measured legacy usage before removal.
   - AI-agent naming is not reused for Web Node Daemon concepts in newly authored product contracts.
@@ -99,8 +99,8 @@ identity, database metadata migration, deprecation window, and removal criteria.
 
 ## Implementation And Verification Evidence
 
-- The v3 binary prefers four `SDKWORK_WEB_NODE_*` runtime keys, reads the matching
-  `SDKWORK_WEB_AGENT_*` keys as deprecated aliases, and rejects unequal dual definitions.
+- The v3 binary prefers four `SDKWORK_WEBSERVER_NODE_*` runtime keys, reads the matching
+  `SDKWORK_WEBSERVER_AGENT_*` keys as deprecated aliases, and rejects unequal dual definitions.
 - The durable default path and `sdkwork-web-agent-state.json` filename remain unchanged; no upgrade
   path can silently reset `observedSyncVersion` merely because terminology changed.
 - The tracked environment example uses placeholder Node keys only and the source-config validator

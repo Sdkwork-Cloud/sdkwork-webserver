@@ -78,3 +78,6 @@ coverage/
 *.log
 .DS_Store
 Thumbs.db
+
+# ZCode CLI local session metadata (never committed)
+.zcode/

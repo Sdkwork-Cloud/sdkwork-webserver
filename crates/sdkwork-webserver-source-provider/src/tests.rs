@@ -11,8 +11,8 @@ struct EnvironmentVariableGuard {
 
 impl EnvironmentVariableGuard {
     fn set(value: &str) -> Self {
-        let previous_value = std::env::var_os("SDKWORK_WEB_GIT_ALLOWED_HOSTS");
-        std::env::set_var("SDKWORK_WEB_GIT_ALLOWED_HOSTS", value);
+        let previous_value = std::env::var_os("SDKWORK_WEBSERVER_GIT_ALLOWED_HOSTS");
+        std::env::set_var("SDKWORK_WEBSERVER_GIT_ALLOWED_HOSTS", value);
         Self { previous_value }
     }
 }
@@ -20,8 +20,8 @@ impl EnvironmentVariableGuard {
 impl Drop for EnvironmentVariableGuard {
     fn drop(&mut self) {
         match &self.previous_value {
-            Some(value) => std::env::set_var("SDKWORK_WEB_GIT_ALLOWED_HOSTS", value),
-            None => std::env::remove_var("SDKWORK_WEB_GIT_ALLOWED_HOSTS"),
+            Some(value) => std::env::set_var("SDKWORK_WEBSERVER_GIT_ALLOWED_HOSTS", value),
+            None => std::env::remove_var("SDKWORK_WEBSERVER_GIT_ALLOWED_HOSTS"),
         }
     }
 }

@@ -69,51 +69,51 @@ spec:
               containerPort: 8080
               protocol: TCP
           env:
-            - name: SDKWORK_WEB_APP_ROOT
+            - name: SDKWORK_WEBSERVER_APP_ROOT
               value: /app
-            - name: SDKWORK_WEB_ENVIRONMENT
+            - name: SDKWORK_WEBSERVER_ENVIRONMENT
               value: production
-            - name: SDKWORK_WEB_CONFIG_PROFILE
+            - name: SDKWORK_WEBSERVER_CONFIG_PROFILE
               value: production
-            - name: SDKWORK_WEB_DEPLOYMENT_PROFILE
+            - name: SDKWORK_WEBSERVER_DEPLOYMENT_PROFILE
               value: cloud
-            - name: SDKWORK_WEB_PROFILE_ID
+            - name: SDKWORK_WEBSERVER_PROFILE_ID
               value: cloud.production
-            - name: SDKWORK_WEB_RUNTIME_TARGET
+            - name: SDKWORK_WEBSERVER_RUNTIME_TARGET
               value: container
-            - name: SDKWORK_WEB_SERVICE_LAYOUT
+            - name: SDKWORK_WEBSERVER_SERVICE_LAYOUT
               value: website-data-plane
-            - name: SDKWORK_WEB_SERVER_CONFIG_FILE
-              value: /etc/sdkwork/web/sdkwork.webserver.config.json
-            - name: SDKWORK_WEB_RUNTIME_ASSIGNMENT_SOURCE
+            - name: SDKWORK_WEBSERVER_SERVER_CONFIG_FILE
+              value: /etc/sdkwork/webserver/sdkwork.webserver.config.json
+            - name: SDKWORK_WEBSERVER_RUNTIME_ASSIGNMENT_SOURCE
               value: cloud
-            - name: SDKWORK_WEB_INTERNAL_API_BASE_URL
+            - name: SDKWORK_WEBSERVER_INTERNAL_API_BASE_URL
               value: https://web.sdkwork.com
-            - name: SDKWORK_WEB_NODE_UUID
+            - name: SDKWORK_WEBSERVER_NODE_UUID
               valueFrom:
                 secretKeyRef:
                   name: __SDKWORK_WEBSITE_NODE_SECRET_NAME__
                   key: node-uuid
-            - name: SDKWORK_WEB_NODE_TOKEN_FILE
+            - name: SDKWORK_WEBSERVER_NODE_TOKEN_FILE
               value: /run/secrets/sdkwork-web-node/node-token
-            - name: SDKWORK_WEB_WEBSITE_RUNTIME_ENVIRONMENT
+            - name: SDKWORK_WEBSERVER_WEBSITE_RUNTIME_ENVIRONMENT
               value: production
-            - name: SDKWORK_WEB_WEBSITE_RUNTIME_SET_RECOVERY_DIRECTORY
-              value: /var/lib/sdkwork/web/website-runtime-recovery
-            - name: SDKWORK_WEB_WEBSITE_RUNTIME_SET_POLL_INTERVAL_MS
+            - name: SDKWORK_WEBSERVER_WEBSITE_RUNTIME_SET_RECOVERY_DIRECTORY
+              value: /var/lib/sdkwork/webserver/website-runtime-recovery
+            - name: SDKWORK_WEBSERVER_WEBSITE_RUNTIME_SET_POLL_INTERVAL_MS
               value: "2000"
-            - name: SDKWORK_WEB_TLS_RUNTIME_SOURCE
+            - name: SDKWORK_WEBSERVER_TLS_RUNTIME_SOURCE
               value: external
-            - name: SDKWORK_WEB_WEBSITE_TENANT_SCOPE_HASH
+            - name: SDKWORK_WEBSERVER_WEBSITE_TENANT_SCOPE_HASH
               valueFrom:
                 secretKeyRef:
                   name: __SDKWORK_WEBSITE_NODE_SECRET_NAME__
                   key: tenant-scope-hash
-            - name: SDKWORK_WEB_WEBSITE_PROVIDER_VALIDATION_CONCURRENCY
+            - name: SDKWORK_WEBSERVER_WEBSITE_PROVIDER_VALIDATION_CONCURRENCY
               value: "16"
-            - name: SDKWORK_WEB_WEBSITE_PROVIDER_BUFFERED_CONTENT_BYTES
+            - name: SDKWORK_WEBSERVER_WEBSITE_PROVIDER_BUFFERED_CONTENT_BYTES
               value: "268435456"
-            - name: SDKWORK_WEB_WEBSITE_PROVIDER_EVENT_CONFIG_FILE
+            - name: SDKWORK_WEBSERVER_WEBSITE_PROVIDER_EVENT_CONFIG_FILE
               value: /run/secrets/sdkwork-web-node/website-provider-events.json
             - name: SDKWORK_WEBSERVER_DRIVE_INTERNAL_API_BASE_URL
               value: https://drive-internal.sdkwork.com
@@ -123,7 +123,7 @@ spec:
               value: https://knowledgebase.sdkwork.com
             - name: SDKWORK_WEBSERVER_KNOWLEDGEBASE_INTERNAL_API_INGRESS_TOKEN_FILE
               value: /run/secrets/sdkwork-web-node/knowledgebase-ingress-token
-            - name: SDKWORK_WEB_DATA_PLANE_OPERATIONS_BIND
+            - name: SDKWORK_WEBSERVER_DATA_PLANE_OPERATIONS_BIND
               value: 127.0.0.1:3901
           startupProbe:
             exec:
@@ -169,13 +169,13 @@ spec:
                 - ALL
           volumeMounts:
             - name: host-config
-              mountPath: /etc/sdkwork/web
+              mountPath: /etc/sdkwork/webserver
               readOnly: true
             - name: node-secrets
               mountPath: /run/secrets/sdkwork-web-node
               readOnly: true
             - name: recovery
-              mountPath: /var/lib/sdkwork/web
+              mountPath: /var/lib/sdkwork/webserver
             - name: temporary
               mountPath: /tmp
         - name: provider-event-relay
@@ -189,9 +189,9 @@ spec:
               containerPort: 3811
               protocol: TCP
           env:
-            - name: SDKWORK_WEB_WEBSITE_PROVIDER_EVENT_RELAY_BIND
+            - name: SDKWORK_WEBSERVER_WEBSITE_PROVIDER_EVENT_RELAY_BIND
               value: 0.0.0.0:3811
-            - name: SDKWORK_WEB_WEBSITE_PROVIDER_EVENT_RELAY_TARGET
+            - name: SDKWORK_WEBSERVER_WEBSITE_PROVIDER_EVENT_RELAY_TARGET
               value: 127.0.0.1:3810
           startupProbe:
             tcpSocket:

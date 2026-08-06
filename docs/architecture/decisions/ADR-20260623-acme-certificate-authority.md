@@ -27,7 +27,7 @@ SDKWork Web Server 需要在控制面内嵌 **免费 TLS 证书自动签发与�
 5. **V1 验证方式**：**HTTP-01**。挑战 token 由证书 worker 原子写入 webroot，自建数据面监听器通过 **窄优先级端点**（`acmeHttp01.webroot` 配置驱动）只服务精确的 `/.well-known/acme-challenge/<token>` 路径：不暴露目录、不接受任意 token、不覆盖其他路由、挑战结束后清理。DNS-01 与 wildcard 延后至 Phase 3。
 6. **不引入 Certbot/acme.sh 运行时依赖** 作为 V1 默认路径；若治理批准，可作为灾备运维工具，但不写入产品默认架构。
 7. **证书落地自建 TLS 运行时**：签发/续期成功后，worker 将节点 listener 绑定投影为版本化 TLS 材料（`material_root/<version-uuid>/fullchain.pem + privkey.pem`）与单调 `tls-runtime.json` 快照；数据面 `FileTlsRuntimeController` 轮询快照并热加载 Rustls 配置（A/B 恢复槽、指纹/有效期/SNI 校验）。外部 Nginx 边沿激活仅保留为文档标注的可选遗留路径，不参与证书生命周期。
-8. **持久化 ACME 账户**：账户凭证经主密钥派生密钥 AES-256-GCM 加密后按 CA directory 写入 `SDKWORK_WEB_ACME_ACCOUNT_ROOT`（0600、原子写），签发/续期/撤销/ARI 复用同一账户，避免 LE 账户创建限流并保留账户身份。
+8. **持久化 ACME 账户**：账户凭证经主密钥派生密钥 AES-256-GCM 加密后按 CA directory 写入 `SDKWORK_WEBSERVER_ACME_ACCOUNT_ROOT`（0600、原子写），签发/续期/撤销/ARI 复用同一账户，避免 LE 账户创建限流并保留账户身份。
 9. **撤销与 ARI**：`POST /certificates/{certificateId}/revoke` 同步撤销（CA 确认后才本地标记 `status=3`，归档 listener 绑定，停止自动续期）；签发成功后查询 CA 建议续期窗口（RFC 9773 ARI）并记录，调度优先使用 ARI 窗口，回退固定 `renew_before_days`。
 
 实现归属：
@@ -49,10 +49,10 @@ SDKWork Web Server 需要在控制面内嵌 **免费 TLS 证书自动签发与�
 
 - Cargo workspace 新增 `instant-acme`、`rcgen` 依赖；需在 `SUPPLY_CHAIN_SECURITY_SPEC.md` 流程中登记 license 与版本 pin。
 - `certificates.issue` 持久化异步 ACME 操作并返回 HTTP `202` 标准异步数据；完成后写入不可变证书版本、更新 `web_certificate` 聚合并触发节点 TLS 材料发布。
-- HTTP-01 要求自建数据面监听器配置 `acmeHttp01.webroot`，且 worker 的 `SDKWORK_WEB_ACME_WEBROOT` 指向同一目录；验证窗口内该监听器必须公网可达。
+- HTTP-01 要求自建数据面监听器配置 `acmeHttp01.webroot`，且 worker 的 `SDKWORK_WEBSERVER_ACME_WEBROOT` 指向同一目录；验证窗口内该监听器必须公网可达。
 - ACME 证书自动续期默认在到期前 30 天启动（ARI 窗口优先）；失败写入 `renewal_status=3` 并告警。自签名证书仅支持显式手动重签，不进入自动续期扫描。
 - Staging CA 签发证书不受浏览器信任，仅用于联调；生产 profile 必须显式指向 LE 生产目录。
-- 生产-like 环境必须配置 `SDKWORK_WEB_ACME_ACCOUNT_ROOT`（账户持久化）与 `SDKWORK_WEB_NODE_UUID`（TLS 材料分发），否则启动失败或跳过分发并告警。
+- 生产-like 环境必须配置 `SDKWORK_WEBSERVER_ACME_ACCOUNT_ROOT`（账户持久化）与 `SDKWORK_WEBSERVER_NODE_UUID`（TLS 材料分发），否则启动失败或跳过分发并告警。
 
 ## Verification
 

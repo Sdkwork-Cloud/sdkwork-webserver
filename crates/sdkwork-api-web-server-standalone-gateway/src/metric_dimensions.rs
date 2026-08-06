@@ -8,11 +8,15 @@ pub(crate) struct CanonicalMetricDimensions {
 impl CanonicalMetricDimensions {
     pub(crate) fn from_env() -> Result<Self, String> {
         Self::new(
-            std::env::var("SDKWORK_WEB_ENVIRONMENT").ok().as_deref(),
-            std::env::var("SDKWORK_WEB_DEPLOYMENT_PROFILE")
+            std::env::var("SDKWORK_WEBSERVER_ENVIRONMENT")
                 .ok()
                 .as_deref(),
-            std::env::var("SDKWORK_WEB_RUNTIME_TARGET").ok().as_deref(),
+            std::env::var("SDKWORK_WEBSERVER_DEPLOYMENT_PROFILE")
+                .ok()
+                .as_deref(),
+            std::env::var("SDKWORK_WEBSERVER_RUNTIME_TARGET")
+                .ok()
+                .as_deref(),
         )
     }
 
@@ -23,19 +27,19 @@ impl CanonicalMetricDimensions {
     ) -> Result<Self, String> {
         Ok(Self {
             environment: validated_metric_dimension(
-                "SDKWORK_WEB_ENVIRONMENT",
+                "SDKWORK_WEBSERVER_ENVIRONMENT",
                 environment,
                 "development",
                 &["development", "test", "staging", "production"],
             )?,
             deployment_profile: validated_metric_dimension(
-                "SDKWORK_WEB_DEPLOYMENT_PROFILE",
+                "SDKWORK_WEBSERVER_DEPLOYMENT_PROFILE",
                 deployment_profile,
                 "standalone",
                 &["standalone", "cloud"],
             )?,
             runtime_target: validated_metric_dimension(
-                "SDKWORK_WEB_RUNTIME_TARGET",
+                "SDKWORK_WEBSERVER_RUNTIME_TARGET",
                 runtime_target,
                 "server",
                 &["server", "container"],

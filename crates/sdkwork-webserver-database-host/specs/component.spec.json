@@ -40,7 +40,7 @@
     "dependencyApiExports": [],
     "dependencyApiSurfaces": [],
     "events": [],
-    "configKeys": ["SDKWORK_DATABASE_URL", "SDKWORK_WEB_APP_ROOT"]
+    "configKeys": ["SDKWORK_DATABASE_URL", "SDKWORK_WEBSERVER_APP_ROOT"]
   },
   "verification": {
     "commands": [

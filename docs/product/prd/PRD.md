@@ -56,7 +56,7 @@ The managed machine is a **Web Node** and its host process is the **Web Node
 Daemon**. New product, deployment, log, metric, runbook, environment-key, and
 binary names MUST use `node`/`node-daemon`; `Agent` is reserved for SDKWork AI
 agent capabilities. The v3 `/agent/*` routes, `AgentToken` wire fields,
-`SDKWORK_WEB_AGENT_*` aliases, `sdkwork-web-agent` crate/binary, and persisted
+`SDKWORK_WEBSERVER_AGENT_*` aliases, `sdkwork-web-agent` crate/binary, and persisted
 state filename remain explicit compatibility identifiers until a separately
 reviewed major-version migration removes them. The compatibility layer is one
 implementation and one state store; it must not create a second synchronization

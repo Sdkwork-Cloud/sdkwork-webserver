@@ -53,5 +53,5 @@ test('standalone development supplies an explicit single-node Snowflake id', () 
     ),
   );
 
-  assert.equal(profile.SDKWORK_WEB_SNOWFLAKE_NODE_ID, '0');
+  assert.equal(profile.SDKWORK_WEBSERVER_SNOWFLAKE_NODE_ID, '0');
 });

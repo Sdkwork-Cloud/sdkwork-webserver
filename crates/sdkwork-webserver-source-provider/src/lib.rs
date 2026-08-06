@@ -36,7 +36,7 @@ const MAX_PATH_DEPTH: usize = 32;
 const GIT_TIMEOUT: Duration = Duration::from_secs(60);
 const DEFAULT_GIT_IMPORT_CONCURRENCY: usize = 2;
 const MAXIMUM_GIT_IMPORT_CONCURRENCY: usize = 16;
-const GIT_IMPORT_CONCURRENCY_ENV: &str = "SDKWORK_WEB_GIT_IMPORT_CONCURRENCY";
+const GIT_IMPORT_CONCURRENCY_ENV: &str = "SDKWORK_WEBSERVER_GIT_IMPORT_CONCURRENCY";
 
 pub struct GitDriveSourceImporter {
     pool: PgPool,
@@ -239,12 +239,12 @@ async fn validate_repository_target(
     let host_name = url.host_str().unwrap_or_default().to_ascii_lowercase();
     let allowed_hosts = configured_allowed_hosts().ok_or_else(|| {
         WebServiceError::validation(
-            "Git source import is disabled until SDKWORK_WEB_GIT_ALLOWED_HOSTS is configured",
+            "Git source import is disabled until SDKWORK_WEBSERVER_GIT_ALLOWED_HOSTS is configured",
         )
     })?;
     if !allowed_hosts.iter().any(|allowed| allowed == &host_name) {
         return Err(WebServiceError::validation(
-            "repositoryUrl host is not allowed by SDKWORK_WEB_GIT_ALLOWED_HOSTS",
+            "repositoryUrl host is not allowed by SDKWORK_WEBSERVER_GIT_ALLOWED_HOSTS",
         ));
     }
     let resolved_addresses = match host {
@@ -514,7 +514,7 @@ fn normalize_source_path(path: &Path) -> WebServiceResult<String> {
 }
 
 fn configured_allowed_hosts() -> Option<Vec<String>> {
-    let hosts = std::env::var("SDKWORK_WEB_GIT_ALLOWED_HOSTS").ok()?;
+    let hosts = std::env::var("SDKWORK_WEBSERVER_GIT_ALLOWED_HOSTS").ok()?;
     let hosts = hosts
         .split(',')
         .map(|value| value.trim().to_ascii_lowercase())

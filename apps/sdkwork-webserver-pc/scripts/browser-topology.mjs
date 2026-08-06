@@ -19,13 +19,13 @@ export function resolveViteRuntimeProfile(mode, processEnv = process.env) {
   const modeMatch = PROFILE_ID_PATTERN.exec(mode);
   const deploymentProfile = firstText(
     processEnv.SDKWORK_DEPLOYMENT_PROFILE,
-    processEnv.SDKWORK_WEB_DEPLOYMENT_PROFILE,
+    processEnv.SDKWORK_WEBSERVER_DEPLOYMENT_PROFILE,
     modeMatch?.[1],
     'standalone',
   );
   const environment = firstText(
     processEnv.SDKWORK_ENVIRONMENT,
-    processEnv.SDKWORK_WEB_ENVIRONMENT,
+    processEnv.SDKWORK_WEBSERVER_ENVIRONMENT,
     modeMatch?.[2],
     LIFECYCLE_ENVIRONMENTS.has(mode) ? mode : undefined,
     'development',
@@ -208,13 +208,13 @@ function loadParentTopologyProfile({
 function assertProfileIdentity(values, deploymentProfile, environment, profileId) {
   const actualDeploymentProfile = firstText(
     values.SDKWORK_DEPLOYMENT_PROFILE,
-    values.SDKWORK_WEB_DEPLOYMENT_PROFILE,
+    values.SDKWORK_WEBSERVER_DEPLOYMENT_PROFILE,
   );
   const actualEnvironment = firstText(
     values.SDKWORK_ENVIRONMENT,
-    values.SDKWORK_WEB_ENVIRONMENT,
+    values.SDKWORK_WEBSERVER_ENVIRONMENT,
   );
-  const actualProfileId = firstText(values.SDKWORK_PROFILE_ID, values.SDKWORK_WEB_PROFILE_ID);
+  const actualProfileId = firstText(values.SDKWORK_PROFILE_ID, values.SDKWORK_WEBSERVER_PROFILE_ID);
   if (
     actualDeploymentProfile !== deploymentProfile
       || actualEnvironment !== environment

@@ -25,13 +25,13 @@ pub struct WebRuntime {
 }
 
 fn snowflake_from_env() -> Result<SnowflakeIdGenerator, String> {
-    let node_id = match std::env::var("SDKWORK_WEB_SNOWFLAKE_NODE_ID") {
+    let node_id = match std::env::var("SDKWORK_WEBSERVER_SNOWFLAKE_NODE_ID") {
         Ok(value) => value
             .parse::<u16>()
-            .map_err(|error| format!("invalid SDKWORK_WEB_SNOWFLAKE_NODE_ID: {error}"))?,
+            .map_err(|error| format!("invalid SDKWORK_WEBSERVER_SNOWFLAKE_NODE_ID: {error}"))?,
         Err(_) => {
             return Err(
-                "SDKWORK_WEB_SNOWFLAKE_NODE_ID is required (multi-instance must set unique node id)"
+                "SDKWORK_WEBSERVER_SNOWFLAKE_NODE_ID is required (multi-instance must set unique node id)"
                     .to_string(),
             );
         }
@@ -41,17 +41,17 @@ fn snowflake_from_env() -> Result<SnowflakeIdGenerator, String> {
 
 fn secret_key_from_env() -> Result<SecretEncryptionKey, String> {
     let production_like = web_is_production_like_environment();
-    let raw = match std::env::var("SDKWORK_WEB_SECRET_ENCRYPTION_KEY") {
+    let raw = match std::env::var("SDKWORK_WEBSERVER_SECRET_ENCRYPTION_KEY") {
         Ok(value) => value,
         Err(_) if !production_like => {
             tracing::warn!(
-                "SDKWORK_WEB_SECRET_ENCRYPTION_KEY missing; using development-only derived key"
+                "SDKWORK_WEBSERVER_SECRET_ENCRYPTION_KEY missing; using development-only derived key"
             );
             "sdkwork-web-development-secret-key".to_string()
         }
         Err(_) => {
             return Err(
-                "SDKWORK_WEB_SECRET_ENCRYPTION_KEY is required in production-like environments"
+                "SDKWORK_WEBSERVER_SECRET_ENCRYPTION_KEY is required in production-like environments"
                     .to_string(),
             );
         }
@@ -68,42 +68,43 @@ fn certificate_issuer_from_env(
 ) -> Result<CertificateIssuer, String> {
     let environment = web_environment_name();
     let environment_production_like = web_is_production_like_environment();
-    let use_production = match std::env::var("SDKWORK_WEB_ACME_PROFILE") {
+    let use_production = match std::env::var("SDKWORK_WEBSERVER_ACME_PROFILE") {
         Ok(value) => match value.trim().to_ascii_lowercase().as_str() {
             "production" | "prod" => true,
             "staging" | "stage" | "test" => false,
             other => {
                 return Err(format!(
-                    "invalid SDKWORK_WEB_ACME_PROFILE {other}; expected production or staging"
+                    "invalid SDKWORK_WEBSERVER_ACME_PROFILE {other}; expected production or staging"
                 ));
             }
         },
         Err(_) => matches!(environment.as_str(), "production" | "prod"),
     };
     let production_like = environment_production_like || use_production;
-    let directory_url = std::env::var("SDKWORK_WEB_ACME_DIRECTORY_URL").unwrap_or_else(|_| {
-        if use_production {
-            "https://acme-v02.api.letsencrypt.org/directory".to_string()
-        } else {
-            "https://acme-staging-v02.api.letsencrypt.org/directory".to_string()
-        }
-    });
-    let contact_email = match std::env::var("SDKWORK_WEB_ACME_CONTACT_EMAIL") {
+    let directory_url =
+        std::env::var("SDKWORK_WEBSERVER_ACME_DIRECTORY_URL").unwrap_or_else(|_| {
+            if use_production {
+                "https://acme-v02.api.letsencrypt.org/directory".to_string()
+            } else {
+                "https://acme-staging-v02.api.letsencrypt.org/directory".to_string()
+            }
+        });
+    let contact_email = match std::env::var("SDKWORK_WEBSERVER_ACME_CONTACT_EMAIL") {
         Ok(value) => value,
         Err(_) if !production_like => "admin@localhost".to_string(),
         Err(_) => {
             return Err(
-                "SDKWORK_WEB_ACME_CONTACT_EMAIL is required in production-like environments"
+                "SDKWORK_WEBSERVER_ACME_CONTACT_EMAIL is required in production-like environments"
                     .to_string(),
             );
         }
     };
-    let renew_before_days = parse_env_or("SDKWORK_WEB_CERT_RENEW_BEFORE_DAYS", 30_u32)?;
-    let webroot = std::env::var("SDKWORK_WEB_ACME_WEBROOT").ok();
-    let cert_root = std::env::var("SDKWORK_WEB_CERT_LIVE_ROOT")
+    let renew_before_days = parse_env_or("SDKWORK_WEBSERVER_CERT_RENEW_BEFORE_DAYS", 30_u32)?;
+    let webroot = std::env::var("SDKWORK_WEBSERVER_ACME_WEBROOT").ok();
+    let cert_root = std::env::var("SDKWORK_WEBSERVER_CERT_LIVE_ROOT")
         .unwrap_or_else(|_| "/opt/certs/letsencrypt/live".to_string());
     let operation_timeout_ms = parse_env_or(
-        "SDKWORK_WEB_ACME_OPERATION_TIMEOUT_MS",
+        "SDKWORK_WEBSERVER_ACME_OPERATION_TIMEOUT_MS",
         DEFAULT_ACME_OPERATION_TIMEOUT_MS,
     )?;
     // Durable ACME account credentials: one encrypted file per CA directory
@@ -112,7 +113,7 @@ fn certificate_issuer_from_env(
     // preserves account identity across restarts. The in-memory fallback
     // exists only for development; production-like environments must persist.
     let account_store: Arc<dyn AcmeAccountStore> = match std::env::var(
-        "SDKWORK_WEB_ACME_ACCOUNT_ROOT",
+        "SDKWORK_WEBSERVER_ACME_ACCOUNT_ROOT",
     ) {
         Ok(root) => {
             if root.is_empty()
@@ -122,7 +123,7 @@ fn certificate_issuer_from_env(
                     .any(|byte| byte == 0 || byte.is_ascii_control())
             {
                 return Err(
-                    "SDKWORK_WEB_ACME_ACCOUNT_ROOT must contain 1..4096 safe path bytes"
+                    "SDKWORK_WEBSERVER_ACME_ACCOUNT_ROOT must contain 1..4096 safe path bytes"
                         .to_string(),
                 );
             }
@@ -133,13 +134,13 @@ fn certificate_issuer_from_env(
         }
         Err(_) if !production_like => {
             tracing::warn!(
-                    "SDKWORK_WEB_ACME_ACCOUNT_ROOT missing; ACME account credentials are kept only in process memory"
+                    "SDKWORK_WEBSERVER_ACME_ACCOUNT_ROOT missing; ACME account credentials are kept only in process memory"
                 );
             Arc::new(MemoryAcmeAccountStore::default())
         }
         Err(_) => {
             return Err(
-                "SDKWORK_WEB_ACME_ACCOUNT_ROOT is required in production-like environments"
+                "SDKWORK_WEBSERVER_ACME_ACCOUNT_ROOT is required in production-like environments"
                     .to_string(),
             );
         }

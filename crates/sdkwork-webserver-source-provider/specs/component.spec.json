@@ -46,8 +46,8 @@
     "dependencyApiSurfaces": [],
     "events": [],
     "configKeys": [
-      "SDKWORK_WEB_GIT_ALLOWED_HOSTS",
-      "SDKWORK_WEB_GIT_IMPORT_CONCURRENCY",
+      "SDKWORK_WEBSERVER_GIT_ALLOWED_HOSTS",
+      "SDKWORK_WEBSERVER_GIT_IMPORT_CONCURRENCY",
       "SDKWORK_DATABASE_URL"
     ]
   },

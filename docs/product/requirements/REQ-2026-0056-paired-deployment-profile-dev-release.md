@@ -20,7 +20,7 @@ non_goals:
 acceptance_criteria:
   - dev delegates directly to dev:standalone; dev:standalone resolves standalone.development and dev:cloud resolves cloud.development.
   - The cloud profile contains one remote HTTPS backend API origin, contains no token, and the runner starts only the canonical Web Node Daemon binary.
-  - Tracked Node Daemon environment examples keep SDKWORK_WEB_NODE_TOKEN blank.
+  - Tracked Node Daemon environment examples keep SDKWORK_WEBSERVER_NODE_TOKEN blank.
   - release:package:standalone and release:package:cloud produce distinct canonical artifact names from SDKWORK_PACKAGE_VERSION.
   - The workflow planner exposes Linux x64 and arm64 server tar.gz targets for each supported deployment profile with archive, checksum, signature, and SBOM output globs.
   - Packaging is restricted to a matching Linux architecture and uses a confined temporary stage, deterministic tar metadata, a per-file SHA-256 manifest, atomic archive rename, a SHA-256 sidecar, and a 512 MiB archive ceiling.

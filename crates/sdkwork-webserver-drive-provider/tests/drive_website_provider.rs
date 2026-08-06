@@ -303,19 +303,11 @@ async fn revalidates_path_generation_and_node_version_before_opening_content() {
     assert_eq!(opened.content_length, 10);
     assert_eq!(opened.content_range, None);
     let mut collected = Vec::new();
-    while let Some(chunk) = opened
-        .stream
-        .next_chunk()
-        .await
-        .expect("content chunk")
-    {
+    while let Some(chunk) = opened.stream.next_chunk().await.expect("content chunk") {
         collected.extend_from_slice(&chunk);
     }
     assert_eq!(collected, b"0123456789".to_vec());
-    assert_eq!(
-        opened.stream.next_chunk().await.expect("stream end"),
-        None
-    );
+    assert_eq!(opened.stream.next_chunk().await.expect("stream end"), None);
 
     let request = sdk
         .resolve_requests

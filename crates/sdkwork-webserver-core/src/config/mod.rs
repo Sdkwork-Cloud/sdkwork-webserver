@@ -1,4 +1,5 @@
 mod compiled;
+mod discovery;
 mod error;
 mod loader;
 mod model;
@@ -7,6 +8,10 @@ mod uri;
 mod validate;
 
 pub use compiled::{normalize_authority_host, CompiledWebServerApp, SelectedRoute};
+pub use discovery::{
+    canonical_webserver_config_directory, resolve_webserver_config_path, WEBSERVER_CONFIG_FILE_ENV,
+    WEBSERVER_CONFIG_FILE_NAME,
+};
 pub use error::{ConfigDiagnostic, WebServerConfigError};
 pub use loader::{
     inspect_webserver_config_revision, load_and_compile_webserver_config,

@@ -26,8 +26,8 @@ async fn main() -> anyhow::Result<()> {
         .init();
 
     let poll_interval_secs = parse_bounded_interval(
-        "SDKWORK_WEB_CERT_OPERATION_POLL_INTERVAL_SECS",
-        std::env::var("SDKWORK_WEB_CERT_OPERATION_POLL_INTERVAL_SECS")
+        "SDKWORK_WEBSERVER_CERT_OPERATION_POLL_INTERVAL_SECS",
+        std::env::var("SDKWORK_WEBSERVER_CERT_OPERATION_POLL_INTERVAL_SECS")
             .ok()
             .as_deref(),
         DEFAULT_OPERATION_POLL_INTERVAL_SECS,
@@ -35,15 +35,15 @@ async fn main() -> anyhow::Result<()> {
         MAX_OPERATION_POLL_INTERVAL_SECS,
     )?;
     let renewal_schedule_interval_secs = parse_bounded_interval(
-        "SDKWORK_WEB_CERT_RENEW_SCAN_INTERVAL_SECS",
-        std::env::var("SDKWORK_WEB_CERT_RENEW_SCAN_INTERVAL_SECS")
+        "SDKWORK_WEBSERVER_CERT_RENEW_SCAN_INTERVAL_SECS",
+        std::env::var("SDKWORK_WEBSERVER_CERT_RENEW_SCAN_INTERVAL_SECS")
             .ok()
             .as_deref(),
         DEFAULT_RENEWAL_SCHEDULE_INTERVAL_SECS,
         MIN_RENEWAL_SCHEDULE_INTERVAL_SECS,
         MAX_RENEWAL_SCHEDULE_INTERVAL_SECS,
     )?;
-    let worker_id = resolve_worker_id(std::env::var("SDKWORK_WEB_CERT_WORKER_ID").ok())?;
+    let worker_id = resolve_worker_id(std::env::var("SDKWORK_WEBSERVER_CERT_WORKER_ID").ok())?;
 
     info!(
         worker_id,
@@ -201,7 +201,7 @@ fn resolve_worker_id(configured: Option<String>) -> anyhow::Result<String> {
             .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'-' | b'_' | b'.' | b':'))
     {
         anyhow::bail!(
-            "SDKWORK_WEB_CERT_WORKER_ID must contain 1..128 ASCII letters, digits, '-', '_', '.', or ':'"
+            "SDKWORK_WEBSERVER_CERT_WORKER_ID must contain 1..128 ASCII letters, digits, '-', '_', '.', or ':'"
         );
     }
     Ok(worker_id)

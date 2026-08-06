@@ -21,7 +21,7 @@ use crate::metric_dimensions::CanonicalMetricDimensions;
 
 use super::{runtime::DataPlaneRuntime, DataPlaneError};
 
-const OPERATIONS_BIND_ENV: &str = "SDKWORK_WEB_DATA_PLANE_OPERATIONS_BIND";
+const OPERATIONS_BIND_ENV: &str = "SDKWORK_WEBSERVER_DATA_PLANE_OPERATIONS_BIND";
 const MAX_OPERATIONS_CONNECTIONS: usize = 32;
 const OPERATIONS_MAX_HEADER_BYTES: usize = 16 * 1024;
 const OPERATIONS_HEADER_TIMEOUT: Duration = Duration::from_secs(5);

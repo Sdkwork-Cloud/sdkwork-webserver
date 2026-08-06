@@ -69,14 +69,17 @@ fn build_backend_sdk_client(
 impl NodeDaemonRuntimeConfig {
     fn from_env() -> anyhow::Result<Self> {
         let control_plane = parse_control_plane_url(
-            &std::env::var("SDKWORK_WEB_CONTROL_PLANE_URL")
-                .map_err(|_| anyhow::anyhow!("SDKWORK_WEB_CONTROL_PLANE_URL is required"))?,
+            &std::env::var("SDKWORK_WEBSERVER_CONTROL_PLANE_URL")
+                .map_err(|_| anyhow::anyhow!("SDKWORK_WEBSERVER_CONTROL_PLANE_URL is required"))?,
         )?;
-        let node_token = required_env_alias("SDKWORK_WEB_NODE_TOKEN", "SDKWORK_WEB_AGENT_TOKEN")?;
+        let node_token = required_env_alias(
+            "SDKWORK_WEBSERVER_NODE_TOKEN",
+            "SDKWORK_WEBSERVER_AGENT_TOKEN",
+        )?;
         validate_node_token(&node_token)?;
         let interval_secs = read_env_alias(
-            "SDKWORK_WEB_NODE_SYNC_INTERVAL_SECS",
-            "SDKWORK_WEB_AGENT_SYNC_INTERVAL_SECS",
+            "SDKWORK_WEBSERVER_NODE_SYNC_INTERVAL_SECS",
+            "SDKWORK_WEBSERVER_AGENT_SYNC_INTERVAL_SECS",
         )?
         .map(|value| parse_sync_interval(&value))
         .transpose()?
@@ -612,7 +615,7 @@ fn parse_control_plane_url(value: &str) -> anyhow::Result<String> {
         || url.path() != "/"
     {
         anyhow::bail!(
-            "SDKWORK_WEB_CONTROL_PLANE_URL must be an HTTP(S) origin without credentials, path, query, or fragment"
+            "SDKWORK_WEBSERVER_CONTROL_PLANE_URL must be an HTTP(S) origin without credentials, path, query, or fragment"
         );
     }
     Ok(url.to_string())
@@ -620,7 +623,7 @@ fn parse_control_plane_url(value: &str) -> anyhow::Result<String> {
 
 fn validate_node_token(value: &str) -> anyhow::Result<()> {
     if !(16..=4_096).contains(&value.len()) || value.bytes().any(|byte| byte.is_ascii_control()) {
-        anyhow::bail!("SDKWORK_WEB_NODE_TOKEN must contain 16..=4096 non-control bytes");
+        anyhow::bail!("SDKWORK_WEBSERVER_NODE_TOKEN must contain 16..=4096 non-control bytes");
     }
     Ok(())
 }
@@ -662,12 +665,12 @@ fn resolve_alias_values(
 }
 
 fn parse_sync_interval(value: &str) -> anyhow::Result<u64> {
-    let interval = value
-        .parse::<u64>()
-        .map_err(|error| anyhow::anyhow!("invalid SDKWORK_WEB_NODE_SYNC_INTERVAL_SECS: {error}"))?;
+    let interval = value.parse::<u64>().map_err(|error| {
+        anyhow::anyhow!("invalid SDKWORK_WEBSERVER_NODE_SYNC_INTERVAL_SECS: {error}")
+    })?;
     if !(MIN_SYNC_INTERVAL_SECS..=MAX_SYNC_INTERVAL_SECS).contains(&interval) {
         anyhow::bail!(
-            "SDKWORK_WEB_NODE_SYNC_INTERVAL_SECS must be between {MIN_SYNC_INTERVAL_SECS} and {MAX_SYNC_INTERVAL_SECS}"
+            "SDKWORK_WEBSERVER_NODE_SYNC_INTERVAL_SECS must be between {MIN_SYNC_INTERVAL_SECS} and {MAX_SYNC_INTERVAL_SECS}"
         );
     }
     Ok(interval)
@@ -803,9 +806,9 @@ mod tests {
     fn node_configuration_aliases_are_additive_and_fail_on_conflict() {
         assert_eq!(
             resolve_alias_values(
-                "SDKWORK_WEB_NODE_TOKEN",
+                "SDKWORK_WEBSERVER_NODE_TOKEN",
                 Some("preferred".to_string()),
-                "SDKWORK_WEB_AGENT_TOKEN",
+                "SDKWORK_WEBSERVER_AGENT_TOKEN",
                 None,
             )
             .unwrap(),
@@ -813,18 +816,18 @@ mod tests {
         );
         assert_eq!(
             resolve_alias_values(
-                "SDKWORK_WEB_NODE_TOKEN",
+                "SDKWORK_WEBSERVER_NODE_TOKEN",
                 None,
-                "SDKWORK_WEB_AGENT_TOKEN",
+                "SDKWORK_WEBSERVER_AGENT_TOKEN",
                 Some("legacy".to_string()),
             )
             .unwrap(),
             Some("legacy".to_string())
         );
         assert!(resolve_alias_values(
-            "SDKWORK_WEB_NODE_TOKEN",
+            "SDKWORK_WEBSERVER_NODE_TOKEN",
             Some("left".to_string()),
-            "SDKWORK_WEB_AGENT_TOKEN",
+            "SDKWORK_WEBSERVER_AGENT_TOKEN",
             Some("right".to_string()),
         )
         .is_err());

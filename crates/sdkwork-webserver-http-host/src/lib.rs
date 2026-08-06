@@ -21,7 +21,7 @@ pub use tenant_isolation::WebServerTenantIsolationPolicy;
 
 const PRODUCTION_AUTH_UNAVAILABLE: &str = "production Web auth requires IAM PostgreSQL database";
 const SHARED_ENVIRONMENT_KEY: &str = "SDKWORK_ENVIRONMENT";
-const WEB_ENVIRONMENT_KEY: &str = "SDKWORK_WEB_ENVIRONMENT";
+const WEB_ENVIRONMENT_KEY: &str = "SDKWORK_WEBSERVER_ENVIRONMENT";
 const SHARED_CORS_ALLOWED_ORIGINS_KEY: &str = "SDKWORK_CORS_ALLOWED_ORIGINS";
 
 fn canonical_lifecycle_environment(value: &str) -> Result<&'static str, String> {

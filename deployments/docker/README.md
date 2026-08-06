@@ -29,7 +29,7 @@ is not the cloud image entrypoint.
 
 The packaged `/app/etc/data-plane/website.cloud.config.json` is a fail-closed base policy and trusts
 no forwarding headers. A container placed behind an external TLS terminator must mount a
-compiler-validated environment-specific config at `/etc/sdkwork/web/sdkwork.webserver.config.json`,
-set `SDKWORK_WEB_SERVER_CONFIG_FILE` to that path, and list only the terminator's direct peer CIDRs
+compiler-validated environment-specific config at `/etc/sdkwork/webserver/sdkwork.webserver.config.json`,
+set `SDKWORK_WEBSERVER_SERVER_CONFIG_FILE` to that path, and list only the terminator's direct peer CIDRs
 under `listeners[].trustedProxy.trustedCidrs`. The Kubernetes renderer performs this materialization;
 setting a universal trusted network is forbidden.

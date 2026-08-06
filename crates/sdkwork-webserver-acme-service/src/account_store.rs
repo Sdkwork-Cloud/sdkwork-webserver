@@ -90,7 +90,7 @@ impl AcmeAccountStore for MemoryAcmeAccountStore {
 /// Encrypted, atomic, permission-confined file store.
 ///
 /// Credentials are AES-256-GCM encrypted with a key derived from the process
-/// secret master key (`SDKWORK_WEB_SECRET_ENCRYPTION_KEY`) before they reach
+/// secret master key (`SDKWORK_WEBSERVER_SECRET_ENCRYPTION_KEY`) before they reach
 /// disk. Files are written through a temporary sibling and renamed, so a
 /// crash never leaves a truncated credential file. Unix permissions are
 /// confined to the owner (`0600`).

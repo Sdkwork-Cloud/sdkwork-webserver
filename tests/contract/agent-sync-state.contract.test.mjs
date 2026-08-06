@@ -22,7 +22,7 @@ test('node daemon sync state is durable, checksummed, bounded, and fail-closed',
   assert.match(state, /sdkwork-web-node-daemon\.lock/u);
   assert.match(state, /file\.try_lock\(\)/u);
   assert.match(state, /another Web Node Daemon already owns this state directory/u);
-  assert.match(state, /\/var\/lib\/sdkwork\/web\/edge/u);
+  assert.match(state, /\/var\/lib\/sdkwork\/webserver\/edge/u);
   assert.doesNotMatch(state, /std::env::temp_dir/u);
   assert.doesNotMatch(state, /unwrap_or_default\(\)/u);
 });
@@ -76,15 +76,15 @@ test('node daemon state contract is present in root verification and component m
       'utf8',
     ),
   );
-  assert.ok(component.contracts.configKeys.includes('SDKWORK_WEB_AGENT_STATE_PATH'));
-  assert.ok(component.contracts.configKeys.includes('SDKWORK_WEB_AGENT_STATE_DIR'));
-  assert.ok(component.contracts.configKeys.includes('SDKWORK_WEB_NODE_TOKEN'));
-  assert.ok(component.contracts.configKeys.includes('SDKWORK_WEB_NODE_SYNC_INTERVAL_SECS'));
-  assert.ok(component.contracts.configKeys.includes('SDKWORK_WEB_NODE_STATE_PATH'));
-  assert.ok(component.contracts.configKeys.includes('SDKWORK_WEB_NODE_STATE_DIR'));
+  assert.ok(component.contracts.configKeys.includes('SDKWORK_WEBSERVER_AGENT_STATE_PATH'));
+  assert.ok(component.contracts.configKeys.includes('SDKWORK_WEBSERVER_AGENT_STATE_DIR'));
+  assert.ok(component.contracts.configKeys.includes('SDKWORK_WEBSERVER_NODE_TOKEN'));
+  assert.ok(component.contracts.configKeys.includes('SDKWORK_WEBSERVER_NODE_SYNC_INTERVAL_SECS'));
+  assert.ok(component.contracts.configKeys.includes('SDKWORK_WEBSERVER_NODE_STATE_PATH'));
+  assert.ok(component.contracts.configKeys.includes('SDKWORK_WEBSERVER_NODE_STATE_DIR'));
   assert.ok(component.contracts.runtimeEntrypoints.includes('binary#sdkwork-web-node-daemon'));
   assert.ok(component.contracts.runtimeEntrypoints.includes('binary#sdkwork-web-agent'));
-  assert.ok(component.contracts.configKeys.includes('SDKWORK_WEB_EDGE_ROOT'));
+  assert.ok(component.contracts.configKeys.includes('SDKWORK_WEBSERVER_EDGE_ROOT'));
 });
 
 test('web node daemon terminology is preferred without breaking v3 aliases', () => {
@@ -100,13 +100,13 @@ test('web node daemon terminology is preferred without breaking v3 aliases', () 
     path.join(REPO_ROOT, 'etc/node-daemon/development.env.example'),
     'utf8',
   );
-  assert.match(main, /SDKWORK_WEB_NODE_TOKEN/u);
-  assert.match(main, /SDKWORK_WEB_NODE_SYNC_INTERVAL_SECS/u);
+  assert.match(main, /SDKWORK_WEBSERVER_NODE_TOKEN/u);
+  assert.match(main, /SDKWORK_WEBSERVER_NODE_SYNC_INTERVAL_SECS/u);
   assert.match(main, /conflicts with legacy alias/u);
-  assert.match(state, /SDKWORK_WEB_NODE_STATE_PATH/u);
-  assert.match(state, /SDKWORK_WEB_NODE_STATE_DIR/u);
-  assert.match(env, /^SDKWORK_WEB_NODE_TOKEN=/mu);
-  assert.match(env, /^SDKWORK_WEB_NODE_SYNC_INTERVAL_SECS=/mu);
-  assert.doesNotMatch(env, /^SDKWORK_WEB_AGENT_TOKEN=/mu);
-  assert.doesNotMatch(env, /^SDKWORK_WEB_AGENT_SYNC_INTERVAL_SECS=/mu);
+  assert.match(state, /SDKWORK_WEBSERVER_NODE_STATE_PATH/u);
+  assert.match(state, /SDKWORK_WEBSERVER_NODE_STATE_DIR/u);
+  assert.match(env, /^SDKWORK_WEBSERVER_NODE_TOKEN=/mu);
+  assert.match(env, /^SDKWORK_WEBSERVER_NODE_SYNC_INTERVAL_SECS=/mu);
+  assert.doesNotMatch(env, /^SDKWORK_WEBSERVER_AGENT_TOKEN=/mu);
+  assert.doesNotMatch(env, /^SDKWORK_WEBSERVER_AGENT_SYNC_INTERVAL_SECS=/mu);
 });

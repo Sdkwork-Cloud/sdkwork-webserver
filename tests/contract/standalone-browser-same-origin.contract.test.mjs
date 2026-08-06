@@ -48,7 +48,7 @@ test('standalone topology declares one canonical browser origin in both lifecycl
       apiSurfaceId: 'application.public-ingress',
       hostProcessId: 'application.public-ingress',
       buildOutput: 'apps/sdkwork-webserver-pc/dist',
-      runtimeRootEnv: 'SDKWORK_WEB_PC_STATIC_ROOT',
+      runtimeRootEnv: 'SDKWORK_WEBSERVER_PC_STATIC_ROOT',
       mountPath: '/',
       spaFallback: '/index.html',
     },
@@ -101,11 +101,11 @@ test('standalone package and gateway resolve PC and dependency assets from one p
   const productionEnv = read('etc/topology/standalone.production.env');
   for (const declaration of [
     'SDKWORK_APP_ROOT=.',
-    'SDKWORK_WEB_APP_ROOT=.',
-    'SDKWORK_WEB_SERVER_APP_ROOT=.',
+    'SDKWORK_WEBSERVER_APP_ROOT=.',
+    'SDKWORK_WEBSERVER_SERVER_APP_ROOT=.',
     'SDKWORK_IAM_APP_ROOT=share/sdkwork/iam',
     'SDKWORK_DRIVE_APP_ROOT=share/sdkwork/drive',
-    'SDKWORK_WEB_PC_STATIC_ROOT=share/sdkwork/webserver-pc',
+    'SDKWORK_WEBSERVER_PC_STATIC_ROOT=share/sdkwork/webserver-pc',
   ]) {
     assert.match(productionEnv, new RegExp(`^${declaration.replaceAll('/', '\\/').replace('.', '\\.')}$$`, 'mu'));
   }

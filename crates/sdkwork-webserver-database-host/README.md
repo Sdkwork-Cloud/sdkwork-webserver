@@ -19,7 +19,7 @@ application-root SDKWork database framework crates.
 ## Configuration
 
 Database engine, URL, pool limits, and lifecycle overrides are resolved through
-the typed `SDKWORK_WEB_*` database environment profile. Concrete values belong
+the typed `SDKWORK_WEBSERVER_*` database environment profile. Concrete values belong
 in source `etc/`, installed operator configuration, or secret injection, never
 in `sdkwork.app.config.json`.
 

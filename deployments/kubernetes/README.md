@@ -39,7 +39,7 @@ contain:
 | referenced signing-secret keys | The Node's Drive derivation secret and Knowledgebase outbox secrets referenced by the event config |
 
 The event config uses `/run/secrets/sdkwork-web-node/<key>` paths for its signing secrets and
-`/var/lib/sdkwork/web/website-provider-events` for checkpoints. Do not reuse a Node Secret across
+`/var/lib/sdkwork/webserver/website-provider-events` for checkpoints. Do not reuse a Node Secret across
 StatefulSets. Do not commit a Secret manifest or plaintext values. Encryption roots and Node/provider
 credentials must be independent, randomly generated, least-privilege, rotation-governed values.
 The Drive entry must use subscription ID `drive-website-events`; its derivation secret must contain
@@ -108,7 +108,7 @@ service-account token mounting, dropped Linux capabilities, RuntimeDefault secco
 ephemeral-storage requests/limits, disabled Service-link environment injection, loopback-only
 operations, exec probes, a bounded provider-event relay sidecar, ingress NetworkPolicy, rolling
 updates, and a tenant-fleet-scoped PodDisruptionBudget.
-The container also sets `SDKWORK_WEB_WEBSITE_PROVIDER_BUFFERED_CONTENT_BYTES=268435456`, a
+The container also sets `SDKWORK_WEBSERVER_WEBSITE_PROVIDER_BUFFERED_CONTENT_BYTES=268435456`, a
 non-queueing process-wide 256 MiB admission ceiling for complete Drive/Knowledgebase SDK content
 buffers retained by active responses. The compiled route's full `maximumObjectBytes` ceiling is
 reserved even for small or Range requests, and the reservation is released when the response
@@ -132,7 +132,7 @@ inside the process. The data plane accepts
 downgrade native TLS. Website HTTPS redirects, reverse-proxy forwarding headers, and access logs
 consume that same resolved scheme. The runtime can consume validated native TLS assignments and
 atomically hot-activate Rustls SNI contexts, but this template explicitly sets
-`SDKWORK_WEB_TLS_RUNTIME_SOURCE=external`. It does not claim native custom-domain certificate
+`SDKWORK_WEBSERVER_TLS_RUNTIME_SOURCE=external`. It does not claim native custom-domain certificate
 activation until Deploy publishes independent TLS assignments, an approved secret provider mounts
 authorized versioned material, the listener and Service expose the reviewed TLS port, and
 served-fingerprint/node-convergence probes are recorded.
@@ -162,7 +162,7 @@ The `sdkwork-web-certificate-state` PVC carries three state roots:
 
 To activate self-hosted TLS hot reload and HTTP-01 challenge serving on a Node, mount the same PVC
 into the website data-plane StatefulSet (e.g. `certificate-state` mounted at
-`/var/lib/sdkwork/web`), set `SDKWORK_WEB_TLS_RUNTIME_SOURCE=file` with the matching
-`SDKWORK_WEB_TLS_RUNTIME_SNAPSHOT_FILE`/`SDKWORK_WEB_TLS_MATERIAL_ROOT`, and configure
+`/var/lib/sdkwork/webserver`), set `SDKWORK_WEBSERVER_TLS_RUNTIME_SOURCE=file` with the matching
+`SDKWORK_WEBSERVER_TLS_RUNTIME_SNAPSHOT_FILE`/`SDKWORK_WEBSERVER_TLS_MATERIAL_ROOT`, and configure
 `acmeHttp01.webroot` in the Node's `sdkwork.webserver.config.json` to point at the shared
 `acme-webroot` directory. No nginx directive or external process is involved.

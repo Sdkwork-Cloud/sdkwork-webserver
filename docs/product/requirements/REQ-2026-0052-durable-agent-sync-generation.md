@@ -24,7 +24,7 @@ acceptance_criteria:
   - State schema records schemaVersion, monotonic revision, desiredSyncVersion, observedSyncVersion, and a SHA-256 checksum over the canonical checksum payload.
   - Sync versions use exact sv1 plus 64 lowercase hexadecimal SHA-256 bytes; unknown fields, unsupported schema versions, invalid transitions, checksum mismatch, empty files, oversized files, non-files, and symlinks fail closed.
   - The state file is at most 8 KiB, is staged in the target directory, flushed, fsynced, atomically persisted, and directory-synced; Unix state files use mode 0600.
-  - Linux defaults to /var/lib/sdkwork/web/edge, Windows to ProgramData/sdkwork/web/Data/edge, and macOS to the SDKWork Application Support data directory; every explicit override must be absolute.
+  - Linux defaults to /var/lib/sdkwork/webserver/edge, Windows to ProgramData/sdkwork/webserver/Data/edge, and macOS to the SDKWork Application Support data directory; every explicit override must be absolute.
   - Exact legacy lastSyncVersion state migrates to equal desired/observed values, while malformed or extended legacy input is rejected.
   - The Agent process loads state once at startup and fails closed on corruption rather than looping with an empty version.
   - A changed manifest is validated and desired is durably saved before the first artifact write; observed is durably saved only after edge.reload succeeds.

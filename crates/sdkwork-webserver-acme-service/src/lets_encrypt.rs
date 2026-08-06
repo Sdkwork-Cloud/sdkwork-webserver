@@ -69,7 +69,7 @@ async fn issue_lets_encrypt_inner(
     } = params;
     let webroot = config.webroot.as_deref().map(Path::new).ok_or_else(|| {
         AcmeServiceError::config(
-            "SDKWORK_WEB_ACME_WEBROOT is required for Let's Encrypt HTTP-01 issuance",
+            "SDKWORK_WEBSERVER_ACME_WEBROOT is required for Let's Encrypt HTTP-01 issuance",
         )
     })?;
 

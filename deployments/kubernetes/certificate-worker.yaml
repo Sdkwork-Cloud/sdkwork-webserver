@@ -54,52 +54,52 @@ spec:
           command:
             - /app/bin/sdkwork-webserver-certificate-worker
           env:
-            - name: SDKWORK_WEB_ENVIRONMENT
+            - name: SDKWORK_WEBSERVER_ENVIRONMENT
               value: production
-            - name: SDKWORK_WEB_DEPLOYMENT_PROFILE
+            - name: SDKWORK_WEBSERVER_DEPLOYMENT_PROFILE
               value: cloud
-            - name: SDKWORK_WEB_PROFILE_ID
+            - name: SDKWORK_WEBSERVER_PROFILE_ID
               value: cloud.production
-            - name: SDKWORK_WEB_SNOWFLAKE_NODE_ID
+            - name: SDKWORK_WEBSERVER_SNOWFLAKE_NODE_ID
               value: "10001"
-            - name: SDKWORK_WEB_CERT_WORKER_ID
+            - name: SDKWORK_WEBSERVER_CERT_WORKER_ID
               value: certificate-worker-0
-            - name: SDKWORK_WEB_CERT_OPERATION_POLL_INTERVAL_SECS
+            - name: SDKWORK_WEBSERVER_CERT_OPERATION_POLL_INTERVAL_SECS
               value: "5"
-            - name: SDKWORK_WEB_CERT_RENEW_SCAN_INTERVAL_SECS
+            - name: SDKWORK_WEBSERVER_CERT_RENEW_SCAN_INTERVAL_SECS
               value: "3600"
-            - name: SDKWORK_WEB_CERT_RENEW_BEFORE_DAYS
+            - name: SDKWORK_WEBSERVER_CERT_RENEW_BEFORE_DAYS
               value: "30"
-            - name: SDKWORK_WEB_SECRET_ENCRYPTION_KEY
+            - name: SDKWORK_WEBSERVER_SECRET_ENCRYPTION_KEY
               valueFrom:
                 secretKeyRef:
                   name: sdkwork-web-server-runtime
                   key: secret-encryption-key
-            - name: SDKWORK_WEB_ACME_DIRECTORY_URL
+            - name: SDKWORK_WEBSERVER_ACME_DIRECTORY_URL
               value: https://acme-v02.api.letsencrypt.org/directory
-            - name: SDKWORK_WEB_ACME_PROFILE
+            - name: SDKWORK_WEBSERVER_ACME_PROFILE
               value: production
-            - name: SDKWORK_WEB_ACME_CONTACT_EMAIL
+            - name: SDKWORK_WEBSERVER_ACME_CONTACT_EMAIL
               valueFrom:
                 secretKeyRef:
                   name: sdkwork-web-server-runtime
                   key: acme-contact-email
-            - name: SDKWORK_WEB_ACME_OPERATION_TIMEOUT_MS
+            - name: SDKWORK_WEBSERVER_ACME_OPERATION_TIMEOUT_MS
               value: "180000"
-            - name: SDKWORK_WEB_ACME_WEBROOT
-              value: /var/lib/sdkwork/web/acme-webroot
-            - name: SDKWORK_WEB_ACME_ACCOUNT_ROOT
-              value: /var/lib/sdkwork/web/acme-accounts
-            - name: SDKWORK_WEB_NODE_UUID
+            - name: SDKWORK_WEBSERVER_ACME_WEBROOT
+              value: /var/lib/sdkwork/webserver/acme-webroot
+            - name: SDKWORK_WEBSERVER_ACME_ACCOUNT_ROOT
+              value: /var/lib/sdkwork/webserver/acme-accounts
+            - name: SDKWORK_WEBSERVER_NODE_UUID
               valueFrom:
                 secretKeyRef:
                   name: __SDKWORK_WEBSITE_NODE_SECRET_NAME__
                   key: node-uuid
-            - name: SDKWORK_WEB_TLS_MATERIAL_ROOT
-              value: /var/lib/sdkwork/web/tls-materials
-            - name: SDKWORK_WEB_TLS_RUNTIME_SNAPSHOT_FILE
-              value: /var/lib/sdkwork/web/tls-materials/tls-runtime.json
-            - name: SDKWORK_WEB_TLS_SNAPSHOT_ALPN
+            - name: SDKWORK_WEBSERVER_TLS_MATERIAL_ROOT
+              value: /var/lib/sdkwork/webserver/tls-materials
+            - name: SDKWORK_WEBSERVER_TLS_RUNTIME_SNAPSHOT_FILE
+              value: /var/lib/sdkwork/webserver/tls-materials/tls-runtime.json
+            - name: SDKWORK_WEBSERVER_TLS_SNAPSHOT_ALPN
               value: h2,http/1.1
             - name: SDKWORK_DATABASE_URL
               valueFrom:
@@ -123,7 +123,7 @@ spec:
                 - ALL
           volumeMounts:
             - name: certificate-state
-              mountPath: /var/lib/sdkwork/web
+              mountPath: /var/lib/sdkwork/webserver
             - name: temporary
               mountPath: /tmp
       volumes:

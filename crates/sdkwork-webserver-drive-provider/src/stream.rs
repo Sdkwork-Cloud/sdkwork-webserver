@@ -35,8 +35,9 @@ impl WebsiteProviderContentStream for BoundedDriveContentStream {
             .map_err(|_| WebsiteProviderError::new(WebsiteProviderErrorKind::ContractMismatch))?;
         match chunk {
             Some(bytes) => {
-                let length = u64::try_from(bytes.len())
-                    .map_err(|_| WebsiteProviderError::new(WebsiteProviderErrorKind::ContractMismatch))?;
+                let length = u64::try_from(bytes.len()).map_err(|_| {
+                    WebsiteProviderError::new(WebsiteProviderErrorKind::ContractMismatch)
+                })?;
                 if length > self.remaining {
                     self.source = None;
                     return Err(WebsiteProviderError::new(

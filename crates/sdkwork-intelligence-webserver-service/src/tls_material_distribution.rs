@@ -42,7 +42,7 @@ const DISTRIBUTION_LOCK_RETRY: Duration = Duration::from_millis(100);
 ///
 /// The distributor shares the data plane's material root and snapshot file
 /// configuration so a single deployment keeps one authority. Distribution is
-/// skipped entirely when `SDKWORK_WEB_NODE_UUID` is absent, which keeps
+/// skipped entirely when `SDKWORK_WEBSERVER_NODE_UUID` is absent, which keeps
 /// existing deployments (and workers that do not own TLS material) working
 /// unchanged.
 #[derive(Clone, Debug)]
@@ -55,7 +55,7 @@ pub struct TlsMaterialDistributionConfig {
 
 impl TlsMaterialDistributionConfig {
     pub fn from_env() -> WebServiceResult<Self> {
-        let material_root = std::env::var("SDKWORK_WEB_TLS_MATERIAL_ROOT")
+        let material_root = std::env::var("SDKWORK_WEBSERVER_TLS_MATERIAL_ROOT")
             .unwrap_or_else(|_| DEFAULT_MATERIAL_ROOT.to_string());
         if material_root.is_empty()
             || material_root.len() > 4_096
@@ -64,14 +64,14 @@ impl TlsMaterialDistributionConfig {
                 .any(|byte| byte == 0 || byte.is_ascii_control())
         {
             return Err(WebServiceError::validation(
-                "SDKWORK_WEB_TLS_MATERIAL_ROOT must contain 1..4096 safe path bytes",
+                "SDKWORK_WEBSERVER_TLS_MATERIAL_ROOT must contain 1..4096 safe path bytes",
             ));
         }
         let material_root = PathBuf::from(material_root);
-        let snapshot_file = std::env::var("SDKWORK_WEB_TLS_RUNTIME_SNAPSHOT_FILE")
+        let snapshot_file = std::env::var("SDKWORK_WEBSERVER_TLS_RUNTIME_SNAPSHOT_FILE")
             .map(PathBuf::from)
             .unwrap_or_else(|_| material_root.join(DEFAULT_SNAPSHOT_FILE_NAME));
-        let node_uuid = std::env::var("SDKWORK_WEB_NODE_UUID").ok();
+        let node_uuid = std::env::var("SDKWORK_WEBSERVER_NODE_UUID").ok();
         if let Some(node_uuid) = &node_uuid {
             if node_uuid.is_empty()
                 || node_uuid.len() > 128
@@ -80,12 +80,12 @@ impl TlsMaterialDistributionConfig {
                 })
             {
                 return Err(WebServiceError::validation(
-                    "SDKWORK_WEB_NODE_UUID must contain 1..128 safe ASCII bytes",
+                    "SDKWORK_WEBSERVER_NODE_UUID must contain 1..128 safe ASCII bytes",
                 ));
             }
         }
         let alpn = parse_alpn(
-            std::env::var("SDKWORK_WEB_TLS_SNAPSHOT_ALPN")
+            std::env::var("SDKWORK_WEBSERVER_TLS_SNAPSHOT_ALPN")
                 .unwrap_or_else(|_| "h2,http/1.1".to_string())
                 .as_str(),
         )?;
@@ -172,9 +172,8 @@ fn publish_node_tls_material_blocking(
     if existing_snapshot_matches(&config.snapshot_file, &snapshot_sha256)? {
         return Ok(());
     }
-    let serialized = serde_json::to_vec(&snapshot).map_err(|error| {
-        WebServiceError::Internal(format!("serialize TLS snapshot: {error}"))
-    })?;
+    let serialized = serde_json::to_vec(&snapshot)
+        .map_err(|error| WebServiceError::Internal(format!("serialize TLS snapshot: {error}")))?;
     write_snapshot_atomically(&config.snapshot_file, &serialized)?;
     prune_stale_material_directories(&config.material_root, &snapshot)?;
     tracing::info!(
@@ -540,14 +539,14 @@ fn parse_alpn(value: &str) -> WebServiceResult<Vec<String>> {
             }
             _ => {
                 return Err(WebServiceError::validation(format!(
-                    "SDKWORK_WEB_TLS_SNAPSHOT_ALPN contains unsupported protocol {protocol}"
+                    "SDKWORK_WEBSERVER_TLS_SNAPSHOT_ALPN contains unsupported protocol {protocol}"
                 )));
             }
         }
     }
     if protocols.is_empty() {
         return Err(WebServiceError::validation(
-            "SDKWORK_WEB_TLS_SNAPSHOT_ALPN must select h2 and/or http/1.1",
+            "SDKWORK_WEBSERVER_TLS_SNAPSHOT_ALPN must select h2 and/or http/1.1",
         ));
     }
     Ok(protocols)

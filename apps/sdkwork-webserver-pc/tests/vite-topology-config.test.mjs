@@ -22,8 +22,8 @@ describe('Vite browser topology', () => {
         const source = readFileSync(file, 'utf8');
         if (!file.endsWith('standalone.development.env')) return source;
         return source
-          .replace(/^SDKWORK_WEB_PC_DEV_BIND=.*$/mu, `SDKWORK_WEB_PC_DEV_BIND=127.0.0.1:${browserPort}`)
-          .replace(/^SDKWORK_WEB_APPLICATION_PUBLIC_HTTP_URL=.*$/mu, `SDKWORK_WEB_APPLICATION_PUBLIC_HTTP_URL=http://127.0.0.1:${ingressPort}`);
+          .replace(/^SDKWORK_WEBSERVER_PC_DEV_BIND=.*$/mu, `SDKWORK_WEBSERVER_PC_DEV_BIND=127.0.0.1:${browserPort}`)
+          .replace(/^SDKWORK_WEBSERVER_APPLICATION_PUBLIC_HTTP_URL=.*$/mu, `SDKWORK_WEBSERVER_APPLICATION_PUBLIC_HTTP_URL=http://127.0.0.1:${ingressPort}`);
       },
     });
 

@@ -14,8 +14,8 @@ function readJson(relativePath) {
 
 function runNode(args, env = {}) {
   const inherited = { ...process.env };
-  delete inherited.SDKWORK_WEB_NODE_TOKEN;
-  delete inherited.SDKWORK_WEB_AGENT_TOKEN;
+  delete inherited.SDKWORK_WEBSERVER_NODE_TOKEN;
+  delete inherited.SDKWORK_WEBSERVER_AGENT_TOKEN;
   delete inherited.SDKWORK_PACKAGE_VERSION;
   delete inherited.SDKWORK_RELEASE_VERSION;
   delete inherited.SDKWORK_PACKAGE_ARCHITECTURE;
@@ -58,9 +58,9 @@ test('cloud development uses remote HTTPS surfaces and starts only local clients
       .filter((line) => line && !line.startsWith('#'))
       .map((line) => line.split(/=(.*)/su).slice(0, 2)),
   );
-  assert.equal(values.SDKWORK_WEB_DEPLOYMENT_PROFILE, 'cloud');
-  assert.equal(values.SDKWORK_WEB_ENVIRONMENT, 'development');
-  const controlPlane = new URL(values.SDKWORK_WEB_APPLICATION_BACKEND_HTTP_URL);
+  assert.equal(values.SDKWORK_WEBSERVER_DEPLOYMENT_PROFILE, 'cloud');
+  assert.equal(values.SDKWORK_WEBSERVER_ENVIRONMENT, 'development');
+  const controlPlane = new URL(values.SDKWORK_WEBSERVER_APPLICATION_BACKEND_HTTP_URL);
   assert.equal(controlPlane.protocol, 'https:');
   assert.notEqual(controlPlane.hostname, 'localhost');
   assert.doesNotMatch(source, /token|credential|secret/iu);
@@ -76,7 +76,7 @@ test('cloud development uses remote HTTPS surfaces and starts only local clients
   assert.equal(browser.script, '_sdkwork:client:browser:cloud');
   assert.deepEqual(browser.runtimeTargets, ['browser']);
   const envExample = readFileSync(path.join(REPO_ROOT, 'etc/agent/development.env.example'), 'utf8');
-  assert.match(envExample, /^SDKWORK_WEB_NODE_TOKEN=$/mu);
+  assert.match(envExample, /^SDKWORK_WEBSERVER_NODE_TOKEN=$/mu);
 });
 
 test('release dry-runs produce distinct profile and workflow-version-bound artifact names', () => {

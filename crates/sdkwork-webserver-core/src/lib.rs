@@ -8,9 +8,10 @@ pub mod tls_runtime;
 pub mod website_runtime;
 
 pub use config::{
-    inspect_webserver_config_revision, load_and_compile_webserver_config,
-    load_and_compile_webserver_config_revision, normalize_authority_host, normalize_server_name,
-    normalize_uri_path, server_name_covers, upstream_ip_is_allowed, CertificateConfig,
+    canonical_webserver_config_directory, inspect_webserver_config_revision,
+    load_and_compile_webserver_config, load_and_compile_webserver_config_revision,
+    normalize_authority_host, normalize_server_name, normalize_uri_path,
+    resolve_webserver_config_path, server_name_covers, upstream_ip_is_allowed, CertificateConfig,
     CertificateSource, CompiledWebServerApp, CompiledWebServerRevision, ConfigDiagnostic,
     ConfigProviderType, CustomHeaderConfig, ListenerConfig, ListenerProtocol, ListenerTlsRuntime,
     ProviderCachePolicy, ProxyProtocolConfig, ProxyProtocolCrc32cPolicy, ProxyProtocolVersion,
@@ -22,7 +23,8 @@ pub use config::{
     UpstreamLoadBalancingStrategy, UpstreamPassiveHealthConfig, UpstreamRetryCondition,
     UpstreamRetryConfig, UpstreamTlsConfig, UpstreamTlsTrustMode, UriPathNormalizationError,
     VirtualHostConfig, WebServerAppConfig, WebServerConfigError, WebServerConfigFileRevision,
-    WebServerLimits, XFrameOptions, MAX_CONFIG_BYTES,
+    WebServerLimits, XFrameOptions, MAX_CONFIG_BYTES, WEBSERVER_CONFIG_FILE_ENV,
+    WEBSERVER_CONFIG_FILE_NAME,
 };
 pub use runtime_env::{
     web_dev_auth_bypass_enabled, web_environment_name, web_is_production_like_environment,

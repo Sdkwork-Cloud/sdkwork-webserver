@@ -23,9 +23,9 @@ use crate::data_plane::{
     static_path::{open_static_path, StaticPathError, StaticPathTarget},
 };
 
-pub(crate) const PC_STATIC_ROOT_ENV: &str = "SDKWORK_WEB_PC_STATIC_ROOT";
+pub(crate) const PC_STATIC_ROOT_ENV: &str = "SDKWORK_WEBSERVER_PC_STATIC_ROOT";
 
-const WEB_DEPLOYMENT_PROFILE_ENV: &str = "SDKWORK_WEB_DEPLOYMENT_PROFILE";
+const WEB_DEPLOYMENT_PROFILE_ENV: &str = "SDKWORK_WEBSERVER_DEPLOYMENT_PROFILE";
 const DEPLOYMENT_PROFILE_ENV: &str = "SDKWORK_DEPLOYMENT_PROFILE";
 const INDEX_FILE: &str = "index.html";
 const RUNTIME_ENV_FILE: &str = "runtime-env.json";
@@ -336,7 +336,7 @@ fn canonical_environment(environment: &str) -> Result<&str, String> {
         "staging" | "stage" => Ok("staging"),
         "production" | "prod" => Ok("production"),
         other => Err(format!(
-            "unsupported SDKWORK_WEB_ENVIRONMENT {other} for standalone static delivery"
+            "unsupported SDKWORK_WEBSERVER_ENVIRONMENT {other} for standalone static delivery"
         )),
     }
 }

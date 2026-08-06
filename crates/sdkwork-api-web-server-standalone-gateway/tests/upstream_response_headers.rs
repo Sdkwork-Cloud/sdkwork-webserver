@@ -332,10 +332,7 @@ fn signed_server_identity(authority: &TestCertificateAuthority) -> TestTlsIdenti
     params.extended_key_usages = vec![ExtendedKeyUsagePurpose::ServerAuth];
     let key = KeyPair::generate().expect("generate server key");
     let certificate = params
-        .signed_by(
-            &key,
-            &Issuer::new(authority.params.clone(), &authority.key),
-        )
+        .signed_by(&key, &Issuer::new(authority.params.clone(), &authority.key))
         .expect("sign server identity");
     TestTlsIdentity {
         certificate: CertificateDer::from(certificate.der().to_vec()),

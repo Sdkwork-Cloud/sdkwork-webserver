@@ -4,7 +4,9 @@ use sdkwork_api_web_server_standalone_gateway::{
     probe_data_plane_operations_from_env, run_website_data_plane_from_config_until,
     DataPlaneOperationsConfig, WEBSITE_RUNTIME_SET_FILE_ENV,
 };
-use sdkwork_webserver_core::load_and_compile_webserver_config_revision;
+use sdkwork_webserver_core::{
+    load_and_compile_webserver_config_revision, resolve_webserver_config_path,
+};
 use tokio::signal;
 
 mod provider_event_relay;
@@ -106,16 +108,8 @@ fn validate_host_config(path: PathBuf) -> MainResult<()> {
 }
 
 fn config_path(argument: Option<String>) -> MainResult<PathBuf> {
-    argument
-        .or_else(|| std::env::var("SDKWORK_WEB_SERVER_CONFIG_FILE").ok())
-        .map(PathBuf::from)
-        .ok_or_else(|| {
-            io::Error::new(
-                io::ErrorKind::InvalidInput,
-                "a config path argument or SDKWORK_WEB_SERVER_CONFIG_FILE is required",
-            )
-            .into()
-        })
+    resolve_webserver_config_path(argument)
+        .map_err(|message| io::Error::new(io::ErrorKind::InvalidInput, message).into())
 }
 
 fn runtime_set_path(argument: Option<String>) -> Option<PathBuf> {
@@ -142,11 +136,17 @@ fn print_help() {
          Operations:\n\
            serve [host-config] [runtime-set]\n\
                                   Start immutable website/Wiki delivery listeners (default).\n\
-                                  File source may use SDKWORK_WEB_WEBSITE_RUNTIME_SET_FILE;\n\
-                                  cloud source is selected by SDKWORK_WEB_RUNTIME_ASSIGNMENT_SOURCE.\n\
+                                  File source may use SDKWORK_WEBSERVER_WEBSITE_RUNTIME_SET_FILE;\n\
+                                  cloud source is selected by SDKWORK_WEBSERVER_RUNTIME_ASSIGNMENT_SOURCE.\n\
            probe [health-path]    Probe the loopback operations listener; defaults to /readyz.\n\
            validate [host-config] Validate and compile the website listener configuration.\n\
-           relay-provider-events Relay bounded internal callback connections to the loopback receiver.\n"
+           relay-provider-events Relay bounded internal callback connections to the loopback receiver.\n\
+         \n\
+         Config resolution: explicit host-config argument, then\n\
+         SDKWORK_WEBSERVER_SERVER_CONFIG_FILE, then the canonical OS config\n\
+         directory (Linux /etc/sdkwork/webserver, macOS\n\
+         /Library/Application Support/sdkwork/webserver, Windows\n\
+         %ProgramData%\\sdkwork\\webserver) joined with sdkwork.webserver.config.json.\n"
     );
 }
 

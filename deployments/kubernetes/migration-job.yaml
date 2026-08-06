@@ -31,13 +31,13 @@ spec:
           imagePullPolicy: IfNotPresent
           args: ["db-migrate"]
           env:
-            - name: SDKWORK_WEB_APP_ROOT
+            - name: SDKWORK_WEBSERVER_APP_ROOT
               value: /app
-            - name: SDKWORK_WEB_ENVIRONMENT
+            - name: SDKWORK_WEBSERVER_ENVIRONMENT
               value: production
-            - name: SDKWORK_WEB_DEPLOYMENT_PROFILE
+            - name: SDKWORK_WEBSERVER_DEPLOYMENT_PROFILE
               value: cloud
-            - name: SDKWORK_WEB_PROFILE_ID
+            - name: SDKWORK_WEBSERVER_PROFILE_ID
               value: cloud.production
             - name: SDKWORK_DATABASE_URL
               valueFrom:

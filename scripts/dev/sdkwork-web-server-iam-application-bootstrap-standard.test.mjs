@@ -100,5 +100,5 @@ test('standalone runner injects owner runtime roots and keeps real auth enabled'
   assert.match(topologyHelper, /SDKWORK_DRIVE_APP_ROOT:\s*DRIVE_REPO_ROOT/u);
   assert.match(devRunner, /resolveIamDevEnv/u);
   assert.match(devRunner, /IAM_APPLICATION_BOOTSTRAP_ENV/u);
-  assert.doesNotMatch(devRunner, /SDKWORK_WEB_DEV_AUTH_BYPASS/u);
+  assert.doesNotMatch(devRunner, /SDKWORK_WEBSERVER_DEV_AUTH_BYPASS/u);
 });

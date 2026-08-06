@@ -341,16 +341,17 @@ impl NodeDaemonState {
 
 pub fn resolve_state_path() -> anyhow::Result<PathBuf> {
     let path = if let Some(path) = read_path_env_alias(
-        "SDKWORK_WEB_NODE_STATE_PATH",
-        "SDKWORK_WEB_AGENT_STATE_PATH",
+        "SDKWORK_WEBSERVER_NODE_STATE_PATH",
+        "SDKWORK_WEBSERVER_AGENT_STATE_PATH",
     )? {
         PathBuf::from(path)
     } else {
-        let root = if let Some(path) =
-            read_path_env_alias("SDKWORK_WEB_NODE_STATE_DIR", "SDKWORK_WEB_AGENT_STATE_DIR")?
-        {
+        let root = if let Some(path) = read_path_env_alias(
+            "SDKWORK_WEBSERVER_NODE_STATE_DIR",
+            "SDKWORK_WEBSERVER_AGENT_STATE_DIR",
+        )? {
             PathBuf::from(path)
-        } else if let Some(path) = std::env::var_os("SDKWORK_WEB_EDGE_ROOT") {
+        } else if let Some(path) = std::env::var_os("SDKWORK_WEBSERVER_EDGE_ROOT") {
             PathBuf::from(path)
         } else {
             default_edge_state_root()?
@@ -392,23 +393,23 @@ fn default_edge_state_root() -> anyhow::Result<PathBuf> {
             .ok_or_else(|| anyhow::anyhow!("PROGRAMDATA is required for Web Node Daemon state"))?;
         Ok(PathBuf::from(program_data)
             .join("sdkwork")
-            .join("web")
+            .join("webserver")
             .join("Data")
             .join("edge"))
     }
     #[cfg(target_os = "macos")]
     {
         Ok(PathBuf::from(
-            "/Library/Application Support/sdkwork/web/Data/edge",
+            "/Library/Application Support/sdkwork/webserver/Data/edge",
         ))
     }
     #[cfg(all(unix, not(target_os = "macos")))]
     {
-        Ok(PathBuf::from("/var/lib/sdkwork/web/edge"))
+        Ok(PathBuf::from("/var/lib/sdkwork/webserver/edge"))
     }
     #[cfg(not(any(unix, target_os = "windows")))]
     {
-        bail!("SDKWORK_WEB_AGENT_STATE_DIR is required on this platform")
+        bail!("SDKWORK_WEBSERVER_AGENT_STATE_DIR is required on this platform")
     }
 }
 
@@ -622,9 +623,9 @@ mod tests {
     fn node_state_path_aliases_are_additive_and_fail_on_conflict() {
         assert_eq!(
             resolve_path_alias_values(
-                "SDKWORK_WEB_NODE_STATE_PATH",
+                "SDKWORK_WEBSERVER_NODE_STATE_PATH",
                 Some(OsString::from("preferred")),
-                "SDKWORK_WEB_AGENT_STATE_PATH",
+                "SDKWORK_WEBSERVER_AGENT_STATE_PATH",
                 None,
             )
             .unwrap(),
@@ -632,18 +633,18 @@ mod tests {
         );
         assert_eq!(
             resolve_path_alias_values(
-                "SDKWORK_WEB_NODE_STATE_PATH",
+                "SDKWORK_WEBSERVER_NODE_STATE_PATH",
                 None,
-                "SDKWORK_WEB_AGENT_STATE_PATH",
+                "SDKWORK_WEBSERVER_AGENT_STATE_PATH",
                 Some(OsString::from("legacy")),
             )
             .unwrap(),
             Some(OsString::from("legacy"))
         );
         assert!(resolve_path_alias_values(
-            "SDKWORK_WEB_NODE_STATE_PATH",
+            "SDKWORK_WEBSERVER_NODE_STATE_PATH",
             Some(OsString::from("left")),
-            "SDKWORK_WEB_AGENT_STATE_PATH",
+            "SDKWORK_WEBSERVER_AGENT_STATE_PATH",
             Some(OsString::from("right")),
         )
         .is_err());

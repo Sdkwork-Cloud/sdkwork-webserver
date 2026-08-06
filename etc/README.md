@@ -26,17 +26,24 @@ local `sdkwork-web-node-daemon` client and resolves the deployed development sur
 seed process, or deployed-service worker.
 
 `node-daemon/development.env.example` is the canonical non-secret Node Daemon environment example.
-`agent/development.env.example` and `SDKWORK_WEB_AGENT_*` remain wire/runtime compatibility aliases
+`agent/development.env.example` and `SDKWORK_WEBSERVER_AGENT_*` remain wire/runtime compatibility aliases
 for the v3 Agent contract; conflicting canonical and compatibility values fail startup.
 
 `worker/development.env.example` configures the durable certificate operation worker. API issue and
 renew commands persist work before returning `202`; the worker claims that work with an expiring
 lease and fencing token, executes bounded ACME/material activation through the service, and writes
 the terminal aggregate state transactionally. Each replica uses a distinct stable
-`SDKWORK_WEB_CERT_WORKER_ID`. Browser polling cancellation only stops the client query loop and does
+`SDKWORK_WEBSERVER_CERT_WORKER_ID`. Browser polling cancellation only stops the client query loop and does
 not cancel persisted server work.
 
 ## Runtime And Secrets
+
+The Web Server config file is discovered in this order: an explicit config argument, then
+`SDKWORK_WEBSERVER_SERVER_CONFIG_FILE`, then the canonical OS system-scope directory for
+application code `webserver` joined with `sdkwork.webserver.config.json`: Linux
+`/etc/sdkwork/webserver`, macOS `/Library/Application Support/sdkwork/webserver`, Windows
+`%ProgramData%\sdkwork\webserver`. A missing canonical default fails closed with the expected
+path and override variable.
 
 Tracked files contain no access tokens, Node Tokens, passwords, private keys, or database
 credentials. Use process environment overrides, protected secret files, or the deployment
@@ -46,7 +53,7 @@ platform's secret manager. Local overrides and materialized runtime state belong
 Production images carry the fail-closed website listener base policy at
 `/app/etc/data-plane/website.cloud.config.json`; it trusts no forwarding metadata. Kubernetes
 renders the reviewed direct-ingress CIDRs into an immutable per-Node ConfigMap mounted at
-`/etc/sdkwork/web/sdkwork.webserver.config.json`. Mutable Node identity, provider-event subscriptions,
+`/etc/sdkwork/webserver/sdkwork.webserver.config.json`. Mutable Node identity, provider-event subscriptions,
 and credentials are mounted read-only under `/run/secrets/sdkwork-web-node/`. The Kubernetes
 migration Job obtains database URLs, independent encryption roots, and the ACME contact through the
 `sdkwork-web-server-runtime` secret reference documented in `../deployments/kubernetes/README.md`.
@@ -66,7 +73,7 @@ runtime-set containing another or multiple tenant scopes is rejected before acti
 files contain only deployment-provided ingress tokens and must never be committed. Production and
 staging provider origins must use HTTPS. Provider resources are validated before initial activation
 and every watched update with bounded concurrency; a failure retains the last-known-good set.
-`SDKWORK_WEB_WEBSITE_PROVIDER_BUFFERED_CONTENT_BYTES` bounds the aggregate provider content bytes
+`SDKWORK_WEBSERVER_WEBSITE_PROVIDER_BUFFERED_CONTENT_BYTES` bounds the aggregate provider content bytes
 admitted by one process while Drive or Knowledgebase generated SDK responses remain live. It is a
 strict integer from 16777216 through 2147483648 bytes and defaults to 268435456 bytes. Admission is
 conservative: every content request reserves the compiled route's `maximumObjectBytes`, so
@@ -75,7 +82,7 @@ immediately with a retryable unavailable result and
 does not create a memory waiter queue. The permit remains owned by the HTTP response stream and is
 released on completion, stream failure, or cancellation. This is a process memory-amplification
 guard for the current generated `Vec<u8>` transports, not a claim of end-to-end provider streaming.
-`SDKWORK_WEB_WEBSITE_PROVIDER_RESOLUTION_CACHE_ENTRIES` bounds the node-local Provider resolution
+`SDKWORK_WEBSERVER_WEBSITE_PROVIDER_RESOLUTION_CACHE_ENTRIES` bounds the node-local Provider resolution
 metadata cache. It is a strict integer from 1 through 1048576 and defaults to 16384. The cache stores
 only public static/Wiki resolution metadata, Wiki redirects, and non-disclosing negatives; it never
 stores response bytes, credentials, private/draft content, conditional responses, or activation
@@ -86,7 +93,7 @@ cache by exact path, Provider resource, or Provider type, with an epoch fence pr
 in-flight reinsertion. The loopback operations listener exports capacity, entries, in-flight work,
 lookup outcomes, writes, evictions, revalidations, and invalidations through the fixed-cardinality
 `sdkwork_web_data_plane_provider_resolution_cache_*` Prometheus family.
-`SDKWORK_WEB_WEBSITE_RUNTIME_SET_RECOVERY_DIRECTORY` owns a dedicated node-local A/B slot
+`SDKWORK_WEBSERVER_WEBSITE_RUNTIME_SET_RECOVERY_DIRECTORY` owns a dedicated node-local A/B slot
 directory containing only complete, hash-verified `sdkwork.website-runtime-set.v1` snapshots.
 Staging and production require this directory. Bootstrap selects the highest valid generation from
 the source and recovery state, rejects same-generation hash conflicts and node/environment scope
@@ -97,30 +104,30 @@ durable. The directory is node data-plane state, not Web business persistence or
 authenticated Deploy runtime-set distribution; it must be writable only by the service identity,
 must not share files with another subsystem, and belongs on durable host storage.
 
-TLS termination is selected independently with `SDKWORK_WEB_TLS_RUNTIME_SOURCE`. `external` means
+TLS termination is selected independently with `SDKWORK_WEBSERVER_TLS_RUNTIME_SOURCE`. `external` means
 the reviewed load balancer, CDN, or ingress terminates TLS and is the explicit setting in the
 current cloud profiles. `file` enables native Rustls termination and requires a listener declaring
-`"tlsRuntime": "assignment"`, plus `SDKWORK_WEB_TLS_RUNTIME_SNAPSHOT_FILE`,
-`SDKWORK_WEB_TLS_MATERIAL_ROOT`, and `SDKWORK_WEB_TLS_LISTENER_ID`. The snapshot follows
+`"tlsRuntime": "assignment"`, plus `SDKWORK_WEBSERVER_TLS_RUNTIME_SNAPSHOT_FILE`,
+`SDKWORK_WEBSERVER_TLS_MATERIAL_ROOT`, and `SDKWORK_WEBSERVER_TLS_LISTENER_ID`. The snapshot follows
 `../specs/sdkwork.tls-runtime.snapshot.schema.json`; every `materialReference` must be
 `file:<opaque-version-id>` and resolves only to
 `<material-root>/<opaque-version-id>/fullchain.pem` and `privkey.pem` after canonical boundary
 checks. Snapshot JSON never contains PEM, a filesystem path, URL, token, or key.
 
-`SDKWORK_WEB_TLS_RUNTIME_POLL_INTERVAL_MS` is bounded to 250..60000 milliseconds. Candidate
+`SDKWORK_WEBSERVER_TLS_RUNTIME_POLL_INTERVAL_MS` is bounded to 250..60000 milliseconds. Candidate
 snapshots are schema/hash/node/policy checked before any material work, unchanged hashes skip
 certificate parsing, and changed candidates validate SAN coverage, current validity, declared
 validity evidence, leaf SHA-256, key match, SNI ownership, TLS version range, and listener ALPN.
 Only a complete candidate replaces the shared Rustls context; existing connections keep their
 original context and a rejected candidate leaves last-known-good active. Native TLS in staging and
-production additionally requires `SDKWORK_WEB_TLS_RUNTIME_RECOVERY_DIRECTORY`, an exclusive
+production additionally requires `SDKWORK_WEBSERVER_TLS_RUNTIME_RECOVERY_DIRECTORY`, an exclusive
 node-local A/B directory persisted before activation and used for restart recovery. The recovery
 slots contain only bounded hash-verified snapshots; certificate material remains in the protected
 material provider root. `data-plane/website.native-tls.config.json` and
 `data-plane/website.native-tls.development.env.example` are the non-secret native TLS examples.
 
 `data-plane/website-provider-events.development.json.example` is the provider-event ingress
-instance selected by `SDKWORK_WEB_WEBSITE_PROVIDER_EVENT_CONFIG_FILE` and validated by
+instance selected by `SDKWORK_WEBSERVER_WEBSITE_PROVIDER_EVENT_CONFIG_FILE` and validated by
 `../specs/sdkwork.website-provider-event-ingress.schema.json`. It binds only to loopback, maps each
 subscription to an expected provider/channel/tenant/organization, references a protected signing
 secret file, and writes dual-slot per-stream checkpoints under ignored runtime state. Drive accepts
@@ -141,15 +148,15 @@ The website data plane starts with:
 cargo run -p sdkwork-web-server-website-delivery-edge-runtime
 ```
 
-The dedicated edge runtime loads `SDKWORK_WEB_SERVER_CONFIG_FILE` for listener/TLS limits and the assignment
-source selected by `SDKWORK_WEB_RUNTIME_ASSIGNMENT_SOURCE` for immutable
+The dedicated edge runtime loads `SDKWORK_WEBSERVER_SERVER_CONFIG_FILE` for listener/TLS limits and the assignment
+source selected by `SDKWORK_WEBSERVER_RUNTIME_ASSIGNMENT_SOURCE` for immutable
 Site/Binding/Variant/Mount routing. `cloud` is the production source: the generated Web Internal
-SDK authenticates with the secret-file `SDKWORK_WEB_NODE_TOKEN_FILE`, conditionally pulls the
-current assignment for `SDKWORK_WEB_NODE_UUID` and
-`SDKWORK_WEB_WEBSITE_RUNTIME_ENVIRONMENT`, verifies assignment identity/hash and the complete
+SDK authenticates with the secret-file `SDKWORK_WEBSERVER_NODE_TOKEN_FILE`, conditionally pulls the
+current assignment for `SDKWORK_WEBSERVER_NODE_UUID` and
+`SDKWORK_WEBSERVER_WEBSITE_RUNTIME_ENVIRONMENT`, verifies assignment identity/hash and the complete
 runtime-set, and reports `RECEIVED`, `VALIDATED`, `STAGED`, `ACTIVE`, or bounded `REJECTED`
 observations. `file` is limited to standalone/development and reads
-`SDKWORK_WEB_WEBSITE_RUNTIME_SET_FILE`. Both modes retain the durable last-known-good runtime-set
+`SDKWORK_WEBSERVER_WEBSITE_RUNTIME_SET_FILE`. Both modes retain the durable last-known-good runtime-set
 when an update is invalid, stale, terminally rejected, or requires an unavailable provider, and
 recover it after restart when the source is temporarily unavailable. A cloud node with a valid
 last-known-good snapshot can start during a temporary control-plane outage; a first-start node

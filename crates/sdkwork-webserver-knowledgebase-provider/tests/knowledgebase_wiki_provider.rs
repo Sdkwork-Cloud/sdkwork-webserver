@@ -290,12 +290,7 @@ async fn opens_revalidated_bounded_content_and_rejects_range_or_oversize() {
     assert_eq!(opened.content_length, 6);
     assert_eq!(opened.content_range, None);
     let mut collected = Vec::new();
-    while let Some(chunk) = opened
-        .stream
-        .next_chunk()
-        .await
-        .expect("content chunk")
-    {
+    while let Some(chunk) = opened.stream.next_chunk().await.expect("content chunk") {
         collected.extend_from_slice(&chunk);
     }
     assert_eq!(collected, b"# Wiki".to_vec());

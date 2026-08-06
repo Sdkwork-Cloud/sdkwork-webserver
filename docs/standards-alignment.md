@@ -118,7 +118,7 @@ approval. Normative requirements are owned by `../sdkwork-specs`.
 - Audit writes fail closed when the IAM tenant subject cannot be resolved to a positive numeric
   id: no audit row is persisted with a fabricated `tenant_id = 0`.
 - The management listener (unauthenticated `/healthz`, `/readyz`, `/livez`, `/metrics`) fails
-  closed on a non-loopback bind unless `SDKWORK_WEB_MANAGEMENT_EXPOSE_ALLOWED=true` is set by
+  closed on a non-loopback bind unless `SDKWORK_WEBSERVER_MANAGEMENT_EXPOSE_ALLOWED=true` is set by
   the operator; the standalone production profile declares it explicitly, and the standalone
   data-plane operations listener (`127.0.0.1:3901`) keeps the profile observable.
 - Cross-tenant runtime-assignment publication records a durable
@@ -159,7 +159,7 @@ approval. Normative requirements are owned by `../sdkwork-specs`.
 - Let's Encrypt account credentials are persisted encrypted (AES-256-GCM under the process
   secret key, atomic file commit, `0600`) and reused across issuances and restarts, avoiding
   per-operation CA account creation and its rate limits. The runtime requires
-  `SDKWORK_WEB_ACME_ACCOUNT_ROOT` in production-like environments and falls back to process
+  `SDKWORK_WEBSERVER_ACME_ACCOUNT_ROOT` in production-like environments and falls back to process
   memory only for development.
 - Certificate revocation (`POST /backend/v3/api/certificates/{certificateId}/revoke`) is
   synchronous and CA-acknowledged: the ACME account restores from the durable store, the CA
@@ -171,7 +171,7 @@ approval. Normative requirements are owned by `../sdkwork-specs`.
   `renew_before_days` window.
 - Self-hosted TLS activation: after each successful certificate operation the worker projects the
   node's listener certificate bindings into versioned material files
-  (`SDKWORK_WEB_TLS_MATERIAL_ROOT/<version-uuid>/fullchain.pem + privkey.pem`, atomic, `0600`
+  (`SDKWORK_WEBSERVER_TLS_MATERIAL_ROOT/<version-uuid>/fullchain.pem + privkey.pem`, atomic, `0600`
   private keys) and publishes a monotonic `tls-runtime.json` snapshot; the data plane's
   `FileTlsRuntimeController` hot-loads the revision with fingerprint, validity, SNI, and ALPN
   verification and A/B recovery slots. HTTP-01 challenges are served by the data plane listener

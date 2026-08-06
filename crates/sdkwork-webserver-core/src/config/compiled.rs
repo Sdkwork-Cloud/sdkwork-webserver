@@ -204,9 +204,8 @@ impl CompiledWebServerApp {
             HashMap::new();
         for (host_index, virtual_host) in config.virtual_hosts.iter().enumerate() {
             for listener_ref in &virtual_host.listener_refs {
-                let (exact_hosts, wildcard_hosts) = listener_hosts
-                    .entry(listener_ref.as_str())
-                    .or_default();
+                let (exact_hosts, wildcard_hosts) =
+                    listener_hosts.entry(listener_ref.as_str()).or_default();
                 for server_name in &virtual_host.server_names {
                     let normalized = normalize_server_name(server_name).ok_or_else(|| {
                         validation_error(
@@ -359,9 +358,7 @@ impl CompiledWebServerApp {
                 // constant-time map lookup on `host.split_once('.')`.
                 normalized_host.as_deref().and_then(|host| {
                     host.split_once('.')
-                        .and_then(|(label, remainder)| {
-                            (!label.is_empty()).then_some(remainder)
-                        })
+                        .and_then(|(label, remainder)| (!label.is_empty()).then_some(remainder))
                         .and_then(|suffix| listener.wildcard_hosts.get(suffix).copied())
                 })
             })

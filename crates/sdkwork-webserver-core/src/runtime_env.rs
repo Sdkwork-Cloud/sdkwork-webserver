@@ -12,8 +12,8 @@ pub fn env_test_lock() -> std::sync::MutexGuard<'static, ()> {
 }
 
 pub fn web_environment_name() -> String {
-    std::env::var("SDKWORK_WEB_ENVIRONMENT")
-        .or_else(|_| std::env::var("SDKWORK_WEB_CONFIG_PROFILE"))
+    std::env::var("SDKWORK_WEBSERVER_ENVIRONMENT")
+        .or_else(|_| std::env::var("SDKWORK_WEBSERVER_CONFIG_PROFILE"))
         .unwrap_or_else(|_| "development".to_string())
         .to_ascii_lowercase()
 }
@@ -33,7 +33,7 @@ fn env_truthy(key: &str) -> bool {
 }
 
 pub fn web_dev_auth_bypass_enabled() -> bool {
-    env_truthy("SDKWORK_WEB_DEV_AUTH_BYPASS")
+    env_truthy("SDKWORK_WEBSERVER_DEV_AUTH_BYPASS")
 }
 
 pub fn web_use_dev_inline_auth_resolver() -> bool {
@@ -60,8 +60,8 @@ mod tests {
     #[test]
     fn production_never_uses_dev_inline_auth() {
         let _guard = env_test_lock();
-        with_env("SDKWORK_WEB_ENVIRONMENT", Some("production"), || {
-            with_env("SDKWORK_WEB_DEV_AUTH_BYPASS", Some("true"), || {
+        with_env("SDKWORK_WEBSERVER_ENVIRONMENT", Some("production"), || {
+            with_env("SDKWORK_WEBSERVER_DEV_AUTH_BYPASS", Some("true"), || {
                 assert!(!web_use_dev_inline_auth_resolver());
             });
         });
