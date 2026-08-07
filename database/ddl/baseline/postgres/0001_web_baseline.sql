@@ -12,7 +12,7 @@
 -- Author: SDKWork Web Server
 -- Date: 2026-06-14
 
-CREATE TABLE web_site (
+CREATE TABLE IF NOT EXISTS web_site (
     id              BIGINT       NOT NULL,
     uuid            VARCHAR(64)  NOT NULL,
     tenant_id       BIGINT       NOT NULL DEFAULT 0,
@@ -55,24 +55,24 @@ COMMENT ON COLUMN web_site.status IS 'Status: 0=draft, 1=active, 2=paused, 3=arc
 COMMENT ON COLUMN web_site.runtime_config IS 'Runtime configuration JSON';
 COMMENT ON COLUMN web_site.version IS 'Optimistic concurrency version';
 
-CREATE INDEX idx_web_site_tenant_status_updated
+CREATE INDEX IF NOT EXISTS idx_web_site_tenant_status_updated
     ON web_site (tenant_id, organization_id, status, updated_at DESC);
 
-CREATE INDEX idx_web_site_tenant_application_type_updated
+CREATE INDEX IF NOT EXISTS idx_web_site_tenant_application_type_updated
     ON web_site (tenant_id, application_type, updated_at DESC);
 
-CREATE INDEX idx_web_site_user_updated
+CREATE INDEX IF NOT EXISTS idx_web_site_user_updated
     ON web_site (tenant_id, user_id, updated_at DESC);
 
 -- Active slugs are unique per tenant; soft-deleted sites release their slug.
-CREATE UNIQUE INDEX uk_web_site_slug
+CREATE UNIQUE INDEX IF NOT EXISTS uk_web_site_slug
     ON web_site (tenant_id, slug)
     WHERE deleted_at IS NULL;
 
-CREATE INDEX idx_web_site_slug
+CREATE INDEX IF NOT EXISTS idx_web_site_slug
     ON web_site (tenant_id, slug);
 
-CREATE TABLE web_root_domain (
+CREATE TABLE IF NOT EXISTS web_root_domain (
     id              BIGINT       NOT NULL,
     uuid            VARCHAR(64)  NOT NULL,
     tenant_id       BIGINT       NOT NULL DEFAULT 0,
@@ -97,14 +97,14 @@ COMMENT ON TABLE web_root_domain IS 'Tenant-owned root-domain Zone';
 COMMENT ON COLUMN web_root_domain.hostname IS 'Explicit normalized root domain';
 COMMENT ON COLUMN web_root_domain.status IS 'Status: 0=pending, 1=active, 2=disabled';
 
-CREATE UNIQUE INDEX uk_web_root_domain_active_hostname
+CREATE UNIQUE INDEX IF NOT EXISTS uk_web_root_domain_active_hostname
     ON web_root_domain (hostname)
     WHERE deleted_at IS NULL;
 
-CREATE INDEX idx_web_root_domain_tenant_updated
+CREATE INDEX IF NOT EXISTS idx_web_root_domain_tenant_updated
     ON web_root_domain (tenant_id, updated_at DESC, id DESC);
 
-CREATE TABLE web_domain (
+CREATE TABLE IF NOT EXISTS web_domain (
     id              BIGINT       NOT NULL,
     uuid            VARCHAR(64)  NOT NULL,
     tenant_id       BIGINT       NOT NULL DEFAULT 0,
@@ -141,23 +141,23 @@ COMMENT ON TABLE web_domain IS 'Root-domain owned hostname asset independent of 
 COMMENT ON COLUMN web_domain.hostname IS 'Normalized lowercase ASCII hostname';
 COMMENT ON COLUMN web_domain.status IS 'Status: 0=pending, 1=active, 2=disabled';
 
-CREATE UNIQUE INDEX uk_web_domain_active_hostname
+CREATE UNIQUE INDEX IF NOT EXISTS uk_web_domain_active_hostname
     ON web_domain (hostname)
     WHERE deleted_at IS NULL;
 
-CREATE INDEX idx_web_domain_tenant_status
+CREATE INDEX IF NOT EXISTS idx_web_domain_tenant_status
     ON web_domain (tenant_id, status, updated_at DESC, id DESC)
     WHERE deleted_at IS NULL;
 
-CREATE INDEX idx_web_domain_root_updated
+CREATE INDEX IF NOT EXISTS idx_web_domain_root_updated
     ON web_domain (tenant_id, root_domain_id, updated_at DESC, id DESC)
     WHERE deleted_at IS NULL;
 
-CREATE INDEX idx_web_domain_user_updated
+CREATE INDEX IF NOT EXISTS idx_web_domain_user_updated
     ON web_domain (tenant_id, user_id, updated_at DESC, id DESC)
     WHERE user_id IS NOT NULL AND deleted_at IS NULL;
 
-CREATE TABLE web_domain_verification (
+CREATE TABLE IF NOT EXISTS web_domain_verification (
     id                BIGINT       NOT NULL,
     uuid              VARCHAR(64)  NOT NULL,
     tenant_id         BIGINT       NOT NULL,
@@ -189,15 +189,15 @@ CREATE TABLE web_domain_verification (
     CONSTRAINT chk_web_domain_verification_attempts CHECK (attempt_count BETWEEN 0 AND 1000)
 );
 
-CREATE UNIQUE INDEX uk_web_domain_verification_active
+CREATE UNIQUE INDEX IF NOT EXISTS uk_web_domain_verification_active
     ON web_domain_verification (domain_id)
     WHERE status IN ('PENDING', 'CHECKING');
 
-CREATE INDEX idx_web_domain_verification_due
+CREATE INDEX IF NOT EXISTS idx_web_domain_verification_due
     ON web_domain_verification (status, next_attempt_at, expires_at, id)
     WHERE status IN ('PENDING', 'CHECKING');
 
-CREATE TABLE web_site_binding (
+CREATE TABLE IF NOT EXISTS web_site_binding (
     id                BIGINT        NOT NULL,
     uuid              VARCHAR(64)   NOT NULL,
     tenant_id         BIGINT        NOT NULL,
@@ -237,23 +237,23 @@ CREATE TABLE web_site_binding (
     )
 );
 
-CREATE UNIQUE INDEX uk_web_site_binding_active_route
+CREATE UNIQUE INDEX IF NOT EXISTS uk_web_site_binding_active_route
     ON web_site_binding (domain_id, environment, path_prefix)
     WHERE status IN ('PENDING', 'ACTIVE', 'PAUSED') AND deleted_at IS NULL;
 
-CREATE UNIQUE INDEX uk_web_site_binding_primary
+CREATE UNIQUE INDEX IF NOT EXISTS uk_web_site_binding_primary
     ON web_site_binding (site_id, environment)
     WHERE is_primary = true AND status = 'ACTIVE' AND deleted_at IS NULL;
 
-CREATE INDEX idx_web_site_binding_site_status
+CREATE INDEX IF NOT EXISTS idx_web_site_binding_site_status
     ON web_site_binding (tenant_id, site_id, environment, status, updated_at DESC, id DESC)
     WHERE deleted_at IS NULL;
 
-CREATE INDEX idx_web_site_binding_domain_status
+CREATE INDEX IF NOT EXISTS idx_web_site_binding_domain_status
     ON web_site_binding (tenant_id, domain_id, environment, status, updated_at DESC, id DESC)
     WHERE deleted_at IS NULL;
 
-CREATE TABLE web_tls_policy (
+CREATE TABLE IF NOT EXISTS web_tls_policy (
     id                  BIGINT       NOT NULL,
     uuid                VARCHAR(64)  NOT NULL,
     tenant_id           BIGINT       NOT NULL,
@@ -285,7 +285,7 @@ CREATE TABLE web_tls_policy (
     CONSTRAINT chk_web_tls_policy_status CHECK (status IN ('ACTIVE', 'PAUSED', 'ARCHIVED'))
 );
 
-CREATE UNIQUE INDEX uk_web_tls_policy_active_binding
+CREATE UNIQUE INDEX IF NOT EXISTS uk_web_tls_policy_active_binding
     ON web_tls_policy (site_binding_id)
     WHERE status = 'ACTIVE' AND deleted_at IS NULL;
 
@@ -295,7 +295,7 @@ CREATE UNIQUE INDEX uk_web_tls_policy_active_binding
 -- Author: SDKWork Web Server
 -- Date: 2026-06-14
 
-CREATE TABLE web_nginx_config (
+CREATE TABLE IF NOT EXISTS web_nginx_config (
     id              BIGINT       NOT NULL,
     uuid            VARCHAR(64)  NOT NULL,
     tenant_id       BIGINT       NOT NULL DEFAULT 0,
@@ -327,16 +327,16 @@ COMMENT ON COLUMN web_nginx_config.version_no IS 'Config revision number';
 COMMENT ON COLUMN web_nginx_config.deployed_at IS 'Deployed at timestamp';
 COMMENT ON COLUMN web_nginx_config.status IS 'Status: 0=draft, 1=active, 2=deploying, 3=failed';
 
-CREATE INDEX idx_web_nginx_config_site_active
+CREATE INDEX IF NOT EXISTS idx_web_nginx_config_site_active
     ON web_nginx_config (site_id, is_active);
 
-CREATE INDEX idx_web_nginx_config_type_status
+CREATE INDEX IF NOT EXISTS idx_web_nginx_config_type_status
     ON web_nginx_config (config_type, status);
 
-CREATE INDEX idx_web_nginx_config_tenant_updated
+CREATE INDEX IF NOT EXISTS idx_web_nginx_config_tenant_updated
     ON web_nginx_config (tenant_id, updated_at DESC, id DESC);
 
-CREATE TABLE web_certificate (
+CREATE TABLE IF NOT EXISTS web_certificate (
     id                      BIGINT       NOT NULL,
     uuid                    VARCHAR(64)  NOT NULL,
     tenant_id               BIGINT       NOT NULL,
@@ -371,19 +371,19 @@ COMMENT ON COLUMN web_certificate.auto_renew IS 'Whether auto-renewal is enabled
 COMMENT ON COLUMN web_certificate.renewal_status IS 'Renewal status: 0=idle, 1=renewing, 2=pending, 3=failed';
 COMMENT ON COLUMN web_certificate.status IS 'Asset status: 0=pending, 1=issued, 2=expired, 3=revoked, 4=archived';
 
-CREATE INDEX idx_web_certificate_renewal
+CREATE INDEX IF NOT EXISTS idx_web_certificate_renewal
     ON web_certificate (tenant_id, renewal_status, updated_at, id)
     WHERE auto_renew = true AND status IN (1, 2) AND deleted_at IS NULL;
 
-CREATE INDEX idx_web_certificate_tenant_updated
+CREATE INDEX IF NOT EXISTS idx_web_certificate_tenant_updated
     ON web_certificate (tenant_id, updated_at DESC, id DESC)
     WHERE deleted_at IS NULL;
 
-CREATE INDEX idx_web_certificate_user_updated
+CREATE INDEX IF NOT EXISTS idx_web_certificate_user_updated
     ON web_certificate (tenant_id, user_id, updated_at DESC, id DESC)
     WHERE user_id IS NOT NULL AND deleted_at IS NULL;
 
-CREATE TABLE web_certificate_identifier (
+CREATE TABLE IF NOT EXISTS web_certificate_identifier (
     id              BIGINT       NOT NULL,
     uuid            VARCHAR(64)  NOT NULL,
     tenant_id       BIGINT       NOT NULL,
@@ -405,10 +405,10 @@ CREATE TABLE web_certificate_identifier (
     CONSTRAINT chk_web_certificate_identifier_position CHECK (position BETWEEN 0 AND 7)
 );
 
-CREATE INDEX idx_web_certificate_identifier_domain
+CREATE INDEX IF NOT EXISTS idx_web_certificate_identifier_domain
     ON web_certificate_identifier (tenant_id, domain_id, certificate_id);
 
-CREATE TABLE web_certificate_version (
+CREATE TABLE IF NOT EXISTS web_certificate_version (
     id                 BIGINT        NOT NULL,
     uuid               VARCHAR(64)   NOT NULL,
     tenant_id          BIGINT        NOT NULL,
@@ -448,10 +448,10 @@ CREATE TABLE web_certificate_version (
     )
 );
 
-CREATE INDEX idx_web_certificate_version_lifecycle
+CREATE INDEX IF NOT EXISTS idx_web_certificate_version_lifecycle
     ON web_certificate_version (tenant_id, status, not_after, id);
 
-CREATE TABLE web_certificate_secret_bundle (
+CREATE TABLE IF NOT EXISTS web_certificate_secret_bundle (
     id                     BIGINT       NOT NULL,
     uuid                   VARCHAR(64)  NOT NULL,
     tenant_id              BIGINT       NOT NULL,
@@ -472,7 +472,7 @@ CREATE TABLE web_certificate_secret_bundle (
     )
 );
 
-CREATE TABLE web_certificate_operation (
+CREATE TABLE IF NOT EXISTS web_certificate_operation (
     id                   BIGINT       NOT NULL,
     uuid                 VARCHAR(64)  NOT NULL,
     tenant_id            BIGINT       NOT NULL,
@@ -522,26 +522,29 @@ COMMENT ON TABLE web_certificate_operation IS 'Durable certificate issuance and 
 COMMENT ON COLUMN web_certificate_operation.idempotency_key_hash IS 'SHA-256 of the tenant, actor, operation scope, and raw Idempotency-Key; raw keys are never stored';
 COMMENT ON COLUMN web_certificate_operation.request_sha256 IS 'Canonical request fingerprint used to reject conflicting idempotency-key replay';
 
-CREATE UNIQUE INDEX uk_web_certificate_operation_idempotency
+CREATE UNIQUE INDEX IF NOT EXISTS uk_web_certificate_operation_idempotency
     ON web_certificate_operation (tenant_id, idempotency_key_hash)
     WHERE idempotency_key_hash IS NOT NULL;
 
-CREATE UNIQUE INDEX uk_web_certificate_operation_active_certificate
+CREATE UNIQUE INDEX IF NOT EXISTS uk_web_certificate_operation_active_certificate
     ON web_certificate_operation (tenant_id, certificate_id)
     WHERE status IN ('PENDING', 'RUNNING');
 
-CREATE INDEX idx_web_certificate_operation_claim
+CREATE INDEX IF NOT EXISTS idx_web_certificate_operation_claim
     ON web_certificate_operation (next_attempt_at, id)
     WHERE status IN ('PENDING', 'RUNNING');
 
-CREATE INDEX idx_web_certificate_operation_certificate_history
+CREATE INDEX IF NOT EXISTS idx_web_certificate_operation_certificate_history
     ON web_certificate_operation (tenant_id, certificate_id, created_at DESC, id DESC);
 
-ALTER TABLE web_certificate
-    ADD CONSTRAINT fk_web_certificate_current_version
-        FOREIGN KEY (id, current_version_id) REFERENCES web_certificate_version(certificate_id, id);
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_web_certificate_current_version') THEN
+        ALTER TABLE web_certificate ADD CONSTRAINT fk_web_certificate_current_version FOREIGN KEY (id, current_version_id) REFERENCES web_certificate_version(certificate_id, id);
+    END IF;
+END $$;
 
-CREATE TABLE web_listener_certificate_binding (
+CREATE TABLE IF NOT EXISTS web_listener_certificate_binding (
     id                     BIGINT      NOT NULL,
     uuid                   VARCHAR(64) NOT NULL,
     tenant_id              BIGINT      NOT NULL,
@@ -581,25 +584,25 @@ CREATE TABLE web_listener_certificate_binding (
     )
 );
 
-CREATE UNIQUE INDEX uk_web_listener_certificate_binding_active_algorithm
+CREATE UNIQUE INDEX IF NOT EXISTS uk_web_listener_certificate_binding_active_algorithm
     ON web_listener_certificate_binding (site_binding_id, key_algorithm)
     WHERE status <> 'ARCHIVED' AND deleted_at IS NULL;
 
-CREATE UNIQUE INDEX uk_web_listener_certificate_binding_default
+CREATE UNIQUE INDEX IF NOT EXISTS uk_web_listener_certificate_binding_default
     ON web_listener_certificate_binding (site_binding_id)
     WHERE is_default = true AND status <> 'ARCHIVED' AND deleted_at IS NULL;
 
-CREATE INDEX idx_web_listener_certificate_binding_certificate
+CREATE INDEX IF NOT EXISTS idx_web_listener_certificate_binding_certificate
     ON web_listener_certificate_binding (tenant_id, certificate_id, status)
     WHERE deleted_at IS NULL;
 
 -- List-query hardening: listener binding listing orders by
 -- (is_default DESC, priority ASC, id ASC) per site binding.
-CREATE INDEX idx_web_listener_certificate_binding_site_sort
+CREATE INDEX IF NOT EXISTS idx_web_listener_certificate_binding_site_sort
     ON web_listener_certificate_binding (site_binding_id, is_default, priority, id)
     WHERE deleted_at IS NULL;
 
-CREATE TABLE web_source_version (
+CREATE TABLE IF NOT EXISTS web_source_version (
     id              BIGINT       NOT NULL,
     uuid            VARCHAR(64)  NOT NULL,
     tenant_id       BIGINT       NOT NULL,
@@ -632,15 +635,15 @@ CREATE TABLE web_source_version (
 COMMENT ON TABLE web_source_version IS 'Immutable Drive-backed application source version';
 COMMENT ON COLUMN web_source_version.status IS 'Status: 0=preparing, 1=ready, 2=failed, 3=pruned';
 
-CREATE INDEX idx_web_source_version_site_created
+CREATE INDEX IF NOT EXISTS idx_web_source_version_site_created
     ON web_source_version (site_id, created_at DESC);
 
 -- List-query hardening: source-version listing filters by tenant then site and
 -- sorts by created_at DESC (PAGINATION_SPEC/DATABASE_SPEC §20.5).
-CREATE INDEX idx_web_source_version_tenant_site_created
+CREATE INDEX IF NOT EXISTS idx_web_source_version_tenant_site_created
     ON web_source_version (tenant_id, site_id, created_at DESC);
 
-CREATE INDEX idx_web_source_version_retention
+CREATE INDEX IF NOT EXISTS idx_web_source_version_retention
     ON web_source_version (tenant_id, site_id, status, created_at DESC);
 
 -- source: migrations/005_create_web_deployment.sql
@@ -649,7 +652,7 @@ CREATE INDEX idx_web_source_version_retention
 -- Author: SDKWork Web Server
 -- Date: 2026-06-14
 
-CREATE TABLE web_deployment (
+CREATE TABLE IF NOT EXISTS web_deployment (
     id              BIGINT       NOT NULL,
     uuid            VARCHAR(64)  NOT NULL,
     tenant_id       BIGINT       NOT NULL DEFAULT 0,
@@ -692,21 +695,21 @@ COMMENT ON COLUMN web_deployment.duration_ms IS 'Deployment duration in millisec
 COMMENT ON COLUMN web_deployment.rollback_from IS 'Source deployment ID for rollback';
 COMMENT ON COLUMN web_deployment.idempotency_key IS 'Client-provided idempotency key';
 
-CREATE INDEX idx_web_deployment_site_created
+CREATE INDEX IF NOT EXISTS idx_web_deployment_site_created
     ON web_deployment (site_id, created_at DESC);
 
 -- List-query hardening: deployment listing filters by tenant then site and
 -- sorts by created_at DESC (PAGINATION_SPEC/DATABASE_SPEC §20.5).
-CREATE INDEX idx_web_deployment_tenant_site_created
+CREATE INDEX IF NOT EXISTS idx_web_deployment_tenant_site_created
     ON web_deployment (tenant_id, site_id, created_at DESC);
 
-CREATE INDEX idx_web_deployment_source_version
+CREATE INDEX IF NOT EXISTS idx_web_deployment_source_version
     ON web_deployment (source_version_id);
 
-CREATE INDEX idx_web_deployment_tenant_status
+CREATE INDEX IF NOT EXISTS idx_web_deployment_tenant_status
     ON web_deployment (tenant_id, status, created_at DESC);
 
-CREATE INDEX idx_web_deployment_status
+CREATE INDEX IF NOT EXISTS idx_web_deployment_status
     ON web_deployment (status)
     WHERE status IN (0, 1, 2);
 
@@ -716,7 +719,7 @@ CREATE INDEX idx_web_deployment_status
 -- Author: SDKWork Web Server
 -- Date: 2026-06-14
 
-CREATE TABLE web_env_variable (
+CREATE TABLE IF NOT EXISTS web_env_variable (
     id              BIGINT       NOT NULL,
     uuid            VARCHAR(64)  NOT NULL,
     tenant_id       BIGINT       NOT NULL DEFAULT 0,
@@ -736,7 +739,7 @@ CREATE TABLE web_env_variable (
 
 -- Active environment variables are unique per site and environment; deactivated
 -- (soft-deleted) variables release their key so it can be re-created.
-CREATE UNIQUE INDEX uk_web_env_variable_active_key
+CREATE UNIQUE INDEX IF NOT EXISTS uk_web_env_variable_active_key
     ON web_env_variable (site_id, environment, key)
     WHERE status = 1;
 
@@ -746,7 +749,7 @@ COMMENT ON COLUMN web_env_variable.value_encrypted IS 'AES-256-GCM encrypted val
 COMMENT ON COLUMN web_env_variable.is_secret IS 'Whether the value is a secret';
 COMMENT ON COLUMN web_env_variable.environment IS 'Environment name';
 
-CREATE INDEX idx_web_env_variable_site_env
+CREATE INDEX IF NOT EXISTS idx_web_env_variable_site_env
     ON web_env_variable (site_id, environment);
 
 -- source: migrations/007_create_web_health_check.sql
@@ -755,7 +758,7 @@ CREATE INDEX idx_web_env_variable_site_env
 -- Author: SDKWork Web Server
 -- Date: 2026-06-14
 
-CREATE TABLE web_health_check (
+CREATE TABLE IF NOT EXISTS web_health_check (
     id              BIGINT       NOT NULL,
     uuid            VARCHAR(64)  NOT NULL,
     tenant_id       BIGINT       NOT NULL DEFAULT 0,
@@ -783,7 +786,7 @@ COMMENT ON COLUMN web_health_check.check_interval IS 'Check interval in seconds'
 COMMENT ON COLUMN web_health_check.timeout_ms IS 'Check timeout in milliseconds';
 COMMENT ON COLUMN web_health_check.retry_count IS 'Retry count on failure';
 
-CREATE INDEX idx_web_health_check_site
+CREATE INDEX IF NOT EXISTS idx_web_health_check_site
     ON web_health_check (site_id);
 
 -- source: migrations/008_create_web_health_result.sql
@@ -792,7 +795,7 @@ CREATE INDEX idx_web_health_check_site
 -- Author: SDKWork Web Server
 -- Date: 2026-06-14
 
-CREATE TABLE web_health_result (
+CREATE TABLE IF NOT EXISTS web_health_result (
     id              BIGINT       NOT NULL,
     uuid            VARCHAR(64)  NOT NULL,
     tenant_id       BIGINT       NOT NULL DEFAULT 0,
@@ -817,10 +820,10 @@ COMMENT ON COLUMN web_health_result.response_ms IS 'Response time in millisecond
 COMMENT ON COLUMN web_health_result.status_code IS 'HTTP status code';
 COMMENT ON COLUMN web_health_result.checked_at IS 'Check execution timestamp';
 
-CREATE INDEX idx_web_health_result_check_time
+CREATE INDEX IF NOT EXISTS idx_web_health_result_check_time
     ON web_health_result (health_check_id, checked_at DESC);
 
-CREATE INDEX idx_web_health_result_site_time
+CREATE INDEX IF NOT EXISTS idx_web_health_result_site_time
     ON web_health_result (site_id, checked_at DESC);
 
 -- source: migrations/009_create_web_audit_log.sql
@@ -829,7 +832,7 @@ CREATE INDEX idx_web_health_result_site_time
 -- Author: SDKWork Web Server
 -- Date: 2026-06-14
 
-CREATE TABLE web_audit_log (
+CREATE TABLE IF NOT EXISTS web_audit_log (
     id              BIGINT       NOT NULL,
     uuid            VARCHAR(64)  NOT NULL,
     tenant_id       BIGINT       NOT NULL DEFAULT 0,
@@ -857,16 +860,16 @@ COMMENT ON COLUMN web_audit_log.target_type IS 'Target resource type';
 COMMENT ON COLUMN web_audit_log.target_id IS 'Target resource ID';
 COMMENT ON COLUMN web_audit_log.changes IS 'Field changes JSON: {"field": {"old": x, "new": y}}';
 
-CREATE INDEX idx_web_audit_log_target
+CREATE INDEX IF NOT EXISTS idx_web_audit_log_target
     ON web_audit_log (target_type, target_id, created_at DESC);
 
-CREATE INDEX idx_web_audit_log_operator
+CREATE INDEX IF NOT EXISTS idx_web_audit_log_operator
     ON web_audit_log (operator_id, created_at DESC);
 
-CREATE INDEX idx_web_audit_log_tenant_action
+CREATE INDEX IF NOT EXISTS idx_web_audit_log_tenant_action
     ON web_audit_log (tenant_id, action, created_at DESC);
 
-CREATE INDEX idx_web_audit_log_tenant_created
+CREATE INDEX IF NOT EXISTS idx_web_audit_log_tenant_created
     ON web_audit_log (tenant_id, created_at DESC, id DESC);
 
 -- source: migrations/010_create_web_server.sql
@@ -875,7 +878,7 @@ CREATE INDEX idx_web_audit_log_tenant_created
 -- Author: SDKWork Web Server
 -- Date: 2026-06-23
 
-CREATE TABLE web_server (
+CREATE TABLE IF NOT EXISTS web_server (
     id              BIGINT       NOT NULL,
     uuid            VARCHAR(64)  NOT NULL,
     tenant_id       BIGINT       NOT NULL DEFAULT 0,
@@ -899,21 +902,21 @@ CREATE TABLE web_server (
 COMMENT ON TABLE web_server IS 'Web edge server registry';
 COMMENT ON COLUMN web_server.status IS 'Status: 0=offline, 1=online, 2=deploying, 3=error, 4=maintenance';
 
-CREATE INDEX idx_web_server_tenant_status
+CREATE INDEX IF NOT EXISTS idx_web_server_tenant_status
     ON web_server (tenant_id, status, updated_at DESC);
 
 -- List-query hardening: Web Node keyset listing orders by (updated_at DESC,
 -- id DESC) without a status predicate; this index covers the keyset seek.
-CREATE INDEX idx_web_server_tenant_updated
+CREATE INDEX IF NOT EXISTS idx_web_server_tenant_updated
     ON web_server (tenant_id, updated_at DESC);
 
 -- Node credential lookup: agent token hashes are stored in metadata and must
 -- be indexed for bounded authentication, otherwise every node heartbeat scans
 -- the whole server registry.
-CREATE INDEX idx_web_server_metadata_gin
+CREATE INDEX IF NOT EXISTS idx_web_server_metadata_gin
     ON web_server USING GIN (metadata);
 
-CREATE TABLE web_certificate_node_state (
+CREATE TABLE IF NOT EXISTS web_certificate_node_state (
     id                     BIGINT       NOT NULL,
     uuid                   VARCHAR(64)  NOT NULL,
     tenant_id              BIGINT       NOT NULL,
@@ -952,13 +955,13 @@ CREATE TABLE web_certificate_node_state (
     )
 );
 
-CREATE INDEX idx_web_certificate_node_state_version
+CREATE INDEX IF NOT EXISTS idx_web_certificate_node_state_version
     ON web_certificate_node_state (tenant_id, certificate_version_id, state, server_id);
 
-CREATE INDEX idx_web_certificate_node_state_server
+CREATE INDEX IF NOT EXISTS idx_web_certificate_node_state_server
     ON web_certificate_node_state (tenant_id, server_id, state, observed_at DESC);
 
-CREATE TABLE web_runtime_assignment (
+CREATE TABLE IF NOT EXISTS web_runtime_assignment (
     id                  BIGINT        NOT NULL,
     uuid                VARCHAR(64)   NOT NULL,
     tenant_id           BIGINT        NOT NULL,
@@ -997,10 +1000,10 @@ CREATE TABLE web_runtime_assignment (
 COMMENT ON TABLE web_runtime_assignment IS
     'Immutable Website runtime-set assignment delivered to one Web Node environment';
 
-CREATE INDEX idx_web_runtime_assignment_current
+CREATE INDEX IF NOT EXISTS idx_web_runtime_assignment_current
     ON web_runtime_assignment (tenant_id, server_id, environment, generation DESC);
 
-CREATE TABLE web_runtime_observation (
+CREATE TABLE IF NOT EXISTS web_runtime_observation (
     id              BIGINT        NOT NULL,
     uuid            VARCHAR(64)   NOT NULL,
     tenant_id       BIGINT        NOT NULL,
@@ -1033,10 +1036,10 @@ CREATE TABLE web_runtime_observation (
 COMMENT ON TABLE web_runtime_observation IS
     'Append-only Web Node activation observations for an immutable runtime assignment';
 
-CREATE INDEX idx_web_runtime_observation_assignment
+CREATE INDEX IF NOT EXISTS idx_web_runtime_observation_assignment
     ON web_runtime_observation (tenant_id, assignment_id, id DESC);
 
-CREATE INDEX idx_web_runtime_observation_node_time
+CREATE INDEX IF NOT EXISTS idx_web_runtime_observation_node_time
     ON web_runtime_observation (tenant_id, server_id, observed_at DESC);
 
 -- folded migration: migrations/postgres/0001_web_schema_hardening.up.sql
@@ -1070,7 +1073,7 @@ BEGIN
     END IF;
 END
 $$;
-CREATE UNIQUE INDEX uk_web_site_slug
+CREATE UNIQUE INDEX IF NOT EXISTS uk_web_site_slug
     ON web_site (tenant_id, slug)
     WHERE deleted_at IS NULL;
 
@@ -1308,7 +1311,7 @@ BEGIN
     END IF;
 END
 $$;
-CREATE UNIQUE INDEX uk_web_listener_certificate_binding_active_algorithm
+CREATE UNIQUE INDEX IF NOT EXISTS uk_web_listener_certificate_binding_active_algorithm
     ON web_listener_certificate_binding (site_binding_id, key_algorithm)
     WHERE status <> 'ARCHIVED' AND deleted_at IS NULL;
 
@@ -1327,7 +1330,7 @@ BEGIN
     END IF;
 END
 $$;
-CREATE UNIQUE INDEX uk_web_listener_certificate_binding_default
+CREATE UNIQUE INDEX IF NOT EXISTS uk_web_listener_certificate_binding_default
     ON web_listener_certificate_binding (site_binding_id)
     WHERE is_default = true AND status <> 'ARCHIVED' AND deleted_at IS NULL;
 
