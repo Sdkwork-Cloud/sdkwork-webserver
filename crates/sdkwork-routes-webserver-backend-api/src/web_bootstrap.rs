@@ -11,8 +11,9 @@ use sdkwork_routes_webserver_common::{
 use sdkwork_web_axum::{with_web_request_context, WebFrameworkLayer};
 use sdkwork_web_bootstrap::WebFrameworkBuilder;
 use sdkwork_web_core::{
-    DefaultWebRequestContextResolver, DomainContextInjector, HttpMetricsRegistry,
-    WebRequestContext, WebRequestContextProfile, WebRequestContextResolver,
+    DefaultWebRequestContextResolver, DomainContextInjector, HttpMetricsRegistry, WebEnvironment,
+    WebFrameworkOptionalFeatures, WebRequestContext, WebRequestContextProfile,
+    WebRequestContextResolver,
 };
 use sdkwork_webserver_contract::{MachineCredentialAuthenticator, WebBackendRequestContext};
 
@@ -53,11 +54,18 @@ fn web_backend_context_from_web_request(
 fn build_web_backend_api_framework_layer<R>(
     resolver: R,
     metrics: Option<Arc<HttpMetricsRegistry>>,
+    audit_emitter: Arc<dyn sdkwork_web_core::AuditEmitter>,
+    security_event_emitter: Arc<dyn sdkwork_web_core::SecurityEventEmitter>,
 ) -> WebFrameworkLayer<R>
 where
     R: WebRequestContextResolver + Clone,
 {
     let (environment, security_policy) = web_framework_runtime_policy_from_env();
+    // Control-plane surfaces (agent/backend/internal) assemble with the
+    // standalone control-plane production features in production so the
+    // framework production validation accepts the tenant-bound machine
+    // resolver and the SQLx-backed stores.
+    let production_control_plane = matches!(environment, WebEnvironment::Prod);
     let route_manifest = backend_route_manifest();
     let mut builder = WebFrameworkBuilder::new(resolver)
         .profile(WebRequestContextProfile {
@@ -69,7 +77,14 @@ where
         .route_manifest(route_manifest.clone())
         .authorization_policy(Arc::new(IamAuthorizationPolicy::new(route_manifest)))
         .tenant_isolation_policy(Arc::new(WebServerTenantIsolationPolicy))
-        .domain_injector(Arc::new(WebBackendContextInjector));
+        .domain_injector(Arc::new(WebBackendContextInjector))
+        .audit_emitter(audit_emitter)
+        .security_event_emitter(security_event_emitter);
+    if production_control_plane {
+        builder = builder.optional_features(
+            WebFrameworkOptionalFeatures::production_sqlx().control_plane_standalone(),
+        );
+    }
     if let Some(metrics) = metrics {
         builder = builder.metrics_registry(metrics);
     }
@@ -79,17 +94,34 @@ where
 pub async fn wrap_router_with_web_framework_from_env(
     router: Router,
     service: Arc<WebService>,
+    audit_emitter: Arc<dyn sdkwork_web_core::AuditEmitter>,
+    security_event_emitter: Arc<dyn sdkwork_web_core::SecurityEventEmitter>,
 ) -> Router {
-    wrap_router_with_web_framework_from_env_and_optional_metrics(router, service, None).await
+    wrap_router_with_web_framework_from_env_and_optional_metrics(
+        router,
+        service,
+        None,
+        audit_emitter,
+        security_event_emitter,
+    )
+    .await
 }
 
 pub async fn wrap_router_with_web_framework_from_env_and_metrics(
     router: Router,
     service: Arc<WebService>,
     metrics: Arc<HttpMetricsRegistry>,
+    audit_emitter: Arc<dyn sdkwork_web_core::AuditEmitter>,
+    security_event_emitter: Arc<dyn sdkwork_web_core::SecurityEventEmitter>,
 ) -> Router {
-    wrap_router_with_web_framework_from_env_and_optional_metrics(router, service, Some(metrics))
-        .await
+    wrap_router_with_web_framework_from_env_and_optional_metrics(
+        router,
+        service,
+        Some(metrics),
+        audit_emitter,
+        security_event_emitter,
+    )
+    .await
 }
 
 /// Wraps the Web Node agent router in a machine-only framework layer.
@@ -100,6 +132,8 @@ pub async fn wrap_router_with_web_framework_from_env_and_metrics(
 pub async fn wrap_agent_router_with_web_framework_from_env(
     router: Router,
     service: Arc<WebService>,
+    audit_emitter: Arc<dyn sdkwork_web_core::AuditEmitter>,
+    security_event_emitter: Arc<dyn sdkwork_web_core::SecurityEventEmitter>,
 ) -> Router {
     let machine_authenticator: Arc<dyn MachineCredentialAuthenticator> = service.clone();
     let correlated = with_problem_correlation(router).layer(Extension(service));
@@ -112,6 +146,8 @@ pub async fn wrap_agent_router_with_web_framework_from_env(
                     machine_authenticator,
                 ),
                 None,
+                audit_emitter,
+                security_event_emitter,
             ),
         ),
         WebAuthMode::ProductionFailClosed => with_web_request_context(
@@ -122,6 +158,8 @@ pub async fn wrap_agent_router_with_web_framework_from_env(
                     machine_authenticator,
                 ),
                 None,
+                audit_emitter,
+                security_event_emitter,
             ),
         ),
         WebAuthMode::IamDatabase(resolver) => with_web_request_context(
@@ -132,6 +170,8 @@ pub async fn wrap_agent_router_with_web_framework_from_env(
                     machine_authenticator,
                 ),
                 None,
+                audit_emitter,
+                security_event_emitter,
             ),
         ),
     }
@@ -141,6 +181,8 @@ async fn wrap_router_with_web_framework_from_env_and_optional_metrics(
     router: Router,
     service: Arc<WebService>,
     metrics: Option<Arc<HttpMetricsRegistry>>,
+    audit_emitter: Arc<dyn sdkwork_web_core::AuditEmitter>,
+    security_event_emitter: Arc<dyn sdkwork_web_core::SecurityEventEmitter>,
 ) -> Router {
     // Clone service for the resolver decorator before moving the original into Extension.
     let service_for_resolver = service.clone();
@@ -157,6 +199,8 @@ async fn wrap_router_with_web_framework_from_env_and_optional_metrics(
                     machine_authenticator.clone(),
                 ),
                 metrics,
+                audit_emitter.clone(),
+                security_event_emitter.clone(),
             ),
         ),
         WebAuthMode::ProductionFailClosed => with_web_request_context(
@@ -167,6 +211,8 @@ async fn wrap_router_with_web_framework_from_env_and_optional_metrics(
                     machine_authenticator.clone(),
                 ),
                 metrics,
+                audit_emitter.clone(),
+                security_event_emitter.clone(),
             ),
         ),
         WebAuthMode::IamDatabase(resolver) => with_web_request_context(
@@ -174,6 +220,8 @@ async fn wrap_router_with_web_framework_from_env_and_optional_metrics(
             build_web_backend_api_framework_layer(
                 MachineCredentialResolverDecorator::new(resolver, machine_authenticator),
                 metrics,
+                audit_emitter,
+                security_event_emitter,
             ),
         ),
     }

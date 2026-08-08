@@ -10,7 +10,7 @@ prefix so a policy change creates a new object instead of mutating an active rev
 
 ## Required Secrets
 
-Create `sdkwork-web-server-runtime` through the approved secret manager integration with these keys:
+Create `sdkwork-webserver-runtime` through the approved secret manager integration with these keys:
 
 | Key | Purpose |
 | --- | --- |
@@ -38,7 +38,7 @@ contain:
 | `website-provider-events.json` | Loopback provider-event subscription config for this tenant scope |
 | referenced signing-secret keys | The Node's Drive derivation secret and Knowledgebase outbox secrets referenced by the event config |
 
-The event config uses `/run/secrets/sdkwork-web-node/<key>` paths for its signing secrets and
+The event config uses `/run/secrets/sdkwork-webserver-node/<key>` paths for its signing secrets and
 `/var/lib/sdkwork/webserver/website-provider-events` for checkpoints. Do not reuse a Node Secret across
 StatefulSets. Do not commit a Secret manifest or plaintext values. Encryption roots and Node/provider
 credentials must be independent, randomly generated, least-privilege, rotation-governed values.
@@ -88,7 +88,7 @@ Per-WebsiteRoot verification tokens are derived in memory and must not be stored
    `network-policy.yaml`.
 7. Configure the reviewed internal HTTPS ingress or service mesh to send exact owner callback
    requests at `/nodes/{nodeUuid}/provider-events/drive-website-events` to
-   `sdkwork-web-events-<tenant-fleet-name>-<node-name>:3811` for that exact Node. Preserve the path;
+   `sdkwork-webserver-events-<tenant-fleet-name>-<node-name>:3811` for that exact Node. Preserve the path;
    the unqualified `/provider-events/{subscriptionId}` route is reserved for Knowledgebase. A fleet
    Service must never randomly distribute signed callbacks because Drive channels, signing
    secrets, and checkpoints are Node-bound. The authored relay sidecar preserves the TCP byte
@@ -121,7 +121,7 @@ availability-zone spread is preferred without making a single-zone cluster perma
 unschedulable.
 
 Public website HTTP is available only through the per-tenant ClusterIP
-`sdkwork-web-website-<tenant-fleet-name>`. The external load balancer/CDN owns public exposure and
+`sdkwork-webserver-website-<tenant-fleet-name>`. The external load balancer/CDN owns public exposure and
 must route every custom or platform domain to the Service for its assigned tenant fleet before the
 runtime performs Host, Binding, device Variant, Mount, and resource selection. No shared Service
 may select Pods from different tenant scopes. The `sdkwork.com/tenant-fleet` selector enforces this
@@ -149,10 +149,10 @@ storage access.
 
 `certificate-worker.yaml` deploys `sdkwork-webserver-certificate-worker` (exactly one
 replica; the worker id and ACME account credentials are stable process identities). It consumes
-`database-url` and `secret-encryption-key` from `sdkwork-web-server-runtime`, `acme-contact-email`
+`database-url` and `secret-encryption-key` from `sdkwork-webserver-runtime`, `acme-contact-email`
 from the same Secret, and `node-uuid` from the Node Secret of the fleet it serves.
 
-The `sdkwork-web-certificate-state` PVC carries three state roots:
+The `sdkwork-webserver-certificate-state` PVC carries three state roots:
 
 | Root | Purpose |
 | --- | --- |

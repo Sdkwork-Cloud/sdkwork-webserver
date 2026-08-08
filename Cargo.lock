@@ -3972,6 +3972,7 @@ dependencies = [
  "sdkwork-database-sqlx",
  "sdkwork-drive-contract",
  "sdkwork-drive-internal-sdk-generated-rust",
+ "sdkwork-iam-database-host",
  "sdkwork-iam-web-adapter",
  "sdkwork-knowledgebase-internal-sdk",
  "sdkwork-utils-rust",
@@ -4271,7 +4272,7 @@ name = "sdkwork-drive-app-sdk-generated-rust"
 version = "0.1.0"
 dependencies = [
  "http 1.5.0",
- "reqwest 0.12.28",
+ "reqwest 0.13.4",
  "serde",
  "serde_json",
  "thiserror 1.0.69",
@@ -5184,6 +5185,7 @@ dependencies = [
  "sdkwork-database-sqlx",
  "sdkwork-intelligence-webserver-repository-sqlx",
  "sdkwork-intelligence-webserver-service",
+ "sdkwork-webserver-core",
  "tokio",
  "tracing",
  "tracing-subscriber",
@@ -5214,6 +5216,7 @@ dependencies = [
  "serde_json",
  "tempfile",
  "thiserror 2.0.19",
+ "toml 0.8.23",
  "url",
 ]
 

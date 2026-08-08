@@ -9,32 +9,32 @@
 #
 # Run exactly one replica: the worker id must stay stable because operation
 # leases and ACME account credentials are keyed by process identity. The
-# `sdkwork-web-certificate-state` PVC carries the encrypted ACME account
+# `sdkwork-webserver-certificate-state` PVC carries the encrypted ACME account
 # credentials, the HTTP-01 challenge webroot, and the TLS material root; it
 # must be shared with the data plane workload when self-hosted TLS hot reload
 # (`tlsRuntime=assignment`) and HTTP-01 challenge serving are enabled.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: sdkwork-web-certificate-worker
+  name: sdkwork-webserver-certificate-worker
   labels:
-    app.kubernetes.io/name: sdkwork-web-server
+    app.kubernetes.io/name: sdkwork-webserver
     app.kubernetes.io/component: certificate-worker
-    app.kubernetes.io/part-of: sdkwork-web-server
+    app.kubernetes.io/part-of: sdkwork-webserver
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/name: sdkwork-web-server
+      app.kubernetes.io/name: sdkwork-webserver
       app.kubernetes.io/component: certificate-worker
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: sdkwork-web-server
+        app.kubernetes.io/name: sdkwork-webserver
         app.kubernetes.io/component: certificate-worker
-        app.kubernetes.io/part-of: sdkwork-web-server
+        app.kubernetes.io/part-of: sdkwork-webserver
     spec:
       automountServiceAccountToken: false
       enableServiceLinks: false
@@ -49,7 +49,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: certificate-worker
-          image: registry.sdkwork.com/apps/sdkwork-web@sha256:__SDKWORK_IMAGE_DIGEST__
+          image: registry.sdkwork.com/apps/sdkwork-webserver@sha256:__SDKWORK_IMAGE_DIGEST__
           imagePullPolicy: IfNotPresent
           command:
             - /app/bin/sdkwork-webserver-certificate-worker
@@ -73,7 +73,7 @@ spec:
             - name: SDKWORK_WEBSERVER_SECRET_ENCRYPTION_KEY
               valueFrom:
                 secretKeyRef:
-                  name: sdkwork-web-server-runtime
+                  name: sdkwork-webserver-runtime
                   key: secret-encryption-key
             - name: SDKWORK_WEBSERVER_ACME_DIRECTORY_URL
               value: https://acme-v02.api.letsencrypt.org/directory
@@ -82,7 +82,7 @@ spec:
             - name: SDKWORK_WEBSERVER_ACME_CONTACT_EMAIL
               valueFrom:
                 secretKeyRef:
-                  name: sdkwork-web-server-runtime
+                  name: sdkwork-webserver-runtime
                   key: acme-contact-email
             - name: SDKWORK_WEBSERVER_ACME_OPERATION_TIMEOUT_MS
               value: "180000"
@@ -104,7 +104,7 @@ spec:
             - name: SDKWORK_DATABASE_URL
               valueFrom:
                 secretKeyRef:
-                  name: sdkwork-web-server-runtime
+                  name: sdkwork-webserver-runtime
                   key: database-url
           resources:
             requests:
@@ -129,18 +129,18 @@ spec:
       volumes:
         - name: certificate-state
           persistentVolumeClaim:
-            claimName: sdkwork-web-certificate-state
+            claimName: sdkwork-webserver-certificate-state
         - name: temporary
           emptyDir: {}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: sdkwork-web-certificate-state
+  name: sdkwork-webserver-certificate-state
   labels:
-    app.kubernetes.io/name: sdkwork-web-server
+    app.kubernetes.io/name: sdkwork-webserver
     app.kubernetes.io/component: certificate-worker
-    app.kubernetes.io/part-of: sdkwork-web-server
+    app.kubernetes.io/part-of: sdkwork-webserver
 spec:
   accessModes:
     - ReadWriteOnce

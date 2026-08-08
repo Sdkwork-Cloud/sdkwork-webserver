@@ -27,8 +27,12 @@ import { list as listTar } from 'tar';
 import { ensureTrackedBuildSources } from './lib/build-source-integrity.mjs';
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const STAGE_PARENT = path.join(REPO_ROOT, '.sdkwork', 'runtime', 'release-stage');
-const OUTPUT_ROOT = path.join(REPO_ROOT, 'dist', 'release');
+// The staging directory must live on a filesystem with real permission bits
+// (Linux ext4). On shared/Windows-mounted filesystems (WSL /mnt) the mode
+// bits are not preserved; override with SDKWORK_RELEASE_STAGE_PARENT.
+const STAGE_PARENT = process.env.SDKWORK_RELEASE_STAGE_PARENT
+  ? path.resolve(process.env.SDKWORK_RELEASE_STAGE_PARENT)
+  : path.join(REPO_ROOT, '.sdkwork', 'runtime', 'release-stage');const OUTPUT_ROOT = path.join(REPO_ROOT, 'dist', 'release');
 const MAX_ARCHIVE_BYTES = 512 * 1024 * 1024;
 const MAX_PACKAGE_FILE_BYTES = 256 * 1024 * 1024;
 const MAX_PACKAGE_CONTENT_BYTES = 1024 * 1024 * 1024;
@@ -71,6 +75,20 @@ const DEPENDENCY_RUNTIME_ASSETS = Object.freeze([
     sourceRoot: path.resolve(REPO_ROOT, '..', 'sdkwork-drive'),
     sourceDirectories: ['database'],
     packagePrefix: 'share/sdkwork/drive',
+    requiredPaths: ['database/database.manifest.json'],
+  },
+  {
+    id: 'deploy',
+    sourceRoot: path.resolve(REPO_ROOT, '..', 'sdkwork-deployments'),
+    sourceDirectories: ['database'],
+    packagePrefix: 'share/sdkwork/deploy',
+    requiredPaths: ['database/database.manifest.json'],
+  },
+  {
+    id: 'webstore',
+    sourceRoot: path.resolve(REPO_ROOT, '..', 'sdkwork-web-framework'),
+    sourceDirectories: ['database'],
+    packagePrefix: 'share/sdkwork/webstore',
     requiredPaths: ['database/database.manifest.json'],
   },
 ]);
@@ -161,9 +179,9 @@ function archiveDirectoriesFor(contentPaths) {
       contentPaths.flatMap((contentPath) => {
         const segments = contentPath.split('/');
         return segments.slice(0, -1).map((_, index) =>
-          ['sdkwork-web', ...segments.slice(0, index + 1)].join('/'),
+          ['sdkwork-webserver', ...segments.slice(0, index + 1)].join('/'),
         );
-      }).concat('sdkwork-web'),
+      }).concat('sdkwork-webserver'),
     ),
   ).sort();
 }
@@ -175,6 +193,7 @@ function parseArgs(argv) {
     architecture: process.env.SDKWORK_PACKAGE_ARCHITECTURE,
     version: undefined,
     dryRun: false,
+    skipPcBuild: false,
   };
   for (let index = 1; index < argv.length; index += 1) {
     const argument = argv[index];
@@ -186,6 +205,12 @@ function parseArgs(argv) {
       settings.version = argv[++index];
     } else if (argument === '--dry-run') {
       settings.dryRun = true;
+    } else if (argument === '--skip-pc-build') {
+      // Reuse an existing PC static build (apps/sdkwork-webserver-pc/dist)
+      // instead of rebuilding it on this runner. The dist output is
+      // platform-independent; used when the runner has no matching Node
+      // toolchain (for example a WSL packaging runner).
+      settings.skipPcBuild = true;
     } else if (argument === '--help' || argument === '-h') {
       settings.help = true;
     } else {
@@ -357,7 +382,7 @@ function resolveArtifact(settings) {
   }
   const version = resolveVersion(settings);
   const architecture = resolveArchitecture(settings);
-  const artifactBase = `sdkwork-web-linux-${architecture}-${settings.deploymentProfile}-server-${version}`;
+  const artifactBase = `sdkwork-webserver-linux-${architecture}-${settings.deploymentProfile}-server-${version}`;
   const archive = path.join(OUTPUT_ROOT, `${artifactBase}.tar.gz`);
   assertSafeOwnedPath(archive, OUTPUT_ROOT, 'release archive');
   return { version, architecture, artifactBase, archive };
@@ -623,8 +648,8 @@ function normalizeArchivePath(value) {
     normalized.length === 0 ||
     segments.some((segment) => segment === '' || segment === '.' || segment === '..') ||
     path.posix.normalize(normalized) !== normalized ||
-    !normalized.startsWith('sdkwork-web') ||
-    (normalized !== 'sdkwork-web' && !normalized.startsWith('sdkwork-web/'))
+    !normalized.startsWith('sdkwork-webserver') ||
+    (normalized !== 'sdkwork-webserver' && !normalized.startsWith('sdkwork-webserver/'))
   ) {
     throw new Error(`unsafe archive entry path: ${JSON.stringify(value)}`);
   }
@@ -707,10 +732,10 @@ async function inspectArchiveEntries(archive) {
 
         const hash = createHash('sha256');
         let actualBytes = 0;
-        const captureLimit = entryPath === 'sdkwork-web/package.manifest.json'
+        const captureLimit = entryPath === 'sdkwork-webserver/package.manifest.json'
           ? MAX_MANIFEST_BYTES
           : [PC_PACKAGE_INDEX, PC_PACKAGE_RUNTIME_ENV]
-              .map((item) => `sdkwork-web/${item}`)
+              .map((item) => `sdkwork-webserver/${item}`)
               .includes(entryPath)
             ? MAX_PC_BOOTSTRAP_FILE_BYTES
             : undefined;
@@ -738,7 +763,7 @@ async function inspectArchiveEntries(archive) {
             if (captureLimit !== undefined) {
               const captured = Buffer.concat(capturedChunks, actualBytes);
               capturedBuffers.set(entryPath, captured);
-              if (entryPath === 'sdkwork-web/package.manifest.json') {
+              if (entryPath === 'sdkwork-webserver/package.manifest.json') {
                 manifestBuffer = captured;
               }
             }
@@ -829,7 +854,7 @@ function validatePackageManifest(manifestBuffer, records, order, capturedBuffers
     }
     normalizePackageContentPath(item.path, `package manifest content[${index}].path`);
     manifestPaths.push(item.path);
-    const record = records.get(`sdkwork-web/${item.path}`);
+    const record = records.get(`sdkwork-webserver/${item.path}`);
     if (
       !record ||
       record.type !== 'File' ||
@@ -872,8 +897,8 @@ function validatePackageManifest(manifestBuffer, records, order, capturedBuffers
       throw new Error('standalone package must contain at least one PC assets/ file');
     }
     validatePcBootstrapFiles(
-      capturedBuffers.get(`sdkwork-web/${PC_PACKAGE_INDEX}`),
-      capturedBuffers.get(`sdkwork-web/${PC_PACKAGE_RUNTIME_ENV}`),
+      capturedBuffers.get(`sdkwork-webserver/${PC_PACKAGE_INDEX}`),
+      capturedBuffers.get(`sdkwork-webserver/${PC_PACKAGE_RUNTIME_ENV}`),
       'standalone package',
     );
     if (
@@ -890,7 +915,7 @@ function validatePackageManifest(manifestBuffer, records, order, capturedBuffers
       ));
       for (const requiredPath of dependency.requiredPaths) {
         const packagePath = `${dependency.packagePrefix}/${requiredPath}`;
-        const record = records.get(`sdkwork-web/${packagePath}`);
+        const record = records.get(`sdkwork-webserver/${packagePath}`);
         if (!packagePaths.includes(packagePath) || !record || record.actualBytes === 0) {
           throw new Error(
             `standalone package ${dependency.id} runtime assets require non-empty ${requiredPath}`,
@@ -902,7 +927,7 @@ function validatePackageManifest(manifestBuffer, records, order, capturedBuffers
         && !packagePaths.some((item) => (
           item.startsWith(`${dependency.packagePrefix}/${dependency.requiredPrefix}`)
             && item.endsWith(dependency.requiredSuffix)
-            && records.get(`sdkwork-web/${item}`)?.actualBytes > 0
+            && records.get(`sdkwork-webserver/${item}`)?.actualBytes > 0
         ))
       ) {
         throw new Error(
@@ -921,8 +946,8 @@ function validatePackageManifest(manifestBuffer, records, order, capturedBuffers
   }
 
   const expectedFiles = [
-    'sdkwork-web/package.manifest.json',
-    ...expectedContentPaths.map((item) => `sdkwork-web/${item}`),
+    'sdkwork-webserver/package.manifest.json',
+    ...expectedContentPaths.map((item) => `sdkwork-webserver/${item}`),
   ].sort();
   const expectedDirectories = archiveDirectoriesFor(expectedContentPaths);
   const actualFiles = [...records.values()]
@@ -957,7 +982,7 @@ function validatePackageManifest(manifestBuffer, records, order, capturedBuffers
     if ((record.mode & 0o400) === 0) {
       throw new Error(`archive file ${record.path} must be owner readable`);
     }
-    const isBinary = record.path.startsWith('sdkwork-web/bin/');
+    const isBinary = record.path.startsWith('sdkwork-webserver/bin/');
     if (isBinary && (record.mode & 0o111) === 0) {
       throw new Error(`archive binary ${record.path} must be executable`);
     }
@@ -995,7 +1020,7 @@ async function validateReleaseArchive(settings, resolved = resolveArtifact(setti
     },
   );
   console.log(
-    `[sdkwork-web-release] validated artifact=${artifactBase}.tar.gz bytes=${archiveStat.size} entries=${inspected.records.size}`,
+    `[sdkwork-webserver-release] validated artifact=${artifactBase}.tar.gz bytes=${archiveStat.size} entries=${inspected.records.size}`,
   );
 }
 
@@ -1003,9 +1028,9 @@ async function packageArchive(settings) {
   const resolved = resolveArtifact(settings);
   const { version, architecture, artifactBase, archive } = resolved;
   console.log(
-    `[sdkwork-web-release] operation=package deploymentProfile=${settings.deploymentProfile} runtimeTarget=server architecture=${architecture} version=${version}`,
+    `[sdkwork-webserver-release] operation=package deploymentProfile=${settings.deploymentProfile} runtimeTarget=server architecture=${architecture} version=${version}`,
   );
-  console.log(`[sdkwork-web-release] artifact=${artifactBase}.tar.gz`);
+  console.log(`[sdkwork-webserver-release] artifact=${artifactBase}.tar.gz`);
   if (settings.dryRun) {
     return;
   }
@@ -1020,15 +1045,17 @@ async function packageArchive(settings) {
   let pcStaticFiles = [];
   let dependencyRuntimeFiles = [];
   if (settings.deploymentProfile === 'standalone') {
-    run('pnpm', ['--dir', PC_APP_RELATIVE_ROOT, 'run', 'build:standalone'], {
-      timeoutMs: PC_BUILD_TIMEOUT_MS,
-    });
+    if (!settings.skipPcBuild) {
+      run('pnpm', ['--dir', PC_APP_RELATIVE_ROOT, 'run', 'build:standalone'], {
+        timeoutMs: PC_BUILD_TIMEOUT_MS,
+      });
+    }
     pcStaticFiles = inspectPcBuildOutput();
     dependencyRuntimeFiles = inspectDependencyRuntimeAssets();
   }
   const cargoTargetRoot = resolveCargoTargetRoot();
   const stageContainer = path.join(STAGE_PARENT, `${artifactBase}-${process.pid}`);
-  const stageRoot = path.join(stageContainer, 'sdkwork-web');
+  const stageRoot = path.join(stageContainer, 'sdkwork-webserver');
   assertSafeOwnedPath(stageContainer, STAGE_PARENT, 'release stage');
   rmSync(stageContainer, { recursive: true, force: true });
   mkdirSync(path.join(stageRoot, 'bin'), { recursive: true, mode: 0o755 });
@@ -1109,7 +1136,7 @@ async function packageArchive(settings) {
           '--numeric-owner',
           '-czf',
           temporaryArchive,
-          'sdkwork-web',
+          'sdkwork-webserver',
         ],
         {
           cwd: stageContainer,
@@ -1151,7 +1178,7 @@ async function packageArchive(settings) {
       ],
       { timeoutMs: SBOM_TIMEOUT_MS },
     );
-    console.log(`[sdkwork-web-release] wrote ${path.relative(REPO_ROOT, archive)}`);
+    console.log(`[sdkwork-webserver-release] wrote ${path.relative(REPO_ROOT, archive)}`);
   } finally {
     rmSync(stageContainer, { recursive: true, force: true });
   }
@@ -1161,7 +1188,7 @@ async function main() {
   const settings = parseArgs(process.argv.slice(2));
   if (settings.help) {
     console.log(
-      'Usage: node scripts/webserver-release.mjs <package|validate> --deployment-profile <standalone|cloud> [--architecture <x64|arm64>] [--version <semver>] [--dry-run]',
+      'Usage: node scripts/webserver-release.mjs <package|validate> --deployment-profile <standalone|cloud> [--architecture <x64|arm64>] [--version <semver>] [--skip-pc-build] [--dry-run]',
     );
     return;
   }
@@ -1174,15 +1201,15 @@ async function main() {
   }
   const resolved = resolveArtifact(settings);
   console.log(
-    `[sdkwork-web-release] operation=validate deploymentProfile=${settings.deploymentProfile} runtimeTarget=server architecture=${resolved.architecture} version=${resolved.version}`,
+    `[sdkwork-webserver-release] operation=validate deploymentProfile=${settings.deploymentProfile} runtimeTarget=server architecture=${resolved.architecture} version=${resolved.version}`,
   );
-  console.log(`[sdkwork-web-release] artifact=${resolved.artifactBase}.tar.gz`);
+  console.log(`[sdkwork-webserver-release] artifact=${resolved.artifactBase}.tar.gz`);
   if (!settings.dryRun) {
     await validateReleaseArchive(settings, resolved);
   }
 }
 
 main().catch((error) => {
-  process.stderr.write(`[sdkwork-web-release] ${error instanceof Error ? error.message : String(error)}\n`);
+  process.stderr.write(`[sdkwork-webserver-release] ${error instanceof Error ? error.message : String(error)}\n`);
   process.exitCode = 1;
 });

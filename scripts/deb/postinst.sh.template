@@ -1,0 +1,288 @@
+#!/bin/bash
+# postinst for the sdkwork-webserver package (environment: __ENVIRONMENT__).
+# Follows PACKAGING_SPEC.md section 5.5 installer layout and
+# RUNTIME_DIRECTORY_SPEC.md section 4.1. This script only configures the
+# runtime layout and service registration; it never embeds credentials into
+# config templates or unit files. The typed runtime configuration is written
+# to /etc/sdkwork/webserver/sdkwork-webserver.toml and loaded by the
+# binaries at startup; secret material is referenced by file path only.
+
+set -euo pipefail
+
+ENVIRONMENT="__ENVIRONMENT__"
+DOMAIN="__DOMAIN__"
+DB_NAME="__DB_NAME__"
+DB_USER="__DB_USER__"
+SERVICE_NAME="__SERVICE_NAME__"
+VERSION="__VERSION__"
+GATEWAY_BINARY="sdkwork-api-web-server-standalone-gateway"
+CERT_WORKER_BINARY="sdkwork-webserver-certificate-worker"
+
+INSTALL_ROOT=/usr/lib/sdkwork/webserver
+CONFIG_ROOT=/etc/sdkwork/webserver
+DATA_ROOT=/var/lib/sdkwork/webserver
+LOG_ROOT=/var/log/sdkwork/webserver
+CACHE_ROOT=/var/cache/sdkwork/webserver
+RUN_ROOT=/run/sdkwork/webserver
+DB_SECRET_FILE="${CONFIG_ROOT}/secrets/database.secret"
+RUNTIME_CONFIG_FILE="${CONFIG_ROOT}/sdkwork-webserver.toml"
+
+log() { echo "[sdkwork-webserver-postinst] $*"; }
+
+# 1. PostgreSQL dependency (declared in Depends; install when dpkg -i is used).
+if ! command -v psql >/dev/null 2>&1; then
+  export DEBIAN_FRONTEND=noninteractive
+  apt-get update -qq
+  apt-get install -y -qq postgresql
+fi
+
+# 2. Dedicated non-root service identity.
+if ! id sdkwork >/dev/null 2>&1; then
+  useradd --system --no-create-home --home-dir "${DATA_ROOT}" --shell /usr/sbin/nologin sdkwork
+fi
+
+# 3. Runtime directories (RUNTIME_DIRECTORY_SPEC section 4.1 ownership).
+install -d -o root -g sdkwork -m 0750 "${CONFIG_ROOT}"
+install -d -o sdkwork -g sdkwork -m 0750 \
+  "${CONFIG_ROOT}/secrets" \
+  "${DATA_ROOT}" "${LOG_ROOT}" "${CACHE_ROOT}" "${RUN_ROOT}"
+install -d -o sdkwork -g sdkwork -m 0750 \
+  "${DATA_ROOT}/acme-webroot" "${DATA_ROOT}/acme-accounts" "${DATA_ROOT}/tls-materials"
+# IAM/Drive module trees installed by dpkg under ${DATA_ROOT}/{iam,drive} are
+# runtime-mutated (registry materialization lock files); make them writable.
+chown -R sdkwork:sdkwork "${DATA_ROOT}/iam" "${DATA_ROOT}/drive" "${DATA_ROOT}/deploy" "${DATA_ROOT}/webstore" 2>/dev/null || true
+
+# 4. Start PostgreSQL and wait for readiness.
+if ! pg_isready -q 2>/dev/null; then
+  systemctl start postgresql >/dev/null 2>&1 || service postgresql start >/dev/null 2>&1 || true
+  for _attempt in $(seq 1 60); do
+    if pg_isready -q 2>/dev/null; then break; fi
+    sleep 1
+  done
+fi
+if ! pg_isready -q 2>/dev/null; then
+  log "PostgreSQL is not reachable; refusing to continue"
+  exit 1
+fi
+# The Web Server database contract requires PostgreSQL 16+ (ENVIRONMENT_SPEC
+# section 7 / database README); Ubuntu 22.04 ships 14 by default, so enable a
+# newer version (pgdg) before installing this package.
+PG_VERSION_MAJOR="$(runuser -u postgres -- psql -tAc 'SHOW server_version_num' 2>/dev/null || true | tr -d ' \r\n')"
+if [ -z "${PG_VERSION_MAJOR}" ] || [ "${PG_VERSION_MAJOR}" -lt 160000 ]; then
+  log "PostgreSQL 16+ is required (found $(runuser -u postgres -- psql -tAc 'SHOW server_version' 2>/dev/null || true | tr -d ' \r\n')); install PostgreSQL 16+ first"
+  exit 1
+fi
+
+# 5. Create the environment-specific role, database, and schema with a fresh
+#    random password. The password is written only to the workspace database
+#    secret file (0600) and referenced from the TOML runtime config.
+DB_PASSWORD="$(openssl rand -hex 24)"
+if [ -s "${DB_SECRET_FILE}" ]; then
+  DB_PASSWORD="$(tr -d '\r\n' < "${DB_SECRET_FILE}")"
+fi
+if ! runuser -u postgres -- psql -tAc "SELECT 1 FROM pg_roles WHERE rolname = '${DB_USER}'" | grep -q 1; then
+  printf "CREATE ROLE \"%s\" LOGIN PASSWORD '%s';\n" "${DB_USER}" "${DB_PASSWORD}" \
+    | runuser -u postgres -- psql -v ON_ERROR_STOP=1 -q >/dev/null
+else
+  printf "ALTER ROLE \"%s\" WITH LOGIN PASSWORD '%s';\n" "${DB_USER}" "${DB_PASSWORD}" \
+    | runuser -u postgres -- psql -v ON_ERROR_STOP=1 -q >/dev/null
+fi
+if ! runuser -u postgres -- psql -tAc "SELECT 1 FROM pg_database WHERE datname = '${DB_NAME}'" | grep -q 1; then
+  runuser -u postgres -- createdb -O "${DB_USER}" "${DB_NAME}"
+fi
+printf 'CREATE SCHEMA IF NOT EXISTS "%s" AUTHORIZATION "%s";\n' "${DB_NAME}" "${DB_USER}" \
+  | runuser -u postgres -- psql -d "${DB_NAME}" -v ON_ERROR_STOP=1 -q >/dev/null
+
+install -o sdkwork -g sdkwork -m 0600 /dev/null "${DB_SECRET_FILE}"
+printf '%s' "${DB_PASSWORD}" > "${DB_SECRET_FILE}"
+
+# 5b. Encryption master key files (0600, sdkwork-owned) for the
+#     production-like environments; referenced by path from the TOML runtime
+#     config and injected in-process by the binary loader.
+for secret_name in encryption-key deploy-encryption-key; do
+  secret_file="${CONFIG_ROOT}/secrets/${secret_name}"
+  if [ ! -s "${secret_file}" ]; then
+    printf '%s' "$(openssl rand -hex 32)" > "${secret_file}"
+    chown sdkwork:sdkwork "${secret_file}"
+    chmod 0600 "${secret_file}"
+  fi
+done
+
+# 5c. Same-process Internal API ingress tokens (0600, sdkwork-owned), one per
+#     dependency port (Web, Drive, Knowledgebase).
+for token_name in web-internal-api drive-internal-api knowledgebase-internal-api; do
+  token_file="${CONFIG_ROOT}/secrets/${token_name}-ingress-token"
+  if [ ! -s "${token_file}" ]; then
+    printf '%s' "$(openssl rand -hex 32)" > "${token_file}"
+    chown sdkwork:sdkwork "${token_file}"
+    chmod 0600 "${token_file}"
+  fi
+done
+
+# 6. Typed runtime configuration (RUNTIME_DIRECTORY_SPEC section 4.1: the
+#    <application-code>.toml runtime config file). Loaded and materialized
+#    into the process environment by the gateway / db-migrate / certificate
+#    worker at startup; secret material is referenced by file path only.
+cat > "${RUNTIME_CONFIG_FILE}" <<EOF
+# Generated by ${SERVICE_NAME} postinst (version ${VERSION}, environment ${ENVIRONMENT}).
+[profile]
+deployment_profile = "standalone"
+environment = "${ENVIRONMENT}"
+profile_id = "standalone.${ENVIRONMENT}"
+node_id = 0
+
+[ingress]
+bind = "__INGRESS_BIND__"
+management_expose_allowed = true
+data_plane_operations_bind = "127.0.0.1:3901"
+public_http_url = "__PUBLIC_URL__"
+app_http_url = "__PUBLIC_URL__"
+backend_http_url = "__PUBLIC_URL__"
+cors_allowed_origins = ["__PUBLIC_URL__"]
+
+[app_roots]
+app_root = "${INSTALL_ROOT}"
+iam_app_root = "${DATA_ROOT}/iam"
+drive_app_root = "${DATA_ROOT}/drive"
+deploy_app_root = "${DATA_ROOT}/deploy"
+web_store_app_root = "${DATA_ROOT}/webstore"
+pc_static_root = "/usr/share/sdkwork/webserver/web/pc"
+
+[deploy]
+deployment_profile = "standalone"
+environment = "${ENVIRONMENT}"
+profile_id = "standalone.${ENVIRONMENT}"
+use_memory_drive = false
+use_memory_content_provider = false
+# Same-process Drive facade: the gateway serves the Drive App API same-origin
+# on the loopback ingress port.
+drive_facade_url = "__INTERNAL_API_URL__"
+drive_internal_api_url = "__INTERNAL_API_URL__"
+drive_internal_api_ingress_token_file = "${CONFIG_ROOT}/secrets/drive-internal-api-ingress-token"
+knowledgebase_internal_api_url = "__INTERNAL_API_URL__"
+knowledgebase_internal_api_ingress_token_file = "${CONFIG_ROOT}/secrets/knowledgebase-internal-api-ingress-token"
+# Same-process Web Internal API for the Deployments runtime publication port.
+web_internal_api_url = "__INTERNAL_API_URL__"
+web_internal_api_ingress_token_file = "${CONFIG_ROOT}/secrets/web-internal-api-ingress-token"
+runtime_assignment_worker_id = "deploy-worker-0"
+
+[database]
+engine = "postgresql"
+host = "127.0.0.1"
+port = 5432
+name = "${DB_NAME}"
+schema = "${DB_NAME}"
+schema_fallback_public = false
+username = "${DB_USER}"
+password_file = "${DB_SECRET_FILE}"
+ssl_mode = "disable"
+max_connections = 10
+# Standalone installer: the Web/IAM/Deployments domains auto-migrate on
+# service start (the db-migrate command covers the Web module only).
+# Operators preferring strict manual migrations may set this to false after
+# the first start.
+auto_migrate = true
+
+[secrets]
+encryption_key_file = "${CONFIG_ROOT}/secrets/encryption-key"
+deploy_encryption_key_file = "${CONFIG_ROOT}/secrets/deploy-encryption-key"
+
+[acme]
+profile = "__ACME_PROFILE__"
+directory_url = "__ACME_DIRECTORY_URL__"
+contact_email = "admin@localhost"
+webroot = "${DATA_ROOT}/acme-webroot"
+account_root = "${DATA_ROOT}/acme-accounts"
+renew_before_days = 30
+worker_id = "certificate-worker-0"
+operation_poll_interval_secs = 5
+renew_scan_interval_secs = 3600
+
+[tls]
+material_root = "${DATA_ROOT}/tls-materials"
+runtime_snapshot_file = "${DATA_ROOT}/tls-materials/tls-runtime.json"
+snapshot_alpn = "h2,http/1.1"
+
+[node]
+uuid = "standalone-${ENVIRONMENT}-node"
+
+[region]
+region_code = "cn"
+seed_locale = "zh-CN"
+EOF
+chown root:sdkwork "${RUNTIME_CONFIG_FILE}"
+chmod 0640 "${RUNTIME_CONFIG_FILE}"
+
+# 7. Run the database migration once as the service identity. The binary
+#    loads the TOML runtime config and referenced secret files itself.
+if ! runuser -u sdkwork -- "${INSTALL_ROOT}/bin/${GATEWAY_BINARY}" db-migrate; then
+  log "database migration failed; service is not started"
+  exit 1
+fi
+
+# 8. Register and start the gateway service.
+systemctl daemon-reload >/dev/null 2>&1 || true
+systemctl enable "${SERVICE_NAME}" >/dev/null 2>&1 || true
+systemctl start "${SERVICE_NAME}"
+
+# 9. Test environment: bind the host to the test domain for direct access.
+if [ "${ENVIRONMENT}" = "test" ]; then
+  if ! grep -q "^127.0.0.1[[:space:]]\+${DOMAIN}" /etc/hosts; then
+    printf '127.0.0.1 %s\n' "${DOMAIN}" >> /etc/hosts
+  fi
+fi
+
+# 10. Production environment: ACME webroot challenge server (nginx :80) and
+#     HTTPS reverse proxy (:443 -> 127.0.0.1:__INGRESS_PORT__). Certificates are issued
+#     and renewed by the certificate worker into
+#     ${DATA_ROOT}/tls-materials/<uuid>/; symlink the active issue under
+#     ${DATA_ROOT}/tls-materials/active/ once DNS resolves to this host.
+if [ "${ENVIRONMENT}" = "production" ]; then
+  if ! command -v nginx >/dev/null 2>&1; then
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get install -y -qq nginx
+  fi
+  cat > /etc/nginx/sites-available/sdkwork-webserver <<EOF
+# Generated by ${SERVICE_NAME} postinst. ACME http-01 webroot on :80 and
+# HTTPS reverse proxy (:443) to the standalone gateway on 127.0.0.1:__INGRESS_PORT__.
+server {
+    listen 80;
+    listen [::]:80;
+    server_name ${DOMAIN};
+
+    location /.well-known/acme-challenge/ {
+        root ${DATA_ROOT}/acme-webroot;
+    }
+
+    location / {
+        return 301 https://\$host\$request_uri;
+    }
+}
+
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    server_name ${DOMAIN};
+
+    ssl_certificate ${DATA_ROOT}/tls-materials/active/fullchain.pem;
+    ssl_certificate_key ${DATA_ROOT}/tls-materials/active/privkey.pem;
+
+    location / {
+        proxy_pass http://127.0.0.1:__INGRESS_PORT__;
+        proxy_http_version 1.1;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+    }
+}
+EOF
+  ln -sf /etc/nginx/sites-available/sdkwork-webserver /etc/nginx/sites-enabled/sdkwork-webserver
+  systemctl enable nginx >/dev/null 2>&1 || true
+  systemctl restart nginx >/dev/null 2>&1 || true
+  systemctl enable sdkwork-webserver-certificate-worker >/dev/null 2>&1 || true
+  systemctl start sdkwork-webserver-certificate-worker || true
+fi
+
+log "installed environment=${ENVIRONMENT} database=${DB_NAME} ingress=__INGRESS_BIND__ domain=${DOMAIN} config=${RUNTIME_CONFIG_FILE}"
+exit 0

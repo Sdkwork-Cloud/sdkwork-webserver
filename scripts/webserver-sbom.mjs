@@ -145,7 +145,7 @@ function resolveArtifact(settings) {
     throw new Error('release architecture must be x64 or arm64');
   }
   const version = resolveVersion(settings);
-  const artifactBase = `sdkwork-web-linux-${architecture}-${settings.deploymentProfile}-server-${version}`;
+  const artifactBase = `sdkwork-webserver-linux-${architecture}-${settings.deploymentProfile}-server-${version}`;
   const archive = path.join(OUTPUT_ROOT, `${artifactBase}.tar.gz`);
   const sbom = `${archive}.cdx.json`;
   assertSafeOwnedPath(archive, OUTPUT_ROOT, 'release archive');
@@ -331,7 +331,7 @@ function buildSbom(resolved) {
   const components = [...closure.selected]
     .map((packageId) => componentForPackage(closure.packageById.get(packageId)))
     .sort((left, right) => left['bom-ref'].localeCompare(right['bom-ref'], 'en'));
-  const artifactRef = `pkg:generic/sdkwork-web@${encodeURIComponent(resolved.version)}?arch=${resolved.architecture}&profile=${resolved.deploymentProfile}`;
+  const artifactRef = `pkg:generic/sdkwork-webserver@${encodeURIComponent(resolved.version)}?arch=${resolved.architecture}&profile=${resolved.deploymentProfile}`;
   const dependencies = [...closure.selected]
     .map((packageId) => {
       const node = closure.nodeById.get(packageId);
@@ -358,7 +358,7 @@ function buildSbom(resolved) {
         type: 'application',
         'bom-ref': artifactRef,
         group: 'sdkwork',
-        name: 'sdkwork-web',
+        name: 'sdkwork-webserver',
         version: resolved.version,
         hashes: [{ alg: 'SHA-256', content: archiveDigest }],
         properties: [
@@ -405,7 +405,7 @@ function generate(resolved) {
   const checksum = sha256File(resolved.sbom);
   writeAtomic(resolved.sbomChecksum, `${checksum}  ${path.basename(resolved.sbom)}\n`);
   console.log(
-    `[sdkwork-web-sbom] wrote artifact=${resolved.artifactBase}.tar.gz components=${JSON.parse(sbomText).components.length}`,
+    `[sdkwork-webserver-sbom] wrote artifact=${resolved.artifactBase}.tar.gz components=${JSON.parse(sbomText).components.length}`,
   );
 }
 
@@ -445,7 +445,7 @@ function validate(resolved) {
     throw new Error('release SBOM does not match the artifact and locked Cargo dependency closure');
   }
   console.log(
-    `[sdkwork-web-sbom] validated artifact=${resolved.artifactBase}.tar.gz components=${parsed.components.length}`,
+    `[sdkwork-webserver-sbom] validated artifact=${resolved.artifactBase}.tar.gz components=${parsed.components.length}`,
   );
 }
 
@@ -474,6 +474,6 @@ function main() {
 try {
   main();
 } catch (error) {
-  process.stderr.write(`[sdkwork-web-sbom] ${error instanceof Error ? error.message : String(error)}\n`);
+  process.stderr.write(`[sdkwork-webserver-sbom] ${error instanceof Error ? error.message : String(error)}\n`);
   process.exitCode = 1;
 }

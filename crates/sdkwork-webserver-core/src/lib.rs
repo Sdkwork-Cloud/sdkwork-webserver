@@ -3,6 +3,7 @@
 mod canonical_json;
 
 pub mod config;
+pub mod runtime_config;
 pub mod runtime_env;
 pub mod tls_runtime;
 pub mod website_runtime;

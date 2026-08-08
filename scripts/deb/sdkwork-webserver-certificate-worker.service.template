@@ -1,0 +1,24 @@
+[Unit]
+Description=SDKWork Web Server certificate worker (__ENVIRONMENT__)
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=sdkwork
+Group=sdkwork
+# The typed runtime configuration (/etc/sdkwork/webserver/sdkwork-webserver.toml)
+# is loaded by the binary at startup; secret material is referenced by file
+# path inside the TOML, never injected through EnvironmentFile.
+ExecStart=/usr/lib/sdkwork/webserver/bin/sdkwork-webserver-certificate-worker
+Restart=on-failure
+RestartSec=10s
+LimitNOFILE=65536
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/sdkwork/webserver /run/sdkwork/webserver
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

@@ -156,6 +156,8 @@ pub async fn assemble_business_routes(
                 wrap_agent_router_with_web_framework_from_env(
                     agent_gateway_mount(service.clone()),
                     service.clone(),
+                    audit_emitter.clone(),
+                    security_event_emitter.clone(),
                 )
                 .await,
             );
@@ -169,8 +171,13 @@ pub async fn assemble_business_routes(
     // guarantees that user API keys can never reach internal routes, and
     // `wagent_`-prefixed credentials never fall back to user-key resolution.
     router = router.merge(
-        wrap_router_with_web_framework_from_env(mount_internal(service.clone()), service.clone())
-            .await,
+        wrap_router_with_web_framework_from_env(
+            mount_internal(service.clone()),
+            service.clone(),
+            audit_emitter.clone(),
+            security_event_emitter.clone(),
+        )
+        .await,
     );
     domain_context_injectors.extend(web_internal_domain_context_injectors());
     let permission_catalog = permission_catalog(route_manifest.routes());

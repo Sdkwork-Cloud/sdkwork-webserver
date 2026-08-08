@@ -1,9 +1,9 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: sdkwork-web-server-db-migrate
+  name: sdkwork-webserver-db-migrate
   labels:
-    app.kubernetes.io/name: sdkwork-web-server
+    app.kubernetes.io/name: sdkwork-webserver
     app.kubernetes.io/component: db-migrate
 spec:
   backoffLimit: 3
@@ -12,7 +12,7 @@ spec:
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: sdkwork-web-server
+        app.kubernetes.io/name: sdkwork-webserver
         app.kubernetes.io/component: db-migrate
     spec:
       restartPolicy: OnFailure
@@ -27,7 +27,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: migrate
-          image: registry.sdkwork.com/apps/sdkwork-web@sha256:__SDKWORK_IMAGE_DIGEST__
+          image: registry.sdkwork.com/apps/sdkwork-webserver@sha256:__SDKWORK_IMAGE_DIGEST__
           imagePullPolicy: IfNotPresent
           args: ["db-migrate"]
           env:
@@ -42,7 +42,7 @@ spec:
             - name: SDKWORK_DATABASE_URL
               valueFrom:
                 secretKeyRef:
-                  name: sdkwork-web-server-runtime
+                  name: sdkwork-webserver-runtime
                   key: database-url
           resources:
             requests:

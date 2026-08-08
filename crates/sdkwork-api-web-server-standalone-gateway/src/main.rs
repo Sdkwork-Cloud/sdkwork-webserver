@@ -29,6 +29,12 @@ async fn main() {
 }
 
 async fn run() -> MainResult<()> {
+    // Installed deployments load the typed runtime configuration
+    // (/etc/sdkwork/webserver/sdkwork-webserver.toml) and materialize it into
+    // the process environment before any runtime component reads it.
+    sdkwork_webserver_core::runtime_config::load_runtime_toml_config().map_err(|error| {
+        io::Error::other(format!("runtime TOML configuration is invalid: {error}"))
+    })?;
     configure_packaged_runtime_roots_from_env().map_err(|error| {
         io::Error::other(format!("packaged runtime roots are invalid: {error}"))
     })?;

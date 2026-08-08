@@ -31,6 +31,16 @@ pub async fn build_router() -> Result<Router, String> {
     let profile = assemble_standalone_profile()
         .await
         .map_err(|error| error.to_string())?;
+    // IAM database lifecycle: the standalone gateway owns the IAM module
+    // (SDKWORK_IAM_APP_ROOT). Bootstrap performs init, auto-migrate, and the
+    // drift check, and installs the process-shared pool for the IAM web
+    // adapter (tenant/session lookups).
+    let iam_pool = process_shared_database_pool().ok_or_else(|| {
+        "standalone gateway requires the process-shared database pool; bootstrap the database lifecycle first".to_string()
+    })?;
+    sdkwork_iam_database_host::bootstrap_iam_database(iam_pool)
+        .await
+        .map_err(|error| format!("IAM database bootstrap failed: {error}"))?;
     let metrics = HttpMetricsRegistry::new();
     let resolver = MachineCredentialResolverDecorator::new_standalone_iam(
         iam_web_request_context_resolver_from_env().await,
@@ -126,5 +136,14 @@ pub async fn run_database_migrate_only() -> Result<(), String> {
         .await
         .map_err(|error| error.to_string())?;
     info!("Web database migration completed");
+    // The IAM module is owned by the standalone gateway; its lifecycle
+    // (init + auto-migrate + drift) runs through the same process-shared pool.
+    let iam_pool = process_shared_database_pool().ok_or_else(|| {
+        "standalone gateway requires the process-shared database pool; bootstrap the database lifecycle first".to_string()
+    })?;
+    sdkwork_iam_database_host::bootstrap_iam_database(iam_pool)
+        .await
+        .map_err(|error| format!("IAM database bootstrap failed: {error}"))?;
+    info!("IAM database migration completed");
     Ok(())
 }

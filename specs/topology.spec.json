@@ -16,6 +16,7 @@
     "environment": {
       "allowed": [
         "development",
+        "test",
         "production"
       ]
     }
@@ -30,6 +31,7 @@
     "cloud.development": "etc/topology/cloud.development.env",
     "cloud.production": "etc/topology/cloud.production.env",
     "standalone.development": "etc/topology/standalone.development.env",
+    "standalone.test": "etc/topology/standalone.test.env",
     "standalone.production": "etc/topology/standalone.production.env"
   },
   "envKeys": {
@@ -97,6 +99,7 @@
       "executableAssemblyExport": "sdkwork_api_deployments_assembly::assemble_domain_certificate_blocks",
       "profileCoverage": [
         "standalone.development",
+        "standalone.test",
         "standalone.production"
       ]
     }
@@ -210,6 +213,37 @@
         "healthSurfaces": [
           "edge.website-delivery",
           "platform.api-gateway"
+        ]
+      },
+      "standalone.test": {
+        "processes": [
+          {
+            "id": "application.public-ingress",
+            "crate": "sdkwork-api-web-server-standalone-gateway",
+            "binary": "sdkwork-api-web-server-standalone-gateway",
+            "required": true,
+            "role": "api-standalone-gateway"
+          }
+        ],
+        "browserDeliveries": [
+          {
+            "id": "webserver-pc-browser",
+            "applicationRoot": "apps/sdkwork-webserver-pc",
+            "clientArchitectures": [
+              "pc-web"
+            ],
+            "originMode": "same-origin",
+            "deliveryMode": "gateway-static",
+            "apiSurfaceId": "application.public-ingress",
+            "hostProcessId": "application.public-ingress",
+            "buildOutput": "apps/sdkwork-webserver-pc/dist",
+            "runtimeRootEnv": "SDKWORK_WEBSERVER_PC_STATIC_ROOT",
+            "mountPath": "/",
+            "spaFallback": "/index.html"
+          }
+        ],
+        "healthSurfaces": [
+          "application.public-ingress"
         ]
       },
       "standalone.production": {

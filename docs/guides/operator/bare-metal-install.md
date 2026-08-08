@@ -4,6 +4,11 @@ This guide installs the standalone Web Server binary package on Linux (and the e
 scope on macOS and Windows) without Kubernetes. It covers the canonical config directory
 initialization, resource deployment, a systemd unit, verification, and lifecycle operations.
 
+On Ubuntu/Debian prefer the native installer in
+[`deb-install.md`](deb-install.md) (`sdkwork-webserver[_test]_.deb`), which automates the
+layout below, the PostgreSQL initialization, migration, and service registration. This guide
+documents the manual archive flow for other Linux distributions and custom layouts.
+
 Normative host layout, ownership, and permissions are owned by
 `RUNTIME_DIRECTORY_SPEC.md` sections 3-4 and 11; config discovery order is owned by
 `ENVIRONMENT_SPEC.md` section 8. This guide links those authorities instead of restating them.
@@ -21,12 +26,14 @@ Normative host layout, ownership, and permissions are owned by
 
 ## 2. Extract The Package
 
-Install under `/opt/sdkwork-web` (product identity), keeping the archive layout:
+Self-contained archive installs follow the archive install root of
+`RUNTIME_DIRECTORY_SPEC.md` section 4.1: `/opt/sdkwork/<application-code>`. Install the
+archive under `/opt/sdkwork/webserver` (product identity), keeping the archive layout:
 
 ```bash
-sudo install -d -o root -g root -m 0755 /opt/sdkwork-web
-sudo tar -xzf sdkwork-web-linux-x64-standalone-server-*.tar.gz -C /opt/sdkwork-web
-sudo chown -R root:root /opt/sdkwork-web
+sudo install -d -o root -g root -m 0755 /opt/sdkwork/webserver
+sudo tar -xzf sdkwork-webserver-linux-x64-standalone-server-*.tar.gz -C /opt/sdkwork/webserver
+sudo chown -R root:root /opt/sdkwork/webserver
 ```
 
 The package contains `bin/` (five service binaries), `etc/examples/` (safe example config and
@@ -50,7 +57,7 @@ Permissions follow `RUNTIME_DIRECTORY_SPEC.md` section 11: config directory `075
 
    ```bash
    sudo install -o root -g sdkwork -m 0640 \
-     /opt/sdkwork-web/etc/examples/sdkwork.webserver.config.json \
+     /opt/sdkwork/webserver/etc/examples/sdkwork.webserver.config.json \
      /etc/sdkwork/webserver/sdkwork.webserver.config.json
    ```
 
@@ -61,7 +68,7 @@ Permissions follow `RUNTIME_DIRECTORY_SPEC.md` section 11: config directory `075
    ```bash
    sudo install -d -o sdkwork -g sdkwork -m 0755 /etc/sdkwork/webserver/public
    sudo install -o sdkwork -g sdkwork -m 0644 \
-     /opt/sdkwork-web/etc/examples/public/index.html \
+     /opt/sdkwork/webserver/etc/examples/public/index.html \
      /etc/sdkwork/webserver/public/index.html
    ```
 
@@ -82,7 +89,7 @@ A missing canonical default fails closed with the expected path.
 ## 5. Validate Before Starting
 
 ```bash
-sudo -u sdkwork /opt/sdkwork-web/bin/sdkwork-api-web-server-standalone-gateway validate
+sudo -u sdkwork /opt/sdkwork/webserver/bin/sdkwork-api-web-server-standalone-gateway validate
 ```
 
 Expected output: `validated appKey=... revision=... bytes=... listeners=... virtualHosts=...`.
@@ -100,7 +107,7 @@ Wants=network-online.target
 Type=simple
 User=sdkwork
 Group=sdkwork
-ExecStart=/opt/sdkwork-web/bin/sdkwork-api-web-server-standalone-gateway data-plane
+ExecStart=/opt/sdkwork/webserver/bin/sdkwork-api-web-server-standalone-gateway data-plane
 Environment=SDKWORK_WEBSERVER_ENVIRONMENT=production
 Environment=SDKWORK_WEBSERVER_DEPLOYMENT_PROFILE=standalone
 Environment=SDKWORK_WEBSERVER_RUNTIME_TARGET=server
@@ -113,7 +120,7 @@ LimitNOFILE=65536
 NoNewPrivileges=true
 ProtectSystem=strict
 ProtectHome=true
-ReadOnlyPaths=/etc/sdkwork/webserver /opt/sdkwork-web
+ReadOnlyPaths=/etc/sdkwork/webserver /opt/sdkwork/webserver
 PrivateTmp=true
 # Add ReadWritePaths=/var/lib/sdkwork/webserver only when the service uses an
 # A/B recovery directory (website runtime-set or native TLS recovery).
@@ -136,7 +143,7 @@ journalctl -u sdkwork-webserver -f
 Run migrations once before first start:
 
 ```bash
-sudo -u sdkwork /opt/sdkwork-web/bin/sdkwork-api-web-server-standalone-gateway db-migrate
+sudo -u sdkwork /opt/sdkwork/webserver/bin/sdkwork-api-web-server-standalone-gateway db-migrate
 ```
 
 ## 8. Lifecycle
@@ -148,7 +155,7 @@ sudo -u sdkwork /opt/sdkwork-web/bin/sdkwork-api-web-server-standalone-gateway d
   restart the service, then remove the old tree after a soak window.
 - **Rollback**: keep the previous archive; point the unit back at the previous `ExecStart` and
   restart.
-- **Uninstall**: `sudo systemctl disable --now sdkwork-webserver`, remove `/opt/sdkwork-web`,
+- **Uninstall**: `sudo systemctl disable --now sdkwork-webserver`, remove `/opt/sdkwork/webserver`,
   and archive or remove `/etc/sdkwork/webserver` after confirming no other SDKWork services
   share the host.
 

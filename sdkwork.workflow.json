@@ -9,7 +9,7 @@
     "configPath": "sdkwork.app.config.json"
   },
   "release": {
-    "artifactPrefix": "sdkwork-web",
+    "artifactPrefix": "sdkwork-webserver",
     "defaultVersion": "0.1.0",
     "changelog": {
       "source": "app-manifest",
@@ -97,6 +97,16 @@
         "name": "Package immutable web server archive",
         "shell": "pwsh",
         "run": "node scripts/webserver-release.mjs package"
+      },
+      {
+        "name": "Package Ubuntu installers (test and production)",
+        "shell": "pwsh",
+        "run": "node scripts/webserver-deb.mjs package --environment test --architecture x64 && node scripts/webserver-deb.mjs package --environment production --architecture x64"
+      },
+      {
+        "name": "Package RHEL installers (test and production)",
+        "shell": "pwsh",
+        "run": "node scripts/webserver-rpm.mjs package --environment test --architecture x64 && node scripts/webserver-rpm.mjs package --environment production --architecture x64"
       }
     ],
     "sign": [
@@ -167,14 +177,16 @@
       "profile": "server",
       "platform": "linux",
       "architecture": "x64",
-      "formats": ["tar.gz"],
+      "formats": [
+        "tar.gz"
+      ],
       "runner": "ubuntu-24.04",
       "outputGlobs": [
-        "dist/release/sdkwork-web-linux-x64-cloud-server-*.tar.gz",
-        "dist/release/sdkwork-web-linux-x64-cloud-server-*.tar.gz.sha256",
-        "dist/release/sdkwork-web-linux-x64-cloud-server-*.tar.gz.sigstore.json",
-        "dist/release/sdkwork-web-linux-x64-cloud-server-*.tar.gz.cdx.json",
-        "dist/release/sdkwork-web-linux-x64-cloud-server-*.tar.gz.cdx.json.sha256"
+        "dist/release/sdkwork-webserver-linux-x64-cloud-server-*.tar.gz",
+        "dist/release/sdkwork-webserver-linux-x64-cloud-server-*.tar.gz.sha256",
+        "dist/release/sdkwork-webserver-linux-x64-cloud-server-*.tar.gz.sigstore.json",
+        "dist/release/sdkwork-webserver-linux-x64-cloud-server-*.tar.gz.cdx.json",
+        "dist/release/sdkwork-webserver-linux-x64-cloud-server-*.tar.gz.cdx.json.sha256"
       ],
       "deploymentProfile": "cloud",
       "runtimeTarget": "server"
@@ -184,14 +196,16 @@
       "profile": "server",
       "platform": "linux",
       "architecture": "x64",
-      "formats": ["tar.gz"],
+      "formats": [
+        "tar.gz"
+      ],
       "runner": "ubuntu-24.04",
       "outputGlobs": [
-        "dist/release/sdkwork-web-linux-x64-standalone-server-*.tar.gz",
-        "dist/release/sdkwork-web-linux-x64-standalone-server-*.tar.gz.sha256",
-        "dist/release/sdkwork-web-linux-x64-standalone-server-*.tar.gz.sigstore.json",
-        "dist/release/sdkwork-web-linux-x64-standalone-server-*.tar.gz.cdx.json",
-        "dist/release/sdkwork-web-linux-x64-standalone-server-*.tar.gz.cdx.json.sha256"
+        "dist/release/sdkwork-webserver-linux-x64-standalone-server-*.tar.gz",
+        "dist/release/sdkwork-webserver-linux-x64-standalone-server-*.tar.gz.sha256",
+        "dist/release/sdkwork-webserver-linux-x64-standalone-server-*.tar.gz.sigstore.json",
+        "dist/release/sdkwork-webserver-linux-x64-standalone-server-*.tar.gz.cdx.json",
+        "dist/release/sdkwork-webserver-linux-x64-standalone-server-*.tar.gz.cdx.json.sha256"
       ],
       "deploymentProfile": "standalone",
       "runtimeTarget": "server"
@@ -201,14 +215,16 @@
       "profile": "server",
       "platform": "linux",
       "architecture": "arm64",
-      "formats": ["tar.gz"],
+      "formats": [
+        "tar.gz"
+      ],
       "runner": "ubuntu-24.04-arm",
       "outputGlobs": [
-        "dist/release/sdkwork-web-linux-arm64-cloud-server-*.tar.gz",
-        "dist/release/sdkwork-web-linux-arm64-cloud-server-*.tar.gz.sha256",
-        "dist/release/sdkwork-web-linux-arm64-cloud-server-*.tar.gz.sigstore.json",
-        "dist/release/sdkwork-web-linux-arm64-cloud-server-*.tar.gz.cdx.json",
-        "dist/release/sdkwork-web-linux-arm64-cloud-server-*.tar.gz.cdx.json.sha256"
+        "dist/release/sdkwork-webserver-linux-arm64-cloud-server-*.tar.gz",
+        "dist/release/sdkwork-webserver-linux-arm64-cloud-server-*.tar.gz.sha256",
+        "dist/release/sdkwork-webserver-linux-arm64-cloud-server-*.tar.gz.sigstore.json",
+        "dist/release/sdkwork-webserver-linux-arm64-cloud-server-*.tar.gz.cdx.json",
+        "dist/release/sdkwork-webserver-linux-arm64-cloud-server-*.tar.gz.cdx.json.sha256"
       ],
       "deploymentProfile": "cloud",
       "runtimeTarget": "server"
@@ -218,14 +234,88 @@
       "profile": "server",
       "platform": "linux",
       "architecture": "arm64",
-      "formats": ["tar.gz"],
+      "formats": [
+        "tar.gz"
+      ],
       "runner": "ubuntu-24.04-arm",
       "outputGlobs": [
-        "dist/release/sdkwork-web-linux-arm64-standalone-server-*.tar.gz",
-        "dist/release/sdkwork-web-linux-arm64-standalone-server-*.tar.gz.sha256",
-        "dist/release/sdkwork-web-linux-arm64-standalone-server-*.tar.gz.sigstore.json",
-        "dist/release/sdkwork-web-linux-arm64-standalone-server-*.tar.gz.cdx.json",
-        "dist/release/sdkwork-web-linux-arm64-standalone-server-*.tar.gz.cdx.json.sha256"
+        "dist/release/sdkwork-webserver-linux-arm64-standalone-server-*.tar.gz",
+        "dist/release/sdkwork-webserver-linux-arm64-standalone-server-*.tar.gz.sha256",
+        "dist/release/sdkwork-webserver-linux-arm64-standalone-server-*.tar.gz.sigstore.json",
+        "dist/release/sdkwork-webserver-linux-arm64-standalone-server-*.tar.gz.cdx.json",
+        "dist/release/sdkwork-webserver-linux-arm64-standalone-server-*.tar.gz.cdx.json.sha256"
+      ],
+      "deploymentProfile": "standalone",
+      "runtimeTarget": "server"
+    },
+    {
+      "id": "linux-ubuntu-x64-standalone-server-deb",
+      "profile": "server",
+      "platform": "linux",
+      "architecture": "x64",
+      "formats": [
+        "deb"
+      ],
+      "distribution": "ubuntu",
+      "environment": "production",
+      "runner": "ubuntu-24.04",
+      "outputGlobs": [
+        "dist/installers/sdkwork-webserver_*.deb",
+        "dist/installers/sdkwork-webserver_*.deb.sha256"
+      ],
+      "deploymentProfile": "standalone",
+      "runtimeTarget": "server"
+    },
+    {
+      "id": "linux-ubuntu-x64-standalone-test-server-deb",
+      "profile": "server",
+      "platform": "linux",
+      "architecture": "x64",
+      "formats": [
+        "deb"
+      ],
+      "distribution": "ubuntu",
+      "environment": "test",
+      "runner": "ubuntu-24.04",
+      "outputGlobs": [
+        "dist/installers/sdkwork-webserver-test_*.deb",
+        "dist/installers/sdkwork-webserver-test_*.deb.sha256"
+      ],
+      "deploymentProfile": "standalone",
+      "runtimeTarget": "server"
+    },
+    {
+      "id": "linux-rhel-x64-standalone-server-rpm",
+      "profile": "server",
+      "platform": "linux",
+      "architecture": "x64",
+      "formats": [
+        "rpm"
+      ],
+      "distribution": "rhel",
+      "environment": "production",
+      "runner": "ubuntu-24.04",
+      "outputGlobs": [
+        "dist/installers/sdkwork-webserver-*.rpm",
+        "dist/installers/sdkwork-webserver-*.rpm.sha256"
+      ],
+      "deploymentProfile": "standalone",
+      "runtimeTarget": "server"
+    },
+    {
+      "id": "linux-rhel-x64-standalone-test-server-rpm",
+      "profile": "server",
+      "platform": "linux",
+      "architecture": "x64",
+      "formats": [
+        "rpm"
+      ],
+      "distribution": "rhel",
+      "environment": "test",
+      "runner": "ubuntu-24.04",
+      "outputGlobs": [
+        "dist/installers/sdkwork-webserver-test-*.rpm",
+        "dist/installers/sdkwork-webserver-test-*.rpm.sha256"
       ],
       "deploymentProfile": "standalone",
       "runtimeTarget": "server"

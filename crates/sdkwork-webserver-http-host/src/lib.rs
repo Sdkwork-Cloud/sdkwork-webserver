@@ -94,8 +94,24 @@ fn web_security_policy(
         ));
     }
 
-    let policy =
-        sdkwork_web_bootstrap::security_policy_for_environment(environment, configured_origins);
+    // Production-like environments start from the production SecurityPolicy
+    // (rate limiting, HSTS, strict CORS) so every mounted Web API surface
+    // passes the framework production-assembly validation; operator-configured
+    // origins are merged in below. Development/test environments keep the
+    // framework defaults.
+    let mut policy = if matches!(environment, WebEnvironment::Prod) {
+        sdkwork_web_core::security::SecurityPolicy::production()
+    } else {
+        sdkwork_web_bootstrap::security_policy_for_environment(
+            environment,
+            configured_origins.clone(),
+        )
+    };
+    for origin in configured_origins {
+        if !policy.cors.allowed_origins.contains(&origin) {
+            policy.cors.allowed_origins.push(origin);
+        }
+    }
     if matches!(environment, WebEnvironment::Prod) {
         policy
             .cors

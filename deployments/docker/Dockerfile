@@ -8,7 +8,7 @@ RUN apt-get update \
 
 WORKDIR /app
 
-# The build context is the verified sdkwork-web/ root extracted from the release archive.
+# The build context is the verified sdkwork-webserver/ root extracted from the release archive.
 COPY --chown=10001:10001 . /app/
 
 ENV SDKWORK_WEBSERVER_APP_ROOT=/app \

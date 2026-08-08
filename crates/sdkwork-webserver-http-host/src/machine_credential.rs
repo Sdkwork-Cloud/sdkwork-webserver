@@ -47,7 +47,11 @@ where
         Self {
             inner,
             authenticator,
-            production_profile: None,
+            // Machine credentials are tenant-bound (the authenticator returns
+            // a tenant-scoped principal), so the machine-only surface reports
+            // the tenant-bound production profile and passes the framework
+            // production-assembly resolver validation.
+            production_profile: Some(ResolverProductionProfile::TenantBoundBootstrap),
             machine_only: true,
         }
     }

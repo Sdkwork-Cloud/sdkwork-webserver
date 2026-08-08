@@ -10,6 +10,7 @@ ipnet.workspace = true
 jsonschema.workspace = true
 serde.workspace = true
 serde_json.workspace = true
+toml.workspace = true
 thiserror.workspace = true
 url.workspace = true
 

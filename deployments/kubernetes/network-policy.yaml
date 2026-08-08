@@ -1,15 +1,15 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: sdkwork-web-website-__SDKWORK_WEBSITE_TENANT_FLEET_NAME__-ingress
+  name: sdkwork-webserver-website-__SDKWORK_WEBSITE_TENANT_FLEET_NAME__-ingress
   labels:
-    app.kubernetes.io/name: sdkwork-web-server
+    app.kubernetes.io/name: sdkwork-webserver
     app.kubernetes.io/component: website-data-plane
     sdkwork.com/tenant-fleet: __SDKWORK_WEBSITE_TENANT_FLEET_NAME__
 spec:
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: sdkwork-web-server
+      app.kubernetes.io/name: sdkwork-webserver
       app.kubernetes.io/component: website-data-plane
       sdkwork.com/tenant-fleet: __SDKWORK_WEBSITE_TENANT_FLEET_NAME__
   policyTypes:

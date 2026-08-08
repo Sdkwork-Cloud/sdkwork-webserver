@@ -98,7 +98,7 @@ function resolveArtifact(settings) {
   if (!SUPPORTED_ARCHITECTURES.has(architecture)) {
     throw new Error('release architecture must be x64 or arm64');
   }
-  const artifactBase = `sdkwork-web-linux-${architecture}-${settings.deploymentProfile}-server-${version}`;
+  const artifactBase = `sdkwork-webserver-linux-${architecture}-${settings.deploymentProfile}-server-${version}`;
   return {
     version,
     architecture,
@@ -595,7 +595,7 @@ async function smoke(settings) {
     resolved.version,
   ]);
 
-  const temporaryRoot = mkdtempSync(path.join(os.tmpdir(), 'sdkwork-web-release-smoke-'));
+  const temporaryRoot = mkdtempSync(path.join(os.tmpdir(), 'sdkwork-webserver-release-smoke-'));
   let child;
   try {
     await extractTar({
@@ -604,7 +604,7 @@ async function smoke(settings) {
       strict: true,
       preservePaths: false,
     });
-    const packageRoot = path.join(temporaryRoot, 'sdkwork-web');
+    const packageRoot = path.join(temporaryRoot, 'sdkwork-webserver');
     const binRoot = path.join(packageRoot, 'bin');
     for (const binary of EXPECTED_BINARIES) {
       const metadata = statSync(path.join(binRoot, binary));
@@ -746,7 +746,7 @@ async function smoke(settings) {
       ? ` sameOrigin=http://127.0.0.1:${sameOriginPort}`
       : '';
     console.log(
-      `[sdkwork-web-release-smoke] passed artifact=${resolved.artifactBase}.tar.gz http=${httpPort} https=${httpsPort}${sameOrigin}`,
+      `[sdkwork-webserver-release-smoke] passed artifact=${resolved.artifactBase}.tar.gz http=${httpPort} https=${httpsPort}${sameOrigin}`,
     );
   } finally {
     if (child && child.exitCode === null && child.signalCode === null) {
@@ -770,7 +770,7 @@ async function main() {
 
 main().catch((error) => {
   process.stderr.write(
-    `[sdkwork-web-release-smoke] ${error instanceof Error ? error.message : String(error)}\n`,
+    `[sdkwork-webserver-release-smoke] ${error instanceof Error ? error.message : String(error)}\n`,
   );
   process.exitCode = 1;
 });

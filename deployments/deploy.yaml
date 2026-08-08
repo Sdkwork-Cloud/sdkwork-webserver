@@ -26,8 +26,8 @@ profiles:
       kubernetes:
         reference: deployments/kubernetes/
       websiteDelivery:
-        servicePattern: sdkwork-web-website-{tenantFleetName}
-        providerEventServicePattern: sdkwork-web-events-{tenantFleetName}-{nodeName}
+        servicePattern: sdkwork-webserver-website-{tenantFleetName}
+        providerEventServicePattern: sdkwork-webserver-events-{tenantFleetName}-{nodeName}
         tenantFleetName: required-opaque-tf-base32-render-input
         tenantScope: node-secret-only
         hostRouting: runtime-set
@@ -36,6 +36,36 @@ profiles:
         listenerConfig: per-node-immutable-config-map
         trustedProxyCidrs: required-render-input
         customDomains: true
+
+  standalone.test:
+    deployment:
+      deploymentProfile: standalone
+      environment: test
+      deliveryKind: host-package
+      deploymentDriver: host-service
+      managementModel: customer-managed
+      tenancyModel: single-tenant
+      isolationModel: dedicated
+      networkExposure: private
+      rolloutStrategy: recreate
+      availabilityMode: single-instance
+    install:
+      layout: binary-package
+    expose:
+      - domain: testserver.sdkwork.com
+        tls: none
+        mode: api
+    packages: []
+    overrides:
+      topology:
+        spec: specs/topology.spec.json
+        profile: standalone.test
+        env: etc/topology/standalone.test.env
+      proxy:
+        upstreams:
+          application.public-ingress: http://127.0.0.1:8888
+          application.app-http: http://127.0.0.1:8888
+          application.backend-http: http://127.0.0.1:8888
 
   standalone.production:
     deployment:
@@ -52,7 +82,7 @@ profiles:
     install:
       layout: binary-package
     expose:
-      - domain: web.internal.example
+      - domain: server.sdkwork.com
         tls: managed
         mode: api
     packages: []
@@ -63,6 +93,6 @@ profiles:
         env: etc/topology/standalone.production.env
       proxy:
         upstreams:
-          application.public-ingress: http://127.0.0.1:3800
-          application.app-http: http://127.0.0.1:3800
-          application.backend-http: http://127.0.0.1:3800
+          application.public-ingress: http://127.0.0.1:8080
+          application.app-http: http://127.0.0.1:8080
+          application.backend-http: http://127.0.0.1:8080

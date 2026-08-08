@@ -70,7 +70,7 @@ function resolveArtifact(settings) {
     /^[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?$/u,
     'package version',
   );
-  const basename = `sdkwork-web-linux-${architecture}-${deploymentProfile}-server-${version}.tar.gz`;
+  const basename = `sdkwork-webserver-linux-${architecture}-${deploymentProfile}-server-${version}.tar.gz`;
   return {
     archive: path.join(OUTPUT_ROOT, basename),
     bundle: path.join(OUTPUT_ROOT, `${basename}.sigstore.json`),
@@ -118,7 +118,7 @@ async function signArtifact(artifact) {
   const payload = readRegularFile(artifact.archive, MAX_ARCHIVE_BYTES, 'release archive');
   const bundle = await sign(payload, { tlogUpload: true });
   writeAtomic(artifact.bundle, `${JSON.stringify(bundle)}\n`);
-  console.log(`[sdkwork-web-sign] signed ${path.basename(artifact.archive)}`);
+  console.log(`[sdkwork-webserver-sign] signed ${path.basename(artifact.archive)}`);
 }
 
 async function verifyArtifact(artifact) {
@@ -136,7 +136,7 @@ async function verifyArtifact(artifact) {
     ctLogThreshold: 1,
     tlogThreshold: 1,
   });
-  console.log(`[sdkwork-web-sign] verified ${path.basename(artifact.archive)}`);
+  console.log(`[sdkwork-webserver-sign] verified ${path.basename(artifact.archive)}`);
 }
 
 async function main() {
@@ -159,6 +159,6 @@ async function main() {
 }
 
 main().catch((error) => {
-  process.stderr.write(`[sdkwork-web-sign] ${error instanceof Error ? error.message : String(error)}\n`);
+  process.stderr.write(`[sdkwork-webserver-sign] ${error instanceof Error ? error.message : String(error)}\n`);
   process.exitCode = 1;
 });

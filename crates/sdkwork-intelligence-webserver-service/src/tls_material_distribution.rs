@@ -312,13 +312,18 @@ fn write_bounded_file(path: &Path, content: &[u8]) -> WebServiceResult<()> {
     #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
-        let mut permissions = file.metadata().map_err(|error| {
-            WebServiceError::Internal(format!(
-                "inspect staged TLS material {}: {error}",
-                path.display()
-            ))
-        })?;
-        permissions.permissions_mut().set_mode(0o600);
+        // file.metadata() yields Metadata; the chmod must be applied to the
+        // Permissions view of it (Metadata has no permissions_mut).
+        let mut permissions = file
+            .metadata()
+            .map_err(|error| {
+                WebServiceError::Internal(format!(
+                    "inspect staged TLS material {}: {error}",
+                    path.display()
+                ))
+            })?
+            .permissions();
+        permissions.set_mode(0o600);
         file.set_permissions(permissions).map_err(|error| {
             WebServiceError::Internal(format!(
                 "confine staged TLS material {}: {error}",

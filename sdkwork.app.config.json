@@ -13,7 +13,7 @@
     "termsOfServiceUrl": "https://sdkwork.com/terms",
     "appType": "SDK",
     "identifiers": {
-      "containerImage": "registry.sdkwork.com/apps/sdkwork-web"
+      "containerImage": "registry.sdkwork.com/apps/sdkwork-webserver"
     }
   },
   "backend": {
@@ -139,6 +139,86 @@
           }
         },
         {
+          "id": "linux-ubuntu-x64-standalone-server-deb",
+          "name": "SDKWork Web Server Ubuntu amd64 Standalone Installer (production)",
+          "sourceType": "SCRIPT",
+          "packageFormat": "DEB",
+          "platform": "API",
+          "architecture": "x64",
+          "profileBinding": "fixed",
+          "deploymentProfile": "standalone",
+          "runtimeTarget": "server",
+          "targetPlatform": "linux",
+          "enabled": true,
+          "metadata": {
+            "distribution": "ubuntu",
+            "environment": "production",
+            "domain": "server.sdkwork.com"
+          },
+          "checksumAlgorithm": "sha256",
+          "checksum": "c4b068663cefc203f852ee41c1337ef79bac3007635a64c0208b413be99d2940"
+        },
+        {
+          "id": "linux-ubuntu-x64-standalone-test-server-deb",
+          "name": "SDKWork Web Server Ubuntu amd64 Standalone Installer (test)",
+          "sourceType": "SCRIPT",
+          "packageFormat": "DEB",
+          "platform": "API",
+          "architecture": "x64",
+          "profileBinding": "fixed",
+          "deploymentProfile": "standalone",
+          "runtimeTarget": "server",
+          "targetPlatform": "linux",
+          "enabled": true,
+          "metadata": {
+            "distribution": "ubuntu",
+            "environment": "test",
+            "domain": "testserver.sdkwork.com"
+          },
+          "checksumAlgorithm": "sha256",
+          "checksum": "7455cdf8054a43a65aaa18f65c3e84ad7d32018f04322c9fb7bbee9ef5ae1ac7"
+        },
+        {
+          "id": "linux-rhel-x64-standalone-server-rpm",
+          "name": "SDKWork Web Server RHEL amd64 Standalone Installer (production)",
+          "sourceType": "SCRIPT",
+          "packageFormat": "RPM",
+          "platform": "API",
+          "architecture": "x64",
+          "profileBinding": "fixed",
+          "deploymentProfile": "standalone",
+          "runtimeTarget": "server",
+          "targetPlatform": "linux",
+          "enabled": true,
+          "metadata": {
+            "distribution": "rhel",
+            "environment": "production",
+            "domain": "server.sdkwork.com"
+          },
+          "checksumAlgorithm": "sha256",
+          "checksum": "a98dde537a0abe799747f3f9e47e4560651c8558adcd96b42a33aacbede7514b"
+        },
+        {
+          "id": "linux-rhel-x64-standalone-test-server-rpm",
+          "name": "SDKWork Web Server RHEL amd64 Standalone Installer (test)",
+          "sourceType": "SCRIPT",
+          "packageFormat": "RPM",
+          "platform": "API",
+          "architecture": "x64",
+          "profileBinding": "fixed",
+          "deploymentProfile": "standalone",
+          "runtimeTarget": "server",
+          "targetPlatform": "linux",
+          "enabled": true,
+          "metadata": {
+            "distribution": "rhel",
+            "environment": "test",
+            "domain": "testserver.sdkwork.com"
+          },
+          "checksumAlgorithm": "sha256",
+          "checksum": "fa13af784ae26e4312ed9efad72159087350d82170f544c85c7d5e6591c4b8dc"
+        },
+        {
           "id": "linux-arm64-cloud-server-tar-gz",
           "name": "SDKWork Web Server Linux arm64 Cloud",
           "sourceType": "SCRIPT",
@@ -168,8 +248,12 @@
         "version": "0.1.0",
         "channel": "BETA",
         "current": true,
-        "summary": "Pre-release SDKWork standards alignment baseline; package builds remain deferred.",
+        "summary": "Pre-release SDKWork standards alignment baseline; Ubuntu .deb and RHEL .rpm installers (test/production) built and verified on Ubuntu 22.04.",
         "packageIds": [
+          "linux-rhel-x64-standalone-server-rpm",
+          "linux-rhel-x64-standalone-test-server-rpm",
+          "linux-ubuntu-x64-standalone-server-deb",
+          "linux-ubuntu-x64-standalone-test-server-deb",
           "linux-x64-standalone-server-tar-gz",
           "linux-x64-cloud-server-tar-gz",
           "linux-arm64-standalone-server-tar-gz",

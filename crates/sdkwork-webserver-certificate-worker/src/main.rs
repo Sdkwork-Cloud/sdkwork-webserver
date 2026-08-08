@@ -20,6 +20,11 @@ const MAX_CYCLE_TIMEOUT_SECS: u64 = 600;
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     dotenvy::dotenv().ok();
+    // Installed deployments load the typed runtime configuration
+    // (/etc/sdkwork/webserver/sdkwork-webserver.toml) and materialize it into
+    // the process environment before any runtime component reads it.
+    sdkwork_webserver_core::runtime_config::load_runtime_toml_config()
+        .map_err(|error| anyhow::anyhow!("runtime TOML configuration is invalid: {error}"))?;
     sdkwork_database_sqlx::enable_process_shared_database_pool();
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())

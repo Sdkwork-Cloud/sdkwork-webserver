@@ -1,12 +1,13 @@
 # SDKWork Web Server Source Configuration
 
 `etc/sdkwork.deployment.config.json` is the source configuration entrypoint. It identifies
-`sdkwork-web-server`, links `../specs/topology.spec.json`, and maps the four supported profiles to
+`sdkwork-webserver`, links `../specs/topology.spec.json`, and maps the supported profiles to
 tracked environment files:
 
 | Profile | Source |
 | --- | --- |
 | `standalone.development` | `topology/standalone.development.env` |
+| `standalone.test` | `topology/standalone.test.env` |
 | `cloud.development` | `topology/cloud.development.env` |
 | `standalone.production` | `topology/standalone.production.env` |
 | `cloud.production` | `topology/cloud.production.env` |
@@ -19,6 +20,12 @@ owned by `etc/` and `specs/topology.spec.json`.
 
 `pnpm dev` and `pnpm dev:standalone` select `standalone.development` with runtime target `server`.
 The plan starts the application-owned standalone gateway on `127.0.0.1:3800`.
+
+`standalone.test` is the test-environment installer profile: the gateway public ingress binds
+`0.0.0.0:8888` and the host is bound to `testserver.sdkwork.com` (the test `.deb` package writes
+`/etc/hosts`; see `docs/guides/operator/deb-install.md`). It uses the Let's Encrypt staging
+directory and the `sdkwork_ai_test` database. `standalone.production` binds `0.0.0.0:8888` and
+`server.sdkwork.com` with ACME production issuance and the `sdkwork_ai_prod` database.
 
 `pnpm dev:cloud` selects `cloud.development` with runtime target `server`. The plan starts only the
 local `sdkwork-web-node-daemon` client and resolves the deployed development surfaces from explicit
@@ -54,9 +61,9 @@ Production images carry the fail-closed website listener base policy at
 `/app/etc/data-plane/website.cloud.config.json`; it trusts no forwarding metadata. Kubernetes
 renders the reviewed direct-ingress CIDRs into an immutable per-Node ConfigMap mounted at
 `/etc/sdkwork/webserver/sdkwork.webserver.config.json`. Mutable Node identity, provider-event subscriptions,
-and credentials are mounted read-only under `/run/secrets/sdkwork-web-node/`. The Kubernetes
+and credentials are mounted read-only under `/run/secrets/sdkwork-webserver-node/`. The Kubernetes
 migration Job obtains database URLs, independent encryption roots, and the ACME contact through the
-`sdkwork-web-server-runtime` secret reference documented in `../deployments/kubernetes/README.md`.
+`sdkwork-webserver-runtime` secret reference documented in `../deployments/kubernetes/README.md`.
 
 `examples/sdkwork.webserver.config.json` is the safe standalone data-plane example. It is validated
 against `../specs/sdkwork.webserver.config.schema.json`; certificate and private-key values are file

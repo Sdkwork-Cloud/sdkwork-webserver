@@ -1,16 +1,16 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: sdkwork-web-website-__SDKWORK_WEBSITE_TENANT_FLEET_NAME__-headless
+  name: sdkwork-webserver-website-__SDKWORK_WEBSITE_TENANT_FLEET_NAME__-headless
   labels:
-    app.kubernetes.io/name: sdkwork-web-server
+    app.kubernetes.io/name: sdkwork-webserver
     app.kubernetes.io/component: website-data-plane
     sdkwork.com/tenant-fleet: __SDKWORK_WEBSITE_TENANT_FLEET_NAME__
 spec:
   clusterIP: None
   publishNotReadyAddresses: false
   selector:
-    app.kubernetes.io/name: sdkwork-web-server
+    app.kubernetes.io/name: sdkwork-webserver
     app.kubernetes.io/component: website-data-plane
     sdkwork.com/tenant-fleet: __SDKWORK_WEBSITE_TENANT_FLEET_NAME__
   ports:
@@ -22,15 +22,15 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: sdkwork-web-website-__SDKWORK_WEBSITE_TENANT_FLEET_NAME__
+  name: sdkwork-webserver-website-__SDKWORK_WEBSITE_TENANT_FLEET_NAME__
   labels:
-    app.kubernetes.io/name: sdkwork-web-server
+    app.kubernetes.io/name: sdkwork-webserver
     app.kubernetes.io/component: website-data-plane
     sdkwork.com/tenant-fleet: __SDKWORK_WEBSITE_TENANT_FLEET_NAME__
 spec:
   type: ClusterIP
   selector:
-    app.kubernetes.io/name: sdkwork-web-server
+    app.kubernetes.io/name: sdkwork-webserver
     app.kubernetes.io/component: website-data-plane
     sdkwork.com/tenant-fleet: __SDKWORK_WEBSITE_TENANT_FLEET_NAME__
   ports:
@@ -43,16 +43,16 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: sdkwork-web-events-__SDKWORK_WEBSITE_TENANT_FLEET_NAME__-__SDKWORK_WEBSITE_NODE_NAME__
+  name: sdkwork-webserver-events-__SDKWORK_WEBSITE_TENANT_FLEET_NAME__-__SDKWORK_WEBSITE_NODE_NAME__
   labels:
-    app.kubernetes.io/name: sdkwork-web-server
+    app.kubernetes.io/name: sdkwork-webserver
     app.kubernetes.io/component: website-data-plane
     sdkwork.com/tenant-fleet: __SDKWORK_WEBSITE_TENANT_FLEET_NAME__
     sdkwork.com/web-node: __SDKWORK_WEBSITE_NODE_NAME__
 spec:
   type: ClusterIP
   selector:
-    app.kubernetes.io/name: sdkwork-web-server
+    app.kubernetes.io/name: sdkwork-webserver
     app.kubernetes.io/component: website-data-plane
     sdkwork.com/tenant-fleet: __SDKWORK_WEBSITE_TENANT_FLEET_NAME__
     sdkwork.com/web-node: __SDKWORK_WEBSITE_NODE_NAME__

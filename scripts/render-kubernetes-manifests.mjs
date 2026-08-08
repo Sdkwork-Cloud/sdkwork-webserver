@@ -255,9 +255,9 @@ function renderWebsiteConfigMap(settings, config, outputDirectory) {
     metadata: {
       name: settings.websiteConfigMapName,
       labels: {
-        'app.kubernetes.io/name': 'sdkwork-web-server',
+        'app.kubernetes.io/name': 'sdkwork-webserver',
         'app.kubernetes.io/component': 'website-data-plane',
-        'app.kubernetes.io/part-of': 'sdkwork-web-server',
+        'app.kubernetes.io/part-of': 'sdkwork-webserver',
         'sdkwork.com/tenant-fleet': settings.websiteTenantFleetName,
         'sdkwork.com/web-node': settings.websiteNodeName,
         'sdkwork.com/config-revision': settings.websiteConfigRevision.slice(0, 16),
@@ -366,7 +366,7 @@ function main() {
     const hostConfig = materializeWebsiteHostConfig(settings.websiteTrustedProxyCidrs);
     settings.websiteConfigRevision = createHash('sha256').update(hostConfig).digest('hex');
     settings.websiteConfigMapName =
-      `sdkwork-web-website-config-${settings.websiteTenantFleetName}-${settings.websiteNodeName}-${settings.websiteConfigRevision.slice(0, 16)}`;
+      `sdkwork-webserver-website-config-${settings.websiteTenantFleetName}-${settings.websiteNodeName}-${settings.websiteConfigRevision.slice(0, 16)}`;
     const hostConfigPath = path.join(stagingDirectory, WEBSITE_HOST_CONFIG_KEY);
     writeFileSync(hostConfigPath, hostConfig, { encoding: 'utf8', flag: 'wx', mode: 0o600 });
     validateWebsiteHostConfig(hostConfigPath);
@@ -386,6 +386,6 @@ function main() {
 try {
   main();
 } catch (error) {
-  process.stderr.write(`[sdkwork-web-kubernetes-render] ${error instanceof Error ? error.message : String(error)}\n`);
+  process.stderr.write(`[sdkwork-webserver-kubernetes-render] ${error instanceof Error ? error.message : String(error)}\n`);
   process.exitCode = 1;
 }
